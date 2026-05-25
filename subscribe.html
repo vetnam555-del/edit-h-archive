@@ -7,6 +7,13 @@
 <meta property="og:title" content="EDIT H — 매일 아침의 마케팅 브리프">
 <meta property="og:description" content="매 영업일 오전 8시, 한국 마케터를 위한 큐레이션 뉴스레터. 무료 구독 신청.">
 <meta property="og:type" content="website">
+<meta property="og:image" content="https://vetnam555-del.github.io/edit-h-archive/og_image.png">
+<meta property="og:url" content="https://vetnam555-del.github.io/edit-h-archive/subscribe.html">
+<meta property="og:site_name" content="EDIT H">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://vetnam555-del.github.io/edit-h-archive/og_image.png">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="favicon.png">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -67,6 +74,7 @@
     background: #FAFAF7; padding: 14px 18px; border: 1px solid #E5E5DD;
     font-size: 12px; color: #666; line-height: 1.7; margin-top: 4px;
   }
+
   .privacy h3 { font-size: 12px; color: #000; margin-bottom: 6px; font-weight: 800; }
   .share-section { margin-top: 28px; padding-top: 24px; border-top: 1px solid #E5E5DD; text-align: center; }
   .share-label { font-size: 11px; letter-spacing: 3px; color: #888; font-weight: 800; margin-bottom: 14px; }
@@ -143,6 +151,17 @@
       🔗 링크 복사
     </button>
     <div class="share-toast" id="shareToast">✅ 클립보드에 복사됐습니다. 카카오톡에 붙여넣으세요!</div>
+  </div>
+
+  <div class="share-section">
+    <div class="share-label">📤 동료에게도 공유</div>
+    <button type="button" class="share-btn kakao" id="shareKakaoBtn">
+      <span style="font-size:18px; margin-right:6px;">💬</span> 카카오톡으로 공유
+    </button>
+    <button type="button" class="share-btn copy" id="copyLinkBtn">
+      🔗 링크 복사
+    </button>
+    <div class="share-toast" id="shareToast"></div>
   </div>
 
   <div class="footer-note">
