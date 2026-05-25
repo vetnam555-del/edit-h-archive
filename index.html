@@ -4,16 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>EDIT H — Archive</title>
-<meta property="og:title" content="EDIT H — 매일 아침의 마케팅 브리프">
-<meta property="og:description" content="매 영업일 오전 8시, 한국 마케터를 위한 큐레이션 뉴스레터. 무료 구독 신청.">
-<meta property="og:type" content="website">
-<meta property="og:image" content="https://vetnam555-del.github.io/edit-h-archive/og_image.png">
-<meta property="og:url" content="https://vetnam555-del.github.io/edit-h-archive/">
-<meta property="og:site_name" content="EDIT H">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://vetnam555-del.github.io/edit-h-archive/og_image.png">
-<link rel="icon" type="image/png" href="favicon.png">
-<link rel="apple-touch-icon" href="favicon.png">
 <style>
   * { box-sizing: border-box; }
   body { font-family: 'Apple SD Gothic Neo','Pretendard','Malgun Gothic',-apple-system,sans-serif;
@@ -47,17 +37,6 @@
     font-size: 11px; color: #999; text-align: center; line-height: 1.7; }
   .footer .red { color: #B91C1C; font-weight: 800; letter-spacing: 1px; }
   .footer a { color: #B91C1C; text-decoration: none; font-weight: 600; }
-  .kakao-share-bar { background: #FEE500; padding: 18px 24px; margin: 28px 0 0; display: flex; align-items: center;
-    justify-content: space-between; gap: 14px; flex-wrap: wrap; cursor: pointer; transition: background 0.15s; }
-  .kakao-share-bar:hover { background: #FDD800; }
-  .kakao-share-bar .ktext { font-size: 14px; color: #191919; font-weight: 700; }
-  .kakao-share-bar .kicon { font-size: 22px; }
-  .kakao-share-bar .kbtn { background: #191919; color: #FEE500; padding: 8px 16px; font-size: 12px;
-    font-weight: 800; letter-spacing: 1px; }
-  #kshareToast { display: none; padding: 14px 18px; background: #F0FDF4; border-left: 4px solid #16A34A;
-    font-size: 13px; color: #166534; margin-top: 12px; }
-  #kshareToast.show { display: block; animation: fadeIn 0.3s; }
-  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 </style>
 </head>
 <body>
@@ -75,17 +54,14 @@
     <a href="subscribe.html" class="btn">구독 신청 →</a>
   </div>
 
-  <div class="kakao-share-bar" id="kakaoShareBar">
-    <div>
-      <span class="kicon">💬</span>
-      <span class="ktext">동료에게도 카카오톡으로 공유</span>
-    </div>
-    <span class="kbtn">공유하기 →</span>
-  </div>
-  <div id="kshareToast"></div>
-
   <h2>📨 DAILY · 지난 데일리 뉴스레터</h2>
   
+  <a href="2026-05-26.html" class="item">
+    <div class="meta"><span class="vol">VOL.006</span><span>2026-05-26 (화)</span></div>
+    <div class="title"><span class="ico">🚨</span> 정용진, 오전 9시 마이크 앞 — '탱크데이' 그룹 회장이 직접 답한다</div>
+    <div class="subtitle">정용진 대국민 사과+진상조사 D-Day·NVIDIA 데이터센터 92%·메타 글래스 한국 출시 D-Day·애플 WWDC26 D-13·쿠팡 4년만 최대 적자·환율 1520원·인스타 라이브 광고 가속·설화수×르쥬·SpaceX 6/12 IPO 등 9개 이슈</div>
+  </a>
+
   <a href="2026-05-23.html" class="item">
     <div class="meta"><span class="vol">VOL.005</span><span>2026-05-23 (토)</span></div>
     <div class="title"><span class="ico">🌟</span> 데이터센터 92%·환율 1,520원·AI 글래스 D-2</div>
@@ -107,4 +83,25 @@
   <a href="2026-05-20.html" class="item">
     <div class="meta"><span class="vol">VOL.002</span><span>2026-05-20 (수)</span></div>
     <div class="title"><span class="ico">🤖</span> 구글 "24/7 AI 에이전트" 시대가 열렸다</div>
-  
+    <div class="subtitle">구글 I/O 2026 Gemini Spark·Antigravity·스타벅스 본사 사과·쿠팡 4년 만 최대 적자</div>
+  </a>
+
+  <a href="2026-05-19.html" class="item">
+    <div class="meta"><span class="vol">VOL.001</span><span>2026-05-19 (화)</span></div>
+    <div class="title"><span class="ico">🔥</span> 24시간이 지났는데 불은 더 커진다</div>
+    <div class="subtitle">스타벅스 탱크데이 사태·우버 네이버 8조 배민 인수·앤트로픽 종량제 등 12개 이슈</div>
+  </a>
+
+
+  <h2>🎯 WEEKLY · 지난 위클리 정리호</h2>
+  <div class="empty">아직 발행된 위클리가 없습니다. 첫 EDIT H WEEKLY는 <b>2026-05-29 (금) 18:00</b> 발행 예정.</div>
+
+  <div class="footer">
+    <span class="red">EDIT H</span> · DAILY 매 영업일 08:00 · WEEKLY 매주 금 18:00<br>
+    <a href="subscribe.html">구독 신청</a> · <a href="unsubscribe.html">수신 거부</a><br>
+    제작 · kim.seonill@hll.kr<br><br>
+    이 페이지의 URL을 북마크해두시면 모든 호수를 한곳에서 보실 수 있습니다.
+  </div>
+</div>
+</body>
+</html>
