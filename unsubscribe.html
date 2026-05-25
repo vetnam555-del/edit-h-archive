@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EDIT H — 수신 거부</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Apple SD Gothic Neo','Pretendard','Malgun Gothic',-apple-system,sans-serif;
+    background: #FAFAF7; color: #1A1A1A; line-height: 1.7;
+    min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 32px 16px;
+  }
+  .card { max-width: 480px; width: 100%; background: #FFF; padding: 48px 40px; }
+  .brand { font-size: 11px; letter-spacing: 5px; color: #888; font-weight: 700; margin-bottom: 8px; }
+  .logo { font-size: 38px; font-weight: 900; letter-spacing: -2px; line-height: 1; }
+  .logo .h { color: #B91C1C; }
+  .divider { height: 2px; background: #000; margin: 20px 0 28px; }
+  h1 { font-size: 22px; font-weight: 900; margin-bottom: 14px; }
+  .intro { font-size: 15px; color: #444; margin-bottom: 24px; line-height: 1.75; }
+  form { display: flex; flex-direction: column; gap: 14px; }
+  label { font-size: 12px; font-weight: 800; color: #666; letter-spacing: 2px; text-transform: uppercase; }
+  input[type="email"], textarea {
+    width: 100%; padding: 14px 16px; font-size: 15px;
+    border: 1px solid #DDD; background: #FFF;
+    font-family: inherit; outline: none;
+  }
+  input[type="email"]:focus, textarea:focus { border-color: #B91C1C; }
+  textarea { min-height: 80px; resize: vertical; }
+  button {
+    width: 100%; padding: 16px; font-size: 14px; font-weight: 800;
+    background: #B91C1C; color: #FFF; border: none; cursor: pointer;
+    letter-spacing: 2px; font-family: inherit;
+    transition: background 0.15s;
+  }
+  button:hover { background: #000; }
+  button:disabled { background: #999; cursor: not-allowed; }
+  .footer-note { font-size: 12px; color: #888; margin-top: 24px; line-height: 1.7; text-align: center; }
+  .footer-note a { color: #555; text-decoration: none; }
+  .success {
+    display: none; padding: 24px; background: #F0FDF4; border-left: 4px solid #16A34A;
+    margin-top: 20px; font-size: 14px; color: #166534; line-height: 1.7;
+  }
+  .error {
+    display: none; padding: 16px; background: #FEF2F2; border-left: 4px solid #B91C1C;
+    margin-top: 16px; font-size: 13px; color: #991B1B;
+  }
+  .privacy-msg { background: #FAFAF7; padding: 14px 18px; border: 1px solid #E5E5DD;
+    font-size: 12px; color: #666; line-height: 1.7; margin-top: 16px; }
+</style>
+</head>
+<body>
+
+<div class="card">
+
+  <div class="brand">UNSUBSCRIBE</div>
+  <div class="logo">EDIT<span class="h"> H</span></div>
+
+  <div class="divider"></div>
+
+  <h1>수신 거부</h1>
+
+  <div class="intro">
+    EDIT H 뉴스레터 수신을 중단하시려면 아래에 이메일을 입력해주세요. 처리 완료 후 1~2 영업일 이내에 발송 목록에서 제거됩니다.
+  </div>
+
+  <form id="unsubForm" action="https://formspree.io/f/YOUR_UNSUB_FORM_ID" method="POST">
+
+    <label for="email">EMAIL</label>
+    <input type="email" id="email" name="email" placeholder="구독 중인 이메일" required>
+
+    <label for="reason" style="margin-top:4px;">사유 (선택)</label>
+    <textarea id="reason" name="reason" placeholder="EDIT H가 어떤 점에서 부족했는지 알려주시면 개선에 큰 도움이 됩니다."></textarea>
+
+    <input type="hidden" name="_subject" value="[EDIT H] 수신 거부 신청">
+    <input type="hidden" name="_format" value="plain">
+    <input type="hidden" name="unsubscribed_at" id="unsubscribed_at">
+
+    <button type="submit" id="submitBtn">수신 거부 신청</button>
+
+    <div class="success" id="successMsg">
+      ✅ <b>수신 거부 요청이 접수됐습니다.</b><br>
+      1~2 영업일 이내에 발송 목록에서 제거됩니다. 그동안 EDIT H를 읽어주셔서 감사합니다.
+    </div>
+
+    <div class="error" id="errorMsg">
+      ⚠ 처리 중 오류가 발생했습니다. 잠시 후 다시 시도하거나 kim.seonill@hll.kr로 직접 알려주세요.
+    </div>
+
+  </form>
+
+  <div class="footer-note">
+    <a href="subscribe.html">다시 구독</a> · <a href="index.html">지난 호 보기</a>
+  </div>
+
+  <div class="privacy-msg">
+    수신 거부 신청 시 입력한 이메일은 발송 목록에서만 제거되며, 추가 보관되지 않습니다.
+  </div>
+
+</div>
+
+<script>
+  // URL 파라미터에서 이메일 자동 입력 (수신거부 링크 클릭 시)
+  const params = new URLSearchParams(window.location.search);
+  const emailParam = params.get('email');
+  if (emailParam) {
+    document.getElementById('email').value = decodeURIComponent(emailParam);
+  }
+  document.getElementById('unsubscribed_at').value = new Date().toISOString();
+
+  const form = document.getElementById('unsubForm');
+  const submitBtn = document.getElementById('submitBtn');
+  const successMsg = document.getElementById('successMsg');
+  const errorMsg = document.getElementById('errorMsg');
+
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    submitBtn.disabled = true;
+    submitBtn.textContent = '처리 중...';
+    errorMsg.style.display = 'none';
+
+    try {
+      const formData = new FormData(form);
+      const response = await fetch(form.action, {
+        method: 'POST',
+        body: formData,
+        headers: { 'Accept': 'application/json' }
+      });
+      if (response.ok) {
+        form.style.display = 'none';
+        successMsg.style.display = 'block';
+      } else {
+        throw new Error('submit failed');
+      }
+    } catch (err) {
+      errorMsg.style.display = 'block';
+      submitBtn.disabled = false;
+      submitBtn.textContent = '수신 거부 신청';
+    }
+  });
+</script>
+
+</body>
+</html>
