@@ -13,6 +13,15 @@
   .logo { font-size: 42px; font-weight: 900; letter-spacing: -2px; margin: 8px 0 4px; }
   .logo .h { color: #B91C1C; }
   .tagline { font-size: 13px; color: #555; letter-spacing: 1px; }
+  .subscribe-cta { background: #000; color: #FFF; padding: 24px 28px; margin: 28px 0;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  .subscribe-cta .text { flex: 1; min-width: 200px; }
+  .subscribe-cta .label { font-size: 11px; letter-spacing: 4px; color: #B91C1C; font-weight: 800; margin-bottom: 6px; }
+  .subscribe-cta h3 { font-size: 18px; font-weight: 900; margin-bottom: 4px; letter-spacing: -0.3px; }
+  .subscribe-cta p { font-size: 13px; color: #BBB; line-height: 1.6; }
+  .subscribe-cta a.btn { display: inline-block; background: #B91C1C; color: #FFF; padding: 12px 20px;
+    text-decoration: none; font-size: 13px; font-weight: 800; letter-spacing: 1.5px; white-space: nowrap; }
+  .subscribe-cta a.btn:hover { background: #FFF; color: #000; }
   h2 { font-size: 16px; font-weight: 800; margin: 40px 0 14px; padding-bottom: 8px;
     border-bottom: 2px solid #000; letter-spacing: -0.3px; }
   .item { display: block; padding: 18px 0; border-bottom: 1px solid #EEE;
@@ -27,6 +36,7 @@
   .footer { margin-top: 48px; padding-top: 24px; border-top: 1px solid #DDD;
     font-size: 11px; color: #999; text-align: center; line-height: 1.7; }
   .footer .red { color: #B91C1C; font-weight: 800; letter-spacing: 1px; }
+  .footer a { color: #B91C1C; text-decoration: none; font-weight: 600; }
 </style>
 </head>
 <body>
@@ -34,6 +44,15 @@
   <div class="brand">DAILY MARKETING BRIEF</div>
   <div class="logo">EDIT<span class="h"> H</span></div>
   <div class="tagline">한 호씩 모아 보는 마케팅 큐레이션 아카이브</div>
+
+  <div class="subscribe-cta">
+    <div class="text">
+      <div class="label">SUBSCRIBE · 무료</div>
+      <h3>매일 아침 8시, 메일로 받아보세요</h3>
+      <p>매 영업일 12개 마케팅 신호 · 매주 금 한 주 정리</p>
+    </div>
+    <a href="subscribe.html" class="btn">구독 신청 →</a>
+  </div>
 
   <h2>📨 DAILY · 지난 데일리 뉴스레터</h2>
   
@@ -73,6 +92,7 @@
 
   <div class="footer">
     <span class="red">EDIT H</span> · DAILY 매 영업일 08:00 · WEEKLY 매주 금 18:00<br>
+    <a href="subscribe.html">구독 신청</a> · <a href="unsubscribe.html">수신 거부</a><br>
     제작 · kim.seonill@hll.kr<br><br>
     이 페이지의 URL을 북마크해두시면 모든 호수를 한곳에서 보실 수 있습니다.
   </div>
