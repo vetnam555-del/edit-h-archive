@@ -1,0 +1,112 @@
+{
+  "newsletter_name": "EDIT H",
+  "tagline": "DAILY MARKETING BRIEF",
+  "brand_color_main": "#000000",
+  "brand_color_accent": "#B91C1C",
+  "created": "2026-05-19",
+  "issues": [
+    {
+      "vol": "001",
+      "date": "2026-05-19",
+      "weekday": "화",
+      "emoji": "🔥",
+      "title": "24시간이 지났는데 불은 더 커진다",
+      "subtitle": "스타벅스 탱크데이 사태·우버 네이버 8조 배민 인수·앤트로픽 종량제 등 12개 이슈",
+      "filename": "2026-05-19.html",
+      "key_keywords": [
+        "스타벅스 탱크데이",
+        "배민 8조",
+        "공정위 30억",
+        "앤트로픽 종량제"
+      ]
+    },
+    {
+      "vol": "002",
+      "date": "2026-05-20",
+      "weekday": "수",
+      "emoji": "🤖",
+      "title": "구글 \"24/7 AI 에이전트\" 시대가 열렸다",
+      "subtitle": "구글 I/O 2026 Gemini Spark·Antigravity·스타벅스 본사 사과·쿠팡 4년 만 최대 적자",
+      "filename": "2026-05-20.html",
+      "key_keywords": [
+        "Gemini Spark",
+        "Antigravity",
+        "24/7 AI 에이전트",
+        "스타벅스 본사 사과",
+        "쿠팡 적자"
+      ]
+    },
+    {
+      "vol": "003",
+      "date": "2026-05-21",
+      "weekday": "목",
+      "emoji": "🔥",
+      "title": "25년 만에 닫히는 검색창, 25년 만에 열리는 검색",
+      "subtitle": "구글 검색 25년 만 전면 개편·카카오 5개 법인 파업·오픈AI IPO·무신사 7년 만 재사과 등 9개",
+      "filename": "2026-05-21.html",
+      "key_keywords": [
+        "구글 검색 25년 개편",
+        "카카오 파업",
+        "오픈AI IPO",
+        "챗GPT 3개월 무료",
+        "무신사 사죄",
+        "네이버 단독 식품"
+      ],
+      "auto_published": false,
+      "stage": "STAGE 1",
+      "status": "corrected — 정정 발행 완료",
+      "filename_broken": "2026-05-21_v1_broken.html"
+    },
+    {
+      "vol": "004",
+      "date": "2026-05-22",
+      "weekday": "금",
+      "emoji": "⚡",
+      "title": "스벅의 여름이 잠시 멈췄다 — 'e프리퀀시'마저 보류",
+      "subtitle": "스타벅스 Summer1·e프리퀀시 잠정 중단·이마트 주가 25%·SpaceX 800억$ IPO·오픈AI SEC 제출·메타AI 한국 상륙 등 9개 이슈",
+      "filename": "2026-05-22.html",
+      "key_keywords": [
+        "스타벅스 Summer1 보류",
+        "e프리퀀시 잠정 중단",
+        "이마트 주가 25% 하락",
+        "정용진 책임 통감",
+        "SpaceX 6/12 IPO 800억$",
+        "오픈AI SEC 비공개 IPO",
+        "메타AI 한국 상륙",
+        "올리브영 패서디나",
+        "AI 광고 라벨 의무화"
+      ],
+      "auto_published": true,
+      "stage": "STAGE 1",
+      "status": "published — BCC 9명 발송 완료",
+      "sent_count": 9
+    },
+    {
+      "vol": "005",
+      "date": "2026-05-23",
+      "weekday": "토",
+      "emoji": "🌟",
+      "title": "데이터센터 92%·환율 1,520원·AI 글래스 D-2",
+      "subtitle": "NVIDIA 92% 데이터센터·Anthropic 9,000억$·Google Antigravity 2.0·레이밴 메타 5/25 한국·WIS 2026 SKT 에이닷 케이원·SM-삼성 월간 SM 콘서트·환율 1,520원 단호조치·스텔란티스 3만$ 신차·쇼츠 CPV 5~15원 등 9개 이슈",
+      "filename": "2026-05-23.html",
+      "key_keywords": [
+        "NVIDIA 92% 데이터센터",
+        "Anthropic 9000억 펀딩",
+        "Google Antigravity 2.0",
+        "Gemini 3.5 Flash",
+        "레이밴 메타 오클리 메타 한국 5/25",
+        "WIS 2026 SKT 에이닷 케이원",
+        "LGU+ 보이스 AI",
+        "SM-삼성 월간 SM 콘서트",
+        "환율 1520원 단호조치",
+        "스텔란티스 3만달러 신차",
+        "쇼츠 CPV 5~15원",
+        "마이크로 인플루언서"
+      ],
+      "auto_published": true,
+      "stage": "STAGE 1",
+      "status": "published — BCC 9명 발송 완료",
+      "sent_count": 9
+    }
+  ]
+}
