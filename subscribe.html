@@ -68,6 +68,18 @@
     font-size: 12px; color: #666; line-height: 1.7; margin-top: 4px;
   }
   .privacy h3 { font-size: 12px; color: #000; margin-bottom: 6px; font-weight: 800; }
+  .share-section { margin-top: 28px; padding-top: 24px; border-top: 1px solid #E5E5DD; text-align: center; }
+  .share-label { font-size: 11px; letter-spacing: 3px; color: #888; font-weight: 800; margin-bottom: 14px; }
+  .share-btn { width: auto; display: inline-block; padding: 12px 22px; margin: 4px; font-size: 14px; font-weight: 800;
+    border: none; cursor: pointer; letter-spacing: 0.5px; font-family: inherit; transition: all 0.15s; }
+  .share-btn.kakao { background: #FEE500; color: #191919; }
+  .share-btn.kakao:hover { background: #FDD800; }
+  .share-btn.copy { background: #FFF; color: #555; border: 1px solid #DDD; }
+  .share-btn.copy:hover { background: #F5F5EE; }
+  .share-toast { display: none; margin-top: 12px; padding: 12px 16px; background: #F0FDF4;
+    border-left: 4px solid #16A34A; font-size: 13px; color: #166534; text-align: left; }
+  .share-toast.show { display: block; animation: fadeIn 0.3s; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
 </style>
 </head>
 <body>
@@ -122,59 +134,20 @@
 
   </form>
 
+  <div class="share-section">
+    <div class="share-label">📤 동료에게도 공유</div>
+    <button type="button" class="share-btn kakao" id="shareKakaoBtn">
+      <span style="font-size:18px; margin-right:6px;">💬</span> 카카오톡으로 공유
+    </button>
+    <button type="button" class="share-btn copy" id="copyLinkBtn">
+      🔗 링크 복사
+    </button>
+    <div class="share-toast" id="shareToast">✅ 클립보드에 복사됐습니다. 카카오톡에 붙여넣으세요!</div>
+  </div>
+
   <div class="footer-note">
     이미 구독자라면 <a href="unsubscribe.html">수신 거부</a> · <a href="index.html">지난 호 보기</a>
   </div>
 
   <div class="privacy" id="privacy" style="margin-top:32px;">
-    <h3>개인정보 수집·이용 안내</h3>
-    수집 항목: 이메일 주소, 이름(선택)<br>
-    이용 목적: EDIT H 마케팅 뉴스레터 발송<br>
-    보유 기간: 구독 해지 시까지<br>
-    수신 거부: 매 메일 하단 링크 또는 본 페이지 하단 "수신 거부"<br>
-    문의: kim.seonill@hll.kr
-  </div>
-
-</div>
-
-<script>
-  // 가입 시각 자동 입력
-  document.getElementById('subscribed_at').value = new Date().toISOString();
-
-  // 폼 제출 처리 (Formspree AJAX)
-  const form = document.getElementById('subscribeForm');
-  const submitBtn = document.getElementById('submitBtn');
-  const successMsg = document.getElementById('successMsg');
-  const errorMsg = document.getElementById('errorMsg');
-
-  form.addEventListener('submit', async function(e) {
-    e.preventDefault();
-    submitBtn.disabled = true;
-    submitBtn.textContent = '처리 중...';
-    errorMsg.style.display = 'none';
-
-    try {
-      const formData = new FormData(form);
-      const response = await fetch(form.action, {
-        method: 'POST',
-        body: formData,
-        headers: { 'Accept': 'application/json' }
-      });
-
-      if (response.ok) {
-        form.style.display = 'none';
-        successMsg.style.display = 'block';
-      } else {
-        const data = await response.json();
-        throw new Error(data.error || 'submit failed');
-      }
-    } catch (err) {
-      errorMsg.style.display = 'block';
-      submitBtn.disabled = false;
-      submitBtn.textContent = '구독 신청';
-    }
-  });
-</script>
-
-</body>
-</html>
+    
