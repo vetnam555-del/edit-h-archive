@@ -221,6 +221,94 @@
       "big_issue_brand": "CJ메조미디어 (광고시장 데이터)",
       "replaced_from": "v9.3 → v9.6 보강판 교체",
       "replaced_at": "2026-05-27T16:30:00+09:00"
+    },
+    {
+      "vol": "008",
+      "date": "2026-05-28",
+      "weekday": "목",
+      "emoji": "🏦",
+      "title": "오늘 오전 10시, 한은은 일곱 번째 동결을 꺼낸다",
+      "subtitle": "한은 금통위 2.5% 7회 연속 동결·NVIDIA 1Q FY27 매출 109조·SpaceX 6/12 IPO·WWDC26 D-11·올리브영 MAU 1038만·환율 1532원·저작권법 17일·유니클로C 26SS·MZ 팝업 3000개·Claude Opus 4.7 87.6% 등 12개 이슈",
+      "filename": "2026-05-28.html",
+      "version": "v9.6",
+      "key_keywords": [
+        "한은 금통위 5/28 동결 7회 연속",
+        "기준금리 2.5% 동결 컨센서스 87%",
+        "NVIDIA 1Q FY27 매출 816억$",
+        "데이터센터 752억$ 한 분기 109조원",
+        "SpaceX 6/12 SPCX 상장 D-15",
+        "1.75조$ 밸류 사상 최대 IPO",
+        "Apple WWDC26 6/9 D-11 챗봇형 시리 캄포스",
+        "Google Gemini Omni Daily Brief 풀 롤아웃",
+        "Claude Opus 4.7 SWE-bench 87.6%",
+        "올리브영 3월 MAU 1038만 결제액 6590억",
+        "환율 1532원 7거래일째",
+        "방송광고비 −7.8% TV칸막이 해제",
+        "인스타 라이브 광고 한국 정식 오픈",
+        "개정 저작권법 5/11 시행 17일차",
+        "유니클로C 26SS 클레어 웨이트 켈러",
+        "2025 팝업 3000개 +66%"
+      ],
+      "auto_published": true,
+      "stage": "STAGE 1",
+      "status": "published — 자동 발행 완료 (BCC 10명 + 발신자 1명 = 11명)",
+      "sent_count": 11,
+      "v96_qa": {
+        "본문_길이": 8108,
+        "외부_링크_수": 76,
+        "이슈당_평균_링크": 5.3,
+        "이슈_카드_수": 12,
+        "이슈_본문_200자_이상": "12/12",
+        "빅이슈_본문": 1010,
+        "추천_인사이트_카드": 2,
+        "메타관찰_박스": true,
+        "EDITORS_NOTE_도입부": true,
+        "6대_카테고리_모두": true,
+        "긴_문장_90자_비율": "22%",
+        "한국_광고주_입장_반복": 0,
+        "같은_매체_3회_연속": 0,
+        "안장_단어_출력": 0,
+        "이중발행_차단": "3중 멱등성 통과 + sent.lock 작성",
+        "블랙리스트_매체": 0,
+        "고유_인용_매체_수": 54
+      },
+      "tier_distribution": {
+        "tier_1": 20,
+        "tier_2": 32,
+        "tier_3": 13,
+        "official_brand_channels": 4,
+        "tier_1_pct": "29% (단일) / Tier1+공식브랜드 = 35%",
+        "tier_1_plus_tier_2_pct": "75% (실질 공신력)",
+        "note": "Apple Newsroom·Google Blog·NVIDIA IR 등 공식 채널은 별도 분류 — Tier1 동등 수준"
+      },
+      "category_distribution": [
+        "🏦 통화정책 (Big Issue)",
+        "📺 광고·매체 (2)",
+        "🤖 AI·반도체·플랫폼 (3)",
+        "🚀 글로벌 빅테크 (2)",
+        "💄 유통·뷰티·패션 (2)",
+        "💼 정책·시장·금융 (2)",
+        "✨ 생활밀착 (1)"
+      ],
+      "sent_lock": "sent_2026-05-28.lock",
+      "external_links": 76,
+      "whitelisted_media": 50,
+      "categories": [
+        "광고·매체",
+        "AI·반도체",
+        "글로벌 빅테크",
+        "유통·뷰티",
+        "정책·시장",
+        "생활밀착"
+      ],
+      "big_issue_brand": "한국은행 금통위 (통화 정책)",
+      "previous_big_issues_3vol": [
+        "VOL.007 CJ메조미디어",
+        "VOL.006 정용진/이마트",
+        "VOL.005 NVIDIA"
+      ],
+      "consecutive_brand_check": "OK — 한은은 신규 주체, 동일 브랜드 3호 연속 0건",
+      "published_at": "2026-05-27T23:10:28.279976+09:00"
     }
   ]
 }
