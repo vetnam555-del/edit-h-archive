@@ -309,6 +309,43 @@
       ],
       "consecutive_brand_check": "OK — 한은은 신규 주체, 동일 브랜드 3호 연속 0건",
       "published_at": "2026-05-27T23:10:28.279976+09:00"
+    },
+    {
+      "vol": "009",
+      "date": "2026-05-29",
+      "weekday": "금",
+      "emoji": "🔁",
+      "title": "25년 만에 광고 1위가 바뀐다 — 메타가 구글을 넘어선다",
+      "subtitle": "메타 글로벌 광고 첫 1위·티빙 AVOD 확대·SK하이닉스 HBM 완판·올리브영 미국 직진출·한은 금리 동결 등 12개 이슈",
+      "filename": "2026-05-29.html",
+      "key_keywords": [
+        "메타 광고 1위",
+        "구글 추월",
+        "티빙 AVOD",
+        "SK하이닉스 HBM 완판",
+        "올리브영 미국 진출",
+        "한은 2.5% 동결"
+      ],
+      "auto_published": true,
+      "stage": "STAGE 1",
+      "version": "v9.8",
+      "audit": {
+        "P0": "pass(0재생성)",
+        "P1_warn": 0,
+        "chars": 5322,
+        "big_chars": 851,
+        "issues": 15,
+        "links": 70,
+        "forbidden": 0,
+        "cats": "6/6"
+      },
+      "bcc": {
+        "expected": 14,
+        "actual": 14,
+        "fail": 0,
+        "corp": 6,
+        "personal": 7
+      }
     }
   ]
 }
