@@ -347,5 +347,35 @@
         "personal": 7
       }
     }
+  ],
+  "weekly_issues": [
+    {
+      "vol": "002",
+      "date": "2026-05-29",
+      "weekday": "금",
+      "emoji": "🎯",
+      "cover": "2026-05-25 ~ 2026-05-29",
+      "title": "광고비의 무게중심이 옮겨간 한 주",
+      "subtitle": "메타, 25년 만에 구글 제치고 디지털 광고 1위 · 9.7초 주목 · 7회 동결 · NVIDIA 92%",
+      "filename": "weekly_2026-05-29.html",
+      "type": "weekly",
+      "self_eval": {
+        "content": 9.1,
+        "human": 8.0,
+        "avg_links": 66,
+        "avg_issues": 14,
+        "best": "VOL.009",
+        "weak": "VOL.006",
+        "daily_count": 4,
+        "holiday_skip": "2026-05-25"
+      },
+      "key_keywords": [
+        "메타 구글 추월",
+        "9.7초",
+        "7회 동결",
+        "HBM 완판",
+        "챗봇형 시리"
+      ]
+    }
   ]
 }
