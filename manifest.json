@@ -346,6 +346,32 @@
         "corp": 6,
         "personal": 7
       }
+    },
+    {
+      "vol": "010",
+      "date": "2026-06-01",
+      "weekday": "월",
+      "emoji": "🎯",
+      "title": "이번 주, '검색'이 '대화'에게 자리를 내준다 — 애플 WWDC D-7",
+      "subtitle": "대화형 시리·네이버 카카오 AI 에이전트·SpaceX IPO·올영 6월 빅세일·코스피 사상최고 등 12개 이슈",
+      "filename": "2026-06-01.html",
+      "auto_published": true,
+      "stage": "STAGE 1 (자동 발행 완료)",
+      "key_keywords": [
+        "애플 WWDC 대화형 시리",
+        "AI 에이전트 전면전",
+        "SpaceX SPCX IPO",
+        "올리브영 6월 빅세일",
+        "온라인 광고 60%",
+        "코스피 사상최고"
+      ],
+      "send_check": {
+        "expected": 14,
+        "actual": 14,
+        "fail": 0,
+        "corp": 4,
+        "personal": 10
+      }
     }
   ],
   "weekly_issues": [
