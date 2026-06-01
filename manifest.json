@@ -372,6 +372,22 @@
         "corp": 4,
         "personal": 10
       }
+    },
+    {
+      "vol": "011",
+      "date": "2026-06-02",
+      "weekday": "화",
+      "emoji": "💱",
+      "title": "넉 달 만에 방향을 튼 환율",
+      "subtitle": "원화 강세 반전·6월 매체비 재계산 · 카카오 광고 +16% · WWDC D-6 · SpaceX 6/4 로드쇼 · 올리브영 빅세일 막바지 등 12개",
+      "filename": "2026-06-02.html",
+      "key_keywords": [
+        "원화 강세 반전",
+        "해외 매체비",
+        "카카오 톡비즈 +16%",
+        "WWDC D-6",
+        "SpaceX SPCX IPO"
+      ]
     }
   ],
   "weekly_issues": [
