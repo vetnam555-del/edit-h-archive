@@ -388,6 +388,46 @@
         "WWDC D-6",
         "SpaceX SPCX IPO"
       ]
+    },
+    {
+      "vol": "011",
+      "date": "2026-06-02",
+      "weekday": "화",
+      "emoji": "🚀",
+      "title": "Anthropic도 줄섰다 — OpenAI·SpaceX 2026 IPO 트리오 완성",
+      "subtitle": "Anthropic IPO 신청·SpaceX D-10·NVIDIA Vera CPU·MiniMax M3·6/3 지방선거·월드컵 D-9·올리브영 미국 D+3·환율 1520 안정 등 12개 이슈",
+      "filename": "2026-06-02.html",
+      "version": "v9.9.1",
+      "auto_published": false,
+      "manual_published": true,
+      "note": "자동 트리거 누락 — 수동 보완 발행",
+      "key_keywords": [
+        "Anthropic IPO 신청",
+        "SpaceX 6/12 상장 D-10",
+        "OpenAI 가을 IPO 추정",
+        "NVIDIA Vera CPU",
+        "MiniMax M3 출시",
+        "WWDC26 D-6",
+        "6/3 지방선거 광고 정지",
+        "월드컵 D-9 광고 시즌",
+        "올리브영 패서디나 D+3",
+        "환율 1520 안정",
+        "Meta Strique D2C AI"
+      ],
+      "audit": {
+        "P0": "pass",
+        "chars": 5897,
+        "big_chars": 781,
+        "issues": 12,
+        "links": 56,
+        "forbidden": 0,
+        "cats": "6/6"
+      },
+      "bcc": {
+        "expected": 13,
+        "actual": 13,
+        "fail": 0
+      }
     }
   ],
   "weekly_issues": [
