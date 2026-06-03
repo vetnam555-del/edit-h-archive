@@ -406,6 +406,42 @@
         "fail": 0,
         "note": "13명 각자 2통씩 받음 (이중 발행)"
       }
+    },
+    {
+      "vol": "012",
+      "date": "2026-06-03",
+      "weekday": "수",
+      "emoji": "🤖",
+      "title": "'URL만 넣으면 광고 완성' — 완전자동 AI 광고가 마케터 직무를 다시 쓴다",
+      "subtitle": "메타·구글 광고 전과정 자동화 · WWDC D-5 시리 · SpaceX 1.75조$ IPO · 코스피 7천조 · 올영세일 막바지",
+      "filename": "2026-06-03.html",
+      "version": "v9.9.1",
+      "auto_published": true,
+      "big_issue": "메타·구글 완전자동 AI 광고 — 사람의 일은 브랜드·데이터·검수로 이동",
+      "audit": {
+        "P0": "pass",
+        "chars_kr": 4151,
+        "big_chars": 761,
+        "issues": 12,
+        "links": 53,
+        "forbidden": 0,
+        "cats": "6/6",
+        "human": 8.4
+      },
+      "bcc": {
+        "expected": 13,
+        "actual": 13,
+        "fail": 0,
+        "duplicates_blocked": 0
+      },
+      "key_keywords": [
+        "완전자동 AI 광고",
+        "메타 Advantage+",
+        "WWDC D-5 시리",
+        "SpaceX SPCX IPO",
+        "코스피 7천조",
+        "리테일미디어 100조"
+      ]
     }
   ],
   "weekly_issues": [
