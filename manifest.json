@@ -446,28 +446,57 @@
     {
       "vol": "013",
       "date": "2026-06-04",
-      "weekday": "?",
-      "emoji": "??",
-      "title": "?? ?? ??? ? ?? ??? ??",
-      "subtitle": "???? ???? ????? 1? ????GS???? ?????CJ????29CM??????????EBS AI ??",
+      "weekday": "목",
+      "emoji": "⚠",
+      "title": "증빙 없는 광고가 더 빨리 막히는 시대",
+      "subtitle": "증빙 없는 광고는 더 빨리 막히는 시대로 간다 · '순간 1위' 문구, 이제는 성과보다 리스크가 먼저 붙는다 · GS더프레시, 퀵커머스 매출 비중 첫 10% 돌파 · CJ웰케어, 성수에서 '이너비 뷰티 랩' 팝업으로 성분을 경험화 · 29CM×로프트, 문구를 '취향 이벤트'로 키운다",
       "filename": "2026-06-04.html",
       "auto_published": true,
-      "stage": "STAGE 1 (?? ?? ??)",
       "key_keywords": [
-        "???? ????",
-        "?? 1? ???",
-        "GS???? ????",
-        "CJ??? ??? ??",
-        "29CM ???",
-        "EBS AI??? ?????"
+        "증빙 없는 광고는 더 빨리 막히는 시대로 간다",
+        "'순간 1위' 문구, 이제는 성과보다 리스크가 먼저 붙는다",
+        "GS더프레시, 퀵커머스 매출 비중 첫 10% 돌파",
+        "CJ웰케어, 성수에서 '이너비 뷰티 랩' 팝업으로 성분을 경험화",
+        "29CM×로프트, 문구를 '취향 이벤트'로 키운다",
+        "롯데마트 '통큰데이', 할인에 팬덤 굿즈까지 붙였다"
       ],
       "send_check": {
         "expected": 14,
         "actual": 14,
-        "fail": 0,
-        "corp": 4,
-        "personal": 10
+        "fail": 0
       }
+    },
+    {
+      "vol": "014",
+      "date": "2026-06-05",
+      "weekday": "금",
+      "emoji": "🎯",
+      "title": "젠슨 황 한 끼가 만든 성수 상권의 언드 미디어",
+      "subtitle": "깐부치킨 다음은 성수 삼겹살집 · 확정 전에도 예약과 SNS 노출이 움직인 외식 상권 이슈 · 스타벅스, 논란 8일 만에 카톡 선물하기 1위 복귀 · 젝시믹스, 고윤정 모델 발탁과 'UNDEFINE' 캠페인 공개 · 롯데마트, 캠핑+피크닉 '캠크닉' 수요를 PB 행사로 묶다 · 테라 X 락앤락, 월드컵 '홈술'을 보냉 굿즈로 잡는다",
+      "filename": "2026-06-05.html",
+      "auto_published": true,
+      "manual_published": true,
+      "manual_reason": "computer_off_catchup",
+      "kind": "daily",
+      "source_log": "outputs/sources/sources_2026-06-05.json",
+      "public_url": "https://vetnam555-del.github.io/edit-h-archive/2026-06-05.html",
+      "key_keywords": [
+        "깐부치킨 다음은 성수 삼겹살집 · 확정 전에도 예약과 SNS 노출",
+        "스타벅스, 논란 8일 만에 카톡 선물하기 1위 복귀",
+        "젝시믹스, 고윤정 모델 발탁과 'UNDEFINE' 캠페인 공개",
+        "롯데마트, 캠핑+피크닉 '캠크닉' 수요를 PB 행사로 묶다",
+        "테라 X 락앤락, 월드컵 '홈술'을 보냉 굿즈로 잡는다",
+        "세븐일레븐, 70kcal '케일&파인 스무디'로 헬시플레저 정조준"
+      ],
+      "send_check": {
+        "expected": 15,
+        "actual": 15,
+        "fail": 0,
+        "to": 1,
+        "bcc": 14,
+        "new_subscriber_included": true
+      },
+      "published_at_kst": "2026-06-05T09:25:25+09:00"
     }
   ],
   "weekly_issues": [
