@@ -528,6 +528,37 @@
         "챗봇형 시리"
       ],
       "cover_period": "2026-05-25 ~ 2026-05-29"
+    },
+    {
+      "vol": "003",
+      "date": "2026-06-05",
+      "weekday": "?",
+      "emoji": "??",
+      "cover": "2026-06-01 ~ 2026-06-05",
+      "title": "??, ??, ?? ???? ? ???? ? ?",
+      "subtitle": "??? ??? ??????, ??? ?? ????, ????? ??? ???? ??? ? ?",
+      "filename": "weekly_2026-06-05.html",
+      "type": "weekly",
+      "self_eval": {
+        "content": 8.7,
+        "human": 8.6,
+        "avg_links": 10,
+        "avg_issues": 5,
+        "best": "VOL.014",
+        "weak": "VOL.011",
+        "daily_count": 5,
+        "holiday_skip": "2026-06-03 daily holiday context included in weekly synthesis"
+      },
+      "key_keywords": [
+        "WWDC26",
+        "?? ?? ????",
+        "?? ?? ??",
+        "???? ???? ??",
+        "???",
+        "Creative Brand Lion"
+      ],
+      "cover_period": "2026-06-01 ~ 2026-06-05",
+      "public_url": "https://vetnam555-del.github.io/edit-h-archive/weekly_2026-06-05.html"
     }
   ]
 }
