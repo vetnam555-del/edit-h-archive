@@ -497,6 +497,25 @@
         "new_subscriber_included": true
       },
       "published_at_kst": "2026-06-05T09:25:25+09:00"
+    },
+    {
+      "vol": "015",
+      "date": "2026-06-06",
+      "weekday": "토",
+      "emoji": "🏠",
+      "title": "한옥 팝업이 보여준 체험형 마케팅의 새 기준",
+      "subtitle": "KFC 북촌 팝업·불닭 IP·무신사 AI 글래스·젠틀몬스터 캐릭터 컬렉션을 소비자 행동 관점으로 읽은 인스타 특집",
+      "filename": "2026-06-06.html",
+      "key_keywords": [
+        "KFC 북촌 팝업",
+        "불닭 페포 IP",
+        "무신사 AI 글래스",
+        "체험형 팝업",
+        "마케팅을 보는 감각"
+      ],
+      "auto_published": false,
+      "stage": "INSTAGRAM SPECIAL",
+      "status": "generated and validated; formal email blocked by weekend holiday rule"
     }
   ],
   "weekly_issues": [
