@@ -459,6 +459,40 @@
       "key_keywords": [
         "팝업은 제품 진열보다 사용 장면을 판다"
       ]
+    },
+    {
+      "vol": "019",
+      "date": "2026-06-10",
+      "weekday": "수",
+      "emoji": "⚽",
+      "title": "한낮 월드컵은 치맥보다 응원 동선을 판다",
+      "subtitle": "월드컵 한낮 경기, 교촌 SNS 응원, 알리바바-구글 AI 광고, 퍼그 제로, 에이블리 피처링 등 8개 이슈",
+      "filename": "2026-06-10.html",
+      "key_keywords": [
+        "한낮 월드컵은 치맥보다 응원 동선을 판다",
+        "월드컵 응원 동선",
+        "AI 광고 운영",
+        "체험단 자동화"
+      ]
+    },
+    {
+      "vol": "020",
+      "date": "2026-06-11",
+      "weekday": "목",
+      "emoji": "🔥",
+      "title": "황 픽은 광고보다 먼저 검색창을 움직였다",
+      "subtitle": "젠슨 황 먹방·성수 수입차·X 19금 전환·한진 셀러툴·N32 라이브커머스·쿠팡 개인정보·AI 3강",
+      "filename": "2026-06-11.html",
+      "key_keywords": [
+        "젠슨 황",
+        "황 픽",
+        "HBM 스낵",
+        "검색량 160배",
+        "브랜드 사건"
+      ],
+      "auto_published": false,
+      "stage": "CODEx DAILY",
+      "status": "generated_pending_send"
     }
   ],
   "weekly_issues": [
