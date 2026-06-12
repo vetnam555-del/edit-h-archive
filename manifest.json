@@ -493,6 +493,25 @@
       "auto_published": false,
       "stage": "CODEx DAILY",
       "status": "generated_pending_send"
+    },
+    {
+      "vol": "021",
+      "date": "2026-06-12",
+      "weekday": "금",
+      "emoji": "🔥",
+      "title": "쿠팡나우는 배달앱의 빈 시간을 노린다",
+      "subtitle": "쿠팡나우·코리아 캠프·쿠팡 과징금·지그재그 140배·팝업 평당 기억·AI 광고제",
+      "filename": "2026-06-12.html",
+      "key_keywords": [
+        "쿠팡나우",
+        "퀵커머스",
+        "코리아 캠프",
+        "지그재그 140배",
+        "평당 기억"
+      ],
+      "auto_published": true,
+      "stage": "CODEx DAILY",
+      "status": "generated, validated, sent to all recipients, Instagram package prepared, and published on 2026-06-12"
     }
   ],
   "weekly_issues": [
