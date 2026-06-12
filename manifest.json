@@ -512,6 +512,27 @@
       "auto_published": true,
       "stage": "CODEx DAILY",
       "status": "generated, validated, sent to all recipients, Instagram package prepared, and published on 2026-06-12"
+    },
+    {
+      "vol": "022",
+      "date": "2026-06-13",
+      "weekday": "토",
+      "emoji": "🏟️",
+      "title": "월드컵 마케팅은 경기보다 시청 장면을 판다",
+      "subtitle": "월드컵 응원 마케팅·기아 글로벌 캠페인·빗썸 피싱 예방·쿠키런 데이·디지털 소통 평가",
+      "filename": "2026-06-13.html",
+      "key_keywords": [
+        "월드컵 마케팅",
+        "집관",
+        "기아 캠페인",
+        "빗썸 피싱 예방",
+        "쿠키런 데이"
+      ],
+      "auto_published": true,
+      "stage": "WEEKEND DAILY",
+      "status": "generated, validated, sent to weekend recipient, Instagram package prepared, and published on 2026-06-13",
+      "public_url": "https://vetnam555-del.github.io/edit-h-archive/2026-06-13.html",
+      "source_log": "outputs/sources/sources_2026-06-13.json"
     }
   ],
   "weekly_issues": [
