@@ -565,6 +565,32 @@
       ],
       "cover_period": "2026-06-01 ~ 2026-06-05",
       "public_url": "https://vetnam555-del.github.io/edit-h-archive/weekly_2026-06-05.html"
+    },
+    {
+      "vol": "004",
+      "date": "2026-06-12",
+      "weekday": "금",
+      "emoji": "🎯",
+      "cover": "2026-06-08 ~ 2026-06-12",
+      "title": "노출 다음 화면까지 책임진 한 주",
+      "subtitle": "한낮 월드컵, 사용 장면 팝업, 쿠팡나우, 지그재그 140배, AI 제작 검수가 모두 다음 행동 설계로 모인 주",
+      "filename": "weekly_2026-06-12.html",
+      "type": "weekly",
+      "self_eval": {
+        "content": 8.6,
+        "human": 8.4,
+        "avg_links": 8.6,
+        "avg_issues": 8.6,
+        "best": "VOL.021",
+        "weak": "VOL.017~019",
+        "daily_count": 5,
+        "improvement_focus": "top frame starts from concrete scenes, not macro abstraction"
+      },
+      "key_keywords": [
+        "노출 다음 화면까지 책임진 한 주"
+      ],
+      "cover_period": "2026-06-08 ~ 2026-06-12",
+      "public_url": "https://vetnam555-del.github.io/edit-h-archive/weekly_2026-06-12.html"
     }
   ]
 }
