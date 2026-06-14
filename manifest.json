@@ -533,6 +533,25 @@
       "status": "generated, validated, sent to weekend recipient, Instagram package prepared, and published on 2026-06-13",
       "public_url": "https://vetnam555-del.github.io/edit-h-archive/2026-06-13.html",
       "source_log": "outputs/sources/sources_2026-06-13.json"
+    },
+    {
+      "vol": "023",
+      "date": "2026-06-14",
+      "weekday": "일",
+      "emoji": "🧭",
+      "title": "AI 광고는 모델보다 캐릭터를 먼저 세운다",
+      "subtitle": "동국제약 AI 캐릭터 광고와 월드컵 프로모션이 보여준 새 접점 설계",
+      "filename": "2026-06-14.html",
+      "key_keywords": [
+        "AI 광고",
+        "동국제약",
+        "월드컵 마케팅",
+        "모델 계약",
+        "접점 설계"
+      ],
+      "auto_published": false,
+      "stage": "CODEX DAILY WATCHDOG CATCHUP",
+      "status": "generated_pending_send"
     }
   ],
   "weekly_issues": [
