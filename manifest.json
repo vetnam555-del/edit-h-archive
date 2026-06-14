@@ -549,9 +549,9 @@
         "모델 계약",
         "접점 설계"
       ],
-      "auto_published": false,
-      "stage": "CODEX DAILY WATCHDOG CATCHUP",
-      "status": "generated_pending_send"
+      "auto_published": true,
+      "stage": "WEEKEND DAILY WATCHDOG CATCHUP",
+      "status": "generated, validated, late catch-up sent to weekend recipient, Instagram package prepared, and published on 2026-06-14"
     }
   ],
   "weekly_issues": [
