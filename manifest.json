@@ -552,6 +552,67 @@
       "auto_published": true,
       "stage": "WEEKEND DAILY WATCHDOG CATCHUP",
       "status": "generated, validated, late catch-up sent to weekend recipient, Instagram package prepared, and published on 2026-06-14"
+    },
+    {
+      "vol": "024",
+      "date": "2026-06-15",
+      "weekday": "월",
+      "emoji": "🔥",
+      "title": "모델을 쓰는 일이 캐릭터를 설계하는 일로 바뀐다",
+      "subtitle": "유통가 새 얼굴, 카스 리필 타임, 비디비치 일본 확장, LGU+ 음성 캠페인",
+      "filename": "2026-06-15.html",
+      "key_keywords": [
+        "새 얼굴",
+        "카스 리필 타임",
+        "비디비치",
+        "심플 사서함",
+        "핑크 축구화"
+      ],
+      "auto_published": false,
+      "stage": "CODEX DAILY",
+      "status": "generated_pending_send",
+      "public_url": "https://vetnam555-del.github.io/edit-h-archive/2026-06-15.html"
+    },
+    {
+      "vol": "025",
+      "date": "2026-06-16",
+      "weekday": "화",
+      "emoji": "🔥",
+      "title": "숏폼은 이제 광고 수업이 아니라 실행 패키지가 된다",
+      "subtitle": "틱톡 SMB 아카데미, 무신사 소담상회, 아로나민 광고, 포토이즘×졸스",
+      "filename": "2026-06-16.html",
+      "key_keywords": [
+        "틱톡 SMB",
+        "숏폼 광고",
+        "무신사 소담상회",
+        "아로나민 씨플러스",
+        "포토이즘 졸스"
+      ],
+      "auto_published": false,
+      "stage": "CODEX DAILY",
+      "status": "generated_pending_send",
+      "public_url": "https://vetnam555-del.github.io/edit-h-archive/2026-06-16.html"
+    },
+    {
+      "vol": "026",
+      "date": "2026-06-17",
+      "weekday": "수",
+      "emoji": "🔥",
+      "title": "광고는 이제 재고와 매출 화면을 같이 봐야 한다",
+      "subtitle": "카페24 토털 커머스 마케팅, KB국민카드 광고, 삼성 워시포인트, 파리바게뜨 안녕 캠페인",
+      "filename": "2026-06-17.html",
+      "key_keywords": [
+        "카페24",
+        "토털 커머스 마케팅",
+        "KB국민카드",
+        "삼성 워시포인트",
+        "파리바게뜨 안녕"
+      ],
+      "auto_published": false,
+      "stage": "CODEX DAILY",
+      "status": "generated_pending_send",
+      "public_url": "https://vetnam555-del.github.io/edit-h-archive/2026-06-17.html",
+      "source_log": "outputs/sources/sources_2026-06-17.json"
     }
   ],
   "weekly_issues": [
