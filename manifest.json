@@ -656,6 +656,28 @@
       "status": "generated_pending_send",
       "public_url": "https://vetnam555-del.github.io/edit-h-archive/2026-06-19.html",
       "source_log": "outputs/sources/sources_2026-06-19.json"
+    },
+    {
+      "vol": "029",
+      "date": "2026-06-20",
+      "weekday": "토",
+      "emoji": "▣",
+      "title": "광고는 이제 답변 안으로 들어옵니다",
+      "subtitle": "챗GPT 광고 한국 파일럿, 네이버 AI 브리핑 광고, 비즈넵 환급바다, 야세 협업, 금융권 콘텐츠",
+      "filename": "2026-06-20.html",
+      "key_keywords": [
+        "챗GPT 광고",
+        "네이버 AI 브리핑",
+        "비즈넵 환급바다",
+        "야세 송이송이",
+        "금융권 콘텐츠",
+        "스너글 실내건조"
+      ],
+      "auto_published": false,
+      "stage": "CODEX DAILY",
+      "status": "generated_pending_send",
+      "public_url": "https://vetnam555-del.github.io/edit-h-archive/2026-06-20.html",
+      "source_log": "outputs/sources/sources_2026-06-20.json"
     }
   ],
   "weekly_issues": [
