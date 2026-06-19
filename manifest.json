@@ -613,6 +613,49 @@
       "status": "generated_pending_send",
       "public_url": "https://vetnam555-del.github.io/edit-h-archive/2026-06-17.html",
       "source_log": "outputs/sources/sources_2026-06-17.json"
+    },
+    {
+      "vol": "027",
+      "date": "2026-06-18",
+      "weekday": "목",
+      "emoji": "▣",
+      "title": "배송, 응원, 메뉴가 광고의 다음 화면이 됐다",
+      "subtitle": "CJ대한통운 오네, 카스 와이드 컵, 배민-피자헛, 에버랜드 지역 굿즈, 네이버 광고 지면, 메타 AI 마케팅",
+      "filename": "2026-06-18.html",
+      "key_keywords": [
+        "CJ대한통운 오네",
+        "카스 와이드 컵",
+        "배민 피자헛",
+        "에버랜드 구석구석",
+        "네이버 플레이스광고"
+      ],
+      "auto_published": false,
+      "stage": "CODEX DAILY",
+      "status": "generated_pending_send",
+      "public_url": "https://vetnam555-del.github.io/edit-h-archive/2026-06-18.html",
+      "source_log": "outputs/sources/sources_2026-06-18.json"
+    },
+    {
+      "vol": "028",
+      "date": "2026-06-19",
+      "weekday": "금",
+      "emoji": "▣",
+      "title": "여름 세일은 가격보다 움직이는 동선을 판다",
+      "subtitle": "무신사 무진장, 코웨이 뮤지컬 광고, 더에스엠씨 AI 렌즈, 네이버 광고 인증, 스레드 커뮤니티, CJ 소바바",
+      "filename": "2026-06-19.html",
+      "key_keywords": [
+        "무신사 무진장",
+        "코웨이 더매너",
+        "더에스엠씨 렌즈",
+        "네이버 Ads Expert",
+        "스레드 커뮤니티",
+        "소바바"
+      ],
+      "auto_published": false,
+      "stage": "CODEX DAILY",
+      "status": "generated_pending_send",
+      "public_url": "https://vetnam555-del.github.io/edit-h-archive/2026-06-19.html",
+      "source_log": "outputs/sources/sources_2026-06-19.json"
     }
   ],
   "weekly_issues": [
