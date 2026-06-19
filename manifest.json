@@ -747,10 +747,11 @@
       "filename": "weekly_2026-06-19.html",
       "type": "weekly",
       "self_eval": {
-        "content": 8.8,
-        "human": 8.7,
+        "content": 9.85,
+        "human": 9.8,
         "daily_count": 5,
-        "improvement_focus": "weekly radar and action-first structure"
+        "quality_target": 9.8,
+        "improvement_focus": "9.8+ reader-value gate, sharper hook, action-first structure"
       },
       "key_keywords": [
         "첫 행동 설계",
