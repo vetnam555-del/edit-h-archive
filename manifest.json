@@ -735,6 +735,30 @@
       ],
       "cover_period": "2026-06-08 ~ 2026-06-12",
       "public_url": "https://vetnam555-del.github.io/edit-h-archive/weekly_2026-06-12.html"
+    },
+    {
+      "vol": "005",
+      "date": "2026-06-19",
+      "weekday": "금",
+      "emoji": "⚡",
+      "cover": "2026-06-15 ~ 2026-06-19",
+      "title": "첫 행동을 짧게 만든 한 주",
+      "subtitle": "모델, 숏폼, 커머스 데이터, 배송 브랜드, 세일이 모두 고객의 첫 행동 설계로 모인 주",
+      "filename": "weekly_2026-06-19.html",
+      "type": "weekly",
+      "self_eval": {
+        "content": 8.8,
+        "human": 8.7,
+        "daily_count": 5,
+        "improvement_focus": "weekly radar and action-first structure"
+      },
+      "key_keywords": [
+        "첫 행동 설계",
+        "짧은 입구",
+        "성과 증거"
+      ],
+      "cover_period": "2026-06-15 ~ 2026-06-19",
+      "public_url": "https://vetnam555-del.github.io/edit-h-archive/weekly_2026-06-19.html"
     }
   ]
 }
