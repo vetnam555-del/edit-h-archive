@@ -570,7 +570,7 @@
       ],
       "auto_published": false,
       "stage": "CODEX DAILY",
-      "status": "generated_pending_send",
+      "status": "sent",
       "public_url": "https://vetnam555-del.github.io/edit-h-archive/2026-06-15.html"
     },
     {
@@ -678,6 +678,98 @@
       "status": "generated_pending_send",
       "public_url": "https://vetnam555-del.github.io/edit-h-archive/2026-06-20.html",
       "source_log": "outputs/sources/sources_2026-06-20.json"
+    },
+    {
+      "vol": "030",
+      "date": "2026-06-21",
+      "weekday": "일",
+      "emoji": "🧭",
+      "title": "광고가 빨라질수록 첫 설명이 더 중요해진다",
+      "subtitle": "애드GPT 제품 URL 광고 생성·청호나이스 AI 광고 공모전·삼양 서포트럭·굽네 스탬프 챌린지 등",
+      "filename": "2026-06-21.html",
+      "key_keywords": [
+        "제품 URL",
+        "AI 광고",
+        "청호나이스",
+        "삼양 서포트럭",
+        "굽네 스탬프",
+        "해외 마케팅"
+      ],
+      "auto_published": false,
+      "stage": "CODEX DAILY",
+      "status": "generated_pending_send",
+      "public_url": "https://vetnam555-del.github.io/edit-h-archive/2026-06-21.html",
+      "source_log": "outputs/sources/sources_2026-06-21.json"
+    },
+    {
+      "vol": "031",
+      "date": "2026-06-22",
+      "weekday": "월",
+      "emoji": "🧭",
+      "title": "AI가 답을 줄수록 광고는 표시와 근거를 보여야 한다",
+      "subtitle": "네이버 AI 브리핑 광고, 월드컵 스포츠 광고, G마켓 광고 반등, 코웨이 뮤지컬 광고, CU 러닝 아이스크림",
+      "filename": "2026-06-22.html",
+      "key_keywords": [
+        "AI 브리핑",
+        "네이버 광고",
+        "월드컵 광고",
+        "G마켓",
+        "코웨이",
+        "올영신상"
+      ],
+      "auto_published": false,
+      "stage": "CODEX DAILY",
+      "status": "generated_sent",
+      "public_url": "https://vetnam555-del.github.io/edit-h-archive/2026-06-22.html",
+      "source_log": "outputs/sources/sources_2026-06-22.json"
+    },
+    {
+      "vol": "032",
+      "date": "2026-06-23",
+      "weekday": "화",
+      "emoji": "🧭",
+      "title": "후기처럼 보이는 광고, 사람은 표시부터 찾는다",
+      "subtitle": "폴리마켓 바이럴 의혹, 네이버 AI 브리핑 광고, 챗GPT 광고, 인스타그램 캐러셀, OOH 타기팅",
+      "filename": "2026-06-23.html",
+      "key_keywords": [
+        "폴리마켓",
+        "AI 광고",
+        "챗GPT 광고",
+        "인스타그램 캐러셀",
+        "OOH",
+        "아디다스"
+      ],
+      "auto_published": false,
+      "stage": "CODEX DAILY",
+      "status": "generated_sent",
+      "public_url": "https://vetnam555-del.github.io/edit-h-archive/2026-06-23.html",
+      "source_log": "outputs/sources/sources_2026-06-23.json"
+    },
+    {
+      "vol": "034",
+      "date": "2026-06-25",
+      "weekday": "목",
+      "emoji": "🧭",
+      "title": "오늘 사람들은, 어디에 진심이었을까?",
+      "subtitle": "편의점 도시락, 방한 관광객 한식 체험, 광고모델, 밈, 식품 IP, 카카오 커머스 광고 등 10개 소비·브랜드 이슈",
+      "filename": "2026-06-25.html",
+      "key_keywords": [
+        "혼밥",
+        "편의점 도시락",
+        "방한 관광객",
+        "K-푸드",
+        "광고모델",
+        "밈",
+        "식품 IP",
+        "카카오 커머스 광고",
+        "오프라인 체험",
+        "가격 양극화"
+      ],
+      "auto_published": false,
+      "stage": "CLAUDE STUDIO A_CLASSIC → CODEX ARCHIVE",
+      "status": "generated_no_send_archive_updated",
+      "public_url": "https://vetnam555-del.github.io/edit-h-archive/2026-06-25.html",
+      "source_log": "outputs/sources/sources_2026-06-25.json"
     }
   ],
   "weekly_issues": [
@@ -693,7 +785,7 @@
       "type": "weekly",
       "self_eval": {
         "content": 9.1,
-        "human": 8.0,
+        "human": 8,
         "avg_links": 66,
         "avg_issues": 14,
         "best": "VOL.009",
