@@ -770,6 +770,32 @@
       "status": "generated_no_send_archive_updated",
       "public_url": "https://vetnam555-del.github.io/edit-h-archive/2026-06-25.html",
       "source_log": "outputs/sources/sources_2026-06-25.json"
+    },
+    {
+      "vol": "035",
+      "date": "2026-06-26",
+      "weekday": "금",
+      "emoji": "🧭",
+      "title": "검색창이 바뀌면, 사람은 어디서 살까?",
+      "subtitle": "네이버 AI 탭, 쇼핑 추천, 당근 RISE, KREAM F&B 굿즈, 세무 광고 규제, 쇼피파이 결제, 유통 매출, OOH, CTV, 검색 트렌드",
+      "filename": "2026-06-26.html",
+      "key_keywords": [
+        "네이버 AI 탭",
+        "쇼핑 추천",
+        "당근 RISE",
+        "KREAM F&B",
+        "세무 광고 규제",
+        "쇼피파이 결제",
+        "유통 매출",
+        "OOH",
+        "CTV",
+        "검색 트렌드"
+      ],
+      "auto_published": false,
+      "stage": "CODEX DAILY",
+      "status": "generated_sent",
+      "public_url": "https://vetnam555-del.github.io/edit-h-archive/2026-06-26.html",
+      "source_log": "outputs/sources/sources_2026-06-26.json"
     }
   ],
   "weekly_issues": [
