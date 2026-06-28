@@ -796,6 +796,50 @@
       "status": "generated_sent",
       "public_url": "https://vetnam555-del.github.io/edit-h-archive/2026-06-26.html",
       "source_log": "outputs/sources/sources_2026-06-26.json"
+    },
+    {
+      "vol": "036",
+      "date": "2026-06-27",
+      "weekday": "토",
+      "emoji": "👀",
+      "title": "사람들은 어디서 멈추고, 무엇을 믿을까요?",
+      "subtitle": "AI 검색, 결제창, 동네 상권, 월드컵, 여름 소비까지 사람의 행동을 먼저 읽은 10개 이슈",
+      "filename": "2026-06-27.html",
+      "key_keywords": [
+        "AI 검색",
+        "결제창",
+        "동네 상권",
+        "월드컵",
+        "여름 소비",
+        "사람의 행동"
+      ],
+      "auto_published": false,
+      "stage": "CODEX DAILY",
+      "status": "generated_sent_archive_updated",
+      "public_url": "https://vetnam555-del.github.io/edit-h-archive/2026-06-27.html",
+      "source_log": "outputs/sources/sources_2026-06-27.json"
+    },
+    {
+      "vol": "037",
+      "date": "2026-06-28",
+      "weekday": "일",
+      "emoji": "👀",
+      "title": "광고가 답 안으로 들어오면, 사람은 먼저 근거를 찾는다",
+      "subtitle": "AI 브리핑 광고, AI 검색 확인 행동, 동네 광고, 결제창, 리테일 미디어, 여름 소비 등 10개 흐름",
+      "filename": "2026-06-28.html",
+      "key_keywords": [
+        "AI 브리핑 광고",
+        "AI 검색 확인 행동",
+        "동네 광고",
+        "결제창",
+        "리테일 미디어",
+        "여름 소비"
+      ],
+      "auto_published": false,
+      "stage": "CODEX DAILY",
+      "status": "generated_archive_updated",
+      "public_url": "https://vetnam555-del.github.io/edit-h-archive/2026-06-28.html",
+      "source_log": "outputs/sources/sources_2026-06-28.json"
     }
   ],
   "weekly_issues": [
