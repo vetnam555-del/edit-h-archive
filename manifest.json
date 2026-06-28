@@ -840,6 +840,28 @@
       "status": "generated_archive_updated",
       "public_url": "https://vetnam555-del.github.io/edit-h-archive/2026-06-28.html",
       "source_log": "outputs/sources/sources_2026-06-28.json"
+    },
+    {
+      "vol": "032",
+      "date": "2026-06-29",
+      "weekday": "월",
+      "emoji": "🧭",
+      "title": "월드컵 광고전은 경기보다 보는 시간을 삽니다",
+      "subtitle": "네이버 AI 브리핑 안에 광고가 붙기 시작합니다 · AI 탭이 커질수록 검색 뒤 확인 행동이 남습니다 · 월드컵 광고전은 경기보다 보는 시간을 삽니다 · G마켓 광고는 싼값보다 기억을 노립니다 · CU 러닝 상품은 음료보다 참여 이유를 팝니다 등 10개 이슈",
+      "filename": "2026-06-29.html",
+      "key_keywords": [
+        "네이버 AI 브리핑 안에 광고가 붙기 시작합니다",
+        "AI 탭이 커질수록 검색 뒤 확인 행동이 남습니다",
+        "월드컵 광고전은 경기보다 보는 시간을 삽니다",
+        "G마켓 광고는 싼값보다 기억을 노립니다",
+        "CU 러닝 상품은 음료보다 참여 이유를 팝니다",
+        "오트밀 캠페인은 산지를 신뢰 언어로 바꿉니다"
+      ],
+      "auto_published": false,
+      "stage": "CODEX DAILY",
+      "status": "generated_sent",
+      "public_url": "https://vetnam555-del.github.io/edit-h-archive/2026-06-29.html",
+      "source_log": "outputs/sources/sources_2026-06-29.json"
     }
   ],
   "weekly_issues": [
