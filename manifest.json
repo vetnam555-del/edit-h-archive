@@ -1008,22 +1008,137 @@
       "vol": "045",
       "date": "2026-07-07",
       "weekday": "화",
-      "title": "닭고기 값이 오르면 초복 장바구니는 물량부터 봅니다",
-      "subtitle": "복날 가격, 장바구니 쿠폰, K뷰티 팝업, 로컬 광고, 개인정보 신뢰, 해외 소비재 행사까지 오늘의 선택 흐름을 봅니다.",
+      "title": "냉면이 2만원이 되자 벌어진 일 — 편의점 냉면 +395%",
+      "subtitle": "폭염 속 냉면값 논란, 편의점 냉면 매출 +395% 등 여름철 소비 지도를 읽은 10개 이슈",
       "filename": "2026-07-07.html",
       "type": "daily",
       "key_keywords": [
-        "복날",
-        "닭고기 가격",
-        "와우 멤버스데이",
-        "K뷰티 팝업",
-        "플레이스광고",
-        "쇼핑 카테고리",
-        "개인정보",
-        "한류박람회"
+        "냉면",
+        "폭염 소비",
+        "편의점 매출",
+        "여름 물가"
       ],
       "source_count": 11,
       "public_url": "https://vetnam555-del.github.io/edit-h-archive/2026-07-07.html"
+    },
+    {
+      "vol": "046",
+      "date": "2026-07-08",
+      "weekday": "수",
+      "title": "같은 지갑인데 왜 — 백화점은 웃고 아울렛은 폭증했다",
+      "subtitle": "백화점 3사 영업이익 +69.1%, 아울렛 이용액 +5,055% — 소비 양극화를 읽은 10개 이슈",
+      "filename": "2026-07-08.html",
+      "type": "daily",
+      "key_keywords": [
+        "소비양극화",
+        "백화점",
+        "아울렛",
+        "신한카드"
+      ],
+      "source_count": 10,
+      "public_url": "https://vetnam555-del.github.io/edit-h-archive/2026-07-08.html"
+    },
+    {
+      "vol": "047",
+      "date": "2026-07-09",
+      "weekday": "목",
+      "title": "'팝업=성수' 공식이 깨졌다 — 시장 3배, 잠실 검색 +200%",
+      "subtitle": "팝업스토어 상권이 성수동을 벗어나 확산, 잠실 검색량 +200%까지 상권 재편을 읽은 10개 이슈",
+      "filename": "2026-07-09.html",
+      "type": "daily",
+      "key_keywords": [
+        "팝업스토어",
+        "상권재편",
+        "성수동",
+        "잠실"
+      ],
+      "source_count": 10,
+      "public_url": "https://vetnam555-del.github.io/edit-h-archive/2026-07-09.html"
+    },
+    {
+      "vol": "048",
+      "date": "2026-07-13",
+      "weekday": "월",
+      "title": "연휴 D-4, 객실은 벌써 만석 — 남은 건 이동·먹거리·현지 소비",
+      "subtitle": "제헌절 연휴 D-4 숙박 예약 급증, 삼계버거 4700원, 간편결제 3사 경쟁까지 읽은 10개 이슈",
+      "filename": "2026-07-13.html",
+      "type": "daily",
+      "key_keywords": [
+        "제헌절 연휴",
+        "숙박예약",
+        "삼계버거",
+        "간편결제"
+      ],
+      "source_count": 10,
+      "public_url": "https://vetnam555-del.github.io/edit-h-archive/2026-07-13.html"
+    },
+    {
+      "vol": "049",
+      "date": "2026-07-14",
+      "weekday": "화",
+      "title": "예고는 끝났다 — 홈플러스, 오늘부터 전국 67개 점포 휴업",
+      "subtitle": "홈플러스 전국 67개 점포 임시휴업, 오뚜기 29개 품목 인상, 카카오 쇼핑포인트 522억까지 읽은 10개 이슈",
+      "filename": "2026-07-14.html",
+      "type": "daily",
+      "key_keywords": [
+        "홈플러스",
+        "대형마트",
+        "오뚜기 가격인상",
+        "카카오 포인트"
+      ],
+      "source_count": 10,
+      "public_url": "https://vetnam555-del.github.io/edit-h-archive/2026-07-14.html"
+    },
+    {
+      "vol": "050",
+      "date": "2026-07-15",
+      "weekday": "수",
+      "title": "공식 스폰서 아닌데 — 하인즈가 월드컵 화제를 이겼다",
+      "subtitle": "공식 스폰서가 아닌 하인즈의 월드컵 앰부시 마케팅, 2027년 최저임금 1만700원 확정까지 읽은 10개 이슈",
+      "filename": "2026-07-15.html",
+      "type": "daily",
+      "key_keywords": [
+        "앰부시마케팅",
+        "하인즈",
+        "월드컵",
+        "최저임금"
+      ],
+      "source_count": 10,
+      "public_url": "https://vetnam555-del.github.io/edit-h-archive/2026-07-15.html"
+    },
+    {
+      "vol": "051",
+      "date": "2026-07-16",
+      "weekday": "목",
+      "title": "물어보지도 않고 — GPT-5.6이 전부 지워버렸다",
+      "subtitle": "GPT-5.6이 승인 없이 파일을 삭제·구독을 해지한 사고 3건, 코바코 조사 TV광고 효과 여전히 1위까지 읽은 10개 이슈",
+      "filename": "2026-07-16.html",
+      "type": "daily",
+      "key_keywords": [
+        "GPT-5.6",
+        "AI에이전트",
+        "오픈AI",
+        "코바코"
+      ],
+      "source_count": 10,
+      "public_url": "https://vetnam555-del.github.io/edit-h-archive/2026-07-16.html"
+    },
+    {
+      "vol": "052",
+      "date": "2026-07-20",
+      "weekday": "월",
+      "title": "로켓배송이 이틀째 멈췄다 — 쿠팡 물류센터 47시간째 화재",
+      "subtitle": "인천 쿠팡 물류센터 화재 47시간째, 우버의 배달의민족 모기업 23조원 인수, 나이키 결승 후원 없이 조회수 10배까지 읽은 10개 이슈",
+      "filename": "2026-07-20.html",
+      "type": "daily",
+      "key_keywords": [
+        "쿠팡",
+        "물류센터화재",
+        "우버",
+        "배달의민족"
+      ],
+      "source_count": 10,
+      "public_url": "https://vetnam555-del.github.io/edit-h-archive/2026-07-20.html"
     }
   ],
   "weekly_issues": [
