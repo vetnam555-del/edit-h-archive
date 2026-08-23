@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="color-scheme" content="light">
+<meta name="supported-color-schemes" content="light">
+<title>[EDIT H] AI는 어디서 답을 가져올까?</title>
+<!--
+  EDIT H 데일리 뉴스레터 · VOL.074 · 2026.08.21 (금)
+  ─ 새 디자인 시스템 (2026-07-03 리뉴얼) · 테이블 기반 · 인라인 스타일 → 스티비 HTML 에디터 호환
+  ─ 제작 가이드(코덱스 실행용 런북): ../GUIDE.md
+
+  ★ 데일리 교체 지점 (TEMPLATE MAP) — 아래 주석 앵커를 검색해서 그 블록의 '내용만' 교체한다. 구조·스타일은 손대지 않는다.
+    [매일]  <title> · 프리헤더 · VOL/날짜(헤더) · "오프닝: 에디터의 인사" · "3줄 브리프" · "H의 한 줄 관찰"
+            "BIG ISSUE" 전체 · "이슈 01" ~ "이슈 10" · 섹션 제목 4개 · "짧게 볼 것" · "클로징" 질문
+    [고정]  헤더 워드마크 · 색/폰트/패딩 · CTA 버튼 · 푸터 (링크 UTM의 campaign 날짜만 갱신)
+  ★ 글자수 가드: 이슈 제목 ≤ 40자(2줄) · 본문 문장 ≤ 145자 · 히어로 제목 줄당 ≤ 16자
+-->
+<style>
+  /* 이메일 클라이언트가 무시해도 안전한 보조 스타일 */
+  body { margin:0; padding:0; -webkit-text-size-adjust:100%; }
+  a { color:#E8380D; }
+  @media only screen and (max-width:480px) {
+    .container { width:100% !important; }
+    .px { padding-left:20px !important; padding-right:20px !important; }
+    .hero-title { font-size:30px !important; line-height:1.25 !important; }
+    .bignum { font-size:64px !important; }
+  }
+</style>
+</head>
+<body style="margin:0;padding:0;background:#EFECE6;">
+
+<!-- 프리헤더 (받은편지함 미리보기 문구) -->
+<div style="display:none;font-size:1px;color:#EFECE6;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">
+AI 인용 출처 1위 SNS 34.6% / 델리바이애슐리 +34% / 환율 1300원대 / 클로드 단백질 적중률 26.8% — 금요일의 10가지.</div>
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#EFECE6;">
+<tr><td align="center" style="padding:28px 12px 48px;">
+
+<table role="presentation" class="container" width="640" cellpadding="0" cellspacing="0" style="width:640px;max-width:640px;">
+
+<!-- ══════════ 헤더 ══════════ -->
+<tr><td style="background:#111008;border-radius:16px 16px 0 0;padding:0;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+  <tr>
+    <td class="px" style="padding:26px 36px 24px;">
+      <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:12px;font-weight:700;letter-spacing:4px;color:#B9AE9C;">DAILY MARKETING BRIEF</div>
+      <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:44px;font-weight:900;letter-spacing:-1.5px;color:#FFFFFF;margin-top:6px;">EDIT&nbsp;<span style="color:#FF5233;">H</span><span style="color:#FF5233;font-size:44px;">.</span></div>
+    </td>
+    <td class="px" align="right" style="padding:26px 36px 24px;vertical-align:bottom;">
+      <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:13px;font-weight:700;color:#B9AE9C;line-height:1.9;">
+        VOL.074<br>2026.08.21 금요일<br>읽는 시간 7분
+      </div>
+    </td>
+  </tr>
+  </table>
+</td></tr>
+
+<!-- ══════════ 오프닝: 에디터의 인사 ══════════ -->
+<tr><td style="background:#FFFFFF;padding:0;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+  <tr><td class="px" style="padding:36px 36px 8px;">
+    <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:17px;line-height:1.8;color:#26221B;word-break:keep-all;">
+      금요일 아침이에요. 요즘 검색 대신 AI한테 물어보는 일 많으시죠. 그런데 그 AI가 답을 만들 때
+      가장 많이 들여다본 곳이 언론도, 기업 홈페이지도 아니었어요.
+      <b style="color:#E8380D;">SNS가 34.6%로 1위</b>였고, 그중 62.4%가 블로그였어요.
+      오늘은 이 '새 전쟁터' 이야기부터, 마트 매대를 살린 델리 이야기까지 챙겼어요.
+    </div>
+  </td></tr>
+
+  <!-- 3줄 브리프 -->
+  <tr><td class="px" style="padding:22px 36px 30px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F6F3EC;border-radius:12px;">
+    <tr><td style="padding:20px 24px;">
+      <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:11px;font-weight:800;letter-spacing:3px;color:#9A6B1C;padding-bottom:10px;">오늘의 세 줄</div>
+      <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:15px;line-height:1.75;color:#26221B;word-break:keep-all;">
+        <b style="color:#E8380D;">사람들</b> · 마트 델리 매출이 두 자릿수로 뛰었고, 건강기능식품은 홍삼 대신 효소·콜라겐으로 갈아타고 있어요.<br>
+        <b style="color:#E8380D;">돈</b> · 환율이 11개월 만에 1300원대로 내려오며 홈쇼핑 9월 장거리 여행 편성이 20% 늘었어요.<br>
+        <b style="color:#E8380D;">규칙</b> · 고도몰에서 개인정보가 또 샜고, 챗GPT는 로그인·가입이 동시에 멈추는 장애를 겪었어요.
+      </div>
+    </td></tr>
+    </table>
+  </td></tr>
+
+  <!-- H의 한 줄 관찰 (시그니처 고정 코너) -->
+  <tr><td class="px" style="padding:0 36px 32px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+    <tr>
+      <td width="4" style="background:#E8380D;border-radius:2px;"></td>
+      <td style="padding:2px 0 2px 18px;">
+        <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:11px;font-weight:800;letter-spacing:3px;color:#9A6B1C;">H의 한 줄 관찰</div>
+        <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:16px;font-weight:600;font-style:italic;line-height:1.65;color:#26221B;margin-top:6px;word-break:keep-all;">
+          "이제 검색창이 아니라, AI가 읽는 자리에 우리 이야기가 있어야 하더라고요."
+        </div>
+      </td>
+    </tr>
+    </table>
+  </td></tr>
+  </table>
+</td></tr>
+
+<!-- ══════════ BIG ISSUE (다크 히어로) ══════════ -->
+<tr><td style="background:#111008;padding:0;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+  <tr><td class="px" style="padding:38px 36px 12px;">
+    <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:12px;font-weight:800;letter-spacing:4px;color:#FF5233;">TODAY’S BIG ISSUE · AI 인용이라는 새 전쟁터</div>
+    <div class="hero-title" style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:34px;font-weight:900;letter-spacing:-1px;line-height:1.3;color:#FFFFFF;margin-top:12px;word-break:keep-all;">
+      AI는 어디서 —<br><span style="color:#FF5233;">답을 가져올까?</span>
+    </div>
+  </td></tr>
+  <tr><td class="px" style="padding:16px 36px 6px;">
+    <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:15.5px;line-height:1.8;color:#D9D2C5;word-break:keep-all;">
+      함샤우트 글로벌 AI연구소가 6개 부문 30개 업종에 걸쳐 고정 질문 1616개를 던지고 답변
+      4848건을 모아, 정보 탐색형 질문의 인용 <b style="color:#fff;">3만7923건</b>을 뜯어봤어요.
+      가장 많이 인용된 출처는 SNS(34.6%)였고, 언론(19.7%)·기업 홈페이지(18.8%)·정부·공공기관(11.9%)이
+      뒤를 이었어요. SNS 안에서는 블로그가 62.4%, 유튜브가 28.6%였습니다.
+    </div>
+    <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:15.5px;line-height:1.8;color:#D9D2C5;margin-top:14px;word-break:keep-all;">
+      업종에 따라 그림이 완전히 달랐어요. 증권·보험은 기업 <b style="color:#FF5233;">공식 홈페이지</b>
+      인용이 30.8%로 가장 높았고, 가구·리빙은 SNS가 49.1%, 철강·조선·중공업은 언론이 41.0%였어요.
+      AI 모델별로도 답 하나에 다는 인용 개수가 퍼플렉시티 19.8개, 제미나이 7.8개, 챗GPT 4.0개로
+      크게 갈렸습니다.
+    </div>
+  </td></tr>
+  <!-- 숫자 한 컷 -->
+  <tr><td class="px" align="center" style="padding:26px 36px 8px;">
+    <div class="bignum" style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:84px;font-weight:900;letter-spacing:-4px;color:#FF5233;line-height:1;">34.6<span style="font-size:40px;">%</span></div>
+    <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:13.5px;font-weight:600;color:#B9AE9C;margin-top:10px;word-break:keep-all;">생성형 AI가 정보 탐색형 질문에 답할 때 인용한 출처 중 SNS(블로그·유튜브·커뮤니티)의 비중 (AIBA AI 인용지수 8월 리포트)</div>
+  </td></tr>
+  <!-- 마케터의 한 줄 -->
+  <tr><td class="px" style="padding:24px 36px 38px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#241F15;border-left:4px solid #FF5233;border-radius:0 10px 10px 0;">
+    <tr><td style="padding:18px 22px;">
+      <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:12px;font-weight:800;letter-spacing:2px;color:#FF5233;padding-bottom:8px;">🧭 마케터의 한 줄</div>
+      <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:15px;line-height:1.75;color:#F1EBDF;word-break:keep-all;">
+        우리 업종에서 AI가 <b>어느 채널을 읽는지</b>부터 확인하는 게 순서예요. 가구·리빙처럼
+        SNS 의존이 높은 업종이라면 블로그·유튜브 콘텐츠가 곧 노출 자산이고, 금융처럼 공식 홈페이지
+        비중이 높은 업종이라면 제품 페이지의 사실 정확도가 먼저예요. 채널을 늘리기 전에, 지금
+        우리 브랜드가 AI 답변 안에서 어떻게 요약되는지 직접 물어보고 확인할 것.
+      </div>
+    </td></tr>
+    </table>
+    <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:12.5px;color:#8A8172;margin-top:14px;">출처 · 함샤우트 글로벌 AI연구소 · 포인트데일리·테크42 08.20</div>
+  </td></tr>
+  </table>
+</td></tr>
+
+<!-- ══════════ 섹션 1 · AI가 답을 만드는 재료 ══════════ -->
+<tr><td style="background:#FFFFFF;padding:0;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+  <tr><td class="px" style="padding:38px 36px 6px;">
+    <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:12px;font-weight:800;letter-spacing:3px;color:#9A6B1C;">SECTION 1 · 브랜드 실행 &amp; 플랫폼/기술</div>
+    <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:24px;font-weight:900;letter-spacing:-0.5px;color:#111008;margin-top:6px;word-break:keep-all;">AI가 답을 만드는 재료</div>
+  </td></tr>
+
+  <!-- 이슈 01 -->
+  <tr><td class="px" style="padding:22px 36px 0;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-bottom:1px solid #EAE5DA;">
+    <tr><td style="padding:0 0 24px;">
+      <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:13px;font-weight:800;color:#E8380D;">01 · AI 인용</div>
+      <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:19px;font-weight:800;line-height:1.45;color:#111008;margin-top:6px;word-break:keep-all;">AI가 인용하는 정보, SNS가 1위 — 새 전쟁터가 열렸다</div>
+      <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:15px;line-height:1.75;color:#4A443A;margin-top:10px;word-break:keep-all;">
+        함샤우트 글로벌 AI연구소가 30개 업종 질문 1616개·답변 4848건에서 인용 3만7923건을 분석했더니, 생성형 AI가 가장 많이 참조한 출처는 <b style="color:#E8380D;">SNS(34.6%)</b>였어요. 언론 19.7%, 기업 홈페이지 18.8%, 정부·공공기관 11.9% 순이었고, SNS 안에서는 블로그가 62.4%로 압도적이었습니다. 업종별로는 증권·보험이 공식 홈페이지 30.8%, 가구·리빙이 SNS 49.1%로 갈렸어요.
+      </div>
+      <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:14px;line-height:1.65;color:#111008;margin-top:10px;word-break:keep-all;">
+        <b style="color:#E8380D;">→</b> SEO 다음은 <b>AI 인용 최적화</b>예요 — 우리 업종에서 AI가 읽는 채널부터 확인할 것.
+      </div>
+      <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:12.5px;color:#8A8172;margin-top:10px;">출처 · 함샤우트 글로벌·포인트데일리 08.20</div>
+    </td></tr>
+    </table>
+  </td></tr>
+
+  <!-- 이슈 02 -->
+  <tr><td class="px" style="padding:24px 36px 0;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-bottom:1px solid #EAE5DA;">
+    <tr><td style="padding:0 0 24px;">
+      <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:13px;font-weight:800;color:#E8380D;">02 · AI 판별</div>
+      <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:19px;font-weight:800;line-height:1.45;color:#111008;margin-top:6px;word-break:keep-all;">AI가 썼나 사람이 썼나 — 감별이 하나의 사업이 됐다</div>
+      <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:15px;line-height:1.75;color:#4A443A;margin-top:10px;word-break:keep-all;">
+        저품질 AI 콘텐츠('AI 슬롭')가 늘면서 문장의 작성 주체를 가려내는 서비스가 커지고 있어요. 미국 스타트업 판그램은 멘로벤처스가 주도한 라운드에서 <b style="color:#E8380D;">900만달러</b>를 유치하고 텍스트 모델 '판그램4'와 이미지 감별 모델을 공개했어요. 한국어 포함 24개 언어를 지원하고 구독료는 월 20달러, AI 윤색이나 탐지 우회 도구까지 잡아낸다고 밝혔습니다.
+      </div>
+      <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:14px;line-height:1.65;color:#111008;margin-top:10px;word-break:keep-all;">
+        <b style="color:#E8380D;">→</b> 외주 콘텐츠 검수 항목에 <b>AI 작성 여부</b>가 곧 들어와요 — 계약서 문구부터 손볼 것.
+      </div>
+      <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:12.5px;color:#8A8172;margin-top:10px;">출처 · 테크크런치·조선일보 08.20</div>
+    </td></tr>
+    </table>
+  </td></tr>
+
+  <!-- 이슈 03 -->
+  <tr><td class="px" style="padding:24px 36px 0;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+    <tr><td style="padding:0 0 34px;">
+      <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:13px;font-weight:800;color:#E8380D;">03 · 서비스 안정성</div>
+      <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:19px;font-weight:800;line-height:1.45;color:#111008;margin-top:6px;word-break:keep-all;">챗GPT, 로그인과 신규 가입이 동시에 멈췄다</div>
+      <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:15px;line-height:1.75;color:#4A443A;margin-top:10px;word-break:keep-all;">
+        20일(현지시간) 오픈AI가 챗GPT의 로그인·회원가입이 모두 중단된 상태라고 공식 상태 페이지에서 확인했어요. 이미 로그인한 이용자도 대화 기록이 불러와지지 않거나 응답 생성이 실패하는 사례가 이어졌습니다. 다만 맥용 앱은 테스트에서 정상 작동해, 같은 서비스라도 <b style="color:#E8380D;">접속 경로에 따라</b> 증상이 달랐어요.
+      </div>
+      <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:14px;line-height:1.65;color:#111008;margin-top:10px;word-break:keep-all;">
+        <b style="color:#E8380D;">→</b> 핵심 업무가 단일 AI 도구에 묶여 있지 않은지 점검할 것 — <b>대체 경로</b>를 미리 정해둘 것.
+      </div>
+      <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:12.5px;color:#8A8172;margin-top:10px;">출처 · 나인투파이브맥·디지털투데이 08.21</div>
+    </td></tr>
+    </table>
+  </td></tr>
+  </table>
+</td></tr>
+
+<!-- ══════════ 섹션 2 · 매대가 다시 붐빈다 ══════════ -->
+<tr><td style="background:#F6F3EC;padding:0;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+  <tr><td class="px" style="padding:38px 36px 6px;">
+    <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:12px;font-weight:800;letter-spacing:3px;color:#9A6B1C;">SECTION 2 · 유통/상권 &amp; 생활/소비</div>
+    <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:24px;font-weight:900;letter-spacing:-0.5px;color:#111008;margin-top:6px;word-break:keep-all;">매대가 다시 붐빈다</div>
+  </td></tr>
+
+  <!-- 이슈 04 -->
+  <tr><td class="px" style="padding:22px 36px 0;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-bottom:1px solid #E2DACB;">
+    <tr><td style="padding:0 0 24px;">
+      <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:13px;font-weight:800;color:#E8380D;">04 · 마트 델리</div>
+      <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:19px;font-weight:800;line-height:1.45;color:#111008;margin-top:6px;word-break:keep-all;">델리가 마트를 살린다 — 미끼상품이 효자상품이 됐다</div>
+      <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:15px;line-height:1.75;color:#4A443A;margin-top:10px;word-break:keep-all;">
+        이랜드 킴스클럽의 델리 브랜드 '델리바이애슐리'의 올 상반기 매출은 전년 동기 대비 <b style="color:#E8380D;">34%</b> 늘었어요. 이마트에브리데이(13.8%)·롯데슈퍼(10.8%)도 델리 매출이 크게 뛰었습니다. 이마트 트레이더스의 T-카페는 올해 1월~8월 19일 매출이 17.2% 늘었고 영업이익률이 두 자릿수로 올라서, 이마트는 6일 중동점을 시작으로 일반 매장에도 T-카페를 넣고 있어요.
+      </div>
+      <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:14px;line-height:1.65;color:#111008;margin-top:10px;word-break:keep-all;">
+        <b style="color:#E8380D;">→</b> 집객용으로만 보던 즉석조리 코너를 <b>수익 카테고리</b>로 다시 볼 때예요.
+      </div>
+      <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:12.5px;color:#8A8172;margin-top:10px;">출처 · 한국경제 08.20</div>
+    </td></tr>
+    </table>
+  </td></tr>
+
+  <!-- 이슈 05 -->
+  <tr><td class="px" style="padding:24px 36px 0;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-bottom:1px solid #E2DACB;">
+    <tr><td style="padding:0 0 24px;">
+      <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:13px;font-weight:800;color:#E8380D;">05 · 건강 소비</div>
+      <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:19px;font-weight:800;line-height:1.45;color:#111008;margin-top:6px;word-break:keep-all;">홍삼은 줄고 효소는 284% — 건기식이 기능별로 쪼개진다</div>
+      <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:15px;line-height:1.75;color:#4A443A;margin-top:10px;word-break:keep-all;">
+        CJ온스타일이 최근 1년과 2년 전 같은 기간을 비교했더니, 홍삼·멀티비타민 같은 범용 건강기능식품 주문액은 약 30% 줄었어요. 반대로 효소는 <b style="color:#E8380D;">284%</b>, 콜라겐·히알루론산 등 피부 관련 상품은 103% 늘었습니다. 유산균도 장 건강을 넘어 피부·구강·혈당으로 세분화되며 약 10% 성장했어요.
+      </div>
+      <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:14px;line-height:1.65;color:#111008;margin-top:10px;word-break:keep-all;">
+        <b style="color:#E8380D;">→</b> '종합'이라는 이름이 불리해졌어요 — <b>어떤 기능인지</b>가 제품명에 들어가야 팔려요.
+      </div>
+      <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:12.5px;color:#8A8172;margin-top:10px;">출처 · CJ온스타일·경향신문 08.20</div>
+    </td></tr>
+    </table>
+  </td></tr>
+
+  <!-- 이슈 06 -->
+  <tr><td class="px" style="padding:24px 36px 0;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+    <tr><td style="padding:0 0 34px;">
+      <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:13px;font-weight:800;color:#E8380D;">06 · 제형 혁신</div>
+      <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:19px;font-weight:800;line-height:1.45;color:#111008;margin-top:6px;word-break:keep-all;">먹기 편한 쪽으로 — 젤리·액상 건기식 생산능력이 2배가 됐다</div>
+      <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:15px;line-height:1.75;color:#4A443A;margin-top:10px;word-break:keep-all;">
+        코스맥스엔비티와 코스맥스바이오가 젤리·액상 제품의 월 생산능력을 기존 2100만포에서 <b style="color:#E8380D;">4700만포</b>로 두 배 이상 늘렸어요. 액상스틱 라인엔 12열 설비를 더했고, 구미(젤리) 성형·충전 설비도 새로 깔았습니다. 두 회사 한국법인 합산 매출은 올 1분기 기준 액상이 전년 대비 37%, 젤리가 51%, 구미가 238% 늘었어요.
+      </div>
+      <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:14px;line-height:1.65;color:#111008;margin-top:10px;word-break:keep-all;">
+        <b style="color:#E8380D;">→</b> 성분이 같아도 <b>제형이 다르면 다른 제품</b>이에요 — 섭취 편의성에서 신제품 각을 찾을 것.
+      </div>
+      <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:12.5px;color:#8A8172;margin-top:10px;">출처 · 코스맥스그룹·뉴스핌 08.20</div>
+    </td></tr>
+    </table>
+  </td></tr>
+  </table>
+</td></tr>
+
+<!-- ══════════ 섹션 3 · 환율과 날씨가 정하는 것 ══════════ -->
+<tr><td style="background:#FFFFFF;padding:0;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+  <tr><td class="px" style="padding:38px 36px 6px;">
+    <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:12px;font-weight:800;letter-spacing:3px;color:#9A6B1C;">SECTION 3 · 생활/소비 &amp; 유통/상권</div>
+    <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:24px;font-weight:900;letter-spacing:-0.5px;color:#111008;margin-top:6px;word-break:keep-all;">환율과 날씨가 정하는 것</div>
+  </td></tr>
+
+  <!-- 이슈 07 -->
+  <tr><td class="px" style="padding:22px 36px 0;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-bottom:1px solid #EAE5DA;">
+    <tr><td style="padding:0 0 24px;">
+      <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:13px;font-weight:800;color:#E8380D;">07 · 환율 효과</div>
+      <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:19px;font-weight:800;line-height:1.45;color:#111008;margin-top:6px;word-break:keep-all;">환율 1300원대로 — 홈쇼핑 장거리 여행상품이 다시 뜬다</div>
+      <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:15px;line-height:1.75;color:#4A443A;margin-top:10px;word-break:keep-all;">
+        원·달러 환율이 19일 서울 외환시장에서 1397.70원에 마감하며 약 11개월 만에 <b style="color:#E8380D;">1300원대</b>로 내려왔어요. GS샵은 환율이 1411원이던 8월 9일 방송한 서유럽 패키지에서 상담예약 약 1050건을 받아, 환율 1529원이던 7월 초 방송(약 1000건)보다 5% 늘었습니다. 롯데홈쇼핑은 9월 장거리 편성을 8월 대비 20%, 신세계라이브쇼핑은 전년 대비 약 20% 늘려 잡았어요.
+      </div>
+      <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:14px;line-height:1.65;color:#111008;margin-top:10px;word-break:keep-all;">
+        <b style="color:#E8380D;">→</b> 환율은 <b>상품 편성의 신호</b>예요 — 다만 유류할증료·소비심리 변수는 함께 볼 것.
+      </div>
+      <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:12.5px;color:#8A8172;margin-top:10px;">출처 · 아시아경제·뉴스핌 08.20</div>
+    </td></tr>
+    </table>
+  </td></tr>
+
+  <!-- 이슈 08 -->
+  <tr><td class="px" style="padding:24px 36px 0;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+    <tr><td style="padding:0 0 34px;">
+      <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:13px;font-weight:800;color:#E8380D;">08 · 배송 안전</div>
+      <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:19px;font-weight:800;line-height:1.45;color:#111008;margin-top:6px;word-break:keep-all;">"배송보다 안전" — 폭우에 새벽배송을 멈추는 기준</div>
+      <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:15px;line-height:1.75;color:#4A443A;margin-top:10px;word-break:keep-all;">
+        경남 거제에 기록적인 폭우가 내린 17일, 새벽배송에 나선 배송기사 차량이 침수·고립된 사례가 알려지며 기상악화 대응 기준이 주목받았어요. 쿠팡 CLS는 당일 현지 기사들에게 배송 중단·대피 안내를 보냈고, 쓱닷컴은 일부 지역 배송을 진행하지 않았습니다. 쓱닷컴은 기사가 직접 운행 중단을 요청할 수 있고 그로 인한 미배송에 <b style="color:#E8380D;">변제나 배상을 요구하지 않는다</b>고 밝혔어요.
+      </div>
+      <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:14px;line-height:1.65;color:#111008;margin-top:10px;word-break:keep-all;">
+        <b style="color:#E8380D;">→</b> 속도를 파는 브랜드일수록 <b>멈추는 기준</b>이 신뢰를 만들어요 — 고지 문구를 미리 준비할 것.
+      </div>
+      <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:12.5px;color:#8A8172;margin-top:10px;">출처 · 이투데이 08.20</div>
+    </td></tr>
+    </table>
+  </td></tr>
+  </table>
+</td></tr>
+
+<!-- ══════════ 섹션 4 · AI가 넘어간 자리 ══════════ -->
+<tr><td style="background:#F6F3EC;padding:0;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+  <tr><td class="px" style="padding:38px 36px 6px;">
+    <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:12px;font-weight:800;letter-spacing:3px;color:#9A6B1C;">SECTION 4 · 플랫폼/기술 &amp; 규제/신뢰</div>
+    <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:24px;font-weight:900;letter-spacing:-0.5px;color:#111008;margin-top:6px;word-break:keep-all;">AI가 넘어간 자리</div>
+  </td></tr>
+
+  <!-- 이슈 09 -->
+  <tr><td class="px" style="padding:22px 36px 0;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-bottom:1px solid #E2DACB;">
+    <tr><td style="padding:0 0 24px;">
+      <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:13px;font-weight:800;color:#E8380D;">09 · AI 신약</div>
+      <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:19px;font-weight:800;line-height:1.45;color:#111008;margin-top:6px;word-break:keep-all;">클로드가 설계한 단백질, 4개 중 1개가 표적에 붙었다</div>
+      <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:15px;line-height:1.75;color:#4A443A;margin-top:10px;word-break:keep-all;">
+        앤트로픽은 18일(현지시간) 클로드가 여러 단백질 설계용 AI를 조합해 특정 표적에 결합하는 새 단백질을 설계했다고 발표했어요. 합성·분석이 가능한 후보 1320개 중 354개가 실제로 결합해 적중률 <b style="color:#E8380D;">26.8%</b>를 기록했습니다 — 통상 1% 미만이던 수치예요. 클로드가 1순위로 추천한 후보만 보면 49%가 붙었어요. 다만 후보물질이 신약이 되려면 비임상·임상을 거쳐야 합니다.
+      </div>
+      <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:14px;line-height:1.65;color:#111008;margin-top:10px;word-break:keep-all;">
+        <b style="color:#E8380D;">→</b> AI가 <b>쓰는 일에서 만드는 일</b>로 넘어가고 있어요 — 우리 업의 '설계' 단계를 다시 볼 것.
+      </div>
+      <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:12.5px;color:#8A8172;margin-top:10px;">출처 · 앤트로픽 발표·한국경제 08.20</div>
+    </td></tr>
+    </table>
+  </td></tr>
+
+  <!-- 이슈 10 -->
+  <tr><td class="px" style="padding:24px 36px 0;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+    <tr><td style="padding:0 0 34px;">
+      <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:13px;font-weight:800;color:#E8380D;">10 · 개인정보</div>
+      <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:19px;font-weight:800;line-height:1.45;color:#111008;margin-top:6px;word-break:keep-all;">NHN커머스 고도몰 개인정보 유출 — 제재 반년 만에 또</div>
+      <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:15px;line-height:1.75;color:#4A443A;margin-top:10px;word-break:keep-all;">
+        NHN커머스의 쇼핑몰 솔루션 '고도몰'에서 지난달 9일 진단용 관리 기능이 인증 없이 외부에 노출돼, 비인가자가 시스템 메모리에 접근했어요. 노출 추정 정보는 이름 10건·주문정보 3건이고 금융·인증정보는 없었습니다. 앞서 1월 29일 구형 솔루션 'e나무' 유출(122건)로 <b style="color:#E8380D;">과징금 870만원·과태료 450만원</b>을 받은 지 반년 만이에요.
+      </div>
+      <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:14px;line-height:1.65;color:#111008;margin-top:10px;word-break:keep-all;">
+        <b style="color:#E8380D;">→</b> 솔루션은 위탁해도 <b>사과문은 우리 이름</b>으로 나가요 — 벤더 보안 점검 주기를 계약에 넣을 것.
+      </div>
+      <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:12.5px;color:#8A8172;margin-top:10px;">출처 · 민주신문·개인정보위 08.20</div>
+    </td></tr>
+    </table>
+  </td></tr>
+  </table>
+</td></tr>
+
+<!-- ══════════ 짧게 볼 것 ══════════ -->
+<tr><td style="background:#FFFFFF;padding:0;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+  <tr><td class="px" style="padding:34px 36px 30px;">
+    <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:12px;font-weight:800;letter-spacing:3px;color:#9A6B1C;padding-bottom:14px;">☕ 짧게 볼 것</div>
+    <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:15px;line-height:2.0;color:#26221B;word-break:keep-all;">
+      <b style="color:#E8380D;">·</b> <b>네이버 블로그 인용이 한 달 새 180% 늘었어요</b> — 1306건에서 3652건으로요. 다만 조사 모델 버전과 분류 기준이 함께 바뀌어 단순 비교는 어렵다는 단서가 붙었어요. <span style="color:#8A8172;">(함샤우트 글로벌)</span><br>
+      <b style="color:#E8380D;">·</b> <b>폭염·폭우가 이어지며 '건강 챙기기' 소비가 커졌어요</b> — 저당·제로·무첨가처럼 덜어내는 소비가 두드러졌어요. <span style="color:#8A8172;">(CJ온스타일)</span><br>
+      <b style="color:#E8380D;">·</b> <b>판그램은 법정 증거 영역까지 넓히고 있어요</b> — 이미지 감별 모델도 함께 공개했고, 정확도는 99%를 넘는다고 밝혔어요. <span style="color:#8A8172;">(테크크런치)</span>
+    </div>
+  </td></tr>
+  </table>
+</td></tr>
+
+<!-- ══════════ 클로징 + CTA ══════════ -->
+<tr><td style="background:#111008;border-radius:0 0 16px 16px;padding:0;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+  <tr><td class="px" align="center" style="padding:40px 36px 8px;">
+    <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:12px;font-weight:800;letter-spacing:4px;color:#FF5233;">오늘의 질문</div>
+    <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:23px;font-weight:800;line-height:1.5;color:#FFFFFF;margin-top:14px;word-break:keep-all;">
+      AI가 우리 브랜드를 <span style="color:#FF5233;">설명</span>할 때,<br>어디를 보고 있을까요?
+    </div>
+    <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:14px;color:#B9AE9C;margin-top:14px;word-break:keep-all;">
+      오늘 회의에서 이 질문 하나만 던져보세요. 금요일도 힘내세요! — 에디터 H 드림
+    </div>
+    <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:14px;font-weight:700;color:#F1EBDF;margin-top:16px;word-break:keep-all;">
+      💬 여러분의 답이 궁금해요 — 이 메일에 <span style="color:#FF5233;">답장</span>으로 보내주시면, 다음 호 ‘독자의 한 줄’로 소개합니다.
+    </div>
+  </td></tr>
+  <tr><td align="center" style="padding:26px 36px 8px;">
+    <table role="presentation" cellpadding="0" cellspacing="0">
+    <tr>
+      <td style="background:#FF5233;border-radius:100px;">
+        <a href="https://vetnam555-del.github.io/edit-h-archive/subscribe.html?utm_source=edit_h&amp;utm_medium=email&amp;utm_campaign=daily_20260821&amp;utm_content=cta_subscribe" style="display:inline-block;padding:14px 34px;font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:15px;font-weight:800;color:#111008;text-decoration:none;">EDIT H 구독하기</a>
+      </td>
+      <td style="width:12px;"></td>
+      <td style="border:1px solid #4A443A;border-radius:100px;">
+        <a href="https://vetnam555-del.github.io/edit-h-archive/?utm_source=edit_h&amp;utm_medium=email&amp;utm_campaign=daily_20260821&amp;utm_content=cta_archive" style="display:inline-block;padding:14px 34px;font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:15px;font-weight:800;color:#F1EBDF;text-decoration:none;">지난 호 보기</a>
+      </td>
+    </tr>
+    </table>
+  </td></tr>
+  <tr><td align="center" style="padding:30px 36px 36px;">
+    <div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:12px;line-height:1.9;color:#6F675A;">
+      EDIT H · 매일 아침, 마케터의 트렌드 한 입 · 인스타그램 <a href="https://instagram.com/edit.h.kr?utm_source=edit_h&amp;utm_medium=email&amp;utm_campaign=daily_20260821&amp;utm_content=footer_instagram" style="color:#8A8172;">@edit.h.kr</a><br>
+      이 메일이 유용했다면 동료에게 전달해주세요. ·
+      <a href="https://vetnam555-del.github.io/edit-h-archive/unsubscribe.html?email=PLACEHOLDER" style="color:#6F675A;">수신거부</a>
+    </div>
+  </td></tr>
+  </table>
+</td></tr>
+
+</table>
+</td></tr>
+</table>
+</body>
+</html>
