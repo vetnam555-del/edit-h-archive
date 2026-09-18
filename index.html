@@ -4,14 +4,22 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>EDIT H — Archive</title>
+<!-- 파비콘: 16px 에서도 읽히게 단순화한 마크(디테일 생략, 렌즈 두 개 실루엣만) -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%23FF5233'/%3E%3Ccircle cx='31' cy='50' r='15' fill='%23F5F1E8' stroke='%230D0C0A' stroke-width='7'/%3E%3Ccircle cx='69' cy='50' r='15' fill='%23F5F1E8' stroke='%230D0C0A' stroke-width='7'/%3E%3Cpath d='M43 47 Q50 43 57 47' stroke='%230D0C0A' stroke-width='5' fill='none' stroke-linecap='round'/%3E%3Ccircle cx='31' cy='50' r='5.5' fill='%230D0C0A'/%3E%3Ccircle cx='69' cy='50' r='5.5' fill='%230D0C0A'/%3E%3C/svg%3E">
 <style>
   * { box-sizing: border-box; }
   body { font-family: 'Apple SD Gothic Neo','Pretendard','Malgun Gothic',-apple-system,sans-serif; background: #FAFAF7; margin: 0; padding: 32px 16px; color: #1A1A1A; line-height: 1.7; }
   .container { max-width: 720px; margin: 0 auto; background: #FFF; padding: 48px 40px; }
+  .head { display: flex; align-items: center; gap: 18px; }
+  /* 로고 마크(안경) — 옆에 워드마크가 있으므로 글자 없는 '마크 전용'을 쓴다 */
+  .logomark { width: 64px; height: 64px; border-radius: 50%; background: #FF5233; flex: none;
+    display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  .logomark svg { width: 64px; height: 64px; display: block; }
   .brand { font-size: 11px; letter-spacing: 5px; color: #888; font-weight: 700; }
-  .logo { font-size: 42px; font-weight: 900; letter-spacing: -2px; margin: 8px 0 4px; }
+  .logo { font-size: 42px; font-weight: 900; letter-spacing: -2px; margin: 4px 0 0; }
+  /* 브랜드 원색 #FF5233 은 흰 바탕 위 작은 글자로는 대비가 3.2:1 이라 부족하다 → 글자는 진한 적색을 쓴다 */
   .logo .h { color: #B91C1C; }
-  .tagline { font-size: 13px; color: #555; letter-spacing: 1px; }
+  .tagline { font-size: 13px; color: #555; letter-spacing: 1px; margin-top: 10px; }
   .subscribe-cta { background: #000; color: #FFF; padding: 24px 28px; margin: 28px 0; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
   .subscribe-cta .text { flex: 1; min-width: 200px; }
   .subscribe-cta .label { font-size: 11px; letter-spacing: 4px; color: #E45336; font-weight: 800; margin-bottom: 6px; }
@@ -36,13 +44,26 @@
 </head>
 <body>
 <main class="container">
-  <div class="brand">DAILY MARKETING BRIEF</div>
-  <div class="logo">EDIT<span class="h"> H</span></div>
+  <div class="head">
+    <div class="logomark" aria-hidden="true">
+      <svg viewBox="0 0 1080 1080" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="328" cy="531" r="150" fill="#F5F1E8"/><circle cx="752" cy="531" r="150" fill="#F5F1E8"/>
+        <path fill-rule="evenodd" fill="#0D0C0A" d="M 132 540 a 196 196 0 1 0 392 0 a 196 196 0 1 0 -392 0 Z M 178 531 a 150 150 0 1 0 300 0 a 150 150 0 1 0 -300 0 Z"/>
+        <path fill-rule="evenodd" fill="#0D0C0A" d="M 556 540 a 196 196 0 1 0 392 0 a 196 196 0 1 0 -392 0 Z M 602 531 a 150 150 0 1 0 300 0 a 150 150 0 1 0 -300 0 Z"/>
+        <path d="M 514 526 Q 540 506 566 526" fill="none" stroke="#0D0C0A" stroke-width="48" stroke-linecap="round"/>
+        <circle cx="328" cy="531" r="58" fill="#0D0C0A"/><circle cx="752" cy="531" r="58" fill="#0D0C0A"/>
+      </svg>
+    </div>
+    <div>
+      <div class="brand">DAILY MARKETING BRIEF</div>
+      <div class="logo">EDIT<span class="h"> H</span></div>
+    </div>
+  </div>
   <div class="tagline">한 호씩 모아 보는 마케팅 큐레이션 아카이브</div>
 
   <div class="subscribe-cta">
     <div class="text">
-      <div class="label">SUBSCRIBE · 무료</div>
+      <div class="label">SUBSCRIBE</div>
       <h3>매일 아침 8시, 메일로 받아보세요</h3>
       <p>마케팅을 보는 감각을 기르는 데일리 브리프와 금요일 위클리 정리.</p>
     </div>
