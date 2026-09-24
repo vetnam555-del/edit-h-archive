@@ -19,6 +19,11 @@ on:
       test_to:
         description: "테스트 수신 주소 — 입력하면 이 주소로만 보내고 발송 기록은 남기지 않음"
         required: false
+      check_only:
+        description: "확인만 — 구독자 수와 SMTP 로그인만 확인하고 메일은 보내지 않음"
+        type: boolean
+        required: false
+        default: false
 
 permissions:
   contents: write
@@ -56,7 +61,13 @@ jobs:
           EVENT: ${{ github.event_name }}
           IN_DATE: ${{ inputs.date }}
           IN_TEST_TO: ${{ inputs.test_to }}
-        run: python3 automation/send_newsletter.py --mode "$EVENT" --date "$IN_DATE" --test-to "$IN_TEST_TO"
+          IN_CHECK: ${{ inputs.check_only }}
+        run: |
+          if [ "$IN_CHECK" = "true" ]; then
+            python3 automation/send_newsletter.py --check
+          else
+            python3 automation/send_newsletter.py --mode "$EVENT" --date "$IN_DATE" --test-to "$IN_TEST_TO"
+          fi
 
       - name: Record send
         run: |

@@ -16,6 +16,7 @@
   python3 automation/send_newsletter.py --mode push                # 늦게 올라온 호 즉시 발송(09:00 이후일 때만)
   python3 automation/send_newsletter.py --date 2026-09-28 --test-to me@example.com   # 테스트(기록 안 남김)
   python3 automation/send_newsletter.py --dry-run                  # 실제 발송 없이 대상·제목만 확인
+  python3 automation/send_newsletter.py --check                    # 구독자 수·SMTP 로그인만 확인(메일 안 보냄, 주소는 출력 안 함)
 """
 import argparse
 import html
@@ -43,14 +44,56 @@ def notice(msg):
     print(f"::notice::{msg}" if os.environ.get("GITHUB_ACTIONS") else msg)
 
 
+EMAIL = re.compile(r"[A-Za-z0-9._%+'-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}")
+
+
+def parse_recipients(raw):
+    """(주소 목록, 중복 수, 주소가 없는 항목 번호). 항목은 쉼표·세미콜론·줄바꿈으로 나눈다.
+    '홍길동 <a@b.com>' 이나 표에서 복사한 줄처럼 주소 앞뒤에 다른 글자가 붙어 있어도 주소만 뽑는다."""
+    seen, out, dup, bad = set(), [], 0, []
+    parts = [p.strip() for p in re.split(r"[,\n;]+", raw or "") if p.strip()]
+    for n, part in enumerate(parts, 1):
+        found = EMAIL.findall(part)
+        if not found:
+            bad.append(n)
+        for addr in found:
+            if addr.lower() in seen:
+                dup += 1
+            else:
+                seen.add(addr.lower())
+                out.append(addr)
+    return out, dup, bad
+
+
 def recipients(raw):
-    seen, out = set(), []
-    for addr in re.split(r"[,\n;]+", raw or ""):
-        addr = addr.strip()
-        if addr and re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", addr) and addr.lower() not in seen:
-            seen.add(addr.lower())
-            out.append(addr)
-    return out
+    return parse_recipients(raw)[0]
+
+
+def check():
+    """구독자 수와 SMTP 로그인만 확인한다. 공개 저장소라 실행 로그를 누구나 볼 수 있으므로 주소는 출력하지 않는다."""
+    to_list, dup, bad = parse_recipients(os.environ.get("SUBSCRIBERS"))
+    msg = f"SUBSCRIBERS: 발송 대상 {len(to_list)}명"
+    if dup:
+        msg += f" · 중복 {dup}개 제외"
+    if bad:
+        msg += f" · 주소가 없는 항목 {len(bad)}개({', '.join(f'{n}번째' for n in bad)}) 무시"
+    notice(msg)
+    ok = bool(to_list)
+
+    user, password = os.environ.get("SMTP_USER", ""), os.environ.get("SMTP_PASSWORD", "")
+    if not user or not password:
+        notice("SMTP_USER / SMTP_PASSWORD Secret 이 없습니다")
+        return 1
+    host = os.environ.get("SMTP_HOST") or "smtp.gmail.com"
+    port = int(os.environ.get("SMTP_PORT") or 465)
+    try:
+        with smtplib.SMTP_SSL(host, port, context=ssl.create_default_context(), timeout=30) as smtp:
+            smtp.login(user, password)
+        notice(f"SMTP 로그인 성공({host}) — 메일은 보내지 않았습니다")
+    except (smtplib.SMTPException, OSError) as e:
+        notice(f"SMTP 로그인 실패({host}): {type(e).__name__} {str(e)[:200]}")
+        ok = False
+    return 0 if ok else 1
 
 
 def html_to_text(src):
@@ -84,7 +127,10 @@ def main():
     ap.add_argument("--date", default="", help="YYYY-MM-DD (비우면 오늘 KST)")
     ap.add_argument("--test-to", default="", help="이 주소로만 보내고 발송 기록은 남기지 않음")
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--check", action="store_true", help="구독자 수·SMTP 로그인만 확인하고 끝낸다")
     args = ap.parse_args()
+    if args.check:
+        return check()
 
     cfg = load_config()
     now = now_kst()

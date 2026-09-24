@@ -48,6 +48,7 @@ Claude 세션 상단의 클라우드 환경 메뉴 → **Edit → Network access
 |---|---|
 | 특정 호 다시 빌드 | `python3 automation/build_issue.py 2026-09-24` (JSON 수정 후) |
 | 오늘 발행 여부 확인 | `python3 automation/check_today.py` |
+| 구독자 수·메일 계정 확인 | Actions → Send EDIT H newsletter → Run workflow 에서 `check_only` 체크. 메일은 보내지 않고 로그에 발송 대상 인원과 SMTP 로그인 결과만 나온다(공개 저장소라 주소는 출력하지 않음) |
 | 메일 재발송/특정 날짜 발송 | Actions → Send EDIT H newsletter → Run workflow (`date` 입력). 이미 보낸 날은 `automation/sent/날짜.json` 을 지워야 다시 보낸다 |
 | 임시공휴일 추가 | `holidays_kr.json` 에 한 줄 추가 |
 | 발송 시각 변경 | `config.json` 의 `send_time_kst`(문구·대기 시각이 따라 바뀜) + 워크플로 `cron`(발송 20분 전) + 루틴 시각(발송 1시간 전)을 함께 바꾼다 |
