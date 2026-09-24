@@ -3,7 +3,8 @@
 Design M 카드뉴스 키트 '매거진 세트'(표지 24 → 본문 9 → 마무리 9) 규격을 재현한 것으로, 키트 원본
 파일·이미지는 쓰지 않고 실측한 치수·색만 옮겼다. 키트의 핑크는 EDIT H 브랜드 버밀리언 계열로 바꿨다.
 
-  01      표지     EDIT H. 워드마크(비스킷식) + 머리말 + 띠 제목 두 줄(뉴닉식) + 핵심어 대형 마커 또는 실사 사진 + 다른 이슈 스티커 3개
+  01      표지     EDIT H. 워드마크(비스킷식) + 머리말 + 띠 제목 두 줄(뉴닉식) + 핵심어 대형 마커·다른 이슈 스티커 3개
+                   또는 실사 사진 풀블리드(위·아래만 어둡게, 스티커 없음)
   02      요약     '오늘의 6가지 한눈에' — 번호·제목·숫자 목록(키트 본문 19·20 문법). 저장을 부르는 카드
   03~08   이슈 6장  말풍선 태그 → 형광 마커 숫자 → 보조 수치 상자 → 번호 배지 → 제목 → 짧은 본문 → '그래서 마케터는?' 대화
                    H PICK 1장은 검정 배경 + 윤곽 숫자 + 노란 '(H PICK · 오늘의 핵심)', compare형은 BEFORE/AFTER 상자
@@ -42,6 +43,8 @@ body{background:#777;width:1080px;}
 
 _BOLD = re.compile(r"\*\*(.+?)\*\*")
 _MARK = re.compile(r"==(.+?)==")
+# 따옴표로 묶은 짧은 말('이동 시간 대비 만족'을)은 중간에서 줄이 갈리면 뜻이 끊겨 보이므로 한 덩어리로 둔다
+_QUOTE = re.compile(r"(?:&#x27;|&quot;|[‘“])[^<>*=\n]{1,14}?(?:&#x27;|&quot;|[’”])[가-힣]{0,2}")
 
 
 def esc(s):
@@ -58,7 +61,8 @@ def plain(s):
 def mk(s, strong=TEXT, dark=False):
     hi = (f'<span style="color:{ACC_FILL};">\\1</span>' if dark
           else f'<span style="background:linear-gradient(180deg,transparent 58%,{ACC_FILL} 58%);">\\1</span>')
-    out = _BOLD.sub(f'<b style="font-weight:700;color:{strong};">\\1</b>', esc(s or ""))
+    out = _QUOTE.sub(lambda m: f'<span style="white-space:nowrap;">{m.group(0)}</span>', esc(s or ""))
+    out = _BOLD.sub(f'<b style="font-weight:700;color:{strong};">\\1</b>', out)
     return _MARK.sub(hi, out).replace("\n", "<br>")
 
 
@@ -84,7 +88,7 @@ def chip_row(items, size=36):
 
 def bubble(text):
     """표지 18 말풍선 — 이슈 태그."""
-    return (f'<div style="position:relative;display:inline-block;margin-bottom:28px;">'
+    return (f'<div style="position:relative;display:inline-block;margin-bottom:38px;">'
             f'<div style="background:#FFFFFF;border:2px solid #000000;border-radius:50%;padding:22px 40px;font-weight:500;'
             f'font-size:{fs(30)};line-height:1;color:#111111;white-space:nowrap;">{esc(text)}</div>'
             f'<svg width="30" height="26" viewBox="0 0 30 26" style="position:absolute;right:22%;bottom:-21px;overflow:visible;">'
@@ -171,11 +175,12 @@ def cover(d, kicker=None, foot=None):
     foot = foot or f"밀어서 {len(issues)}가지 보기 →"
     bg = ""
     if photo:
-        # 사진이 아래 60%를 채우고, 위쪽은 흰 그라데이션으로 띠 제목을 받친다
+        # 뉴닉식 풀블리드: 사진을 끝까지 보여주고, 위(워드마크·머리말)와 아래(넘김 안내)만 어둡게 받친다.
+        # 띠 제목은 자체 상자라 어떤 사진 위에서도 읽힌다. 스티커는 사진을 가리므로 사진 표지에서는 뺀다.
         bg = (f'<div style="position:absolute;inset:0;background:url(\'{_photo_uri(photo)}\') {cov.get("focus") or "center"}/cover no-repeat;"></div>'
-              '<div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.97) 0%,'
-              'rgba(255,255,255,.9) 26%,rgba(255,255,255,0) 46%);"></div>')
-        hero = ""
+              '<div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.62) 0%,rgba(0,0,0,.35) 22%,'
+              'rgba(0,0,0,0) 42%,rgba(0,0,0,0) 72%,rgba(0,0,0,.55) 100%);"></div>')
+        hero, sticker_html = "", ""
     else:
         kw = cov["keyword"]
         size = fit_size(kw, 380)
@@ -184,12 +189,13 @@ def cover(d, kicker=None, foot=None):
                 f'background:linear-gradient(180deg,transparent 62%,{ACC_FILL} 62%);">{esc(kw)}</span></div>')
     shadow = "text-shadow:0 1px 4px rgba(0,0,0,.55);" if photo else ""
     foot_color = "#FFFFFF" if photo else MUTED
+    head_color, kick_color = ("#FFFFFF", "rgba(255,255,255,.92)") if photo else (TEXT, "#5A5A5E")
     credit = (f'<div style="position:absolute;right:40px;bottom:24px;font-size:19px;color:rgba(255,255,255,.85);{shadow}">'
               f'{esc(cov["credit"])}</div>') if photo and cov.get("credit") else ""
     return _frame(f"""{bg}
 <div class="body" style="padding:64px 60px 0;align-items:center;text-align:center;">
-  <div style="font-weight:900;font-size:34px;line-height:1;letter-spacing:-1px;color:{TEXT};">EDIT H<span style="color:{ACC};">.</span></div>
-  <div style="margin-top:22px;font-weight:700;font-size:28px;color:#5A5A5E;">{esc(kicker)}</div>
+  <div style="font-weight:900;font-size:34px;line-height:1;letter-spacing:-1px;color:{head_color};{shadow}">EDIT H<span style="color:{ACC};">.</span></div>
+  <div style="margin-top:22px;font-weight:700;font-size:28px;color:{kick_color};{shadow}">{esc(kicker)}</div>
   <div style="flex:none;margin-top:26px;display:flex;flex-direction:column;align-items:center;gap:14px;">{_strip(l1, "#FFFFFF")}{_strip(l2, ACC_FILL)}</div>
   <div style="flex:none;position:relative;margin-top:70px;width:100%;height:560px;">{hero}{sticker_html}</div>
 </div>
@@ -203,19 +209,19 @@ def hero_value(it):
 def summary(d, period="오늘의"):
     """키트 본문 19·20(번호 목록) 문법 — 오늘의 6가지를 한 장에. 저장해두고 다시 볼 이유를 만든다."""
     rows = "".join(
-        f'<div style="display:flex;align-items:center;gap:26px;padding:24px 0;border-bottom:2px solid #EAEAEA;">'
-        f'<div style="flex:none;width:52px;height:52px;border-radius:12px;background:{"#000000" if it.get("accent") else TEXT};color:#FFFFFF;'
-        f'display:flex;align-items:center;justify-content:center;font-weight:600;font-size:28px;">{i}</div>'
-        f'<div style="flex:1;min-width:0;font-weight:700;font-size:{fs(36)};line-height:1.3;color:{TEXT};">{plain(it["headline"])}</div>'
-        f'<div style="flex:none;font-weight:800;font-size:{fs(34)};color:{TEXT};white-space:nowrap;'
+        f'<div style="display:flex;align-items:center;gap:26px;padding:31px 0;border-bottom:2px solid #EAEAEA;">'
+        f'<div style="flex:none;width:58px;height:58px;border-radius:13px;background:{"#000000" if it.get("accent") else TEXT};color:#FFFFFF;'
+        f'display:flex;align-items:center;justify-content:center;font-weight:600;font-size:30px;">{i}</div>'
+        f'<div style="flex:1;min-width:0;font-weight:700;font-size:{fs(39)};line-height:1.3;color:{TEXT};">{plain(it["headline"])}</div>'
+        f'<div style="flex:none;font-weight:800;font-size:{fs(38)};color:{TEXT};white-space:nowrap;'
         f'background:linear-gradient(180deg,transparent 58%,{ACC_FILL} 58%);">{esc(hero_value(it))}</div></div>'
         for i, it in enumerate(d["card_issues"], 1))
     n = len(d["card_issues"])
     return _frame(f"""
-<div class="body" style="padding:60px 80px 150px;justify-content:center;">
-  <div style="text-align:center;font-weight:700;font-size:28px;color:#5A5A5E;">저장해두고 회의 전에 보세요</div>
-  <div style="text-align:center;margin-top:22px;font-weight:700;font-size:{fs(64)};letter-spacing:-1px;color:{TEXT};">{period} <span style="background:linear-gradient(180deg,transparent 58%,{ACC_FILL} 58%);">{n}가지</span> 한눈에</div>
-  <div style="flex:none;margin-top:44px;border-top:3px solid {TEXT};">{rows}</div>
+<div class="body" style="padding:110px 76px 100px;justify-content:center;">
+  <div style="text-align:center;font-weight:700;font-size:30px;color:#5A5A5E;">저장해두고 회의 전에 보세요</div>
+  <div style="text-align:center;margin-top:22px;font-weight:700;font-size:{fs(72)};letter-spacing:-1px;color:{TEXT};">{period} <span style="background:linear-gradient(180deg,transparent 58%,{ACC_FILL} 58%);">{n}가지</span> 한눈에</div>
+  <div style="flex:none;margin-top:52px;border-top:3px solid {TEXT};">{rows}</div>
 </div>""")
 
 
@@ -230,15 +236,16 @@ def stat_tiles(metrics, dark):
 
 
 def dialogue(take, dark):
-    """뉴닉식 대화 — 흰 질문 말풍선 '그래서 마케터는?' → 복숭아색 답 말풍선(인사이트). 키트 본문 21(Q&A) 문법과도 맞다."""
+    """뉴닉식 대화 — 흰 질문 말풍선 '그래서 마케터는?' → 복숭아색 답 말풍선(인사이트). 키트 본문 21(Q&A) 문법과도 맞다.
+    답이 'A — B' 꼴이면 줄표 뒤에서 줄을 바꿔 두 마디로 읽히게 하고, 렌더러(.shrink)가 말풍선 폭을 가장 긴 줄에 맞춘다."""
     q_bg, q_fg = ("#1E1E21", "#FFFFFF") if dark else ("#FFFFFF", TEXT)
     line = "#FFFFFF" if dark else TEXT
     return (f'<div style="flex:none;width:100%;margin-top:26px;display:flex;flex-direction:column;gap:10px;">'
             f'<div style="align-self:flex-start;background:{q_bg};border:3px solid {line};border-radius:22px 22px 22px 6px;'
             f'padding:14px 24px;font-weight:600;font-size:{fs(28)};line-height:1.2;color:{q_fg};">그래서 마케터는?</div>'
-            f'<div class="bal" style="align-self:flex-end;max-width:92%;background:{ACC_FILL};border:3px solid {line};'
+            f'<div class="bal shrink" style="align-self:flex-end;max-width:92%;background:{ACC_FILL};border:3px solid {line};'
             f'border-radius:22px 22px 6px 22px;padding:16px 26px;text-align:left;font-weight:700;font-size:{fs(31)};'
-            f'line-height:1.45;color:{TEXT};">{mk(take, TEXT)}</div></div>')
+            f'line-height:1.45;color:{TEXT};">{mk(take, TEXT).replace(" — ", " —<br>")}</div></div>')
 
 
 def issue_card(it, n):
@@ -281,28 +288,29 @@ def observation(d):
     head, sep, tail = text.partition(" — ")
     body = f"{mk(head)} — <span style=\"background:linear-gradient(180deg,transparent 58%,{ACC_FILL} 58%);font-weight:800;color:{TEXT};\">{mk(tail)}</span>" if sep else mk(text)
     return _frame(f"""
-<div class="body" style="padding:60px 90px 150px;justify-content:center;">
-  <div style="display:flex;align-items:center;gap:16px;font-weight:700;font-size:30px;color:{TEXT};">
-    <div style="width:22px;height:22px;background:{ACC};"></div>H의 한 줄 관찰</div>
-  <div class="bal" style="margin-top:44px;font-weight:600;font-size:{fs(50)};line-height:1.62;letter-spacing:-1px;color:{TEXT};">{body}</div>
-  <div style="margin-top:48px;text-align:right;font-weight:500;font-size:28px;color:{SUB};">— 에디터 H</div>
+<div class="body" style="padding:110px 90px 110px;justify-content:center;">
+  <div style="display:flex;align-items:center;gap:16px;font-weight:700;font-size:32px;color:{TEXT};">
+    <div style="width:24px;height:24px;background:{ACC};"></div>H의 한 줄 관찰</div>
+  <div style="margin-top:34px;font-weight:900;font-size:150px;line-height:.7;height:70px;color:{ACC_FILL};">“</div>
+  <div class="bal" style="margin-top:6px;font-weight:600;font-size:{fs(62)};line-height:1.55;letter-spacing:-1.5px;color:{TEXT};">{body}</div>
+  <div style="margin-top:56px;text-align:right;font-weight:500;font-size:30px;color:{SUB};">— 에디터 H</div>
 </div>""")
 
 
 def list_card(label, title, rows):
     """라벨 + 굵은 제목 + 번호 목록 — 주간 특집 '이번 주를 한 줄로' 등."""
     items = "".join(
-        f'<div style="display:flex;gap:22px;align-items:flex-start;padding:26px 0;border-bottom:2px solid #EAEAEA;">'
-        f'<div style="flex:none;width:50px;height:50px;border-radius:12px;background:{TEXT};color:#FFFFFF;display:flex;'
-        f'align-items:center;justify-content:center;font-weight:700;font-size:26px;">{i}</div>'
-        f'<div style="font-size:{fs(33)};line-height:1.5;color:{SUB};">{mk(r)}</div></div>'
+        f'<div style="display:flex;gap:24px;align-items:flex-start;padding:36px 0;border-bottom:2px solid #EAEAEA;">'
+        f'<div style="flex:none;width:58px;height:58px;border-radius:13px;background:{TEXT};color:#FFFFFF;display:flex;'
+        f'align-items:center;justify-content:center;font-weight:700;font-size:30px;">{i}</div>'
+        f'<div class="bal" style="font-weight:500;font-size:{fs(40)};line-height:1.45;color:{TEXT};padding-top:2px;">{mk(r)}</div></div>'
         for i, r in enumerate(rows, 1))
     return _frame(f"""
-<div class="body" style="padding:60px 84px 140px;justify-content:center;">
-  <div style="display:flex;align-items:center;gap:16px;font-weight:700;font-size:30px;color:{TEXT};">
-    <div style="width:22px;height:22px;background:{ACC};"></div>{esc(label)}</div>
-  <div class="bal" style="margin-top:30px;font-weight:800;font-size:{fs(56)};line-height:1.35;letter-spacing:-1px;color:{TEXT};">{mk(title)}</div>
-  <div style="flex:none;margin-top:30px;border-top:3px solid {TEXT};">{items}</div>
+<div class="body" style="padding:110px 84px 110px;justify-content:center;">
+  <div style="display:flex;align-items:center;gap:16px;font-weight:700;font-size:32px;color:{TEXT};">
+    <div style="width:24px;height:24px;background:{ACC};"></div>{esc(label)}</div>
+  <div class="bal" style="margin-top:34px;font-weight:800;font-size:{fs(68)};line-height:1.3;letter-spacing:-1.5px;color:{TEXT};">{mk(title, dark=False)}</div>
+  <div style="flex:none;margin-top:44px;border-top:3px solid {TEXT};">{items}</div>
 </div>""")
 
 

@@ -33,12 +33,26 @@ function loadPlaywright() {
       }
       return card.scrollHeight <= card.clientHeight + 1;
     };
+    // .shrink: 줄을 고르게 나눈(balance) 뒤 상자 폭을 가장 긴 줄에 맞춘다 — 말풍선 오른쪽이 비지 않게.
+    // 폭만 줄이므로 높이는 늘지 않아 위의 넘침 판정이 그대로 유효하다.
+    const shrinkWrap = (el) => {
+      const range = document.createRange();
+      range.selectNodeContents(el);
+      const rects = [...range.getClientRects()].filter((r) => r.width > 0);
+      if (!rects.length) return;
+      const cs = getComputedStyle(el);
+      const px = (v) => parseFloat(v) || 0;
+      const inner = el.getBoundingClientRect().left + px(cs.borderLeftWidth) + px(cs.paddingLeft);
+      const text = Math.max(...rects.map((r) => r.right)) - inner;
+      el.style.width = Math.ceil(text + px(cs.paddingLeft) + px(cs.paddingRight) + px(cs.borderLeftWidth) + px(cs.borderRightWidth) + 2) + 'px';
+    };
     return [...document.querySelectorAll('.card')].map((card) => {
       let k = 1;
       while (!fits(card) && k > 0.8) {
         k = Math.round((k - 0.03) * 100) / 100;
         card.style.setProperty('--k', k);
       }
+      card.querySelectorAll('.shrink').forEach(shrinkWrap);
       const fonts = [...new Set([...card.querySelectorAll('*')].map((e) => getComputedStyle(e).fontFamily.split(',')[0].replace(/['"]/g, '')))];
       return { k, overflow: !fits(card), fonts };
     });
