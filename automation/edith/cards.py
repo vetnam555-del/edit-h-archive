@@ -1,249 +1,167 @@
-"""매거진 스타일 카드뉴스(1080×1350, 4:5) HTML.
+"""카드뉴스(1080×1350, 4:5) — 최신 뉴스레터 양식(VOL.092)과 같은 디자인 언어, 6장 구성.
 
-구성(기본 8장)
-  01 COVER     잡지 표지: 마스트헤드 + 세리프 헤드라인 + 커버라인 3개
-  02 CONTENTS  오늘의 10가지 목차
-  03 FEATURE   빅이슈: 핵심 문장 + 큰 숫자
-  04 SO WHAT   빅이슈의 '그래서 마케터는?' + 오늘 점검할 것
-  05~07 PICK   섹션별 대표 이슈 1개씩
-  08 QUESTION  오늘의 질문 + 저장/공유/구독 CTA
+  01 COVER     @edit.h.kr · #호수/요일 칩 · 제목(굵게/보통 두 줄) · 세 줄 요약
+  02 BIG ISSUE 번호 배지 · 제목 · 태그 · 핵심 문장 · 형광펜 큰 숫자 · 마케터의 한 줄
+  03~05 PICK   섹션별 대표 이슈 1개씩(같은 구성)
+  06 QUESTION  Q · 오늘의 질문 · 프로필 카드 · 구독 안내
 
-이전 카드(2026-06, 크림+레드 산세리프) 대비 개선점
-  - 한 장 = 한 메시지. 본문 글자 수 상한(content.CARD_LIMITS)과 자동 축소(최대 20%)로 빽빽함 방지
-  - 세리프 헤드라인·큰 숫자·괘선·폴리오로 '잡지' 위계를 분명히
-  - 밝은/어두운/레드 페이지 리듬으로 스와이프 이탈 방지
-  - 모든 사실 카드에 출처, 하단 진행 막대로 남은 장 수 표시
-  - 인스타 UI(하단 점·캡션)에 가리지 않도록 하단 안전영역 확보
+한 장에 한 메시지만 담도록 글자 수 상한(content.CARD_LIMITS)과 자동 축소(최대 20%)를 둔다.
 """
-from .common import ROOT, WEEKDAYS_EN, esc, md, plain
+from .common import esc, md, plain
 
 W, H = 1080, 1350
+TOTAL = 6
 
 CSS = """
-:root{--ink:#0D0C0A;--paper:#F5F1E8;--cream:#F5F1E8;--red:#FF5233;--red-ink:#D23A12;--muted:#6E665A;--muted-d:#A39A8B;--rule:#D9D1C2;}
+:root{--ink:#282F38;--body:#555558;--muted:#767676;--chipbg:#FFDCCB;--chipfg:#B23A0F;--hl:#FFC9AD;--box:#F3F3F3;
+  --rule:#EAEAEA;--dchip:#363636;--dchipfg:#FF9466;}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:#777;width:1080px;}
-.card{width:1080px;height:1350px;position:relative;overflow:hidden;background:var(--paper);color:var(--ink);
+.card{width:1080px;height:1350px;position:relative;overflow:hidden;background:#FFFFFF;color:var(--ink);
   font-family:'Pretendard',sans-serif;word-break:keep-all;overflow-wrap:break-word;--k:1;
-  display:flex;flex-direction:column;padding:78px 88px 0;}
-.card.dark{background:var(--ink);color:var(--cream);}
-.card.red{background:var(--red);color:var(--ink);}
-.serif{font-family:'Noto Serif KR',serif;}
-h1,h2,blockquote{text-wrap:balance;}
-.mast{display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid currentColor;padding-bottom:20px;flex:none;}
-.mast img{height:40px;display:block;}
-.mast .folio{font-size:21px;font-weight:800;letter-spacing:.16em;}
-.body{flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;padding:0 0 150px;}
-.foot{position:absolute;left:88px;right:88px;bottom:58px;display:flex;justify-content:space-between;align-items:baseline;
-  font-size:22px;font-weight:600;color:var(--muted);}
-.dark .foot{color:var(--muted-d);} .red .foot{color:var(--ink);}
-.foot .pg{font-weight:800;color:var(--ink);letter-spacing:.06em;} .dark .foot .pg{color:var(--cream);}
-.progress{position:absolute;left:0;bottom:0;height:12px;background:var(--red);} .red .progress{background:var(--ink);}
-.kicker{font-size:calc(24px*var(--k));font-weight:800;letter-spacing:.14em;color:var(--red-ink);}
-.dark .kicker{color:var(--red);} .red .kicker{color:var(--ink);}
-.chip{display:inline-block;align-self:flex-start;font-size:calc(24px*var(--k));font-weight:800;padding:10px 16px 9px;background:var(--ink);color:var(--cream);}
-.dark .chip{background:var(--red);color:var(--ink);}
-.acc{color:var(--red-ink);} .dark .acc{color:var(--red);} .red .acc{color:var(--cream);}
-.src{font-size:calc(21px*var(--k));color:var(--muted);margin-top:auto;padding-top:22px;} .dark .src{color:var(--muted-d);}
-.swipe{font-size:26px;font-weight:800;color:var(--red);}
-
-/* COVER */
-.cover .issue{margin-top:44px;display:flex;justify-content:space-between;align-items:flex-end;}
-.cover .issue .no{font-size:150px;font-weight:900;line-height:.8;color:var(--red);letter-spacing:-.02em;}
-.cover .issue .date{font-size:24px;font-weight:700;text-align:right;line-height:1.5;color:var(--muted-d);}
-.cover h1{font-size:calc(92px*var(--k));font-weight:900;line-height:1.22;letter-spacing:-.01em;margin-top:64px;}
-.cover .deck{font-size:calc(30px*var(--k));line-height:1.6;color:var(--muted-d);margin-top:30px;font-weight:500;}
-.cover .lines{margin-top:auto;border-top:1px solid #3A352D;}
-.cover .lines div{display:flex;gap:22px;padding:17px 0;border-bottom:1px solid #3A352D;font-size:calc(27px*var(--k));font-weight:600;}
-.cover .lines b{color:var(--red);font-weight:800;min-width:40px;}
-.cover .swipe{margin-top:26px;}
-
-/* CONTENTS */
-.contents h2{font-size:calc(66px*var(--k));font-weight:900;margin-top:10px;line-height:1.2;}
-.contents .top{margin-top:44px;}
-.contents ol{list-style:none;margin-top:26px;border-top:2px solid var(--ink);}
-.contents li{display:flex;align-items:baseline;gap:26px;padding:calc(15px*var(--k)) 0;border-bottom:1px solid var(--rule);}
-.contents li .n{font-size:calc(34px*var(--k));font-weight:900;color:var(--red-ink);min-width:52px;}
-.contents li .t{font-size:calc(31px*var(--k));font-weight:700;line-height:1.3;flex:1;}
-.contents li .g{font-size:calc(21px*var(--k));font-weight:600;color:var(--muted);white-space:nowrap;}
-.contents li.big .t{font-weight:900;}
-
-/* FEATURE / PICK */
-.feature .top,.pick .top{margin-top:48px;display:flex;flex-direction:column;gap:22px;}
-.feature h2,.pick h2{font-size:calc(70px*var(--k));font-weight:900;line-height:1.24;letter-spacing:-.01em;}
-.feature p,.pick p{font-size:calc(33px*var(--k));line-height:1.62;font-weight:500;color:#3B362E;margin-top:34px;}
-.dark .feature p{color:#D9D2C5;}
-.stat{margin-top:auto;padding-top:28px;border-top:2px solid currentColor;display:flex;align-items:flex-end;gap:28px;}
-.stat .v{font-size:calc(168px*var(--k));font-weight:900;line-height:.9;color:var(--red-ink);letter-spacing:-.02em;white-space:nowrap;}
-.stat .v small{font-size:.42em;margin-left:6px;}
-.stat .c{font-size:calc(23px*var(--k));line-height:1.5;color:var(--muted);padding-bottom:10px;}
-.pick .num{font-size:calc(150px*var(--k));font-weight:900;line-height:.8;color:var(--red-ink);}
-.pick .row{display:flex;justify-content:space-between;align-items:flex-end;}
-.pick .mid{margin:auto 0;padding:36px 0 12px;}
-.pick .mid p{margin-top:0;}
+  display:flex;flex-direction:column;padding:62px 84px 0;}
+.handle{flex:none;text-align:center;font-size:26px;font-weight:700;color:#5A5A5E;}
+.body{flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;padding:0 0 118px;}
+.foot{position:absolute;left:0;right:0;bottom:50px;text-align:center;font-size:22px;font-weight:600;color:#A0A0A6;letter-spacing:.1em;}
+h1,h2{text-wrap:balance;}
+.hl{background:var(--hl);color:var(--ink);font-weight:700;}
+.chips{display:flex;justify-content:center;gap:12px;margin-top:46px;}
+.chips span{font-size:calc(28px*var(--k));font-weight:700;line-height:1;padding:13px 17px;background:var(--chipbg);color:var(--chipfg);white-space:nowrap;}
+.chips span.d{background:var(--dchip);color:var(--dchipfg);}
+.badge{flex:none;width:66px;height:66px;border-radius:15px;background:var(--ink);color:#FFFFFF;font-size:33px;font-weight:600;
+  display:flex;align-items:center;justify-content:center;margin:56px auto 0;}
+.tag{align-self:center;background:var(--chipbg);color:var(--chipfg);font-size:calc(26px*var(--k));font-weight:700;line-height:1;padding:12px 15px;margin-top:24px;}
+h1{font-size:calc(82px*var(--k));line-height:1.38;text-align:center;letter-spacing:-.015em;margin-top:40px;color:var(--ink);}
+h1 .l1{font-weight:700;} h1 .l2{font-weight:400;}
+.meta{text-align:center;font-size:calc(25px*var(--k));color:var(--muted);margin-top:26px;}
+.rule{border-top:2px solid var(--rule);margin:52px 0 20px;}
+.pt{display:flex;gap:20px;align-items:flex-start;margin-top:26px;}
+.pt .n{flex:none;width:44px;height:44px;border-radius:22px;background:var(--ink);color:#FFFFFF;font-size:23px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;margin-top:3px;}
+.pt .t{font-size:calc(31px*var(--k));line-height:1.52;color:var(--body);}
+.pt .t b{color:var(--ink);font-weight:700;}
+.swipe{margin-top:auto;text-align:center;font-size:27px;font-weight:700;color:var(--chipfg);}
+h2{font-size:calc(58px*var(--k));font-weight:700;line-height:1.36;text-align:center;margin-top:26px;letter-spacing:-.01em;}
+p.txt{font-size:calc(32px*var(--k));line-height:1.7;color:var(--body);margin-top:36px;}
+p.txt b{background:var(--hl);color:var(--ink);font-weight:700;}
+.stat{align-self:center;background:var(--hl);padding:6px 26px;font-size:calc(108px*var(--k));font-weight:800;line-height:1.12;color:var(--ink);
+  margin-top:40px;white-space:nowrap;}
+.stat small{font-size:.48em;margin-left:4px;}
+.stat.s{font-size:calc(86px*var(--k));margin-top:32px;}
+.cap{text-align:center;font-size:calc(24px*var(--k));color:var(--muted);margin-top:16px;line-height:1.5;}
+.box{background:var(--box);border-radius:30px;padding:30px 36px;margin-top:36px;}
+.box .lb{font-size:calc(24px*var(--k));font-weight:700;color:var(--ink);}
+.box .tx{font-size:calc(30px*var(--k));line-height:1.6;color:var(--body);margin-top:10px;font-weight:500;}
+.box .tx b{color:var(--ink);font-weight:700;}
+.src{font-size:calc(22px*var(--k));color:var(--muted);margin-top:auto;padding-top:24px;}
+.pick .mid{margin:auto 0;padding:10px 0;}
+.pick .mid p.txt{margin-top:0;}
 .pick .src{margin-top:0;}
-.pick .take{margin-top:44px;border-left:8px solid var(--red);padding:6px 0 6px 26px;font-size:calc(31px*var(--k));line-height:1.55;font-weight:700;}
-.pick .take b{color:var(--red-ink);}
-.pick .ministat{margin-top:30px;display:flex;align-items:baseline;gap:18px;}
-.pick .ministat .v{font-size:calc(92px*var(--k));font-weight:900;color:var(--red-ink);line-height:1;}
-.pick .ministat .c{font-size:calc(23px*var(--k));color:var(--muted);line-height:1.45;}
-
-/* SO WHAT */
-.sowhat .center{margin:auto 0;padding:40px 0;}
-.sowhat .q{font-size:260px;line-height:.62;color:var(--red);height:120px;}
-.sowhat blockquote{font-size:calc(62px*var(--k));font-weight:700;line-height:1.5;margin-top:26px;}
-.sowhat blockquote b{color:var(--red);font-weight:900;}
-.sowhat .check{border-top:1px solid #3A352D;padding-top:22px;}
-.sowhat .check h3{font-size:calc(22px*var(--k));letter-spacing:.14em;color:var(--red);font-weight:800;}
-.sowhat .check div{font-size:calc(28px*var(--k));line-height:1.55;margin-top:12px;color:#E4DDD0;font-weight:500;}
-
-/* QUESTION */
-.question .top{margin-top:70px;}
-.question h2{font-size:calc(88px*var(--k));position:relative;z-index:1;font-weight:900;line-height:1.3;margin-top:26px;}
-.question .cta{margin-top:auto;border-top:3px solid var(--ink);}
-.question .cta div{display:flex;gap:22px;align-items:baseline;padding:20px 0;border-bottom:1px solid rgba(13,12,10,.25);font-size:calc(30px*var(--k));font-weight:700;}
-.question .cta span{font-size:24px;font-weight:800;min-width:40px;}
-.question .mark{position:absolute;right:40px;top:330px;font-size:620px;line-height:1;font-weight:900;color:rgba(13,12,10,.10);pointer-events:none;}
-.question .cta,.question .handle{position:relative;z-index:1;}
-.question .handle{font-size:calc(40px*var(--k));font-weight:900;margin-top:28px;}
+.q .mid{margin:auto 0;padding:20px 0 40px;}
+.Q{text-align:center;font-size:50px;font-weight:800;color:var(--body);line-height:1;}
+.q h2{font-size:calc(66px*var(--k));margin-top:28px;}
+.q .box{text-align:center;}
+.profile{margin-top:0;border:2px solid var(--rule);border-radius:36px;padding:30px 32px;display:flex;gap:28px;align-items:center;
+  box-shadow:0 4px 14px rgba(0,0,0,.08);}
+.avatar{flex:none;width:106px;height:106px;border-radius:50%;background:#0D0C0A;border:9px solid #FF5233;color:#F5F1E8;
+  font-size:45px;font-weight:800;display:flex;align-items:center;justify-content:center;letter-spacing:-2px;}
+.avatar i{font-style:normal;color:#FF5233;}
+.profile .nm{font-size:29px;font-weight:500;color:var(--ink);}
+.profile .stats{display:flex;gap:40px;margin-top:12px;}
+.profile .stats b{display:block;font-size:31px;font-weight:700;color:#1B1B1E;}
+.profile .stats span{font-size:21px;color:#6B6E75;}
+.subscribe{margin-top:26px;background:var(--chipfg);color:#FFFFFF;border-radius:20px;text-align:center;font-size:30px;font-weight:700;padding:26px;}
 """
 
 
-WORDMARKS = {  # 바탕별 워드마크: 레드 바탕에선 빨간 취소선이 묻히므로 크림 취소선 버전을 쓴다
-    "paper": "edit_h_wordmark_strike_paper.png",
-    "dark": "edit_h_wordmark_strike_cream.png",
-    "red": "edit_h_wordmark_strike_onred.png",
-}
+def _t(text):
+    """**굵게** → <b>, ==강조== → 형광펜(.hl), \\n → 줄바꿈."""
+    return md(text).replace("<span>", '<span class="hl">')
 
 
-def _mast(d, bg):
-    wm = WORDMARKS[bg]
-    folio = f"VOL.{d['vol']} · {d['date_obj'].strftime('%Y.%m.%d')} {WEEKDAYS_EN[d['date_obj'].weekday()]}"
-    return (f'<div class="mast"><img src="{(ROOT / "assets" / wm).as_uri()}" alt="EDIT H">'
-            f'<div class="folio">{folio}</div></div>')
-
-
-def _foot(n, total, send_time):
-    return (f'<div class="foot"><span>@edit.h.kr · 매 영업일 {send_time}</span><span class="pg">{n:02d} / {total:02d}</span></div>'
-            f'<div class="progress" style="width:{n / total * 100:.2f}%"></div>')
+def _frame(n, cls, inner):
+    return (f'<section class="card {cls}"><div class="handle">@edit.h.kr</div><div class="body">{inner}</div>'
+            f'<div class="foot">{n} / {TOTAL}</div></section>')
 
 
 def _src(sources):
     names = "·".join(esc(s["name"]) for s in sources)
-    return f'<div class="src">출처 · {names} {esc(sources[-1].get("date", ""))}</div>'
+    return f'<div class="src">출처 · {names} {esc(sources[-1].get("date", ""))}</div>'.replace(" </div>", "</div>")
 
 
-def _acc(text):
-    """==강조== 는 레드(.acc), **굵게** 는 굵게. 색은 CSS 가 페이지 바탕(밝음/어둠/레드)에 맞춰 준다."""
-    return md(text).replace("<span>", '<span class="acc">')
+def _stat(st, small=False):
+    return (f'<div class="stat{" s" if small else ""}">{esc(st["value"])}<small>{esc(st.get("unit", ""))}</small></div>'
+            f'<div class="cap">{_t(st["caption"])}</div>')
 
 
-def cover(d, n, total):
-    title = d.get("cover_title", d["hero_title"])
-    lines = "".join(
-        f'<div><b>{it["no"]}</b><span>{esc(plain(it.get("short_title", it["title"])))}</span></div>'
-        for it in d["pick_items"]
-    )
-    return f"""<section class="card dark cover">{_mast(d, "dark")}<div class="body">
-<div class="issue"><div class="no serif">{esc(d['vol'])}</div><div class="date">DAILY MARKETING BRIEF<br>{d['date_obj'].strftime('%Y.%m.%d')} {d['weekday']}요일</div></div>
-<div class="kicker" style="margin-top:56px">TODAY'S BIG ISSUE · {esc(d['big_issue']['tag'])}</div>
-<h1 class="serif" data-fit>{_acc(title)}</h1>
-<div class="deck">{esc(plain(d.get('cover_deck', d['subtitle'])))}</div>
-<div class="lines">{lines}</div>
-<div class="swipe">밀어서 10가지 보기 →</div>
-</div>{_foot(n, total, d["send_time_kst"])}</section>"""
+def _box(label, text):
+    return f'<div class="box"><div class="lb">{label}</div><div class="tx">{_t(text)}</div></div>'
 
 
-def contents(d, n, total):
-    rows = "".join(
-        f'<li class="{"big" if i == 0 else ""}"><span class="n serif">{it["no"]}</span>'
-        f'<span class="t">{esc(plain(it.get("short_title", it.get("title", d["title"]))))}</span>'
-        f'<span class="g">{esc(it["tag"])}</span></li>'
-        for i, it in enumerate(d["all_items"])
-    )
-    return f"""<section class="card contents">{_mast(d, "paper")}<div class="body">
-<div class="top"><div class="kicker">IN THIS ISSUE</div><h2 class="serif">오늘의 10가지</h2></div>
-<ol>{rows}</ol>
-</div>{_foot(n, total, d["send_time_kst"])}</section>"""
+def cover(d):
+    lines = d.get("cover_title", d["hero_title"]).split("\n")
+    title = f'<span class="l1">{_t(lines[0])}</span>' + "".join(f'<br><span class="l2">{_t(x)}</span>' for x in lines[1:])
+    pts = d.get("lead_points") or [{"title": t["label"], "text": t["text"]} for t in d["three_lines"]]
+    points = "".join(
+        f'<div class="pt"><div class="n">{i}</div><div class="t"><b>{_t(p["title"])}</b> — {_t(p["text"])}</div></div>'
+        for i, p in enumerate(pts[:3], 1))
+    return _frame(1, "cover", f"""
+<div class="chips"><span class="d">#{esc(d['vol'])}</span><span>{d['weekday']}요일의</span><span>마케팅</span><span>브리프</span></div>
+<h1 data-fit>{title}</h1>
+<div class="meta">VOL.{esc(d['vol'])} · {d['date_obj'].strftime('%Y.%m.%d')} {d['weekday']}요일</div>
+<div class="rule"></div>
+{points}
+<div class="swipe">밀어서 {len(d['all_items'])}가지 보기 →</div>""")
 
 
-def _stat_block(st):
-    return (f'<div class="stat"><div class="v serif">{esc(st["value"])}<small>{esc(st.get("unit", ""))}</small></div>'
-            f'<div class="c">{md(st["caption"])}</div></div>')
-
-
-def feature(d, n, total):
+def big_issue(d):
     b = d["big_issue"]
-    text = b.get("card_text", b["paragraphs"][0])
-    return f"""<section class="card feature">{_mast(d, "paper")}<div class="body">
-<div class="top"><div class="kicker">01 · TODAY'S BIG ISSUE</div><span class="chip">{esc(b['tag'])}</span>
-<h2 class="serif">{_acc(b.get('card_title', d['hero_title']))}</h2></div>
-<p>{_acc(text)}</p>
-{_stat_block(b['stat'])}
-{_src(b['sources'])}
-</div>{_foot(n, total, d["send_time_kst"])}</section>"""
+    take = b.get("card_takeaway", b["takeaway"]).replace("\n", " ")
+    return _frame(2, "feature", f"""
+<div class="badge">1</div>
+<h2>{esc(plain(d['title']))}</h2>
+<div class="tag">01 · {esc(b['tag'])}</div>
+<p class="txt">{_t(b.get('card_text', b['paragraphs'][0]))}</p>
+{_stat(b['stat'])}
+{_box('마케터의 한 줄', take)}
+{_src(b['sources'])}""")
 
 
-def sowhat(d, n, total):
-    b = d["big_issue"]
-    checks = b.get("checklist") or []
-    check_html = ""
-    if checks:
-        check_html = '<div class="check"><h3>오늘 점검할 것</h3>' + "".join(
-            f"<div>☐ {esc(plain(c))}</div>" for c in checks[:3]) + "</div>"
-    return f"""<section class="card dark sowhat">{_mast(d, "dark")}<div class="body">
-<div class="kicker" style="margin-top:48px">SO WHAT · 그래서, 마케터는?</div>
-<div class="center"><div class="q serif">“</div>
-<blockquote class="serif">{_acc(b.get('card_takeaway', b['takeaway']))}</blockquote></div>
-{check_html}
-</div>{_foot(n, total, d["send_time_kst"])}</section>"""
-
-
-def pick(d, it, n, total):
+def pick(d, it, n):
     card = it.get("card", {})
-    text = card.get("text", it["body"])
-    take = card.get("takeaway", it["takeaway"])
-    st = card.get("stat")
-    ministat = ""
-    if st:
-        ministat = (f'<div class="ministat"><div class="v serif">{esc(st["value"])}<small style="font-size:.45em">{esc(st.get("unit", ""))}</small></div>'
-                    f'<div class="c">{md(st["caption"])}</div></div>')
-    return f"""<section class="card pick">{_mast(d, "paper")}<div class="body">
-<div class="top"><div class="row"><div class="num serif">{it['no']}</div><span class="chip">{esc(it['tag'])}</span></div>
-<h2 class="serif">{_acc(card.get('title', it['title']))}</h2></div>
-{ministat}
-<div class="mid"><p>{_acc(text)}</p>
-<div class="take">→ {_acc(take)}</div></div>
-{_src(it['sources'])}
-</div>{_foot(n, total, d["send_time_kst"])}</section>"""
+    stat = _stat(card["stat"], small=True) if card.get("stat") else ""
+    return _frame(n, "pick", f"""
+<div class="badge">{int(it['no'])}</div>
+<h2>{_t(card.get('title', it['title']))}</h2>
+<div class="tag">{it['no']} · {esc(it['tag'])}</div>
+{stat}
+<div class="mid"><p class="txt">{_t(card.get('text', it['body']))}</p>
+{_box('마케터의 한 줄', card.get('takeaway', it['takeaway']))}</div>
+{_src(it['sources'])}""")
 
 
-def question(d, n, total):
+def question(d):
     q = d["question"]
-    return f"""<section class="card red question">{_mast(d, "red")}<div class="body">
-<div class="top"><div class="kicker">TODAY'S QUESTION · 오늘의 질문</div>
-<h2 class="serif">{_acc(q['text'])}</h2></div>
-<div class="cta">
-<div><span>01</span>💬 댓글로 여러분의 답을 남겨주세요</div>
-<div><span>02</span>📌 저장해두고 회의 전에 다시 꺼내보세요</div>
-<div><span>03</span>📩 전문 10가지는 뉴스레터로 — 프로필 링크</div>
-</div>
-<div class="handle">@edit.h.kr</div>
-</div><div class="mark serif" aria-hidden="true">?</div>{_foot(n, total, d["send_time_kst"])}</section>"""
+    n_items = len(d["all_items"])
+    return _frame(TOTAL, "q", f"""
+<div class="mid"><div class="Q">Q</div>
+<h2>{_t(q['text'])}</h2>
+<div class="box"><div class="tx">💬 댓글로 여러분의 답을 남겨주세요<br>📌 저장해두고 회의 전에 다시 꺼내보세요</div></div></div>
+<div class="profile"><div class="avatar">H<i>.</i></div><div><div class="nm">edit.h.kr</div>
+<div class="stats"><div><b>{n_items}개</b><span>이슈 전문</span></div><div><b>{TOTAL}장</b><span>카드뉴스</span></div><div><b>{int(d['vol'])}호</b><span>누적 발행</span></div></div></div></div>
+<div class="subscribe">매일 아침 {n_items}가지 이슈 — 프로필 링크에서 구독</div>""")
 
 
-CARD_NAMES = ["cover", "contents", "feature", "sowhat", "pick1", "pick2", "pick3", "question"]
+CARD_NAMES = ["cover", "bigissue", "pick1", "pick2", "pick3", "question"]
 
 
 def build(d, font_css):
     """(html 문자열, 파일명 목록)을 돌려준다. 카드 순서 = 파일명 순서."""
     picks = d["pick_items"][:3]
-    names = CARD_NAMES[:4] + [f"pick{i}" for i in range(1, len(picks) + 1)] + ["question"]
-    total = len(names)
-    sections = [cover(d, 1, total), contents(d, 2, total), feature(d, 3, total), sowhat(d, 4, total)]
-    sections += [pick(d, it, 5 + i, total) for i, it in enumerate(picks)]
-    sections.append(question(d, total, total))
-    files = [f"{i:02d}_edit_h_{d['date']}_{name}.png" for i, name in enumerate(names, 1)]
+    if len(picks) != 3:
+        raise ValueError("카드뉴스 픽 아이템은 3개여야 합니다(card_picks 또는 섹션 3개 이상)")
+    sections = [cover(d), big_issue(d)] + [pick(d, it, 3 + i) for i, it in enumerate(picks)] + [question(d)]
+    files = [f"{i:02d}_edit_h_{d['date']}_{name}.png" for i, name in enumerate(CARD_NAMES, 1)]
     page = f"""<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8">
 <style>{font_css}
 {CSS}</style></head><body>

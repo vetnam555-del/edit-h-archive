@@ -16,7 +16,8 @@ CARD_LIMITS = {
     "feature_text": 150,
     "pick_text": 130,
     "takeaway": 110,
-    "item_title_contents": 24,
+    "lead_point_title": 22,
+    "lead_point_text": 40,
 }
 
 
@@ -118,7 +119,14 @@ def prepare(data, date_str):
         except KeyError as e:
             raise ContentError(f"{where}: card_picks 의 번호 {e} 가 02~10 범위를 벗어났습니다")
     else:
-        data["pick_items"] = [sec["items"][0] for sec in data["sections"]][:3]
+        # 섹션마다 첫 아이템, 섹션이 3개보다 적으면 남은 아이템으로 채운다
+        picks = [sec["items"][0] for sec in data["sections"]][:3]
+        for it in items:
+            if len(picks) >= 3:
+                break
+            if it not in picks:
+                picks.append(it)
+        data["pick_items"] = picks
 
     problems = []
     _len_check(data.get("cover_title", data["hero_title"]), CARD_LIMITS["cover_title"], "cover_title(또는 hero_title)", problems)
@@ -128,9 +136,9 @@ def prepare(data, date_str):
         card = it.get("card", {})
         _len_check(card.get("text", it["body"]), CARD_LIMITS["pick_text"], f"{it['no']} card.text(없으면 body)", problems)
         _len_check(card.get("takeaway", it["takeaway"]), CARD_LIMITS["takeaway"], f"{it['no']} card.takeaway(없으면 takeaway)", problems)
-    for it in data["all_items"]:
-        title = it.get("short_title", it.get("title", data["title"]))
-        _len_check(title, CARD_LIMITS["item_title_contents"], f"{it['no']} short_title(목차 카드용, 없으면 title)", problems)
+    for i, p in enumerate(data.get("lead_points") or [], 1):
+        _len_check(p["title"], CARD_LIMITS["lead_point_title"], f"lead_points[{i}].title(표지 카드)", problems)
+        _len_check(p["text"], CARD_LIMITS["lead_point_text"], f"lead_points[{i}].text(표지 카드)", problems)
     if problems:
         raise ContentError("카드 글자 수 초과:\n  - " + "\n  - ".join(problems))
     return data

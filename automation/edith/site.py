@@ -72,7 +72,7 @@ def gallery_page(d, site, card_files, caption):
 <meta property="og:title" content="[EDIT H 카드뉴스] {esc(title)}">
 <meta property="og:image" content="{site}/instagram/{d['date']}/{card_files[0]}">
 <style>
-  :root {{ --ink:#111008; --paper:#F5F1E8; --acc:#C8300A; --muted:#736A5C; }}
+  :root {{ --ink:#282F38; --paper:#F3F3F3; --acc:#B23A0F; --muted:#6B6E75; }}
   * {{ box-sizing:border-box; }}
   body {{ margin:0; background:var(--paper); color:var(--ink); font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif; }}
   main {{ max-width:560px; margin:0 auto; padding:28px 16px 60px; }}
@@ -83,7 +83,7 @@ def gallery_page(d, site, card_files, caption):
   figure img {{ width:100%; height:auto; display:block; border-radius:4px; box-shadow:0 2px 10px rgba(0,0,0,.10); }}
   figcaption {{ font-size:12px; color:var(--muted); margin-top:6px; text-align:right; }}
   figcaption a, .links a {{ color:var(--acc); font-weight:700; }}
-  .caption {{ margin-top:30px; background:#fff; border:1px solid #E2DACB; border-radius:12px; padding:16px; }}
+  .caption {{ margin-top:30px; background:#fff; border:1px solid #EAEAEA; border-radius:12px; padding:16px; }}
   .caption pre {{ white-space:pre-wrap; word-break:keep-all; font-family:inherit; font-size:14px; line-height:1.7; margin:10px 0 0; }}
   button {{ font:inherit; font-size:14px; font-weight:800; background:var(--ink); color:#fff; border:0; border-radius:100px; padding:10px 18px; cursor:pointer; }}
   button:focus-visible, a:focus-visible {{ outline:3px solid #2563EB; outline-offset:2px; }}
