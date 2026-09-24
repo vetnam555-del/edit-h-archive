@@ -3,13 +3,13 @@
 노트북이 꺼져 있어도 매 영업일 아침 뉴스레터와 카드뉴스가 발행되도록, 로컬에서 하던 작업을 이 저장소 안으로 옮겼다.
 
 ```
-07:30 KST  Claude 클라우드 루틴 시작 ─ automation/RUNBOOK.md 대로
+08:00 KST  Claude 클라우드 루틴 시작 ─ automation/RUNBOOK.md 대로
            ├ 안장출근길 확인 → 없으면 주요 매체 검색으로 10개 선정·사실 확인
            ├ content/YYYY-MM-DD.json 작성
            ├ build_issue.py → 뉴스레터 HTML · 카드뉴스 8장 · manifest · index
            └ main 에 푸시 → GitHub Pages 에 게시
-08:30 KST  GitHub Actions(send-newsletter.yml) → 구독자에게 메일 발송
-           (루틴이 늦어 08:30 이후 푸시되면 푸시 즉시 발송)
+09:00 KST  GitHub Actions(send-newsletter.yml) → 구독자에게 메일 발송
+           (08:40 에 예약 실행 → 09:00 까지 대기 후 발송. 루틴이 늦어 09:00 이후 푸시되면 푸시 즉시 발송)
 ```
 
 - 주말과 `holidays_kr.json` 의 공휴일은 건너뛴다(`config.json` 의 `publish_days` 로 요일 변경 가능).
@@ -50,7 +50,7 @@ Claude 세션 상단의 클라우드 환경 메뉴 → **Edit → Network access
 | 오늘 발행 여부 확인 | `python3 automation/check_today.py` |
 | 메일 재발송/특정 날짜 발송 | Actions → Send EDIT H newsletter → Run workflow (`date` 입력). 이미 보낸 날은 `automation/sent/날짜.json` 을 지워야 다시 보낸다 |
 | 임시공휴일 추가 | `holidays_kr.json` 에 한 줄 추가 |
-| 발송 시각 변경 | `config.json` 의 `send_time_kst` + 워크플로 `cron` + 루틴 시각을 함께 바꾼다 |
+| 발송 시각 변경 | `config.json` 의 `send_time_kst`(문구·대기 시각이 따라 바뀜) + 워크플로 `cron`(발송 20분 전) + 루틴 시각(발송 1시간 전)을 함께 바꾼다 |
 
 ## 파일 구조
 
@@ -64,6 +64,7 @@ automation/
   render_cards.cjs      카드 HTML → PNG (Playwright, 넘침 감지·자동 축소)
   preview_newsletter.cjs  검수용 뉴스레터 스크린샷
   send_newsletter.py    메일 발송(GitHub Actions 에서 실행)
+  wait_until_send.py    예약 실행이 일찍 시작돼도 발송 시각까지 기다림
   sent/                 발송 기록(주소 없이 날짜·건수만)
   edith/                템플릿 모듈(newsletter·cards·site·content·fonts)
 content/YYYY-MM-DD.json 호마다의 원본 콘텐츠(출처 URL 포함)

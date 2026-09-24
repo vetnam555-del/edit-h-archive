@@ -1,7 +1,7 @@
 {
   "site_url": "https://vetnam555-del.github.io/edit-h-archive",
-  "send_time_kst": "08:30",
-  "routine_start_kst": "07:30",
+  "send_time_kst": "09:00",
+  "routine_start_kst": "08:00",
   "publish_days": ["월", "화", "수", "목", "금"],
   "skip_kr_public_holidays": true,
   "items_per_issue": 10,

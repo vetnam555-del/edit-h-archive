@@ -120,8 +120,8 @@ def _mast(d, bg):
             f'<div class="folio">{folio}</div></div>')
 
 
-def _foot(n, total):
-    return (f'<div class="foot"><span>@edit.h.kr · 매 영업일 08:30</span><span class="pg">{n:02d} / {total:02d}</span></div>'
+def _foot(n, total, send_time):
+    return (f'<div class="foot"><span>@edit.h.kr · 매 영업일 {send_time}</span><span class="pg">{n:02d} / {total:02d}</span></div>'
             f'<div class="progress" style="width:{n / total * 100:.2f}%"></div>')
 
 
@@ -148,7 +148,7 @@ def cover(d, n, total):
 <div class="deck">{esc(plain(d.get('cover_deck', d['subtitle'])))}</div>
 <div class="lines">{lines}</div>
 <div class="swipe">밀어서 10가지 보기 →</div>
-</div>{_foot(n, total)}</section>"""
+</div>{_foot(n, total, d["send_time_kst"])}</section>"""
 
 
 def contents(d, n, total):
@@ -161,7 +161,7 @@ def contents(d, n, total):
     return f"""<section class="card contents">{_mast(d, "paper")}<div class="body">
 <div class="top"><div class="kicker">IN THIS ISSUE</div><h2 class="serif">오늘의 10가지</h2></div>
 <ol>{rows}</ol>
-</div>{_foot(n, total)}</section>"""
+</div>{_foot(n, total, d["send_time_kst"])}</section>"""
 
 
 def _stat_block(st):
@@ -178,7 +178,7 @@ def feature(d, n, total):
 <p>{_acc(text)}</p>
 {_stat_block(b['stat'])}
 {_src(b['sources'])}
-</div>{_foot(n, total)}</section>"""
+</div>{_foot(n, total, d["send_time_kst"])}</section>"""
 
 
 def sowhat(d, n, total):
@@ -193,7 +193,7 @@ def sowhat(d, n, total):
 <div class="center"><div class="q serif">“</div>
 <blockquote class="serif">{_acc(b.get('card_takeaway', b['takeaway']))}</blockquote></div>
 {check_html}
-</div>{_foot(n, total)}</section>"""
+</div>{_foot(n, total, d["send_time_kst"])}</section>"""
 
 
 def pick(d, it, n, total):
@@ -212,7 +212,7 @@ def pick(d, it, n, total):
 <p>{_acc(text)}</p>
 <div class="take">→ {_acc(take)}</div>
 {_src(it['sources'])}
-</div>{_foot(n, total)}</section>"""
+</div>{_foot(n, total, d["send_time_kst"])}</section>"""
 
 
 def question(d, n, total):
@@ -226,7 +226,7 @@ def question(d, n, total):
 <div><span>03</span>📩 전문 10가지는 뉴스레터로 — 프로필 링크</div>
 </div>
 <div class="handle">@edit.h.kr</div>
-</div><div class="mark serif" aria-hidden="true">?</div>{_foot(n, total)}</section>"""
+</div><div class="mark serif" aria-hidden="true">?</div>{_foot(n, total, d["send_time_kst"])}</section>"""
 
 
 CARD_NAMES = ["cover", "contents", "feature", "sowhat", "pick1", "pick2", "pick3", "question"]

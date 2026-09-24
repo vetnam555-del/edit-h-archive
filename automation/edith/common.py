@@ -21,6 +21,13 @@ def load_config():
     return json.loads((AUTOMATION / "config.json").read_text(encoding="utf-8"))
 
 
+def send_time_ko(t):
+    """'09:00' → '오전 9시', '08:30' → '오전 8시 30분' (뉴스레터·카드 문구용)."""
+    h, m = map(int, t.split(":"))
+    ampm, h12 = ("오전", h) if h < 12 else ("오후", h - 12 if h > 12 else 12)
+    return f"{ampm} {h12}시" + (f" {m}분" if m else "")
+
+
 def now_kst():
     return dt.datetime.now(KST)
 
