@@ -66,10 +66,17 @@ def parse_recipients(raw):
 
 
 def excluded(addrs):
-    """config.email.exclude_sha256 에 해시가 있는 주소를 뺀다(수신 제외 요청). (남은 주소, 뺀 수)."""
+    """config.email.exclude_sha256 에 걸리는 주소를 뺀다(수신 제외 요청). (남은 주소, 뺀 수).
+    소문자로 바꾼 주소 전체, 도메인(x.co.kr), 도메인의 한 부분(x) 가운데 하나의 SHA-256 이 목록에 있으면 뺀다."""
     import hashlib
     hashes = set((load_config().get("email") or {}).get("exclude_sha256") or [])
-    kept = [a for a in addrs if hashlib.sha256(a.lower().encode()).hexdigest() not in hashes]
+
+    def hit(addr):
+        a = addr.lower()
+        domain = a.rsplit("@", 1)[-1]
+        return any(hashlib.sha256(k.encode()).hexdigest() in hashes for k in (a, domain, *domain.split(".")))
+
+    kept = [a for a in addrs if not hit(a)]
     return kept, len(addrs) - len(kept)
 
 
