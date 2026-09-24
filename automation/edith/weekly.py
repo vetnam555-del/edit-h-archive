@@ -11,7 +11,7 @@ import json
 import re
 
 from . import content
-from .common import CONTENT_DIR, load_config, parse_date, plain, send_time_ko, weekday_ko
+from .common import CONTENT_DIR, ROOT, cover_photo_problem, load_config, parse_date, plain, send_time_ko, weekday_ko
 
 WEEKLY_DIR = CONTENT_DIR / "weekly"
 LIMITS = {"title": 34, "keyword": 5, "line": 40, "oneliner_title": 24}
@@ -93,6 +93,11 @@ def load(date_str):
             problems.append(f"{where}: {len(plain(text))}자 → {lim}자 이하")
     if problems:
         raise WeeklyError("글자 수 초과:\n  - " + "\n  - ".join(problems))
+    if spec.get("photo"):
+        if not (ROOT / spec["photo"]).exists() or not spec.get("credit"):
+            raise WeeklyError("photo 를 쓰면 파일이 있어야 하고 credit(출처·라이선스)도 적어야 합니다")
+        if why := cover_photo_problem(spec["photo"]):
+            raise WeeklyError(why)
 
     # 카드 함수가 쓰는 모양으로 맞춘다. 주간 특집에서는 H PICK 반전을 쓰지 않는다('오늘의 핵심' 문구가 맞지 않음).
     items = [{**it, "accent": False} for _, it in picks]
@@ -102,7 +107,8 @@ def load(date_str):
         "hero_title": spec["title"], "week_label": week_label(friday),
         "cards": {
             "cover": {"title": spec["title"], "keyword": spec.get("keyword") or "TOP5",
-                      "photo": spec.get("photo"), "credit": spec.get("credit")},
+                      "photo": spec.get("photo"), "credit": spec.get("credit"),
+                      "focus": spec.get("focus")},
             "cta": {"kick": "이번 주 저장각", "headline": spec.get("cta_headline") or ol["title"],
                     "sub": "다음 주 회의 전에 한 번 더 꺼내보세요.", "pill": "팔로우 + 저장해두기"},
         },

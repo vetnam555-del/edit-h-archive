@@ -3,6 +3,9 @@
 
 뉴스 보도사진은 라이선스 없이 쓸 수 없으므로, 출처 표기만 하면 되는 사진(CC0·퍼블릭 도메인·CC BY)만 고른다.
 CC BY-SA 는 글자를 얹은 표지 이미지까지 같은 라이선스로 공개해야 할 수 있어 기본에서 뺐다(--allow-sa 로만 허용).
+해상도: 표지(1080×1350)를 꽉 채울 때 10% 넘게 늘려야 하는 사진은 흐려지므로 후보에서 뺀다
+(가로로 아주 긴 파노라마도 여기서 빠진다 — 4:5 로 자르면 대부분이 잘려 나가 어차피 맞지 않는다).
+내려받을 때는 1280px 또는 1920px 폭 중 표지를 채우는 가장 작은 쪽을 받는다(용량 절약).
 키 없이 쓸 수 있는 공개 API 라서 클라우드 환경의 네트워크 허용 목록에
 commons.wikimedia.org · upload.wikimedia.org 두 도메인만 있으면 된다. 막혀 있으면 코드 2로 끝나고,
 그날은 사진 없이(핵심어 표지) 발행하면 된다.
@@ -28,6 +31,16 @@ API = "https://commons.wikimedia.org/w/api.php"
 UA = "EDIT-H-newsletter/1.0 (https://vetnam555-del.github.io/edit-h-archive/)"
 OK_LICENSE = re.compile(r"^(cc0|pd|public domain|cc-by-\d|cc by \d)", re.I)
 SA_LICENSE = re.compile(r"^(cc-by-sa-\d|cc by-sa \d)", re.I)
+CARD_W, CARD_H, MAX_UPSCALE = 1080, 1350, 1.1  # content.py 의 표지 사진 검사와 같은 기준
+THUMB_WIDTHS = (1280, 1920)  # 위키미디어 표준 썸네일 폭
+
+
+def fetch_width(w, h):
+    """표지를 채우는 데 충분한 가장 작은 내려받기 폭. 원본으로도 모자라면 None."""
+    for tw in [x for x in THUMB_WIDTHS if x < w] + [w]:
+        if max(CARD_W / tw, CARD_H / (h * tw / w)) <= MAX_UPSCALE:
+            return tw
+    return None
 
 
 def _get(url):
@@ -54,16 +67,29 @@ def search(query, limit=15, allow_sa=False):
         lic = _text((meta.get("LicenseShortName") or {}).get("value")) or _text((meta.get("License") or {}).get("value"))
         if not (OK_LICENSE.match(lic) or (allow_sa and SA_LICENSE.match(lic))) or info.get("mime") not in ("image/jpeg", "image/png"):
             continue  # NC·ND·공정 이용 등 재사용 조건이 맞지 않는 사진은 뺀다
-        if info.get("width", 0) < 1080:
-            continue
+        tw = fetch_width(info.get("width") or 1, info.get("height") or 1)
+        if not tw:
+            continue  # 표지를 채우려면 늘려야 해서 흐려지는 사진
         out.append({
             "title": page["title"], "license": lic,
             "artist": _text((meta.get("Artist") or {}).get("value"))[:80] or "작가 미상",
             "description": _text((meta.get("ImageDescription") or {}).get("value"))[:160],
             "thumb": info.get("thumburl") or info.get("url"), "page": info.get("descriptionurl"),
-            "size": f"{info.get('width')}×{info.get('height')}",
+            "size": f"{info.get('width')}×{info.get('height')}", "fetch_width": tw,
+            "original": info.get("url"), "original_width": info.get("width"),
         })
     return out
+
+
+def download_url(c):
+    """고른 폭의 썸네일 주소(원본 폭이면 원본 주소)."""
+    if c["fetch_width"] >= c["original_width"]:
+        return c["original"]
+    params = {"action": "query", "format": "json", "titles": c["title"], "prop": "imageinfo",
+              "iiprop": "url", "iiurlwidth": c["fetch_width"]}
+    data = json.loads(_get(f"{API}?{urllib.parse.urlencode(params)}"))
+    page = next(iter(data["query"]["pages"].values()))
+    return page["imageinfo"][0].get("thumburl") or page["imageinfo"][0]["url"]
 
 
 def main():
@@ -89,9 +115,10 @@ def main():
     if not args.date:
         sys.exit("--pick 에는 --date 가 필요합니다")
     c = cands[args.pick - 1]
-    dest = ROOT / "assets" / "photos" / f"{args.date}{'.png' if c['thumb'].lower().endswith('.png') else '.jpg'}"
+    url = download_url(c)
+    dest = ROOT / "assets" / "photos" / f"{args.date}{'.png' if url.lower().endswith('.png') else '.jpg'}"
     dest.parent.mkdir(parents=True, exist_ok=True)
-    dest.write_bytes(_get(c["thumb"]))
+    dest.write_bytes(_get(url))
     credit = f"사진 = {c['artist']} / Wikimedia Commons ({c['license']})"
     print(f"✓ {dest.relative_to(ROOT)} 저장 ({dest.stat().st_size // 1024}KB) — Read 도구로 사진을 직접 보고 쓸지 결정하세요")
     print(json.dumps({"photo": str(dest.relative_to(ROOT)), "credit": credit, "photo_source": c["page"]}, ensure_ascii=False))
