@@ -52,6 +52,10 @@ def main():
     if str(d.year) not in years:
         warn.append(f"holidays_kr.json 에 {d.year}년 공휴일이 없습니다 — 공휴일을 확인해 추가하세요")
 
+    ws = cfg.get("weekly_special") or {}
+    weekly_due = (reason is None and ws.get("enabled_from") is not None and date >= ws["enabled_from"]
+                  and wd == ws.get("weekday", "금"))
+
     print(json.dumps({
         "date": date,
         "weekday": wd,
@@ -60,6 +64,7 @@ def main():
         "already_published": exists,
         "next_vol": next_vol(date),
         "send_time_kst": cfg["send_time_kst"],
+        "weekly_special_due": weekly_due,  # true 면 데일리 발행 뒤 RUNBOOK '금요일 주간 특집'도 만든다
         "recent_issues": recent,
         "recent_item_titles": recent_items,
         "warnings": warn,

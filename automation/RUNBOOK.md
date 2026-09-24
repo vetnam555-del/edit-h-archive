@@ -151,6 +151,26 @@ python3 automation/build_issue.py {날짜}           # 뉴스레터·카드·man
   (두 번째 인자가 출력 경로 접두어. 세션에 스크래치 폴더가 있으면 그곳을, 없으면 `/tmp` 를 쓴다)
 - 고칠 게 있으면 JSON 수정 → 3단계 재실행.
 
+## 4-1. 금요일 주간 특집 'TOP5' (`check_today.py` 의 `weekly_special_due` 가 true 일 때만)
+
+데일리를 다 만든 뒤, 같은 커밋에 인스타 전용 주간 특집을 더한다. **새로 취재하지 않는다** — 이번 주(월~금) 데일리 카드 이슈 중
+5개를 다시 엮는 것이라 사실 확인은 이미 끝나 있다. 뉴스레터·메일은 건드리지 않는다.
+
+1. `content/weekly/{날짜}.json` 작성:
+   ```json
+   {"date": "{날짜}",
+    "title": "회의 때 꺼내기 좋은,\n이번 주 마케팅 숫자 5",
+    "oneliner": {"title": "짧아진 연휴, ==빨라진 결정==", "lines": ["…", "…", "…"]},
+    "caption": "질문형 첫 줄\n\n대화체 2문장 요약",
+    "picks": [{"date": "YYYY-MM-DD", "no": 8}, …]}
+   ```
+   - `title`: 쓸모형 목록 제목(두 줄, 34자 이하). `oneliner`: 이번 주를 꿰는 한 줄(24자 이하) + 3줄(각 40자 이하, 셋째 줄은 다음 주 회의 질문).
+   - `picks`(선택, 5개): 데일리 content 의 `cards.issues[].no` 기준. 비우면 날마다의 H PICK 먼저, 태그가 겹치지 않게 자동으로 고른다.
+     숫자가 뚜렷하고 주제가 서로 다른 5개가 되도록 직접 고르는 편이 낫다.
+2. `python3 automation/build_weekly.py {날짜} --check` → `python3 automation/build_weekly.py {날짜}`
+3. `instagram/{날짜}-weekly/*.png` 9장을 Read 도구로 본다. 5단계 커밋에 `content/weekly/ instagram/{날짜}-weekly/` 를 더한다.
+4. 6단계 보고에 주간 특집 갤러리 링크(`…/instagram/{날짜}-weekly/`)를 함께 적는다.
+
 ## 5. 커밋·푸시
 
 ```bash
