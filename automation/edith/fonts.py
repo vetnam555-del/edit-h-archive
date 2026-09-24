@@ -33,6 +33,7 @@ def _ensure_pretendard():
         with tarfile.open(tgz) as tf:
             member = tf.getmember("package/dist/web/variable/woff2/PretendardVariable.woff2")
             target.write_bytes(tf.extractfile(member).read())
+        tgz.unlink()  # 70MB 짜리 원본 패키지는 필요한 파일만 꺼내고 지운다
     return target
 
 
@@ -49,6 +50,7 @@ def _ensure_serif():
                     f"-{w}-normal" in name for w in SERIF_WEIGHTS)
                 if keep_css or keep_font:
                     (base / name).write_bytes(tf.extractfile(m).read())
+        tgz.unlink()
     return base
 
 
