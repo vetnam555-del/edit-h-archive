@@ -2,7 +2,7 @@
 import json
 import re
 
-from .common import INDEX, MANIFEST, esc, plain
+from .common import INDEX, MANIFEST, esc, plain, send_time_ko
 
 
 def update_manifest(d, site, n_cards, publish_time):
@@ -125,4 +125,5 @@ def instagram_caption(d, site):
         body = "\n".join(lines)
     tags = ig.get("hashtags") or ["마케팅", "마케팅트렌드", "마케터", "브랜드마케팅", "카드뉴스", "EDITH"]
     tags = " ".join("#" + re.sub(r"\s+", "", t.lstrip("#")) for t in tags)
-    return f"{body}\n\n📩 매 영업일 아침 8시 30분, 뉴스레터로 받아보세요 — 프로필 링크\n{tags}"
+    when = send_time_ko(d["send_time_kst"]).replace("오전", "아침")
+    return f"{body}\n\n📩 매 영업일 {when}, 뉴스레터로 받아보세요 — 프로필 링크\n{tags}"

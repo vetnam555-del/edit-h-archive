@@ -12,8 +12,8 @@
   MAIL_FROM        선택. 기본 SMTP_USER
 
 사용
-  python3 automation/send_newsletter.py --mode schedule            # 08:30 정기 발송
-  python3 automation/send_newsletter.py --mode push                # 늦게 올라온 호 즉시 발송(08:30 이후일 때만)
+  python3 automation/send_newsletter.py --mode schedule            # 09:00 정기 발송
+  python3 automation/send_newsletter.py --mode push                # 늦게 올라온 호 즉시 발송(09:00 이후일 때만)
   python3 automation/send_newsletter.py --date 2026-09-28 --test-to me@example.com   # 테스트(기록 안 남김)
   python3 automation/send_newsletter.py --dry-run                  # 실제 발송 없이 대상·제목만 확인
 """
@@ -99,7 +99,7 @@ def main():
 
     marker = SENT_DIR / f"{date}.json"
     if marker.exists() and not args.test_to:
-        notice(f"{date} 호는 이미 발송됐습니다({marker.name}) — 건너뜁니다")
+        notice(f"{date} 호는 발송 기록(또는 발송 제외 기록)이 있어 건너뜁니다 — automation/sent/{marker.name}")
         return 0
 
     if args.mode == "push" and not args.test_to:

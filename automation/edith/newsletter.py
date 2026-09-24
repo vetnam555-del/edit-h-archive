@@ -9,7 +9,7 @@ VOL.091(2026-09-15) 매거진 스타일(잉크 블랙·크림·레드)을 기본
 - 작은 글씨의 레드·회색을 WCAG AA(4.5:1) 이상으로 조정
 이메일 클라이언트 호환을 위해 레이아웃은 table + 인라인 스타일만 쓴다.
 """
-from .common import esc, md, plain
+from .common import esc, md, plain, send_time_ko
 
 F = "'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif"
 
@@ -243,7 +243,7 @@ def _closing(d, site, campaign):
 </tr></table>
 </td></tr>
 <tr><td align="center" style="padding:30px 36px 36px;">
-{_div(f"font-size:12px;line-height:1.9;color:{MUTED_DARK};text-align:center;", f'EDIT H · 매 영업일 오전 8시 30분, 마케터의 트렌드 한 입 · 인스타그램 <a href="{ig}" style="color:{MUTED_DARK};">@edit.h.kr</a><br>이 메일이 유용했다면 동료에게 전달해주세요. · <a href="{site}/unsubscribe.html?email=PLACEHOLDER" style="color:{MUTED_DARK};">수신거부</a>')}
+{_div(f"font-size:12px;line-height:1.9;color:{MUTED_DARK};text-align:center;", f'EDIT H · 매 영업일 {send_time_ko(d["send_time_kst"])}, 마케터의 트렌드 한 입 · 인스타그램 <a href="{ig}" style="color:{MUTED_DARK};">@edit.h.kr</a><br>이 메일이 유용했다면 동료에게 전달해주세요. · <a href="{site}/unsubscribe.html?email=PLACEHOLDER" style="color:{MUTED_DARK};">수신거부</a>')}
 </td></tr>
 </table>
 </td></tr>"""

@@ -1,7 +1,7 @@
 # EDIT H 데일리 발행 런북 (클라우드 루틴용)
 
-이 문서는 매 영업일 **07:30 KST**에 시작하는 Claude 클라우드 루틴이 그대로 따라 하는 절차다.
-목표는 **08:20 전에 main 에 푸시**하는 것. 메일 발송은 GitHub Actions 가 **08:30**에 한다
+이 문서는 매 영업일 **08:00 KST**에 시작하는 Claude 클라우드 루틴이 그대로 따라 하는 절차다.
+목표는 **08:45 전에 main 에 푸시**하는 것. 메일 발송은 GitHub Actions 가 **09:00**에 한다
 (`.github/workflows/send-newsletter.yml`). 늦게 푸시해도 푸시 즉시 발송되므로, 서두르다 품질을 버리지 않는다.
 
 > **권한** — 이 루틴은 사용자가 승인한 자동 발행 작업이다. 브랜치를 만들거나 PR 을 열지 말고
@@ -129,7 +129,7 @@ git push origin HEAD:main
 소스: fallback (안장출근길 접근 불가: EGRESS_BLOCKED)
 10개: 01 … / 02 … / … / 10 …
 카드뉴스: https://vetnam555-del.github.io/edit-h-archive/instagram/2026-09-24/
-뉴스레터: https://vetnam555-del.github.io/edit-h-archive/2026-09-24.html  (메일은 08:30 GitHub Actions 발송)
+뉴스레터: https://vetnam555-del.github.io/edit-h-archive/2026-09-24.html  (메일은 09:00 GitHub Actions 발송)
 확인 필요: (있으면) 교차 확인이 약했던 숫자, 자동 축소된 카드, warnings
 ```
 
