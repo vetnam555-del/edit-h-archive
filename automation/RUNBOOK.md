@@ -36,7 +36,11 @@ python3 automation/fetch_anjang.py --since {recent_issues 의 마지막 발행�
 - 코드 3(해당 기간 글 없음)·코드 2(접속 실패)면 1-2 로 넘어간다. 여기서 시간을 5분 넘게 쓰지 않는다.
 - **안장출근길은 '무엇을 다룰지' 고르는 단서일 뿐이다.** 본문 문장을 옮기지 않고, 출처로 표기하지 않는다.
   모든 사실은 1-3 에서 원 기사로 확인하고 **원 기사를 출처로** 단다.
-- 안장출근길에서 주제를 3개 이상 가져왔으면 JSON 의 `source_mode` 를 `"anjang"`, 일부면 `"mixed"`, 못 썼으면 `"fallback"`.
+- **겹침 상한 — 10개 중 안장 헤드라인과 같은 이슈는 최대 4개.** 나머지 6개 이상은 1-2 소스(기업 발표·실적·플랫폼 공식 블로그·
+  정부 발표·해외 사례)에서 직접 고른다. 매일 같은 뉴스를 다루면 'EDIT H = 안장 요약본'으로 보이기 때문이다(2026-09-24 점검).
+  겹치는 이슈도 안장과 다른 각도 — '회의에서 무엇을 결정할지' — 로 쓴다. H PICK(오늘의 핵심)은 가능하면 안장에 없는 이슈에서 고른다.
+- JSON 에 `"anjang_overlap": 겹친 개수` 를 적는다(빌드가 5개 이상이면 막는다). `source_mode` 는
+  안장에서 3~4개를 가져왔으면 `"anjang"`, 1~2개면 `"mixed"`, 못 썼으면 `"fallback"`.
 
 ### 1-2. 보강·대체 소스 (안장출근길이 없거나 10개가 안 될 때)
 
@@ -200,7 +204,7 @@ git push origin HEAD:main
 
 ```
 ✅ EDIT H VOL.093 (2026-09-24) 발행 — 추석은 9월인데, 대목은 8월이었다고?
-소스: fallback (안장출근길 접근 불가: EGRESS_BLOCKED)
+소스: fallback (안장출근길 접근 불가: EGRESS_BLOCKED) · 안장 겹침 0/10
 10개: 01 … / 02 … / … / 10 …
 카드뉴스: https://vetnam555-del.github.io/edit-h-archive/instagram/2026-09-24/  (인스타 캐러셀·릴스는 09:00 GitHub Actions 자동 게시)
 뉴스레터: https://vetnam555-del.github.io/edit-h-archive/2026-09-24.html  (메일은 09:00 GitHub Actions 발송)
