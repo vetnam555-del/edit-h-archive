@@ -20,6 +20,8 @@
   "email": {
     "from_name": "EDIT H",
     "subject_prefix": "[EDIT H]",
+    "exclude_contains": ["hll"],
+    "_exclude_contains_note": "주소 어디든 이 글자가 들어 있으면 보내지 않는다(대소문자 무시). 2026-09-25 요청: hll 들어간 주소 제외",
     "exclude_sha256": [
       "0dbd74c2021f88c355fdf82722b8293ba90626e97197a8ff87f5a2031d61810b",
       "f97ab7d41b89dc4eb36595e119c62a3da9d5a7b6a4b20f74091f5b334a52a2db"
