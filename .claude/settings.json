@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git fetch *)",
+      "Bash(git pull *)",
+      "Bash(git checkout main)",
+      "Bash(git status *)",
+      "Bash(git log *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git push origin HEAD:main)",
+      "Bash(git push origin main)",
+      "Bash(python3 automation/*)",
+      "Bash(node automation/*)"
+    ]
+  }
+}

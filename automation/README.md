@@ -68,6 +68,8 @@ automation/
   sent/                 발송 기록(주소 없이 날짜·건수만)
   edith/                템플릿 모듈(newsletter·cards·site·content·fonts)
 content/YYYY-MM-DD.json 호마다의 원본 콘텐츠(출처 URL 포함)
+.claude/settings.json   무인 발행 세션이 확인 창 없이 실행할 수 있는 명령 목록
+                        (커밋·main 푸시·빌드 스크립트만. 지켜보는 사람이 없어 이 목록이 없으면 푸시 단계에서 멈춘다)
 ```
 
 ## 이번에 바뀐 디자인
