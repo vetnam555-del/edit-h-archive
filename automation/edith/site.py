@@ -2,7 +2,7 @@
 import json
 import re
 
-from .common import INDEX, MANIFEST, esc, plain, send_time_ko
+from .common import load_config, INDEX, MANIFEST, esc, plain, send_time_ko
 
 
 def update_manifest(d, site, n_cards, publish_time):
@@ -116,17 +116,21 @@ document.getElementById('copy').addEventListener('click', async (e) => {{
 
 
 def instagram_caption(d, site):
+    """뉴닉식 캡션: 질문형 첫 줄 + 대화체 요약 → 오늘의 N가지 목록 → 저장·댓글 유도 → 구독 안내 → 해시태그.
+
+    content 의 instagram.caption 에는 '첫 줄 훅 + 2~3문장 요약'만 쓴다. 나머지는 여기서 붙인다.
+    """
     ig = d.get("instagram", {})
-    if ig.get("caption"):
-        body = ig["caption"].strip()
-    else:
-        # VOL.092 캡션 구성: 훅 → 'O요일의 마케팅 브리프 N가지' → 카드 이슈 목록 → 뉴스레터 안내
-        issues = d["card_issues"]
-        lines = [plain(d["title"]), "", f"{d['weekday']}요일의 마케팅 브리프 {len(issues)}가지 —", ""]
-        lines += [f"· {plain(it['headline'])}" for it in issues]
-        lines += ["", f"핵심 {len(issues)}장으로 먼저 보고, 전체 {len(d['all_items'])}개 이슈는 뉴스레터에서 이어보세요."]
-        body = "\n".join(lines)
-    tags = ig.get("hashtags") or ["마케팅", "마케팅트렌드", "마케터", "브랜드마케팅", "카드뉴스", "EDITH"]
-    tags = " ".join("#" + re.sub(r"\s+", "", t.lstrip("#")) for t in tags)
+    issues = d["card_issues"]
+    head = (ig.get("caption") or "").strip() or f"{plain(d['title'])}\n\n{plain(d['lead'])}"
+    lines = [head, "", f"{d['weekday']}요일의 마케팅 브리프 {len(issues)}가지 👇"]
+    lines += [f"· {plain(it['headline'])}" for it in issues]
+    lines += ["", "📌 저장해두고 회의 전에 꺼내보세요", f"💬 {plain(d['question']['text'])} 댓글로 알려주세요", ""]
+    kw = (load_config().get("instagram") or {}).get("dm_keyword")
+    if kw:
+        lines.append(f"📩 댓글에 '{kw}' 남기면 뉴스레터 구독 링크를 DM으로 보내드려요")
     when = send_time_ko(d["send_time_kst"]).replace("오전", "아침")
-    return f"{body}\n\n📩 매 영업일 {when}, 뉴스레터로 받아보세요 — 프로필 링크\n{tags}"
+    lines.append(f"매 영업일 {when}, {len(d['all_items'])}가지 전문과 출처는 뉴스레터로 — 프로필 링크 @edit.h.kr")
+    tags = ig.get("hashtags") or ["마케팅", "마케팅트렌드", "마케터", "브랜드마케팅", "카드뉴스", "EDITH"]
+    lines.append(" ".join("#" + re.sub(r"\s+", "", t.lstrip("#")) for t in tags))
+    return "\n".join(lines)

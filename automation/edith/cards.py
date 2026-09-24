@@ -3,9 +3,9 @@
 Design M 카드뉴스 키트 '매거진 세트'(표지 24 → 본문 9 → 마무리 9) 규격을 재현한 것으로, 키트 원본
 파일·이미지는 쓰지 않고 실측한 치수·색만 옮겼다. 키트의 핑크는 EDIT H 브랜드 버밀리언 계열로 바꿨다.
 
-  01      표지     #호수·요일·브리프·N가지 칩 + 핵심어 대형 형광 마커 + 두 줄 제목. 사진이 있으면 사진 배경
+  01      표지     머리말 + 띠 제목 두 줄(뉴닉식) + 핵심어 대형 마커 또는 실사 사진 + 다른 이슈 스티커 3개
   02      요약     '오늘의 6가지 한눈에' — 번호·제목·숫자 목록(키트 본문 19·20 문법). 저장을 부르는 카드
-  03~08   이슈 6장  말풍선 태그 → 형광 마커 숫자 → 보조 수치 상자 → 번호 배지 → 제목 → 짧은 본문 → 인사이트 상자
+  03~08   이슈 6장  말풍선 태그 → 형광 마커 숫자 → 보조 수치 상자 → 번호 배지 → 제목 → 짧은 본문 → '그래서 마케터는?' 대화
                    H PICK 1장은 검정 배경 + 윤곽 숫자 + 노란 '(H PICK · 오늘의 핵심)', compare형은 BEFORE/AFTER 상자
   09      마무리   오늘의 저장각 + 프로필 카드(10개 이슈 전문 · 6장 핵심 카드 · N호 누적 발행)
 
@@ -138,34 +138,53 @@ def _photo_uri(path):
     return f"data:{mime};base64,{base64.b64encode(p.read_bytes()).decode()}"
 
 
+def _strip(text, bg, size=74):
+    """뉴닉식 띠 제목 — 줄마다 테두리 상자. 그리드 썸네일에서도 제목이 읽히게 한다."""
+    return (f'<div style="display:inline-block;background:{bg};border:4px solid {TEXT};padding:10px 22px 12px;'
+            f'font-weight:800;font-size:{fs(size)};line-height:1.15;letter-spacing:-1.5px;color:{TEXT};white-space:nowrap;">{plain(text)}</div>')
+
+
+def _sticker(text, rotate):
+    return (f'<div style="display:inline-block;transform:rotate({rotate}deg);background:#FFFFFF;border:3px solid {TEXT};'
+            f'padding:10px 18px;font-weight:700;font-size:30px;line-height:1;color:{TEXT};white-space:nowrap;'
+            f'box-shadow:0 3px 8px rgba(0,0,0,.14);">{esc(text)}</div>')
+
+
 def cover(d):
+    """머리말 → 띠 제목 두 줄 → (사진 또는 핵심어 대형 마커) + 오늘의 다른 이슈 스티커 3개."""
     cov = d["cards"]["cover"]
     photo = cov.get("photo")
-    fg = "#FFFFFF" if photo else TEXT
-    first, *rest = str(cov.get("title") or d["hero_title"]).split("\n")
-    chips = [(f"#{d['vol']}", True), (f"{WEEKDAY_FULL[d['weekday']]}의", False), ("브리프", False),
-             (f"{len(d['card_issues'])}가지", False)]
-    kw = cov["keyword"]
-    kw_size = fit_size(kw, 300)
-    keyword = (f'<div style="margin-top:70px;display:inline-block;padding:0 .06em;font-weight:800;font-size:{fs(kw_size)};'
-               f'line-height:1;letter-spacing:-{round(kw_size / 30)}px;color:{fg};white-space:nowrap;'
-               f'background:linear-gradient(180deg,transparent 62%,{ACC_FILL if not photo else "rgba(255,201,173,.55)"} 62%);">{esc(kw)}</div>')
+    l1, *rest = str(cov.get("title") or d["hero_title"]).split("\n")
+    l2 = " ".join(rest)
+    issues = d["card_issues"]
+    stickers = [f'{it["tag"]} {hero_value(it)}' for it in issues[1:4]]
+    spots = [("left:10px;top:0;", -3), ("right:0;top:230px;", 2), ("left:40px;top:430px;", -1.5)]
+    sticker_html = "".join(f'<div style="position:absolute;{pos}">{_sticker(t, r)}</div>' for t, (pos, r) in zip(stickers, spots))
+    kicker = f"#{d['vol']} {WEEKDAY_FULL[d['weekday']]}의 마케팅 브리프 | 오늘의 {len(issues)}가지"
     bg = ""
     if photo:
+        # 사진이 아래 60%를 채우고, 위쪽은 흰 그라데이션으로 띠 제목을 받친다
         bg = (f'<div style="position:absolute;inset:0;background:url(\'{_photo_uri(photo)}\') {cov.get("focus") or "center"}/cover no-repeat;"></div>'
-              '<div style="position:absolute;inset:0;background:rgba(0,0,0,.37);"></div>'
-              '<div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 45%,rgba(0,0,0,.38) 100%);"></div>')
-    credit = (f'<div style="position:absolute;right:60px;bottom:48px;font-size:20px;color:rgba(255,255,255,.72);">'
+              '<div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.97) 0%,'
+              'rgba(255,255,255,.9) 26%,rgba(255,255,255,0) 46%);"></div>')
+        hero = ""
+    else:
+        kw = cov["keyword"]
+        size = fit_size(kw, 380)
+        hero = (f'<div style="position:absolute;left:0;right:0;top:40px;text-align:center;"><span style="display:inline-block;'
+                f'padding:0 .06em;font-weight:800;font-size:{fs(size)};line-height:1;letter-spacing:-{round(size / 30)}px;color:{TEXT};'
+                f'background:linear-gradient(180deg,transparent 62%,{ACC_FILL} 62%);">{esc(kw)}</span></div>')
+    shadow = "text-shadow:0 1px 4px rgba(0,0,0,.55);" if photo else ""
+    foot_color = "#FFFFFF" if photo else MUTED
+    credit = (f'<div style="position:absolute;right:40px;bottom:24px;font-size:19px;color:rgba(255,255,255,.85);{shadow}">'
               f'{esc(cov["credit"])}</div>') if photo and cov.get("credit") else ""
     return _frame(f"""{bg}
-<div class="body" style="padding:0 60px 170px;justify-content:flex-end;align-items:center;text-align:center;">
-  {chip_row(chips)}
-  {keyword}
-  <div class="bal" style="margin-top:56px;font-size:{fs(80)};line-height:1.42;letter-spacing:-1.5px;color:{fg};">
-    <div style="font-weight:700;">{plain(first)}</div>
-    <div style="font-weight:400;">{plain(" ".join(rest))}</div>
-  </div>
-</div>{credit}""", "#000000" if photo else "#FFFFFF")
+<div class="body" style="padding:96px 60px 0;align-items:center;text-align:center;">
+  <div style="font-weight:700;font-size:28px;color:#5A5A5E;">{esc(kicker)}</div>
+  <div style="flex:none;margin-top:26px;display:flex;flex-direction:column;align-items:center;gap:14px;">{_strip(l1, "#FFFFFF")}{_strip(l2, ACC_FILL)}</div>
+  <div style="flex:none;position:relative;margin-top:70px;width:100%;height:560px;">{hero}{sticker_html}</div>
+</div>
+<div style="position:absolute;left:0;right:0;bottom:60px;text-align:center;font-weight:700;font-size:26px;color:{foot_color};{shadow}">밀어서 {len(issues)}가지 보기 →</div>{credit}""")
 
 
 def hero_value(it):
@@ -201,6 +220,18 @@ def stat_tiles(metrics, dark):
     return f'<div style="flex:none;display:flex;gap:14px;width:100%;margin-top:30px;">{tiles}</div>'
 
 
+def dialogue(take, dark):
+    """뉴닉식 대화 — 흰 질문 말풍선 '그래서 마케터는?' → 복숭아색 답 말풍선(인사이트). 키트 본문 21(Q&A) 문법과도 맞다."""
+    q_bg, q_fg = ("#1E1E21", "#FFFFFF") if dark else ("#FFFFFF", TEXT)
+    line = "#FFFFFF" if dark else TEXT
+    return (f'<div style="flex:none;width:100%;margin-top:26px;display:flex;flex-direction:column;gap:10px;">'
+            f'<div style="align-self:flex-start;background:{q_bg};border:3px solid {line};border-radius:22px 22px 22px 6px;'
+            f'padding:14px 24px;font-weight:600;font-size:{fs(28)};line-height:1.2;color:{q_fg};">그래서 마케터는?</div>'
+            f'<div class="bal" style="align-self:flex-end;max-width:92%;background:{ACC_FILL};border:3px solid {line};'
+            f'border-radius:22px 22px 6px 22px;padding:16px 26px;text-align:left;font-weight:700;font-size:{fs(31)};'
+            f'line-height:1.45;color:{TEXT};">{mk(take, TEXT)}</div></div>')
+
+
 def issue_card(it, n):
     dark = bool(it.get("accent"))
     fg = "#FFFFFF" if dark else TEXT
@@ -223,12 +254,12 @@ def issue_card(it, n):
   {bubble(it["tag"])}
   {hero}
   {tiles}
-  <div style="flex:none;height:50px;"></div>
+  <div style="flex:none;height:38px;"></div>
   {badge}
   {pick}
   <div class="bal" style="margin-top:{22 if dark else 32}px;font-weight:700;font-size:{fs(56)};line-height:1.34;letter-spacing:-1px;color:{fg};">{mk(it["headline"], fg, dark)}</div>
   <div class="bal" style="margin-top:22px;font-weight:400;font-size:{fs(33)};line-height:1.55;color:{"#BDBDBD" if dark else SUB};">{mk(it["body"], fg, dark)}</div>
-  <div class="bal" style="flex:none;margin-top:32px;width:100%;background:{"#1E1E21" if dark else BOX};border-radius:34px;padding:28px 40px;font-weight:600;font-size:{fs(31)};line-height:1.5;color:{fg};">{mk(it["takeaway"], fg, dark)}</div>
+  {dialogue(it["takeaway"], dark)}
 </div>
 <div style="position:absolute;left:60px;right:60px;bottom:80px;text-align:center;font-size:24px;line-height:1.4;color:{MUTED if dark else SRC_LIGHT};">출처 · {esc(it["source"])}</div>""",
                   "#000000" if dark else "#FFFFFF")
