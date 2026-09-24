@@ -24,5 +24,11 @@
   "instagram": {
     "dm_keyword": "에디트",
     "_note": "캡션 끝 '댓글에 OO 남기면 구독 링크 DM' 문구의 키워드. 비우면 문구를 넣지 않는다(DM은 직접 보내야 함)"
+  },
+  "weekly_special": {
+    "enabled_from": "2026-10-16",
+    "weekday": "금",
+    "count": 5,
+    "_note": "금요일 인스타 주간 특집 'TOP5'. 이번 주 데일리 카드 이슈를 재편집(새 취재 없음). 끄려면 enabled_from 을 먼 미래로"
   }
 }

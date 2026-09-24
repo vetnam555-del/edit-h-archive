@@ -1,0 +1,129 @@
+"""금요일 주간 특집 'TOP5' — 이번 주(월~금) 데일리 카드 이슈 중 5개를 목록형 캐러셀로 다시 엮는다.
+
+새로 취재하지 않는다: 그 주에 이미 사실 확인을 거쳐 발행한 카드 이슈만 재편집한다(틀릴 위험이 가장 낮은 방식).
+content/weekly/{금요일}.json 에 제목·한 줄 정리·(선택) 고를 이슈를 적는다. 고를 이슈를 비우면 날마다의
+H PICK 을 먼저, 그다음 날짜 순으로 태그가 겹치지 않게 자동으로 고른다.
+
+  01 표지(목록형 제목 + TOP5) → 02 이번 주 5가지 한눈에 → 03~07 항목 5장 → 08 이번 주를 한 줄로 → 09 마무리
+"""
+import datetime as dt
+import json
+import re
+
+from . import content
+from .common import CONTENT_DIR, load_config, parse_date, plain, send_time_ko, weekday_ko
+
+WEEKLY_DIR = CONTENT_DIR / "weekly"
+LIMITS = {"title": 34, "keyword": 5, "line": 40, "oneliner_title": 24}
+
+
+class WeeklyError(ValueError):
+    pass
+
+
+def week_label(d):
+    """'10월 3주차' — 월요일 시작 주 기준."""
+    first = d.replace(day=1)
+    return f"{d.month}월 {(d.day + first.weekday() - 1) // 7 + 1}주차"
+
+
+def week_issues(friday):
+    """이번 주 월~금 데일리 카드 이슈. [(날짜, 카드 이슈)]"""
+    monday = friday - dt.timedelta(days=friday.weekday())
+    out, last = [], None
+    for i in range(friday.weekday() + 1):
+        day = monday + dt.timedelta(days=i)
+        path = CONTENT_DIR / f"{day.isoformat()}.json"
+        if not path.exists():
+            continue
+        last = content.load(day.isoformat())
+        for it in last["card_issues"]:
+            out.append((day, {**it, "day_label": f"{day.month}/{day.day} {weekday_ko(day)}"}))
+    return out, last
+
+
+def auto_pick(pool, n):
+    """날마다의 H PICK 먼저, 다음은 날짜·카드 순. 같은 태그는 한 번만."""
+    ordered = [x for x in pool if x[1].get("accent")] + [x for x in pool if not x[1].get("accent")]
+    picks, tags = [], set()
+    for day, it in ordered:
+        if it["tag"] in tags:
+            continue
+        picks.append((day, it))
+        tags.add(it["tag"])
+        if len(picks) == n:
+            break
+    return sorted(picks, key=lambda x: (x[0], pool.index(x)))
+
+
+def load(date_str):
+    cfg = load_config().get("weekly_special") or {}
+    n = int(cfg.get("count", 5))
+    friday = parse_date(date_str)
+    spec_path = WEEKLY_DIR / f"{date_str}.json"
+    if not spec_path.exists():
+        raise WeeklyError(f"{spec_path} 가 없습니다 — 제목·한 줄 정리를 먼저 쓰세요(RUNBOOK '금요일 주간 특집')")
+    spec = json.loads(spec_path.read_text(encoding="utf-8"))
+    pool, last = week_issues(friday)
+    if len(pool) < n:
+        raise WeeklyError(f"이번 주 카드 이슈가 {len(pool)}개뿐이라 {n}개를 고를 수 없습니다 — 이번 주는 특집을 건너뛰세요")
+
+    if spec.get("picks"):
+        by_key = {(day.isoformat(), int(it["no"])): (day, it) for day, it in pool}
+        try:
+            picks = [by_key[(p["date"], int(p["no"]))] for p in spec["picks"]]
+        except KeyError as e:
+            raise WeeklyError(f"picks 의 {e} 가 이번 주 카드 이슈에 없습니다(date·no 는 데일리 content 의 cards.issues 기준)")
+        if len(picks) != n:
+            raise WeeklyError(f"picks 는 정확히 {n}개여야 합니다")
+    else:
+        picks = auto_pick(pool, n)
+
+    for key in ("title", "oneliner", "caption"):
+        if not spec.get(key):
+            raise WeeklyError(f"content/weekly/{date_str}.json: '{key}' 가 비어 있습니다")
+    ol = spec["oneliner"]
+    if not ol.get("title") or len(ol.get("lines") or []) != 3:
+        raise WeeklyError("oneliner 에는 title 과 lines 3개가 필요합니다")
+    problems = []
+    for text, lim, where in [(spec["title"], LIMITS["title"], "title"), (spec.get("keyword", "TOP5"), LIMITS["keyword"], "keyword"),
+                             (ol["title"], LIMITS["oneliner_title"], "oneliner.title")] + \
+            [(line, LIMITS["line"], f"oneliner.lines[{i}]") for i, line in enumerate(ol["lines"], 1)]:
+        if len(plain(text)) > lim:
+            problems.append(f"{where}: {len(plain(text))}자 → {lim}자 이하")
+    if problems:
+        raise WeeklyError("글자 수 초과:\n  - " + "\n  - ".join(problems))
+
+    # 카드 함수가 쓰는 모양으로 맞춘다. 주간 특집에서는 H PICK 반전을 쓰지 않는다('오늘의 핵심' 문구가 맞지 않음).
+    items = [{**it, "accent": False} for _, it in picks]
+    return {
+        "date": f"{date_str}-weekly", "friday": friday, "vol": last["vol"], "weekday": weekday_ko(friday),
+        "title": plain(spec["title"]), "spec": spec, "card_issues": items, "all_items": last["all_items"],
+        "hero_title": spec["title"], "week_label": week_label(friday),
+        "cards": {
+            "cover": {"title": spec["title"], "keyword": spec.get("keyword") or "TOP5",
+                      "photo": spec.get("photo"), "credit": spec.get("credit")},
+            "cta": {"kick": "이번 주 저장각", "headline": spec.get("cta_headline") or ol["title"],
+                    "sub": "다음 주 회의 전에 한 번 더 꺼내보세요.", "pill": "팔로우 + 저장해두기"},
+        },
+        "send_time_kst": load_config()["send_time_kst"],
+    }
+
+
+def caption(w):
+    spec = w["spec"]
+    lines = [spec["caption"].strip(), "", f"{w['week_label']} 마케팅 숫자 {len(w['card_issues'])} 👇"]
+    lines += [f"{'❶❷❸❹❺❻❼'[i]} {plain(it['headline'])} ({it['day_label']})" for i, it in enumerate(w["card_issues"])]
+    lines += ["", "📌 저장해두고 다음 주 회의 전에 꺼내보세요", "💬 이 중 우리 팀 회의에 가져갈 한 가지는? 댓글로 알려주세요", ""]
+    if w["cards"]["cover"].get("photo") and w["cards"]["cover"].get("credit"):
+        lines.append(f"📷 표지 사진 출처: {w['cards']['cover']['credit'].replace('사진 = ', '')}")
+    kw = (load_config().get("instagram") or {}).get("dm_keyword")
+    if kw:
+        lines.append(f"📩 댓글에 '{kw}' 남기면 뉴스레터 구독 링크를 DM으로 보내드려요")
+    when = send_time_ko(w["send_time_kst"]).replace("오전", "아침")
+    lines.append(f"매 영업일 {when}, 10가지 전문과 출처는 뉴스레터로 — 프로필 링크")
+    lines.append("EDIT H · 매일 아침, 마케터의 트렌드 한 입 (@edit.h.kr)")
+    lines.append("/ 에디터. H")
+    tags = spec.get("hashtags") or ["마케팅", "마케팅트렌드", "주간마케팅", "마케터", "카드뉴스", "EDITH"]
+    lines.append(" ".join("#" + re.sub(r"\s+", "", t.lstrip("#")) for t in tags))
+    return "\n".join(lines)

@@ -157,7 +157,7 @@ def _sticker(text, rotate):
             f'box-shadow:0 3px 8px rgba(0,0,0,.14);">{esc(text)}</div>')
 
 
-def cover(d):
+def cover(d, kicker=None, foot=None):
     """머리말 → 띠 제목 두 줄 → (사진 또는 핵심어 대형 마커) + 오늘의 다른 이슈 스티커 3개."""
     cov = d["cards"]["cover"]
     photo = cov.get("photo")
@@ -167,7 +167,8 @@ def cover(d):
     stickers = [f'{it["tag"]} {hero_value(it)}' for it in issues[1:4]]
     spots = [("left:10px;top:0;", -3), ("right:0;top:230px;", 2), ("left:40px;top:430px;", -1.5)]
     sticker_html = "".join(f'<div style="position:absolute;{pos}">{_sticker(t, r)}</div>' for t, (pos, r) in zip(stickers, spots))
-    kicker = f"#{d['vol']} {WEEKDAY_FULL[d['weekday']]}의 마케팅 브리프 | 오늘의 {len(issues)}가지"
+    kicker = kicker or f"#{d['vol']} {WEEKDAY_FULL[d['weekday']]}의 마케팅 브리프 | 오늘의 {len(issues)}가지"
+    foot = foot or f"밀어서 {len(issues)}가지 보기 →"
     bg = ""
     if photo:
         # 사진이 아래 60%를 채우고, 위쪽은 흰 그라데이션으로 띠 제목을 받친다
@@ -192,14 +193,14 @@ def cover(d):
   <div style="flex:none;margin-top:26px;display:flex;flex-direction:column;align-items:center;gap:14px;">{_strip(l1, "#FFFFFF")}{_strip(l2, ACC_FILL)}</div>
   <div style="flex:none;position:relative;margin-top:70px;width:100%;height:560px;">{hero}{sticker_html}</div>
 </div>
-<div style="position:absolute;left:0;right:0;bottom:60px;text-align:center;font-weight:700;font-size:26px;color:{foot_color};{shadow}">밀어서 {len(issues)}가지 보기 →</div>{credit}""", mark=False)
+<div style="position:absolute;left:0;right:0;bottom:60px;text-align:center;font-weight:700;font-size:26px;color:{foot_color};{shadow}">{esc(foot)}</div>{credit}""", mark=False)
 
 
 def hero_value(it):
     return it["compare"]["to"]["value"] if it.get("compare") else it["number"]
 
 
-def summary(d):
+def summary(d, period="오늘의"):
     """키트 본문 19·20(번호 목록) 문법 — 오늘의 6가지를 한 장에. 저장해두고 다시 볼 이유를 만든다."""
     rows = "".join(
         f'<div style="display:flex;align-items:center;gap:26px;padding:24px 0;border-bottom:2px solid #EAEAEA;">'
@@ -213,7 +214,7 @@ def summary(d):
     return _frame(f"""
 <div class="body" style="padding:60px 80px 150px;justify-content:center;">
   <div style="text-align:center;font-weight:700;font-size:28px;color:#5A5A5E;">저장해두고 회의 전에 보세요</div>
-  <div style="text-align:center;margin-top:22px;font-weight:700;font-size:{fs(64)};letter-spacing:-1px;color:{TEXT};">오늘의 <span style="background:linear-gradient(180deg,transparent 58%,{ACC_FILL} 58%);">{n}가지</span> 한눈에</div>
+  <div style="text-align:center;margin-top:22px;font-weight:700;font-size:{fs(64)};letter-spacing:-1px;color:{TEXT};">{period} <span style="background:linear-gradient(180deg,transparent 58%,{ACC_FILL} 58%);">{n}가지</span> 한눈에</div>
   <div style="flex:none;margin-top:44px;border-top:3px solid {TEXT};">{rows}</div>
 </div>""")
 
@@ -285,6 +286,23 @@ def observation(d):
     <div style="width:22px;height:22px;background:{ACC};"></div>H의 한 줄 관찰</div>
   <div class="bal" style="margin-top:44px;font-weight:600;font-size:{fs(50)};line-height:1.62;letter-spacing:-1px;color:{TEXT};">{body}</div>
   <div style="margin-top:48px;text-align:right;font-weight:500;font-size:28px;color:{SUB};">— 에디터 H</div>
+</div>""")
+
+
+def list_card(label, title, rows):
+    """라벨 + 굵은 제목 + 번호 목록 — 주간 특집 '이번 주를 한 줄로' 등."""
+    items = "".join(
+        f'<div style="display:flex;gap:22px;align-items:flex-start;padding:26px 0;border-bottom:2px solid #EAEAEA;">'
+        f'<div style="flex:none;width:50px;height:50px;border-radius:12px;background:{TEXT};color:#FFFFFF;display:flex;'
+        f'align-items:center;justify-content:center;font-weight:700;font-size:26px;">{i}</div>'
+        f'<div style="font-size:{fs(33)};line-height:1.5;color:{SUB};">{mk(r)}</div></div>'
+        for i, r in enumerate(rows, 1))
+    return _frame(f"""
+<div class="body" style="padding:60px 84px 140px;justify-content:center;">
+  <div style="display:flex;align-items:center;gap:16px;font-weight:700;font-size:30px;color:{TEXT};">
+    <div style="width:22px;height:22px;background:{ACC};"></div>{esc(label)}</div>
+  <div class="bal" style="margin-top:30px;font-weight:800;font-size:{fs(56)};line-height:1.35;letter-spacing:-1px;color:{TEXT};">{mk(title)}</div>
+  <div style="flex:none;margin-top:30px;border-top:3px solid {TEXT};">{items}</div>
 </div>""")
 
 
