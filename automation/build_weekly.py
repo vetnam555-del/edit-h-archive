@@ -46,14 +46,16 @@ def main():
                 + [cards.list_card("이번 주를 한 줄로", ol["title"], ol["lines"]), cards.cta(w)])
     files = [f"{i:02d}_edit_h_{w['date']}_{n}.png" for i, n in enumerate(NAMES, 1)]
     out = Path(args.out) if args.out else INSTAGRAM_DIR / w["date"]
-    out.mkdir(parents=True, exist_ok=True)
-    for old in out.glob("*.png"):
+    jpeg_dir = out / "ig"  # 인스타그램 자동 게시용 JPEG
+    jpeg_dir.mkdir(parents=True, exist_ok=True)
+    for old in [*out.glob("*.png"), *jpeg_dir.glob("*.jpg")]:
         old.unlink()
     page = f'<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><style>{font_css()}\n{cards.CSS}</style></head><body>{"".join(sections)}</body></html>'
     with tempfile.TemporaryDirectory() as tmp:
         hp = Path(tmp) / "weekly.html"
         hp.write_text(page, encoding="utf-8")
-        proc = subprocess.run(["node", str(AUTOMATION / "render_cards.cjs"), str(hp), str(out), *files], capture_output=True, text=True)
+        proc = subprocess.run(["node", str(AUTOMATION / "render_cards.cjs"), str(hp), str(out), f"--jpeg-dir={jpeg_dir}", *files],
+                              capture_output=True, text=True)
     if proc.returncode != 0:
         raise SystemExit(f"카드 렌더링 실패:\n{proc.stderr[-2000:]}")
     report = json.loads(proc.stdout.strip().splitlines()[-1])

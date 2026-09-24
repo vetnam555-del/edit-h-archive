@@ -158,6 +158,8 @@ python3 automation/build_issue.py {날짜}           # 뉴스레터·카드·man
 ## 4. 눈으로 검수 (생략 금지)
 
 - Read 도구로 `instagram/{날짜}/*.png` **10장 모두** 본다: 글자 잘림·겹침, 어색한 줄바꿈, 오탈자, 숫자·단위.
+  **이 카드와 `caption.txt`·`first_comment.txt` 가 09:00 에 인스타그램에 그대로 자동 게시된다**(post-instagram.yml —
+  캐러셀 + 같은 카드로 만든 음악 릴스). 게시 뒤에는 고치기 어려우니 여기서 끝까지 본다. `ig/*.jpg` 는 게시용 사본이라 따로 볼 필요 없다.
 - 뉴스레터: `node automation/preview_newsletter.cjs {날짜}.html <스크래치 폴더>/nl` 후 `<스크래치 폴더>/nl_*.png` 를 본다
   (두 번째 인자가 출력 경로 접두어. 세션에 스크래치 폴더가 있으면 그곳을, 없으면 `/tmp` 를 쓴다)
 - 고칠 게 있으면 JSON 수정 → 3단계 재실행.
@@ -200,7 +202,7 @@ git push origin HEAD:main
 ✅ EDIT H VOL.093 (2026-09-24) 발행 — 추석은 9월인데, 대목은 8월이었다고?
 소스: fallback (안장출근길 접근 불가: EGRESS_BLOCKED)
 10개: 01 … / 02 … / … / 10 …
-카드뉴스: https://vetnam555-del.github.io/edit-h-archive/instagram/2026-09-24/
+카드뉴스: https://vetnam555-del.github.io/edit-h-archive/instagram/2026-09-24/  (인스타 캐러셀·릴스는 09:00 GitHub Actions 자동 게시)
 뉴스레터: https://vetnam555-del.github.io/edit-h-archive/2026-09-24.html  (메일은 09:00 GitHub Actions 발송)
 확인 필요: (있으면) 교차 확인이 약했던 숫자, 자동 축소된 카드, warnings
 ```

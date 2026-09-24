@@ -23,7 +23,20 @@
   },
   "instagram": {
     "dm_keyword": "에디트",
-    "_note": "캡션 끝 '댓글에 OO 남기면 구독 링크 DM' 문구의 키워드. 비우면 문구를 넣지 않는다(DM은 직접 보내야 함)"
+    "_note": "게시: .github/workflows/post-instagram.yml(평일 09:00, 금 주간 특집 18:00). 릴스는 피드 격자에 캐러셀과 겹치지 않게 릴스 탭에만(reel_share_to_feed=false).",
+    "auto_post": true,
+    "api_version": "v23.0",
+    "reel": true,
+    "weekly_reel": true,
+    "reel_share_to_feed": false,
+    "reel_timing": {
+      "first": 2.5,
+      "card": 3.8,
+      "last": 3.0,
+      "fade": 0.4,
+      "lift": 60
+    },
+    "keep_jpeg_days": 14
   },
   "weekly_special": {
     "enabled_from": "2026-10-16",

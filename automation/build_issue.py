@@ -25,14 +25,15 @@ def render_cards(d, out_dir):
     from edith.fonts import font_css
 
     page, files = cards.build(d, font_css())
-    out_dir.mkdir(parents=True, exist_ok=True)
-    for old in out_dir.glob(f"*_edit_h_{d['date']}_*.png"):
+    jpeg_dir = out_dir / "ig"  # 인스타그램 자동 게시용 JPEG(API 는 JPEG 만 받는다)
+    jpeg_dir.mkdir(parents=True, exist_ok=True)
+    for old in [*out_dir.glob(f"*_edit_h_{d['date']}_*.png"), *jpeg_dir.glob("*.jpg")]:
         old.unlink()
     with tempfile.TemporaryDirectory() as tmp:
         html_path = Path(tmp) / "cards.html"
         html_path.write_text(page, encoding="utf-8")
         proc = subprocess.run(
-            ["node", str(AUTOMATION / "render_cards.cjs"), str(html_path), str(out_dir), *files],
+            ["node", str(AUTOMATION / "render_cards.cjs"), str(html_path), str(out_dir), f"--jpeg-dir={jpeg_dir}", *files],
             capture_output=True, text=True,
         )
     if proc.returncode != 0:
