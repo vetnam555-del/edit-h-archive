@@ -4,5 +4,10 @@
   "check_today_2026_09_28": {
     "publish": true,
     "next_vol": "094"
+  },
+  "scheduled_test_at_kst": "2026-09-24T11:36:55+09:00",
+  "scheduled_test_check_today": {
+    "publish": false,
+    "skip_reason": "공휴일(추석 연휴)"
   }
 }
