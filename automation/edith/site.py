@@ -126,11 +126,15 @@ def instagram_caption(d, site):
     lines = [head, "", f"{d['weekday']}요일의 마케팅 브리프 {len(issues)}가지 👇"]
     lines += [f"· {plain(it['headline'])}" for it in issues]
     lines += ["", "📌 저장해두고 회의 전에 꺼내보세요", f"💬 {plain(d['question']['text'])} 댓글로 알려주세요", ""]
+    cov = (d.get("cards") or {}).get("cover") or {}
+    if cov.get("photo") and cov.get("credit"):
+        lines.append(f"📷 표지 사진 출처: {cov['credit'].replace('사진 = ', '')}")
     kw = (load_config().get("instagram") or {}).get("dm_keyword")
     if kw:
         lines.append(f"📩 댓글에 '{kw}' 남기면 뉴스레터 구독 링크를 DM으로 보내드려요")
     when = send_time_ko(d["send_time_kst"]).replace("오전", "아침")
-    lines.append(f"매 영업일 {when}, {len(d['all_items'])}가지 전문과 출처는 뉴스레터로 — 프로필 링크 @edit.h.kr")
+    lines.append(f"매 영업일 {when}, {len(d['all_items'])}가지 전문과 출처는 뉴스레터로 — 프로필 링크")
+    lines.append("EDIT H · 매일 아침, 마케터의 트렌드 한 입 (@edit.h.kr)")
     tags = ig.get("hashtags") or ["마케팅", "마케팅트렌드", "마케터", "브랜드마케팅", "카드뉴스", "EDITH"]
     lines.append(" ".join("#" + re.sub(r"\s+", "", t.lstrip("#")) for t in tags))
     return "\n".join(lines)

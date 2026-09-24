@@ -3,7 +3,7 @@
 Design M 카드뉴스 키트 '매거진 세트'(표지 24 → 본문 9 → 마무리 9) 규격을 재현한 것으로, 키트 원본
 파일·이미지는 쓰지 않고 실측한 치수·색만 옮겼다. 키트의 핑크는 EDIT H 브랜드 버밀리언 계열로 바꿨다.
 
-  01      표지     머리말 + 띠 제목 두 줄(뉴닉식) + 핵심어 대형 마커 또는 실사 사진 + 다른 이슈 스티커 3개
+  01      표지     EDIT H. 워드마크(비스킷식) + 머리말 + 띠 제목 두 줄(뉴닉식) + 핵심어 대형 마커 또는 실사 사진 + 다른 이슈 스티커 3개
   02      요약     '오늘의 6가지 한눈에' — 번호·제목·숫자 목록(키트 본문 19·20 문법). 저장을 부르는 카드
   03~08   이슈 6장  말풍선 태그 → 형광 마커 숫자 → 보조 수치 상자 → 번호 배지 → 제목 → 짧은 본문 → '그래서 마케터는?' 대화
                    H PICK 1장은 검정 배경 + 윤곽 숫자 + 노란 '(H PICK · 오늘의 핵심)', compare형은 BEFORE/AFTER 상자
@@ -179,8 +179,9 @@ def cover(d):
     credit = (f'<div style="position:absolute;right:40px;bottom:24px;font-size:19px;color:rgba(255,255,255,.85);{shadow}">'
               f'{esc(cov["credit"])}</div>') if photo and cov.get("credit") else ""
     return _frame(f"""{bg}
-<div class="body" style="padding:96px 60px 0;align-items:center;text-align:center;">
-  <div style="font-weight:700;font-size:28px;color:#5A5A5E;">{esc(kicker)}</div>
+<div class="body" style="padding:64px 60px 0;align-items:center;text-align:center;">
+  <div style="font-weight:900;font-size:34px;line-height:1;letter-spacing:-1px;color:{TEXT};">EDIT H<span style="color:{ACC};">.</span></div>
+  <div style="margin-top:22px;font-weight:700;font-size:28px;color:#5A5A5E;">{esc(kicker)}</div>
   <div style="flex:none;margin-top:26px;display:flex;flex-direction:column;align-items:center;gap:14px;">{_strip(l1, "#FFFFFF")}{_strip(l2, ACC_FILL)}</div>
   <div style="flex:none;position:relative;margin-top:70px;width:100%;height:560px;">{hero}{sticker_html}</div>
 </div>
