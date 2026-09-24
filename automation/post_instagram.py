@@ -65,6 +65,24 @@ class Graph:
         except urllib.error.URLError as e:
             raise IGError(f"접속 실패: {e.reason}") from None
 
+    def call_json(self, path, body):
+        """문서 예시(Instagram 로그인 API 재개 가능 업로드)와 같은 모양 — JSON 본문 + Authorization 헤더."""
+        req = urllib.request.Request(f"{self.base}/{path.lstrip('/')}", data=json.dumps(body).encode(), method="POST",
+                                     headers={"Content-Type": "application/json", "Authorization": f"Bearer {self.token}"})
+        try:
+            with urllib.request.urlopen(req, timeout=60) as r:
+                return json.loads(r.read() or b"{}")
+        except urllib.error.HTTPError as e:
+            raw = e.read().decode(errors="replace")
+            try:
+                err = json.loads(raw).get("error", {})
+                raise IGError(f"{e.code} {err.get('type', '')} (code {err.get('code')}): "
+                              f"{err.get('error_user_msg') or err.get('message') or raw}") from None
+            except ValueError:
+                raise IGError(f"{e.code}: {raw[:300]}") from None
+        except urllib.error.URLError as e:
+            raise IGError(f"접속 실패: {e.reason}") from None
+
     def wait_ready(self, container_id, what, timeout=600):
         """컨테이너 처리 완료(FINISHED)까지 기다린다. 영상은 몇 분 걸릴 수 있다."""
         start = time.time()
@@ -159,8 +177,10 @@ def post_reel(g, uid, key, folder, cfg, dry, ffmpeg):
         print("  (dry-run) 릴스는 업로드하지 않음")
         return None, track
     params = {"media_type": "REELS", "upload_type": "resumable", "caption": reel_caption(folder, track),
-              "share_to_feed": "true" if cfg.get("reel_share_to_feed") else "false", "thumb_offset": "800"}
-    created = g.call("POST", f"{uid}/media", **params)
+              "share_to_feed": cfg.get("reel_share_to_feed", False), "thumb_offset": 800}
+    # 2026-09-25 첫 실전: 폼 본문으로 보내면 upload_type 이 먹지 않아 'video_url is required'(code 100).
+    # 문서 예시처럼 JSON 본문 + Authorization 헤더로 보낸다.
+    created = g.call_json(f"{uid}/media", params)
     cid = created["id"]
     upload_url = created.get("uri") or f"https://rupload.facebook.com/ig-api-upload/{g.version}/{cid}"
     data = out.read_bytes()
