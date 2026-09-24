@@ -69,7 +69,9 @@ def main():
         files, card_report = render_cards(d, out_dir)
         caption = site.instagram_caption(d, site_url)
         (out_dir / "caption.txt").write_text(caption + "\n", encoding="utf-8")
-        (out_dir / "index.html").write_text(site.gallery_page(d, site_url, files, caption), encoding="utf-8")
+        comment = site.first_comment(d)
+        (out_dir / "first_comment.txt").write_text(comment + "\n", encoding="utf-8")
+        (out_dir / "index.html").write_text(site.gallery_page(d, site_url, files, caption, comment), encoding="utf-8")
 
     # 뉴스레터 프로필의 'N장 카드뉴스'는 이슈 카드 수(표지·마무리 제외, VOL.092 와 같은 기준)
     n_issue_cards = len(d["card_issues"]) if files else 0

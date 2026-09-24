@@ -54,7 +54,7 @@ def regenerate_index(manifest):
     INDEX.write_text(html[:s] + "  \n" + items + "\n" + html[e:], encoding="utf-8")
 
 
-def gallery_page(d, site, card_files, caption):
+def gallery_page(d, site, card_files, caption, comment=""):
     """instagram/YYYY-MM-DD/index.html — 휴대폰에서 카드 저장·캡션 복사 후 바로 업로드할 수 있는 페이지."""
     imgs = "\n".join(
         f'<figure><a href="{f}" download><img src="{f}" alt="카드 {n:02d}/{len(card_files):02d}" loading="lazy"></a>'
@@ -98,17 +98,21 @@ def gallery_page(d, site, card_files, caption):
   <div class="links"><a href="../../{d['date']}.html">뉴스레터 전문 읽기 →</a></div>
   {imgs}
   <section class="caption">
-    <button type="button" id="copy">캡션 복사</button>
+    <button type="button" class="copy" data-target="cap">캡션 복사</button>
     <pre id="cap">{esc(caption)}</pre>
+  </section>
+  <section class="caption">
+    <button type="button" class="copy" data-target="cmt">첫 댓글 복사</button> <span class="meta">올린 직후 계정으로 달고 고정하세요</span>
+    <pre id="cmt">{esc(comment)}</pre>
   </section>
 </main>
 <script>
-document.getElementById('copy').addEventListener('click', async (e) => {{
-  const t = document.getElementById('cap').innerText;
-  try {{ await navigator.clipboard.writeText(t); e.target.textContent = '복사됨 ✓'; }}
-  catch (_) {{ const r = document.createRange(); r.selectNodeContents(document.getElementById('cap'));
+document.querySelectorAll('button.copy').forEach((btn) => btn.addEventListener('click', async (e) => {{
+  const el = document.getElementById(btn.dataset.target);
+  try {{ await navigator.clipboard.writeText(el.innerText); e.target.textContent = '복사됨 ✓'; }}
+  catch (_) {{ const r = document.createRange(); r.selectNodeContents(el);
     const s = getSelection(); s.removeAllRanges(); s.addRange(r); e.target.textContent = '길게 눌러 복사하세요'; }}
-}});
+}}));
 </script>
 </body>
 </html>
@@ -124,7 +128,7 @@ def instagram_caption(d, site):
     issues = d["card_issues"]
     head = (ig.get("caption") or "").strip() or f"{plain(d['title'])}\n\n{plain(d['lead'])}"
     lines = [head, "", f"{d['weekday']}요일의 마케팅 브리프 {len(issues)}가지 👇"]
-    lines += [f"· {plain(it['headline'])}" for it in issues]
+    lines += [f"{'❶❷❸❹❺❻❼❽❾❿'[i]} {plain(it['headline'])}" for i, it in enumerate(issues)]
     lines += ["", "📌 저장해두고 회의 전에 꺼내보세요", f"💬 {plain(d['question']['text'])} 댓글로 알려주세요", ""]
     cov = (d.get("cards") or {}).get("cover") or {}
     if cov.get("photo") and cov.get("credit"):
@@ -135,6 +139,16 @@ def instagram_caption(d, site):
     when = send_time_ko(d["send_time_kst"]).replace("오전", "아침")
     lines.append(f"매 영업일 {when}, {len(d['all_items'])}가지 전문과 출처는 뉴스레터로 — 프로필 링크")
     lines.append("EDIT H · 매일 아침, 마케터의 트렌드 한 입 (@edit.h.kr)")
+    lines.append("/ 에디터. H")
     tags = ig.get("hashtags") or ["마케팅", "마케팅트렌드", "마케터", "브랜드마케팅", "카드뉴스", "EDITH"]
     lines.append(" ".join("#" + re.sub(r"\s+", "", t.lstrip("#")) for t in tags))
+    return "\n".join(lines)
+
+
+def first_comment(d):
+    """올린 직후 계정으로 달아 고정할 첫 댓글(마트식 팔로우 안내)."""
+    kw = (load_config().get("instagram") or {}).get("dm_keyword")
+    lines = ["매일 아침, 마케터의 트렌드 한 입 — EDIT H @edit.h.kr 팔로우하고 저장해 두세요 🧡"]
+    if kw:
+        lines.append(f"📩 '{kw}' 댓글 남기면 뉴스레터 구독 링크를 DM으로 보내드려요")
     return "\n".join(lines)

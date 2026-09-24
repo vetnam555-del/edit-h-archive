@@ -21,6 +21,7 @@ CARD_LIMITS = {
     "metric_label": 16,      # 보조 수치 상자 설명
     "takeaway": 60,          # 인사이트 상자
     "cta_headline": 34,      # 마무리 카드 질문
+    "observation": 90,       # H의 한 줄 관찰 카드(뉴스레터와 같은 문장)
     "lead_point_title": 22,  # 뉴스레터 '오늘의 편지' 핵심 3개
     "lead_point_text": 40,
 }
@@ -190,6 +191,7 @@ def prepare(data, date_str):
             _len_check(m["value"], CARD_LIMITS["metric_value"], f"{w}.metrics[{j}].value", problems)
             _len_check(m["label"], CARD_LIMITS["metric_label"], f"{w}.metrics[{j}].label", problems)
     _len_check(cta["headline"], CARD_LIMITS["cta_headline"], "cards.cta.headline(없으면 question.text)", problems)
+    _len_check(data["observation"], CARD_LIMITS["observation"], "observation(관찰 카드)", problems)
     for i, p in enumerate(data.get("lead_points") or [], 1):
         _len_check(p["title"], CARD_LIMITS["lead_point_title"], f"lead_points[{i}].title", problems)
         _len_check(p["text"], CARD_LIMITS["lead_point_text"], f"lead_points[{i}].text", problems)
