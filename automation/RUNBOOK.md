@@ -69,12 +69,12 @@ IT·산업 전문지(전자신문, ZDNet Korea, 디지털데일리, AI타임스,
   나왔으면 실적으로 바꾼다. 못 찾으면 문장에 '전망'임을 밝힌다.
 - 실행일과 발행일이 다를 때(리허설·미리 만들기)는 본문의 시점 표현을 **발행일 기준**으로 쓴다(예: "연휴 뒤 첫 월요일").
 
-### 1-4. 선정 기준 (10개 = 빅이슈 1 + 섹션 3×3)
+### 1-4. 선정 기준 (10개 = 빅이슈 1 + 섹션 아이템 9, 보통 3섹션 × 3)
 
 1. 마케터가 **오늘 뭔가 해볼 수 있는** 이야기인가 (행동 가능성)
 2. 숫자가 있는가 (카드·뉴스레터의 '큰 숫자' 재료)
 3. `recent_item_titles` 와 겹치지 않는가 (같은 사건의 새 국면이면 OK, 그 점을 제목에 드러낸다)
-4. 카테고리가 한쪽으로 쏠리지 않았는가 (섹션 3개가 서로 다른 축)
+4. 카테고리가 한쪽으로 쏠리지 않았는가 (섹션끼리 서로 다른 축)
 5. 빅이슈 = 오늘 가장 파급력 크고 숫자가 선명한 것
 
 ## 2. content/{날짜}.json 작성
@@ -83,12 +83,13 @@ IT·산업 전문지(전자신문, ZDNet Korea, 디지털데일리, AI타임스,
 
 | 필드 | 내용 |
 |---|---|
-| `date`, `emoji`, `title`, `hero_title`, `subtitle`, `cover_deck` | 제목은 질문·반전형으로 짧게, 쉼표로 호흡 (`토스가 이번엔, 새벽배송을 품었다고?`). `hero_title` 은 줄바꿈 `\n`, 강조 `==8월==` |
+| `date`, `emoji`, `title`, `hero_title`, `subtitle` | 제목은 질문·반전형으로 짧게, 쉼표로 호흡 (`토스가 이번엔, 새벽배송을 품었다고?`). `hero_title` 은 뉴스레터 머리·카드 표지 제목 — 두 줄(`\n`)로 쓰면 첫 줄은 굵게, 둘째 줄은 보통 굵기. `title` 은 빅이슈 제목으로도 쓰인다 |
 | `keywords` | 5개(manifest·아카이브용) |
 | `source_mode` | `anjang` / `mixed` / `fallback` |
-| `lead`, `three_lines`(사람들·돈·규칙), `observation` | 에디터 H 목소리 |
-| `big_issue` | `tag`, `paragraphs`(2), `stat`, `takeaway`, `checklist`(1~3), `sources`, 카드용 `card_title`·`card_text`·`card_takeaway` |
-| `sections` | 정확히 3개 × `items` 3개. 아이템: `tag`, `title`, `body`(2~3문장), `takeaway`(1문장), `sources`, 카드로 쓸 아이템만 `card` |
+| `lead`, `lead_points`, `observation` | '오늘의 편지'. `lead_points` = 오늘의 핵심 3개 `{"title", "text"}` — 뉴스레터 번호 목록과 카드 표지에 함께 쓰인다(표지 기준 title 22자·text 40자 이하). `observation` 은 'H의 한 줄 관찰' |
+| `three_lines` | 사람들·돈·규칙 세 줄(`label`·`text`). 인스타그램 캡션용, `lead_points` 가 없을 때 대신 쓰인다 |
+| `big_issue` | `tag`, `paragraphs`(2), `stat`(`value`·`unit`·`caption`), `takeaway`, `checklist`(1~3, '오늘 점검할 것'), `sources`, 카드용 `card_text`·`card_takeaway` |
+| `sections` | 2~4개, 아이템 합계 **정확히 9개**(보통 3×3). 섹션: `label`(카테고리, 예 `생활/소비 & 여행/레저`)·`title`. 아이템: `tag`, `title`, `body`(2~3문장), `takeaway`(1문장), `sources`, 카드로 쓸 아이템만 `card`(`title`·`text`·`takeaway`·`stat` 선택) |
 | `briefs` | 0~3개 짧은 소식 |
 | `question` | `text`(강조 `==…==`, 줄바꿈 `\n`), `closing` |
 | `instagram` | `caption`, `hashtags` (없으면 자동 생성) |
@@ -97,7 +98,8 @@ IT·산업 전문지(전자신문, ZDNet Korea, 디지털데일리, AI타임스,
 - 톤: "~했어요/~예요" 구어체 존댓말, 문장은 짧게. takeaway 는 **마케터가 무엇을 하면 되는지** 한 문장.
 - 출처: `{"name": "매체명", "url": "기사 URL", "date": "MM.DD"}` — 날짜순으로 두면 마지막 날짜가 표시된다.
   `date` 는 확인한 경우에만 쓰고, 모르면 필드를 빼도 된다(추측해서 채우지 않는다).
-- 카드뉴스 픽(5~7번 카드)은 기본값이 **섹션별 첫 아이템**이다. 다르게 하려면 `"card_picks": [3, 6, 9]`.
+- 카드뉴스는 6장: 표지 · 빅이슈 · 픽 3장 · 오늘의 질문. 픽(3~5번 카드)은 기본값이 **섹션별 첫 아이템**이다
+  (섹션이 2개면 남은 아이템으로 채움). 다르게 하려면 `"card_picks": [3, 6, 9]`.
 - 카드 글자 수 상한은 `automation/edith/content.py` 의 `CARD_LIMITS`. 넘으면 빌드가 무엇을 줄일지 알려준다.
 
 ## 3. 빌드
@@ -112,10 +114,9 @@ python3 automation/build_issue.py {날짜}           # 뉴스레터·카드·man
 
 ## 4. 눈으로 검수 (생략 금지)
 
-- Read 도구로 `instagram/{날짜}/*.png` **8장 모두** 본다: 글자 잘림·겹침, 어색한 줄바꿈, 오탈자, 숫자·단위.
+- Read 도구로 `instagram/{날짜}/*.png` **6장 모두** 본다: 글자 잘림·겹침, 어색한 줄바꿈, 오탈자, 숫자·단위.
 - 뉴스레터: `node automation/preview_newsletter.cjs {날짜}.html <스크래치 폴더>/nl` 후 `<스크래치 폴더>/nl_*.png` 를 본다
   (두 번째 인자가 출력 경로 접두어. 세션에 스크래치 폴더가 있으면 그곳을, 없으면 `/tmp` 를 쓴다)
-  (워드마크·카드 이미지는 배포 전이라 깨져 보이는 게 정상).
 - 고칠 게 있으면 JSON 수정 → 3단계 재실행.
 
 ## 5. 커밋·푸시

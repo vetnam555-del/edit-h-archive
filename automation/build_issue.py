@@ -38,7 +38,7 @@ def render_cards(d, out_dir):
     if proc.returncode != 0:
         raise SystemExit(f"카드 렌더링 실패:\n{proc.stderr[-2000:]}")
     report = json.loads(proc.stdout.strip().splitlines()[-1])
-    missing = {"Pretendard", "Noto Serif KR"} - set(report["fontsLoaded"])
+    missing = {"Pretendard"} - set(report["fontsLoaded"])
     if missing:
         raise SystemExit(f"폰트가 로드되지 않았습니다: {missing} — 대체 글꼴로 찍혔을 수 있으니 확인하세요")
     return files, report["cards"]

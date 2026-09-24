@@ -2,8 +2,7 @@
 
 컨테이너에는 한글 폰트가 없어서, npm 레지스트리(클라우드 환경에서 항상 열려 있음)에서 받아
 ~/.cache/edit-h-fonts 에 풀어 둔다. 저장소에 수 MB 바이너리를 넣지 않기 위해서다.
-- Pretendard Variable: 본문·라벨 (OFL)
-- Noto Serif KR 700/900: 매거진 헤드라인·숫자 (OFL)
+- Pretendard Variable: 카드 전체 (OFL). 최신 양식(VOL.092)은 Pretendard 하나만 쓴다.
 """
 import os
 import re
@@ -54,18 +53,20 @@ def _ensure_serif():
     return base
 
 
-def font_css():
-    """카드 HTML 에 그대로 넣을 @font-face 블록(file:// 절대경로)."""
+def font_css(serif=False):
+    """카드 HTML 에 그대로 넣을 @font-face 블록(file:// 절대경로). serif=True 면 Noto Serif KR 도 넣는다."""
     pre = _ensure_pretendard()
-    serif = _ensure_serif()
     css = [
         "@font-face{font-family:'Pretendard';font-weight:45 920;font-style:normal;"
         f"src:url('{pre.as_uri()}') format('woff2-variations'),url('{pre.as_uri()}') format('woff2');}}"
     ]
+    if not serif:
+        return "\n".join(css)
+    base = _ensure_serif()
     for w in SERIF_WEIGHTS:
-        text = (serif / f"{w}.css").read_text(encoding="utf-8")
+        text = (base / f"{w}.css").read_text(encoding="utf-8")
         # woff 대체 소스는 풀지 않았으므로 woff2 만 남기고, 상대경로를 절대 file:// 로 바꾼다
-        text = text.replace("url(./files/", f"url({(serif / 'files').as_uri()}/")
+        text = text.replace("url(./files/", f"url({(base / 'files').as_uri()}/")
         text = re.sub(r",\s*url\([^)]*\.woff\) format\('woff'\)", "", text)
         css.append(text)
     return "\n".join(css)
