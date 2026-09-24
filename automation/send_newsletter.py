@@ -12,8 +12,8 @@
   MAIL_FROM        선택. 기본 SMTP_USER
 
 사용
-  python3 automation/send_newsletter.py --mode schedule            # 09:00 정기 발송
-  python3 automation/send_newsletter.py --mode push                # 늦게 올라온 호 즉시 발송(09:00 이후일 때만)
+  python3 automation/send_newsletter.py --mode schedule            # 정기 발송(config.send_time_kst, 08:00)
+  python3 automation/send_newsletter.py --mode push                # 늦게 올라온 호 즉시 발송(발송 시각 이후일 때만)
   python3 automation/send_newsletter.py --date 2026-09-28 --test-to me@example.com   # 테스트(기록 안 남김)
   python3 automation/send_newsletter.py --dry-run                  # 실제 발송 없이 대상·제목만 확인
   python3 automation/send_newsletter.py --check                    # 구독자 수·SMTP 로그인만 확인(메일 안 보냄, 주소는 출력 안 함)

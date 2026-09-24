@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""인스타그램 자동 게시 — 카드 캐러셀(10장) + 음악 릴스. post-instagram.yml 이 09:00(금 주간 특집은 18:00)에 돌린다.
+"""인스타그램 자동 게시 — 카드 캐러셀(10장) + 음악 릴스. post-instagram.yml 이 발송 시각(config.send_time_kst, 금 주간 특집은 18:00)에 돌린다.
 
 공식 Instagram API(Instagram 로그인 방식, graph.instagram.com)만 쓴다. 비공식 자동화는 계정 정지 위험이 있어 쓰지 않는다.
   1) 캐러셀: GitHub Pages 에 올라간 JPEG(instagram/{키}/ig/*.jpg) 10장 → 캡션(caption.txt) → 게시 → 첫 댓글(first_comment.txt)
@@ -278,7 +278,7 @@ def main():
     if args.event == "push" and not args.key and args.kind == "daily":
         hh, mm = map(int, cfg_all["send_time_kst"].split(":"))
         now = now_kst()
-        if (now.hour, now.minute) < (hh, mm):  # 일찍 올라온 호는 08:40 예약 실행이 09:00 에 올린다
+        if (now.hour, now.minute) < (hh, mm):  # 일찍 올라온 호는 예약 실행이 발송 시각에 올린다
             print(f"push 로 올라온 오늘 호: 게시 시각({cfg_all['send_time_kst']}) 전이라 예약 게시에 맡깁니다")
             return
     token = os.environ.get("IG_ACCESS_TOKEN", "").strip()

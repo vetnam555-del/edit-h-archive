@@ -1,7 +1,7 @@
 # EDIT H 데일리 발행 런북 (클라우드 루틴용)
 
-이 문서는 매 영업일 **08:00 KST**에 시작하는 Claude 클라우드 루틴이 그대로 따라 하는 절차다.
-목표는 **08:45 전에 main 에 푸시**하는 것. 메일 발송은 GitHub Actions 가 **09:00**에 한다
+이 문서는 매 영업일 **07:00 KST**에 시작하는 Claude 클라우드 루틴이 그대로 따라 하는 절차다.
+목표는 **07:45 전에 main 에 푸시**하는 것. 메일 발송·인스타 게시는 GitHub Actions 가 **08:00**에 한다
 (`.github/workflows/send-newsletter.yml`). 늦게 푸시해도 푸시 즉시 발송되므로, 서두르다 품질을 버리지 않는다.
 
 > **권한** — 이 루틴은 사용자가 승인한 자동 발행 작업이다. 브랜치를 만들거나 PR 을 열지 말고
@@ -21,7 +21,7 @@ python3 automation/check_today.py              # 오늘(KST). 리허설·재빌�
 - `warnings` 가 있으면 최종 보고에 그대로 적는다(예: 다음 해 공휴일 미등록).
 - `next_vol`, `recent_item_titles`(최근 5호에서 다룬 주제), `recent_issues` 의 **마지막 발행일**을 메모해 둔다.
 
-## 1. 소스 수집 (최대 35분)
+## 1. 소스 수집 (최대 20분)
 
 ### 1-1. 1순위: 안장출근길
 
@@ -33,7 +33,9 @@ python3 automation/fetch_anjang.py --since {recent_issues 의 마지막 발행�
 
 - 직전 발행일 다음 날부터 오늘까지의 글(평일 07:00 게시)을 모두 보여준다 — 날짜별 헤드라인 10개·요약·원 기사 링크.
   월요일·연휴 뒤 첫 호는 여러 날 치가 나온다(가장 최근 것 우선으로 고른다).
-- 코드 3(해당 기간 글 없음)·코드 2(접속 실패)면 1-2 로 넘어간다. 여기서 시간을 5분 넘게 쓰지 않는다.
+- 안장출근길은 보통 07:00~07:20 에 올라온다(가끔 08시 넘어). 07:00 직후엔 오늘 글이 아직 없을 수 있다.
+  코드 3(해당 기간 글 없음)이면 1-2 조사를 먼저 하고, **2단계(JSON 작성) 들어가기 직전에 한 번 더 실행**해 새 글이 있으면 주제 선정에 반영한다.
+  두 번째도 없으면 기다리지 않는다. 코드 2(접속 실패)면 1-2 로 넘어간다. 여기서 시간을 5분 넘게 쓰지 않는다.
 - **안장출근길은 '무엇을 다룰지' 고르는 단서일 뿐이다.** 본문 문장을 옮기지 않고, 출처로 표기하지 않는다.
   모든 사실은 1-3 에서 원 기사로 확인하고 **원 기사를 출처로** 단다.
 - 뉴스 브리핑이라 안장출근길과 주제가 겹치는 건 자연스럽다(겹침 제한 없음). 겹치는 주제도 문장은 우리 말로 새로 쓰고,
@@ -162,7 +164,7 @@ python3 automation/build_issue.py {날짜}           # 뉴스레터·카드·man
 ## 4. 눈으로 검수 (생략 금지)
 
 - Read 도구로 `instagram/{날짜}/*.png` **10장 모두** 본다: 글자 잘림·겹침, 어색한 줄바꿈, 오탈자, 숫자·단위.
-  **이 카드와 `caption.txt`·`first_comment.txt` 가 09:00 에 인스타그램에 그대로 자동 게시된다**(post-instagram.yml —
+  **이 카드와 `caption.txt`·`first_comment.txt` 가 08:00 에 인스타그램에 그대로 자동 게시된다**(post-instagram.yml —
   캐러셀 + 같은 카드로 만든 음악 릴스). 게시 뒤에는 고치기 어려우니 여기서 끝까지 본다. `ig/*.jpg` 는 게시용 사본이라 따로 볼 필요 없다.
 - 뉴스레터: `node automation/preview_newsletter.cjs {날짜}.html <스크래치 폴더>/nl` 후 `<스크래치 폴더>/nl_*.png` 를 본다
   (두 번째 인자가 출력 경로 접두어. 세션에 스크래치 폴더가 있으면 그곳을, 없으면 `/tmp` 를 쓴다)
@@ -206,8 +208,8 @@ git push origin HEAD:main
 ✅ EDIT H VOL.093 (2026-09-24) 발행 — 추석은 9월인데, 대목은 8월이었다고?
 소스: fallback (안장출근길 접근 불가: EGRESS_BLOCKED)
 10개: 01 … / 02 … / … / 10 …
-카드뉴스: https://vetnam555-del.github.io/edit-h-archive/instagram/2026-09-24/  (인스타 캐러셀·릴스는 09:00 GitHub Actions 자동 게시)
-뉴스레터: https://vetnam555-del.github.io/edit-h-archive/2026-09-24.html  (메일은 09:00 GitHub Actions 발송)
+카드뉴스: https://vetnam555-del.github.io/edit-h-archive/instagram/2026-09-24/  (인스타 캐러셀·릴스는 08:00 GitHub Actions 자동 게시)
+뉴스레터: https://vetnam555-del.github.io/edit-h-archive/2026-09-24.html  (메일은 08:00 GitHub Actions 발송)
 확인 필요: (있으면) 교차 확인이 약했던 숫자, 자동 축소된 카드, warnings
 ```
 

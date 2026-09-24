@@ -12,6 +12,7 @@ import re
 
 from . import content
 from .common import CONTENT_DIR, ROOT, cover_photo_problem, load_config, parse_date, plain, send_time_ko, weekday_ko
+from .site import dm_line
 
 WEEKLY_DIR = CONTENT_DIR / "weekly"
 LIMITS = {"title": 34, "keyword": 5, "line": 40, "oneliner_title": 24}
@@ -123,9 +124,8 @@ def caption(w):
     lines += ["", "📌 저장해두고 다음 주에 다시 꺼내보세요", "💬 이 중 가장 와닿은 한 가지는? 댓글로 알려주세요", ""]
     if w["cards"]["cover"].get("photo") and w["cards"]["cover"].get("credit"):
         lines.append(f"📷 표지 사진 출처: {w['cards']['cover']['credit'].replace('사진 = ', '')}")
-    kw = (load_config().get("instagram") or {}).get("dm_keyword")
-    if kw:
-        lines.append(f"📩 댓글에 '{kw}' 남기면 뉴스레터 구독 링크를 DM으로 보내드려요")
+    if dm_line():
+        lines.append(dm_line())
     when = send_time_ko(w["send_time_kst"]).replace("오전", "아침")
     lines.append(f"매 영업일 {when}, 10가지 전문과 출처는 뉴스레터로 — 프로필 링크")
     lines.append("EDIT H · 매일 아침, 트렌드 한 입 (@edit.h.kr)")

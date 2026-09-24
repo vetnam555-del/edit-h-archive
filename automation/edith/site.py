@@ -133,9 +133,8 @@ def instagram_caption(d, site):
     cov = (d.get("cards") or {}).get("cover") or {}
     if cov.get("photo") and cov.get("credit"):
         lines.append(f"📷 표지 사진 출처: {cov['credit'].replace('사진 = ', '')}")
-    kw = (load_config().get("instagram") or {}).get("dm_keyword")
-    if kw:
-        lines.append(f"📩 댓글에 '{kw}' 남기면 뉴스레터 구독 링크를 DM으로 보내드려요")
+    if dm_line():
+        lines.append(dm_line())
     when = send_time_ko(d["send_time_kst"]).replace("오전", "아침")
     lines.append(f"매 영업일 {when}, {len(d['all_items'])}가지 전문과 출처는 뉴스레터로 — 프로필 링크")
     lines.append("EDIT H · 매일 아침, 트렌드 한 입 (@edit.h.kr)")
@@ -145,10 +144,17 @@ def instagram_caption(d, site):
     return "\n".join(lines)
 
 
+def dm_line(short=False):
+    """'댓글 남기면 DM' 안내. DM 자동 답장(config.instagram.dm_auto_reply)이 켜져 있을 때만 약속하고, 아니면 None."""
+    ig = load_config().get("instagram") or {}
+    kw = ig.get("dm_keyword")
+    if not (kw and ig.get("dm_auto_reply")):
+        return None
+    return (f"📩 '{kw}' 댓글 남기면 뉴스레터 구독 링크를 DM으로 보내드려요" if short
+            else f"📩 댓글에 '{kw}' 남기면 뉴스레터 구독 링크를 DM으로 보내드려요")
+
+
 def first_comment(d):
     """올린 직후 계정으로 달아 고정할 첫 댓글(마트식 팔로우 안내)."""
-    kw = (load_config().get("instagram") or {}).get("dm_keyword")
-    lines = ["매일 아침, 트렌드 한 입 — EDIT H @edit.h.kr 팔로우하고 저장해 두세요 🧡"]
-    if kw:
-        lines.append(f"📩 '{kw}' 댓글 남기면 뉴스레터 구독 링크를 DM으로 보내드려요")
-    return "\n".join(lines)
+    return "\n".join(["매일 아침, 트렌드 한 입 — EDIT H @edit.h.kr 팔로우하고 저장해 두세요 🧡",
+                      dm_line(short=True) or "📩 뉴스레터 무료 구독은 프로필 링크에서"])
