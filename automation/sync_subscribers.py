@@ -185,6 +185,11 @@ def main():
     new, adds, removes = apply_events(old, events)
     ok, why = check_safe(old, new, removes)
     notice(f"SUBSCRIBERS: {len(old)}개 → {len(new)}개 (추가 {len(adds)} · 제거 {len(removes)})")
+    if removes:
+        from send_newsletter import excluded
+        n_ex = len(removes) - len(excluded(removes)[0])
+        notice(f"제거 대상 {len(removes)}명 중 이미 발송에서 빠지던(수신 제외 규칙) 주소 {n_ex}명 — "
+               f"나머지 {len(removes) - n_ex}명은 수신 거부 뒤에도 메일을 받고 있었다")
     if not ok:
         notice(why)
         return 1
