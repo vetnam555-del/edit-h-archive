@@ -19,7 +19,11 @@
   },
   "email": {
     "from_name": "EDIT H",
-    "subject_prefix": "[EDIT H]"
+    "subject_prefix": "[EDIT H]",
+    "exclude_sha256": [
+      "0dbd74c2021f88c355fdf82722b8293ba90626e97197a8ff87f5a2031d61810b"
+    ],
+    "_exclude_note": "SUBSCRIBERS 에 있어도 보내지 않을 주소. 공개 저장소라 주소 대신 소문자 주소의 SHA-256 을 적는다 — python3 -c \"import hashlib;print(hashlib.sha256('주소'.lower().encode()).hexdigest())\""
   },
   "instagram": {
     "dm_keyword": "에디트",
