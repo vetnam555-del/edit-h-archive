@@ -270,10 +270,17 @@ def main():
     ap.add_argument("--check", action="store_true")
     ap.add_argument("--only", choices=["carousel", "reel"])
     ap.add_argument("--ffmpeg", default="ffmpeg")
+    ap.add_argument("--event", default="manual", help="schedule | push | workflow_dispatch | manual")
     args = ap.parse_args()
 
     cfg_all = load_config()
     cfg = cfg_all.get("instagram") or {}
+    if args.event == "push" and not args.key and args.kind == "daily":
+        hh, mm = map(int, cfg_all["send_time_kst"].split(":"))
+        now = now_kst()
+        if (now.hour, now.minute) < (hh, mm):  # 일찍 올라온 호는 08:40 예약 실행이 09:00 에 올린다
+            print(f"push 로 올라온 오늘 호: 게시 시각({cfg_all['send_time_kst']}) 전이라 예약 게시에 맡깁니다")
+            return
     token = os.environ.get("IG_ACCESS_TOKEN", "").strip()
     if not token:
         print("✗ IG_ACCESS_TOKEN Secret 이 없습니다 — automation/README.md '인스타그램 자동 게시' 설정을 먼저 하세요. 건너뜁니다.")
