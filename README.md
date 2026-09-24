@@ -1,2 +1,2 @@
 # edit-h-archive
-EDIT H 마케팅 뉴스레터 아카이브
+EDIT H 트렌드 뉴스레터 아카이브
