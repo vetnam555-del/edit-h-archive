@@ -1,0 +1,66 @@
+# EDIT H 구독 신청·수신 거부 자동 반영 — Formspree 알림 메일(Gmail IMAP, 읽기 전용) → Secret SUBSCRIBERS.
+# 매일 07:10(KST, 발송 20분 전). 새 구독자에게 환영 메일. 바꾸기 전 값은 SUBSCRIBERS_BACKUP 에 남긴다.
+# 공개 로그라 주소는 찍지 않고 건수만 남긴다(automation/sync_subscribers.py).
+# 필요한 Secrets: SMTP_USER · SMTP_PASSWORD · SUBSCRIBERS · GH_ADMIN_TOKEN(Secrets 쓰기)
+name: Sync EDIT H subscribers
+
+on:
+  schedule:
+    - cron: "10 22 * * *"    # UTC 22:10 = KST 07:10 매일(주말 신청도 환영 메일은 바로)
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "읽기만 — 몇 건 추가·제거될지 숫자만 확인(Secret 안 바꿈)"
+        type: boolean
+        default: true
+      since:
+        description: "처음 한 번만: 이 날짜(YYYY-MM-DD) 뒤 신청까지 거슬러 반영. 비우면 지금부터"
+        required: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-subscribers
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Install PyNaCl
+        run: pip install -q pynacl
+
+      - name: Sync
+        env:
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          SUBSCRIBERS: ${{ secrets.SUBSCRIBERS }}
+          MAIL_FROM: ${{ secrets.MAIL_FROM }}
+          GH_ADMIN_TOKEN: ${{ secrets.GH_ADMIN_TOKEN }}
+          IN_DRY: ${{ inputs.dry_run }}
+          IN_SINCE: ${{ inputs.since }}
+        run: |
+          args=""
+          [ "$IN_DRY" = "true" ] && args="$args --dry-run"
+          [ -n "$IN_SINCE" ] && args="$args --since $IN_SINCE"
+          python3 automation/sync_subscribers.py $args
+
+      - name: Record sync position
+        if: always()
+        run: |
+          if [ -n "$(git status --porcelain automation/subscribers_sync.json)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add automation/subscribers_sync.json
+            git commit -m "Record subscriber sync position ($(date -u +%F))"
+            for i in 1 2 3 4; do
+              git pull --rebase origin main && git push origin HEAD:main && break
+              sleep $((i * 5))
+            done
+          fi
