@@ -192,6 +192,17 @@ def _question(d):
             + "</td></tr>")
 
 
+# @edit.h.kr 프로필 마크(58px) — 로고의 '마크 전용'(안경만) 버전. 이 메일은 이미지를 하나도 쓰지 않으므로
+# (차단·로딩 실패 방지) PNG 대신 도형으로 그린다. VOL.092 발행 뒤 바뀐 최신 프로필 사진과 같은 구성.
+_LENS = ('<div style="display:inline-block;box-sizing:border-box;width:21px;height:21px;border-radius:50%;'
+         'border:3px solid #0D0C0A;background:#F5F1E8;vertical-align:middle;">'
+         '<div style="width:6px;height:6px;border-radius:50%;background:#0D0C0A;margin:4px auto 0;font-size:0;line-height:0;">&nbsp;</div></div>')
+AVATAR_MARK = ('<table role="presentation" width="58" height="58" cellpadding="0" cellspacing="0" border="0" '
+               'style="width:58px;height:58px;border-radius:50%;background:#FF5233;"><tr>'
+               '<td align="center" valign="middle" style="font-size:0;line-height:0;">' + _LENS
+               + '<div style="display:inline-block;width:5px;height:3px;background:#0D0C0A;vertical-align:middle;font-size:0;line-height:0;">&nbsp;</div>'
+               + _LENS + '</td></tr></table>')
+
 def _cta(d, site, campaign, n_cards):
     stat = lambda big, small: (  # noqa: E731
         f'<td valign="top">{_div(f"font-size:16px;font-weight:700;line-height:1.2;color:#1B1B1E;", big)}'
@@ -207,7 +218,7 @@ def _cta(d, site, campaign, n_cards):
                    f"매일 아침 {len(d['all_items'])}가지 마케팅 이슈를<br>한 번에 정리해 드려요!", True)
             + f"""<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:16px;background:#FFFFFF;border:1px solid {RULE};border-radius:18px;box-shadow:0 2px 6px rgba(0,0,0,.08);"><tr><td style="padding:18px 16px;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
-    <td valign="middle" style="width:70px;"><div style="box-sizing:border-box;width:58px;height:58px;border-radius:50%;background:#0D0C0A;border:5px solid #FF5233;text-align:center;line-height:46px;font-family:{F};font-size:24px;font-weight:800;color:#F5F1E8;letter-spacing:-1px;">H<span style="color:#FF5233;">.</span></div></td>
+    <td valign="middle" style="width:70px;">{AVATAR_MARK}</td>
     <td valign="middle" style="padding-left:12px;">{_div(f"font-size:15px;font-weight:500;line-height:1.2;color:{INK};", "edit.h.kr")}
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:8px;"><tr>{stats}</tr></table>
     </td>

@@ -22,9 +22,16 @@ function loadPlaywright() {
   await page.waitForTimeout(400);
 
   const report = await page.evaluate(() => {
+    // 카드 내용은 아래에서 위로 쌓이므로(.body 가 flex-end) 넘치면 위쪽으로 삐져나간다 —
+    // 스크롤 높이와 함께 첫 요소가 카드 위 여백(60px) 안으로 들어왔는지도 본다.
     const fits = (card) => {
-      const body = card.querySelector('.body');
-      return body.scrollHeight <= body.clientHeight + 1 && card.scrollHeight <= card.clientHeight + 1;
+      const top = card.getBoundingClientRect().top;
+      for (const body of card.querySelectorAll('.body')) {
+        if (body.scrollHeight > body.clientHeight + 1) return false;
+        const first = body.firstElementChild;
+        if (first && first.getBoundingClientRect().top < top + 60) return false;
+      }
+      return card.scrollHeight <= card.clientHeight + 1;
     };
     return [...document.querySelectorAll('.card')].map((card) => {
       let k = 1;

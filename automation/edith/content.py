@@ -2,23 +2,26 @@
 import json
 import re
 
-from .common import CONTENT_DIR, MANIFEST, parse_date, plain, weekday_ko
+from .common import CONTENT_DIR, MANIFEST, ROOT, parse_date, plain, source_label, weekday_ko
 
 
 class ContentError(ValueError):
     pass
 
 
-# 카드 한 장에 들어가는 글자 수 상한(공백 포함). 넘치면 렌더러가 폰트를 줄이는데,
-# 그 전에 여기서 먼저 막아 '글이 빽빽한 카드'를 원천적으로 줄인다.
+# 카드 한 장에 들어가는 글자 수 상한(공백·마크업 제외). 넘치면 렌더러가 폰트를 줄이는데,
+# 그 전에 여기서 먼저 막아 '글이 빽빽한 카드'를 원천적으로 줄인다. 기준은 VOL.092 실제 카드.
 CARD_LIMITS = {
-    "cover_title": 34,
-    "feature_text": 150,
-    "pick_text": 130,
-    "takeaway": 110,
-    "lead_point_title": 22,
+    "cover_title": 34,       # 표지 두 줄 제목 합계
+    "number": 9,             # 이슈 카드의 큰 숫자 (예: 300억원, 8.9조원, 82%)
+    "headline": 26,          # 이슈 카드 제목 (두 줄)
+    "body": 130,             # 이슈 카드 본문
+    "takeaway": 60,          # 인사이트 상자
+    "cta_headline": 34,      # 마무리 카드 질문
+    "lead_point_title": 22,  # 뉴스레터 '오늘의 편지' 핵심 3개
     "lead_point_text": 40,
 }
+CARD_ISSUES = 6
 
 
 def _need(obj, key, where):
@@ -41,6 +44,41 @@ def _len_check(text, limit, where, problems):
     n = len(plain(text))
     if n > limit:
         problems.append(f"{where}: {n}자 → {limit}자 이하로 줄여주세요")
+
+
+def _card_issues(data, where):
+    """cards.issues(정확히 6개) → 카드용 이슈 목록. no 로 뉴스레터 이슈(1=빅이슈, 2~10)를 가리키고,
+    tag·출처는 그 이슈에서 가져온다(카드에 따로 쓰면 그 값을 쓴다)."""
+    cards = data.get("cards") or {}
+    issues = cards.get("issues") or []
+    if len(issues) != CARD_ISSUES:
+        raise ContentError(f"{where}: cards.issues 는 정확히 {CARD_ISSUES}개여야 합니다(지금 {len(issues)}개) — "
+                           "뉴스레터 10개 중 카드로 만들 6개를 고르세요")
+    by_no = {int(it["no"]): it for it in data["all_items"]}
+    seen, out = set(), []
+    for i, ci in enumerate(issues, 1):
+        w = f"{where} cards.issues[{i}]"
+        no = int(_need(ci, "no", w))
+        if no not in by_no:
+            raise ContentError(f"{w}: no={no} 인 뉴스레터 이슈가 없습니다(1~10)")
+        if no in seen:
+            raise ContentError(f"{w}: no={no} 이슈가 두 번 들어갔습니다")
+        seen.add(no)
+        for key in ("headline", "body", "takeaway"):
+            _need(ci, key, w)
+        cmp = ci.get("compare")
+        if cmp:
+            for side in ("from", "to"):
+                if not (cmp.get(side) or {}).get("value") or not cmp[side].get("label"):
+                    raise ContentError(f"{w}: compare.{side} 에 value·label 이 모두 필요합니다")
+        else:
+            _need(ci, "number", w)
+        src = by_no[no]
+        out.append({**ci, "no": no, "tag": ci.get("tag") or src["tag"],
+                    "source": ci.get("source") or source_label(src["sources"])})
+    if sum(1 for it in out if it.get("accent")) > 1:
+        raise ContentError(f"{where}: accent(H PICK)는 한 장에만 쓰세요")
+    return out
 
 
 def next_vol(date_str):
@@ -110,35 +148,33 @@ def prepare(data, date_str):
     data["items"] = items
     data["all_items"] = [big] + items
 
-    # 카드뉴스 픽: 지정이 없으면 섹션마다 첫 아이템
-    picks = data.get("card_picks")
-    if picks:
-        by_no = {int(it["no"]): it for it in items}
-        try:
-            data["pick_items"] = [by_no[int(p)] for p in picks]
-        except KeyError as e:
-            raise ContentError(f"{where}: card_picks 의 번호 {e} 가 02~10 범위를 벗어났습니다")
-    else:
-        # 섹션마다 첫 아이템, 섹션이 3개보다 적으면 남은 아이템으로 채운다
-        picks = [sec["items"][0] for sec in data["sections"]][:3]
-        for it in items:
-            if len(picks) >= 3:
-                break
-            if it not in picks:
-                picks.append(it)
-        data["pick_items"] = picks
+    data["card_issues"] = _card_issues(data, where)
+    cards = data["cards"]
+    cards.setdefault("cover", {})
+    cards["cover"].setdefault("title", data["hero_title"])
+    if cards["cover"].get("photo") and not (ROOT / cards["cover"]["photo"]).exists():
+        raise ContentError(f"{where}: cards.cover.photo 파일이 없습니다 ({cards['cover']['photo']})")
+    if cards["cover"].get("photo") and not cards["cover"].get("credit"):
+        raise ContentError(f"{where}: 표지 사진을 쓰면 cards.cover.credit(출처·라이선스)이 필요합니다")
+    cta = cards.setdefault("cta", {})
+    cta.setdefault("kick", "오늘의 저장각")
+    cta.setdefault("headline", data["question"]["text"])
+    cta.setdefault("sub", "하나만 골라도 회의가 달라져요.")
+    cta.setdefault("pill", "팔로우 + 저장해두기")
 
     problems = []
-    _len_check(data.get("cover_title", data["hero_title"]), CARD_LIMITS["cover_title"], "cover_title(또는 hero_title)", problems)
-    _len_check(big.get("card_text", big["paragraphs"][0]), CARD_LIMITS["feature_text"], "big_issue.card_text(없으면 첫 문단)", problems)
-    _len_check(big["takeaway"], CARD_LIMITS["takeaway"] * 2, "big_issue.takeaway", problems)
-    for it in data["pick_items"]:
-        card = it.get("card", {})
-        _len_check(card.get("text", it["body"]), CARD_LIMITS["pick_text"], f"{it['no']} card.text(없으면 body)", problems)
-        _len_check(card.get("takeaway", it["takeaway"]), CARD_LIMITS["takeaway"], f"{it['no']} card.takeaway(없으면 takeaway)", problems)
+    _len_check(cards["cover"]["title"], CARD_LIMITS["cover_title"], "cards.cover.title(없으면 hero_title)", problems)
+    for i, it in enumerate(data["card_issues"], 1):
+        w = f"cards.issues[{i}]"
+        if "number" in it:
+            _len_check(it["number"], CARD_LIMITS["number"], f"{w}.number", problems)
+        _len_check(it["headline"], CARD_LIMITS["headline"], f"{w}.headline", problems)
+        _len_check(it["body"], CARD_LIMITS["body"], f"{w}.body", problems)
+        _len_check(it["takeaway"], CARD_LIMITS["takeaway"], f"{w}.takeaway", problems)
+    _len_check(cta["headline"], CARD_LIMITS["cta_headline"], "cards.cta.headline(없으면 question.text)", problems)
     for i, p in enumerate(data.get("lead_points") or [], 1):
-        _len_check(p["title"], CARD_LIMITS["lead_point_title"], f"lead_points[{i}].title(표지 카드)", problems)
-        _len_check(p["text"], CARD_LIMITS["lead_point_text"], f"lead_points[{i}].text(표지 카드)", problems)
+        _len_check(p["title"], CARD_LIMITS["lead_point_title"], f"lead_points[{i}].title", problems)
+        _len_check(p["text"], CARD_LIMITS["lead_point_text"], f"lead_points[{i}].text", problems)
     if problems:
-        raise ContentError("카드 글자 수 초과:\n  - " + "\n  - ".join(problems))
+        raise ContentError("글자 수 초과:\n  - " + "\n  - ".join(problems))
     return data

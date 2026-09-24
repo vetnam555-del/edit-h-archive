@@ -120,8 +120,11 @@ def instagram_caption(d, site):
     if ig.get("caption"):
         body = ig["caption"].strip()
     else:
-        lines = [plain(d["title"]), "", plain(d["lead"]), ""]
-        lines += [f"{it['no']} {plain(it.get('title', d['title']))}" for it in d["all_items"]]
+        # VOL.092 캡션 구성: 훅 → 'O요일의 마케팅 브리프 N가지' → 카드 이슈 목록 → 뉴스레터 안내
+        issues = d["card_issues"]
+        lines = [plain(d["title"]), "", f"{d['weekday']}요일의 마케팅 브리프 {len(issues)}가지 —", ""]
+        lines += [f"· {plain(it['headline'])}" for it in issues]
+        lines += ["", f"핵심 {len(issues)}장으로 먼저 보고, 전체 {len(d['all_items'])}개 이슈는 뉴스레터에서 이어보세요."]
         body = "\n".join(lines)
     tags = ig.get("hashtags") or ["마케팅", "마케팅트렌드", "마케터", "브랜드마케팅", "카드뉴스", "EDITH"]
     tags = " ".join("#" + re.sub(r"\s+", "", t.lstrip("#")) for t in tags)
