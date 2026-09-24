@@ -11,7 +11,7 @@ on:
     - cron: "40 8 * * 5"      # KST 금 17:40 → 18:00 까지 대기 후 주간 특집 게시
   push:
     branches: [main]
-    paths: ["20[0-9][0-9]-[0-9][0-9]-[0-9][0-9].html"]   # 루틴이 09:00 이후에 늦게 푸시한 날
+    paths: ["20[0-9][0-9]-[0-9][0-9]-[0-9][0-9].html"]   # 루틴이 09:00 이후에 늦게 푸시한 날(그 전 push 는 예약 게시에 맡긴다)
   workflow_dispatch:
     inputs:
       key:
@@ -78,11 +78,12 @@ jobs:
           GH_ADMIN_TOKEN: ${{ secrets.GH_ADMIN_TOKEN }}
           IG_APP_SECRET: ${{ secrets.IG_APP_SECRET }}
           KIND: ${{ steps.what.outputs.kind }}
+          EVENT: ${{ github.event_name }}
           IN_KEY: ${{ inputs.key }}
           IN_MODE: ${{ inputs.mode }}
           IN_ONLY: ${{ inputs.only }}
         run: |
-          args="--kind $KIND"
+          args="--kind $KIND --event $EVENT"
           [ -n "$IN_KEY" ] && args="$args --key $IN_KEY"
           [ "$IN_MODE" = "check" ] && args="$args --check"
           [ "$IN_MODE" = "dry-run" ] && args="$args --dry-run"

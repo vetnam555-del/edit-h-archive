@@ -65,14 +65,25 @@ def parse_recipients(raw):
     return out, dup, bad
 
 
+def excluded(addrs):
+    """config.email.exclude_sha256 에 해시가 있는 주소를 뺀다(수신 제외 요청). (남은 주소, 뺀 수)."""
+    import hashlib
+    hashes = set((load_config().get("email") or {}).get("exclude_sha256") or [])
+    kept = [a for a in addrs if hashlib.sha256(a.lower().encode()).hexdigest() not in hashes]
+    return kept, len(addrs) - len(kept)
+
+
 def recipients(raw):
-    return parse_recipients(raw)[0]
+    return excluded(parse_recipients(raw)[0])[0]
 
 
 def check():
     """구독자 수와 SMTP 로그인만 확인한다. 공개 저장소라 실행 로그를 누구나 볼 수 있으므로 주소는 출력하지 않는다."""
     to_list, dup, bad = parse_recipients(os.environ.get("SUBSCRIBERS"))
+    to_list, n_ex = excluded(to_list)
     msg = f"SUBSCRIBERS: 발송 대상 {len(to_list)}명"
+    if n_ex:
+        msg += f" · 수신 제외 {n_ex}명"
     if dup:
         msg += f" · 중복 {dup}개 제외"
     if bad:
