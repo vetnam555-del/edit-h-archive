@@ -173,6 +173,10 @@ def prepare(data, date_str):
         raise ContentError(f"{where}: 표지 사진을 쓰면 cards.cover.credit(출처·라이선스)이 필요합니다")
     if cards["cover"].get("photo") and (why := cover_photo_problem(cards["cover"]["photo"])):
         raise ContentError(f"{where}: {why}")
+    overlap = data.get("anjang_overlap")
+    if overlap is not None and (not isinstance(overlap, int) or overlap > 4):
+        raise ContentError(f"{where}: anjang_overlap={overlap} — 안장출근길과 겹치는 이슈는 10개 중 4개까지입니다(RUNBOOK 1-1). "
+                           "겹친 이슈를 다른 소스의 소식으로 바꾸세요")
     cta = cards.setdefault("cta", {})
     cta.setdefault("kick", "오늘의 저장각")
     cta.setdefault("headline", data["question"]["text"])
