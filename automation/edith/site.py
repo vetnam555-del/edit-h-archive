@@ -129,7 +129,13 @@ def instagram_caption(d, site):
     head = (ig.get("caption") or "").strip() or f"{plain(d['title'])}\n\n{plain(d['lead'])}"
     lines = [head, "", f"{d['weekday']}요일의 트렌드 브리프 {len(issues)}가지 👇"]
     lines += [f"{'❶❷❸❹❺❻❼❽❾❿'[i]} {plain(it['headline'])}" for i, it in enumerate(issues)]
-    lines += ["", "📌 저장해두고 다시 꺼내보세요", f"💬 {plain(d['question']['text'])} 댓글로 알려주세요", ""]
+    if d.get("poll"):
+        q = d["poll"]
+        ask = [f"🗳 이번 주 투표 — {plain(q['question'])}",
+               f"A {plain(q['options'][0])} / B {plain(q['options'][1])} · 댓글로 A 또는 B! (금요일에 결과 공개)"]
+    else:
+        ask = [f"💬 {plain(d['question']['text'])} 댓글로 알려주세요"]
+    lines += ["", "📌 저장해두고 다시 꺼내보세요", *ask, ""]
     cov = (d.get("cards") or {}).get("cover") or {}
     if cov.get("photo") and cov.get("credit"):
         lines.append(f"📷 표지 사진 출처: {cov['credit'].replace('사진 = ', '')}")

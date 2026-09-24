@@ -127,7 +127,7 @@ def caption(w):
     if dm_line():
         lines.append(dm_line())
     when = send_time_ko(w["send_time_kst"]).replace("오전", "아침")
-    lines.append(f"매 영업일 {when}, 10가지 전문과 출처는 뉴스레터로 — 프로필 링크")
+    lines.append(f"매 영업일 {when}, {len(w['all_items'])}가지 전문과 출처는 뉴스레터로 — 프로필 링크")
     lines.append("EDIT H · 매일 아침, 트렌드 한 입 (@edit.h.kr)")
     lines.append("/ 에디터. H")
     tags = spec.get("hashtags") or ["트렌드", "주간트렌드", "뉴스브리핑", "경제뉴스", "카드뉴스", "EDITH"]

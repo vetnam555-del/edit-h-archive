@@ -1,8 +1,10 @@
-"""뉴스레터(이메일) HTML — 최신 양식(VOL.092, 2026-09-18) 기준.
+"""뉴스레터(이메일) HTML — 최신 양식(VOL.092, 2026-09-18) 기준. 형식 2(5가지, 2026-09-28~)는 아래 '형식 2' 참고.
 
 @edit.h.kr 머리 → #호수·요일 칩 → 가운데 정렬 제목(굵게/보통 두 줄) → 오늘의 편지(세 줄 요약 + H의 한 줄 관찰)
 → 01 빅이슈(큰 숫자 박스 + '그래서 뭐가 달라져?') → #1~#N 섹션(번호 배지 · 태그 칩 · 회색 요약 박스)
 → 짧게 볼 것 → Q(오늘의 질문) → 프로필 카드·구독 버튼 → 푸터.
+형식 2: 에디터 H 노트(안경 마크 + 오늘의 5가지 + H의 한 줄) → 01 H PICK 심층(무슨 일이야 → 큰 숫자 → 숫자로 보면
+→ 왜 중요해 → 그래서 뭐가 달라져 → 알아두면 좋은 것) → 02~05 → 한 줄 뉴스 → (금) 투표 결과 → Q 또는 (월) 투표.
 색: 글자 #282F38 · 본문 #555558 · 보조 #767676 · 칩 #FFDCCB/#B23A0F · 형광펜 #FFC9AD · 회색 박스 #F3F3F3.
 VOL.092 대비 보강: 출처를 원문 링크로, '카드뉴스 보기' 링크 추가. 이메일 호환을 위해 table + 인라인 스타일만 쓴다.
 """
@@ -159,7 +161,7 @@ def _item(it):
   {_sources(it['sources'])}</td></tr>"""
 
 
-def _briefs(d):
+def _briefs(d, heading="짧게 볼 것"):
     if not d["briefs"]:
         return ""
     rows = []
@@ -176,7 +178,7 @@ def _briefs(d):
             + "</td></tr></table>")
     return (_divider() + f'<tr><td class="px" style="padding:0 36px;">'
             + _div(f"font-size:17px;font-weight:700;line-height:1.4;color:{INK};",
-                   f'짧게 볼 것 <span style="color:#C4C4C4;font-weight:400;">|</span> <span style="font-size:12px;font-weight:500;color:{MUTED};">BRIEFS</span>')
+                   f'{heading} <span style="color:#C4C4C4;font-weight:400;">|</span> <span style="font-size:12px;font-weight:500;color:{MUTED};">BRIEFS</span>')
             + "".join(rows) + "</td></tr>")
 
 
@@ -188,7 +190,7 @@ def _question(d):
             + _div(f"font-size:21px;font-weight:700;line-height:1.5;color:{INK};margin-top:10px;", md(q["text"], BOLD, HL_B), True)
             + _box(_div(f"font-size:14.5px;font-weight:400;line-height:1.7;color:{INK};", closing, True)
                    + _div(f"font-size:13px;font-weight:400;line-height:1.7;color:{BODY};margin-top:8px;",
-                          "💬 여러분의 답이 궁금해요 — 이 메일에 답장으로 보내주시면, 다음 호 '독자의 한 줄'로 소개합니다.", True))
+                          "💬 여러분의 답이 궁금해요 — 이 메일에 답장으로 들려주세요.", True))
             + "</td></tr>")
 
 
@@ -202,6 +204,144 @@ AVATAR_MARK = ('<table role="presentation" width="58" height="58" cellpadding="0
                '<td align="center" valign="middle" style="font-size:0;line-height:0;">' + _LENS
                + '<div style="display:inline-block;width:5px;height:3px;background:#0D0C0A;vertical-align:middle;font-size:0;line-height:0;">&nbsp;</div>'
                + _LENS + '</td></tr></table>')
+
+# ── 형식 2 ──────────────────────────────────────────────────────────────
+
+def _mini_avatar(px=40):
+    """AVATAR_MARK(58px)를 작게 — 에디터 H 노트 머리."""
+    k = px / 58
+    lens = (f'<div style="display:inline-block;box-sizing:border-box;width:{round(21 * k)}px;height:{round(21 * k)}px;border-radius:50%;'
+            f'border:{max(2, round(3 * k))}px solid #0D0C0A;background:#F5F1E8;vertical-align:middle;">'
+            f'<div style="width:{max(3, round(6 * k))}px;height:{max(3, round(6 * k))}px;border-radius:50%;background:#0D0C0A;'
+            f'margin:{max(2, round(4 * k))}px auto 0;font-size:0;line-height:0;">&nbsp;</div></div>')
+    return (f'<table role="presentation" width="{px}" height="{px}" cellpadding="0" cellspacing="0" border="0" '
+            f'style="width:{px}px;height:{px}px;border-radius:50%;background:#FF5233;"><tr>'
+            f'<td align="center" valign="middle" style="font-size:0;line-height:0;">{lens}'
+            f'<div style="display:inline-block;width:{max(3, round(5 * k))}px;height:{max(2, round(3 * k))}px;background:#0D0C0A;'
+            f'vertical-align:middle;font-size:0;line-height:0;">&nbsp;</div>{lens}</td></tr></table>')
+
+
+def _label(text, mt=22):
+    """심층 안의 소제목 — '무슨 일이야?', '왜 중요해?' 등."""
+    return _div(f"font-size:13px;font-weight:800;line-height:1.3;color:{CHIP_FG};margin-top:{mt}px;letter-spacing:.2px;", esc(text))
+
+
+def _note(d):
+    """에디터 H 노트 — 고정 코너. 안경 마크 + 1인칭 편지 + 오늘의 5가지 목록 + H의 한 줄."""
+    head = (f'<table role="presentation" cellpadding="0" cellspacing="0"><tr><td valign="middle">{_mini_avatar()}</td>'
+            f'<td valign="middle" style="padding-left:10px;">'
+            + _div(f"font-size:17px;font-weight:700;line-height:1.3;color:{INK};",
+                   '에디터 H 노트 <span style="color:#C4C4C4;font-weight:400;">|</span> '
+                   f'<span style="font-size:12px;font-weight:500;color:{MUTED};">EDITOR H&#39;S NOTE</span>')
+            + '</td></tr></table>')
+    lead = _div(f"font-size:15.5px;font-weight:400;line-height:1.85;color:{BODY};margin-top:12px;", md(d["lead"], HL_B, HL_B))
+    rows = []
+    for i, it in enumerate(d["card_issues"], 1):
+        pick = (f' <span style="background:{DARK_CHIP};color:{DARK_CHIP_FG};font-size:10.5px;font-weight:700;padding:2px 5px;'
+                f'vertical-align:1px;">H PICK</span>') if i == 1 else ""
+        rows.append(
+            f'<tr><td valign="top" style="width:26px;padding:6px 0;"><div style="width:20px;height:20px;border-radius:10px;'
+            f'background:{INK};color:#FFFFFF;text-align:center;font-family:{F};font-size:11px;font-weight:700;line-height:20px;">{i}</div></td>'
+            f'<td valign="top" style="padding:6px 0;">'
+            + _div(f"font-size:14.5px;font-weight:400;line-height:1.6;color:{BODY};",
+                   f'<b style="font-weight:700;color:{INK};">{esc(plain(it["headline"]).replace(chr(10), " "))}</b>{pick}')
+            + "</td></tr>")
+    today = (_div(f"font-size:12.5px;font-weight:700;line-height:1.3;color:{INK};margin-top:18px;", f"오늘의 {len(rows)}가지")
+             + f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:6px;">{"".join(rows)}</table>')
+    obs = _box(_div(f"font-size:14.5px;font-weight:400;line-height:1.7;color:{INK};",
+                    f'<b style="font-weight:700;color:{INK};">H의 한 줄 ·</b> ' + md(d["observation"])), mt=14)
+    return f'\n<tr><td class="px" style="padding:0 36px;">{head}\n  {lead}\n  {today}\n  {obs}</td></tr>'
+
+
+def _numbers(nums):
+    cells = "".join(
+        (f'<td style="width:8px;font-size:0;line-height:0;">&nbsp;</td>' if i else "")
+        + f'<td valign="top" style="background:{BOX};border-radius:12px;padding:14px 8px;text-align:center;">'
+        + _div(f"font-size:22px;font-weight:800;line-height:1.1;color:{INK};", esc(n["value"]), True)
+        + _div(f"font-size:12px;font-weight:400;line-height:1.4;color:{MUTED};margin-top:6px;", esc(n["label"]), True) + "</td>"
+        for i, n in enumerate(nums))
+    return f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:10px;table-layout:fixed;"><tr>{cells}</tr></table>'
+
+
+def _pick(d):
+    """01 H PICK 심층 — 한 이슈를 '무슨 일 → 숫자 → 왜 중요 → 그래서'로 깊게."""
+    b = d["big_issue"]
+    st = b["stat"]
+    paras = "".join(_body(p, "15.5px", "1.85", 8 if i == 0 else 12) for i, p in enumerate(b["paragraphs"]))
+    why = "".join(_body(p, "15.5px", "1.85", 8 if i == 0 else 12) for i, p in enumerate(b["why"]))
+    check = ""
+    if b.get("checklist"):
+        items = "".join(_div(f"font-size:14px;line-height:1.7;color:{BODY};margin-top:6px;", "☐ " + md(c)) for c in b["checklist"])
+        check = _box(_div(f"font-size:12.5px;font-weight:700;line-height:1.3;color:{INK};", "알아두면 좋은 것") + items, mt=12)
+    return f"""
+<!-- 01 H PICK 심층 -->
+<tr><td class="px" style="padding:0 36px;">{_chips([("H PICK", True), ("오늘의 심층", False)])}
+  {_div(f"font-size:23px;font-weight:700;line-height:1.45;color:{INK};margin-top:14px;", esc(plain(d['title'])), True)}
+  {_tag(f"01 · {b['tag']}")}
+  {_label("무슨 일이야?")}
+  {paras}
+  <table role="presentation" align="center" cellpadding="0" cellspacing="0" style="margin-top:22px;"><tr><td class="stat" style="background:{HL};padding:4px 14px;font-family:{F};font-size:44px;font-weight:800;line-height:1.1;color:{INK};">{esc(st['value'])}<span style="font-size:24px;">{esc(st.get('unit', ''))}</span></td></tr></table>
+  {_div(f"font-size:12.5px;font-weight:400;line-height:1.6;color:{MUTED};margin-top:8px;", esc(plain(st['caption'])), True)}
+  {_label("숫자로 보면")}
+  {_numbers(b["numbers"])}
+  {_label("왜 중요해?")}
+  {why}
+  {_box(_div(f"font-size:12.5px;font-weight:700;line-height:1.3;color:{INK};", "그래서 뭐가 달라져?") + _div(f"font-size:14.5px;font-weight:400;line-height:1.75;color:{BODY};margin-top:8px;", md(b['takeaway'], BOLD)), mt=20)}
+  {check}
+  {_sources(b['sources'])}</td></tr>"""
+
+
+def _poll_links(site, poll):
+    """투표 버튼 주소. 웹(아카이브)에서는 투표 안내 페이지로 가고, 메일로 나갈 때 send_newsletter.py 가
+    'mailto:발신 주소?subject=[EDIT H 투표 {id}] A' 로 바꾼다(주소를 공개 저장소에 두지 않으려고)."""
+    return [f"{site}/poll.html?id={poll['id']}&amp;v={v}" for v in "AB"]
+
+
+def _poll_block(d, site):
+    q = d["poll"]
+    closing = md(d["question"].get("closing", "오늘도 EDIT H가 함께할게요. — 에디터 H 드림"))
+    btn = lambda href, key, text: (  # noqa: E731
+        f'<td width="50%" style="padding:0 4px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0">'
+        f'<tr><td align="center" style="background:{"#FFFFFF" if key == "A" else HL};border:2px solid {INK};border-radius:12px;">'
+        f'<a href="{href}" style="display:block;padding:14px 8px;font-family:{F};font-size:15px;font-weight:700;color:{INK};'
+        f'text-decoration:none;">{key} · {esc(text)}</a></td></tr></table></td>')
+    a, b = _poll_links(site, q)
+    return (_divider(30) + f'<tr><td class="px" style="padding:0 36px;">'
+            + _chips([("이번 주 투표", True), ("금요일에 결과 공개", False)])
+            + _div(f"font-size:21px;font-weight:700;line-height:1.5;color:{INK};margin-top:14px;", md(q["question"], BOLD, HL_B), True)
+            + f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:16px;"><tr>'
+            + btn(a, "A", q["options"][0]) + btn(b, "B", q["options"][1]) + "</tr></table>"
+            + _div(f"font-size:12.5px;font-weight:400;line-height:1.7;color:{MUTED};margin-top:10px;",
+                   "버튼을 누르면 투표 메일이 열려요 — 보내기만 누르면 끝. 이 메일에 A 또는 B 로 답장해도 되고, "
+                   "인스타그램 @edit.h.kr 게시물 댓글(A/B)도 함께 세요. 한 사람당 한 표, 이름·주소는 저장하지 않아요.", True)
+            + _box(_div(f"font-size:14.5px;font-weight:400;line-height:1.7;color:{INK};", closing, True), mt=16)
+            + "</td></tr>")
+
+
+def _poll_result(d):
+    r = d["poll_result"]
+    t = r["tally"]
+    bars = []
+    lead = max(t["votes"], key=lambda k: t["votes"][k])
+    for i, key in enumerate("AB"):
+        pct = t["pct"].get(key, 0)
+        fill = HL if key == lead else "#E4E4E4"
+        bars.append(
+            _div(f"font-size:14px;font-weight:700;line-height:1.4;color:{INK};margin-top:{12 if i else 14}px;",
+                 f"{key} · {esc(t['options'][i])} <span style=\"float:right;\">{pct}%</span>")
+            + f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:6px;background:{BOX};border-radius:8px;">'
+            f'<tr><td style="width:{max(pct, 2)}%;height:14px;background:{fill};border-radius:8px;font-size:0;line-height:0;">&nbsp;</td>'
+            f'<td style="font-size:0;line-height:0;">&nbsp;</td></tr></table>')
+    src = f"{t['total']}명 참여 · 메일 {t['channels'].get('email', 0)} · 인스타 {t['channels'].get('instagram', 0)}"
+    return (_divider(30) + f'<tr><td class="px" style="padding:0 36px;">'
+            + _chips([("투표 결과", True), (f"{r['id'][5:].replace('-', '/')} 투표", False)])
+            + _div(f"font-size:19px;font-weight:700;line-height:1.5;color:{INK};margin-top:14px;", md(t["question"], BOLD), True)
+            + "".join(bars)
+            + _div(f"font-size:12px;font-weight:400;line-height:1.5;color:{MUTED};margin-top:10px;", esc(src), True)
+            + (_box(_div(f"font-size:14.5px;font-weight:400;line-height:1.7;color:{INK};",
+                         f'<b style="font-weight:700;">에디터 H ·</b> ' + md(r["comment"])), mt=14) if r.get("comment") else "")
+            + "</td></tr>")
+
 
 def _cta(d, site, campaign, n_cards):
     stat = lambda big, small: (  # noqa: E731
@@ -240,12 +380,22 @@ def _footer(site, campaign):
 def render(d, site, n_cards):
     campaign = "daily_" + d["date"].replace("-", "")
     title = plain(d["title"])
-    body = [_header(d), _divider(), _letter(d), _divider(30), _hero(d)]
-    for i, sec in enumerate(d["sections"], 1):
-        body.append(_divider(0))
-        body.append(_section_head(i, sec))
-        body.extend(_item(it) for it in sec["items"])
-    body += [_briefs(d), _question(d), _cta(d, site, campaign, n_cards), _footer(site, campaign)]
+    if d.get("format") == 2:
+        body = [_header(d), _divider(), _note(d), _divider(30), _pick(d), _divider(0),
+                f'<tr><td class="px" style="padding:30px 36px 0;">{_chips([("02–05", True), ("함께 볼 4가지", False)])}</td></tr>']
+        body.extend(_item(it) for it in d["items"])
+        body.append(_briefs(d, "한 줄 뉴스"))
+        if d.get("poll_result"):
+            body.append(_poll_result(d))
+        body.append(_poll_block(d, site) if d.get("poll") else _question(d))
+    else:
+        body = [_header(d), _divider(), _letter(d), _divider(30), _hero(d)]
+        for i, sec in enumerate(d["sections"], 1):
+            body.append(_divider(0))
+            body.append(_section_head(i, sec))
+            body.extend(_item(it) for it in sec["items"])
+        body += [_briefs(d), _question(d)]
+    body += [_cta(d, site, campaign, n_cards), _footer(site, campaign)]
     return f"""<!DOCTYPE html>
 <html lang="ko">
 <head>
