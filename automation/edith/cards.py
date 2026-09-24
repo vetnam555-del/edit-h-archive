@@ -11,6 +11,9 @@ Design M 카드뉴스 키트 '매거진 세트'(표지 24 → 본문 9 → 마�
   09      관찰     H의 한 줄 관찰(마트 '시식후기'식 에디터 결론)
   10      마무리   오늘의 저장각 + 프로필 카드(10개 이슈 전문 · 6장 핵심 카드 · N호 누적 발행)
 
+형식 2(5가지, 2026-09-28~): 01 표지 → 02 5가지 요약 → 03 H PICK → 04 심층 '왜 중요해?'(숫자 상자 + 요점) → 05~08 이슈 4장
+  → 09 에디터 H 노트(안경 마크 + 한 줄, 금요일엔 투표 결과) → 10 마무리(월요일엔 A/B 투표)
+
 개선안(B)을 고른 근거(A 현재·B·C 블랙 시안을 같은 내용으로 렌더링해 피드 390px·그리드 130px 크기로 측정):
 표지 최대 글자가 그리드에서 10px→36px, 카드당 글자 127→90자, 피드 본문 10.5→11.9px, 출처 글자 대비 3.1→4.5:1 이상.
 
@@ -297,6 +300,68 @@ def observation(d):
 </div>""")
 
 
+def deep_card(d):
+    """형식 2 — H PICK 심층 '왜 중요해?'. 검정 H PICK 카드 바로 뒤에 붙어 한 이슈를 두 장으로 읽게 한다."""
+    b, deep = d["big_issue"], d["cards"]["deep"]
+    tiles = "".join(
+        f'<div style="flex:1;min-width:0;background:{BOX};border-radius:24px;padding:24px 14px;text-align:center;">'
+        f'<div style="font-weight:800;font-size:{fs(54)};line-height:1.1;letter-spacing:-1px;color:{TEXT};white-space:nowrap;">{esc(n["value"])}</div>'
+        f'<div style="font-weight:500;font-size:{fs(24)};line-height:1.35;margin-top:10px;color:{SUB};">{esc(n["label"])}</div></div>'
+        for n in b["numbers"])
+    points = "".join(
+        f'<div style="display:flex;gap:22px;align-items:flex-start;padding:32px 0;border-bottom:2px solid #EAEAEA;">'
+        f'<div style="flex:none;width:54px;height:54px;border-radius:12px;background:{TEXT};color:#FFFFFF;display:flex;'
+        f'align-items:center;justify-content:center;font-weight:700;font-size:28px;">{i}</div>'
+        f'<div class="bal" style="font-weight:600;font-size:{fs(40)};line-height:1.45;color:{TEXT};padding-top:1px;text-align:left;">{mk(pt)}</div></div>'
+        for i, pt in enumerate(deep["points"], 1))
+    src = d["card_issues"][0]["source"]
+    return _frame(f"""
+<div class="body" style="padding:110px 70px 140px;justify-content:center;">
+  <div style="text-align:center;">{bubble("왜 중요해?")}</div>
+  <div class="bal" style="text-align:center;font-weight:800;font-size:{fs(74)};line-height:1.3;letter-spacing:-1.5px;color:{TEXT};">{mk(deep["headline"])}</div>
+  <div style="flex:none;display:flex;gap:14px;width:100%;margin-top:46px;">{tiles}</div>
+  <div style="flex:none;margin-top:40px;border-top:3px solid {TEXT};">{points}</div>
+</div>
+<div style="position:absolute;left:60px;right:60px;bottom:70px;text-align:center;font-size:24px;line-height:1.4;color:{SRC_LIGHT};">H PICK 심층 · 출처 · {esc(src)}</div>""")
+
+
+def note_card(d):
+    """형식 2 — 에디터 H 노트(고정 코너). 안경 마크로 에디터를 캐릭터로 세운다. 투표 결과가 있는 날은 결과를 싣는다."""
+    head = (f'<div style="display:flex;align-items:center;gap:22px;">{avatar(96)}'
+            f'<div><div style="font-weight:800;font-size:38px;line-height:1.1;color:{TEXT};">에디터 H 노트</div>'
+            f'<div style="font-weight:500;font-size:24px;line-height:1;margin-top:10px;color:{SUB};letter-spacing:1px;">EDITOR H&#39;S NOTE</div></div></div>')
+    r = d.get("poll_result")
+    if r:
+        t = r["tally"]
+        lead = max(t["votes"], key=lambda k: t["votes"][k])
+        bars = "".join(
+            f'<div style="margin-top:{34 if i else 40}px;">'
+            f'<div style="display:flex;justify-content:space-between;font-weight:700;font-size:{fs(36)};color:{TEXT};">'
+            f'<span>{key} · {esc(t["options"][i])}</span><span>{t["pct"].get(key, 0)}%</span></div>'
+            f'<div style="margin-top:14px;height:34px;border-radius:17px;background:{BOX};overflow:hidden;">'
+            f'<div style="width:{max(t["pct"].get(key, 0), 3)}%;height:100%;border-radius:17px;background:{ACC_FILL if key == lead else "#D9D9D9"};"></div></div></div>'
+            for i, key in enumerate("AB"))
+        body = (f'<div style="margin-top:56px;display:inline-block;align-self:flex-start;background:{CHIP_DARK};color:{ACC_ON_DARK};'
+                f'font-weight:700;font-size:28px;padding:12px 18px;">지난 투표 결과 · {t["total"]}명 참여</div>'
+                f'<div class="bal" style="margin-top:28px;font-weight:800;font-size:{fs(54)};line-height:1.35;letter-spacing:-1px;color:{TEXT};">{mk(t["question"])}</div>'
+                f'{bars}'
+                + (f'<div class="bal" style="margin-top:48px;font-weight:500;font-size:{fs(34)};line-height:1.55;color:{SUB};">{mk(r["comment"])}</div>'
+                   if r.get("comment") else ""))
+    else:
+        text = str(d["observation"])
+        h, sep, tail = text.partition(" — ")
+        quote = (f"{mk(h)} — <span style=\"background:linear-gradient(180deg,transparent 58%,{ACC_FILL} 58%);font-weight:800;color:{TEXT};\">{mk(tail)}</span>"
+                 if sep else mk(text))
+        body = (f'<div style="margin-top:50px;font-weight:900;font-size:150px;line-height:.7;height:70px;color:{ACC_FILL};">“</div>'
+                f'<div class="bal" style="margin-top:6px;font-weight:600;font-size:{fs(60)};line-height:1.55;letter-spacing:-1.5px;color:{TEXT};">{quote}</div>')
+    return _frame(f"""
+<div class="body" style="padding:120px 90px 110px;justify-content:center;">
+  {head}
+  {body}
+  <div style="margin-top:56px;text-align:right;font-weight:500;font-size:30px;color:{SUB};">— 에디터 H</div>
+</div>""")
+
+
 def list_card(label, title, rows):
     """라벨 + 굵은 제목 + 번호 목록 — 주간 특집 '이번 주를 한 줄로' 등."""
     items = "".join(
@@ -327,6 +392,7 @@ def avatar(size=148):
 
 def cta(d):
     c = d["cards"]["cta"]
+    poll = d.get("poll")
     stats = [(f"{len(d['all_items'])}개", "이슈 전문"), (f"{len(d['card_issues'])}장", "핵심 카드"), (f"{int(d['vol'])}호", "누적 발행")]
     stat_html = "".join(
         f'<div><div style="font-weight:700;font-size:36px;line-height:1;color:#1B1B1E;">{v}</div>'
@@ -334,12 +400,24 @@ def cta(d):
         for v, lbl in stats)
     link = re.sub(r"^[^0-9A-Za-z가-힣]+\s*", "", c.get("pill", "팔로우 + 저장해두기"))
     tail = f"이슈 {len(d['all_items'])}개 전문＋출처는 매일 아침 뉴스레터로\n→ **프로필 링크**에서 받아보세요"
+    if poll:
+        # 월요일 투표 — 댓글 A/B 로 받는다(tally_poll.py 가 세고, 금요일 호에 결과를 싣는다)
+        pill = lambda key, text, bg: (  # noqa: E731
+            f'<div style="flex:1;min-width:0;background:{bg};border:4px solid {TEXT};border-radius:26px;padding:26px 18px;text-align:center;">'
+            f'<div style="font-weight:900;font-size:56px;line-height:1;color:{TEXT};">{key}</div>'
+            f'<div class="bal" style="margin-top:14px;font-weight:700;font-size:{fs(34)};line-height:1.3;color:{TEXT};">{esc(text)}</div></div>')
+        top = (f'<div style="text-align:center;font-weight:700;font-size:28px;line-height:1;color:#5A5A5E;">이번 주 투표 · 금요일에 결과 공개</div>'
+               f'<div class="bal" style="margin-top:30px;text-align:center;font-weight:800;font-size:{fs(54)};line-height:1.35;letter-spacing:-1px;color:{TEXT};">{mk(poll["question"])}</div>'
+               f'<div style="flex:none;margin-top:36px;display:flex;gap:18px;">{pill("A", poll["options"][0], "#FFFFFF")}{pill("B", poll["options"][1], ACC_FILL)}</div>'
+               f'<div style="margin-top:24px;text-align:center;font-weight:700;font-size:{fs(32)};color:{ACC_INK};">댓글로 A 또는 B 남겨주세요</div>')
+    else:
+        top = (f'<div style="text-align:center;font-weight:700;font-size:28px;line-height:1;color:#5A5A5E;">{esc(c["kick"])}</div>'
+               f'<div class="bal" style="margin-top:34px;text-align:center;font-weight:700;font-size:{fs(52)};line-height:1.4;letter-spacing:-1px;color:{TEXT};">{mk(c["headline"])}</div>'
+               f'<div class="bal" style="margin-top:22px;text-align:center;font-weight:400;font-size:{fs(32)};line-height:1.5;color:{SUB};">{mk(c["sub"])}</div>')
     return _frame(f"""
 <div class="body" style="padding:60px 78px;justify-content:center;">
-  <div style="text-align:center;font-weight:700;font-size:28px;line-height:1;color:#5A5A5E;">{esc(c["kick"])}</div>
-  <div class="bal" style="margin-top:34px;text-align:center;font-weight:700;font-size:{fs(52)};line-height:1.4;letter-spacing:-1px;color:{TEXT};">{mk(c["headline"])}</div>
-  <div class="bal" style="margin-top:22px;text-align:center;font-weight:400;font-size:{fs(32)};line-height:1.5;color:{SUB};">{mk(c["sub"])}</div>
-  <div style="flex:none;margin-top:50px;background:#FFFFFF;border:1.5px solid #EAEAEA;border-radius:34px;box-shadow:0 4px 10px rgba(0,0,0,.10);padding:36px 40px;display:flex;align-items:center;gap:40px;">
+  {top}
+  <div style="flex:none;margin-top:{40 if poll else 50}px;background:#FFFFFF;border:1.5px solid #EAEAEA;border-radius:34px;box-shadow:0 4px 10px rgba(0,0,0,.10);padding:36px 40px;display:flex;align-items:center;gap:40px;">
     {avatar()}
     <div style="flex:1;">
       <div style="font-weight:500;font-size:31px;line-height:1;color:{TEXT};">edit.h.kr</div>
@@ -347,18 +425,26 @@ def cta(d):
     </div>
   </div>
   <div style="margin-top:26px;text-align:right;font-weight:400;font-size:30px;line-height:1;color:{SRC_LIGHT};">{esc(link)}&gt;</div>
-  <div class="bal" style="margin-top:64px;text-align:center;font-weight:400;font-size:27px;line-height:1.6;color:{SUB};">{mk(tail)}</div>
+  <div class="bal" style="margin-top:{40 if poll else 64}px;text-align:center;font-weight:400;font-size:27px;line-height:1.6;color:{SUB};">{mk(tail)}</div>
 </div>""")
 
 
 CARD_NAMES = ["cover", "summary", "issue1", "issue2", "issue3", "issue4", "issue5", "issue6", "observation", "cta"]
+CARD_NAMES_2 = ["cover", "summary", "pick", "deep", "issue2", "issue3", "issue4", "issue5", "note", "cta"]
 
 
 def build(d, font_css):
     """(html 문자열, 파일명 목록)을 돌려준다. 카드 순서 = 파일명 순서."""
     issues = d["card_issues"]
-    sections = [cover(d), summary(d)] + [issue_card(it, i) for i, it in enumerate(issues, 1)] + [observation(d), cta(d)]
-    files = [f"{i:02d}_edit_h_{d['date']}_{name}.png" for i, name in enumerate(CARD_NAMES, 1)]
+    if d.get("format") == 2:
+        cards = ([cover(d), summary(d), issue_card(issues[0], 1), deep_card(d)]
+                 + [issue_card(it, i) for i, it in enumerate(issues[1:], 2)] + [note_card(d), cta(d)])
+        names = CARD_NAMES_2
+    else:
+        cards = [cover(d), summary(d)] + [issue_card(it, i) for i, it in enumerate(issues, 1)] + [observation(d), cta(d)]
+        names = CARD_NAMES
+    sections = cards
+    files = [f"{i:02d}_edit_h_{d['date']}_{name}.png" for i, name in enumerate(names, 1)]
     page = f"""<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8">
 <style>{font_css}
 {CSS}</style></head><body>

@@ -126,11 +126,22 @@ def html_to_text(src):
     return re.sub(r"\n{3,}", "\n\n", "\n".join(lines)).strip()
 
 
+def poll_links(page, site, sender):
+    """웹(아카이브)용 투표 버튼(poll.html)을 메일에서는 '투표 메일 쓰기'(mailto)로 바꾼다.
+    제목 '[EDIT H POLL 2026-09-28] A' 를 tally_poll.py 가 센다. 발신 주소를 공개 저장소에 두지 않으려고 보낼 때 바꾼다."""
+    def to_mailto(m):
+        pid, v = m.group(1), m.group(2)
+        subject = urllib.parse.quote(f"[EDIT H POLL {pid}] {v}")
+        body = urllib.parse.quote(f"{v} 에 투표합니다. (이대로 보내기만 하면 한 표가 돼요)")
+        return f"mailto:{sender}?subject={subject}&amp;body={body}"
+    return re.sub(re.escape(site) + r"/poll\.html\?id=(\d{4}-\d{2}-\d{2})&amp;v=([AB])", to_mailto, page)
+
+
 def build_message(issue, page, to_addr, cfg, sender):
     site = cfg["site_url"]
     q = urllib.parse.quote(to_addr)
     unsub = f"{site}/unsubscribe.html?email={q}"
-    body = page.replace("email=PLACEHOLDER", f"email={q}")
+    body = poll_links(page.replace("email=PLACEHOLDER", f"email={q}"), site, sender)
     msg = EmailMessage()
     msg["Subject"] = f"{cfg['email']['subject_prefix']} {issue['title']}"
     msg["From"] = formataddr((cfg["email"]["from_name"], sender))

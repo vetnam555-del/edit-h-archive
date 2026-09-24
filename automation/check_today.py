@@ -4,6 +4,7 @@
 사용: python3 automation/check_today.py [YYYY-MM-DD]
 출력: JSON 한 덩어리. publish=false 면 루틴은 아무것도 만들지 않고 끝낸다.
 """
+import datetime as dt
 import json
 import sys
 from pathlib import Path
@@ -21,6 +22,37 @@ def holidays():
         if not k.startswith("_"):
             out.update(v)
     return out, sorted(k for k in data if not k.startswith("_"))
+
+
+def poll_status(d, wd, cfg):
+    """(poll_due, poll_result). 그 주 첫 발행 호면 투표를 낸다. 금요일(또는 투표 주가 지난 첫 호)이면
+    아직 싣지 않은 지난 투표 결과를 알려준다 — 참여가 config.poll.min_votes 보다 적으면 싣지 않는다(note 로 사유)."""
+    monday = d - dt.timedelta(days=d.weekday())
+    files = {p.stem: p for p in CONTENT_DIR.glob("20*.json")}
+    this_week = [k for k in files if monday.isoformat() <= k < d.isoformat()]
+    poll_due = not this_week
+
+    polls = sorted(k for k in files if k < d.isoformat() and (d - parse_date(k)).days <= 14
+                   and json.loads(files[k].read_text(encoding="utf-8")).get("poll"))
+    if not polls:
+        return poll_due, None
+    pid = polls[-1]
+    shown = any(json.loads(files[k].read_text(encoding="utf-8")).get("poll_result", {}).get("id") == pid
+                for k in files if k > pid)
+    poll_week_over = parse_date(pid) < monday
+    if shown or not (wd == "금" or poll_week_over):
+        return poll_due, None
+    path = AUTOMATION / "polls" / f"{pid}.json"
+    if not path.exists():
+        return poll_due, {"id": pid, "show": False, "note": "집계 파일이 아직 없어요(tally-poll.yml 06:20) — 오늘은 결과 없이 발행"}
+    t = json.loads(path.read_text(encoding="utf-8"))
+    total = sum(t["votes"].values())
+    need = int((cfg.get("poll") or {}).get("min_votes", 5))
+    if total < need:
+        return poll_due, {"id": pid, "show": False, "total": total,
+                          "note": f"참여 {total}명(기준 {need}명 미만) — 결과는 싣지 않는다"}
+    return poll_due, {"id": pid, "show": True, "question": t["question"], "options": t["options"],
+                      "votes": t["votes"], "total": total, "channels": t.get("channels", {})}
 
 
 def main():
@@ -47,6 +79,7 @@ def main():
     for p in sorted(CONTENT_DIR.glob("*.json"))[-5:]:
         c = json.loads(p.read_text(encoding="utf-8"))
         recent_items += [it["title"] for sec in c.get("sections", []) for it in sec.get("items", [])]
+        recent_items += [it["title"] for it in c.get("items", [])]  # 형식 2
 
     warn = []
     if str(d.year) not in years:
@@ -55,6 +88,8 @@ def main():
     ws = cfg.get("weekly_special") or {}
     weekly_due = (reason is None and ws.get("enabled_from") is not None and date >= ws["enabled_from"]
                   and wd == ws.get("weekday", "금"))
+
+    poll_due, poll_result = poll_status(d, wd, cfg)
 
     print(json.dumps({
         "date": date,
@@ -65,6 +100,8 @@ def main():
         "next_vol": next_vol(date),
         "send_time_kst": cfg["send_time_kst"],
         "weekly_special_due": weekly_due,  # true 면 데일리 발행 뒤 RUNBOOK '금요일 주간 특집'도 만든다
+        "poll_due": poll_due,              # true 면 오늘 호에 content.poll(A/B 투표)을 넣는다(그 주 첫 호)
+        "poll_result": poll_result,        # 있으면 오늘 호에 content.poll_result 로 결과를 싣는다(RUNBOOK '독자 투표')
         "recent_issues": recent,
         "recent_item_titles": recent_items,
         "warnings": warn,

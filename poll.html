@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EDIT H — 이번 주 투표</title>
+<meta property="og:title" content="EDIT H — 이번 주 투표">
+<meta property="og:description" content="매주 월요일 묻고, 금요일에 결과를 공개해요. 메일 또는 인스타그램 댓글로 참여하세요.">
+<meta property="og:image" content="https://vetnam555-del.github.io/edit-h-archive/og_image.png">
+<link rel="icon" type="image/png" href="favicon.png">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Apple SD Gothic Neo','Pretendard','Malgun Gothic',-apple-system,sans-serif; background: #FAFAF7; color: #1A1A1A;
+    line-height: 1.7; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 32px 16px; }
+  .card { max-width: 520px; width: 100%; background: #FFF; padding: 44px 36px; }
+  .brand { font-size: 11px; letter-spacing: 5px; color: #888; font-weight: 700; margin-bottom: 8px; }
+  .logo { font-size: 42px; font-weight: 900; letter-spacing: -2px; line-height: 1; }
+  .logo .h { color: #B91C1C; }
+  .divider { height: 2px; background: #000; margin: 22px 0 26px; }
+  h1 { font-size: 23px; font-weight: 900; letter-spacing: -0.6px; line-height: 1.4; margin-bottom: 12px; }
+  .pick { display: inline-block; margin: 6px 0 18px; padding: 6px 12px; background: #FFC9AD; font-weight: 800; }
+  p { font-size: 15px; color: #444; margin-bottom: 14px; }
+  ol { margin: 0 0 20px 20px; font-size: 15px; color: #333; }
+  ol li { margin-bottom: 8px; }
+  a.btn { display: block; text-align: center; padding: 15px; margin-top: 10px; font-weight: 800; letter-spacing: 1px;
+    background: #000; color: #FFF; text-decoration: none; }
+  a.btn.alt { background: #FFF; color: #000; border: 1px solid #000; }
+  .note { font-size: 12px; color: #888; margin-top: 18px; text-align: center; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="brand">WEEKLY POLL</div>
+  <div class="logo">EDIT<span class="h"> H</span></div>
+  <div class="divider"></div>
+
+  <h1>이번 주 투표는<br>메일과 인스타그램 댓글로 받아요</h1>
+  <div class="pick" id="pick" hidden></div>
+  <p>매주 월요일 EDIT H가 A·B 중 하나를 묻고, 금요일 아침 호에서 결과를 공개해요.</p>
+  <ol>
+    <li><b>뉴스레터 구독자</b> — 메일 속 A·B 버튼을 누르면 투표 메일이 열려요. 보내기만 누르면 끝. 메일에 A 또는 B 로 답장해도 돼요.</li>
+    <li><b>인스타그램</b> — @edit.h.kr 월요일 게시물에 댓글로 <b>A</b> 또는 <b>B</b>.</li>
+  </ol>
+  <a class="btn" href="https://instagram.com/edit.h.kr" target="_blank" rel="noopener">인스타그램에서 투표하기</a>
+  <a class="btn alt" href="subscribe.html">뉴스레터 구독하고 메일로 투표하기</a>
+  <div class="note">한 사람당 한 표 · 이름·주소·계정은 저장하지 않고 숫자만 집계해요</div>
+</div>
+<script>
+  // 웹 아카이브에서 버튼을 누르고 들어온 경우, 고른 쪽을 보여준다(표는 메일·댓글로만 집계된다)
+  const v = new URLSearchParams(location.search).get('v');
+  if (v === 'A' || v === 'B') {
+    const el = document.getElementById('pick');
+    el.textContent = v + ' 를 고르셨네요 — 아래 방법으로 한 표를 남겨주세요';
+    el.hidden = false;
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+# EDIT H 주간 독자 투표 집계 — 메일(투표 메일·A/B 답장, Gmail IMAP 읽기 전용) + 인스타그램 댓글.
+# 평일 06:20(KST)에 돌아 automation/polls/{투표 날짜}.json 을 갱신한다. 07:00 제작 루틴이 금요일에 이 숫자로 결과를 싣는다.
+# 공개 저장소라 숫자만 남기고, 로그에도 주소·계정 이름은 찍지 않는다(automation/tally_poll.py).
+name: Tally EDIT H poll
+
+on:
+  schedule:
+    - cron: "20 21 * * 0-4"   # UTC 일–목 21:20 = KST 월–금 06:20
+  workflow_dispatch:
+    inputs:
+      id:
+        description: "투표 날짜 YYYY-MM-DD (비우면 최근 14일 안의 투표 전부)"
+        required: false
+      dry_run:
+        description: "세기만 하고 저장하지 않음"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: tally-poll
+  cancel-in-progress: false
+
+jobs:
+  tally:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Tally
+        env:
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          IN_ID: ${{ inputs.id }}
+          IN_DRY: ${{ inputs.dry_run }}
+        run: |
+          args=""
+          [ -n "$IN_ID" ] && args="$args --id $IN_ID"
+          [ "$IN_DRY" = "true" ] && args="$args --dry-run"
+          python3 automation/tally_poll.py $args
+
+      - name: Record tally
+        run: |
+          if [ -n "$(git status --porcelain automation/polls)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add automation/polls
+            git commit -m "Tally EDIT H poll ($(date -u +%F))"
+            for i in 1 2 3 4; do
+              git pull --rebase origin main && git push origin HEAD:main && break
+              sleep $((i * 5))
+            done
+          fi

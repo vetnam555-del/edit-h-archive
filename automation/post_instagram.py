@@ -175,8 +175,9 @@ def post_reel(g, uid, key, folder, cfg, dry, ffmpeg):
     return g.call("POST", f"{uid}/media_publish", creation_id=cid)["id"], track
 
 
-def _save_secret(new_token):
-    """GitHub Secret IG_ACCESS_TOKEN 을 새 토큰으로 바꾼다(GH_ADMIN_TOKEN 필요). 토큰 값은 절대 로그에 찍지 않는다."""
+def _save_secret(new_token, name="IG_ACCESS_TOKEN"):
+    """GitHub Secret(기본 IG_ACCESS_TOKEN)을 새 값으로 바꾼다(GH_ADMIN_TOKEN 필요). 값은 절대 로그에 찍지 않는다.
+    sync_subscribers.py 도 SUBSCRIBERS·SUBSCRIBERS_BACKUP 을 쓸 때 이걸 쓴다."""
     admin, repo = os.environ.get("GH_ADMIN_TOKEN"), os.environ.get("GITHUB_REPOSITORY")
     if not (admin and repo):
         return False
@@ -188,7 +189,7 @@ def _save_secret(new_token):
     box = public.SealedBox(public.PublicKey(pk["key"].encode(), encoding.Base64Encoder()))
     body = json.dumps({"encrypted_value": base64.b64encode(box.encrypt(new_token.encode())).decode(),
                        "key_id": pk["key_id"]}).encode()
-    req = urllib.request.Request(f"{api}/IG_ACCESS_TOKEN", data=body, method="PUT",
+    req = urllib.request.Request(f"{api}/{name}", data=body, method="PUT",
                                  headers={**hdr, "Content-Type": "application/json"})
     with urllib.request.urlopen(req, timeout=30):
         pass
