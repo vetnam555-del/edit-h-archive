@@ -79,6 +79,9 @@ h1,h2,blockquote{text-wrap:balance;}
 .stat .c{font-size:calc(23px*var(--k));line-height:1.5;color:var(--muted);padding-bottom:10px;}
 .pick .num{font-size:calc(150px*var(--k));font-weight:900;line-height:.8;color:var(--red-ink);}
 .pick .row{display:flex;justify-content:space-between;align-items:flex-end;}
+.pick .mid{margin:auto 0;padding:36px 0 12px;}
+.pick .mid p{margin-top:0;}
+.pick .src{margin-top:0;}
 .pick .take{margin-top:44px;border-left:8px solid var(--red);padding:6px 0 6px 26px;font-size:calc(31px*var(--k));line-height:1.55;font-weight:700;}
 .pick .take b{color:var(--red-ink);}
 .pick .ministat{margin-top:30px;display:flex;align-items:baseline;gap:18px;}
@@ -209,8 +212,8 @@ def pick(d, it, n, total):
 <div class="top"><div class="row"><div class="num serif">{it['no']}</div><span class="chip">{esc(it['tag'])}</span></div>
 <h2 class="serif">{_acc(card.get('title', it['title']))}</h2></div>
 {ministat}
-<p>{_acc(text)}</p>
-<div class="take">→ {_acc(take)}</div>
+<div class="mid"><p>{_acc(text)}</p>
+<div class="take">→ {_acc(take)}</div></div>
 {_src(it['sources'])}
 </div>{_foot(n, total, d["send_time_kst"])}</section>"""
 
