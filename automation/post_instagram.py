@@ -133,7 +133,7 @@ def reel_caption(folder, track):
     tags = next((line for line in reversed(cap) if line.startswith("#")), "")
     n = len(list(folder.glob("[0-9][0-9]_edit_h_*.png"))) or 10
     lines = [hook, "", f"카드 {n}장 전체는 피드 게시물에서 저장해두세요 📌",
-             "📩 매일 아침 마케팅 뉴스레터는 프로필 링크에서"]
+             "📩 매일 아침 트렌드 뉴스레터는 프로필 링크에서"]
     if track:
         credit = f"🎵 {track['title']} — {track['artist']}"
         if track.get("license", "").upper() != "CC0":

@@ -6,7 +6,7 @@ Design M 카드뉴스 키트 '매거진 세트'(표지 24 → 본문 9 → 마�
   01      표지     EDIT H. 워드마크(비스킷식) + 머리말 + 띠 제목 두 줄(뉴닉식) + 핵심어 대형 마커·다른 이슈 스티커 3개
                    또는 실사 사진 풀블리드(위·아래만 어둡게, 스티커 없음)
   02      요약     '오늘의 6가지 한눈에' — 번호·제목·숫자 목록(키트 본문 19·20 문법). 저장을 부르는 카드
-  03~08   이슈 6장  말풍선 태그 → 형광 마커 숫자 → 보조 수치 상자 → 번호 배지 → 제목 → 짧은 본문 → '그래서 마케터는?' 대화
+  03~08   이슈 6장  말풍선 태그 → 형광 마커 숫자 → 보조 수치 상자 → 번호 배지 → 제목 → 짧은 본문 → '그래서 뭐가 달라져?' 대화
                    H PICK 1장은 검정 배경 + 윤곽 숫자 + 노란 '(H PICK · 오늘의 핵심)', compare형은 BEFORE/AFTER 상자
   09      관찰     H의 한 줄 관찰(마트 '시식후기'식 에디터 결론)
   10      마무리   오늘의 저장각 + 프로필 카드(10개 이슈 전문 · 6장 핵심 카드 · N호 누적 발행)
@@ -171,7 +171,7 @@ def cover(d, kicker=None, foot=None):
     stickers = [f'{it["tag"]} {hero_value(it)}' for it in issues[1:4]]
     spots = [("left:10px;top:0;", -3), ("right:0;top:230px;", 2), ("left:40px;top:430px;", -1.5)]
     sticker_html = "".join(f'<div style="position:absolute;{pos}">{_sticker(t, r)}</div>' for t, (pos, r) in zip(stickers, spots))
-    kicker = kicker or f"#{d['vol']} {WEEKDAY_FULL[d['weekday']]}의 마케팅 브리프 | 오늘의 {len(issues)}가지"
+    kicker = kicker or f"#{d['vol']} {WEEKDAY_FULL[d['weekday']]}의 트렌드 브리프 | 오늘의 {len(issues)}가지"
     foot = foot or f"밀어서 {len(issues)}가지 보기 →"
     bg = ""
     if photo:
@@ -219,7 +219,7 @@ def summary(d, period="오늘의"):
     n = len(d["card_issues"])
     return _frame(f"""
 <div class="body" style="padding:110px 76px 100px;justify-content:center;">
-  <div style="text-align:center;font-weight:700;font-size:30px;color:#5A5A5E;">저장해두고 회의 전에 보세요</div>
+  <div style="text-align:center;font-weight:700;font-size:30px;color:#5A5A5E;">저장해두고 두고두고 보세요</div>
   <div style="text-align:center;margin-top:22px;font-weight:700;font-size:{fs(72)};letter-spacing:-1px;color:{TEXT};">{period} <span style="background:linear-gradient(180deg,transparent 58%,{ACC_FILL} 58%);">{n}가지</span> 한눈에</div>
   <div style="flex:none;margin-top:52px;border-top:3px solid {TEXT};">{rows}</div>
 </div>""")
@@ -236,13 +236,13 @@ def stat_tiles(metrics, dark):
 
 
 def dialogue(take, dark):
-    """뉴닉식 대화 — 흰 질문 말풍선 '그래서 마케터는?' → 복숭아색 답 말풍선(인사이트). 키트 본문 21(Q&A) 문법과도 맞다.
+    """대화 — 흰 질문 말풍선 '그래서 뭐가 달라져?' → 복숭아색 답 말풍선(이 뉴스로 바뀌는 것, 누구나 읽을 수 있게). 키트 본문 21(Q&A) 문법과도 맞다.
     답이 'A — B' 꼴이면 줄표 뒤에서 줄을 바꿔 두 마디로 읽히게 하고, 렌더러(.shrink)가 말풍선 폭을 가장 긴 줄에 맞춘다."""
     q_bg, q_fg = ("#1E1E21", "#FFFFFF") if dark else ("#FFFFFF", TEXT)
     line = "#FFFFFF" if dark else TEXT
     return (f'<div style="flex:none;width:100%;margin-top:26px;display:flex;flex-direction:column;gap:10px;">'
             f'<div style="align-self:flex-start;background:{q_bg};border:3px solid {line};border-radius:22px 22px 22px 6px;'
-            f'padding:14px 24px;font-weight:600;font-size:{fs(28)};line-height:1.2;color:{q_fg};">그래서 마케터는?</div>'
+            f'padding:14px 24px;font-weight:600;font-size:{fs(28)};line-height:1.2;color:{q_fg};">그래서 뭐가 달라져?</div>'
             f'<div class="bal shrink" style="align-self:flex-end;max-width:92%;background:{ACC_FILL};border:3px solid {line};'
             f'border-radius:22px 22px 6px 22px;padding:16px 26px;text-align:left;font-weight:700;font-size:{fs(31)};'
             f'line-height:1.45;color:{TEXT};">{mk(take, TEXT).replace(" — ", " —<br>")}</div></div>')

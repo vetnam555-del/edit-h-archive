@@ -110,7 +110,7 @@ def load(date_str):
                       "photo": spec.get("photo"), "credit": spec.get("credit"),
                       "focus": spec.get("focus")},
             "cta": {"kick": "이번 주 저장각", "headline": spec.get("cta_headline") or ol["title"],
-                    "sub": "다음 주 회의 전에 한 번 더 꺼내보세요.", "pill": "팔로우 + 저장해두기"},
+                    "sub": "저장해두고 다음 주에 한 번 더 꺼내보세요.", "pill": "팔로우 + 저장해두기"},
         },
         "send_time_kst": load_config()["send_time_kst"],
     }
@@ -118,9 +118,9 @@ def load(date_str):
 
 def caption(w):
     spec = w["spec"]
-    lines = [spec["caption"].strip(), "", f"{w['week_label']} 마케팅 숫자 {len(w['card_issues'])} 👇"]
+    lines = [spec["caption"].strip(), "", f"{w['week_label']} 트렌드 숫자 {len(w['card_issues'])} 👇"]
     lines += [f"{'❶❷❸❹❺❻❼'[i]} {plain(it['headline'])} ({it['day_label']})" for i, it in enumerate(w["card_issues"])]
-    lines += ["", "📌 저장해두고 다음 주 회의 전에 꺼내보세요", "💬 이 중 우리 팀 회의에 가져갈 한 가지는? 댓글로 알려주세요", ""]
+    lines += ["", "📌 저장해두고 다음 주에 다시 꺼내보세요", "💬 이 중 가장 와닿은 한 가지는? 댓글로 알려주세요", ""]
     if w["cards"]["cover"].get("photo") and w["cards"]["cover"].get("credit"):
         lines.append(f"📷 표지 사진 출처: {w['cards']['cover']['credit'].replace('사진 = ', '')}")
     kw = (load_config().get("instagram") or {}).get("dm_keyword")
@@ -128,8 +128,8 @@ def caption(w):
         lines.append(f"📩 댓글에 '{kw}' 남기면 뉴스레터 구독 링크를 DM으로 보내드려요")
     when = send_time_ko(w["send_time_kst"]).replace("오전", "아침")
     lines.append(f"매 영업일 {when}, 10가지 전문과 출처는 뉴스레터로 — 프로필 링크")
-    lines.append("EDIT H · 매일 아침, 마케터의 트렌드 한 입 (@edit.h.kr)")
+    lines.append("EDIT H · 매일 아침, 트렌드 한 입 (@edit.h.kr)")
     lines.append("/ 에디터. H")
-    tags = spec.get("hashtags") or ["마케팅", "마케팅트렌드", "주간마케팅", "마케터", "카드뉴스", "EDITH"]
+    tags = spec.get("hashtags") or ["트렌드", "주간트렌드", "뉴스브리핑", "경제뉴스", "카드뉴스", "EDITH"]
     lines.append(" ".join("#" + re.sub(r"\s+", "", t.lstrip("#")) for t in tags))
     return "\n".join(lines)

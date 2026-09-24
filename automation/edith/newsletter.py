@@ -1,7 +1,7 @@
 """뉴스레터(이메일) HTML — 최신 양식(VOL.092, 2026-09-18) 기준.
 
 @edit.h.kr 머리 → #호수·요일 칩 → 가운데 정렬 제목(굵게/보통 두 줄) → 오늘의 편지(세 줄 요약 + H의 한 줄 관찰)
-→ 01 빅이슈(큰 숫자 박스 + 마케터의 한 줄) → #1~#N 섹션(번호 배지 · 태그 칩 · 회색 요약 박스)
+→ 01 빅이슈(큰 숫자 박스 + '그래서 뭐가 달라져?') → #1~#N 섹션(번호 배지 · 태그 칩 · 회색 요약 박스)
 → 짧게 볼 것 → Q(오늘의 질문) → 프로필 카드·구독 버튼 → 푸터.
 색: 글자 #282F38 · 본문 #555558 · 보조 #767676 · 칩 #FFDCCB/#B23A0F · 형광펜 #FFC9AD · 회색 박스 #F3F3F3.
 VOL.092 대비 보강: 출처를 원문 링크로, '카드뉴스 보기' 링크 추가. 이메일 호환을 위해 table + 인라인 스타일만 쓴다.
@@ -88,7 +88,7 @@ def _cover_title(hero):
 
 def _header(d):
     date_txt = d["date_obj"].strftime("%Y.%m.%d")
-    chips = [(f"#{d['vol']}", True), (f"{d['weekday']}요일의", False), ("마케팅", False), ("브리프", False)]
+    chips = [(f"#{d['vol']}", True), (f"{d['weekday']}요일의", False), ("트렌드", False), ("브리프", False)]
     return f"""
 <tr><td class="px" style="padding:30px 36px 0;">{_div(f"font-size:13px;font-weight:700;line-height:1;color:#5A5A5E;", "@edit.h.kr", True)}</td></tr>
 <tr><td class="px" style="padding:26px 36px 0;">{_chips(chips)}
@@ -128,7 +128,7 @@ def _hero(d):
     check = ""
     if b.get("checklist"):
         items = "".join(_div(f"font-size:14px;line-height:1.7;color:{BODY};margin-top:6px;", "☐ " + md(c)) for c in b["checklist"])
-        check = _box(_div(f"font-size:12.5px;font-weight:700;line-height:1.3;color:{INK};", "오늘 점검할 것") + items, mt=12)
+        check = _box(_div(f"font-size:12.5px;font-weight:700;line-height:1.3;color:{INK};", "알아두면 좋은 것") + items, mt=12)
     return f"""
 <!-- 이슈 01 -->
 <tr><td class="px" style="padding:0 36px;">{_badge(1)}
@@ -137,7 +137,7 @@ def _hero(d):
   {paras}
   <table role="presentation" align="center" cellpadding="0" cellspacing="0" style="margin-top:22px;"><tr><td class="stat" style="background:{HL};padding:4px 14px;font-family:{F};font-size:44px;font-weight:800;line-height:1.1;color:{INK};">{esc(st['value'])}<span style="font-size:24px;">{esc(st.get('unit', ''))}</span></td></tr></table>
   {_div(f"font-size:12.5px;font-weight:400;line-height:1.6;color:{MUTED};margin-top:8px;", esc(plain(st['caption'])), True)}
-  {_box(_div(f"font-size:12.5px;font-weight:700;line-height:1.3;color:{INK};", "마케터의 한 줄") + _div(f"font-size:14.5px;font-weight:400;line-height:1.75;color:{BODY};margin-top:8px;", md(b['takeaway'], BOLD)), mt=18)}
+  {_box(_div(f"font-size:12.5px;font-weight:700;line-height:1.3;color:{INK};", "그래서 뭐가 달라져?") + _div(f"font-size:14.5px;font-weight:400;line-height:1.75;color:{BODY};margin-top:8px;", md(b['takeaway'], BOLD)), mt=18)}
   {check}
   {_sources(b['sources'])}</td></tr>"""
 
@@ -215,7 +215,7 @@ def _cta(d, site, campaign, n_cards):
                  f'<span style="color:#C4C4C4;"> &nbsp;|&nbsp; </span>' + links)
     return (_divider(30) + f'<tr><td class="px" style="padding:0 36px;">'
             + _div(f"font-size:19px;font-weight:700;line-height:1.45;color:{INK};",
-                   f"매일 아침 {len(d['all_items'])}가지 마케팅 이슈를<br>한 번에 정리해 드려요!", True)
+                   f"매일 아침 {len(d['all_items'])}가지 트렌드 이슈를<br>한 번에 정리해 드려요!", True)
             + f"""<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:16px;background:#FFFFFF;border:1px solid {RULE};border-radius:18px;box-shadow:0 2px 6px rgba(0,0,0,.08);"><tr><td style="padding:18px 16px;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
     <td valign="middle" style="width:70px;">{AVATAR_MARK}</td>
@@ -232,7 +232,7 @@ def _footer(site, campaign):
     ig = f"https://instagram.com/edit.h.kr?utm_source=edit_h&amp;utm_medium=email&amp;utm_campaign={campaign}&amp;utm_content=footer_instagram"
     return (f'<tr><td class="px" style="padding:34px 36px 40px;">'
             + _div(f"font-size:12px;font-weight:400;line-height:1.9;color:{MUTED};",
-                   f'EDIT H · 매일 아침, 마케터의 트렌드 한 입 · 인스타그램 <a href="{ig}" style="color:{MUTED};">@edit.h.kr</a><br>'
+                   f'EDIT H · 매일 아침, 트렌드 한 입 · 인스타그램 <a href="{ig}" style="color:{MUTED};">@edit.h.kr</a><br>'
                    f'이 메일이 유용했다면 동료에게 전달해주세요. · <a href="{site}/unsubscribe.html?email=PLACEHOLDER" style="color:{MUTED};">수신거부</a>', True)
             + "</td></tr>")
 

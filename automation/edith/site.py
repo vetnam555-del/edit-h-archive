@@ -127,9 +127,9 @@ def instagram_caption(d, site):
     ig = d.get("instagram", {})
     issues = d["card_issues"]
     head = (ig.get("caption") or "").strip() or f"{plain(d['title'])}\n\n{plain(d['lead'])}"
-    lines = [head, "", f"{d['weekday']}요일의 마케팅 브리프 {len(issues)}가지 👇"]
+    lines = [head, "", f"{d['weekday']}요일의 트렌드 브리프 {len(issues)}가지 👇"]
     lines += [f"{'❶❷❸❹❺❻❼❽❾❿'[i]} {plain(it['headline'])}" for i, it in enumerate(issues)]
-    lines += ["", "📌 저장해두고 회의 전에 꺼내보세요", f"💬 {plain(d['question']['text'])} 댓글로 알려주세요", ""]
+    lines += ["", "📌 저장해두고 다시 꺼내보세요", f"💬 {plain(d['question']['text'])} 댓글로 알려주세요", ""]
     cov = (d.get("cards") or {}).get("cover") or {}
     if cov.get("photo") and cov.get("credit"):
         lines.append(f"📷 표지 사진 출처: {cov['credit'].replace('사진 = ', '')}")
@@ -138,9 +138,9 @@ def instagram_caption(d, site):
         lines.append(f"📩 댓글에 '{kw}' 남기면 뉴스레터 구독 링크를 DM으로 보내드려요")
     when = send_time_ko(d["send_time_kst"]).replace("오전", "아침")
     lines.append(f"매 영업일 {when}, {len(d['all_items'])}가지 전문과 출처는 뉴스레터로 — 프로필 링크")
-    lines.append("EDIT H · 매일 아침, 마케터의 트렌드 한 입 (@edit.h.kr)")
+    lines.append("EDIT H · 매일 아침, 트렌드 한 입 (@edit.h.kr)")
     lines.append("/ 에디터. H")
-    tags = ig.get("hashtags") or ["마케팅", "마케팅트렌드", "마케터", "브랜드마케팅", "카드뉴스", "EDITH"]
+    tags = ig.get("hashtags") or ["트렌드", "트렌드뉴스", "뉴스브리핑", "경제뉴스", "소비트렌드", "카드뉴스", "EDITH"]
     lines.append(" ".join("#" + re.sub(r"\s+", "", t.lstrip("#")) for t in tags))
     return "\n".join(lines)
 
@@ -148,7 +148,7 @@ def instagram_caption(d, site):
 def first_comment(d):
     """올린 직후 계정으로 달아 고정할 첫 댓글(마트식 팔로우 안내)."""
     kw = (load_config().get("instagram") or {}).get("dm_keyword")
-    lines = ["매일 아침, 마케터의 트렌드 한 입 — EDIT H @edit.h.kr 팔로우하고 저장해 두세요 🧡"]
+    lines = ["매일 아침, 트렌드 한 입 — EDIT H @edit.h.kr 팔로우하고 저장해 두세요 🧡"]
     if kw:
         lines.append(f"📩 '{kw}' 댓글 남기면 뉴스레터 구독 링크를 DM으로 보내드려요")
     return "\n".join(lines)
