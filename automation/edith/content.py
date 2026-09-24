@@ -10,12 +10,15 @@ class ContentError(ValueError):
 
 
 # 카드 한 장에 들어가는 글자 수 상한(공백·마크업 제외). 넘치면 렌더러가 폰트를 줄이는데,
-# 그 전에 여기서 먼저 막아 '글이 빽빽한 카드'를 원천적으로 줄인다. 기준은 VOL.092 실제 카드.
+# 그 전에 여기서 먼저 막아 '글이 빽빽한 카드'를 원천적으로 줄인다. 기준은 VOL.092 카드 + 개선안(B) 실측.
 CARD_LIMITS = {
     "cover_title": 34,       # 표지 두 줄 제목 합계
     "number": 9,             # 이슈 카드의 큰 숫자 (예: 300억원, 8.9조원, 82%)
     "headline": 26,          # 이슈 카드 제목 (두 줄)
-    "body": 130,             # 이슈 카드 본문
+    "body": 80,              # 이슈 카드 본문 — 1~2문장 (키트 본문 9 권장은 1문장)
+    "keyword": 5,            # 표지 대형 핵심어 (예: 8월, 새벽배송, 82%)
+    "metric_value": 8,       # 보조 수치 상자 값 (예: 11.9%)
+    "metric_label": 16,      # 보조 수치 상자 설명
     "takeaway": 60,          # 인사이트 상자
     "cta_headline": 34,      # 마무리 카드 질문
     "lead_point_title": 22,  # 뉴스레터 '오늘의 편지' 핵심 3개
@@ -73,6 +76,12 @@ def _card_issues(data, where):
                     raise ContentError(f"{w}: compare.{side} 에 value·label 이 모두 필요합니다")
         else:
             _need(ci, "number", w)
+        metrics = ci.get("metrics") or []
+        if len(metrics) > 3:
+            raise ContentError(f"{w}: metrics 는 3개 이하로 쓰세요(큰 숫자와 같은 값을 빼고 최대 2개가 상자로 나갑니다)")
+        for m in metrics:
+            if not m.get("value") or not m.get("label"):
+                raise ContentError(f"{w}: metrics 의 각 항목에 value·label 이 모두 필요합니다")
         src = by_no[no]
         out.append({**ci, "no": no, "tag": ci.get("tag") or src["tag"],
                     "source": ci.get("source") or source_label(src["sources"])})
@@ -152,6 +161,11 @@ def prepare(data, date_str):
     cards = data["cards"]
     cards.setdefault("cover", {})
     cards["cover"].setdefault("title", data["hero_title"])
+    if not cards["cover"].get("keyword"):
+        # 표지 핵심어 기본값: hero_title 의 ==강조== 첫 단어, 없으면 첫 카드의 큰 숫자
+        m = re.search(r"==(.+?)==", data["hero_title"])
+        first = data["card_issues"][0]
+        cards["cover"]["keyword"] = m.group(1) if m else (first.get("number") or first["compare"]["to"]["value"])
     if cards["cover"].get("photo") and not (ROOT / cards["cover"]["photo"]).exists():
         raise ContentError(f"{where}: cards.cover.photo 파일이 없습니다 ({cards['cover']['photo']})")
     if cards["cover"].get("photo") and not cards["cover"].get("credit"):
@@ -164,6 +178,7 @@ def prepare(data, date_str):
 
     problems = []
     _len_check(cards["cover"]["title"], CARD_LIMITS["cover_title"], "cards.cover.title(없으면 hero_title)", problems)
+    _len_check(cards["cover"]["keyword"], CARD_LIMITS["keyword"], "cards.cover.keyword(없으면 hero_title 의 ==강조==)", problems)
     for i, it in enumerate(data["card_issues"], 1):
         w = f"cards.issues[{i}]"
         if "number" in it:
@@ -171,6 +186,9 @@ def prepare(data, date_str):
         _len_check(it["headline"], CARD_LIMITS["headline"], f"{w}.headline", problems)
         _len_check(it["body"], CARD_LIMITS["body"], f"{w}.body", problems)
         _len_check(it["takeaway"], CARD_LIMITS["takeaway"], f"{w}.takeaway", problems)
+        for j, m in enumerate(it.get("metrics") or [], 1):
+            _len_check(m["value"], CARD_LIMITS["metric_value"], f"{w}.metrics[{j}].value", problems)
+            _len_check(m["label"], CARD_LIMITS["metric_label"], f"{w}.metrics[{j}].label", problems)
     _len_check(cta["headline"], CARD_LIMITS["cta_headline"], "cards.cta.headline(없으면 question.text)", problems)
     for i, p in enumerate(data.get("lead_points") or [], 1):
         _len_check(p["title"], CARD_LIMITS["lead_point_title"], f"lead_points[{i}].title", problems)
