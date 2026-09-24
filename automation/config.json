@@ -2,7 +2,13 @@
   "site_url": "https://vetnam555-del.github.io/edit-h-archive",
   "send_time_kst": "09:00",
   "routine_start_kst": "08:00",
-  "publish_days": ["월", "화", "수", "목", "금"],
+  "publish_days": [
+    "월",
+    "화",
+    "수",
+    "목",
+    "금"
+  ],
   "skip_kr_public_holidays": true,
   "items_per_issue": 10,
   "card_count": 9,
@@ -14,5 +20,9 @@
   "email": {
     "from_name": "EDIT H",
     "subject_prefix": "[EDIT H]"
+  },
+  "instagram": {
+    "dm_keyword": "에디트",
+    "_note": "캡션 끝 '댓글에 OO 남기면 구독 링크 DM' 문구의 키워드. 비우면 문구를 넣지 않는다(DM은 직접 보내야 함)"
   }
 }

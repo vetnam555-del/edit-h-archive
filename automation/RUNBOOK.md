@@ -93,7 +93,7 @@ IT·산업 전문지(전자신문, ZDNet Korea, 디지털데일리, AI타임스,
 | `briefs` | 0~3개 짧은 소식 |
 | `question` | `text`(강조 `==…==`, 줄바꿈 `\n`), `closing` |
 | `cards` | 카드뉴스 9장용 — 아래 '카드뉴스' 참고 |
-| `instagram` | `caption`, `hashtags` (없으면 VOL.092 형식으로 자동 생성) |
+| `instagram` | `caption` = **첫 줄 질문형 훅 + 대화체 2~3문장 요약만**(목록·저장/댓글 유도·구독 안내·해시태그는 자동으로 붙는다), `hashtags` 5~9개 |
 
 - 마크업: `**굵게**`, `==강조색==`, `\n` 줄바꿈. HTML 태그는 쓰지 않는다.
 - 톤: "~했어요/~예요" 구어체 존댓말, 문장은 짧게. takeaway 는 **마케터가 무엇을 하면 되는지** 한 문장.
@@ -108,9 +108,23 @@ IT·산업 전문지(전자신문, ZDNet Korea, 디지털데일리, AI타임스,
 
 | 필드 | 내용 |
 |---|---|
-| `cards.cover` | `title`(두 줄, 없으면 `hero_title`), `keyword`(표지에 크게 찍힐 핵심어 5자 이하 — 없으면 `hero_title` 의 `==강조==`). 사진을 쓰려면 `photo`(저장소 안 경로)·`credit`(출처·라이선스)·`focus`(선택). 없으면 흰 표지 |
-| `cards.issues` | 정확히 6개. `no`(뉴스레터 이슈 번호 1~10 — 태그·출처를 거기서 가져온다), `number`(큰 숫자, 9자 이하 예 `300억원`·`82%`), `headline`(두 줄 26자 이하, 핵심어 하나 `==강조==`), `body`(**1~2문장, 80자 이하** — 뉴스레터 본문을 그대로 옮기지 말고 핵심만), `takeaway`(60자 이하, 인사이트 상자). 선택: `metrics`(큰 숫자를 받쳐줄 보조 수치 `[{"value": "11.9%", "label": "8월 백화점 매출 증가"}]` 최대 2개, 값 8자·설명 16자 이하), `accent: true`(H PICK — 검정 반전, **하루 한 장**), `compare`(`{"from": {"value", "label"}, "to": {...}}` — 이전→이후 숫자가 핵심일 때, 이때 `number` 는 생략), `tag`(말풍선 문구를 바꿀 때) |
+| `cards.cover` | `title`(두 줄 — 각 줄이 띠 상자로 나간다, 없으면 `hero_title`), `keyword`(사진이 없을 때 크게 찍힐 핵심어 5자 이하 — 없으면 `hero_title` 의 `==강조==`). 표지 스티커 3개는 2~4번 이슈의 태그·숫자로 자동 생성. 사진을 쓰려면 `photo`(저장소 안 경로)·`credit`(출처·라이선스)·`focus`(선택). 없으면 흰 표지 |
+| `cards.issues` | 정확히 6개. `no`(뉴스레터 이슈 번호 1~10 — 태그·출처를 거기서 가져온다), `number`(큰 숫자, 9자 이하 예 `300억원`·`82%`), `headline`(두 줄 26자 이하, 핵심어 하나 `==강조==`), `body`(**1~2문장, 80자 이하** — 뉴스레터 본문을 그대로 옮기지 말고 핵심만), `takeaway`(60자 이하 — '그래서 마케터는?'에 대한 답 말풍선). 선택: `metrics`(큰 숫자를 받쳐줄 보조 수치 `[{"value": "11.9%", "label": "8월 백화점 매출 증가"}]` 최대 2개, 값 8자·설명 16자 이하), `accent: true`(H PICK — 검정 반전, **하루 한 장**), `compare`(`{"from": {"value", "label"}, "to": {...}}` — 이전→이후 숫자가 핵심일 때, 이때 `number` 는 생략), `tag`(말풍선 문구를 바꿀 때) |
 | `cards.cta` | `headline`(없으면 `question.text`), 나머지(`kick` 오늘의 저장각·`sub`·`pill`)는 기본값 |
+
+### 표지 사진 (선택, 10분 안에)
+
+뉴닉처럼 실사 사진 표지가 스크롤을 더 잘 멈추게 한다. 단 보도사진은 쓸 수 없으니 재사용 가능한 사진만 쓴다.
+
+```bash
+python3 automation/fetch_photo.py "영어 검색어"                       # 후보: 번호·라이선스·작가·설명
+python3 automation/fetch_photo.py "영어 검색어" --pick 3 --date {날짜}  # assets/photos/{날짜}.jpg 저장 + cards.cover 조각 출력
+```
+
+- 내려받은 사진은 **Read 도구로 직접 보고** 쓴다. 금지: 얼굴이 식별되는 사람, 크게 보이는 브랜드 로고·특정 매장 간판(오인 소지),
+  사건·사고·수사 현장, 기사와 무관한 이국적 풍경. (로컬 VOL.092 때 창고 사진이 실제로는 수사 증거사진이었던 사례가 있다)
+- 출력된 `photo`·`credit` 을 `cards.cover` 에 넣고, 5단계 커밋에 `assets/photos/` 를 포함한다.
+- 접속 실패(코드 2)·적당한 사진 없음이면 사진 없이(핵심어 표지) 진행한다. 사진 때문에 발행을 늦추지 않는다.
 
 카드 문구 원칙(디자인엠 키트의 기획 가이드를 EDIT H에 맞게 줄인 것):
 - 표지는 3초 안에 이해돼야 한다 — 질문·숫자·강한 키워드 중 하나 이상, 과장·낚시 금지.
@@ -140,7 +154,7 @@ python3 automation/build_issue.py {날짜}           # 뉴스레터·카드·man
 ## 5. 커밋·푸시
 
 ```bash
-git add {날짜}.html content/{날짜}.json instagram/{날짜}/ manifest.json index.html
+git add {날짜}.html content/{날짜}.json instagram/{날짜}/ manifest.json index.html assets/photos/
 git commit -m "Publish EDIT H {날짜} (VOL.{vol}) — {title}"
 git push origin HEAD:main
 ```
