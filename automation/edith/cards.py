@@ -7,7 +7,8 @@ Design M 카드뉴스 키트 '매거진 세트'(표지 24 → 본문 9 → 마�
   02      요약     '오늘의 6가지 한눈에' — 번호·제목·숫자 목록(키트 본문 19·20 문법). 저장을 부르는 카드
   03~08   이슈 6장  말풍선 태그 → 형광 마커 숫자 → 보조 수치 상자 → 번호 배지 → 제목 → 짧은 본문 → '그래서 마케터는?' 대화
                    H PICK 1장은 검정 배경 + 윤곽 숫자 + 노란 '(H PICK · 오늘의 핵심)', compare형은 BEFORE/AFTER 상자
-  09      마무리   오늘의 저장각 + 프로필 카드(10개 이슈 전문 · 6장 핵심 카드 · N호 누적 발행)
+  09      관찰     H의 한 줄 관찰(마트 '시식후기'식 에디터 결론)
+  10      마무리   오늘의 저장각 + 프로필 카드(10개 이슈 전문 · 6장 핵심 카드 · N호 누적 발행)
 
 개선안(B)을 고른 근거(A 현재·B·C 블랙 시안을 같은 내용으로 렌더링해 피드 390px·그리드 130px 크기로 측정):
 표지 최대 글자가 그리드에서 10px→36px, 카드당 글자 127→90자, 피드 본문 10.5→11.9px, 출처 글자 대비 3.1→4.5:1 이상.
@@ -128,8 +129,14 @@ def compare_box(cmp, dark):
             f'{box("AFTER", cmp["to"]["value"], cmp["to"]["label"], True)}</div>')
 
 
-def _frame(inner, bg="#FFFFFF"):
-    return f'<section class="card" style="background:{bg};">{inner}</section>'
+def _frame(inner, bg="#FFFFFF", mark=True):
+    """카드 한 장. 표지 밖의 모든 장에 작은 EDIT H. 워드마크를 단다(마트식 — 한 장만 캡처돼 공유돼도 브랜드가 보이게)."""
+    wm = ""
+    if mark:
+        fg = "#FFFFFF" if bg == "#000000" else TEXT
+        wm = (f'<div style="position:absolute;left:56px;top:46px;z-index:2;font-weight:900;font-size:26px;line-height:1;'
+              f'letter-spacing:-.5px;color:{fg};">EDIT H<span style="color:{ACC};">.</span></div>')
+    return f'<section class="card" style="background:{bg};">{wm}{inner}</section>'
 
 
 def _photo_uri(path):
@@ -185,7 +192,7 @@ def cover(d):
   <div style="flex:none;margin-top:26px;display:flex;flex-direction:column;align-items:center;gap:14px;">{_strip(l1, "#FFFFFF")}{_strip(l2, ACC_FILL)}</div>
   <div style="flex:none;position:relative;margin-top:70px;width:100%;height:560px;">{hero}{sticker_html}</div>
 </div>
-<div style="position:absolute;left:0;right:0;bottom:60px;text-align:center;font-weight:700;font-size:26px;color:{foot_color};{shadow}">밀어서 {len(issues)}가지 보기 →</div>{credit}""")
+<div style="position:absolute;left:0;right:0;bottom:60px;text-align:center;font-weight:700;font-size:26px;color:{foot_color};{shadow}">밀어서 {len(issues)}가지 보기 →</div>{credit}""", mark=False)
 
 
 def hero_value(it):
@@ -266,6 +273,21 @@ def issue_card(it, n):
                   "#000000" if dark else "#FFFFFF")
 
 
+def observation(d):
+    """마트 '시식후기'식 마무리 전 장 — 오늘 6가지를 한 줄로 꿰는 에디터 H 의 관찰(뉴스레터 'H의 한 줄 관찰'과 같은 문장).
+    ' — ' 뒤의 결론 부분에 형광 마커를 칠한다."""
+    text = str(d["observation"])
+    head, sep, tail = text.partition(" — ")
+    body = f"{mk(head)} — <span style=\"background:linear-gradient(180deg,transparent 58%,{ACC_FILL} 58%);font-weight:800;color:{TEXT};\">{mk(tail)}</span>" if sep else mk(text)
+    return _frame(f"""
+<div class="body" style="padding:60px 90px 150px;justify-content:center;">
+  <div style="display:flex;align-items:center;gap:16px;font-weight:700;font-size:30px;color:{TEXT};">
+    <div style="width:22px;height:22px;background:{ACC};"></div>H의 한 줄 관찰</div>
+  <div class="bal" style="margin-top:44px;font-weight:600;font-size:{fs(50)};line-height:1.62;letter-spacing:-1px;color:{TEXT};">{body}</div>
+  <div style="margin-top:48px;text-align:right;font-weight:500;font-size:28px;color:{SUB};">— 에디터 H</div>
+</div>""")
+
+
 def avatar(size=148):
     """@edit.h.kr 프로필 마크 — 버밀리언 원 + 안경(렌즈 2개). 뉴스레터 58px 마크를 같은 비율로 키웠다."""
     s = size / 58
@@ -303,13 +325,13 @@ def cta(d):
 </div>""")
 
 
-CARD_NAMES = ["cover", "summary", "issue1", "issue2", "issue3", "issue4", "issue5", "issue6", "cta"]
+CARD_NAMES = ["cover", "summary", "issue1", "issue2", "issue3", "issue4", "issue5", "issue6", "observation", "cta"]
 
 
 def build(d, font_css):
     """(html 문자열, 파일명 목록)을 돌려준다. 카드 순서 = 파일명 순서."""
     issues = d["card_issues"]
-    sections = [cover(d), summary(d)] + [issue_card(it, i) for i, it in enumerate(issues, 1)] + [cta(d)]
+    sections = [cover(d), summary(d)] + [issue_card(it, i) for i, it in enumerate(issues, 1)] + [observation(d), cta(d)]
     files = [f"{i:02d}_edit_h_{d['date']}_{name}.png" for i, name in enumerate(CARD_NAMES, 1)]
     page = f"""<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8">
 <style>{font_css}
