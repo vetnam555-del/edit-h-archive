@@ -83,24 +83,41 @@ IT·산업 전문지(전자신문, ZDNet Korea, 디지털데일리, AI타임스,
 
 | 필드 | 내용 |
 |---|---|
-| `date`, `emoji`, `title`, `hero_title`, `subtitle` | 제목은 질문·반전형으로 짧게, 쉼표로 호흡 (`토스가 이번엔, 새벽배송을 품었다고?`). `hero_title` 은 뉴스레터 머리·카드 표지 제목 — 두 줄(`\n`)로 쓰면 첫 줄은 굵게, 둘째 줄은 보통 굵기. `title` 은 빅이슈 제목으로도 쓰인다 |
+| `date`, `emoji`, `title`, `hero_title`, `subtitle` | 제목은 질문·반전형으로 짧게, 쉼표로 호흡 (`토스가 이번엔, 새벽배송을 품었다고?`). `hero_title` 은 뉴스레터 머리 제목(카드 표지 기본값) — 두 줄(`\n`)로 쓰면 첫 줄은 굵게, 둘째 줄은 보통 굵기. `title` 은 빅이슈 제목으로도 쓰인다 |
 | `keywords` | 5개(manifest·아카이브용) |
 | `source_mode` | `anjang` / `mixed` / `fallback` |
-| `lead`, `lead_points`, `observation` | '오늘의 편지'. `lead_points` = 오늘의 핵심 3개 `{"title", "text"}` — 뉴스레터 번호 목록과 카드 표지에 함께 쓰인다(표지 기준 title 22자·text 40자 이하). `observation` 은 'H의 한 줄 관찰' |
-| `three_lines` | 사람들·돈·규칙 세 줄(`label`·`text`). 인스타그램 캡션용, `lead_points` 가 없을 때 대신 쓰인다 |
-| `big_issue` | `tag`, `paragraphs`(2), `stat`(`value`·`unit`·`caption`), `takeaway`, `checklist`(1~3, '오늘 점검할 것'), `sources`, 카드용 `card_text`·`card_takeaway` |
-| `sections` | 2~4개, 아이템 합계 **정확히 9개**(보통 3×3). 섹션: `label`(카테고리, 예 `생활/소비 & 여행/레저`)·`title`. 아이템: `tag`, `title`, `body`(2~3문장), `takeaway`(1문장), `sources`, 카드로 쓸 아이템만 `card`(`title`·`text`·`takeaway`·`stat` 선택) |
+| `lead`, `lead_points`, `observation` | '오늘의 편지'. `lead_points` = 오늘의 핵심 3개 `{"title", "text"}` — 편지 안 번호 목록(title 22자·text 40자 이하). `observation` 은 'H의 한 줄 관찰' |
+| `three_lines` | 사람들·돈·규칙 세 줄(`label`·`text`). `lead_points` 가 없을 때 대신 쓰인다 |
+| `big_issue` | `tag`, `paragraphs`(2), `stat`(`value`·`unit`·`caption`), `takeaway`, `checklist`(1~3, '오늘 점검할 것'), `sources` |
+| `sections` | 2~4개, 아이템 합계 **정확히 9개**(보통 3×3). 섹션: `label`(카테고리, 예 `생활/소비 & 여행/레저`)·`title`. 아이템: `tag`, `title`, `body`(2~3문장), `takeaway`(1문장), `sources` |
 | `briefs` | 0~3개 짧은 소식 |
 | `question` | `text`(강조 `==…==`, 줄바꿈 `\n`), `closing` |
-| `instagram` | `caption`, `hashtags` (없으면 자동 생성) |
+| `cards` | 카드뉴스 8장용 — 아래 '카드뉴스' 참고 |
+| `instagram` | `caption`, `hashtags` (없으면 VOL.092 형식으로 자동 생성) |
 
 - 마크업: `**굵게**`, `==강조색==`, `\n` 줄바꿈. HTML 태그는 쓰지 않는다.
 - 톤: "~했어요/~예요" 구어체 존댓말, 문장은 짧게. takeaway 는 **마케터가 무엇을 하면 되는지** 한 문장.
 - 출처: `{"name": "매체명", "url": "기사 URL", "date": "MM.DD"}` — 날짜순으로 두면 마지막 날짜가 표시된다.
   `date` 는 확인한 경우에만 쓰고, 모르면 필드를 빼도 된다(추측해서 채우지 않는다).
-- 카드뉴스는 6장: 표지 · 빅이슈 · 픽 3장 · 오늘의 질문. 픽(3~5번 카드)은 기본값이 **섹션별 첫 아이템**이다
-  (섹션이 2개면 남은 아이템으로 채움). 다르게 하려면 `"card_picks": [3, 6, 9]`.
-- 카드 글자 수 상한은 `automation/edith/content.py` 의 `CARD_LIMITS`. 넘으면 빌드가 무엇을 줄일지 알려준다.
+- 글자 수 상한은 `automation/edith/content.py` 의 `CARD_LIMITS`. 넘으면 빌드가 무엇을 줄일지 알려준다.
+
+### 카드뉴스 (`cards`, 8장 — VOL.092 매거진 엔진)
+
+`01 표지 → 02~07 이슈 6장 → 08 마무리`. 뉴스레터 10개 중 **6개**를 골라 한 장에 한 주제·한 숫자로 만든다.
+
+| 필드 | 내용 |
+|---|---|
+| `cards.cover` | `title`(두 줄, 없으면 `hero_title`). 사진을 쓰려면 `photo`(저장소 안 경로)·`credit`(출처·라이선스)·`focus`(선택). 없으면 흰 표지 |
+| `cards.issues` | 정확히 6개. `no`(뉴스레터 이슈 번호 1~10 — 태그·출처를 거기서 가져온다), `number`(큰 숫자, 9자 이하 예 `300억원`·`82%`), `headline`(두 줄 26자 이하, 핵심어 하나 `==강조==`), `body`(130자 이하), `takeaway`(60자 이하, 인사이트 상자). 선택: `accent: true`(H PICK — 검정 반전, **하루 한 장**), `compare`(`{"from": {"value", "label"}, "to": {...}}` — 이전→이후 숫자가 핵심일 때, 이때 `number` 는 생략), `tag`(말풍선 문구를 바꿀 때) |
+| `cards.cta` | `headline`(없으면 `question.text`), 나머지(`kick` 오늘의 저장각·`sub`·`pill`)는 기본값 |
+
+카드 문구 원칙(디자인엠 키트의 기획 가이드를 EDIT H에 맞게 줄인 것):
+- 표지는 3초 안에 이해돼야 한다 — 질문·숫자·강한 키워드 중 하나 이상, 과장·낚시 금지.
+- 한 장에는 한 메시지. 넘치면 문장을 줄이고, 글자 크기 축소에 기대지 않는다.
+- 가장 크게 보이는 곳(숫자·제목)만 읽어도 무엇에 관한 장인지 알 수 있어야 한다. '꼭 알아둘 것' 같은 일반 문구만으로 제목을 쓰지 않는다.
+- 말풍선 태그는 문장이 아니라 **명사형 라벨**(예 `새벽배송 동맹`, `대금 정산 단축`).
+- 제목만 이어 읽어도 오늘의 흐름이 보이게 하고, 같은 주장을 두 장에서 반복하지 않는다.
+- 원문에 없는 수치·사실은 만들지 않는다.
 
 ## 3. 빌드
 
@@ -114,7 +131,7 @@ python3 automation/build_issue.py {날짜}           # 뉴스레터·카드·man
 
 ## 4. 눈으로 검수 (생략 금지)
 
-- Read 도구로 `instagram/{날짜}/*.png` **6장 모두** 본다: 글자 잘림·겹침, 어색한 줄바꿈, 오탈자, 숫자·단위.
+- Read 도구로 `instagram/{날짜}/*.png` **8장 모두** 본다: 글자 잘림·겹침, 어색한 줄바꿈, 오탈자, 숫자·단위.
 - 뉴스레터: `node automation/preview_newsletter.cjs {날짜}.html <스크래치 폴더>/nl` 후 `<스크래치 폴더>/nl_*.png` 를 본다
   (두 번째 인자가 출력 경로 접두어. 세션에 스크래치 폴더가 있으면 그곳을, 없으면 `/tmp` 를 쓴다)
 - 고칠 게 있으면 JSON 수정 → 3단계 재실행.

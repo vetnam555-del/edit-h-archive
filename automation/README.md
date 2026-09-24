@@ -6,14 +6,14 @@
 08:00 KST  Claude 클라우드 루틴 시작 ─ automation/RUNBOOK.md 대로
            ├ 안장출근길 확인 → 없으면 주요 매체 검색으로 10개 선정·사실 확인
            ├ content/YYYY-MM-DD.json 작성
-           ├ build_issue.py → 뉴스레터 HTML · 카드뉴스 6장 · manifest · index
+           ├ build_issue.py → 뉴스레터 HTML · 카드뉴스 8장 · manifest · index
            └ main 에 푸시 → GitHub Pages 에 게시
 09:00 KST  GitHub Actions(send-newsletter.yml) → 구독자에게 메일 발송
            (08:40 에 예약 실행 → 09:00 까지 대기 후 발송. 루틴이 늦어 09:00 이후 푸시되면 푸시 즉시 발송)
 ```
 
 - 주말과 `holidays_kr.json` 의 공휴일은 건너뛴다(`config.json` 의 `publish_days` 로 요일 변경 가능).
-- 카드뉴스는 `instagram/YYYY-MM-DD/` 에 PNG 6장 + 캡션(`caption.txt`) + 휴대폰용 갤러리 페이지
+- 카드뉴스는 `instagram/YYYY-MM-DD/` 에 PNG 8장 + 캡션(`caption.txt`) + 휴대폰용 갤러리 페이지
   (`https://vetnam555-del.github.io/edit-h-archive/instagram/YYYY-MM-DD/`)로 올라간다.
   인스타그램 업로드는 이 페이지에서 저장·캡션 복사 후 직접 올리면 된다.
 
@@ -80,6 +80,9 @@ content/YYYY-MM-DD.json 호마다의 원본 콘텐츠(출처 URL 포함)
 → 번호 배지 빅이슈(큰 숫자 박스·마케터의 한 줄·오늘 점검할 것) → `#1` `#2` 섹션별 02~10 → 짧게 볼 것 → Q 오늘의 질문
 → 프로필 카드·구독 버튼. VOL.092 대비 바꾼 점은 출처를 원문 링크로 건 것과 '카드뉴스 보기' 링크를 더한 것뿐이다.
 
-**카드뉴스(1080×1350, 6장)** — 뉴스레터와 같은 디자인 언어(Pretendard 한 서체, 같은 색·칩·배지·박스).
-표지(칩·두 줄 제목·핵심 3개) · 빅이슈 · 픽 3장(섹션별 대표 이슈) · 오늘의 질문(프로필·구독 안내).
-한 장에 한 메시지만 담도록 글자 수 상한(`content.py` 의 `CARD_LIMITS`)과 자동 축소(최대 20%)를 두고, 모든 사실 카드에 출처를 단다.
+**카드뉴스(1080×1350, 8장)** — VOL.092 정식 발행에 쓴 로컬 '매거진 엔진'(`마케팅카드뉴스_260703/templates/magazine/cards.js`)을
+그대로 옮겼다. 디자인엠 카드뉴스 키트 '매거진 세트'(표지 24 → 본문 9 → 마무리 9)의 치수·색을 실측해 재현한 것으로,
+키트 원본 파일·이미지는 쓰지 않는다. 표지(칩 + 두 줄 제목, 사진 선택) · 이슈 6장(말풍선 태그 → 형광 숫자 → 번호 배지 →
+제목 → 본문 → 인사이트 상자, H PICK 1장은 검정 반전, 이전→이후는 BEFORE/AFTER 상자) · 마무리(프로필 카드).
+한 장에 한 메시지만 담도록 글자 수 상한(`content.py` 의 `CARD_LIMITS`)과 자동 축소(최대 20%)를 두고, 모든 이슈 카드에 출처를 단다.
+프로필 마크는 VOL.092 발행 뒤 바뀐 최신 버전(버밀리언 원 + 안경)으로 뉴스레터와 카드에 똑같이 쓴다.

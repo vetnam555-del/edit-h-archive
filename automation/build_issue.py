@@ -71,7 +71,9 @@ def main():
         (out_dir / "caption.txt").write_text(caption + "\n", encoding="utf-8")
         (out_dir / "index.html").write_text(site.gallery_page(d, site_url, files, caption), encoding="utf-8")
 
-    (ROOT / f"{args.date}.html").write_text(newsletter.render(d, site_url, len(files)), encoding="utf-8")
+    # 뉴스레터 프로필의 'N장 카드뉴스'는 이슈 카드 수(표지·마무리 제외, VOL.092 와 같은 기준)
+    n_issue_cards = len(d["card_issues"]) if files else 0
+    (ROOT / f"{args.date}.html").write_text(newsletter.render(d, site_url, n_issue_cards), encoding="utf-8")
     manifest = site.update_manifest(d, site_url, len(files), cfg["send_time_kst"])
     site.regenerate_index(manifest)
 
