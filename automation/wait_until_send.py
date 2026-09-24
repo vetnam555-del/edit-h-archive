@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """발송 시각(config.send_time_kst)까지 기다린다. send-newsletter.yml 에서 발송 직전에 돈다.
 
-GitHub 예약 실행은 정각에 몰려 수~수십 분 늦게 시작되곤 해서, 예약은 몇 분 일찍 걸어 두고
-여기서 정확한 시각까지 기다린다. 루틴이 발송 시각 전에 푸시해도(push 트리거) 여기서 기다렸다 보낸다.
+GitHub 예약 실행은 정각에 몰려 수~수십 분 늦게 시작되거나 아예 빠지기도 해서(2026-09-25 첫 08:00 예약이
+07:30·08:05 둘 다 돌지 않음), 오늘 호가 푸시되면 push 트리거가 여기서 발송 시각까지 기다렸다 보낸다.
+새벽에 미리 올린 호도 보내지도록 최대 5시간 50분까지 기다린다(워크플로 timeout 370분, 공개 저장소라 Actions 무료).
 
 사용: python3 automation/wait_until_send.py <event> [--at HH:MM] [--need 파일]   # event: schedule | push | workflow_dispatch
   --at   기다릴 시각(기본 config.send_time_kst). 인스타 주간 특집은 18:00.
@@ -17,7 +18,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from edith.common import ROOT, load_config, now_kst  # noqa: E402
 
-MAX_WAIT = dt.timedelta(minutes=90)
+MAX_WAIT = dt.timedelta(minutes=350)
 
 
 def main():

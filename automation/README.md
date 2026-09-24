@@ -9,7 +9,9 @@
            ├ build_issue.py → 뉴스레터 HTML · 카드뉴스 10장 · manifest · index
            └ main 에 푸시 → GitHub Pages 에 게시
 08:00 KST  GitHub Actions(send-newsletter.yml) → 구독자에게 메일 발송 + (post-instagram.yml) 인스타 게시
-           (07:30 에 예약 실행 → 08:00 까지 대기 후 발송. 08:05 예비 실행. 루틴이 늦어 08:00 이후 푸시되면 푸시 즉시 발송)
+           (주 경로: 루틴이 오늘 호를 푸시하면 push 실행이 08:00 까지 기다렸다 발송 — 새벽 02:10 이후 푸시까지.
+            예비: 07:30·08:05 예약 실행(GitHub 예약은 빠지기도 한다). 08:00 이후 푸시는 즉시 발송.
+            마지막 보루: 평일 08:20 Claude 확인 루틴이 발송·게시 기록이 없으면 수동 실행하고 알린다)
 ```
 
 - **금요일 주간 특집 'TOP5'**(2026-10-16부터): 그 주 데일리 카드 이슈 5개를 목록형 9장으로 다시 엮어 `instagram/YYYY-MM-DD-weekly/` 에 올린다(인스타 전용, 새 취재 없음). 설정은 `config.json` 의 `weekly_special`.

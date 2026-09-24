@@ -37,7 +37,7 @@ concurrency:
 jobs:
   send:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 370   # 새벽에 올린 오늘 호를 08:00 까지 기다려 보낼 수 있게(wait_until_send.MAX_WAIT)
     steps:
       - uses: actions/checkout@v4
         with:
