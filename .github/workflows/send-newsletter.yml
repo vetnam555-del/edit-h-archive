@@ -1,13 +1,15 @@
 # EDIT H 뉴스레터 발송.
-# 콘텐츠는 매 영업일 08:00(KST)에 Claude 클라우드 루틴이 만들어 main 에 푸시하고,
-# 발송은 여기서 09:00(KST)에 한다. 예약은 08:40 에 걸고 wait_until_send.py 가 09:00 까지 기다린다
-# (GitHub 예약 실행은 정각에 몰려 늦게 시작되기 쉬워서). 루틴이 늦어 09:00 이후에 푸시되면 push 트리거가 바로 보낸다.
+# 콘텐츠는 매 영업일 07:00(KST)에 Claude 클라우드 루틴이 만들어 main 에 푸시하고,
+# 발송은 여기서 08:00(KST, config.send_time_kst)에 한다. 예약은 07:30 에 걸고 wait_until_send.py 가 08:00 까지 기다린다
+# (GitHub 예약 실행은 정각에 몰려 늦게 시작되기 쉬워서). 08:05 예비 실행은 07:30 실행이 밀리거나 빠졌을 때만 보낸다
+# (발송 기록이 있으면 건너뜀). 루틴이 늦어 08:00 이후에 푸시되면 push 트리거가 바로 보낸다.
 # 필요한 Secrets: SMTP_USER, SMTP_PASSWORD, SUBSCRIBERS (자세한 건 automation/README.md)
 name: Send EDIT H newsletter
 
 on:
   schedule:
-    - cron: "40 23 * * 0-4"   # UTC 일–목 23:40 = KST 월–금 08:40 → 09:00 까지 대기 후 발송
+    - cron: "30 22 * * 0-4"   # UTC 일–목 22:30 = KST 월–금 07:30 → 08:00 까지 대기 후 발송
+    - cron: "5 23 * * 0-4"    # KST 08:05 예비 실행(이미 보냈으면 건너뜀)
   push:
     branches: [main]
     paths: ["20[0-9][0-9]-[0-9][0-9]-[0-9][0-9].html"]

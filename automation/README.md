@@ -3,13 +3,13 @@
 노트북이 꺼져 있어도 매 영업일 아침 뉴스레터와 카드뉴스가 발행되도록, 로컬에서 하던 작업을 이 저장소 안으로 옮겼다.
 
 ```
-08:00 KST  Claude 클라우드 루틴 시작 ─ automation/RUNBOOK.md 대로
+07:00 KST  Claude 클라우드 루틴 시작 ─ automation/RUNBOOK.md 대로
            ├ 안장출근길 확인 → 없으면 주요 매체 검색으로 10개 선정·사실 확인
            ├ content/YYYY-MM-DD.json 작성
            ├ build_issue.py → 뉴스레터 HTML · 카드뉴스 10장 · manifest · index
            └ main 에 푸시 → GitHub Pages 에 게시
-09:00 KST  GitHub Actions(send-newsletter.yml) → 구독자에게 메일 발송
-           (08:40 에 예약 실행 → 09:00 까지 대기 후 발송. 루틴이 늦어 09:00 이후 푸시되면 푸시 즉시 발송)
+08:00 KST  GitHub Actions(send-newsletter.yml) → 구독자에게 메일 발송 + (post-instagram.yml) 인스타 게시
+           (07:30 에 예약 실행 → 08:00 까지 대기 후 발송. 08:05 예비 실행. 루틴이 늦어 08:00 이후 푸시되면 푸시 즉시 발송)
 ```
 
 - **금요일 주간 특집 'TOP5'**(2026-10-16부터): 그 주 데일리 카드 이슈 5개를 목록형 9장으로 다시 엮어 `instagram/YYYY-MM-DD-weekly/` 에 올린다(인스타 전용, 새 취재 없음). 설정은 `config.json` 의 `weekly_special`.
@@ -54,7 +54,7 @@ Claude 의 WebFetch 는 네이버를 열지 못하므로 루틴은 `fetch_anjang
 
 ### 3) 인스타그램 자동 게시 — 카드 캐러셀 + 음악 릴스 (처음 한 번 설정)
 
-매 영업일 09:00 에 카드 10장 캐러셀(캡션·첫 댓글 포함)과, 같은 카드를 세로 영상으로 엮은 **음악 릴스**가 자동으로 올라간다.
+매 영업일 08:00 에 카드 캐러셀(캡션·첫 댓글 포함)과, 같은 카드를 세로 영상으로 엮은 **음악 릴스**가 자동으로 올라간다.
 금요일 주간 특집(TOP5)은 18:00. 공식 Instagram API 만 쓴다(비공식 자동화는 계정 정지 위험).
 **인스타 음악 라이브러리 곡은 API 로 넣을 수 없어서**, 릴스에는 재배포가 허용된 CC BY 곡(`assets/music/`)을 영상에 직접 넣고
 캡션에 출처를 단다. 릴스는 피드 격자에서 캐러셀과 겹치지 않게 릴스 탭에만 올린다(`config.instagram.reel_share_to_feed`).
@@ -86,7 +86,7 @@ Claude 의 WebFetch 는 네이버를 열지 못하므로 루틴은 `fetch_anjang
 **⑤ 확인** — Actions → **Post EDIT H to Instagram → Run workflow**
 1. mode `check` → 로그에 `인스타 계정 @edit.h.kr` 이 보이면 토큰 정상
 2. mode `dry-run` → 게시 없이 이미지 10장·릴스 영상·컨테이너까지 확인(토큰 교환도 이때 한 번 된다)
-3. 끝. 다음 영업일 09:00 부터 자동 게시. 수동으로 특정 호를 올리려면 key 에 날짜, mode `post`.
+3. 끝. 다음 영업일 08:00 부터 자동 게시. 수동으로 특정 호를 올리려면 key 에 날짜, mode `post`.
 
 **음악** — `assets/music/tracks.json` 의 곡을 날짜마다 돌려 쓴다(출처 `assets/music/CREDITS.md`).
 곡 파일은 Actions **Fetch reel music** 가 위키미디어에서 받아 75초 클립으로 넣는다(tracks.json 이 바뀌면 자동 실행).
@@ -102,7 +102,7 @@ Claude 의 WebFetch 는 네이버를 열지 못하므로 루틴은 `fetch_anjang
 | 구독자 수·메일 계정 확인 | Actions → Send EDIT H newsletter → Run workflow 에서 `check_only` 체크. 메일은 보내지 않고 로그에 발송 대상 인원과 SMTP 로그인 결과만 나온다(공개 저장소라 주소는 출력하지 않음) |
 | 메일 재발송/특정 날짜 발송 | Actions → Send EDIT H newsletter → Run workflow (`date` 입력). 이미 보낸 날은 `automation/sent/날짜.json` 을 지워야 다시 보낸다 |
 | 임시공휴일 추가 | `holidays_kr.json` 에 한 줄 추가 |
-| 발송 시각 변경 | `config.json` 의 `send_time_kst`(문구·대기 시각이 따라 바뀜) + 워크플로 `cron`(발송 20분 전) + 루틴 시각(발송 1시간 전)을 함께 바꾼다 |
+| 발송 시각 변경 | `config.json` 의 `send_time_kst`(문구·대기 시각이 따라 바뀜) + 두 워크플로의 `cron`(발송 30분 전 + 5분 뒤 예비) + 루틴 시각(발송 1시간 전)을 함께 바꾼다 |
 
 ## 파일 구조
 
