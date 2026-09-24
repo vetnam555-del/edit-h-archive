@@ -1,0 +1,9 @@
+{
+  "date": "2026-09-25",
+  "vol": "094",
+  "sent_at_kst": "2026-09-25T08:17:16+09:00",
+  "trigger": "workflow_dispatch",
+  "sent": 12,
+  "failed": 0,
+  "failures": []
+}
