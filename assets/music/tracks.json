@@ -1,0 +1,17 @@
+[
+ {"file": "bright_new_day.m4a", "title": "Bright New Day", "artist": "Sascha Ende", "license": "CC BY 4.0",
+  "source_name": "Wikimedia Commons", "page": "https://commons.wikimedia.org/wiki/File:Bright_New_Day_by_Sascha_Ende.mp3",
+  "url": "https://upload.wikimedia.org/wikipedia/commons/9/99/Bright_New_Day_by_Sascha_Ende.mp3", "mood": "밝음 · 우쿨렐레·휘파람"},
+ {"file": "soft_corporate.m4a", "title": "Soft Corporate", "artist": "MusicLFiles", "license": "CC BY 4.0",
+  "source_name": "Wikimedia Commons", "page": "https://commons.wikimedia.org/wiki/File:Soft_Corporate_by_MusicLFiles.ogg",
+  "url": "https://upload.wikimedia.org/wikipedia/commons/5/5f/Soft_Corporate_by_MusicLFiles.ogg", "mood": "산뜻한 기업 브랜딩 · 기타·피아노"},
+ {"file": "study_and_relax.m4a", "title": "Study And Relax", "artist": "Kevin MacLeod", "license": "CC BY 4.0",
+  "source_name": "Wikimedia Commons", "page": "https://commons.wikimedia.org/wiki/File:Study_And_Relax_by_Kevin_MacLeod.ogg",
+  "url": "https://upload.wikimedia.org/wikipedia/commons/9/9c/Study_And_Relax_by_Kevin_MacLeod.ogg", "mood": "로파이 · 차분"},
+ {"file": "wholesome.m4a", "title": "Wholesome", "artist": "Kevin MacLeod", "license": "CC BY 4.0",
+  "source_name": "Wikimedia Commons", "page": "https://commons.wikimedia.org/wiki/File:Wholesome_by_Kevin_MacLeod.ogg",
+  "url": "https://upload.wikimedia.org/wikipedia/commons/f/f2/Wholesome_by_Kevin_MacLeod.ogg", "mood": "어쿠스틱 · 따뜻함"},
+ {"file": "ambient_corporate.m4a", "title": "Ambient Corporate", "artist": "WinnieTheMoog", "license": "CC BY 4.0",
+  "source_name": "Wikimedia Commons", "page": "https://commons.wikimedia.org/wiki/File:WinnieTheMoog_-_Ambient_Corporate.ogg",
+  "url": "https://upload.wikimedia.org/wikipedia/commons/b/be/WinnieTheMoog_-_Ambient_Corporate.ogg", "mood": "잔잔한 앰비언트"}
+]

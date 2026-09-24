@@ -1,5 +1,6 @@
 // 카드 HTML(한 페이지에 .card 여러 장) → PNG 1080×1350.
-// 사용: node automation/render_cards.cjs <cards.html> <out_dir> <file1.png> <file2.png> ...
+// 사용: node automation/render_cards.cjs <cards.html> <out_dir> [--jpeg-dir=<dir>] <file1.png> <file2.png> ...
+// --jpeg-dir: 인스타그램 API 는 JPEG 만 받으므로 같은 카드를 JPEG(품질 92)로도 저장한다(파일명은 .png → .jpg).
 // 넘치는 카드는 글자 크기 배율(--k)을 3%씩 최대 20%까지 줄이고, 그래도 넘치면 결과에 overflow:true 로 남긴다.
 // 결과(JSON)는 stdout 마지막 줄.
 const path = require('path');
@@ -13,7 +14,9 @@ function loadPlaywright() {
 }
 
 (async () => {
-  const [, , htmlPath, outDir, ...files] = process.argv;
+  const [, , htmlPath, outDir, ...rest] = process.argv;
+  const jpegDir = (rest.find((a) => a.startsWith('--jpeg-dir=')) || '').slice('--jpeg-dir='.length);
+  const files = rest.filter((a) => !a.startsWith('--'));
   const { chromium } = loadPlaywright();
   const browser = await chromium.launch({ args: ['--allow-file-access-from-files'] });
   const page = await browser.newPage({ viewport: { width: 1080, height: 1350 }, deviceScaleFactor: 1 });
@@ -67,6 +70,7 @@ function loadPlaywright() {
   }
   for (let i = 0; i < cards.length; i++) {
     await cards[i].screenshot({ path: path.join(outDir, files[i]) });
+    if (jpegDir) await cards[i].screenshot({ path: path.join(jpegDir, files[i].replace(/\.png$/, '.jpg')), type: 'jpeg', quality: 92 });
     report[i].file = files[i];
   }
   await browser.close();

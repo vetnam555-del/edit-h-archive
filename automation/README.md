@@ -52,6 +52,47 @@ Claude 의 WebFetch 는 네이버를 열지 못하므로 루틴은 `fetch_anjang
 안장출근길 글은 로그인 없이 헤드라인·요약·원 기사 링크까지 보인다(2026-09-24 확인). 주제 단서로만 쓰고 출처는 원 기사로 단다.
 다른 언론사 도메인은 막혀 있어도 된다 — 같은 기사를 네이버 뉴스판으로 찾아 읽는다.
 
+### 3) 인스타그램 자동 게시 — 카드 캐러셀 + 음악 릴스 (처음 한 번 설정)
+
+매 영업일 09:00 에 카드 10장 캐러셀(캡션·첫 댓글 포함)과, 같은 카드를 세로 영상으로 엮은 **음악 릴스**가 자동으로 올라간다.
+금요일 주간 특집(TOP5)은 18:00. 공식 Instagram API 만 쓴다(비공식 자동화는 계정 정지 위험).
+**인스타 음악 라이브러리 곡은 API 로 넣을 수 없어서**, 릴스에는 재배포가 허용된 CC BY 곡(`assets/music/`)을 영상에 직접 넣고
+캡션에 출처를 단다. 릴스는 피드 격자에서 캐러셀과 겹치지 않게 릴스 탭에만 올린다(`config.instagram.reel_share_to_feed`).
+
+**① 인스타 계정을 프로페셔널로** — 인스타 앱 → 설정 → 계정 유형 및 도구 → 프로페셔널 계정으로 전환(크리에이터 또는 비즈니스).
+
+**② Meta 개발자 앱 만들기** (PC 권장)
+1. https://developers.facebook.com → 로그인 → **내 앱 → 앱 만들기**
+2. 사용 사례: **Instagram 관련(메시지·콘텐츠 관리)** 항목, 없으면 **기타 → 비즈니스** → 앱 이름 `EDIT H Publisher` → 만들기
+3. 왼쪽 메뉴 **Instagram → Instagram 로그인을 사용한 API 설정**(Facebook 로그인 아님)
+4. **액세스 토큰 생성 → 계정 추가** → @edit.h.kr 로 로그인해 권한 허용 → 표시되는 **토큰 복사**(다시 볼 수 없다)
+   - 테스터 초대 수락이 필요하다고 나오면: 인스타 앱 → 설정 → 웹사이트 권한 → 앱 및 웹사이트 → 테스터 초대 → 수락
+5. 같은 화면(또는 앱 설정)의 **Instagram 앱 시크릿 코드** 복사
+
+**③ GitHub 토큰(토큰 자동 연장용)** — https://github.com/settings/personal-access-tokens/new
+- Repository access: **Only select repositories → edit-h-archive**, Permissions → Repository → **Secrets: Read and write** → Generate → 복사
+
+**④ Secrets 3개 넣기** — 저장소 Settings → Secrets and variables → Actions → New repository secret
+
+| 이름 | 값 |
+|---|---|
+| `IG_ACCESS_TOKEN` | ②-4 인스타 토큰 |
+| `IG_APP_SECRET` | ②-5 앱 시크릿 코드 |
+| `GH_ADMIN_TOKEN` | ③ GitHub 토큰 |
+
+인스타 토큰은 60일짜리다. 두 값(`IG_APP_SECRET`·`GH_ADMIN_TOKEN`)이 있으면 워크플로가 단기 토큰을 60일 토큰으로 바꾸고,
+주 1회 연장해 `IG_ACCESS_TOKEN` 을 스스로 갱신한다. 없으면 60일마다 ②-4 를 다시 해서 넣어야 한다.
+
+**⑤ 확인** — Actions → **Post EDIT H to Instagram → Run workflow**
+1. mode `check` → 로그에 `인스타 계정 @edit.h.kr` 이 보이면 토큰 정상
+2. mode `dry-run` → 게시 없이 이미지 10장·릴스 영상·컨테이너까지 확인(토큰 교환도 이때 한 번 된다)
+3. 끝. 다음 영업일 09:00 부터 자동 게시. 수동으로 특정 호를 올리려면 key 에 날짜, mode `post`.
+
+**음악** — `assets/music/tracks.json` 의 곡을 날짜마다 돌려 쓴다(출처 `assets/music/CREDITS.md`).
+곡 파일은 Actions **Fetch reel music** 가 위키미디어에서 받아 75초 클립으로 넣는다(tracks.json 이 바뀌면 자동 실행).
+바꾸고 싶으면 위키미디어 커먼즈의 CC0·CC BY 곡을 tracks.json 에 추가하면 된다. 유료 스톡 음원은 공개 저장소에 둘 수 없어 넣지 않는다.
+곡이 하나도 없으면 릴스만 건너뛰고 캐러셀은 올라간다.
+
 ## 수동으로 할 일이 생겼을 때
 
 | 상황 | 방법 |
