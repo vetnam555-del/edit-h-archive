@@ -1,0 +1,62 @@
+# EDIT H 뉴스레터 발송.
+# 콘텐츠는 매 영업일 07:30(KST)에 Claude 클라우드 루틴이 만들어 main 에 푸시하고,
+# 발송은 여기서 08:30(KST)에 한다. 루틴이 늦어 08:30 이후에 푸시되면 push 트리거가 바로 보낸다.
+# 필요한 Secrets: SMTP_USER, SMTP_PASSWORD, SUBSCRIBERS (자세한 건 automation/README.md)
+name: Send EDIT H newsletter
+
+on:
+  schedule:
+    - cron: "30 23 * * 0-4"   # UTC 일–목 23:30 = KST 월–금 08:30 (GitHub 사정으로 몇 분 늦을 수 있음)
+  push:
+    branches: [main]
+    paths: ["20[0-9][0-9]-[0-9][0-9]-[0-9][0-9].html"]
+  workflow_dispatch:
+    inputs:
+      date:
+        description: "보낼 호 날짜 YYYY-MM-DD (비우면 오늘 KST)"
+        required: false
+      test_to:
+        description: "테스트 수신 주소 — 입력하면 이 주소로만 보내고 발송 기록은 남기지 않음"
+        required: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: send-newsletter
+  cancel-in-progress: false
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main   # 대기 중 다른 실행이 남긴 발송 기록까지 보도록 최신 main 을 받는다
+
+      - name: Send
+        env:
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          SUBSCRIBERS: ${{ secrets.SUBSCRIBERS }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          MAIL_FROM: ${{ secrets.MAIL_FROM }}
+          EVENT: ${{ github.event_name }}
+          IN_DATE: ${{ inputs.date }}
+          IN_TEST_TO: ${{ inputs.test_to }}
+        run: python3 automation/send_newsletter.py --mode "$EVENT" --date "$IN_DATE" --test-to "$IN_TEST_TO"
+
+      - name: Record send
+        run: |
+          if [ -n "$(git status --porcelain automation/sent)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add automation/sent
+            git commit -m "Record newsletter send ($(ls -t automation/sent | head -1 | sed 's/.json//'))"
+            for i in 1 2 3 4; do
+              git pull --rebase origin main && git push origin HEAD:main && break
+              sleep $((i * 5))
+            done
+          fi
