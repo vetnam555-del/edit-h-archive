@@ -2,7 +2,7 @@
 import json
 import re
 
-from .common import load_config, INDEX, MANIFEST, esc, plain, send_time_ko
+from .common import load_config, INDEX, MANIFEST, ROOT, esc, plain, send_time_ko
 
 
 def update_manifest(d, site, n_cards, publish_time):
@@ -52,6 +52,53 @@ def regenerate_index(manifest):
     e = html.index(end_marker, s)
     items = "\n".join(_index_item(i) for i in reversed(manifest["issues"]))
     INDEX.write_text(html[:s] + "  \n" + items + "\n" + html[e:], encoding="utf-8")
+
+
+FEED = ROOT / "feed.xml"
+SITEMAP = ROOT / "sitemap.xml"
+FEED_ITEMS = 30
+
+
+def _pub(i):
+    return i.get("published_at_kst") or f"{i['date']}T08:00:00+09:00"
+
+
+def write_feeds(manifest, site):
+    """feed.xml(RSS 2.0, 최근 30호)·sitemap.xml(아카이브·구독 페이지·모든 호). 빌드할 때마다 manifest 로 다시 쓴다.
+    RSS 로 받아보거나 검색에 잡히게 하려는 것 — 공개 저장소에 이미 있는 제목·부제·주소만 쓴다."""
+    import datetime as dt
+    from email.utils import format_datetime
+    issues = sorted(manifest["issues"], key=lambda i: i["date"])
+    now = format_datetime(dt.datetime.fromisoformat(_pub(issues[-1]))) if issues else ""
+    items = []
+    for i in reversed(issues[-FEED_ITEMS:]):
+        url = i.get("public_url") or f"{site}/{i['filename']}"
+        title = f"VOL.{i['vol']} {plain(i['title'])}"
+        items.append(
+            "  <item>\n"
+            f"    <title>{esc(title)}</title>\n"
+            f"    <link>{esc(url)}</link>\n"
+            f"    <guid isPermaLink=\"true\">{esc(url)}</guid>\n"
+            f"    <pubDate>{format_datetime(dt.datetime.fromisoformat(_pub(i)))}</pubDate>\n"
+            f"    <description>{esc(plain(i.get('subtitle', '')))}</description>\n"
+            "  </item>")
+    FEED.write_text(
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">\n<channel>\n'
+        "  <title>EDIT H — 매일 아침, 트렌드 한 입</title>\n"
+        f"  <link>{site}/</link>\n"
+        f'  <atom:link href="{site}/feed.xml" rel="self" type="application/rss+xml"/>\n'
+        "  <description>매일 아침 8시, 확인된 숫자로 읽는 트렌드 뉴스레터</description>\n"
+        "  <language>ko</language>\n"
+        f"  <lastBuildDate>{now}</lastBuildDate>\n"
+        + "\n".join(items) + "\n</channel>\n</rss>\n", encoding="utf-8")
+
+    urls = [(f"{site}/", issues[-1]["date"] if issues else None), (f"{site}/subscribe.html", None)]
+    urls += [(i.get("public_url") or f"{site}/{i['filename']}", i["date"]) for i in reversed(issues)]
+    rows = "\n".join(f"  <url><loc>{esc(u)}</loc>" + (f"<lastmod>{d}</lastmod>" if d else "") + "</url>" for u, d in urls)
+    SITEMAP.write_text('<?xml version="1.0" encoding="UTF-8"?>\n'
+                       '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + rows + "\n</urlset>\n",
+                       encoding="utf-8")
 
 
 def gallery_page(d, site, card_files, caption, comment=""):

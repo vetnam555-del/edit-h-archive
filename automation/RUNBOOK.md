@@ -231,7 +231,7 @@ python3 automation/build_issue.py {날짜}           # 뉴스레터·카드·man
 ## 5. 커밋·푸시
 
 ```bash
-git add {날짜}.html content/{날짜}.json instagram/{날짜}/ manifest.json index.html assets/photos/
+git add {날짜}.html content/{날짜}.json instagram/{날짜}/ manifest.json index.html feed.xml sitemap.xml assets/photos/
 git commit -m "Publish EDIT H {날짜} (VOL.{vol}) — {title}"
 git push origin HEAD:main
 ```

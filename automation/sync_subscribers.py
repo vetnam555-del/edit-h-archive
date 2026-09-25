@@ -134,23 +134,85 @@ def check_safe(old_entries, new_entries, removes):
     return True, ""
 
 
-def welcome(smtp, sender, to_addr, cfg):
+def best_issues(n=3):
+    """환영 메일에 붙일 지난 호 n개 — 최신 성과표(인스타 점수)가 높은 순, 점수가 없거나 같으면 최신 순.
+    (반응 좋았던 호인지, 점수가 아직 없어 최근 호인지)를 함께 돌려준다."""
+    issues = json.loads(MANIFEST.read_text(encoding="utf-8"))["issues"]
+    recent = [i for i in issues if i.get("type") == "daily"][-14:] or issues[-14:]
+    scores = {}
+    snaps = sorted((AUTOMATION / "metrics" / "daily").glob("*.json"))
+    if snaps:
+        from collect_metrics import score
+        posts = (json.loads(snaps[-1].read_text(encoding="utf-8")).get("instagram") or {}).get("posts") or {}
+        scores = {day: score(row) or 0 for day, row in posts.items()}
+    ranked = sorted(recent, key=lambda i: (scores.get(i["date"], -1), i["date"]), reverse=True)[:n]
+    return ranked, any(scores.get(i["date"], 0) > 0 for i in ranked)
+
+
+def welcome_message(sender, to_addr, cfg, now=None):
+    """새 구독자 환영 메일(텍스트 + HTML). 첫 호가 언제 오는지, 먼저 읽어볼 지난 호 3개, 인스타, 스팸함 방지 부탁."""
+    import html
+    import urllib.parse
     site = cfg["site_url"]
-    latest = json.loads(MANIFEST.read_text(encoding="utf-8"))["issues"][-1]
-    unsub = f"{site}/unsubscribe.html?email={to_addr}"
+    now = now or now_kst()
+    hh, mm = map(int, cfg["send_time_kst"].split(":"))
+    when = send_time_ko(cfg["send_time_kst"]).replace("오전", "아침")
+    # 07:10 반영분은 그날 08:00 발송에 바로 들어간다. 발송 실행은 07:45 무렵(원고 푸시) 시작하며 Secret 을 읽으므로 20분 여유를 둔다.
+    day = "오늘" if now.hour * 60 + now.minute < hh * 60 + mm - 20 else "내일"
+    picks, by_score = best_issues()
+    unsub = f"{site}/unsubscribe.html?email={urllib.parse.quote(to_addr)}"
+    insta = "https://www.instagram.com/edit.h.kr/"
+    lead = "반응이 좋았던 지난 호" if by_score else "최근 호"
+
     msg = EmailMessage()
-    msg["Subject"] = f"{cfg['email']['subject_prefix']} 구독을 환영해요 — 내일 아침에 만나요"
+    msg["Subject"] = f"{cfg['email']['subject_prefix']} 구독해 주셔서 고마워요 — {day} {when}에 만나요"
     msg["From"] = formataddr((cfg["email"]["from_name"], sender))
     msg["To"] = to_addr
     msg["List-Unsubscribe"] = f"<{unsub}>"
+    rows = [f"· VOL.{i['vol']} {i['title']}\n  {site}/{i['filename']}" for i in picks]
     msg.set_content(
         "EDIT H를 구독해 주셔서 고마워요.\n\n"
-        f"매일 {send_time_ko(cfg['send_time_kst']).replace('오전', '아침')}, 오늘 꼭 알아둘 트렌드 5가지를 보내드려요. 하나는 H PICK으로 깊게 풀어드리고,\n"
-        "월요일엔 독자 투표를 열어 금요일에 결과를 알려드려요.\n\n"
-        f"최근 호 먼저 읽어보기: {site}/{latest['filename']}\n"
-        "메일이 스팸함으로 가지 않게, 이 메일에 한 줄 답장해 주시거나 주소록에 추가해 주세요.\n\n"
-        f"신청하지 않으셨다면 여기서 바로 수신을 거부할 수 있어요: {unsub}\n\n— 에디터 H 드림\n")
-    smtp.send_message(msg)
+        f"{day} {when}에 첫 메일이 가요. 매일 아침, 알아두면 좋은 트렌드 5가지를 확인된 숫자로 짧게 정리해 보내드려요.\n"
+        "그중 하나는 H PICK으로 조금 더 깊게 풀어요.\n\n"
+        f"기다리는 동안 {lead}를 먼저 읽어보세요.\n" + "\n".join(rows) + "\n\n"
+        f"인스타그램에서는 같은 이야기를 카드로 넘겨볼 수 있어요: {insta}\n\n"
+        "메일이 스팸함으로 가지 않게 이 주소를 주소록에 추가해 주세요. 다뤄줬으면 하는 주제가 있으면 이 메일에 그대로 답장하셔도 돼요.\n\n"
+        "— 에디터 H 드림\n\n"
+        f"신청하지 않으셨다면 여기서 수신을 거부할 수 있어요: {unsub}\n")
+
+    li = "".join(
+        f'<tr><td style="padding:10px 0; border-top:1px solid #EEE;">'
+        f'<a href="{site}/{i["filename"]}" style="color:#1A1A1A; text-decoration:none;">'
+        f'<span style="font-size:12px; color:#B91C1C; font-weight:800;">VOL.{i["vol"]}</span><br>'
+        f'<span style="font-size:16px; font-weight:800; line-height:1.5;">{html.escape(i["title"])}</span></a></td></tr>'
+        for i in picks)
+    msg.add_alternative(f"""<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8">
+<meta name="color-scheme" content="light only"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin:0; padding:0; background:#FAFAF7;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FAFAF7;"><tr><td align="center" style="padding:28px 12px;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px; background:#FFFFFF; font-family:'Apple SD Gothic Neo','Pretendard','Malgun Gothic',sans-serif; color:#1A1A1A;">
+<tr><td style="padding:36px 32px 8px;">
+  <div style="font-size:34px; font-weight:900; letter-spacing:-1.5px;">EDIT<span style="color:#B91C1C;"> H</span></div>
+  <div style="height:2px; background:#000; margin:18px 0 24px;"></div>
+  <p style="font-size:19px; font-weight:800; margin:0 0 14px;">구독해 주셔서 고마워요.</p>
+  <p style="font-size:15px; line-height:1.8; color:#333; margin:0 0 12px;"><b>{day} {when}</b>에 첫 메일이 가요.
+  매일 아침, 알아두면 좋은 트렌드 5가지를 확인된 숫자로 짧게 정리해 보내드려요. 그중 하나는 H PICK으로 조금 더 깊게 풀어요.</p>
+  <p style="font-size:15px; line-height:1.8; color:#333; margin:18px 0 6px;">기다리는 동안 {lead}를 먼저 읽어보세요.</p>
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0">{li}</table>
+  <p style="font-size:15px; line-height:1.8; color:#333; margin:22px 0 12px;">인스타그램에서는 같은 이야기를 카드로 넘겨볼 수 있어요 —
+  <a href="{insta}" style="color:#B91C1C; font-weight:800; text-decoration:none;">@edit.h.kr</a></p>
+  <p style="font-size:14px; line-height:1.8; color:#666; margin:0 0 18px;">메일이 스팸함으로 가지 않게 이 주소를 주소록에 추가해 주세요.
+  다뤄줬으면 하는 주제가 있으면 이 메일에 그대로 답장하셔도 돼요.</p>
+  <p style="font-size:15px; font-weight:800; margin:0 0 28px;">— 에디터 H 드림</p>
+</td></tr>
+<tr><td style="padding:16px 32px 28px; font-size:12px; color:#999; border-top:1px solid #EEE;">
+  신청하지 않으셨다면 <a href="{html.escape(unsub)}" style="color:#999;">여기서 수신을 거부</a>할 수 있어요.
+</td></tr></table></td></tr></table></body></html>""", subtype="html")
+    return msg
+
+
+def welcome(smtp, sender, to_addr, cfg):
+    smtp.send_message(welcome_message(sender, to_addr, cfg))
 
 
 def main():
