@@ -124,6 +124,8 @@ automation/
   send_newsletter.py    메일 발송(GitHub Actions 에서 실행)
   wait_until_send.py    예약 실행이 일찍 시작돼도 발송 시각까지 기다림
   sent/                 발송 기록(주소 없이 날짜·건수만)
+  alert.py              운영 알림(실패 즉시 + 08:40 발행 감시) — alerts.yml
+  request_metrics.py    성과표가 오래됐으면 수집을 요청하고 기다림(22:00 회고 첫 단계)
   edith/                템플릿 모듈(newsletter·cards·site·content·fonts)
 content/YYYY-MM-DD.json 호마다의 원본 콘텐츠(출처 URL 포함)
 .claude/settings.json   무인 발행 세션이 확인 창 없이 실행할 수 있는 명령 목록
@@ -135,12 +137,23 @@ content/YYYY-MM-DD.json 호마다의 원본 콘텐츠(출처 URL 포함)
 ```
 21:30  collect-metrics.yml  → automation/metrics/summary.md (최근 14호 성과표: 인스타 좋아요·댓글[권한 있으면 도달·저장·공유],
                                팔로워, 메일 답장·구독 신청·수신 거부, 발송 대상 수, 투표 참여, 제목 유형·표지·요일별 평균)
+       (예약 실행이 늦으면 22:00 회고가 request_metrics.py 로 request.txt 를 푸시해 바로 돌리고 새 성과표를 기다린다)
 22:00  편집 회고(Claude, 발행 세션) → automation/learnings.md: 회고 기록 + '지금 원칙'(근거 3호 이상일 때만 변경) + 가설 + 개선 요청
 07:00  제작 루틴 → RUNBOOK 0단계에서 learnings.md·summary.md 를 읽고 주제·제목·표지에 반영
 일 21:00  개선 루틴(Claude, 작업 세션) → '시스템 개선 요청'·실패 기록을 코드·템플릿으로 고쳐 PR → 머지, 주간 리포트
 ```
 - 숫자만 모은다(주소·계정 이름 없음). 인스타 도달·저장·공유는 토큰에 `instagram_business_manage_insights` 권한이 있어야 나온다 —
   없으면 좋아요·댓글만으로 비교한다(성과표 첫 줄에 표시).
+
+## 운영 알림 (2026-09-26~)
+
+문제가 생기면 운영자 메일(SMTP_USER)로 `EDIT H 운영 알림 · …` 메일이 온다(`alerts.yml` → `automation/alert.py`, 추가 설정 없음).
+- **곧바로**: 발송·인스타 게시·구독 반영·투표 집계·성과 수집·음원 받기 워크플로가 실패로 끝나면(workflow_run — 예약 실행과 달리 늦지 않는다).
+  무슨 작업이 어느 단계에서 실패했는지, 다음에 무슨 일이 일어나는지·할 일을 적는다.
+- **발행 감시(08:40·09:40)**: 오늘 호가 안 올라왔거나(제작 루틴이 사용량 한도·오류로 멈춘 날 — 다른 워크플로는 '실패'하지 않아 이걸로만 잡힌다),
+  메일 발송·인스타 캐러셀·릴스 기록이 없거나, 웹 페이지가 안 열리거나, 성과 수집이 36시간 넘게 멈췄거나, 인스타 토큰이 14일 넘게 연장되지 않았을 때.
+  아직 돌고 있는 발송·게시는 다음 점검으로 미루고, 같은 날 같은 알림은 한 번만 보낸다(`automation/alerts/날짜.json` 에 종류만).
+- 시험: Actions → EDIT H alerts → Run workflow → mode `test`(시험 메일 한 통) 또는 `watch`(오늘 흐름 점검).
 
 ## 구독 신청·수신 거부 자동 반영 (2026-09-25~)
 
