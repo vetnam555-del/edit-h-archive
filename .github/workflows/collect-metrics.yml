@@ -1,0 +1,53 @@
+# EDIT H 매일 성과 수집 — 인스타(좋아요·댓글, 권한이 있으면 도달·저장·공유), 메일(답장·구독 신청·수신 거부), 발송 대상 수, 투표.
+# 매일 21:30(KST). automation/metrics/summary.md 를 22:00 편집 회고와 다음 날 07:00 제작 루틴이 읽는다(automation/learnings.md).
+# 공개 저장소라 숫자만 남기고 로그에도 주소·계정 이름은 찍지 않는다.
+name: Collect EDIT H metrics
+
+on:
+  schedule:
+    - cron: "30 12 * * *"    # UTC 12:30 = KST 21:30 매일
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "모으기만 하고 저장하지 않음"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: collect-metrics
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Collect
+        env:
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          SUBSCRIBERS: ${{ secrets.SUBSCRIBERS }}
+          IN_DRY: ${{ inputs.dry_run }}
+        run: |
+          if [ "$IN_DRY" = "true" ]; then python3 automation/collect_metrics.py --dry-run; else python3 automation/collect_metrics.py; fi
+
+      - name: Record metrics
+        run: |
+          if [ -n "$(git status --porcelain automation/metrics)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add automation/metrics
+            git commit -m "Collect EDIT H metrics ($(date -u +%F))"
+            for i in 1 2 3 4; do
+              git pull --rebase origin main && git push origin HEAD:main && break
+              sleep $((i * 5))
+            done
+          fi

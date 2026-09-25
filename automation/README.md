@@ -129,6 +129,18 @@ content/YYYY-MM-DD.json 호마다의 원본 콘텐츠(출처 URL 포함)
                         (커밋·main 푸시·빌드 스크립트만. 지켜보는 사람이 없어 이 목록이 없으면 푸시 단계에서 멈춘다)
 ```
 
+## 매일 발전하는 고리 (2026-09-25~)
+
+```
+21:30  collect-metrics.yml  → automation/metrics/summary.md (최근 14호 성과표: 인스타 좋아요·댓글[권한 있으면 도달·저장·공유],
+                               팔로워, 메일 답장·구독 신청·수신 거부, 발송 대상 수, 투표 참여, 제목 유형·표지·요일별 평균)
+22:00  편집 회고(Claude, 발행 세션) → automation/learnings.md: 회고 기록 + '지금 원칙'(근거 3호 이상일 때만 변경) + 가설 + 개선 요청
+07:00  제작 루틴 → RUNBOOK 0단계에서 learnings.md·summary.md 를 읽고 주제·제목·표지에 반영
+일 21:00  개선 루틴(Claude, 작업 세션) → '시스템 개선 요청'·실패 기록을 코드·템플릿으로 고쳐 PR → 머지, 주간 리포트
+```
+- 숫자만 모은다(주소·계정 이름 없음). 인스타 도달·저장·공유는 토큰에 `instagram_business_manage_insights` 권한이 있어야 나온다 —
+  없으면 좋아요·댓글만으로 비교한다(성과표 첫 줄에 표시).
+
 ## 구독 신청·수신 거부 자동 반영 (2026-09-25~)
 
 subscribe.html·unsubscribe.html 은 Formspree 로 보내고, Formspree 가 폼 주인 메일로 알림을 보낸다. `sync-subscribers.yml`(매일 07:10)이
