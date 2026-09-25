@@ -189,7 +189,7 @@ python3 automation/build_issue.py {날짜}           # 뉴스레터·카드·man
 - Read 도구로 `instagram/{날짜}/*.png` **10장 모두** 본다: 글자 잘림·겹침, 어색한 줄바꿈, 오탈자, 숫자·단위.
   심층 카드(04)의 숫자 상자·요점, 노트 카드(09), 투표일의 마무리 카드(10) A/B 도 확인한다.
   **이 카드와 `caption.txt`·`first_comment.txt` 가 08:00 에 인스타그램에 그대로 자동 게시된다**(post-instagram.yml —
-  캐러셀 + 같은 카드로 만든 음악 릴스). 게시 뒤에는 고치기 어려우니 여기서 끝까지 본다. `ig/*.jpg` 는 게시용 사본이라 따로 볼 필요 없다.
+  캐러셀. 같은 카드로 만든 음악 릴스 영상은 운영자 메일로 가서 사람이 올린다). 게시 뒤에는 고치기 어려우니 여기서 끝까지 본다. `ig/*.jpg` 는 게시용 사본이라 따로 볼 필요 없다.
 - 뉴스레터: `node automation/preview_newsletter.cjs {날짜}.html <스크래치 폴더>/nl` 후 `<스크래치 폴더>/nl_*.png` 를 본다
   (두 번째 인자가 출력 경로 접두어. 세션에 스크래치 폴더가 있으면 그곳을, 없으면 `/tmp` 를 쓴다)
 - 고칠 게 있으면 JSON 수정 → 3단계 재실행.
@@ -233,7 +233,7 @@ git push origin HEAD:main
 소스: fallback (안장출근길 접근 불가: EGRESS_BLOCKED)
 5가지: 01(H PICK) … / 02 … / … / 05 …
 투표: (월) 질문 A/B · (금) 결과 N명 또는 싣지 않은 사유
-카드뉴스: https://vetnam555-del.github.io/edit-h-archive/instagram/2026-09-24/  (인스타 캐러셀·릴스는 08:00 GitHub Actions 자동 게시)
+카드뉴스: https://vetnam555-del.github.io/edit-h-archive/instagram/2026-09-24/  (인스타 캐러셀은 08:00 GitHub Actions 자동 게시, 릴스 영상은 운영자 메일로)
 뉴스레터: https://vetnam555-del.github.io/edit-h-archive/2026-09-24.html  (메일은 08:00 GitHub Actions 발송)
 확인 필요: (있으면) 교차 확인이 약했던 숫자, 자동 축소된 카드, warnings
 ```
