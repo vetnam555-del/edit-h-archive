@@ -142,7 +142,7 @@ def instagram_caption(d, site):
     if dm_line():
         lines.append(dm_line())
     when = send_time_ko(d["send_time_kst"]).replace("오전", "아침")
-    lines.append(f"매 영업일 {when}, {len(d['all_items'])}가지 전문과 출처는 뉴스레터로 — 프로필 링크")
+    lines.append(f"매일 {when}, {len(d['all_items'])}가지 전문과 출처는 뉴스레터로 — 프로필 링크")
     lines.append("EDIT H · 매일 아침, 트렌드 한 입 (@edit.h.kr)")
     lines.append("/ 에디터. H")
     tags = ig.get("hashtags") or ["트렌드", "트렌드뉴스", "뉴스브리핑", "경제뉴스", "소비트렌드", "카드뉴스", "EDITH"]

@@ -1,15 +1,10 @@
 {
   "site_url": "https://vetnam555-del.github.io/edit-h-archive",
   "send_time_kst": "08:00",
-  "routine_start_kst": "08:00",
-  "publish_days": [
-    "월",
-    "화",
-    "수",
-    "목",
-    "금"
-  ],
-  "skip_kr_public_holidays": true,
+  "routine_start_kst": "07:00",
+  "publish_days": ["월", "화", "수", "목", "금", "토", "일"],
+  "skip_kr_public_holidays": false,
+  "_publish_note": "2026-09-25 요청: 주말·공휴일 상관없이 매일 발행. 영업일만 내려면 publish_days 를 월~금, skip_kr_public_holidays 를 true 로.",
   "items_per_issue": 10,
   "card_count": 10,
   "primary_source": {
@@ -37,7 +32,7 @@
     "dm_keyword": "에디트",
     "dm_auto_reply": false,
     "_dm_note": "dm_auto_reply 가 true 일 때만 캡션에 '댓글 남기면 DM' 약속을 넣는다. 자동 답장을 만들기 전에는 false(지키지 못할 약속 금지).",
-    "_note": "게시: .github/workflows/post-instagram.yml(평일 08:00 = send_time_kst, 금 주간 특집 18:00). 릴스는 피드 격자에 캐러셀과 겹치지 않게 릴스 탭에만(reel_share_to_feed=false).",
+    "_note": "게시: .github/workflows/post-instagram.yml(매일 08:00 = send_time_kst, 금 주간 특집 18:00). 릴스는 피드 격자에 캐러셀과 겹치지 않게 릴스 탭에만(reel_share_to_feed=false).",
     "auto_post": true,
     "api_version": "v23.0",
     "reel": false,

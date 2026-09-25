@@ -139,13 +139,13 @@ def welcome(smtp, sender, to_addr, cfg):
     latest = json.loads(MANIFEST.read_text(encoding="utf-8"))["issues"][-1]
     unsub = f"{site}/unsubscribe.html?email={to_addr}"
     msg = EmailMessage()
-    msg["Subject"] = f"{cfg['email']['subject_prefix']} 구독을 환영해요 — 다음 영업일 아침에 만나요"
+    msg["Subject"] = f"{cfg['email']['subject_prefix']} 구독을 환영해요 — 내일 아침에 만나요"
     msg["From"] = formataddr((cfg["email"]["from_name"], sender))
     msg["To"] = to_addr
     msg["List-Unsubscribe"] = f"<{unsub}>"
     msg.set_content(
         "EDIT H를 구독해 주셔서 고마워요.\n\n"
-        f"매 영업일 {send_time_ko(cfg['send_time_kst']).replace('오전', '아침')}, 오늘 꼭 알아둘 트렌드 5가지를 보내드려요. 하나는 H PICK으로 깊게 풀어드리고,\n"
+        f"매일 {send_time_ko(cfg['send_time_kst']).replace('오전', '아침')}, 오늘 꼭 알아둘 트렌드 5가지를 보내드려요. 하나는 H PICK으로 깊게 풀어드리고,\n"
         "월요일엔 독자 투표를 열어 금요일에 결과를 알려드려요.\n\n"
         f"최근 호 먼저 읽어보기: {site}/{latest['filename']}\n"
         "메일이 스팸함으로 가지 않게, 이 메일에 한 줄 답장해 주시거나 주소록에 추가해 주세요.\n\n"
