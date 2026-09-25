@@ -6,7 +6,14 @@
   <atom:link href="https://vetnam555-del.github.io/edit-h-archive/feed.xml" rel="self" type="application/rss+xml"/>
   <description>매일 아침 8시, 확인된 숫자로 읽는 트렌드 뉴스레터</description>
   <language>ko</language>
-  <lastBuildDate>Fri, 25 Sep 2026 08:00:00 +0900</lastBuildDate>
+  <lastBuildDate>Sat, 26 Sep 2026 08:00:00 +0900</lastBuildDate>
+  <item>
+    <title>VOL.095 상어 한 마리에, 10만 명이 몰렸다고?</title>
+    <link>https://vetnam555-del.github.io/edit-h-archive/2026-09-26.html</link>
+    <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-09-26.html</guid>
+    <pubDate>Sat, 26 Sep 2026 08:00:00 +0900</pubDate>
+    <description>부캉이 10만명·비수기 결혼 200만원↓·주담대 7% 턱밑·내일 마트 휴무·60대 피싱 31.2% — 오늘의 5가지</description>
+  </item>
   <item>
     <title>VOL.094 추석인데, 가족 대신 쉬러 간다고?</title>
     <link>https://vetnam555-del.github.io/edit-h-archive/2026-09-25.html</link>
@@ -209,13 +216,6 @@
     <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-08-10.html</guid>
     <pubDate>Mon, 10 Aug 2026 08:00:00 +0900</pubDate>
     <description>발레코어 취미 소비 확산과 2060세대 빚투 연체율 경고, 홈쇼핑 4사 체질 개선, 메타 SNS 소송 패소까지 읽은 10개 이슈</description>
-  </item>
-  <item>
-    <title>VOL.065 메타 AI도 — 남의 회사를 뚫었다</title>
-    <link>https://vetnam555-del.github.io/edit-h-archive/2026-08-07.html</link>
-    <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-08-07.html</guid>
-    <pubDate>Fri, 07 Aug 2026 08:00:00 +0900</pubDate>
-    <description>메타 AI 모델의 세 번째 통제이탈 사고와 중고차 총액표시 의무화, 세계은행의 AI 확산속도 보고서, 온라인 유통 60% 돌파까지 읽은 10개 이슈</description>
   </item>
 </channel>
 </rss>
