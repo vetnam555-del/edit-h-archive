@@ -1,6 +1,6 @@
 # EDIT H 자동 발행 (클라우드)
 
-노트북이 꺼져 있어도 매 영업일 아침 뉴스레터와 카드뉴스가 발행되도록, 로컬에서 하던 작업을 이 저장소 안으로 옮겼다.
+노트북이 꺼져 있어도 매일(주말·공휴일 포함) 아침 뉴스레터와 카드뉴스가 발행되도록, 로컬에서 하던 작업을 이 저장소 안으로 옮겼다.
 
 ```
 07:00 KST  Claude 클라우드 루틴 시작 ─ automation/RUNBOOK.md 대로
@@ -11,7 +11,7 @@
 08:00 KST  GitHub Actions(send-newsletter.yml) → 구독자에게 메일 발송 + (post-instagram.yml) 인스타 게시
            (주 경로: 루틴이 오늘 호를 푸시하면 push 실행이 08:00 까지 기다렸다 발송 — 새벽 02:10 이후 푸시까지.
             예비: 07:30·08:05 예약 실행(GitHub 예약은 빠지기도 한다). 08:00 이후 푸시는 즉시 발송.
-            마지막 보루: 평일 08:20 Claude 확인 루틴이 발송·게시 기록이 없으면 수동 실행하고 알린다)
+            마지막 보루: 매일 08:20 Claude 확인 루틴이 발송·게시 기록이 없으면 수동 실행하고 알린다)
 ```
 
 - **금요일 주간 특집 'TOP5'**(2026-10-16부터): 그 주 데일리 카드 이슈 5개를 목록형 9장으로 다시 엮어 `instagram/YYYY-MM-DD-weekly/` 에 올린다(인스타 전용, 새 취재 없음). 설정은 `config.json` 의 `weekly_special`.
@@ -56,7 +56,7 @@ Claude 의 WebFetch 는 네이버를 열지 못하므로 루틴은 `fetch_anjang
 
 ### 3) 인스타그램 자동 게시 — 카드 캐러셀 + 음악 릴스 (처음 한 번 설정)
 
-매 영업일 08:00 에 카드 캐러셀(캡션·첫 댓글 포함)이 자동으로 올라간다. 같은 카드를 세로 영상으로 엮은 **음악 릴스**는
+매일 08:00 에 카드 캐러셀(캡션·첫 댓글 포함)이 자동으로 올라간다. 같은 카드를 세로 영상으로 엮은 **음악 릴스**는
 2026-09-25 부터 자동 게시 대신 **운영자 메일(SMTP_USER)로 영상+캡션을 보낸다**(`config.instagram.reel=false`, `reel_delivery="email"`) —
 Instagram 로그인 API(graph.instagram.com)가 영상 직접 업로드를 받지 않고 공개 video_url 을 요구해서다. 휴대폰에서 받아 릴스로 올리면 되고,
 그때 인스타 인기 음원으로 바꿀 수도 있다. 영상을 공개 주소에 둘 방법이 정해지면 `reel` 을 다시 켠다.
@@ -91,7 +91,7 @@ Instagram 로그인 API(graph.instagram.com)가 영상 직접 업로드를 받�
 **⑤ 확인** — Actions → **Post EDIT H to Instagram → Run workflow**
 1. mode `check` → 로그에 `인스타 계정 @edit.h.kr` 이 보이면 토큰 정상
 2. mode `dry-run` → 게시 없이 이미지 10장·릴스 영상·컨테이너까지 확인(토큰 교환도 이때 한 번 된다)
-3. 끝. 다음 영업일 08:00 부터 자동 게시. 수동으로 특정 호를 올리려면 key 에 날짜, mode `post`.
+3. 끝. 다음 날 08:00 부터 자동 게시. 수동으로 특정 호를 올리려면 key 에 날짜, mode `post`.
 
 **음악** — `assets/music/tracks.json` 의 곡을 날짜마다 돌려 쓴다(출처 `assets/music/CREDITS.md`).
 곡 파일은 Actions **Fetch reel music** 가 위키미디어에서 받아 75초 클립으로 넣는다(tracks.json 이 바뀌면 자동 실행).
@@ -146,7 +146,7 @@ subscribe.html·unsubscribe.html 은 Formspree 로 보내고, Formspree 가 폼 
   숫자로 보면 → 왜 중요해 → 그래서 뭐가 달라져 → 알아두면 좋은 것) → 02~05 → 한 줄 뉴스(0~2) → (금) 투표 결과 → Q 또는 (월) 투표.
 - **카드 10장**: 표지 → 5가지 요약 → H PICK(검정) → 심층 '왜 중요해?' → 이슈 4장 → 에디터 H 노트(금요일엔 투표 결과 막대) → 마무리(월요일엔 A/B).
 - **주간 독자 투표**: 월요일(그 주 첫 호)에 A/B 로 묻고 금요일 호에 결과. 메일은 A·B 버튼(보낼 때 `mailto:발신주소?subject=[EDIT H POLL 날짜] A` 로 바뀜 —
-  웹 아카이브에선 `poll.html` 안내로 간다)과 A/B 답장, 인스타는 댓글 A/B 를 `tally-poll.yml`(평일 06:20)이 Gmail IMAP(읽기 전용, 기존 SMTP 앱 비밀번호)과
+  웹 아카이브에선 `poll.html` 안내로 간다)과 A/B 답장, 인스타는 댓글 A/B 를 `tally-poll.yml`(매일 06:20)이 Gmail IMAP(읽기 전용, 기존 SMTP 앱 비밀번호)과
   Instagram API 로 센다. `automation/polls/{날짜}.json` 에 **숫자만** 남긴다. 참여가 `config.poll.min_votes`(5) 미만이면 결과를 싣지 않는다.
 - 지난 호(형식 1: 빅이슈 + 9개)는 그대로 재빌드된다(`content.py` 가 최상위 `items` 유무로 가른다). 견본: `automation/examples/format2.json`.
 

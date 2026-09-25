@@ -1,5 +1,5 @@
 # EDIT H 인스타그램 자동 게시 — 카드 캐러셀 + 음악 릴스.
-# 데일리: 매 영업일 08:00(KST, 뉴스레터와 같은 시각 = config.send_time_kst). 금요일 주간 특집(TOP5): 18:00.
+# 데일리: 매일 08:00(KST, 주말·공휴일 포함, 뉴스레터와 같은 시각 = config.send_time_kst). 금요일 주간 특집(TOP5): 18:00.
 # 카드는 07:00 Claude 루틴이 만들어 main 에 푸시하고(instagram/{날짜}/ig/*.jpg 포함), 여기서는 게시만 한다.
 # 발행하지 않은 날(주말·공휴일)은 폴더가 없어 그냥 끝난다. 같은 호는 automation/ig_posted/ 기록으로 두 번 올리지 않는다.
 # 필요한 Secrets: IG_ACCESS_TOKEN(필수) · IG_APP_SECRET · GH_ADMIN_TOKEN(권장, 토큰 자동 교환·연장) — automation/README.md '인스타그램 자동 게시'
@@ -7,8 +7,8 @@ name: Post EDIT H to Instagram
 
 on:
   schedule:
-    - cron: "30 22 * * 0-4"   # KST 월–금 07:30 → 08:00 까지 대기 후 데일리 게시
-    - cron: "5 23 * * 0-4"    # KST 08:05 예비 실행(이미 올렸으면 건너뜀)
+    - cron: "30 22 * * *"     # KST 매일 07:30 → 08:00 까지 대기 후 데일리 게시(예비 — 주 경로는 루틴 push)
+    - cron: "5 23 * * *"      # KST 08:05 예비 실행(이미 올렸으면 건너뜀)
     - cron: "40 8 * * 5"      # KST 금 17:40 → 18:00 까지 대기 후 주간 특집 게시
   push:
     branches: [main]
