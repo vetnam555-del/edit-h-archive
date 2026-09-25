@@ -1,0 +1,54 @@
+{
+ "collected_at": "2026-09-25T16:19+09:00",
+ "issues": {
+  "2026-09-25": {
+   "title": "추석인데, 가족 대신 쉬러 간다고?",
+   "format": 1,
+   "pick_tag": "달라진 명절",
+   "title_style": "질문형",
+   "cover": "사진",
+   "weekday": "금",
+   "poll": false,
+   "source_mode": "mixed"
+  },
+  "2026-09-24": {
+   "title": "추석은 9월인데, 대목은 8월이었다고?",
+   "format": 1,
+   "pick_tag": "이른 추석 대목",
+   "title_style": "질문형",
+   "cover": "핵심어",
+   "weekday": "목",
+   "poll": false,
+   "source_mode": "fallback"
+  }
+ },
+ "instagram": {
+  "followers": 45,
+  "media": 75,
+  "insights": true,
+  "posts": {
+   "2026-09-25": {
+    "likes": 0,
+    "comments": 0,
+    "reach": 5,
+    "saved": 0,
+    "shares": 0,
+    "views": 8
+   }
+  }
+ },
+ "mail": {
+  "replies": {
+   "2026-09-24": 0,
+   "2026-09-25": 0
+  },
+  "signups_14d": 0,
+  "unsubs_14d": 0
+ },
+ "subscribers": {
+  "listed": 12,
+  "sending": 11,
+  "excluded": 1
+ },
+ "polls": {}
+}
