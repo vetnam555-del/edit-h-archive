@@ -68,10 +68,10 @@ jobs:
       - name: Refresh main
         run: git pull --ff-only origin main
 
-      - name: Install ffmpeg and PyNaCl
+      - name: Install ffmpeg, PyNaCl and Pillow
         run: |
           sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg > /dev/null
-          pip install -q pynacl
+          pip install -q pynacl pillow   # Pillow: 릴스 영상 위쪽의 음악 출처 글자(make_reel.py)
 
       - name: Post
         env:

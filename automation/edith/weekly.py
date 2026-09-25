@@ -125,9 +125,5 @@ def caption(w):
     lines += ["", "이 중에 제일 와닿은 건 몇 번이었어요?"]
     if dm_line():
         lines += ["", dm_line()]
-    lines += ["", _pick(_LETTER, w).format(when=_when(w)), "— 에디터 H", ""]
-    cover = w["cards"]["cover"]
-    if cover.get("photo") and cover.get("credit"):
-        lines.append("표지 사진 " + cover["credit"].replace("사진 = ", "").strip())
-    lines.append(_tags(w, spec.get("hashtags") or ["주간정리"]))
+    lines += ["", _pick(_LETTER, w).format(when=_when(w)), "— 에디터 H", "", _tags(w, spec.get("hashtags") or ["주간정리"])]
     return "\n".join(lines)
