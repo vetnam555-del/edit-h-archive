@@ -165,12 +165,6 @@ def _ask(d):
     return [text] if text else []
 
 
-def _credit(cover):
-    if cover.get("photo") and cover.get("credit"):
-        return "표지 사진 " + cover["credit"].replace("사진 = ", "").strip()
-    return None
-
-
 def instagram_caption(d, site):
     """에디터가 직접 쓴 듯한 캡션: 훅 + 대화체 요약(content) → 오늘의 N가지 → 독자에게 한 질문 → 뉴스레터 한 줄 → 서명 → 해시태그.
 
@@ -186,11 +180,8 @@ def instagram_caption(d, site):
         lines += ["", *ask]
     if dm_line():
         lines += ["", dm_line()]
-    lines += ["", _pick(_LETTER, d).format(when=_when(d)), "— 에디터 H", ""]
-    credit = _credit((d.get("cards") or {}).get("cover") or {})
-    if credit:
-        lines.append(credit)
-    lines.append(_tags(d, ig.get("hashtags")))
+    # 표지 사진·음악 출처는 캡션에 쓰지 않는다(2026-09-25 요청) — 사진 출처는 표지 카드 안에, 음악 출처는 릴스 영상 안에 있다.
+    lines += ["", _pick(_LETTER, d).format(when=_when(d)), "— 에디터 H", "", _tags(d, ig.get("hashtags"))]
     return "\n".join(lines)
 
 

@@ -128,23 +128,27 @@ def post_carousel(g, uid, key, folder, site_url, dry):
     return media_id
 
 
-def reel_caption(folder, track):
-    """릴스 캡션. build_issue.py 가 만든 reel_caption.txt(훅·요약 한 문장·피드 안내·해시태그)에 음악 출처를 해시태그 앞에 넣는다.
+def reel_caption(folder, track=None):
+    """릴스 캡션 = build_issue.py 가 만든 reel_caption.txt(훅·요약 한 문장·피드 안내·해시태그).
+    음악 출처는 캡션에 쓰지 않는다(2026-09-25 요청) — 영상 위쪽에 들어가고(make_reel.py), 못 넣으면 댓글로(music_credit).
     파일이 없으면(주간 특집·예전 호) caption.txt 의 첫 줄과 해시태그로 같은 모양을 만든다."""
     path = folder / "reel_caption.txt"
     if path.exists():
-        lines = path.read_text(encoding="utf-8").strip().splitlines()
-    else:
-        cap = (folder / "caption.txt").read_text(encoding="utf-8").strip().splitlines()
-        tags = next((line for line in reversed(cap) if line.startswith("#")), "")
-        lines = [cap[0] if cap else "", "", "카드 전체는 피드 게시물에 있어요.", tags]
-    tags = lines.pop() if lines and lines[-1].startswith("#") else ""
-    if track:
-        credit = f"음악 · {track['title']} — {track['artist']}"
-        if track.get("license", "").upper() != "CC0":
-            credit += f" ({track['license']}, {track.get('source_name', 'Wikimedia Commons')})"
-        lines += ["", credit]
-    return "\n".join(lines + [tags]).strip()
+        return path.read_text(encoding="utf-8").strip()
+    from edith.site import _GENERIC_TAGS
+    cap = (folder / "caption.txt").read_text(encoding="utf-8").strip().splitlines()
+    line = next((x for x in reversed(cap) if x.startswith("#")), "")
+    keep = [t.lstrip("#") for t in line.split() if t.startswith("#")]
+    keep = [t for t in keep if t not in _GENERIC_TAGS and t.upper() != "EDITH"][:3] + ["EDITH"]
+    return "\n".join([cap[0] if cap else "", "", "카드 전체는 피드 게시물에 있어요.", " ".join("#" + t for t in keep)]).strip()
+
+
+def music_credit(track):
+    """CC BY 곡의 출처 한 줄(영상에 넣지 못했을 때 릴스 댓글로 단다)."""
+    line = f"음악 · {track['title']} — {track['artist']}"
+    if track.get("license", "").upper() != "CC0":
+        line += f" ({track['license']}, {track.get('source_name', 'Wikimedia Commons')})"
+    return line
 
 
 def build_reel(key, folder, ffmpeg):
@@ -157,8 +161,10 @@ def build_reel(key, folder, ffmpeg):
         return None, None
     if proc.returncode != 0:
         raise IGError(f"릴스 영상 만들기 실패: {(proc.stderr or proc.stdout)[-800:]}")
-    track = json.loads(proc.stdout.strip().splitlines()[-1])["track"]
-    print(f"  릴스 영상 {out.stat().st_size // 1024}KB — 음악: {track['title']} / {track['artist']}")
+    info = json.loads(proc.stdout.strip().splitlines()[-1])
+    track = {**info["track"], "credit_in_video": bool(info.get("credit_in_video"))}
+    print(f"  릴스 영상 {out.stat().st_size // 1024}KB — 음악: {track['title']} / {track['artist']}"
+          + (" (출처는 영상 안에)" if track["credit_in_video"] else ""))
     return out, track
 
 
@@ -230,7 +236,14 @@ def post_reel(g, uid, key, folder, cfg, dry, ffmpeg, site_url):
     cid = g.call("POST", f"{uid}/media", media_type="REELS", video_url=url, caption=reel_caption(folder, track),
                  share_to_feed="true" if cfg.get("reel_share_to_feed") else "false", thumb_offset="800")["id"]
     g.wait_ready(cid, "릴스", timeout=900)
-    return g.call("POST", f"{uid}/media_publish", creation_id=cid)["id"], track
+    media_id = g.call("POST", f"{uid}/media_publish", creation_id=cid)["id"]
+    if track.get("license", "").upper() != "CC0" and not track.get("credit_in_video"):
+        try:  # 라이선스(CC BY)가 요구하는 출처 표시 — 영상에 못 넣었을 때만 댓글로
+            g.call("POST", f"{media_id}/comments", message=music_credit(track))
+            print("  ✓ 음악 출처 댓글")
+        except IGError as e:
+            print(f"  ⚠ 음악 출처 댓글 실패: {e}")
+    return media_id, track
 
 
 def _tracked(path):

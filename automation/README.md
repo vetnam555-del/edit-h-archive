@@ -63,7 +63,7 @@ Instagram 로그인 API(graph.instagram.com)는 영상 파일 직접 업로드�
 자동 게시가 실패하면 영상+캡션을 운영자 메일(SMTP_USER)로 보낸다(`config.instagram.reel_delivery="email"`).
 금요일 주간 특집(TOP5)은 18:00. 공식 Instagram API 만 쓴다(비공식 자동화는 계정 정지 위험).
 **인스타 음악 라이브러리 곡은 API 로 넣을 수 없어서**, 릴스에는 재배포가 허용된 CC BY 곡(`assets/music/`)을 영상에 직접 넣고
-캡션에 출처를 단다. 릴스는 피드 격자에서 캐러셀과 겹치지 않게 릴스 탭에만 올린다(`config.instagram.reel_share_to_feed`).
+출처(곡·작가·라이선스)는 캡션이 아니라 영상 위쪽에 작게 넣는다(2026-09-25~, Pillow 가 없으면 릴스 댓글로). 표지 사진 출처도 캡션에서 빼고 표지 카드 안에만 둔다. 릴스는 피드 격자에서 캐러셀과 겹치지 않게 릴스 탭에만 올린다(`config.instagram.reel_share_to_feed`).
 
 **① 인스타 계정을 프로페셔널로** — 인스타 앱 → 설정 → 계정 유형 및 도구 → 프로페셔널 계정으로 전환(크리에이터 또는 비즈니스).
 
