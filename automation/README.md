@@ -56,10 +56,11 @@ Claude 의 WebFetch 는 네이버를 열지 못하므로 루틴은 `fetch_anjang
 
 ### 3) 인스타그램 자동 게시 — 카드 캐러셀 + 음악 릴스 (처음 한 번 설정)
 
-매일 08:00 에 카드 캐러셀(캡션·첫 댓글 포함)이 자동으로 올라간다. 같은 카드를 세로 영상으로 엮은 **음악 릴스**는
-2026-09-25 부터 자동 게시 대신 **운영자 메일(SMTP_USER)로 영상+캡션을 보낸다**(`config.instagram.reel=false`, `reel_delivery="email"`) —
-Instagram 로그인 API(graph.instagram.com)가 영상 직접 업로드를 받지 않고 공개 video_url 을 요구해서다. 휴대폰에서 받아 릴스로 올리면 되고,
-그때 인스타 인기 음원으로 바꿀 수도 있다. 영상을 공개 주소에 둘 방법이 정해지면 `reel` 을 다시 켠다.
+매일 08:00 에 카드 캐러셀(캡션·첫 댓글 포함)과, 같은 카드를 세로 영상으로 엮은 **음악 릴스**가 자동으로 올라간다.
+Instagram 로그인 API(graph.instagram.com)는 영상 파일 직접 업로드를 받지 않고 공개 video_url 만 받으므로(2026-09-25 확인),
+릴스 영상은 `instagram/{날짜}/reel.mp4` 로 main 에 커밋해 GitHub Pages 주소로 넘긴다(2026-09-25 사용자 허락, 일반 커밋·강제 푸시 없음).
+영상은 `keep_jpeg_days`(14일) 뒤 사이트에서 정리된다(저장소 이력에는 남아 하루 약 2.5MB 씩 커진다).
+자동 게시가 실패하면 영상+캡션을 운영자 메일(SMTP_USER)로 보낸다(`config.instagram.reel_delivery="email"`).
 금요일 주간 특집(TOP5)은 18:00. 공식 Instagram API 만 쓴다(비공식 자동화는 계정 정지 위험).
 **인스타 음악 라이브러리 곡은 API 로 넣을 수 없어서**, 릴스에는 재배포가 허용된 CC BY 곡(`assets/music/`)을 영상에 직접 넣고
 캡션에 출처를 단다. 릴스는 피드 격자에서 캐러셀과 겹치지 않게 릴스 탭에만 올린다(`config.instagram.reel_share_to_feed`).

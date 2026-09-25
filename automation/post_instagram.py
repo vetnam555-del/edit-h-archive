@@ -3,7 +3,8 @@
 
 공식 Instagram API(Instagram 로그인 방식, graph.instagram.com)만 쓴다. 비공식 자동화는 계정 정지 위험이 있어 쓰지 않는다.
   1) 캐러셀: GitHub Pages 에 올라간 JPEG(instagram/{키}/ig/*.jpg) 10장 → 캡션(caption.txt) → 게시 → 첫 댓글(first_comment.txt)
-  2) 릴스: make_reel.py 로 만든 세로 영상(음악 포함)을 재개 업로드(rupload)로 올려 게시. 음악 출처는 캡션에 자동으로 붙는다.
+  2) 릴스: make_reel.py 로 만든 세로 영상(음악 포함)을 instagram/{키}/reel.mp4 로 커밋해 Pages 공개 주소(video_url)로 게시.
+     음악 출처는 캡션에 자동으로 붙는다. 실패하면 영상·캡션을 운영자 메일로 보낸다(config.instagram.reel_delivery).
 게시 결과는 automation/ig_posted/{키}.json 에 남겨 같은 호를 두 번 올리지 않는다(단계별로 기록 → 중간에 실패해도 이어서).
 
 필요한 Secrets: IG_ACCESS_TOKEN(필수) · IG_APP_SECRET(권장 — 단기 토큰을 60일 토큰으로 자동 교환)
@@ -65,24 +66,6 @@ class Graph:
         except urllib.error.URLError as e:
             raise IGError(f"접속 실패: {e.reason}") from None
 
-    def call_json(self, path, body):
-        """문서 예시(Instagram 로그인 API 재개 가능 업로드)와 같은 모양 — JSON 본문 + Authorization 헤더."""
-        req = urllib.request.Request(f"{self.base}/{path.lstrip('/')}", data=json.dumps(body).encode(), method="POST",
-                                     headers={"Content-Type": "application/json", "Authorization": f"Bearer {self.token}"})
-        try:
-            with urllib.request.urlopen(req, timeout=60) as r:
-                return json.loads(r.read() or b"{}")
-        except urllib.error.HTTPError as e:
-            raw = e.read().decode(errors="replace")
-            try:
-                err = json.loads(raw).get("error", {})
-                raise IGError(f"{e.code} {err.get('type', '')} (code {err.get('code')}): "
-                              f"{err.get('error_user_msg') or err.get('message') or raw}") from None
-            except ValueError:
-                raise IGError(f"{e.code}: {raw[:300]}") from None
-        except urllib.error.URLError as e:
-            raise IGError(f"접속 실패: {e.reason}") from None
-
     def wait_ready(self, container_id, what, timeout=600):
         """컨테이너 처리 완료(FINISHED)까지 기다린다. 영상은 몇 분 걸릴 수 있다."""
         start = time.time()
@@ -108,8 +91,8 @@ def save_log(key, log):
     (LOG_DIR / f"{key}.json").write_text(json.dumps(log, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
 
 
-def wait_public(urls, timeout=900):
-    """GitHub Pages 배포가 끝나 이미지가 공개 주소로 열릴 때까지 기다린다(인스타 서버가 이 주소에서 가져간다)."""
+def wait_public(urls, timeout=900, kind="jpeg"):
+    """GitHub Pages 배포가 끝나 이미지(또는 영상, kind="video")가 공개 주소로 열릴 때까지 기다린다(인스타 서버가 이 주소에서 가져간다)."""
     start, pending = time.time(), list(urls)
     while pending:
         still = []
@@ -117,7 +100,7 @@ def wait_public(urls, timeout=900):
             try:
                 req = urllib.request.Request(u, method="HEAD")
                 with urllib.request.urlopen(req, timeout=20) as r:
-                    if r.status != 200 or "jpeg" not in (r.headers.get("Content-Type") or ""):
+                    if r.status != 200 or kind not in (r.headers.get("Content-Type") or ""):
                         still.append(u)
             except (urllib.error.URLError, OSError):
                 still.append(u)
@@ -205,30 +188,51 @@ def email_reel(key, folder, ffmpeg):
     return track
 
 
-def post_reel(g, uid, key, folder, cfg, dry, ffmpeg):
+def publish_video(out, key):
+    """영상을 main 에 커밋·푸시해 GitHub Pages 공개 주소로 만든다(2026-09-25 사용자 허락).
+    Instagram 로그인 API(graph.instagram.com)는 릴스 파일 직접 업로드를 받지 않고 공개 video_url 만 받는다.
+    일반 커밋이고(강제 푸시 없음), 다른 변경(게시 기록 등)은 건드리지 않는다. 오래된 영상은 prune() 이 정리한다."""
+    env = {**os.environ, "GIT_AUTHOR_NAME": "github-actions[bot]", "GIT_COMMITTER_NAME": "github-actions[bot]",
+           "GIT_AUTHOR_EMAIL": "41898282+github-actions[bot]@users.noreply.github.com",
+           "GIT_COMMITTER_EMAIL": "41898282+github-actions[bot]@users.noreply.github.com"}
+    rel = out.relative_to(ROOT).as_posix()
+
+    def git(*a):
+        return subprocess.run(["git", "-C", str(ROOT), *a], capture_output=True, text=True, env=env)
+
+    git("add", "--", rel)
+    if git("diff", "--cached", "--quiet", "--", rel).returncode != 0:
+        r = git("commit", "-m", f"Add reel video for {key}", "--", rel)
+        if r.returncode != 0:
+            raise IGError(f"릴스 영상 커밋 실패: {(r.stderr or r.stdout)[-300:]}")
+    for i in range(4):
+        if git("push", "origin", "HEAD:main").returncode == 0:
+            return
+        git("pull", "--rebase", "--autostash", "origin", "main")
+        time.sleep(5 * (i + 1))
+    raise IGError("릴스 영상을 main 에 푸시하지 못했습니다")
+
+
+def post_reel(g, uid, key, folder, cfg, dry, ffmpeg, site_url):
     out, track = build_reel(key, folder, ffmpeg)
     if not out:
         return None, None
     if dry:
-        print("  (dry-run) 릴스는 업로드하지 않음")
+        print("  (dry-run) 릴스는 올리지 않음")
         return None, track
-    params = {"media_type": "REELS", "upload_type": "resumable", "caption": reel_caption(folder, track),
-              "share_to_feed": cfg.get("reel_share_to_feed", False), "thumb_offset": 800}
-    # 2026-09-25 첫 실전: 폼 본문으로 보내면 upload_type 이 먹지 않아 'video_url is required'(code 100).
-    # 문서 예시처럼 JSON 본문 + Authorization 헤더로 보낸다.
-    created = g.call_json(f"{uid}/media", params)
-    cid = created["id"]
-    upload_url = created.get("uri") or f"https://rupload.facebook.com/ig-api-upload/{g.version}/{cid}"
-    data = out.read_bytes()
-    req = urllib.request.Request(upload_url, data=data, method="POST", headers={
-        "Authorization": f"OAuth {g.token}", "offset": "0", "file_size": str(len(data))})
-    try:
-        with urllib.request.urlopen(req, timeout=300) as r:
-            r.read()
-    except urllib.error.HTTPError as e:
-        raise IGError(f"릴스 업로드 실패 {e.code}: {e.read().decode(errors='replace')[:300]}") from None
+    publish_video(out, key)
+    url = f"{site_url}/instagram/{key}/{out.name}"
+    wait_public([url], timeout=900, kind="video")
+    print(f"  영상 공개 주소 {url}")
+    cid = g.call("POST", f"{uid}/media", media_type="REELS", video_url=url, caption=reel_caption(folder, track),
+                 share_to_feed="true" if cfg.get("reel_share_to_feed") else "false", thumb_offset="800")["id"]
     g.wait_ready(cid, "릴스", timeout=900)
     return g.call("POST", f"{uid}/media_publish", creation_id=cid)["id"], track
+
+
+def _tracked(path):
+    return subprocess.run(["git", "-C", str(ROOT), "ls-files", "--error-unmatch", str(path)],
+                          capture_output=True).returncode == 0
 
 
 def _save_secret(new_token, name="IG_ACCESS_TOKEN"):
@@ -309,7 +313,8 @@ def maintain_token(token):
 
 
 def prune(days):
-    """게시가 끝난 지 오래된 호의 게시용 JPEG(ig/)는 지운다 — Pages 용량(1GB) 관리. 카드 PNG·갤러리는 그대로 둔다."""
+    """게시가 끝난 지 오래된 호의 게시용 JPEG(ig/)와 릴스 영상(reel.mp4)은 지운다 — Pages 용량(1GB) 관리.
+    카드 PNG·갤러리는 그대로 둔다."""
     cutoff = now_kst().date() - dt.timedelta(days=days)
     for d in INSTAGRAM_DIR.glob("*/ig"):
         m = re.match(r"(\d{4}-\d{2}-\d{2})", d.parent.name)
@@ -317,6 +322,10 @@ def prune(days):
             for f in d.glob("*.jpg"):
                 f.unlink()
             d.rmdir()
+    for f in INSTAGRAM_DIR.glob("*/reel.mp4"):
+        m = re.match(r"(\d{4}-\d{2}-\d{2})", f.parent.name)
+        if m and dt.date.fromisoformat(m.group(1)) < cutoff and (LOG_DIR / f"{f.parent.name}.json").exists():
+            f.unlink()
 
 
 def main():
@@ -400,7 +409,7 @@ def main():
     if args.only != "carousel" and want_reel and not log.get("reel"):
         try:
             print("릴스 준비 중…")
-            media_id, track = post_reel(g, uid, key, folder, cfg, args.dry_run, args.ffmpeg)
+            media_id, track = post_reel(g, uid, key, folder, cfg, args.dry_run, args.ffmpeg, site_url)
             if media_id:
                 log["reel"] = {"id": media_id, "at": now_kst().isoformat(timespec="seconds"), "track": track["title"]}
                 save_log(key, log)
@@ -412,8 +421,19 @@ def main():
                 print(f"  ✓ 릴스 게시 {log['reel'].get('permalink') or media_id}")
         except IGError as e:
             failures.append(f"릴스: {e}")
+            if cfg.get("reel_delivery") == "email" and not log.get("reel_emailed") and not args.dry_run:
+                try:  # 자동 게시가 막히면 영상·캡션을 운영자 메일로 보내 사람이 올릴 수 있게 한다
+                    track = email_reel(key, folder, args.ffmpeg)
+                    if track:
+                        log["reel_emailed"] = {"at": now_kst().isoformat(timespec="seconds"), "track": track["title"]}
+                        save_log(key, log)
+                        print("  ↪ 릴스 영상·캡션을 SMTP_USER 로 대신 보냄")
+                except (IGError, OSError) as e2:
+                    failures.append(f"릴스 메일: {e2}")
         finally:
-            (folder / "reel.mp4").unlink(missing_ok=True)  # 영상은 저장소에 두지 않는다
+            reel = folder / "reel.mp4"
+            if not _tracked(reel):  # 사이트에 올린(커밋된) 영상은 두고, 못 올린 임시 파일만 지운다
+                reel.unlink(missing_ok=True)
     elif log.get("reel"):
         print("릴스는 이미 게시됨")
     elif (args.only != "carousel" and not cfg.get("reel", True) and cfg.get("reel_delivery") == "email"
