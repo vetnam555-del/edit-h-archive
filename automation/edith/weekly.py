@@ -12,7 +12,7 @@ import re
 
 from . import content
 from .common import CONTENT_DIR, ROOT, cover_photo_problem, load_config, parse_date, plain, send_time_ko, weekday_ko
-from .site import dm_line
+from .site import _LETTER, _pick, _tags, _when, dm_line
 
 WEEKLY_DIR = CONTENT_DIR / "weekly"
 LIMITS = {"title": 34, "keyword": 5, "line": 40, "oneliner_title": 24}
@@ -118,18 +118,16 @@ def load(date_str):
 
 
 def caption(w):
+    """데일리 캡션과 같은 문체(site.instagram_caption) — 고정 이모지 줄·권유 문구·자기 계정 태그 없이."""
     spec = w["spec"]
-    lines = [spec["caption"].strip(), "", f"{w['week_label']} 트렌드 숫자 {len(w['card_issues'])} 👇"]
-    lines += [f"{'❶❷❸❹❺❻❼'[i]} {plain(it['headline'])} ({it['day_label']})" for i, it in enumerate(w["card_issues"])]
-    lines += ["", "📌 저장해두고 다음 주에 다시 꺼내보세요", "💬 이 중 가장 와닿은 한 가지는? 댓글로 알려주세요", ""]
-    if w["cards"]["cover"].get("photo") and w["cards"]["cover"].get("credit"):
-        lines.append(f"📷 표지 사진 출처: {w['cards']['cover']['credit'].replace('사진 = ', '')}")
+    lines = [spec["caption"].strip(), "", f"{w['week_label']}, 다시 볼 만한 숫자 {len(w['card_issues'])}가지"]
+    lines += [f"{i}. {plain(it['headline'])} ({it['day_label']})" for i, it in enumerate(w["card_issues"], 1)]
+    lines += ["", "이 중에 제일 와닿은 건 몇 번이었어요?"]
     if dm_line():
-        lines.append(dm_line())
-    when = send_time_ko(w["send_time_kst"]).replace("오전", "아침")
-    lines.append(f"매일 {when}, {len(w['all_items'])}가지 전문과 출처는 뉴스레터로 — 프로필 링크")
-    lines.append("EDIT H · 매일 아침, 트렌드 한 입 (@edit.h.kr)")
-    lines.append("/ 에디터. H")
-    tags = spec.get("hashtags") or ["트렌드", "주간트렌드", "뉴스브리핑", "경제뉴스", "카드뉴스", "EDITH"]
-    lines.append(" ".join("#" + re.sub(r"\s+", "", t.lstrip("#")) for t in tags))
+        lines += ["", dm_line()]
+    lines += ["", _pick(_LETTER, w).format(when=_when(w)), "— 에디터 H", ""]
+    cover = w["cards"]["cover"]
+    if cover.get("photo") and cover.get("credit"):
+        lines.append("표지 사진 " + cover["credit"].replace("사진 = ", "").strip())
+    lines.append(_tags(w, spec.get("hashtags") or ["주간정리"]))
     return "\n".join(lines)
