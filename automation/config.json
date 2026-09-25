@@ -41,6 +41,7 @@
     "auto_post": true,
     "api_version": "v23.0",
     "reel": false,
+    "reel_delivery": "email",
     "_reel_note": "2026-09-25 첫 실전: Instagram 로그인 API(graph.instagram.com)는 릴스 영상을 직접 올리는 방식(upload_type=resumable)을 받지 않고 video_url(공개 주소)을 요구함(폼·JSON 둘 다 code 100). 영상을 어디에 공개로 둘지 정할 때까지 릴스 자동 게시는 끔 — 캐러셀은 그대로.",
     "weekly_reel": true,
     "reel_share_to_feed": false,

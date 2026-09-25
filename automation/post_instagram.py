@@ -161,7 +161,8 @@ def reel_caption(folder, track):
     return "\n".join(lines).strip()
 
 
-def post_reel(g, uid, key, folder, cfg, dry, ffmpeg):
+def build_reel(key, folder, ffmpeg):
+    """make_reel.py 로 folder/reel.mp4 를 만든다. (영상 경로, 곡) — 쓸 곡이 없으면 (None, None)."""
     out = folder / "reel.mp4"
     proc = subprocess.run([sys.executable, str(AUTOMATION / "make_reel.py"), key, "--out", str(out), "--ffmpeg", ffmpeg],
                           capture_output=True, text=True)
@@ -170,9 +171,44 @@ def post_reel(g, uid, key, folder, cfg, dry, ffmpeg):
         return None, None
     if proc.returncode != 0:
         raise IGError(f"릴스 영상 만들기 실패: {(proc.stderr or proc.stdout)[-800:]}")
-    info = json.loads(proc.stdout.strip().splitlines()[-1])
-    track = info["track"]
+    track = json.loads(proc.stdout.strip().splitlines()[-1])["track"]
     print(f"  릴스 영상 {out.stat().st_size // 1024}KB — 음악: {track['title']} / {track['artist']}")
+    return out, track
+
+
+def email_reel(key, folder, ffmpeg):
+    """릴스 자동 게시를 못 하는 동안(config.instagram.reel=false, reel_delivery='email') 영상과 캡션을
+    운영자 메일(SMTP_USER)로 보낸다 — 휴대폰에서 받아 인스타 앱으로 직접 올린다. 보낸 곡을 돌려준다."""
+    import smtplib
+    import ssl
+    from email.message import EmailMessage
+    user, pw = os.environ.get("SMTP_USER", ""), os.environ.get("SMTP_PASSWORD", "")
+    if not user or not pw:
+        raise IGError("SMTP_USER·SMTP_PASSWORD 가 없어 릴스 영상을 메일로 보낼 수 없습니다")
+    out, track = build_reel(key, folder, ffmpeg)
+    if not out:
+        return None
+    caption = reel_caption(folder, track)
+    msg = EmailMessage()
+    msg["Subject"] = f"[EDIT H] 오늘의 릴스 {key} — 휴대폰에서 올려주세요"
+    msg["From"] = msg["To"] = user
+    msg.set_content(
+        "오늘 릴스 영상과 캡션이에요. 인스타 API 가 영상 직접 업로드를 받지 않아 자동 게시 대신 보내드려요.\n\n"
+        "올리는 법: 첨부 영상 저장 → 인스타 앱 + → 릴스 → 영상 선택 → 아래 캡션 붙여넣기 → 공유\n"
+        "(인기 음원으로 바꾸려면 편집에서 원래 소리를 끄고 음원을 고르세요. 캡션의 음악 출처 줄은 원곡을 쓸 때만 남기면 돼요.)\n\n"
+        f"── 캡션 ──\n{caption}\n")
+    msg.add_attachment(out.read_bytes(), maintype="video", subtype="mp4", filename=f"edit_h_reel_{key}.mp4")
+    with smtplib.SMTP_SSL(os.environ.get("SMTP_HOST") or "smtp.gmail.com", int(os.environ.get("SMTP_PORT") or 465),
+                          context=ssl.create_default_context()) as smtp:
+        smtp.login(user, pw)
+        smtp.send_message(msg)
+    return track
+
+
+def post_reel(g, uid, key, folder, cfg, dry, ffmpeg):
+    out, track = build_reel(key, folder, ffmpeg)
+    if not out:
+        return None, None
     if dry:
         print("  (dry-run) 릴스는 업로드하지 않음")
         return None, track
@@ -380,6 +416,19 @@ def main():
             (folder / "reel.mp4").unlink(missing_ok=True)  # 영상은 저장소에 두지 않는다
     elif log.get("reel"):
         print("릴스는 이미 게시됨")
+    elif (args.only != "carousel" and not cfg.get("reel", True) and cfg.get("reel_delivery") == "email"
+          and (args.kind == "daily" or cfg.get("weekly_reel", True)) and not log.get("reel_emailed") and not args.dry_run):
+        try:
+            print("릴스 영상을 운영자 메일로 보내는 중…(자동 게시 대신)")
+            track = email_reel(key, folder, args.ffmpeg)
+            if track:
+                log["reel_emailed"] = {"at": now_kst().isoformat(timespec="seconds"), "track": track["title"]}
+                save_log(key, log)
+                print("  ✓ 릴스 영상·캡션을 SMTP_USER 로 보냄")
+        except (IGError, OSError) as e:
+            failures.append(f"릴스 메일: {e}")
+        finally:
+            (folder / "reel.mp4").unlink(missing_ok=True)
 
     if not args.dry_run:
         prune(int(cfg.get("keep_jpeg_days", 14)))

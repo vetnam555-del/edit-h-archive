@@ -78,6 +78,10 @@ jobs:
           IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
           GH_ADMIN_TOKEN: ${{ secrets.GH_ADMIN_TOKEN }}
           IG_APP_SECRET: ${{ secrets.IG_APP_SECRET }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}           # 릴스 자동 게시가 꺼져 있으면 영상을 운영자 메일로 보낸다
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
           KIND: ${{ steps.what.outputs.kind }}
           EVENT: ${{ github.event_name }}
           IN_KEY: ${{ inputs.key }}
