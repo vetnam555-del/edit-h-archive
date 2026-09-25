@@ -145,6 +145,13 @@ content/YYYY-MM-DD.json 호마다의 원본 콘텐츠(출처 URL 포함)
 - 숫자만 모은다(주소·계정 이름 없음). 인스타 도달·저장·공유는 토큰에 `instagram_business_manage_insights` 권한이 있어야 나온다 —
   없으면 좋아요·댓글만으로 비교한다(성과표 첫 줄에 표시).
 
+## RSS·사이트맵·환영 메일 (2026-09-26~)
+
+- `feed.xml`(RSS, 최근 30호)·`sitemap.xml` 은 `build_issue.py` 가 매 호 다시 쓴다(`site.write_feeds`). 아카이브 첫 화면 아래에 RSS 링크.
+  검색 노출을 빨리 하려면 Google Search Console 에 사이트를 등록하고 `…/edit-h-archive/sitemap.xml` 을 제출한다(선택).
+- 새 구독자 환영 메일(`sync_subscribers.welcome_message`): 첫 메일이 오늘/내일 언제 오는지, 먼저 읽어볼 지난 호 3개
+  (성과표 점수가 높은 순 — 점수가 아직 없으면 최근 호), 인스타 링크, 스팸함 방지 부탁. 텍스트 + HTML.
+
 ## 운영 알림 (2026-09-26~)
 
 문제가 생기면 운영자 메일(SMTP_USER)로 `EDIT H 운영 알림 · …` 메일이 온다(`alerts.yml` → `automation/alert.py`, 추가 설정 없음).

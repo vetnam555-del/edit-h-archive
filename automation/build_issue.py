@@ -80,6 +80,7 @@ def main():
     (ROOT / f"{args.date}.html").write_text(newsletter.render(d, site_url, n_issue_cards), encoding="utf-8")
     manifest = site.update_manifest(d, site_url, len(files), cfg["send_time_kst"])
     site.regenerate_index(manifest)
+    site.write_feeds(manifest, site_url)   # feed.xml(RSS)·sitemap.xml
 
     print(f"✓ VOL.{d['vol']} {args.date} 빌드 완료")
     print(f"  뉴스레터  {args.date}.html")
