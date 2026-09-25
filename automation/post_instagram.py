@@ -129,19 +129,22 @@ def post_carousel(g, uid, key, folder, site_url, dry):
 
 
 def reel_caption(folder, track):
-    cap = (folder / "caption.txt").read_text(encoding="utf-8").strip().splitlines()
-    hook = cap[0] if cap else ""
-    tags = next((line for line in reversed(cap) if line.startswith("#")), "")
-    n = len(list(folder.glob("[0-9][0-9]_edit_h_*.png"))) or 10
-    lines = [hook, "", f"카드 {n}장 전체는 피드 게시물에서 저장해두세요 📌",
-             "📩 매일 아침 트렌드 뉴스레터는 프로필 링크에서"]
+    """릴스 캡션. build_issue.py 가 만든 reel_caption.txt(훅·요약 한 문장·피드 안내·해시태그)에 음악 출처를 해시태그 앞에 넣는다.
+    파일이 없으면(주간 특집·예전 호) caption.txt 의 첫 줄과 해시태그로 같은 모양을 만든다."""
+    path = folder / "reel_caption.txt"
+    if path.exists():
+        lines = path.read_text(encoding="utf-8").strip().splitlines()
+    else:
+        cap = (folder / "caption.txt").read_text(encoding="utf-8").strip().splitlines()
+        tags = next((line for line in reversed(cap) if line.startswith("#")), "")
+        lines = [cap[0] if cap else "", "", "카드 전체는 피드 게시물에 있어요.", tags]
+    tags = lines.pop() if lines and lines[-1].startswith("#") else ""
     if track:
-        credit = f"🎵 {track['title']} — {track['artist']}"
+        credit = f"음악 · {track['title']} — {track['artist']}"
         if track.get("license", "").upper() != "CC0":
             credit += f" ({track['license']}, {track.get('source_name', 'Wikimedia Commons')})"
-        lines.append(credit)
-    lines += ["/ 에디터. H", tags]
-    return "\n".join(lines).strip()
+        lines += ["", credit]
+    return "\n".join(lines + [tags]).strip()
 
 
 def build_reel(key, folder, ffmpeg):

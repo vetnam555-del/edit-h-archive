@@ -119,34 +119,92 @@ document.querySelectorAll('button.copy').forEach((btn) => btn.addEventListener('
 """
 
 
-def instagram_caption(d, site):
-    """뉴닉식 캡션: 질문형 첫 줄 + 대화체 요약 → 오늘의 N가지 목록 → 저장·댓글 유도 → 구독 안내 → 해시태그.
+# 캡션이 날마다 같은 틀·같은 문장이면 사람이 쓴 글로 보이지 않는다(2026-09-25 사용자 피드백: 'AI 티').
+# 그래서 고정 문구는 줄이고, 남는 몇 줄은 날짜에 따라 돌려 쓴다. 이모지로 줄을 시작하는 안내 줄·권유 문구·자기 계정 태그는 쓰지 않는다.
+_LIST_HEAD = ["오늘 카드에 담은 이야기", "오늘 넘겨볼 {n}가지", "오늘은 이 {n}가지를 골랐어요"]
+_LETTER = [
+    "출처랑 더 긴 이야기는 {when} 뉴스레터에 있어요. 구독은 프로필 링크에서요.",
+    "{when}마다 메일로도 보내드려요. 출처까지 다 담아서요. (프로필 링크)",
+    "뉴스레터로 받아보시면 출처와 뒷이야기까지 볼 수 있어요. 매일 {when}, 프로필 링크에서 구독할 수 있어요.",
+]
+_REEL_TAIL = ["넘겨보는 카드는 피드에 올려뒀어요.", "카드 전체는 피드 게시물에 있어요.", "자세한 숫자는 피드 카드에서 볼 수 있어요."]
+# 누구나 붙이는 넓은 태그는 스팸처럼 보여 뺀다. 주제 태그 위주로 4개 + 브랜드 태그.
+_GENERIC_TAGS = {"트렌드", "트렌드뉴스", "뉴스브리핑", "경제뉴스", "소비트렌드", "카드뉴스", "뉴스", "이슈", "시사", "정보", "꿀팁",
+                 "주간트렌드", "오늘의뉴스", "데일리뉴스"}
 
-    content 의 instagram.caption 에는 '첫 줄 훅 + 2~3문장 요약'만 쓴다. 나머지는 여기서 붙인다.
+
+def _pick(options, d):
+    """날짜마다 다른 문구를 고른다(같은 날은 늘 같은 문구)."""
+    y, m, dd = (int(x) for x in d["date"][:10].split("-"))   # 주간 특집 키('…-weekly')도 날짜 부분만
+    return options[(y * 372 + m * 31 + dd) % len(options)]
+
+
+def _when(d):
+    return send_time_ko(d["send_time_kst"]).replace("오전", "아침")   # '아침 8시'
+
+
+def _tags(d, spec_tags, limit=4):
+    tags, seen = [], set()
+    for t in list(spec_tags or []) + list(d.get("keywords") or []):
+        t = re.sub(r"\s+", "", plain(t).lstrip("#"))
+        if t and t not in _GENERIC_TAGS and t.upper() != "EDITH" and t not in seen:
+            seen.add(t)
+            tags.append(t)
+    return " ".join("#" + t for t in tags[:limit] + ["EDITH"])
+
+
+def _ask(d):
+    """독자에게 건네는 질문 한 줄. 투표가 있으면 투표 안내(댓글 A/B 를 tally_poll.py 가 센다)."""
+    if d.get("poll"):
+        q = d["poll"]
+        return [f"이번 주 투표도 있어요. {plain(q['question'])}",
+                f"A. {plain(q['options'][0])}", f"B. {plain(q['options'][1])}",
+                "댓글에 A나 B만 남겨주셔도 돼요. 결과는 금요일에 알려드릴게요."]
+    ig = d.get("instagram") or {}
+    text = plain(ig.get("ask") or (d.get("question") or {}).get("text") or "").strip()
+    return [text] if text else []
+
+
+def _credit(cover):
+    if cover.get("photo") and cover.get("credit"):
+        return "표지 사진 " + cover["credit"].replace("사진 = ", "").strip()
+    return None
+
+
+def instagram_caption(d, site):
+    """에디터가 직접 쓴 듯한 캡션: 훅 + 대화체 요약(content) → 오늘의 N가지 → 독자에게 한 질문 → 뉴스레터 한 줄 → 서명 → 해시태그.
+
+    content 의 instagram.caption 에는 '첫 줄 훅 + 2~3문장 요약'만 쓴다(RUNBOOK '캡션 문체'). 나머지는 여기서 붙인다.
     """
     ig = d.get("instagram", {})
     issues = d["card_issues"]
     head = (ig.get("caption") or "").strip() or f"{plain(d['title'])}\n\n{plain(d['lead'])}"
-    lines = [head, "", f"{d['weekday']}요일의 트렌드 브리프 {len(issues)}가지 👇"]
-    lines += [f"{'❶❷❸❹❺❻❼❽❾❿'[i]} {plain(it['headline'])}" for i, it in enumerate(issues)]
-    if d.get("poll"):
-        q = d["poll"]
-        ask = [f"🗳 이번 주 투표 — {plain(q['question'])}",
-               f"A {plain(q['options'][0])} / B {plain(q['options'][1])} · 댓글로 A 또는 B! (금요일에 결과 공개)"]
-    else:
-        ask = [f"💬 {plain(d['question']['text'])} 댓글로 알려주세요"]
-    lines += ["", "📌 저장해두고 다시 꺼내보세요", *ask, ""]
-    cov = (d.get("cards") or {}).get("cover") or {}
-    if cov.get("photo") and cov.get("credit"):
-        lines.append(f"📷 표지 사진 출처: {cov['credit'].replace('사진 = ', '')}")
+    lines = [head, "", _pick(_LIST_HEAD, d).format(n=len(issues))]
+    lines += [f"{i}. {plain(it['headline'])}" for i, it in enumerate(issues, 1)]
+    ask = _ask(d)
+    if ask:
+        lines += ["", *ask]
     if dm_line():
-        lines.append(dm_line())
-    when = send_time_ko(d["send_time_kst"]).replace("오전", "아침")
-    lines.append(f"매일 {when}, {len(d['all_items'])}가지 전문과 출처는 뉴스레터로 — 프로필 링크")
-    lines.append("EDIT H · 매일 아침, 트렌드 한 입 (@edit.h.kr)")
-    lines.append("/ 에디터. H")
-    tags = ig.get("hashtags") or ["트렌드", "트렌드뉴스", "뉴스브리핑", "경제뉴스", "소비트렌드", "카드뉴스", "EDITH"]
-    lines.append(" ".join("#" + re.sub(r"\s+", "", t.lstrip("#")) for t in tags))
+        lines += ["", dm_line()]
+    lines += ["", _pick(_LETTER, d).format(when=_when(d)), "— 에디터 H", ""]
+    credit = _credit((d.get("cards") or {}).get("cover") or {})
+    if credit:
+        lines.append(credit)
+    lines.append(_tags(d, ig.get("hashtags")))
+    return "\n".join(lines)
+
+
+def reel_caption(d):
+    """릴스 캡션(음악 출처는 게시할 때 post_instagram.py 가 해시태그 앞에 넣는다). 훅 + 요약 첫 문장 + 피드 안내."""
+    ig = d.get("instagram", {})
+    head = (ig.get("caption") or "").strip() or f"{plain(d['title'])}\n\n{plain(d['lead'])}"
+    parts = [p.strip() for p in head.split("\n\n") if p.strip()]
+    hook = parts[0].splitlines()[0]
+    teaser = ""
+    if len(parts) > 1:
+        m = re.match(r"(.+?[.?!])(\s|$)", parts[1].replace("\n", " "))
+        teaser = (m.group(1) if m else parts[1]).strip()
+    lines = [hook, ""] + ([teaser] if teaser else []) + [_pick(_REEL_TAIL, d), _tags(d, ig.get("hashtags"), limit=3)]
     return "\n".join(lines)
 
 
@@ -161,6 +219,13 @@ def dm_line(short=False):
 
 
 def first_comment(d):
-    """올린 직후 계정으로 달아 고정할 첫 댓글(마트식 팔로우 안내)."""
-    return "\n".join(["매일 아침, 트렌드 한 입 — EDIT H @edit.h.kr 팔로우하고 저장해 두세요 🧡",
-                      dm_line(short=True) or "📩 뉴스레터 무료 구독은 프로필 링크에서"])
+    """올린 직후 계정으로 다는 첫 댓글 — 카드에 쓴 자료의 출처 모음(홍보 문구 대신 쓸모 있는 정보).
+    주소(URL)는 인스타 댓글에서 눌리지 않아 매체 이름·날짜만 적는다. 원문 링크는 뉴스레터에 있다."""
+    rows = []
+    for i, it in enumerate(d.get("card_issues") or [], 1):
+        src = plain(it.get("source") or "").replace("\u2060", "").strip()
+        if src:
+            rows.append(f"{i}. {src}")
+    if not rows:
+        return dm_line(short=True) or ""
+    return "\n".join([_pick(["카드에 쓴 자료 출처 모아둘게요", "오늘 카드 출처예요", "출처는 여기 정리해둘게요"], d), *rows])
