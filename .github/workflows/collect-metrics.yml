@@ -1,11 +1,15 @@
 # EDIT H 매일 성과 수집 — 인스타(좋아요·댓글, 권한이 있으면 도달·저장·공유), 메일(답장·구독 신청·수신 거부), 발송 대상 수, 투표.
 # 매일 21:30(KST). automation/metrics/summary.md 를 22:00 편집 회고와 다음 날 07:00 제작 루틴이 읽는다(automation/learnings.md).
+# GitHub 예약 실행은 자주 늦거나 빠져서, 회고가 성과표가 오래됐으면 request.txt 를 푸시해 여기를 바로 돌린다(automation/request_metrics.py).
 # 공개 저장소라 숫자만 남기고 로그에도 주소·계정 이름은 찍지 않는다.
 name: Collect EDIT H metrics
 
 on:
   schedule:
     - cron: "30 12 * * *"    # UTC 12:30 = KST 21:30 매일
+  push:
+    branches: [main]
+    paths: ["automation/metrics/request.txt"]   # 22:00 편집 회고의 수집 요청(예약 실행이 늦을 때)
   workflow_dispatch:
     inputs:
       dry_run:
