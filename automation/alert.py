@@ -46,6 +46,8 @@ WHAT = {
     "Tally EDIT H poll": ("독자 투표 집계", "내일 06:20 에 다시 셉니다. 결과 공개일(금)에 실패하면 그날은 결과 없이 발행됩니다."),
     "Collect EDIT H metrics": ("성과 수집", "회고·제작은 직전 성과표로 진행하고, 다음 수집 때 따라잡습니다."),
     "Fetch reel music": ("릴스 음원 받기", "기존 음원으로 릴스를 만듭니다. 급하지 않아요."),
+    "EDIT H reserve issue": ("예비 호 발행", "오늘 호가 없는 채로 남았을 수 있어요. 08:20 점검 루틴이 확인하고, 필요하면 Actions → EDIT H reserve issue 를 "
+                             "dry_run 을 끄고 다시 돌리면 됩니다."),
 }
 
 
@@ -232,12 +234,21 @@ def watch(date, dry=False):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("mode", choices=["failed", "watch", "test"])
+    ap.add_argument("mode", choices=["failed", "watch", "test", "rewind"])
     ap.add_argument("--date", default="", help="watch: 확인할 날짜(비우면 오늘 KST)")
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
     if args.mode == "failed":
         return failed()
+    if args.mode == "rewind":   # rewind.yml — 제작 루틴이 멈춰 예비 호로 대신 발행한 날
+        date = args.date or now_kst().date().isoformat()
+        send_mail(f"{SUBJECT} · {date[5:].replace('-', '/')} 예비 호로 대신 발행",
+                  "07:00 제작 루틴이 08:05 까지 오늘 호를 올리지 못해, 예비 호('놓쳤다면, 다시 볼 만한 5가지' — 지난 호 이야기를 다시 엮은 호)로\n"
+                  "대신 발행했어요. 메일 발송과 인스타 게시도 이어서 돌렸습니다.\n\n"
+                  "원인은 대개 Claude 사용량 한도나 루틴 오류예요. 08:20 점검 루틴이 원인을 확인해 알려드려요.\n"
+                  f"실행 기록: https://github.com/{os.environ.get('GITHUB_REPOSITORY', 'vetnam555-del/edit-h-archive')}/actions",
+                  args.dry_run)
+        return 0
     if args.mode == "test":
         send_mail(f"{SUBJECT} · 시험 메일",
                   "EDIT H 운영 알림이 이 메일함으로 옵니다.\n"

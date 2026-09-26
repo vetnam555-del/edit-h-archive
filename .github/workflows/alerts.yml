@@ -15,6 +15,7 @@ on:
       - Tally EDIT H poll
       - Collect EDIT H metrics
       - Fetch reel music
+      - EDIT H reserve issue
     types: [completed]
   schedule:
     - cron: "40 23 * * *"    # UTC 23:40 = KST 08:40 매일

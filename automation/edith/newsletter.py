@@ -282,7 +282,7 @@ def _pick(d):
     return f"""
 <!-- 01 H PICK 심층 -->
 <tr><td class="px" style="padding:0 36px;">{_chips([("H PICK", True), ("오늘의 심층", False)])}
-  {_div(f"font-size:23px;font-weight:700;line-height:1.45;color:{INK};margin-top:14px;", esc(plain(d['title'])), True)}
+  {_div(f"font-size:23px;font-weight:700;line-height:1.45;color:{INK};margin-top:14px;", esc(plain(d['big_issue'].get('title') or d['title'])), True)}
   {_tag(f"01 · {b['tag']}")}
   {_label("무슨 일이야?")}
   {paras}
