@@ -1,6 +1,16 @@
 {
- "collected_at": "2026-09-26T02:21+09:00",
+ "collected_at": "2026-09-26T23:24+09:00",
  "issues": {
+  "2026-09-26": {
+   "title": "상어 한 마리에, 10만 명이 몰렸다고?",
+   "format": 2,
+   "pick_tag": "부캉이",
+   "title_style": "질문형",
+   "cover": "사진",
+   "weekday": "토",
+   "poll": false,
+   "source_mode": "fallback"
+  },
   "2026-09-25": {
    "title": "추석인데, 가족 대신 쉬러 간다고?",
    "format": 1,
@@ -23,27 +33,37 @@
   }
  },
  "instagram": {
-  "followers": 45,
-  "media": 75,
+  "followers": 44,
+  "media": 76,
   "insights": true,
   "posts": {
    "2026-09-25": {
     "likes": 0,
     "comments": 0,
-    "reach": 7,
+    "reach": 8,
     "saved": 0,
     "shares": 0,
-    "views": 15
+    "views": 16
+   },
+   "2026-09-26": {
+    "likes": 0,
+    "comments": 0,
+    "reach": 14,
+    "saved": 0,
+    "shares": 0,
+    "views": 43
    }
   }
  },
  "mail": {
   "replies": {
    "2026-09-24": 0,
-   "2026-09-25": 0
+   "2026-09-25": 0,
+   "2026-09-26": 0
   },
   "signups_14d": 0,
-  "unsubs_14d": 0
+  "unsubs_14d": 0,
+  "signup_refs_14d": {}
  },
  "subscribers": {
   "listed": 12,
