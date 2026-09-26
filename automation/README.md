@@ -152,6 +152,16 @@ content/YYYY-MM-DD.json 호마다의 원본 콘텐츠(출처 URL 포함)
 - 새 구독자 환영 메일(`sync_subscribers.welcome_message`): 첫 메일이 오늘/내일 언제 오는지, 먼저 읽어볼 지난 호 3개
   (성과표 점수가 높은 순 — 점수가 아직 없으면 최근 호), 인스타 링크, 스팸함 방지 부탁. 텍스트 + HTML.
 
+## 추천·구독 경로·다크 모드 (2026-09-26~)
+
+- 뉴스레터 맨 아래 **친구에게 추천하기** 버튼: 받는 사람 칸만 빈 메일을 연다(오늘 호 웹 주소 + 구독 링크 `?ref=share`).
+  구독자 개인 링크(수신 거부 등)는 넣지 않는다. 그 아래 **EDIT H 구독하기**는 `?ref=letter`(전달받은 사람·웹에서 본 사람).
+- `subscribe.html` 은 `ref`(share·letter·web·ig·direct)를 숨은 칸으로 Formspree 에 함께 보내고, `collect_metrics.py` 가
+  신청 알림에서 **숫자로만** 세어 성과표 '한눈에'에 `구독 경로(최근 14일)` 줄을 단다. 아카이브(index.html)의 구독 링크는 `?ref=web`.
+  인스타 경유를 세려면 인스타 프로필의 웹사이트 링크를 `…/edit-h-archive/subscribe.html?ref=ig` 로 바꿔 둔다(인스타 앱에서 직접 — API 로는 못 바꾼다).
+- 다크 모드: `color-scheme: light only` + 표 `bgcolor` — 애플 메일처럼 이 표시를 따르는 앱은 색을 뒤집지 않는다.
+  Gmail 앱(iOS)처럼 무조건 뒤집는 앱도 있어 완전히 막을 수는 없다. 장식용 안경 마크는 `aria-hidden`(화면 낭독기에서 건너뜀).
+
 ## 운영 알림 (2026-09-26~)
 
 문제가 생기면 운영자 메일(SMTP_USER)로 `EDIT H 운영 알림 · …` 메일이 온다(`alerts.yml` → `automation/alert.py`, 추가 설정 없음).

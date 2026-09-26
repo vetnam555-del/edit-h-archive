@@ -120,6 +120,7 @@
     <input type="hidden" name="_subject" value="[EDIT H] 신규 구독 신청">
     <input type="hidden" name="_format" value="plain">
     <input type="hidden" name="subscribed_at" id="subscribed_at">
+    <input type="hidden" name="ref" id="ref" value="direct">
 
     <label class="consent" style="margin-top:8px;">
       <input type="checkbox" name="consent_marketing" value="yes" required>
@@ -160,6 +161,16 @@
 
 <script>
   document.getElementById('subscribed_at').value = new Date().toISOString();
+  // 어디서 왔는지(구독 경로) — 숫자로만 집계한다(collect_metrics.py). share=추천 메일, letter=뉴스레터 속 버튼,
+  // web=웹 아카이브, ig=인스타 프로필 링크, direct=직접. 주소 파라미터가 없으면 이전 페이지로 짐작한다.
+  (function () {
+    let ref = (new URLSearchParams(location.search).get('ref') || '').toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 20);
+    if (!ref) {
+      const r = document.referrer || '';
+      ref = /instagram\.com/.test(r) ? 'ig' : (r.indexOf('edit-h-archive') >= 0 ? 'web' : 'direct');
+    }
+    document.getElementById('ref').value = ref;
+  })();
 
   const form = document.getElementById('subscribeForm');
   const submitBtn = document.getElementById('submitBtn');
