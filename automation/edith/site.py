@@ -174,6 +174,12 @@ _LETTER = [
     "{when}마다 메일로도 보내드려요. 출처까지 다 담아서요. (프로필 링크)",
     "뉴스레터로 받아보시면 출처와 뒷이야기까지 볼 수 있어요. 매일 {when}, 프로필 링크에서 구독할 수 있어요.",
 ]
+# 한 줄 뉴스가 있는 날(메인 5가지 + 한 줄 뉴스 = 10개 주제)은 메일에만 있는 한 줄 뉴스를 구독 이유로 알린다.
+_LETTER_BRIEFS = [
+    "메일로 받아보시면 한 줄 뉴스 {n}개가 더 있어요. 매일 {when}, 구독은 프로필 링크에서요.",
+    "뉴스레터에는 한 줄 뉴스 {n}개와 출처까지 담았어요. {when}마다 보내드려요. (프로필 링크)",
+    "출처랑 한 줄 뉴스 {n}개는 {when} 뉴스레터에 있어요. 구독은 프로필 링크에서요.",
+]
 _REEL_TAIL = ["넘겨보는 카드는 피드에 올려뒀어요.", "카드 전체는 피드 게시물에 있어요.", "자세한 숫자는 피드 카드에서 볼 수 있어요."]
 # 누구나 붙이는 넓은 태그는 스팸처럼 보여 뺀다. 주제 태그 위주로 4개 + 브랜드 태그.
 _GENERIC_TAGS = {"트렌드", "트렌드뉴스", "뉴스브리핑", "경제뉴스", "소비트렌드", "카드뉴스", "뉴스", "이슈", "시사", "정보", "꿀팁",
@@ -228,7 +234,10 @@ def instagram_caption(d, site):
     if dm_line():
         lines += ["", dm_line()]
     # 표지 사진·음악 출처는 캡션에 쓰지 않는다(2026-09-25 요청) — 사진 출처는 표지 카드 안에, 음악 출처는 릴스 영상 안에 있다.
-    lines += ["", _pick(_LETTER, d).format(when=_when(d)), "— 에디터 H", "", _tags(d, ig.get("hashtags"))]
+    n_briefs = len(d.get("briefs") or [])
+    letter = (_pick(_LETTER_BRIEFS, d).format(n=n_briefs, when=_when(d)) if n_briefs
+              else _pick(_LETTER, d).format(when=_when(d)))
+    lines += ["", letter, "— 에디터 H", "", _tags(d, ig.get("hashtags"))]
     return "\n".join(lines)
 
 
