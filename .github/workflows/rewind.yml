@@ -1,0 +1,99 @@
+# EDIT H 예비 호(개선 A-2) — 07:00 제작 루틴이 멈춘 날, Claude 없이 GitHub 만으로 오늘 호를 낸다.
+# 발행일인데 08:05(KST)까지 오늘 호가 없으면 '놓쳤다면, 다시 볼 만한 5가지'(최근 3주 안에 이미 사실 확인을 거쳐 발행한
+# 이야기를 다시 엮은 호 — automation/build_rewind.py)를 빌드해 올리고, 메일 발송·인스타 게시를 이어서 돌리고, 운영 알림을 보낸다.
+# GitHub 예약 실행은 늦거나 빠지기 쉬워 네 번 건다(오늘 호가 있으면 곧바로 끝난다). 루틴이 늦게라도 올린 날은 아무것도 하지 않는다.
+# 필요한 Secrets: SMTP_USER · SMTP_PASSWORD(알림 메일). 발송·게시는 각 워크플로가 자기 Secrets 로 한다.
+name: EDIT H reserve issue
+
+on:
+  schedule:
+    - cron: "7 23 * * *"     # KST 08:07
+    - cron: "37 23 * * *"    # KST 08:37
+    - cron: "7 0 * * *"      # KST 09:07
+    - cron: "47 0 * * *"     # KST 09:47
+  workflow_dispatch:
+    inputs:
+      date:
+        description: "예비 호 날짜 YYYY-MM-DD (비우면 오늘 KST)"
+        required: false
+      dry_run:
+        description: "빌드까지만 — 커밋·발송·게시·알림 없이 확인"
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: rewind
+  cancel-in-progress: false
+
+jobs:
+  rewind:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Need a reserve issue?
+        id: need
+        env:
+          EVENT: ${{ github.event_name }}
+          IN_DATE: ${{ inputs.date }}
+        run: |
+          args=""
+          [ -n "$IN_DATE" ] && args="--date $IN_DATE"
+          [ "$EVENT" = "workflow_dispatch" ] && args="$args --no-deadline"
+          python3 automation/build_rewind.py --need $args
+
+      - uses: actions/setup-node@v4
+        if: steps.need.outputs.need == 'true'
+        with:
+          node-version: "20"
+
+      - name: Install Playwright (card rendering)
+        if: steps.need.outputs.need == 'true'
+        run: |
+          npm install --no-save --no-package-lock playwright > /dev/null
+          npx playwright install --with-deps chromium > /dev/null
+
+      - name: Build reserve issue
+        if: steps.need.outputs.need == 'true'
+        env:
+          DATE: ${{ steps.need.outputs.date }}
+        run: |
+          python3 automation/build_rewind.py --date "$DATE"
+          python3 automation/build_issue.py "$DATE"
+
+      - name: Publish, send, post, alert
+        if: steps.need.outputs.need == 'true' && inputs.dry_run != true
+        env:
+          DATE: ${{ steps.need.outputs.date }}
+          GH_TOKEN: ${{ github.token }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+        run: |
+          git fetch -q origin main
+          if git cat-file -e "origin/main:$DATE.html" 2>/dev/null; then
+            echo "제작 루틴이 방금 오늘 호를 올렸습니다 — 예비 호는 올리지 않습니다"; exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "content/$DATE.json" "$DATE.html" "instagram/$DATE" manifest.json index.html feed.xml sitemap.xml
+          git commit -m "Publish EDIT H reserve issue $DATE (지난 호 다시 보기)"
+          pushed=""
+          for i in 1 2 3 4; do
+            git pull --rebase origin main && git push origin HEAD:main && pushed=1 && break
+            sleep $((i * 5))
+          done
+          [ -n "$pushed" ] || { echo "::error::예비 호를 main 에 푸시하지 못했습니다"; exit 1; }
+          # GITHUB_TOKEN 의 푸시는 다른 워크플로를 깨우지 않으므로 발송·게시를 직접 돌린다(기록이 있으면 각자 건너뛴다)
+          sleep 60   # GitHub Pages 가 새 카드 이미지를 올릴 시간
+          gh workflow run send-newsletter.yml --ref main -f date="$DATE"
+          gh workflow run post-instagram.yml --ref main -f key="$DATE" -f mode=post -f only=both
+          python3 automation/alert.py rewind --date "$DATE"
