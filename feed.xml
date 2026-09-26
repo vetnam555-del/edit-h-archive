@@ -6,7 +6,14 @@
   <atom:link href="https://vetnam555-del.github.io/edit-h-archive/feed.xml" rel="self" type="application/rss+xml"/>
   <description>매일 아침 8시, 확인된 숫자로 읽는 트렌드 뉴스레터</description>
   <language>ko</language>
-  <lastBuildDate>Sat, 26 Sep 2026 08:00:00 +0900</lastBuildDate>
+  <lastBuildDate>Sun, 27 Sep 2026 08:00:00 +0900</lastBuildDate>
+  <item>
+    <title>VOL.096 남은 연차, 돈으로 받을 수 있을까?</title>
+    <link>https://vetnam555-del.github.io/edit-h-archive/2026-09-27.html</link>
+    <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-09-27.html</guid>
+    <pubDate>Sun, 27 Sep 2026 08:00:00 +0900</pubDate>
+    <description>남은 연차 3.5일·주식 결제 하루로·이번 주 물가 발표·부캉이 사흘 32만·연휴 다음 날 심장 — 오늘의 5가지</description>
+  </item>
   <item>
     <title>VOL.095 상어 한 마리에, 10만 명이 몰렸다고?</title>
     <link>https://vetnam555-del.github.io/edit-h-archive/2026-09-26.html</link>
@@ -209,13 +216,6 @@
     <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-08-11.html</guid>
     <pubDate>Tue, 11 Aug 2026 08:00:00 +0900</pubDate>
     <description>H&amp;M 등 패션업계의 리커머스 직접 진출과 택배 3사 이틀 휴무, 서울시 청년 AI 이용권, 클로드 오토모드까지 읽은 10개 이슈</description>
-  </item>
-  <item>
-    <title>VOL.066 발레복 하나에 — 30만원은 쓴다</title>
-    <link>https://vetnam555-del.github.io/edit-h-archive/2026-08-10.html</link>
-    <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-08-10.html</guid>
-    <pubDate>Mon, 10 Aug 2026 08:00:00 +0900</pubDate>
-    <description>발레코어 취미 소비 확산과 2060세대 빚투 연체율 경고, 홈쇼핑 4사 체질 개선, 메타 SNS 소송 패소까지 읽은 10개 이슈</description>
   </item>
 </channel>
 </rss>
