@@ -100,6 +100,18 @@ def _subject(msg):
     return str(email.header.make_header(email.header.decode_header(msg.get("Subject", ""))))
 
 
+def _signup_ref(imap, mid):
+    """구독 신청 알림 본문의 'ref' 칸(subscribe.html 숨은 칸) — 없으면 'direct'. 인코딩(base64·QP)은 email 모듈로 푼다."""
+    typ, got = imap.fetch(mid, "(BODY.PEEK[])")
+    if typ != "OK" or not got or not isinstance(got[0], tuple):
+        return "direct"
+    msg = email.message_from_bytes(got[0][1])
+    part = next((p for p in msg.walk() if p.get_content_type() == "text/plain"), None)
+    text = (part.get_payload(decode=True) or b"").decode(part.get_content_charset() or "utf-8", "replace") if part else ""
+    m = re.search(r"(?im)^\s*ref\s*[:：]?\s*\n?\s*([a-z0-9_-]{1,20})\s*$", text)
+    return m.group(1).lower() if m else "direct"
+
+
 def mailbox(days, titles):
     """{'replies': {날짜: n}, 'signups': n, 'unsubs': n} — 최근 DAYS 일. 주소는 세기만 한다."""
     user, pw = os.environ.get("SMTP_USER", ""), os.environ.get("SMTP_PASSWORD", "")
@@ -114,6 +126,7 @@ def mailbox(days, titles):
         typ, data = imap.search(None, f'(SINCE {since} SUBJECT "[EDIT H]")')
         ids = data[0].split() if typ == "OK" and data and data[0] else []
         replies, senders, signups, unsubs = {d: 0 for d in days}, {d: set() for d in days}, 0, 0
+        refs = {}   # 구독 경로별 신청 수(subscribe.html 의 숨은 칸 ref) — 숫자만
         for mid in ids:
             typ, got = imap.fetch(mid, "(BODY.PEEK[HEADER.FIELDS (SUBJECT FROM)])")
             if typ != "OK" or not got or not isinstance(got[0], tuple):
@@ -123,6 +136,8 @@ def mailbox(days, titles):
             sender = email.utils.parseaddr(msg.get("From", ""))[1].lower()
             if "신규 구독 신청" in subj:
                 signups += 1
+                ref = _signup_ref(imap, mid)
+                refs[ref] = refs.get(ref, 0) + 1
             elif "수신 거부 신청" in subj:
                 unsubs += 1
             elif re.match(r"^\s*(re|답장)\s*:", subj, re.I) and sender and sender != user.lower():
@@ -131,7 +146,7 @@ def mailbox(days, titles):
                         senders[d].add(sender)
         for d in days:
             replies[d] = len(senders[d])
-        return {"replies": replies, "signups_14d": signups, "unsubs_14d": unsubs}
+        return {"replies": replies, "signups_14d": signups, "unsubs_14d": unsubs, "signup_refs_14d": refs}
     finally:
         try:
             imap.logout()
@@ -172,7 +187,13 @@ def summary_md(snap):
               f"- 인스타 팔로워 **{ig.get('followers', '–')}** · 게시물 {ig.get('media', '–')}"
               + ("" if ig.get("insights") else " · 도달·저장 인사이트 권한 없음(좋아요·댓글만)"),
               f"- 메일 발송 대상 **{sub.get('sending', '–')}**명 (명단 {sub.get('listed', '–')} · 수신 제외 {sub.get('excluded', '–')})"
-              f" · 최근 {DAYS}일 구독 신청 {mb.get('signups_14d', '–')} · 수신 거부 {mb.get('unsubs_14d', '–')}", ""]
+              f" · 최근 {DAYS}일 구독 신청 {mb.get('signups_14d', '–')} · 수신 거부 {mb.get('unsubs_14d', '–')}"]
+    refs = mb.get("signup_refs_14d") or {}
+    if refs:
+        names = {"share": "추천 메일", "letter": "뉴스레터 속 버튼", "web": "웹 아카이브", "ig": "인스타", "direct": "직접·알 수 없음"}
+        lines.append("- 구독 경로(최근 %d일): " % DAYS + " · ".join(
+            f"{names.get(k, k)} {v}" for k, v in sorted(refs.items(), key=lambda kv: -kv[1])))
+    lines.append("")
     lines += ["## 호별 성과", "",
               "| 날짜 | 요일 | 제목 | 유형 | 표지 | H PICK | 좋아요 | 댓글 | 저장 | 공유 | 도달 | 답장 | 점수 |",
               "|---|---|---|---|---|---|---|---|---|---|---|---|---|"]

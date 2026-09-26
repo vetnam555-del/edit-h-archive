@@ -201,7 +201,7 @@ def _question(d):
 _LENS = ('<div style="display:inline-block;box-sizing:border-box;width:21px;height:21px;border-radius:50%;'
          'border:3px solid #0D0C0A;background:#F5F1E8;vertical-align:middle;">'
          '<div style="width:6px;height:6px;border-radius:50%;background:#0D0C0A;margin:4px auto 0;font-size:0;line-height:0;">&nbsp;</div></div>')
-AVATAR_MARK = ('<table role="presentation" width="58" height="58" cellpadding="0" cellspacing="0" border="0" '
+AVATAR_MARK = ('<table role="presentation" aria-hidden="true" width="58" height="58" cellpadding="0" cellspacing="0" border="0" '
                'style="width:58px;height:58px;border-radius:50%;background:#FF5233;"><tr>'
                '<td align="center" valign="middle" style="font-size:0;line-height:0;">' + _LENS
                + '<div style="display:inline-block;width:5px;height:3px;background:#0D0C0A;vertical-align:middle;font-size:0;line-height:0;">&nbsp;</div>'
@@ -216,7 +216,7 @@ def _mini_avatar(px=40):
             f'border:{max(2, round(3 * k))}px solid #0D0C0A;background:#F5F1E8;vertical-align:middle;">'
             f'<div style="width:{max(3, round(6 * k))}px;height:{max(3, round(6 * k))}px;border-radius:50%;background:#0D0C0A;'
             f'margin:{max(2, round(4 * k))}px auto 0;font-size:0;line-height:0;">&nbsp;</div></div>')
-    return (f'<table role="presentation" width="{px}" height="{px}" cellpadding="0" cellspacing="0" border="0" '
+    return (f'<table role="presentation" aria-hidden="true" width="{px}" height="{px}" cellpadding="0" cellspacing="0" border="0" '
             f'style="width:{px}px;height:{px}px;border-radius:50%;background:#FF5233;"><tr>'
             f'<td align="center" valign="middle" style="font-size:0;line-height:0;">{lens}'
             f'<div style="display:inline-block;width:{max(3, round(5 * k))}px;height:{max(2, round(3 * k))}px;background:#0D0C0A;'
@@ -349,11 +349,25 @@ def _poll_result(d):
             + "</td></tr>")
 
 
+def _share_mailto(d, site):
+    """'친구에게 추천하기' — 받는 사람 칸만 비운 메일을 연다. 오늘 호 웹 주소 + 구독 링크(ref=share 로 추천 경로를 센다).
+    구독자 개인 링크(수신 거부 등)는 넣지 않는다."""
+    from urllib.parse import quote
+    n = len(d["all_items"]) + (len(d["briefs"]) if d.get("format") == 2 else 0)
+    subject = "매일 아침 트렌드 한 입, EDIT H 추천해요"
+    body = (f"오늘 받아본 뉴스레터인데 괜찮아서 보내요.\n\n[EDIT H] {plain(d['title'])}\n{site}/{d['date']}.html\n\n"
+            f"매일 아침 8시에 트렌드 {n}가지를 정리해서 보내줘요. 무료 구독: {site}/subscribe.html?ref=share\n")
+    return f"mailto:?subject={quote(subject)}&amp;body={quote(body)}"
+
+
 def _cta(d, site, campaign, n_cards):
     stat = lambda big, small: (  # noqa: E731
         f'<td valign="top">{_div(f"font-size:16px;font-weight:700;line-height:1.2;color:#1B1B1E;", big)}'
         f'{_div(f"font-size:11.5px;font-weight:400;line-height:1.3;color:#6B6E75;margin-top:2px;", small)}</td>')
-    stats = stat(f"{len(d['all_items'])}개", "이슈 전문") + (stat(f"{n_cards}장", "카드뉴스") if n_cards else "") + stat(f"{int(d['vol'])}호", "누적 발행")
+    # 형식 2 는 메인 5가지 + 한 줄 뉴스 = 오늘 다룬 주제 수(2026-09-26 절충안)
+    n_topics = len(d["all_items"]) + (len(d["briefs"]) if d.get("format") == 2 else 0)
+    stats = (stat(f"{n_topics}개", "오늘의 주제" if d.get("format") == 2 else "이슈 전문")
+             + (stat(f"{n_cards}장", "카드뉴스") if n_cards else "") + stat(f"{int(d['vol'])}호", "누적 발행"))
     links = f'<a href="{_utm(site, "/", campaign, "cta_archive")}" style="font-family:{F};font-size:14px;color:{MUTED};text-decoration:none;">지난 호 보기&gt;</a>'
     if n_cards:
         cards = _utm(site, f"/instagram/{d['date']}/", campaign, "cardnews")
@@ -361,7 +375,7 @@ def _cta(d, site, campaign, n_cards):
                  f'<span style="color:#C4C4C4;"> &nbsp;|&nbsp; </span>' + links)
     return (_divider(30) + f'<tr><td class="px" style="padding:0 36px;">'
             + _div(f"font-size:19px;font-weight:700;line-height:1.45;color:{INK};",
-                   f"매일 아침 {len(d['all_items'])}가지 트렌드 이슈를<br>한 번에 정리해 드려요!", True)
+                   f"매일 아침 {n_topics}가지 트렌드 이슈를<br>한 번에 정리해 드려요!", True)
             + f"""<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:16px;background:#FFFFFF;border:1px solid {RULE};border-radius:18px;box-shadow:0 2px 6px rgba(0,0,0,.08);"><tr><td style="padding:18px 16px;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
     <td valign="middle" style="width:70px;">{AVATAR_MARK}</td>
@@ -371,7 +385,9 @@ def _cta(d, site, campaign, n_cards):
   </tr></table>
 </td></tr></table>
 <div style="text-align:right;margin-top:10px;">{links}</div>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:16px;"><tr><td align="center" style="background:{CHIP_FG};border-radius:10px;"><a href="{_utm(site, "/subscribe.html", campaign, "cta_subscribe")}" style="display:block;padding:14px 10px;font-family:{F};font-size:15px;font-weight:700;color:#FFFFFF;text-decoration:none;">EDIT H 구독하기</a></td></tr></table></td></tr>""")
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:16px;"><tr><td align="center" bgcolor="#FFFFFF" style="background:#FFFFFF;border:1.5px solid {CHIP_FG};border-radius:10px;"><a href="{_share_mailto(d, site)}" style="display:block;padding:13px 10px;font-family:{F};font-size:15px;font-weight:700;color:{CHIP_FG};text-decoration:none;">친구에게 추천하기</a></td></tr></table>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:10px;"><tr><td align="center" bgcolor="{CHIP_FG}" style="background:{CHIP_FG};border-radius:10px;"><a href="{_utm(site, "/subscribe.html", campaign, "cta_subscribe")}&amp;ref=letter" style="display:block;padding:14px 10px;font-family:{F};font-size:15px;font-weight:700;color:#FFFFFF;text-decoration:none;">EDIT H 구독하기</a></td></tr></table>
+{_div(f"font-size:12px;font-weight:400;line-height:1.6;color:{MUTED};margin-top:8px;", "추천하기를 누르면 오늘 호 링크가 담긴 메일이 열려요. 받는 사람만 넣어 보내면 돼요.", True)}</td></tr>""")
 
 
 def _footer(site, campaign):
@@ -407,22 +423,23 @@ def render(d, site, n_cards):
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="color-scheme" content="light">
-<meta name="supported-color-schemes" content="light">
+<meta name="color-scheme" content="light only">
+<meta name="supported-color-schemes" content="light only">
 <meta property="og:title" content="[EDIT H] {esc(title)}">
 <meta property="og:description" content="{esc(plain(d['subtitle']))}">
 <meta property="og:image" content="{site}/instagram/{d['date']}/01_edit_h_{d['date']}_cover.png">
 <title>[EDIT H] {esc(title)}</title>
 <style>
+:root{{color-scheme:light only;supported-color-schemes:light only;}}
 @media (max-width:480px){{.px{{padding-left:20px!important;padding-right:20px!important;}}.h-cover{{font-size:26px!important;}}}}
 </style>
 </head>
-<body style="margin:0;padding:0;background:{BOX};">
+<body style="margin:0;padding:0;background:{BOX};" bgcolor="{BOX}">
 <!-- 프리헤더 -->
 <div style="display:none;max-height:0;overflow:hidden;">{esc(plain(d['subtitle']))}</div>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:{BOX};">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="{BOX}" style="background:{BOX};">
 <tr><td align="center" style="padding:0;">
-<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#FFFFFF;table-layout:fixed;">
+<table role="presentation" width="600" cellpadding="0" cellspacing="0" bgcolor="#FFFFFF" style="max-width:600px;width:100%;background:#FFFFFF;table-layout:fixed;">
 {''.join(body)}
 </table>
 </td></tr>
