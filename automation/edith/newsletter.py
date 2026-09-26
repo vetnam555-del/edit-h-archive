@@ -1,4 +1,4 @@
-"""뉴스레터(이메일) HTML — 최신 양식(VOL.092, 2026-09-18) 기준. 형식 2(5가지, 2026-09-28~)는 아래 '형식 2' 참고.
+"""뉴스레터(이메일) HTML — 최신 양식(VOL.092, 2026-09-18) 기준. 형식 2(5가지 + 한 줄 뉴스, 2026-09-26~)는 아래 '형식 2' 참고.
 
 @edit.h.kr 머리 → #호수·요일 칩 → 가운데 정렬 제목(굵게/보통 두 줄) → 오늘의 편지(세 줄 요약 + H의 한 줄 관찰)
 → 01 빅이슈(큰 숫자 박스 + '그래서 뭐가 달라져?') → #1~#N 섹션(번호 배지 · 태그 칩 · 회색 요약 박스)
@@ -161,18 +161,20 @@ def _item(it):
   {_sources(it['sources'])}</td></tr>"""
 
 
-def _briefs(d, heading="짧게 볼 것"):
+def _briefs(d, heading="짧게 볼 것", start=None):
+    """한 줄 뉴스. start 가 있으면(형식 2: 06) 메인 5가지 뒤로 번호를 이어 '오늘의 10개 주제'가 한눈에 보이게 한다."""
     if not d["briefs"]:
         return ""
     rows = []
-    for b in d["briefs"]:
+    for n, b in enumerate(d["briefs"], start or 0):
         src = esc(b.get("source", ""))
         if b.get("url"):
             src = f'<a href="{esc(b["url"])}" style="color:{MUTED};text-decoration:underline;">{src}</a>'
+        no = f'<span style="color:{CHIP_FG};font-weight:800;">{n:02d}</span>&nbsp; ' if start else ""
         rows.append(
             f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:12px;border-bottom:1px solid {RULE};">'
             f'<tr><td style="padding:0 0 12px;">'
-            + _div(f"font-size:14.5px;font-weight:700;line-height:1.55;color:{INK};", md(b["title"]))
+            + _div(f"font-size:14.5px;font-weight:700;line-height:1.55;color:{INK};", no + md(b["title"]))
             + _div(f"font-size:14px;font-weight:400;line-height:1.7;color:{BODY};margin-top:2px;",
                    f'{md(b["body"])} <span style="color:{MUTED};">({src})</span>')
             + "</td></tr></table>")
@@ -248,6 +250,10 @@ def _note(d):
             + "</td></tr>")
     today = (_div(f"font-size:12.5px;font-weight:700;line-height:1.3;color:{INK};margin-top:18px;", f"오늘의 {len(rows)}가지")
              + f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:6px;">{"".join(rows)}</table>')
+    if d["briefs"]:   # 메인 5가지 + 한 줄 뉴스 = 오늘 다루는 주제 전부(2026-09-26 절충안)
+        first, last = len(rows) + 1, len(rows) + len(d["briefs"])
+        today += _div(f"font-size:13.5px;font-weight:400;line-height:1.6;color:{MUTED};margin-top:4px;padding-left:26px;",
+                      f'+ 한 줄 뉴스 {len(d["briefs"])}개({first:02d}–{last:02d})는 아래에서 짧게 볼 수 있어요.')
     obs = _box(_div(f"font-size:14.5px;font-weight:400;line-height:1.7;color:{INK};",
                     f'<b style="font-weight:700;color:{INK};">H의 한 줄 ·</b> ' + md(d["observation"])), mt=14)
     return f'\n<tr><td class="px" style="padding:0 36px;">{head}\n  {lead}\n  {today}\n  {obs}</td></tr>'
@@ -384,7 +390,7 @@ def render(d, site, n_cards):
         body = [_header(d), _divider(), _note(d), _divider(30), _pick(d), _divider(0),
                 f'<tr><td class="px" style="padding:30px 36px 0;">{_chips([("02–05", True), ("함께 볼 4가지", False)])}</td></tr>']
         body.extend(_item(it) for it in d["items"])
-        body.append(_briefs(d, "한 줄 뉴스"))
+        body.append(_briefs(d, "한 줄 뉴스", start=len(d["all_items"]) + 1))
         if d.get("poll_result"):
             body.append(_poll_result(d))
         body.append(_poll_block(d, site) if d.get("poll") else _question(d))

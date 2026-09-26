@@ -80,6 +80,7 @@ def main():
         c = json.loads(p.read_text(encoding="utf-8"))
         recent_items += [it["title"] for sec in c.get("sections", []) for it in sec.get("items", [])]
         recent_items += [it["title"] for it in c.get("items", [])]  # 형식 2
+        recent_items += [b["title"] for b in c.get("briefs", [])]  # 한 줄 뉴스도 같은 소식을 되풀이하지 않게
 
     warn = []
     if str(d.year) not in years:

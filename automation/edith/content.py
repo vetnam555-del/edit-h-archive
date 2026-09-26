@@ -1,6 +1,6 @@
 """content/YYYY-MM-DD.json 을 읽고 검증한 뒤, 빌드에 필요한 파생값(VOL·요일·번호 등)을 채운다.
 
-형식 2(2026-09-28~): H PICK 심층 1 + 아이템 4 = 5가지. 최상위 `items`(4개)로 알아본다.
+형식 2(2026-09-26~): H PICK 심층 1 + 아이템 4 = 5가지 + 한 줄 뉴스(최대 5). 최상위 `items`(4개)로 알아본다.
 형식 1(~2026-09-25): 빅이슈 1 + `sections` 아이템 9 = 10가지. 지난 호 재빌드·주간 특집을 위해 그대로 읽는다.
 """
 import json
@@ -35,9 +35,14 @@ CARD_LIMITS = {
     "poll_option": 14,       # 투표 선택지 A·B
     "poll_question": 34,     # 투표 질문(마무리 카드에 크게)
     "poll_comment": 70,      # 투표 결과에 붙이는 에디터 H 한마디
+    "brief_title": 32,       # 형식 2: 한 줄 뉴스 제목(한 문장)
+    "brief_body": 100,       # 형식 2: 한 줄 뉴스 본문(1~2문장)
 }
 CARD_ISSUES = {1: 6, 2: 5}   # 형식별 카드 이슈 수(형식 2 는 5가지 모두 카드로)
 ITEMS = {1: 9, 2: 4}         # 형식별 H PICK(빅이슈) 뒤 아이템 수
+# 형식 2 한 줄 뉴스: 메인 5가지(깊게) + 한 줄 뉴스 5개(짧게) = 하루 10개 주제(2026-09-26 사용자 결정 '절충안').
+# 확인된 소식이 모자란 날(주말 등)은 3개까지 줄여도 된다 — 빌드는 막지 않고 알려만 준다(build_issue.py).
+BRIEFS_MAX, BRIEFS_TARGET, BRIEFS_MIN_OK = 5, 5, 3
 
 
 def _need(obj, key, where):
@@ -200,8 +205,13 @@ def prepare(data, date_str):
     if len(items) != ITEMS[fmt]:
         what = "섹션 아이템은 모두 9개(빅이슈 01 + 02~10)" if fmt == 1 else "items 는 정확히 4개(H PICK 01 + 02~05)"
         raise ContentError(f"{where}: {what}여야 합니다. 지금 {len(items)}개")
-    if fmt == 2 and len(data.get("briefs") or []) > 2:
-        raise ContentError(f"{where}: briefs(한 줄 뉴스)는 2개 이하로 — 형식 2 는 '한 입' 분량이 원칙입니다")
+    briefs = data.get("briefs") or []
+    if fmt == 2:
+        if len(briefs) > BRIEFS_MAX:
+            raise ContentError(f"{where}: briefs(한 줄 뉴스)는 {BRIEFS_MAX}개 이하로 — 메인 5가지 + 한 줄 뉴스 {BRIEFS_MAX}개가 하루 분량입니다")
+        for i, b in enumerate(briefs, 1):
+            for key in ("title", "body", "source", "url"):
+                _need(b, key, f"{where} briefs[{i}]")
 
     # 번호: 빅이슈(H PICK)가 01, 나머지가 02~ (빅이슈를 목록에서 다시 반복하지 않는다)
     big["no"] = "01"
@@ -211,9 +221,9 @@ def prepare(data, date_str):
     data["vol"] = data.get("vol") or next_vol(date_str)
     data["weekday"] = weekday_ko(d)
     data["date_obj"] = d
-    data.setdefault("read_minutes", 7 if fmt == 1 else 4)
-    data.setdefault("emoji", "🧭")
     data.setdefault("briefs", [])
+    data.setdefault("read_minutes", 7 if fmt == 1 else (5 if len(data["briefs"]) > 2 else 4))
+    data.setdefault("emoji", "🧭")
     data.setdefault("keywords", [big["tag"]] + [it["tag"] for it in items[:4]])
     if "hero_title" not in data:
         # '토스가 이번엔, 새벽배송을 품었다고?' → 쉼표 뒤에서 줄바꿈
@@ -272,6 +282,9 @@ def prepare(data, date_str):
         for j, n in enumerate(big["numbers"], 1):
             _len_check(n["value"], CARD_LIMITS["metric_value"], f"big_issue.numbers[{j}].value", problems)
             _len_check(n["label"], CARD_LIMITS["metric_label"], f"big_issue.numbers[{j}].label", problems)
+        for i, b in enumerate(data["briefs"], 1):
+            _len_check(b["title"], CARD_LIMITS["brief_title"], f"briefs[{i}].title", problems)
+            _len_check(b["body"], CARD_LIMITS["brief_body"], f"briefs[{i}].body", problems)
     if data.get("poll"):
         _len_check(data["poll"]["question"], CARD_LIMITS["poll_question"], "poll.question", problems)
         for j, o in enumerate(data["poll"]["options"], 1):
