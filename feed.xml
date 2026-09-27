@@ -6,7 +6,14 @@
   <atom:link href="https://vetnam555-del.github.io/edit-h-archive/feed.xml" rel="self" type="application/rss+xml"/>
   <description>매일 아침 8시, 확인된 숫자로 읽는 트렌드 뉴스레터</description>
   <language>ko</language>
-  <lastBuildDate>Sun, 27 Sep 2026 08:00:00 +0900</lastBuildDate>
+  <lastBuildDate>Mon, 28 Sep 2026 08:00:00 +0900</lastBuildDate>
+  <item>
+    <title>VOL.097 추석 끝나자, 10월부터 줄줄이 오른다고?</title>
+    <link>https://vetnam555-del.github.io/edit-h-archive/2026-09-28.html</link>
+    <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-09-28.html</guid>
+    <pubDate>Mon, 28 Sep 2026 08:00:00 +0900</pubDate>
+    <description>버스 운임 상한 9%·과자 7.8%↑·짝퉁 게시물 151만건·AI 표시 85.6%·SNS 공구 18배·B학점 이상 99.7% — 오늘의 5가지</description>
+  </item>
   <item>
     <title>VOL.096 남은 연차, 돈으로 받을 수 있을까?</title>
     <link>https://vetnam555-del.github.io/edit-h-archive/2026-09-27.html</link>
@@ -209,13 +216,6 @@
     <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-08-12.html</guid>
     <pubDate>Wed, 12 Aug 2026 08:00:00 +0900</pubDate>
     <description>지방공항 외국인 입국 42% 급증(BTS 부산공연 효과)과 카톡 선물하기 내돈내산 20%, AI별 라면 선호, 폭염 배달매출 258%까지 읽은 10개 이슈</description>
-  </item>
-  <item>
-    <title>VOL.067 매장에서 — 중고를 판다</title>
-    <link>https://vetnam555-del.github.io/edit-h-archive/2026-08-11.html</link>
-    <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-08-11.html</guid>
-    <pubDate>Tue, 11 Aug 2026 08:00:00 +0900</pubDate>
-    <description>H&amp;M 등 패션업계의 리커머스 직접 진출과 택배 3사 이틀 휴무, 서울시 청년 AI 이용권, 클로드 오토모드까지 읽은 10개 이슈</description>
   </item>
 </channel>
 </rss>
