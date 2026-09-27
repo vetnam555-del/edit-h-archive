@@ -81,6 +81,19 @@ class Graph:
             time.sleep(8)
 
 
+def publish(g, uid, creation_id, what, tries=6):
+    """media_publish. 컨테이너가 FINISHED 여도 인스타가 잠시 '아직 준비 안 됨'(code 9007)으로 거절할 때가 있어
+    (2026-09-28 캐러셀) 조금씩 더 기다리며 다시 시도한다. 다른 오류는 바로 올린다."""
+    for i in range(tries):
+        try:
+            return g.call("POST", f"{uid}/media_publish", creation_id=creation_id)["id"]
+        except IGError as e:
+            if i == tries - 1 or not ("9007" in str(e) or "not ready" in str(e).lower()):
+                raise
+            print(f"  {what}: 인스타가 아직 준비 중이라고 해 {15 * (i + 1)}초 뒤 다시 게시")
+            time.sleep(15 * (i + 1))
+
+
 def load_log(key):
     p = LOG_DIR / f"{key}.json"
     return json.loads(p.read_text(encoding="utf-8")) if p.exists() else {}
@@ -118,14 +131,15 @@ def post_carousel(g, uid, key, folder, site_url, dry):
     urls = [f"{site_url}/instagram/{key}/ig/{p.name}" for p in jpgs]
     wait_public(urls)
     children = [g.call("POST", f"{uid}/media", image_url=u, is_carousel_item="true")["id"] for u in urls]
+    for n, child in enumerate(children, 1):   # 장마다 처리가 끝난 뒤에 묶어야 게시가 거절되지 않는다
+        g.wait_ready(child, f"캐러셀 {n}번째 장")
     caption = (folder / "caption.txt").read_text(encoding="utf-8").strip()
     parent = g.call("POST", f"{uid}/media", media_type="CAROUSEL", children=",".join(children), caption=caption)["id"]
     g.wait_ready(parent, "캐러셀")
     if dry:
         print(f"  (dry-run) 캐러셀 컨테이너 준비 완료 — {len(children)}장, 게시하지 않음")
         return None
-    media_id = g.call("POST", f"{uid}/media_publish", creation_id=parent)["id"]
-    return media_id
+    return publish(g, uid, parent, "캐러셀")
 
 
 def reel_caption(folder, track=None):
@@ -236,7 +250,7 @@ def post_reel(g, uid, key, folder, cfg, dry, ffmpeg, site_url):
     cid = g.call("POST", f"{uid}/media", media_type="REELS", video_url=url, caption=reel_caption(folder, track),
                  share_to_feed="true" if cfg.get("reel_share_to_feed") else "false", thumb_offset="800")["id"]
     g.wait_ready(cid, "릴스", timeout=900)
-    media_id = g.call("POST", f"{uid}/media_publish", creation_id=cid)["id"]
+    media_id = publish(g, uid, cid, "릴스")
     if track.get("license", "").upper() != "CC0" and not track.get("credit_in_video"):
         try:  # 라이선스(CC BY)가 요구하는 출처 표시 — 영상에 못 넣었을 때만 댓글로
             g.call("POST", f"{media_id}/comments", message=music_credit(track))
