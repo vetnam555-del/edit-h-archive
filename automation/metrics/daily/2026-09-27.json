@@ -1,6 +1,16 @@
 {
- "collected_at": "2026-09-27T01:32+09:00",
+ "collected_at": "2026-09-27T22:09+09:00",
  "issues": {
+  "2026-09-27": {
+   "title": "남은 연차, 돈으로 받을 수 있을까?",
+   "format": 2,
+   "pick_tag": "남은 연차",
+   "title_style": "질문형",
+   "cover": "핵심어",
+   "weekday": "일",
+   "poll": false,
+   "source_mode": "fallback"
+  },
   "2026-09-26": {
    "title": "상어 한 마리에, 10만 명이 몰렸다고?",
    "format": 2,
@@ -34,24 +44,48 @@
  },
  "instagram": {
   "followers": 44,
-  "media": 76,
+  "media": 77,
   "insights": true,
   "posts": {
    "2026-09-25": {
     "likes": 0,
     "comments": 0,
-    "reach": 8,
+    "reach": 11,
     "saved": 0,
     "shares": 0,
-    "views": 16
+    "views": 19
    },
    "2026-09-26": {
     "likes": 0,
     "comments": 0,
-    "reach": 14,
+    "reach": 15,
     "saved": 0,
     "shares": 0,
-    "views": 43
+    "views": 45,
+    "reel": {
+     "likes": 0,
+     "comments": 0,
+     "reach": 106,
+     "saved": 0,
+     "shares": 0,
+     "views": 115
+    }
+   },
+   "2026-09-27": {
+    "likes": 0,
+    "comments": 0,
+    "reach": 1,
+    "saved": 0,
+    "shares": 0,
+    "views": 4,
+    "reel": {
+     "likes": 0,
+     "comments": 0,
+     "reach": 110,
+     "saved": 0,
+     "shares": 0,
+     "views": 127
+    }
    }
   }
  },
@@ -59,7 +93,8 @@
   "replies": {
    "2026-09-24": 0,
    "2026-09-25": 0,
-   "2026-09-26": 0
+   "2026-09-26": 0,
+   "2026-09-27": 0
   },
   "signups_14d": 0,
   "unsubs_14d": 0,
