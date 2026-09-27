@@ -157,8 +157,8 @@ def welcome_message(sender, to_addr, cfg, now=None):
     now = now or now_kst()
     hh, mm = map(int, cfg["send_time_kst"].split(":"))
     when = send_time_ko(cfg["send_time_kst"]).replace("오전", "아침")
-    # 07:10 반영분은 그날 08:00 발송에 바로 들어간다. 발송 실행은 07:45 무렵(원고 푸시) 시작하며 Secret 을 읽으므로 20분 여유를 둔다.
-    day = "오늘" if now.hour * 60 + now.minute < hh * 60 + mm - 20 else "내일"
+    # 발송 작업은 08:00 에 새로 시작하며 그때 Secret 을 읽는다(send-newsletter.yml wait → send). 반영이 08:00 전이면 오늘 호부터 간다.
+    day = "오늘" if now.hour * 60 + now.minute < hh * 60 + mm - 5 else "내일"
     picks, by_score = best_issues()
     unsub = f"{site}/unsubscribe.html?email={urllib.parse.quote(to_addr)}"
     insta = "https://www.instagram.com/edit.h.kr/"
