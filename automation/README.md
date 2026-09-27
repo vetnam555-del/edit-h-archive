@@ -182,7 +182,7 @@ content/YYYY-MM-DD.json 호마다의 원본 콘텐츠(출처 URL 포함)
 
 ## 구독 신청·수신 거부 자동 반영 (2026-09-25~)
 
-subscribe.html·unsubscribe.html 은 Formspree 로 보내고, Formspree 가 폼 주인 메일로 알림을 보낸다. `sync-subscribers.yml`(매일 07:10)이
+subscribe.html·unsubscribe.html 은 Formspree 로 보내고, Formspree 가 폼 주인 메일로 알림을 보낸다. `sync-subscribers.yml`(루틴이 오늘 호를 푸시한 직후 + 예비로 매일 07:10)이
 그 알림을 Gmail IMAP 으로 읽어(기존 SMTP 앱 비밀번호, 읽기 전용) Secret `SUBSCRIBERS` 에 더하고 빼며, 새 구독자에게 환영 메일을 보낸다.
 - **Formspree 알림이 SMTP_USER 와 같은 Gmail 로 와야** 한다(Formspree 대시보드 → 폼 → Settings → 알림 받는 이메일).
 - 바꾸기 전 값은 `SUBSCRIBERS_BACKUP` 에 남는다. 되돌리려면 그 값을 `SUBSCRIBERS` 에 붙여넣는다(Secret 은 되읽을 수 없어 이렇게 둔다).

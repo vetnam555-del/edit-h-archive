@@ -61,6 +61,24 @@ def issue_facts(day):
     }
 
 
+def _media_row(g, media_id, own_comments, out):
+    """게시물 하나의 좋아요·댓글(+ 권한이 있으면 도달·저장·공유·조회)."""
+    from post_instagram import IGError
+    m = g.call("GET", media_id, fields="like_count,comments_count")
+    row = {"likes": _num(m.get("like_count")), "comments": max((_num(m.get("comments_count")) or 0) - own_comments, 0)}
+    if out["insights"] is not False:
+        try:
+            data = g.call("GET", f"{media_id}/insights", metric=INSIGHT_METRICS).get("data", [])
+            for d in data:
+                vals = d.get("values") or [{}]
+                row[d["name"]] = _num(d.get("total_value", {}).get("value", vals[0].get("value")))
+            out["insights"] = True
+        except IGError as e:
+            out["insights"] = False
+            out["insights_error"] = str(e)[:160]
+    return row
+
+
 def instagram(days):
     """{'followers': n, 'insights': bool, 'posts': {날짜: {...}}} 또는 None(토큰 없음)."""
     token = os.environ.get("IG_ACCESS_TOKEN", "").strip()
@@ -79,19 +97,14 @@ def instagram(days):
         cid = (log.get("carousel") or {}).get("id")
         if not cid:
             continue
-        m = g.call("GET", cid, fields="like_count,comments_count")
         own = 1 if (log.get("carousel") or {}).get("first_comment") else 0   # 우리 계정이 단 첫 댓글은 뺀다
-        row = {"likes": _num(m.get("like_count")), "comments": max((_num(m.get("comments_count")) or 0) - own, 0)}
-        if out["insights"] is not False:
+        row = _media_row(g, cid, own, out)
+        rid = (log.get("reel") or {}).get("id")
+        if rid:   # 릴스는 피드 격자에 안 올려(릴스 탭 전용) 도달이 따로 잡힌다 — 호 점수에는 둘을 합친다
             try:
-                data = g.call("GET", f"{cid}/insights", metric=INSIGHT_METRICS).get("data", [])
-                for d in data:
-                    vals = d.get("values") or [{}]
-                    row[d["name"]] = _num(d.get("total_value", {}).get("value", vals[0].get("value")))
-                out["insights"] = True
+                row["reel"] = _media_row(g, rid, 0, out)
             except IGError as e:
-                out["insights"] = False
-                out["insights_error"] = str(e)[:160]
+                row["reel_error"] = str(e)[:120]
         out["posts"][day] = row
     return out
 
@@ -165,11 +178,21 @@ def subscribers():
 
 
 def score(row):
-    """비교용 한 숫자. 저장·공유는 '다시 볼 가치'라 무겁게, 댓글은 대화라 좋아요보다 무겁게."""
+    """비교용 한 숫자. 저장·공유는 '다시 볼 가치'라 무겁게, 댓글은 대화라 좋아요보다 무겁게. 릴스 반응도 더한다."""
     if not row:
         return None
     s = (row.get("likes") or 0) + 2 * (row.get("comments") or 0) + 3 * (row.get("saved") or 0) + 3 * (row.get("shares") or 0)
-    return s
+    return s + (score(row["reel"]) or 0 if row.get("reel") else 0)
+
+
+def _reel_cell(p):
+    """'조회 120·도달 80 (♥2)' — 릴스 기록이 없으면 '–'. 좋아요·댓글·저장은 점수에 합쳐지고 여기엔 반응이 있을 때만 붙인다."""
+    r = p.get("reel") or {}
+    if not r:
+        return "–"
+    cell = f"{r.get('views', '–')}·{r.get('reach', '–')}"
+    extra = (r.get("likes") or 0) + (r.get("comments") or 0) + (r.get("saved") or 0) + (r.get("shares") or 0)
+    return cell + (f" (반응 {extra})" if extra else "")
 
 
 def summary_md(snap):
@@ -195,13 +218,13 @@ def summary_md(snap):
             f"{names.get(k, k)} {v}" for k, v in sorted(refs.items(), key=lambda kv: -kv[1])))
     lines.append("")
     lines += ["## 호별 성과", "",
-              "| 날짜 | 요일 | 제목 | 유형 | 표지 | H PICK | 좋아요 | 댓글 | 저장 | 공유 | 도달 | 답장 | 점수 |",
-              "|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
+              "| 날짜 | 요일 | 제목 | 유형 | 표지 | H PICK | 좋아요 | 댓글 | 저장 | 공유 | 도달 | 릴스 조회·도달 | 답장 | 점수 |",
+              "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
     for day, f, p, sc in rows:
         rep = (mb.get("replies") or {}).get(day, "–")
         lines.append(f"| {day} | {f['weekday']} | {f['title'][:28]} | {f['title_style']} | {f['cover']} | {f['pick_tag'] or '–'} | "
                      f"{p.get('likes', '–')} | {p.get('comments', '–')} | {p.get('saved', '–')} | {p.get('shares', '–')} | "
-                     f"{p.get('reach', '–')} | {rep} | {sc if sc is not None else '–'} |")
+                     f"{p.get('reach', '–')} | {_reel_cell(p)} | {rep} | {sc if sc is not None else '–'} |")
     scored = [(d, f, sc) for d, f, p, sc in rows if sc is not None]
     if len(scored) >= 3:
         def avg_by(key):
