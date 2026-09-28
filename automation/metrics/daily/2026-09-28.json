@@ -1,6 +1,16 @@
 {
- "collected_at": "2026-09-28T02:05+09:00",
+ "collected_at": "2026-09-28T22:26+09:00",
  "issues": {
+  "2026-09-28": {
+   "title": "추석 끝나자, 10월부터 줄줄이 오른다고?",
+   "format": 2,
+   "pick_tag": "10월 가격 인상",
+   "title_style": "질문형",
+   "cover": "핵심어",
+   "weekday": "월",
+   "poll": true,
+   "source_mode": "anjang"
+  },
   "2026-09-27": {
    "title": "남은 연차, 돈으로 받을 수 있을까?",
    "format": 2,
@@ -43,8 +53,8 @@
   }
  },
  "instagram": {
-  "followers": 44,
-  "media": 77,
+  "followers": 47,
+  "media": 78,
   "insights": true,
   "posts": {
    "2026-09-25": {
@@ -58,33 +68,49 @@
    "2026-09-26": {
     "likes": 0,
     "comments": 0,
-    "reach": 15,
+    "reach": 16,
     "saved": 0,
     "shares": 0,
-    "views": 45,
+    "views": 47,
     "reel": {
      "likes": 0,
      "comments": 0,
-     "reach": 106,
+     "reach": 107,
      "saved": 0,
      "shares": 0,
-     "views": 115
+     "views": 116
     }
    },
    "2026-09-27": {
     "likes": 0,
     "comments": 0,
-    "reach": 1,
+    "reach": 4,
     "saved": 0,
     "shares": 0,
-    "views": 4,
+    "views": 7,
     "reel": {
      "likes": 0,
      "comments": 0,
-     "reach": 115,
+     "reach": 128,
      "saved": 0,
      "shares": 0,
-     "views": 132
+     "views": 147
+    }
+   },
+   "2026-09-28": {
+    "likes": 0,
+    "comments": 0,
+    "reach": 7,
+    "saved": 0,
+    "shares": 0,
+    "views": 15,
+    "reel": {
+     "likes": 0,
+     "comments": 0,
+     "reach": 48,
+     "saved": 0,
+     "shares": 0,
+     "views": 50
     }
    }
   }
@@ -94,7 +120,8 @@
    "2026-09-24": 0,
    "2026-09-25": 0,
    "2026-09-26": 0,
-   "2026-09-27": 0
+   "2026-09-27": 0,
+   "2026-09-28": 0
   },
   "signups_14d": 0,
   "unsubs_14d": 0,
@@ -105,5 +132,7 @@
   "sending": 11,
   "excluded": 1
  },
- "polls": {}
+ "polls": {
+  "2026-09-28": 0
+ }
 }
