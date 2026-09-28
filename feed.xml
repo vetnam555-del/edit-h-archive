@@ -6,7 +6,14 @@
   <atom:link href="https://vetnam555-del.github.io/edit-h-archive/feed.xml" rel="self" type="application/rss+xml"/>
   <description>매일 아침 8시, 확인된 숫자로 읽는 트렌드 뉴스레터</description>
   <language>ko</language>
-  <lastBuildDate>Mon, 28 Sep 2026 08:00:00 +0900</lastBuildDate>
+  <lastBuildDate>Tue, 29 Sep 2026 08:00:00 +0900</lastBuildDate>
+  <item>
+    <title>VOL.098 AI가 내 구독을, 알아서 해지해 준다고?</title>
+    <link>https://vetnam555-del.github.io/edit-h-archive/2026-09-29.html</link>
+    <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-09-29.html</guid>
+    <pubDate>Tue, 29 Sep 2026 08:00:00 +0900</pubDate>
+    <description>구독 해지 1.8배·한은 직원 186명 유출·스타벅스 결제액 78%·휘발유 19주 하락·생성형 AI 40.6% — 오늘의 5가지</description>
+  </item>
   <item>
     <title>VOL.097 추석 끝나자, 10월부터 줄줄이 오른다고?</title>
     <link>https://vetnam555-del.github.io/edit-h-archive/2026-09-28.html</link>
@@ -209,13 +216,6 @@
     <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-08-13.html</guid>
     <pubDate>Thu, 13 Aug 2026 08:00:00 +0900</pubDate>
     <description>외국인 카드 소비 12조 돌파와 채널별 양극화, 메가커피의 스타벅스 추월, 택배 나흘 공백, 방송광고 총량 20% 확대까지 읽은 10개 이슈</description>
-  </item>
-  <item>
-    <title>VOL.068 공항에 뜬 — BTS 효과</title>
-    <link>https://vetnam555-del.github.io/edit-h-archive/2026-08-12.html</link>
-    <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-08-12.html</guid>
-    <pubDate>Wed, 12 Aug 2026 08:00:00 +0900</pubDate>
-    <description>지방공항 외국인 입국 42% 급증(BTS 부산공연 효과)과 카톡 선물하기 내돈내산 20%, AI별 라면 선호, 폭염 배달매출 258%까지 읽은 10개 이슈</description>
   </item>
 </channel>
 </rss>
