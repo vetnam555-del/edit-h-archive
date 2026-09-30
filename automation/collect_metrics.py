@@ -32,6 +32,7 @@ from edith.common import AUTOMATION, CONTENT_DIR, load_config, now_kst, weekday_
 METRICS = AUTOMATION / "metrics"
 DAYS = 14
 INSIGHT_METRICS = "reach,saved,shares,views"
+REEL_WATCH_METRICS = "ig_reels_avg_watch_time,ig_reels_video_view_total_time"   # 밀리초 — 릴스 완주 정도를 가늠
 
 
 def _num(v):
@@ -105,6 +106,14 @@ def instagram(days):
                 row["reel"] = _media_row(g, rid, 0, out)
             except IGError as e:
                 row["reel_error"] = str(e)[:120]
+            if row.get("reel"):
+                try:   # 릴스 도달을 가르는 건 시청 시간 — 평균 시청 시간(초)을 함께 본다(2026-10-01~)
+                    data = g.call("GET", f"{rid}/insights", metric=REEL_WATCH_METRICS).get("data", [])
+                    ms = {d["name"]: _num(d.get("total_value", {}).get("value", (d.get("values") or [{}])[0].get("value"))) for d in data}
+                    if ms.get("ig_reels_avg_watch_time") is not None:
+                        row["reel"]["avg_watch_s"] = round(ms["ig_reels_avg_watch_time"] / 1000, 1)
+                except IGError as e:
+                    row["reel"]["watch_error"] = str(e)[:120]
         out["posts"][day] = row
     return out
 
@@ -186,11 +195,13 @@ def score(row):
 
 
 def _reel_cell(p):
-    """'조회 120·도달 80 (♥2)' — 릴스 기록이 없으면 '–'. 좋아요·댓글·저장은 점수에 합쳐지고 여기엔 반응이 있을 때만 붙인다."""
+    """'조회 120·도달 80 · 평균 6.2초 (반응 2)' — 릴스 기록이 없으면 '–'. 좋아요·댓글·저장은 점수에 합쳐지고 여기엔 반응이 있을 때만 붙인다."""
     r = p.get("reel") or {}
     if not r:
         return "–"
     cell = f"{r.get('views', '–')}·{r.get('reach', '–')}"
+    if r.get("avg_watch_s") is not None:
+        cell += f" · 평균 {r['avg_watch_s']}초"
     extra = (r.get("likes") or 0) + (r.get("comments") or 0) + (r.get("saved") or 0) + (r.get("shares") or 0)
     return cell + (f" (반응 {extra})" if extra else "")
 
