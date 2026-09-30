@@ -6,7 +6,14 @@
   <atom:link href="https://vetnam555-del.github.io/edit-h-archive/feed.xml" rel="self" type="application/rss+xml"/>
   <description>매일 아침 8시, 확인된 숫자로 읽는 트렌드 뉴스레터</description>
   <language>ko</language>
-  <lastBuildDate>Wed, 30 Sep 2026 08:00:00 +0900</lastBuildDate>
+  <lastBuildDate>Thu, 01 Oct 2026 08:00:00 +0900</lastBuildDate>
+  <item>
+    <title>VOL.100 정부 사이트 해킹, 피해는 신고의 11배라고?</title>
+    <link>https://vetnam555-del.github.io/edit-h-archive/2026-10-01.html</link>
+    <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-10-01.html</guid>
+    <pubDate>Thu, 01 Oct 2026 08:00:00 +0900</pubDate>
+    <description>1365 유출 신고의 11배·대미투자 1호 223억달러·DSR 예외 70.5%·AI 비서 월 500달러·교통카드도 배달 — 오늘의 5가지</description>
+  </item>
   <item>
     <title>VOL.099 놓쳤다면, 다시 볼 만한 5가지</title>
     <link>https://vetnam555-del.github.io/edit-h-archive/2026-09-30.html</link>
@@ -209,13 +216,6 @@
     <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-08-18.html</guid>
     <pubDate>Tue, 18 Aug 2026 08:00:00 +0900</pubDate>
     <description>AI 에이전틱 커머스의 17% 결제전환율과 아마존·월마트의 엇갈린 전략, 모나미 애국 소비 주가 반전, 왁뿌볼 촉감 마케팅, 오픈AI 기업매출 역전까지 읽은 10개 이슈</description>
-  </item>
-  <item>
-    <title>VOL.070 적자 낸 건 — 마케팅이었다</title>
-    <link>https://vetnam555-del.github.io/edit-h-archive/2026-08-14.html</link>
-    <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-08-14.html</guid>
-    <pubDate>Fri, 14 Aug 2026 08:00:00 +0900</pubDate>
-    <description>스타벅스 27년 만의 첫 분기 적자와 탱크데이 마케팅 논란, 공정위 플랫폼 실태조사, 홈플러스 재개장, 알리코리아 광고비 역전까지 읽은 10개 이슈</description>
   </item>
 </channel>
 </rss>
