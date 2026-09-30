@@ -435,7 +435,13 @@ def main():
     elif log.get("carousel"):
         print(f"캐러셀은 이미 게시됨 ({log['carousel'].get('permalink') or log['carousel']['id']})")
 
-    want_reel = cfg.get("reel", True) and (args.kind == "daily" or cfg.get("weekly_reel", True))
+    # 예비 호(다시 보기)는 릴스를 올리지 않는다 — 이미 올린 카드를 다시 엮은 영상은 재게시로 잡혀 추천을 깎을 수 있다.
+    # 어느 경로(예약·수동·rewind.yml)로 돌든 여기서 막는다.
+    content = ROOT / "content" / f"{key}.json"
+    rewind = args.kind == "daily" and content.exists() and bool(json.loads(content.read_text(encoding="utf-8")).get("rewind"))
+    if rewind and args.only != "carousel":
+        print("예비 호(다시 보기) — 릴스는 올리지 않습니다")
+    want_reel = cfg.get("reel", True) and (args.kind == "daily" or cfg.get("weekly_reel", True)) and not rewind
     if args.only != "carousel" and want_reel and not log.get("reel"):
         try:
             print("릴스 준비 중…")
@@ -466,7 +472,7 @@ def main():
                 reel.unlink(missing_ok=True)
     elif log.get("reel"):
         print("릴스는 이미 게시됨")
-    elif (args.only != "carousel" and not cfg.get("reel", True) and cfg.get("reel_delivery") == "email"
+    elif (args.only != "carousel" and not rewind and not cfg.get("reel", True) and cfg.get("reel_delivery") == "email"
           and (args.kind == "daily" or cfg.get("weekly_reel", True)) and not log.get("reel_emailed") and not args.dry_run):
         try:
             print("릴스 영상을 운영자 메일로 보내는 중…(자동 게시 대신)")
