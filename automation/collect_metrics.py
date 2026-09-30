@@ -195,6 +195,20 @@ def _reel_cell(p):
     return cell + (f" (반응 {extra})" if extra else "")
 
 
+def _at_age(day, snap, hours=24):
+    """그 호 캐러셀의 '게시 hours 시간 뒤 첫 스냅숏' 숫자({reach, views, …}). 아직 그만큼 안 지났으면 {}.
+    스냅숏은 하루 1~2번이라 실제 나이는 24~48시간 사이 — 누적 숫자를 그대로 비교하는 것보다 공정하다."""
+    log = AUTOMATION / "ig_posted" / f"{day}.json"
+    at = ((json.loads(log.read_text(encoding="utf-8")).get("carousel") or {}).get("at") if log.exists() else None) or f"{day}T08:00:00+09:00"
+    due = dt.datetime.fromisoformat(at) + dt.timedelta(hours=hours)
+    snaps = [json.loads(q.read_text(encoding="utf-8")) for q in sorted((METRICS / "daily").glob("*.json"))] + [snap]
+    for s in sorted(snaps, key=lambda s: s.get("collected_at") or ""):
+        row = ((s.get("instagram") or {}).get("posts") or {}).get(day)
+        if row and s.get("collected_at") and dt.datetime.fromisoformat(s["collected_at"]) >= due:
+            return row
+    return {}
+
+
 def summary_md(snap):
     ig = snap.get("instagram") or {}
     posts = ig.get("posts") or {}
@@ -225,25 +239,30 @@ def summary_md(snap):
         lines.append(f"| {day} | {f['weekday']} | {f['title'][:28]} | {f['title_style']} | {f['cover']} | {f['pick_tag'] or '–'} | "
                      f"{p.get('likes', '–')} | {p.get('comments', '–')} | {p.get('saved', '–')} | {p.get('shares', '–')} | "
                      f"{p.get('reach', '–')} | {_reel_cell(p)} | {rep} | {sc if sc is not None else '–'} |")
-    # 예비 호(다시 보기)는 편집 선택이 아니라 비교에서 뺀다. 좋아요·저장이 아직 0 인 날이 많아 캐러셀 도달·조회도 함께 본다.
-    scored = [(d, f, sc, p) for d, f, p, sc in rows if sc is not None and f.get("source_mode") != "rewind"]
+    # 예비 호(다시 보기)는 편집 선택이 아니라 비교에서 뺀다. 좋아요·저장이 아직 0 인 날이 많아 캐러셀 도달·조회도 함께 보되,
+    # 누적 숫자는 오래된 게시물일수록 커지므로 '게시 24시간 뒤 첫 스냅숏'의 값으로 나이를 맞춘다(없으면 그 호는 도달 비교에서 빠진다).
+    scored = [(d, f, sc, _at_age(d, snap)) for d, f, p, sc in rows if sc is not None and f.get("source_mode") != "rewind"]
     if len(scored) >= 3:
         def _mean(vals):
             vals = [v for v in vals if v is not None]
-            return sum(vals) / len(vals) if vals else None
+            return (sum(vals) / len(vals), len(vals)) if vals else (None, 0)
 
         def avg_by(key):
             groups = {}
-            for d, f, sc, p in scored:
-                groups.setdefault(f[key], []).append((sc, p.get("reach"), p.get("views")))
-            stats = {k: (_mean([x[0] for x in v]), _mean([x[1] for x in v]), _mean([x[2] for x in v]), len(v)) for k, v in groups.items()}
-            order = sorted(stats.items(), key=lambda kv: (-kv[1][0], -(kv[1][1] or 0)))
-            return ", ".join(f"{k} {sc:.1f}점·도달 {'–' if r is None else round(r)}·조회 {'–' if vw is None else round(vw)}({n}호)"
-                             for k, (sc, r, vw, n) in order)
-        rank = lambda x: (x[2], x[3].get("reach") or 0)  # noqa: E731 — 점수가 같으면 도달로 가린다
-        best = max(scored, key=rank)
-        worst = min(scored, key=rank)
-        lines += ["", "## 비교 (평균 점수·캐러셀 도달·조회, 호 수 — 예비 호 제외)", "",
+            for d, f, sc, a in scored:
+                groups.setdefault(f[key], []).append((sc, a.get("reach"), a.get("views")))
+            out = []
+            for k, v in groups.items():
+                (sc, _), (r, nr), (vw, _) = _mean([x[0] for x in v]), _mean([x[1] for x in v]), _mean([x[2] for x in v])
+                out.append((k, sc, r, vw, len(v), nr))
+            out.sort(key=lambda x: (-x[1], -(x[2] or 0)))
+            return ", ".join(f"{k} {sc:.1f}점({n}호)·도달 {'–' if r is None else round(r)}·조회 {'–' if vw is None else round(vw)}({nr}호)"
+                             for k, sc, r, vw, n, nr in out)
+        measured = [x for x in scored if x[3].get("reach") is not None] or scored
+        rank = lambda x: (x[2], x[3].get("reach") or 0)  # noqa: E731 — 점수가 같으면 24시간 도달로 가린다(도달을 잰 호끼리만)
+        best = max(measured, key=rank)
+        worst = min(measured, key=rank)
+        lines += ["", "## 비교 (평균 점수(호 수) · 게시 24시간 뒤 캐러셀 도달·조회(잰 호 수) — 예비 호 제외)", "",
                   f"- 제목 유형: {avg_by('title_style')}",
                   f"- 표지: {avg_by('cover')}",
                   f"- 요일: {avg_by('weekday')}",
