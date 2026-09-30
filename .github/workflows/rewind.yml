@@ -124,5 +124,6 @@ jobs:
           # GITHUB_TOKEN 의 푸시는 다른 워크플로를 깨우지 않으므로 발송·게시를 직접 돌린다(기록이 있으면 각자 건너뛴다)
           sleep 60   # GitHub Pages 가 새 카드 이미지를 올릴 시간
           gh workflow run send-newsletter.yml --ref main -f date="$DATE"
-          gh workflow run post-instagram.yml --ref main -f key="$DATE" -f mode=post -f only=both
+          # 인스타는 캐러셀만 — 이미 올렸던 카드를 다시 엮은 영상은 '재게시·비원본'으로 잡혀 계정 추천을 깎을 수 있다(9/30 예비 호 릴스 도달 1)
+          gh workflow run post-instagram.yml --ref main -f key="$DATE" -f mode=post -f only=carousel
           python3 automation/alert.py rewind --date "$DATE"

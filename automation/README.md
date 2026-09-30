@@ -141,7 +141,9 @@ content/YYYY-MM-DD.json 호마다의 원본 콘텐츠(출처 URL 포함)
 22:00  편집 회고(Claude, 발행 세션) → automation/learnings.md: 회고 기록 + '지금 원칙'(근거 3호 이상일 때만 변경) + 가설 + 개선 요청
 07:00  제작 루틴 → RUNBOOK 0단계에서 learnings.md·summary.md 를 읽고 주제·제목·표지에 반영
 일 21:00  개선 루틴(Claude, 작업 세션) → '시스템 개선 요청'·실패 기록을 코드·템플릿으로 고쳐 PR → 머지, 주간 리포트
+          + 레퍼런스·트렌드 조사(WebSearch) → automation/references.md: 진단·조사 요약(출처 링크)·'지금 시험 중'·다음 실험 후보
 ```
+- 릴스(2026-10-02~): 데일리는 표지·H PICK·이슈 4·마무리 7장 약 20초, 장마다 천천히 확대 + 옆으로 밀어 넘기기(`make_reel.REEL_PARTS`·`config.instagram.reel_timing`). 성과표 '릴스' 칸에 평균 시청 시간(초)이 붙는다. 예비 호 날엔 캐러셀만 올린다.
 - 숫자만 모은다(주소·계정 이름 없음). 인스타 도달·저장·공유는 토큰에 `instagram_business_manage_insights` 권한이 있어야 나온다 —
   없으면 좋아요·댓글만으로 비교한다(성과표 첫 줄에 표시).
 
