@@ -225,20 +225,30 @@ def summary_md(snap):
         lines.append(f"| {day} | {f['weekday']} | {f['title'][:28]} | {f['title_style']} | {f['cover']} | {f['pick_tag'] or '–'} | "
                      f"{p.get('likes', '–')} | {p.get('comments', '–')} | {p.get('saved', '–')} | {p.get('shares', '–')} | "
                      f"{p.get('reach', '–')} | {_reel_cell(p)} | {rep} | {sc if sc is not None else '–'} |")
-    scored = [(d, f, sc) for d, f, p, sc in rows if sc is not None]
+    # 예비 호(다시 보기)는 편집 선택이 아니라 비교에서 뺀다. 좋아요·저장이 아직 0 인 날이 많아 캐러셀 도달·조회도 함께 본다.
+    scored = [(d, f, sc, p) for d, f, p, sc in rows if sc is not None and f.get("source_mode") != "rewind"]
     if len(scored) >= 3:
+        def _mean(vals):
+            vals = [v for v in vals if v is not None]
+            return sum(vals) / len(vals) if vals else None
+
         def avg_by(key):
             groups = {}
-            for d, f, sc in scored:
-                groups.setdefault(f[key], []).append(sc)
-            return ", ".join(f"{k} {sum(v) / len(v):.1f}({len(v)}호)" for k, v in sorted(groups.items(), key=lambda kv: -sum(kv[1]) / len(kv[1])))
-        best = max(scored, key=lambda x: x[2])
-        worst = min(scored, key=lambda x: x[2])
-        lines += ["", "## 비교 (평균 점수, 호 수)", "",
+            for d, f, sc, p in scored:
+                groups.setdefault(f[key], []).append((sc, p.get("reach"), p.get("views")))
+            stats = {k: (_mean([x[0] for x in v]), _mean([x[1] for x in v]), _mean([x[2] for x in v]), len(v)) for k, v in groups.items()}
+            order = sorted(stats.items(), key=lambda kv: (-kv[1][0], -(kv[1][1] or 0)))
+            return ", ".join(f"{k} {sc:.1f}점·도달 {'–' if r is None else round(r)}·조회 {'–' if vw is None else round(vw)}({n}호)"
+                             for k, (sc, r, vw, n) in order)
+        rank = lambda x: (x[2], x[3].get("reach") or 0)  # noqa: E731 — 점수가 같으면 도달로 가린다
+        best = max(scored, key=rank)
+        worst = min(scored, key=rank)
+        lines += ["", "## 비교 (평균 점수·캐러셀 도달·조회, 호 수 — 예비 호 제외)", "",
                   f"- 제목 유형: {avg_by('title_style')}",
                   f"- 표지: {avg_by('cover')}",
                   f"- 요일: {avg_by('weekday')}",
-                  f"- 가장 좋았던 호: {best[0]} 「{best[1]['title']}」 {best[2]}점 · 가장 약했던 호: {worst[0]} 「{worst[1]['title']}」 {worst[2]}점",
+                  f"- 가장 좋았던 호: {best[0]} 「{best[1]['title']}」 {best[2]}점·도달 {best[3].get('reach', '–')}"
+                  f" · 가장 약했던 호: {worst[0]} 「{worst[1]['title']}」 {worst[2]}점·도달 {worst[3].get('reach', '–')}",
                   "", "※ 호 수가 적을 때의 차이는 우연일 수 있다. 원칙은 같은 방향의 근거가 3호 이상 쌓였을 때만 바꾼다."]
     else:
         lines += ["", "(비교는 인스타 성과가 3호 이상 쌓이면 나온다)"]

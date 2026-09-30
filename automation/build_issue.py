@@ -93,6 +93,9 @@ def main():
     if d.get("format") == 2 and not d.get("rewind") and len(d["briefs"]) < content.BRIEFS_TARGET:
         note = "괜찮아요(확인된 소식이 부족한 날)" if len(d["briefs"]) >= content.BRIEFS_MIN_OK else "너무 적어요 — 확인된 소식을 더 찾아보세요"
         print(f"  ↘ 한 줄 뉴스 {len(d['briefs'])}개 — 목표 {content.BRIEFS_TARGET}개(메인 5 + 한 줄 뉴스 5 = 10개 주제). {note}")
+    if d.get("format") == 2 and not d.get("rewind") and files and not ((d.get("cards") or {}).get("cover") or {}).get("photo"):
+        print("  ↘ 표지 사진 없음(핵심어 표지) — 2026-10-01 부터 실사 표지가 기본이에요. RUNBOOK '표지 사진'대로 검색어를 3개 이상 시도했는지 보고,"
+              " 못 썼다면 6단계 보고 '표지:' 줄에 사유를 적으세요")
     if overflow:
         print("✗ 넘친 카드(20% 축소로도 안 들어감) — 해당 카드 문장을 줄인 뒤 다시 빌드하세요:")
         for c in overflow:
