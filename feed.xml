@@ -6,7 +6,14 @@
   <atom:link href="https://vetnam555-del.github.io/edit-h-archive/feed.xml" rel="self" type="application/rss+xml"/>
   <description>매일 아침 8시, 확인된 숫자로 읽는 트렌드 뉴스레터</description>
   <language>ko</language>
-  <lastBuildDate>Tue, 29 Sep 2026 08:00:00 +0900</lastBuildDate>
+  <lastBuildDate>Wed, 30 Sep 2026 08:00:00 +0900</lastBuildDate>
+  <item>
+    <title>VOL.099 놓쳤다면, 다시 볼 만한 5가지</title>
+    <link>https://vetnam555-del.github.io/edit-h-archive/2026-09-30.html</link>
+    <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-09-30.html</guid>
+    <pubDate>Wed, 30 Sep 2026 08:00:00 +0900</pubDate>
+    <description>지난 호 다시 보기 — 추석 끝나자, 10월부터 줄줄이 오른다고? · 짝퉁 판매글, 인스타에서 가장 많이 잡혔다 · AI로 만들었으면, 밝혀 달라 · 공구 시장 4년 새 18배, 세금은 깜깜 · 명문대 졸업생 B학점 이상, 100%에 육박</description>
+  </item>
   <item>
     <title>VOL.098 AI가 내 구독을, 알아서 해지해 준다고?</title>
     <link>https://vetnam555-del.github.io/edit-h-archive/2026-09-29.html</link>
@@ -209,13 +216,6 @@
     <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-08-14.html</guid>
     <pubDate>Fri, 14 Aug 2026 08:00:00 +0900</pubDate>
     <description>스타벅스 27년 만의 첫 분기 적자와 탱크데이 마케팅 논란, 공정위 플랫폼 실태조사, 홈플러스 재개장, 알리코리아 광고비 역전까지 읽은 10개 이슈</description>
-  </item>
-  <item>
-    <title>VOL.069 카드값만 — 7개월에 12조</title>
-    <link>https://vetnam555-del.github.io/edit-h-archive/2026-08-13.html</link>
-    <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-08-13.html</guid>
-    <pubDate>Thu, 13 Aug 2026 08:00:00 +0900</pubDate>
-    <description>외국인 카드 소비 12조 돌파와 채널별 양극화, 메가커피의 스타벅스 추월, 택배 나흘 공백, 방송광고 총량 20% 확대까지 읽은 10개 이슈</description>
   </item>
 </channel>
 </rss>
