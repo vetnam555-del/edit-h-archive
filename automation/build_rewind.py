@@ -6,11 +6,13 @@ content/{날짜}.json 을 만들고 build_issue.py 로 뉴스레터·카드를 �
 **새로 취재하지 않는다** — 최근 3주 안에 이미 사실 확인을 거쳐 발행한 이야기(원고 JSON)만 다시 엮는다(주간 특집과 같은 원칙).
 출처 옆 날짜가 처음 실린 날이라, 에디터 H 노트에서 '다시 보기'임을 밝힌다.
 
+  python3 automation/build_rewind.py --wait            # 새벽 예약 실행: 08:05 까지 기다린다(그 사이 오늘 호가 main 에 오면 일찍 끝냄) → go=true/false
   python3 automation/build_rewind.py --need            # 오늘 예비 호가 필요한지(발행일인데 08:05 까지 오늘 호가 없음) → need=true/false
   python3 automation/build_rewind.py [--date YYYY-MM-DD] [--dry-run]   # content/{날짜}.json 작성(드라이런은 출력만)
 
 고르는 법: H PICK = 형식 2 호의 H PICK(심층 필드가 있어야 한다) 중 성과표 점수가 가장 높은 것, 나머지 4개 = 카드가 있던
 이야기 중 태그가 겹치지 않게 점수·최신 순. '오늘·내일·어제·이번 주'처럼 시점이 지난 표현이 든 이야기와 어제 호는 되도록 뺀다.
+앞선 예비 호에 이미 실린 이야기도 되도록 뺀다(사용량 한도처럼 며칠 이어지는 장애에 같은 호가 되풀이되지 않게).
 """
 import argparse
 import copy
@@ -18,7 +20,9 @@ import datetime as dt
 import json
 import os
 import re
+import subprocess
 import sys
+import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -26,6 +30,8 @@ from edith.common import AUTOMATION, CONTENT_DIR, MANIFEST, ROOT, load_config, n
 
 POOL_DAYS = 21
 DEADLINE = (8, 5)   # 이 시각(KST)까지 오늘 호가 없으면 예비 호를 낸다(루틴 목표 07:45 + 20분 여유)
+MAX_WAIT = dt.timedelta(minutes=340)   # --wait 최대 대기(rewind.yml wait 작업 timeout 350분 안)
+POLL = 300   # --wait 중 오늘 호가 올라왔는지 보는 간격(초)
 _STALE = re.compile(r"오늘|내일|어제|모레|이번\s?주|다음\s?주|주말|지금 바로")
 
 
@@ -41,6 +47,19 @@ def _scores():
 
 def _stale(*texts):
     return any(_STALE.search(t or "") for t in texts)
+
+
+def _used(date):
+    """앞선 예비 호(POOL_DAYS 일 안)에 이미 실린 이야기 제목."""
+    today = parse_date(date)
+    used = set()
+    for p in sorted(CONTENT_DIR.glob("20*.json")):
+        if not 0 < (today - parse_date(p.stem)).days <= POOL_DAYS:
+            continue
+        c = json.loads(p.read_text(encoding="utf-8"))
+        if c.get("rewind"):
+            used.update(plain_title(x["title"]) for x in [c["big_issue"], *(c.get("items") or [])])
+    return used
 
 
 def pool(date):
@@ -70,12 +89,14 @@ def pick(date):
     scores = _scores()
     yesterday = (parse_date(date) - dt.timedelta(days=1)).isoformat()
     cands = pool(date)
+    used = _used(date)
 
     def rank(x):
-        story, spec, day, _, _ = x
+        story, spec, day, is_pick, c = x
         stale = _stale(story.get("title"), story.get("body"), story.get("takeaway"), spec.get("headline"), spec.get("body"),
                        " ".join(story.get("paragraphs") or []))
-        return (not stale, day != yesterday, scores.get(day, 0), day)
+        fresh = plain_title(c["title"] if is_pick else story["title"]) not in used
+        return (fresh, not stale, day != yesterday, scores.get(day, 0), day)
 
     picks = sorted((x for x in cands if x[3]), key=rank, reverse=True)
     if not picks:
@@ -145,6 +166,32 @@ def plain_title(t):
     return re.sub(r"==|\*\*", "", t).replace("\n", " ")
 
 
+def published(date):
+    """오늘 호가 main 에 올라왔는가 — 기다리는 동안 작업 트리는 그대로라 origin/main 을 본다."""
+    subprocess.run(["git", "-C", str(ROOT), "fetch", "-q", "origin", "main"], capture_output=True)
+    r = subprocess.run(["git", "-C", str(ROOT), "cat-file", "-e", f"origin/main:{date}.html"], capture_output=True)
+    return r.returncode == 0
+
+
+def wait(date):
+    """(계속할까, 이유) — 새벽 예약 실행이 08:05 까지 기다린다. GitHub 예약은 2~3시간 늦기 일쑤라(2026-09-30 08:07 예약이
+    11:03 에 돌아 예비 호가 3시간 늦음) 새벽에 미리 시작해 두고 제시간에 판단한다. 기다리는 사이 오늘 호가 오면 일찍 끝낸다."""
+    wd = weekday_ko(parse_date(date))
+    if wd not in load_config()["publish_days"]:
+        return False, f"{wd}요일은 발행일이 아님"
+    now = now_kst()
+    target = now.replace(hour=DEADLINE[0], minute=DEADLINE[1], second=30, microsecond=0)
+    if target - now > MAX_WAIT:
+        return False, f"아직 너무 이른 시각({now:%H:%M} KST) — 뒤 예약 실행에 맡김"
+    while True:
+        if published(date):
+            return False, "오늘 호가 main 에 있음"
+        left = (target - now_kst()).total_seconds()
+        if left <= 0:
+            return True, f"{DEADLINE[0]:02d}:{DEADLINE[1]:02d} 까지 오늘 호가 없음"
+        time.sleep(min(POLL, left))
+
+
 def need(date, now=None, respect_deadline=True):
     """(필요한가, 이유)."""
     cfg = load_config()
@@ -163,11 +210,20 @@ def need(date, now=None, respect_deadline=True):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--date", default="")
+    ap.add_argument("--wait", action="store_true", help="08:05 까지 기다린 뒤 이어갈지(GITHUB_OUTPUT 에 go=true/false)")
     ap.add_argument("--need", action="store_true", help="예비 호가 필요한지만 판단(GITHUB_OUTPUT 에 need=true/false)")
     ap.add_argument("--no-deadline", action="store_true", help="수동 실행: 08:05 기준을 보지 않음")
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
     date = args.date or now_kst().date().isoformat()
+    if args.wait:
+        print(f"{date}: {DEADLINE[0]:02d}:{DEADLINE[1]:02d} KST 까지 기다리며 오늘 호를 지켜봄")
+        ok, why = wait(date)
+        print(f"{date}: {'예비 호 판단으로 이어감' if ok else '끝냄'} — {why}")
+        if os.environ.get("GITHUB_OUTPUT"):
+            with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as f:
+                f.write(f"go={'true' if ok else 'false'}\n")
+        return 0
     if args.need:
         ok, why = need(date, respect_deadline=not args.no_deadline)
         print(f"{date}: 예비 호 {'필요' if ok else '불필요'} — {why}")

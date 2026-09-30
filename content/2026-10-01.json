@@ -189,7 +189,10 @@
   "cards": {
     "cover": {
       "title": "정부 사이트 해킹,\n피해는 신고의 11배라고?",
-      "keyword": "11배"
+      "keyword": "11배",
+      "photo": "assets/photos/2026-10-01.jpg",
+      "credit": "사진 = Markus Spiske markusspiske / Wikimedia Commons (CC0)",
+      "focus": "68% center"
     },
     "issues": [
       {
