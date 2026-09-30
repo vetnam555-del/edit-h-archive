@@ -1,0 +1,192 @@
+{
+ "collected_at": "2026-10-01T03:02+09:00",
+ "issues": {
+  "2026-09-30": {
+   "title": "놓쳤다면, 다시 볼 만한 5가지",
+   "format": 2,
+   "pick_tag": "10월 가격 인상",
+   "title_style": "숫자형",
+   "cover": "핵심어",
+   "weekday": "수",
+   "poll": false,
+   "source_mode": "rewind"
+  },
+  "2026-09-29": {
+   "title": "AI가 내 구독을, 알아서 해지해 준다고?",
+   "format": 2,
+   "pick_tag": "AI 비서 뮤즈",
+   "title_style": "질문형",
+   "cover": "핵심어",
+   "weekday": "화",
+   "poll": false,
+   "source_mode": "anjang"
+  },
+  "2026-09-28": {
+   "title": "추석 끝나자, 10월부터 줄줄이 오른다고?",
+   "format": 2,
+   "pick_tag": "10월 가격 인상",
+   "title_style": "질문형",
+   "cover": "핵심어",
+   "weekday": "월",
+   "poll": true,
+   "source_mode": "anjang"
+  },
+  "2026-09-27": {
+   "title": "남은 연차, 돈으로 받을 수 있을까?",
+   "format": 2,
+   "pick_tag": "남은 연차",
+   "title_style": "질문형",
+   "cover": "핵심어",
+   "weekday": "일",
+   "poll": false,
+   "source_mode": "fallback"
+  },
+  "2026-09-26": {
+   "title": "상어 한 마리에, 10만 명이 몰렸다고?",
+   "format": 2,
+   "pick_tag": "부캉이",
+   "title_style": "질문형",
+   "cover": "사진",
+   "weekday": "토",
+   "poll": false,
+   "source_mode": "fallback"
+  },
+  "2026-09-25": {
+   "title": "추석인데, 가족 대신 쉬러 간다고?",
+   "format": 1,
+   "pick_tag": "달라진 명절",
+   "title_style": "질문형",
+   "cover": "사진",
+   "weekday": "금",
+   "poll": false,
+   "source_mode": "mixed"
+  },
+  "2026-09-24": {
+   "title": "추석은 9월인데, 대목은 8월이었다고?",
+   "format": 1,
+   "pick_tag": "이른 추석 대목",
+   "title_style": "질문형",
+   "cover": "핵심어",
+   "weekday": "목",
+   "poll": false,
+   "source_mode": "fallback"
+  }
+ },
+ "instagram": {
+  "followers": 47,
+  "media": 80,
+  "insights": true,
+  "posts": {
+   "2026-09-25": {
+    "likes": 0,
+    "comments": 0,
+    "reach": 11,
+    "saved": 0,
+    "shares": 0,
+    "views": 19
+   },
+   "2026-09-26": {
+    "likes": 0,
+    "comments": 0,
+    "reach": 17,
+    "saved": 0,
+    "shares": 0,
+    "views": 56,
+    "reel": {
+     "likes": 0,
+     "comments": 0,
+     "reach": 107,
+     "saved": 0,
+     "shares": 0,
+     "views": 116
+    }
+   },
+   "2026-09-27": {
+    "likes": 0,
+    "comments": 0,
+    "reach": 6,
+    "saved": 0,
+    "shares": 0,
+    "views": 11,
+    "reel": {
+     "likes": 0,
+     "comments": 0,
+     "reach": 128,
+     "saved": 0,
+     "shares": 0,
+     "views": 147
+    }
+   },
+   "2026-09-28": {
+    "likes": 0,
+    "comments": 0,
+    "reach": 7,
+    "saved": 0,
+    "shares": 0,
+    "views": 15,
+    "reel": {
+     "likes": 0,
+     "comments": 0,
+     "reach": 49,
+     "saved": 0,
+     "shares": 0,
+     "views": 51
+    }
+   },
+   "2026-09-29": {
+    "likes": 0,
+    "comments": 0,
+    "reach": 11,
+    "saved": 0,
+    "shares": 0,
+    "views": 24,
+    "reel": {
+     "likes": 0,
+     "comments": 0,
+     "reach": 2,
+     "saved": 0,
+     "shares": 0,
+     "views": 3
+    }
+   },
+   "2026-09-30": {
+    "likes": 0,
+    "comments": 0,
+    "reach": 4,
+    "saved": 0,
+    "shares": 0,
+    "views": 12,
+    "reel": {
+     "likes": 0,
+     "comments": 0,
+     "reach": 1,
+     "saved": 0,
+     "shares": 0,
+     "views": 2
+    }
+   }
+  }
+ },
+ "mail": {
+  "replies": {
+   "2026-09-24": 0,
+   "2026-09-25": 0,
+   "2026-09-26": 0,
+   "2026-09-27": 0,
+   "2026-09-28": 0,
+   "2026-09-29": 0,
+   "2026-09-30": 0
+  },
+  "signups_14d": 0,
+  "unsubs_14d": 0,
+  "signup_refs_14d": {}
+ },
+ "subscribers": {
+  "listed": 12,
+  "sending": 11,
+  "excluded": 1
+ },
+ "polls": {
+  "2026-09-28": 0
+ }
+}
