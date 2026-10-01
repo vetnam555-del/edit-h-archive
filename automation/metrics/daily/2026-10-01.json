@@ -1,6 +1,16 @@
 {
- "collected_at": "2026-10-01T03:02+09:00",
+ "collected_at": "2026-10-01T09:23+09:00",
  "issues": {
+  "2026-10-01": {
+   "title": "정부 사이트 해킹, 피해는 신고의 11배라고?",
+   "format": 2,
+   "pick_tag": "공공 사이트 유출",
+   "title_style": "질문형",
+   "cover": "사진",
+   "weekday": "목",
+   "poll": false,
+   "source_mode": "anjang"
+  },
   "2026-09-30": {
    "title": "놓쳤다면, 다시 볼 만한 5가지",
    "format": 2,
@@ -74,7 +84,7 @@
  },
  "instagram": {
   "followers": 47,
-  "media": 80,
+  "media": 81,
   "insights": true,
   "posts": {
    "2026-09-25": {
@@ -98,7 +108,8 @@
      "reach": 107,
      "saved": 0,
      "shares": 0,
-     "views": 116
+     "views": 116,
+     "avg_watch_s": 2.4
     }
    },
    "2026-09-27": {
@@ -114,7 +125,8 @@
      "reach": 128,
      "saved": 0,
      "shares": 0,
-     "views": 147
+     "views": 147,
+     "avg_watch_s": 3.8
     }
    },
    "2026-09-28": {
@@ -130,7 +142,8 @@
      "reach": 49,
      "saved": 0,
      "shares": 0,
-     "views": 51
+     "views": 51,
+     "avg_watch_s": 1.5
     }
    },
    "2026-09-29": {
@@ -139,30 +152,49 @@
     "reach": 11,
     "saved": 0,
     "shares": 0,
-    "views": 24,
+    "views": 28,
     "reel": {
      "likes": 0,
      "comments": 0,
      "reach": 2,
      "saved": 0,
      "shares": 0,
-     "views": 3
+     "views": 3,
+     "avg_watch_s": 3.4
     }
    },
    "2026-09-30": {
     "likes": 0,
     "comments": 0,
-    "reach": 4,
+    "reach": 5,
     "saved": 0,
     "shares": 0,
-    "views": 12,
+    "views": 16,
     "reel": {
      "likes": 0,
      "comments": 0,
      "reach": 1,
      "saved": 0,
      "shares": 0,
-     "views": 2
+     "views": 2,
+     "avg_watch_s": 5.8
+    }
+   },
+   "2026-10-01": {
+    "likes": 0,
+    "comments": 0,
+    "reach": 0,
+    "saved": 0,
+    "shares": 0,
+    "views": 1,
+    "reel": {
+     "likes": 0,
+     "comments": 0,
+     "reach": 1,
+     "saved": 0,
+     "shares": 0,
+     "views": 0,
+     "avg_watch_s": 0.0
     }
    }
   }
@@ -175,7 +207,8 @@
    "2026-09-27": 0,
    "2026-09-28": 0,
    "2026-09-29": 0,
-   "2026-09-30": 0
+   "2026-09-30": 0,
+   "2026-10-01": 0
   },
   "signups_14d": 0,
   "unsubs_14d": 0,
