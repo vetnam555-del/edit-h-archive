@@ -6,7 +6,14 @@
   <atom:link href="https://vetnam555-del.github.io/edit-h-archive/feed.xml" rel="self" type="application/rss+xml"/>
   <description>매일 아침 8시, 확인된 숫자로 읽는 트렌드 뉴스레터</description>
   <language>ko</language>
-  <lastBuildDate>Thu, 01 Oct 2026 08:00:00 +0900</lastBuildDate>
+  <lastBuildDate>Fri, 02 Oct 2026 08:00:00 +0900</lastBuildDate>
+  <item>
+    <title>VOL.101 프리랜서 세금, 3.3% 대신 2.2%라고?</title>
+    <link>https://vetnam555-del.github.io/edit-h-archive/2026-10-02.html</link>
+    <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-10-02.html</guid>
+    <pubDate>Fri, 02 Oct 2026 08:00:00 +0900</pubDate>
+    <description>원천징수 3.3%→2.2%·신한은행 2만5천명 유출·솔드아웃 연말 종료·강원 연휴 축제·카톡 광고 73.7% — 오늘의 5가지</description>
+  </item>
   <item>
     <title>VOL.100 정부 사이트 해킹, 피해는 신고의 11배라고?</title>
     <link>https://vetnam555-del.github.io/edit-h-archive/2026-10-01.html</link>
@@ -209,13 +216,6 @@
     <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-08-19.html</guid>
     <pubDate>Wed, 19 Aug 2026 08:00:00 +0900</pubDate>
     <description>국내 5대 OTT 사용시간 합계가 유튜브의 61.2%에 그친 숏폼 지배와 카페24 AI 경유 주문 195% 증가, 1만원 이하 신선식품 새벽배송 금지 논란, 청소년용 챗GPT까지 읽은 10개 이슈</description>
-  </item>
-  <item>
-    <title>VOL.071 AI가 찾아줘도 — 왜 안 살까?</title>
-    <link>https://vetnam555-del.github.io/edit-h-archive/2026-08-18.html</link>
-    <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-08-18.html</guid>
-    <pubDate>Tue, 18 Aug 2026 08:00:00 +0900</pubDate>
-    <description>AI 에이전틱 커머스의 17% 결제전환율과 아마존·월마트의 엇갈린 전략, 모나미 애국 소비 주가 반전, 왁뿌볼 촉감 마케팅, 오픈AI 기업매출 역전까지 읽은 10개 이슈</description>
   </item>
 </channel>
 </rss>
