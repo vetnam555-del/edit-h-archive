@@ -176,7 +176,9 @@ def build_reel(key, folder, ffmpeg):
     if proc.returncode != 0:
         raise IGError(f"릴스 영상 만들기 실패: {(proc.stderr or proc.stdout)[-800:]}")
     info = json.loads(proc.stdout.strip().splitlines()[-1])
-    track = {**info["track"], "credit_in_video": bool(info.get("credit_in_video"))}
+    # style(vertical=세로 전용 프레임 · cards=카드)·seconds 는 게시 기록에 남겨 성과표가 형식별로 비교한다
+    track = {**info["track"], "credit_in_video": bool(info.get("credit_in_video")),
+             "style": info.get("style", "cards"), "seconds": info.get("seconds")}
     print(f"  릴스 영상 {out.stat().st_size // 1024}KB — 음악: {track['title']} / {track['artist']}"
           + (" (출처는 영상 안에)" if track["credit_in_video"] else ""))
     return out, track
@@ -234,6 +236,30 @@ def publish_video(out, key):
         git("pull", "--rebase", "--autostash", "origin", "main")
         time.sleep(5 * (i + 1))
     raise IGError("릴스 영상을 main 에 푸시하지 못했습니다")
+
+
+def probe_trial(g, uid, site_url):
+    """트라이얼 릴스(비팔로워에게만 먼저 노출) 지원 확인(2026-10-02 — Meta 문서에는 trial_params 예시가 있고 Codex 는 앱 전용이라 봄).
+    이미 공개된 지난 릴스 영상으로 컨테이너만 만들고 처리 상태를 본다. media_publish 를 부르지 않으므로 아무것도 게시되지 않는다
+    (게시하지 않은 컨테이너는 24시간 뒤 사라진다). 결과는 automation/ig_posted/trial_probe.json 에 남긴다."""
+    videos = sorted(f for f in INSTAGRAM_DIR.glob("20*/reel.mp4") if _tracked(f))
+    if not videos:
+        print("✗ 공개된 릴스 영상이 없어 확인할 수 없습니다")
+        return
+    v = videos[-1]
+    url = f"{site_url}/instagram/{v.parent.name}/reel.mp4"
+    result = {"at": now_kst().isoformat(timespec="seconds"), "video": url}
+    try:
+        cid = g.call("POST", f"{uid}/media", media_type="REELS", video_url=url, caption="trial probe (not published)",
+                     share_to_feed="false", trial_params=json.dumps({"graduation_strategy": "SS_PERFORMANCE"}))["id"]
+        g.wait_ready(cid, "트라이얼 릴스 확인용", timeout=600)
+        result.update(supported=True, note="컨테이너 생성·처리 완료(게시 안 함)")
+        print("✓ trial_params 를 받습니다 — 트라이얼 릴스를 API 로 올릴 수 있어요(이번 확인은 게시하지 않았습니다)")
+    except IGError as e:
+        result.update(supported=False, error=str(e)[:300])
+        print(f"✗ trial_params 를 받지 않습니다 — 트라이얼 릴스는 앱에서만: {e}")
+    LOG_DIR.mkdir(parents=True, exist_ok=True)
+    (LOG_DIR / "trial_probe.json").write_text(json.dumps(result, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
 
 
 def post_reel(g, uid, key, folder, cfg, dry, ffmpeg, site_url):
@@ -343,7 +369,7 @@ def maintain_token(token):
 
 
 def prune(days):
-    """게시가 끝난 지 오래된 호의 게시용 JPEG(ig/)와 릴스 영상(reel.mp4)은 지운다 — Pages 용량(1GB) 관리.
+    """게시가 끝난 지 오래된 호의 게시용 JPEG(ig/)·릴스 영상(reel.mp4)·세로 릴스 프레임(reel_frames/)은 지운다 — Pages 용량(1GB) 관리.
     카드 PNG·갤러리는 그대로 둔다."""
     cutoff = now_kst().date() - dt.timedelta(days=days)
     for d in INSTAGRAM_DIR.glob("*/ig"):
@@ -352,9 +378,10 @@ def prune(days):
             for f in d.glob("*.jpg"):
                 f.unlink()
             d.rmdir()
-    for f in INSTAGRAM_DIR.glob("*/reel.mp4"):
-        m = re.match(r"(\d{4}-\d{2}-\d{2})", f.parent.name)
-        if m and dt.date.fromisoformat(m.group(1)) < cutoff and (LOG_DIR / f"{f.parent.name}.json").exists():
+    for f in [*INSTAGRAM_DIR.glob("*/reel.mp4"), *INSTAGRAM_DIR.glob("*/reel_frames/*.jpg")]:
+        folder = f.parent.parent if f.parent.name == "reel_frames" else f.parent
+        m = re.match(r"(\d{4}-\d{2}-\d{2})", folder.name)
+        if m and dt.date.fromisoformat(m.group(1)) < cutoff and (LOG_DIR / f"{folder.name}.json").exists():
             f.unlink()
 
 
@@ -367,6 +394,8 @@ def main():
     ap.add_argument("--only", choices=["carousel", "reel"])
     ap.add_argument("--ffmpeg", default="ffmpeg")
     ap.add_argument("--event", default="manual", help="schedule | push | workflow_dispatch | manual")
+    ap.add_argument("--probe-trial", action="store_true",
+                    help="트라이얼 릴스(trial_params)를 API 가 받는지 확인만 — 게시하지 않는 컨테이너 하나를 만들고 끝낸다")
     args = ap.parse_args()
 
     cfg_all = load_config()
@@ -391,6 +420,9 @@ def main():
     uid = me.get("user_id") or me.get("id")
     print(f"인스타 계정 @{me.get('username')} (id {uid})")
     if args.check:
+        return
+    if args.probe_trial:
+        probe_trial(g, uid, cfg_all["site_url"].rstrip("/"))
         return
     if not cfg.get("auto_post", True) and not args.key:
         print("config.instagram.auto_post 가 꺼져 있어 예약 게시를 건너뜁니다")
@@ -447,7 +479,8 @@ def main():
             print("릴스 준비 중…")
             media_id, track = post_reel(g, uid, key, folder, cfg, args.dry_run, args.ffmpeg, site_url)
             if media_id:
-                log["reel"] = {"id": media_id, "at": now_kst().isoformat(timespec="seconds"), "track": track["title"]}
+                log["reel"] = {"id": media_id, "at": now_kst().isoformat(timespec="seconds"), "track": track["title"],
+                               "style": track.get("style"), "seconds": track.get("seconds")}
                 save_log(key, log)
                 try:
                     log["reel"]["permalink"] = g.call("GET", media_id, fields="permalink").get("permalink")

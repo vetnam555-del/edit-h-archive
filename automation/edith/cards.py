@@ -431,12 +431,20 @@ def cta(d):
 
 CARD_NAMES = ["cover", "summary", "issue1", "issue2", "issue3", "issue4", "issue5", "issue6", "observation", "cta"]
 CARD_NAMES_2 = ["cover", "summary", "pick", "deep", "issue2", "issue3", "issue4", "issue5", "note", "cta"]
+# 2026-10-06~ (성장 검토 실험 2): 두 번째 장에 가장 센 숫자(H PICK) — 2장까지 넘긴 사람은 대개 끝까지 본다.
+# 요약(오늘의 5가지)은 심층 뒤로 옮겨 '나머지 4가지' 예고 역할을 한다.
+PICK_FIRST_FROM = "2026-10-06"
+CARD_NAMES_2B = ["cover", "pick", "deep", "summary", "issue2", "issue3", "issue4", "issue5", "note", "cta"]
 
 
 def build(d, font_css):
     """(html 문자열, 파일명 목록)을 돌려준다. 카드 순서 = 파일명 순서."""
     issues = d["card_issues"]
-    if d.get("format") == 2:
+    if d.get("format") == 2 and d["date"] >= PICK_FIRST_FROM and not d.get("rewind"):
+        cards = ([cover(d), issue_card(issues[0], 1), deep_card(d), summary(d)]
+                 + [issue_card(it, i) for i, it in enumerate(issues[1:], 2)] + [note_card(d), cta(d)])
+        names = CARD_NAMES_2B
+    elif d.get("format") == 2:
         cards = ([cover(d), summary(d), issue_card(issues[0], 1), deep_card(d)]
                  + [issue_card(it, i) for i, it in enumerate(issues[1:], 2)] + [note_card(d), cta(d)])
         names = CARD_NAMES_2

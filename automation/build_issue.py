@@ -17,7 +17,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from edith import cards, content, newsletter, site  # noqa: E402
+from edith import cards, content, newsletter, reel_frames, site  # noqa: E402
 from edith.common import AUTOMATION, INSTAGRAM_DIR, ROOT, load_config  # noqa: E402
 
 
@@ -45,6 +45,41 @@ def render_cards(d, out_dir):
     return files, report["cards"]
 
 
+def render_reel_frames(d, out_dir):
+    """세로 전용 릴스 프레임(1080×1920 JPEG) → instagram/{날짜}/reel_frames/. make_reel.py 가 있으면 이걸로 릴스를 만든다.
+    형식 2(H PICK) 데일리 호만. 실패해도 발행은 막지 않는다(릴스는 예전 카드 방식으로 만들어진다)."""
+    from edith.fonts import font_css
+
+    frame_dir = out_dir / "reel_frames"
+    if frame_dir.exists():
+        for old in frame_dir.glob("*.jpg"):
+            old.unlink()
+    if d.get("format") != 2:
+        return []
+    frame_dir.mkdir(parents=True, exist_ok=True)
+    page, files = reel_frames.build(d, font_css())
+    with tempfile.TemporaryDirectory() as tmp:
+        html_path = Path(tmp) / "reel.html"
+        html_path.write_text(page, encoding="utf-8")
+        proc = subprocess.run(
+            ["node", str(AUTOMATION / "render_cards.cjs"), str(html_path), tmp, f"--jpeg-dir={frame_dir}", *files],
+            capture_output=True, text=True,
+        )
+    if proc.returncode != 0:
+        print(f"  ⚠ 세로 릴스 프레임을 만들지 못했습니다 — 릴스는 카드 방식으로 만듭니다\n{proc.stderr[-600:]}")
+        for old in frame_dir.glob("*.jpg"):
+            old.unlink()
+        return []
+    report = json.loads(proc.stdout.strip().splitlines()[-1])["cards"]
+    bad = [c["file"] for c in report if c.get("overflow")]
+    if bad:
+        print(f"  ⚠ 세로 릴스 프레임 글자가 넘칩니다({', '.join(bad)}) — 제목·결론을 줄이거나, 릴스는 카드 방식으로 나갑니다")
+        for old in frame_dir.glob("*.jpg"):
+            old.unlink()
+        return []
+    return [f.replace(".png", ".jpg") for f in files]
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("date", help="YYYY-MM-DD (KST)")
@@ -68,6 +103,10 @@ def main():
     if not args.no_cards:
         out_dir = INSTAGRAM_DIR / args.date
         files, card_report = render_cards(d, out_dir)
+        if not d.get("rewind"):   # 예비 호는 릴스를 올리지 않는다
+            frames = render_reel_frames(d, out_dir)
+            if frames:
+                print(f"  세로 릴스  instagram/{args.date}/reel_frames/ ({len(frames)}장)")
         caption = site.instagram_caption(d, site_url)
         (out_dir / "caption.txt").write_text(caption + "\n", encoding="utf-8")
         comment = site.first_comment(d)

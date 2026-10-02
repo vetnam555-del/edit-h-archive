@@ -143,7 +143,13 @@ content/YYYY-MM-DD.json 호마다의 원본 콘텐츠(출처 URL 포함)
 일 21:00  개선 루틴(Claude, 작업 세션) → '시스템 개선 요청'·실패 기록을 코드·템플릿으로 고쳐 PR → 머지, 주간 리포트
           + 레퍼런스·트렌드 조사(WebSearch) → automation/references.md: 진단·조사 요약(출처 링크)·'지금 시험 중'·다음 실험 후보
 ```
-- 릴스(2026-10-02~): 데일리는 표지·H PICK·이슈 4·마무리 7장 약 20초, 장마다 천천히 확대 + 옆으로 밀어 넘기기(`make_reel.REEL_PARTS`·`config.instagram.reel_timing`). 성과표 '릴스' 칸에 평균 시청 시간(초)이 붙는다. 예비 호 날엔 캐러셀만 올린다.
+- 릴스(2026-10-03~): `build_issue.py` 가 같은 원고로 **세로 전용 프레임 4장**(1080×1920, `instagram/{날짜}/reel_frames/`, `edith/reel_frames.py` —
+  질문 훅 → H PICK 숫자 → 결론 → 에디터 H)을 만들고, `make_reel.py` 가 그걸로 약 10초 영상을 만든다(`config.instagram.reel_vertical_timing`).
+  프레임이 없거나 넘치면 예전처럼 카드 7장 약 20초(`REEL_PARTS`·`reel_timing`). 게시 기록에 형식(style)·길이(seconds)가 남고,
+  성과표 '릴스' 칸에 평균 시청 시간과 길이 대비 비율, '비교'에 릴스 형식·시각대 줄이 붙는다. 예비 호 날엔 캐러셀만 올린다.
+- 릴스 저녁 게시(2026-10-08~, `config.instagram.reel_evening_from`·`reel_time_kst`): 아침 08:00 엔 캐러셀만, 릴스는 18:20 예약이 19:30 까지
+  기다렸다 올린다(20:35 예비). `automation/ig_plan.py` 가 실행마다 무엇을 올릴지 정하고, 운영 알림은 그날 릴스를 20:40 이후에 확인한다(22:25 점검).
+- 카드 순서(2026-10-06~): 두 번째 장에 H PICK(`cards.PICK_FIRST_FROM`). 트라이얼 릴스 확인: Actions → Post EDIT H to Instagram → mode `probe-trial`(게시 안 함).
 - 숫자만 모은다(주소·계정 이름 없음). 인스타 도달·저장·공유는 토큰에 `instagram_business_manage_insights` 권한이 있어야 나온다 —
   없으면 좋아요·댓글만으로 비교한다(성과표 첫 줄에 표시).
 

@@ -29,6 +29,9 @@ W, H, FPS = 1080, 1920, 30
 DEFAULT_TIMING = {"first": 2.2, "card": 3.4, "last": 2.5, "fade": 0.35, "lift": 60, "zoom": 0.035,
                   "transition": "slideleft"}
 REEL_PARTS = ("cover", "pick", "issue", "cta")   # 데일리 릴스에 넣을 카드(파일 이름 끝) — 없으면 전부
+# 세로 전용 프레임(build_issue.py → instagram/{날짜}/reel_frames/r1_hook.jpg …, edith/reel_frames.py)이 있으면 그걸 쓴다
+# (2026-10-03~, 성장 검토: 질문 훅 → 숫자 → 결론 → 에디터 H, 약 10초). 없으면 위 카드 방식.
+VERTICAL_TIMING = {"first": 2.4, "card": 3.0, "last": 2.6, "fade": 0.3, "lift": 0, "zoom": 0.025, "transition": "slideleft"}
 CARD_H = 1350          # 카드 1080×1350 을 가로 1080 에 맞춰 올린다
 CREDIT_H = 60          # 음악 출처 띠 높이(카드 바로 위, 흐린 배경 위)
 FONTS = ["/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", "/usr/share/fonts/dejavu/DejaVuSans.ttf",
@@ -78,8 +81,9 @@ def reel_cards(cards):
     return picked if len(picked) >= 3 and part(picked[0]) == "cover" else cards
 
 
-def build(cards, out, track, ffmpeg="ffmpeg", timing=None, credit=None):
-    t = {**DEFAULT_TIMING, **(timing or {})}
+def build(cards, out, track, ffmpeg="ffmpeg", timing=None, credit=None, full=False):
+    """full=True: 이미 1080×1920 인 세로 프레임(흐린 배경 없이 그대로 채운다)."""
+    t = {**(VERTICAL_TIMING if full else DEFAULT_TIMING), **(timing or {})}
     n = len(cards)
     durs = [t["first"]] + [t["card"]] * (n - 2) + [t["last"]] if n > 1 else [t["first"]]
     fade = t["fade"]
@@ -98,6 +102,9 @@ def build(cards, out, track, ffmpeg="ffmpeg", timing=None, credit=None):
         # 합성한 화면을 장이 넘어가는 동안 zoom 만큼 천천히 키우고 가운데를 잘라 1080×1920 을 유지한다
         grow = (f",scale=w='trunc({W}*(1+{zoom}*t/{durs[i]:.3f})/2)*2':h='trunc({H}*(1+{zoom}*t/{durs[i]:.3f})/2)*2'"
                 f":eval=frame,crop={W}:{H}") if zoom else ""
+        if full:
+            parts.append(f"[{i}:v]scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H},fps={FPS}{grow},format=yuv420p,setsar=1[v{i}]")
+            continue
         parts.append(
             f"[{i}:v]split[a{i}][b{i}];"
             f"[a{i}]scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H},gblur=sigma=160:steps=2,eq=brightness=-0.03[bg{i}];"
@@ -108,8 +115,8 @@ def build(cards, out, track, ffmpeg="ffmpeg", timing=None, credit=None):
         offset += durs[i - 1] - fade
         parts.append(f"[{prev}][v{i}]xfade=transition={t.get('transition') or 'fade'}:duration={fade}:offset={offset:.3f}[x{i}]")
         prev = f"x{i}"
-    if credit:   # 카드 위쪽 흐린 배경에 음악 출처를 영상 내내 작게
-        y = (H - CARD_H) // 2 - t["lift"] - CREDIT_H - 8
+    if credit:   # 카드 위쪽 흐린 배경에 음악 출처를 영상 내내 작게(세로 프레임은 맨 위 워드마크 위)
+        y = 104 if full else (H - CARD_H) // 2 - t["lift"] - CREDIT_H - 8
         parts.append(f"[{prev}][{n + 1}:v]overlay=0:{y}:format=auto,format=yuv420p[vout]")
         prev = "vout"
     start = float(track.get("start", 0))
@@ -129,9 +136,12 @@ def main():
     ap.add_argument("key", help="instagram/ 아래 폴더 이름 (YYYY-MM-DD 또는 YYYY-MM-DD-weekly)")
     ap.add_argument("--out")
     ap.add_argument("--ffmpeg", default=shutil.which("ffmpeg") or "ffmpeg")
+    ap.add_argument("--cards", action="store_true", help="세로 프레임이 있어도 예전 카드 방식으로")
     args = ap.parse_args()
     folder = INSTAGRAM_DIR / args.key
-    cards = reel_cards(sorted(folder.glob("[0-9][0-9]_edit_h_*.png")))
+    frames = sorted((folder / "reel_frames").glob("r[0-9]_*.jpg"))
+    full = len(frames) >= 3 and not args.cards
+    cards = frames if full else reel_cards(sorted(folder.glob("[0-9][0-9]_edit_h_*.png")))
     if not cards:
         sys.exit(f"✗ {folder} 에 카드 PNG 가 없습니다")
     track = pick_track(args.key)
@@ -139,18 +149,21 @@ def main():
         print("✗ assets/music/tracks.json 에 쓸 곡이 없습니다 — 릴스는 건너뜁니다(카드 게시는 그대로)")
         sys.exit(3)
     out = Path(args.out) if args.out else folder / "reel.mp4"
-    timing = (load_config().get("instagram") or {}).get("reel_timing")
+    ig = load_config().get("instagram") or {}
+    timing = ig.get("reel_vertical_timing") if full else ig.get("reel_timing")
     with tempfile.TemporaryDirectory() as tmp:
         credit = credit_image(track, Path(tmp) / "credit.png")
         try:
-            total = build(cards, out, track, args.ffmpeg, timing, credit)
+            total = build(cards, out, track, args.ffmpeg, timing, credit, full)
         except subprocess.CalledProcessError:
             # 오래된 ffmpeg 는 scale 의 t 변수·slideleft 를 모를 수 있다 — 움직임 없이(예전 방식) 한 번 더
             print("  ↘ 확대·밀기 효과로 만들지 못해 효과 없이 다시 만듭니다", flush=True)
-            total = build(cards, out, track, args.ffmpeg, {**(timing or {}), "zoom": 0, "transition": "fade"}, credit)
-    print(f"✓ {out} ({len(cards)}장 {total:.1f}초, {out.stat().st_size // 1024}KB) — 음악: {track['title']} / {track['artist']} ({track['license']})"
-          + (" · 영상에 출처 표시" if credit else ""))
-    print(json.dumps({"reel": str(out), "track": track, "credit_in_video": bool(credit)}, ensure_ascii=False))
+            total = build(cards, out, track, args.ffmpeg, {**(timing or {}), "zoom": 0, "transition": "fade"}, credit, full)
+    style = "vertical" if full else "cards"
+    print(f"✓ {out} ({'세로 프레임' if full else '카드'} {len(cards)}장 {total:.1f}초, {out.stat().st_size // 1024}KB)"
+          f" — 음악: {track['title']} / {track['artist']} ({track['license']})" + (" · 영상에 출처 표시" if credit else ""))
+    print(json.dumps({"reel": str(out), "track": track, "credit_in_video": bool(credit), "style": style,
+                      "seconds": round(total, 1)}, ensure_ascii=False))
 
 
 if __name__ == "__main__":

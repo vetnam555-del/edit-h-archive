@@ -1,5 +1,7 @@
 # EDIT H 인스타그램 자동 게시 — 카드 캐러셀 + 음악 릴스.
 # 데일리: 매일 08:00(KST, 주말·공휴일 포함, 뉴스레터와 같은 시각 = config.send_time_kst). 금요일 주간 특집(TOP5): 18:00.
+# 릴스 저녁 게시(config.instagram.reel_evening_from 부터): 아침 실행은 캐러셀만, 릴스는 18:20 실행이 19:30(reel_time_kst)까지
+# 기다렸다 올린다(20:35 예비). 무엇을 올릴지는 automation/ig_plan.py 가 정한다.
 # 카드는 07:00 Claude 루틴이 만들어 main 에 푸시하고(instagram/{날짜}/ig/*.jpg 포함), 여기서는 게시만 한다.
 # 발행하지 않은 날(주말·공휴일)은 폴더가 없어 그냥 끝난다. 같은 호는 automation/ig_posted/ 기록으로 두 번 올리지 않는다.
 # 필요한 Secrets: IG_ACCESS_TOKEN(필수) · IG_APP_SECRET · GH_ADMIN_TOKEN(권장, 토큰 자동 교환·연장) — automation/README.md '인스타그램 자동 게시'
@@ -10,6 +12,8 @@ on:
     - cron: "30 22 * * *"     # KST 매일 07:30 → 08:00 까지 대기 후 데일리 게시(예비 — 주 경로는 루틴 push)
     - cron: "5 23 * * *"      # KST 08:05 예비 실행(이미 올렸으면 건너뜀)
     - cron: "40 8 * * 5"      # KST 금 17:40 → 18:00 까지 대기 후 주간 특집 게시
+    - cron: "20 9 * * *"      # KST 18:20 → 19:30 까지 대기 후 릴스(저녁 게시를 쓰는 날만 — 아니면 바로 끝남)
+    - cron: "35 11 * * *"     # KST 20:35 릴스 예비(이미 올렸으면 건너뜀)
   push:
     branches: [main]
     paths: ["20[0-9][0-9]-[0-9][0-9]-[0-9][0-9].html"]   # 루틴이 08:00 이후에 늦게 푸시한 날(그 전 push 는 예약 게시에 맡긴다)
@@ -19,9 +23,9 @@ on:
         description: "게시할 호 — YYYY-MM-DD 또는 YYYY-MM-DD-weekly (비우면 오늘 데일리)"
         required: false
       mode:
-        description: "check = 토큰 확인만 · dry-run = 게시 없이 이미지·영상·컨테이너까지 확인 · post = 실제 게시"
+        description: "check = 토큰 확인만 · dry-run = 게시 없이 이미지·영상·컨테이너까지 확인 · post = 실제 게시 · probe-trial = 트라이얼 릴스 API 지원 확인(게시 안 함)"
         type: choice
-        options: [check, dry-run, post]
+        options: [check, dry-run, post, probe-trial]
         default: check
       only:
         description: "하나만 게시(선택)"
@@ -50,14 +54,10 @@ jobs:
         env:
           EVENT: ${{ github.event_name }}
           CRON: ${{ github.event.schedule }}
-        run: |
-          if [ "$CRON" = "40 8 * * 5" ]; then
-            echo "kind=weekly" >> "$GITHUB_OUTPUT"; echo "at=18:00" >> "$GITHUB_OUTPUT"
-          else
-            echo "kind=daily" >> "$GITHUB_OUTPUT"; echo "at=" >> "$GITHUB_OUTPUT"
-          fi
+        run: python3 automation/ig_plan.py "$EVENT" "$CRON"
 
       - name: Wait until post time (KST)
+        if: steps.what.outputs.skip != 'true'
         env:
           EVENT: ${{ github.event_name }}
           AT: ${{ steps.what.outputs.at }}
@@ -66,14 +66,17 @@ jobs:
           else python3 automation/wait_until_send.py "$EVENT" --need "instagram/{date}/caption.txt"; fi
 
       - name: Refresh main
+        if: steps.what.outputs.skip != 'true'
         run: git pull --ff-only origin main
 
       - name: Install ffmpeg, PyNaCl and Pillow
+        if: steps.what.outputs.skip != 'true'
         run: |
           sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg > /dev/null
           pip install -q pynacl pillow   # Pillow: 릴스 영상 위쪽의 음악 출처 글자(make_reel.py)
 
       - name: Post
+        if: steps.what.outputs.skip != 'true'
         env:
           IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
           GH_ADMIN_TOKEN: ${{ secrets.GH_ADMIN_TOKEN }}
@@ -87,12 +90,15 @@ jobs:
           IN_KEY: ${{ inputs.key }}
           IN_MODE: ${{ inputs.mode }}
           IN_ONLY: ${{ inputs.only }}
+          PLAN_ONLY: ${{ steps.what.outputs.only }}
         run: |
           args="--kind $KIND --event $EVENT"
           [ -n "$IN_KEY" ] && args="$args --key $IN_KEY"
           [ "$IN_MODE" = "check" ] && args="$args --check"
           [ "$IN_MODE" = "dry-run" ] && args="$args --dry-run"
-          [ -n "$IN_ONLY" ] && [ "$IN_ONLY" != "both" ] && args="$args --only $IN_ONLY"
+          [ "$IN_MODE" = "probe-trial" ] && args="$args --probe-trial"
+          if [ -n "$IN_ONLY" ] && [ "$IN_ONLY" != "both" ]; then args="$args --only $IN_ONLY"
+          elif [ -n "$PLAN_ONLY" ]; then args="$args --only $PLAN_ONLY"; fi   # 저녁 게시: 아침=carousel · 저녁=reel
           python3 automation/post_instagram.py $args
 
       - name: Record post

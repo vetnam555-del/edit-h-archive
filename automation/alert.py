@@ -147,6 +147,19 @@ def _site_ok(url):
         return False
 
 
+def _reel_due(date):
+    """오늘 릴스를 확인할 때가 됐나 — 저녁 게시(ig_plan.evening_reel)면 그 시각 + 70분 뒤부터."""
+    from ig_plan import evening_reel
+    at = evening_reel(date)
+    if not at:
+        return True
+    now = now_kst()
+    if now.date().isoformat() != date:
+        return now.date().isoformat() > date
+    hh, mm = map(int, at.split(":"))
+    return (now.hour * 60 + now.minute) >= hh * 60 + mm + 70
+
+
 def problems(date, cfg, check_web=True):
     """[(알림 종류, 한 줄 설명)] — 오늘 발행 흐름에서 빠진 것."""
     out = []
@@ -176,7 +189,9 @@ def problems(date, cfg, check_web=True):
             if not (log.get("carousel") or {}).get("id"):
                 out.append(("carousel", "인스타 카드뉴스(캐러셀)가 게시되지 않았습니다."))
             rewind = (_json(ROOT / "content" / f"{date}.json") or {}).get("rewind")   # 예비 호는 캐러셀만 올린다
-            if ig_cfg.get("reel", True) and not rewind and not (log.get("reel") or {}).get("id"):
+            if ig_cfg.get("reel", True) and not rewind and not _reel_due(date):
+                pass   # 릴스 저녁 게시 날 — 아직 올릴 시각(+70분)이 안 됐다
+            elif ig_cfg.get("reel", True) and not rewind and not (log.get("reel") or {}).get("id"):
                 if log.get("reel_emailed"):
                     out.append(("reel_manual", "릴스 자동 게시가 안 돼 영상·캡션을 이 메일함으로 보냈습니다 — 휴대폰에서 올려 주세요."))
                 else:
