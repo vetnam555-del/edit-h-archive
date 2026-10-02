@@ -36,3 +36,32 @@ Claude 가 쓴 초안이고, Codex 의 검토 의견(PR 댓글)을 받아 마지
 2. 개선 후보의 **우선순위**를 데이터(평균 시청 1.5~3.8초, 반응 0, 팔로워 48)에 비추어 다시 매겨 달라. 빠진 것, 효과가 없을 것 같은 것.
 3. 이 저장소 코드(`automation/make_reel.py`, `automation/edith/cards.py`, `automation/post_instagram.py`, `automation/collect_metrics.py`)를 보고
    각 개선안의 **구현 방법과 위험**(Instagram Graph API 제약 — 예: 트라이얼 릴스·협업 게시물·스토리·Threads 게시를 API 로 할 수 있는지).
+
+## 한계와 신뢰도 (2026-10-02, 사용자 질문 "이게 최선인 게 맞아? 확실해?"에 대한 답)
+
+**최선이 아니다.** 지금까지의 레퍼런스에는 다음 한계가 있다.
+
+1. **경쟁 계정의 실제 게시물을 직접 보지 못했다.** 인스타그램과 대부분의 원문 사이트(뉴닉·캐릿·flex·Morning Brew 분석 글 등)가
+   이 작업 환경에서 열리지 않아(로그인·네트워크 차단) **검색 결과 요약**에 기댔다. 팔로워 수 같은 숫자는 2차 출처라 틀릴 수 있다.
+2. **Codex 답은 아직 없다.** GitHub 의 Codex 는 코드 리뷰 봇이라 웹 조사는 기대하기 어렵다(코드 구현 위험 검토에 쓴다).
+3. **유명 대형 계정 위주였다.** 팔로워 48 계정에 맞는 비교 대상은 '최근 0에서 빠르게 큰 작은 계정'인데 그 조사가 얕았다.
+4. **검증이 없다.** 모든 개선안은 가설이다. 우리 데이터로 시험해야 확실해진다.
+
+신뢰도: '첫 3초에 붙잡지 못한다'는 진단은 **높음**(우리 숫자: 릴스 평균 시청 1.5~3.8초). 개별 레퍼런스의 숫자·효과는 **중간 이하**.
+
+## 추가로 찾은 것 (2026-10-02, 3차)
+
+- **업계 기준선**(Socialinsider 2026 2분기, 3,100만 게시물): 인스타 평균 참여율 0.45%, 캐러셀 0.50%, 릴스 0.48%, 이미지 0.33%.
+  우리는 0% — 형식보다 **주제·독자 맞춤** 문제일 가능성이 크다.
+- **작은 계정 성장 사례**: 게시물 28개로 팔로워 3.4만(재테크 계정), 팔로워 2,300 계정이 '원룸 인테리어 꿀팁' 릴스 하나로 조회 120만·3주에 +1.1만,
+  2025년 말부터 카드뉴스(캐러셀) 저장이 2~3배 늘었다는 마케터 보고. 공통점: **한 주제·한 독자에게 당장 쓸모 있는 '꿀팁'**.
+- **반응 좋은 작은 계정의 기준**(캐릿 마이크로 인플루언서 20인): 팔로워 대비 도달 5~10%, 참여율 5% 이상.
+- **경쟁 계정 숫자를 직접 재는 방법**: Instagram **Business Discovery API** 로 다른 프로 계정의 팔로워·최근 게시물 좋아요·댓글·형식·캡션을
+  가져올 수 있다. 단 **Facebook 로그인 방식 토큰**이 필요하다(지금 토큰은 Instagram 로그인 방식이라 안 됨) — 인스타 계정을 페이스북 페이지에 연결해야 한다.
+- **우리 데이터로 A/B 시험하는 방법**: **트라이얼 릴스**(`trial_params`, 비팔로워에게만 먼저 노출, 성과 좋으면 자동 전환)를 지금 게시 권한으로 쓸 수 있다.
+  하루에 형식 두 가지를 올려 비교하면 다른 계정 사례보다 확실한 근거가 된다.
+
+출처: [Socialinsider 2026 벤치마크](https://www.socialinsider.io/social-media-benchmarks/instagram), [하이아웃풋클럽 — 28개로 3.4만](https://blog.highoutputclub.com/2026-reels-growth-instagram-accounts-strategy/),
+[원포인트 — 2026 캐러셀](https://1point.kr/blog/insights/why-insta-carousel-2026/), [캐릿 — 라이징 마이크로 인플루언서](https://www.careet.net/1757),
+[Meta — Business Discovery](https://developers.facebook.com/docs/instagram-api/business-discovery), [Instagram API 정리(2026)](https://gist.github.com/jameschapman2c/65eff9f54a2d350b17a6ce5127b9fe42),
+[Meta — 콘텐츠 게시(트라이얼 릴스)](https://developers.facebook.com/docs/instagram-platform/content-publishing/)
