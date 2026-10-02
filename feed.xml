@@ -6,7 +6,14 @@
   <atom:link href="https://vetnam555-del.github.io/edit-h-archive/feed.xml" rel="self" type="application/rss+xml"/>
   <description>매일 아침 8시, 확인된 숫자로 읽는 트렌드 뉴스레터</description>
   <language>ko</language>
-  <lastBuildDate>Fri, 02 Oct 2026 08:00:00 +0900</lastBuildDate>
+  <lastBuildDate>Sat, 03 Oct 2026 08:00:00 +0900</lastBuildDate>
+  <item>
+    <title>VOL.102 월 50만원 3년이면, 2255만원이라고?</title>
+    <link>https://vetnam555-del.github.io/edit-h-archive/2026-10-03.html</link>
+    <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-10-03.html</guid>
+    <pubDate>Sat, 03 Oct 2026 08:00:00 +0900</pubDate>
+    <description>청년미래적금 2차 7일 시작·9월 물가 2.9%·10월 분양 급증·유커 국경절·연휴 날씨 — 오늘의 5가지</description>
+  </item>
   <item>
     <title>VOL.101 프리랜서 세금, 3.3% 대신 2.2%라고?</title>
     <link>https://vetnam555-del.github.io/edit-h-archive/2026-10-02.html</link>
@@ -209,13 +216,6 @@
     <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-08-20.html</guid>
     <pubDate>Thu, 20 Aug 2026 08:00:00 +0900</pubDate>
     <description>8말9초 호텔 검색량 75% 증가로 깨진 7말8초 공식과 메가MGC의 스타벅스 결제액 94.9% 추격, 징둥 한국 구매법인 설립, 앤트로픽의 오픈AI 매출 첫 추월까지 읽은 10개 이슈</description>
-  </item>
-  <item>
-    <title>VOL.072 OTT 다 합쳐도 — 60%뿐이라고?</title>
-    <link>https://vetnam555-del.github.io/edit-h-archive/2026-08-19.html</link>
-    <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-08-19.html</guid>
-    <pubDate>Wed, 19 Aug 2026 08:00:00 +0900</pubDate>
-    <description>국내 5대 OTT 사용시간 합계가 유튜브의 61.2%에 그친 숏폼 지배와 카페24 AI 경유 주문 195% 증가, 1만원 이하 신선식품 새벽배송 금지 논란, 청소년용 챗GPT까지 읽은 10개 이슈</description>
   </item>
 </channel>
 </rss>
