@@ -60,13 +60,40 @@
 [Morning Brew 인스타 전략](https://www.flipthefeed.com/p/heres-morning-brews-instagram-strategy), [Morning Brew 영상 전략](https://www.linkinbio.news/p/steal-morning-brews-social-video), [Morning Brew 추천 프로그램](https://referralrock.com/blog/morning-brew-referral-program/),
 [theSkimm 성장](https://producthabits.com/the-skimm-7-million-subscribers-in-7-years/), [Finshots](https://finshots.in/archive/the-age-of-newsletters/), [스브스뉴스 분석](http://www.storyofseoul.com/news/articleView.html?idxno=3147), [14F](https://www.mediatoday.co.kr/news/articleView.html?idxno=213152)
 
+## 추가 레퍼런스 (2026-10-02, 2차)
+
+| 계정·방식 | 규모·숫자 | 배울 점 |
+|---|---|---|
+| Chartr | 인스타 약 40만, 주 12개 차트 | **차트 한 장 + 한 줄 해석**. 스톡 사진 대신 데이터 그림이 공유된다 |
+| The Economist | 인스타 120만(18~34세가 2/3), 주 50개 게시물, 인스타 영상 조회 1.8억 회(2025) | 기사·차트·일러스트를 잘게 + **세로 영상이 핵심 전략**("젊은 독자에게 닿으려면 세로 영상이 필수") |
+| NowThis | — | **소리 없이 보는 자막 영상**의 원조 — 릴스·쇼츠의 85%가 무음 재생 |
+| Axios 'Smart Brevity' | — | 6단어 이하 제목 → 강한 첫 문장 1개 → '왜 중요해'. 40% 짧게 써도 정보는 같다 |
+| 1440 | 330만, 직원 15명 | 편향 없는 5분 요약. 소셜 광고로 구독자 1명당 약 3달러에 모은다(측정 가능한 유료 성장) |
+| 댓글 키워드 → DM 자동 응답 | 댓글 남긴 사람의 60~85%가 이메일을 남김 | '댓글에 ○○ 남기면 링크 DM' — 뉴스레터 구독 전환에 가장 많이 쓰는 방법(인스타 공식 API) |
+| 부딩 | 주 2회 | 밀레니얼 세입자·실수요자의 **부동산만** 쉬운 말로 — 좁은 독자 |
+| 디에디트·까탈로그 | 유튜브 + 뉴스레터 | 두 에디터의 **얼굴과 취향**이 브랜드 |
+| 롱블랙 | 유료, 월 4,900원 | 하루 지나면 못 읽는 노트 → 매일 여는 습관. 이메일 + **카카오톡 채널**로 아침마다 알림 |
+| 트렌드라이트 | 국내 최대 커머스 뉴스레터 | '사고파는 모든 것' 한 분야 + 인스타·카카오·커리어리로 채널 확장 |
+
+정리하면, 앞의 다섯 가지(얼굴·좁은 독자·인스타 전용·세로 영상·추천)에 더해 세 가지가 새로 보인다.
+- **차트·숫자 한 장** — 우리는 숫자가 많은데 그림(차트)으로 안 보여준다.
+- **무음 자막 영상** — 우리 릴스는 음악만 있고 화면 글자는 카드 그대로(작다).
+- **구독 전환 장치** — 댓글 키워드 DM, 카카오톡 채널. 우리는 프로필 링크뿐.
+
+출처: [Chartr 인스타 통계](https://www.followerstat.com/report/chartrdaily), [Chartr](https://www.chartr.co/), [INMA — The Economist 세로 영상](https://www.inma.org/blogs/young-audiences-initiative/post.cfm/the-economist-s-shift-to-vertical-video-meets-younger-audience-need), [Economist 인스타](https://medium.com/economist-group-media/how-instagram-helps-the-economist-to-reach-a-new-generation-fbc0fd1bfb37),
+[NowThis](https://en.wikipedia.org/wiki/NowThis), [Axios Smart Brevity](https://www.axioshq.com/research/smart-brevity-communication-checklist), [Press Gazette — 1440](https://pressgazette.co.uk/publishers/digital-journalism/1440-media-interview/), [댓글 → DM 자동화](https://www.replyrush.com/post/instagram-comment-to-dm-automation),
+[인스타 → 이메일 퍼널](https://creatorflow.so/blog/instagram-to-email-funnel-build-list-automatically/), [뉴스레터 추천 모음(부딩·까탈로그)](https://brunch.co.kr/@jhw28/54), [롱블랙 뜯어보기](https://brunch.co.kr/@seastbest/1), [트렌드라이트](https://trendlite.stibee.com/)
+
 ## 다음 실험 후보 (효과 큰 순 — 하나씩)
 
-1. **세로 전용 릴스(14F 문법)** — 4:5 카드 대신 9:16 화면에 큰 글자로 '질문 → 숫자 → 한 줄 답'을 2~3초씩. 첫 화면은 제목 질문만 크게.
-   근거: 10/1 평균 시청 3.3초(20초 영상) — 첫 화면에서 대부분 넘긴다. 코드로 가능(사용자 승인 불필요, 게시 시각 그대로).
-2. **릴스를 저녁(19~21시)에 따로 올리기** — 게시 워크플로 시각을 바꿔야 해서 사용자 확인 후.
-3. **'에디터 H' 얼굴과 말투** — 안경 마크를 캐릭터처럼 카드·릴스 첫 화면에 일관되게 두고, H 의 한 줄 의견을 말풍선으로(뉴닉 고슴이·Morning Brew 진행자처럼).
-4. **헤드라인 한 장(인스타 전용)** — 점심에 그날 가장 센 숫자 하나를 한 장으로(Morning Brew 헤드라인 그래픽). 게시 시각 추가라 사용자 확인 후.
-5. **독자 좁히기** — 예: '2030 직장인의 돈·일·소비 트렌드'. 편집 방향이라 사용자 결정.
-6. **추천 보상** — 추천 N명에 작은 보상(예: 주간 특집 PDF). 구독자 식별·개인정보 설계가 필요해 사용자 결정.
-7. DM 공유를 부르는 마지막 카드 한 줄, 2번째 장을 가장 센 숫자로(캐러셀 완주).
+1. **세로 전용 자막 릴스(14F·NowThis·Economist 문법)** — 4:5 카드 대신 9:16 화면에 큰 글자로 '질문 → 숫자 → 한 줄 답'을 2~3초씩, 소리 없이 봐도 읽히게.
+   첫 화면은 제목 질문만 크게. 근거: 10/1 평균 시청 3.3초(20초 영상). 코드로 가능(게시 시각 그대로).
+2. **숫자 → 차트 한 장(Chartr)** — H PICK 숫자 상자를 막대·선 차트로 그려 카드 한 장에. 공유·저장 유도. 코드로 가능.
+3. **릴스를 저녁(19~21시)에 따로 올리기** — 게시 워크플로 시각을 바꿔야 해서 사용자 확인 후.
+4. **'에디터 H' 얼굴과 말투** — 안경 마크를 캐릭터처럼 카드·릴스 첫 화면에 일관되게, H 의 한 줄 의견을 말풍선으로(뉴닉·디에디트처럼).
+5. **댓글 키워드 → 구독 링크 DM** — 예: 마지막 카드 '댓글에 「구독」 남기면 링크 보내드려요'. 인스타 토큰에 메시지 권한
+   (instagram_business_manage_messages)이 필요해 사용자가 앱 권한을 추가해야 한다.
+6. **헤드라인 한 장(인스타 전용)** — 점심에 그날 가장 센 숫자 하나. 게시 시각 추가라 사용자 확인 후.
+7. **독자 좁히기** — 예: '2030 직장인의 돈·일·소비 트렌드'(어피티·부딩·트렌드라이트처럼 한 분야). 편집 방향이라 사용자 결정.
+8. **추천 보상 / 카카오톡 채널 / 소액 광고(1440 식 구독자당 비용 측정)** — 비용·개인정보 설계가 필요해 사용자 결정.
+9. 제목·카드 문장을 Smart Brevity 로(제목 6단어 안팎·강한 첫 문장 1개·'왜 중요해'), DM 공유를 부르는 마지막 카드 한 줄, 2번째 장을 가장 센 숫자로.
