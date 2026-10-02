@@ -181,6 +181,15 @@ content/YYYY-MM-DD.json 호마다의 원본 콘텐츠(출처 URL 포함)
 - 다크 모드: `color-scheme: light only` + 표 `bgcolor` — 애플 메일처럼 이 표시를 따르는 앱은 색을 뒤집지 않는다.
   Gmail 앱(iOS)처럼 무조건 뒤집는 앱도 있어 완전히 막을 수는 없다. 장식용 안경 마크는 `aria-hidden`(화면 낭독기에서 건너뜀).
 
+## 스레드(Threads) 자동 게시 (준비됨 — 토큰을 넣으면 시작)
+
+- `post-threads.yml`(매일 11:45 시작 → 12:30 게시, 13:40 예비) → `automation/post_threads.py`: 그날 호를 글(500자 안 — 질문 제목 →
+  H PICK 숫자·결론 → 나머지 4가지 → 독자 질문) + 카드 앞 5장 캐러셀로 올리고, 구독 링크(`?ref=threads`)는 답글로 단다.
+- `THREADS_ACCESS_TOKEN` Secret 이 없으면 아무것도 하지 않는다. 발급 순서: `automation/OWNER_TODO.md`. 장기 토큰(60일)은 일주일마다 자동 연장.
+- 기록 `automation/threads_posted/{날짜}.json`. 예비 호는 올리지 않는다. 실패하면 운영 알림.
+
+운영자가 직접 해야 하는 일(계정 상태 확인·지인 테스트·토큰·광고 결정)은 `automation/OWNER_TODO.md` 에 모아 둔다.
+
 ## 운영 알림 (2026-09-26~)
 
 문제가 생기면 운영자 메일(SMTP_USER)로 `EDIT H 운영 알림 · …` 메일이 온다(`alerts.yml` → `automation/alert.py`, 추가 설정 없음).

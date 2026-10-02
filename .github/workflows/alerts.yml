@@ -15,6 +15,7 @@ on:
       - Tally EDIT H poll
       - Collect EDIT H metrics
       - Fetch reel music
+      - Post EDIT H to Threads
       - EDIT H reserve issue
     types: [completed]
   schedule:

@@ -46,6 +46,8 @@ WHAT = {
     "Tally EDIT H poll": ("독자 투표 집계", "내일 06:20 에 다시 셉니다. 결과 공개일(금)에 실패하면 그날은 결과 없이 발행됩니다."),
     "Collect EDIT H metrics": ("성과 수집", "회고·제작은 직전 성과표로 진행하고, 다음 수집 때 따라잡습니다."),
     "Fetch reel music": ("릴스 음원 받기", "기존 음원으로 릴스를 만듭니다. 급하지 않아요."),
+    "Post EDIT H to Threads": ("스레드 게시", "13:40 예비 실행이 한 번 더 시도합니다. 계속 실패하면 THREADS_ACCESS_TOKEN 이 만료됐을 수 있어요"
+                               "(automation/OWNER_TODO.md 순서로 새 토큰)."),
     "EDIT H reserve issue": ("예비 호 발행", "오늘 호가 없는 채로 남았을 수 있어요. 08:20 점검 루틴이 확인하고, 필요하면 Actions → EDIT H reserve issue 를 "
                              "dry_run 을 끄고 다시 돌리면 됩니다."),
 }
