@@ -17,7 +17,9 @@
 - E2 는 캐러셀·뉴스레터, E1·E3 는 릴스 지표로 본다(겹치는 기간의 릴스 판정은 E2 영향을 감안).
 - 판정이 나면 일요일 개선 루틴이 유지·되돌림을 정하고 `learnings.md` 원칙/가설로 옮긴다. 되돌림 스위치:
   E1 `make_reel.py --cards`(또는 `reel_frames/` 빼기) · E2 `cards.PICK_FIRST_FROM`·RUNBOOK 1-4 · E3 `config.instagram.reel_evening_from`.
-- 트라이얼 릴스: 10/02 API 지원 여부 확인(`automation/ig_posted/trial_probe.json`) — 되면 E1 변형(훅 문구 A/B)을 비팔로워에게 먼저 시험.
+- 트라이얼 릴스: 10/02 확인 결과 **API 는 `trial_params` 를 받는다**(Codex 의 '앱 전용' 판단은 틀림). 다만 우리 계정은
+  `account does not meet the trial reel follower requirement` — **팔로워 기준 미달**이라 아직 못 쓴다(`automation/ig_posted/trial_probe.json`).
+  팔로워가 늘면 post-instagram `mode: probe-trial` 로 다시 확인하고, 되면 E1 변형(훅 문구 A/B)을 비팔로워에게 먼저 시험한다.
 
 ## 진단 — 2026-10-01 (조회수 저조)
 
