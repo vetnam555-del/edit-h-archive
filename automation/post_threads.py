@@ -191,7 +191,8 @@ def main():
     if log_path.exists() and not args.dry_run:
         print(f"{key}: 이미 올렸습니다 — 건너뜀")
         return 0
-    token = maybe_refresh(token)
+    if not args.dry_run:   # 드라이런은 출력만 — 토큰 연장(Secret 변경)·기록을 하지 않는다
+        token = maybe_refresh(token)
     log = post(key, token, me["id"], site_url, args.dry_run)
     if log:
         LOG_DIR.mkdir(parents=True, exist_ok=True)

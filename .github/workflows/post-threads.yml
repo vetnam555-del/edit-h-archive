@@ -66,8 +66,11 @@ jobs:
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git add automation/threads_posted
             git commit -m "Record Threads post ($(date -u +%F))"
+            pushed=""
             for i in 1 2 3 4; do
-              git pull --rebase origin main && git push origin HEAD:main && break
+              git pull --rebase origin main && git push origin HEAD:main && pushed=1 && break
               sleep $((i * 5))
             done
+            # 기록이 main 에 안 올라가면 13:40 예비 실행이 같은 호를 또 올릴 수 있다 — 실패로 끝내 운영 알림을 받는다
+            [ -n "$pushed" ] || { echo "::error::스레드 게시 기록을 main 에 푸시하지 못했습니다"; exit 1; }
           fi
