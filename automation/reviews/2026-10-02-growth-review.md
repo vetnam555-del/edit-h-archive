@@ -22,9 +22,9 @@ Claude 가 쓴 초안이고, Codex 의 검토 의견(PR 댓글)을 받아 마지
 |---|---|---|---|---|
 | 1 | 세로 전용 자막 릴스(9:16 큰 글자, 질문→숫자→한 줄 답, 무음으로도 읽힘) | 14F·NowThis·Economist | `make_reel.py` + 새 렌더 템플릿 | 바로 가능 |
 | 2 | 숫자 → 차트 한 장 | Chartr·Economist | `edith/cards.py` 차트 카드 | 바로 가능 |
-| 3 | 릴스 저녁(19~21시) 따로 게시 | 게시 시각 데이터 | 게시 워크플로 시각 | 사용자 확인 |
+| 3 | 릴스 저녁(19~21시) 따로 게시 | 게시 시각 데이터 | 게시 워크플로: 아침·예비 실행은 `--only carousel`, 저녁 실행은 `--only reel`, 08시 뒤 push 경로도 릴스를 미리 올리지 않게 분기(시각만 바꾸면 캐러셀까지 저녁으로 간다) | 사용자 확인 |
 | 4 | 에디터 H 캐릭터·말투 | 뉴닉·디에디트·Morning Brew | 카드·릴스 템플릿 | 바로 가능 |
-| 5 | 댓글 키워드 → 구독 링크 DM | 뉴스레터 퍼널 사례 | 토큰 메시지 권한 + 폴링 | 사용자 설정 |
+| 5 | 댓글 키워드 → 구독 링크 DM | 뉴스레터 퍼널 사례 | 댓글 권한(`instagram_business_manage_comments`) + 메시지 권한(`instagram_business_manage_messages`, 앱 검수) + comments 웹훅(또는 폴링). 비공개 답장은 댓글 후 7일 안 1번만 | 사용자 설정 |
 | 6 | 점심 헤드라인 한 장 | Morning Brew | 게시 시각 추가 | 사용자 확인 |
 | 7 | 독자 좁히기(예: 2030 직장인 돈·일·소비) | 어피티·부딩·트렌드라이트 | 편집 방향 | 사용자 결정 |
 | 8 | 추천 보상·카카오톡 채널·소액 광고 | theSkimm·Morning Brew·롱블랙·1440 | 비용·개인정보 설계 | 사용자 결정 |
@@ -65,3 +65,31 @@ Claude 가 쓴 초안이고, Codex 의 검토 의견(PR 댓글)을 받아 마지
 [원포인트 — 2026 캐러셀](https://1point.kr/blog/insights/why-insta-carousel-2026/), [캐릿 — 라이징 마이크로 인플루언서](https://www.careet.net/1757),
 [Meta — Business Discovery](https://developers.facebook.com/docs/instagram-api/business-discovery), [Instagram API 정리(2026)](https://gist.github.com/jameschapman2c/65eff9f54a2d350b17a6ce5127b9fe42),
 [Meta — 콘텐츠 게시(트라이얼 릴스)](https://developers.facebook.com/docs/instagram-platform/content-publishing/)
+
+## Codex 검토 의견 반영 (2026-10-02, PR #43 리뷰)
+
+**추가 레퍼런스 — 복제할 '형식'만** (Codex 권고: 제3자 숫자는 재현 조건이 없으면 근거로 쓰지 말고, 따라 할 형식만 적는다)
+- **Visual Capitalist** — 차트 한 장이 주장 하나만 말하고, 출처를 이미지 안에 남긴다(저장·공유 단위).
+- **The Pudding** — 데이터 전체를 요약하지 않고 질문 하나에서 시작해 단계적으로 공개한다.
+- **Semafor Signals** — 사실·해석·반대 관점을 칸으로 나눠 짧아도 신뢰를 지킨다.
+- **Finimize** — '무슨 일 → 왜 중요 → 내게 미치는 영향'의 고정 틀.
+- **순살브리핑** — 금융 이슈를 밈·대중문화·고유 말투로 잇되 원문 링크는 따로.
+- **토스 머니그라피** — 진행자와 연재 포맷을 고정해 '다음 편'을 기다리게 한다.
+- **미스터동** — 예상 읽기 시간과 중요도 순서를 먼저 보여 고르는 비용을 줄인다.
+
+→ 위 표의 제3자 숫자(85% 무음 재생, 댓글→DM 60~85%, 계정 규모 등)는 **출처 주장(미검증)** 으로 읽는다.
+
+**구현 지침(Codex)**
+- **세로 릴스**: 4:5 PNG 를 키우는 지금 경로와 분리해 content JSON 에서 1080×1920 전용 프레임을 렌더한다. 관측된 이탈 시간보다 짧은
+  **0~1초 질문 훅 → 핵심 숫자 → 한 줄 결론 → CTA, 3~5장·약 8~12초**. 안전 영역·음악 출처 유지, 만든 길이를 게시 기록에 남긴다. 전환 효과가 읽기를 방해하지 않게.
+- **독자 좁히기**: 렌더러보다 RUNBOOK·콘텐츠 검증에 `audience`·주제 축을 두고 `collect_metrics.issue_facts()` 에도 실험 축을 기록해 **10호 정도 고정**한다.
+- **문장·훅**: `edith/content.py` 길이 제한과 `cards.py` 요약·두 번째 카드 순서를 조정하되, 출처·조건 문장은 지킨다(경제 수치의 전제·인과 왜곡 주의).
+
+**API 사실 확인**
+- 협업 게시물: 컨테이너의 `collaborators` 로 초대 가능, 상대가 수락해야 공동 배포.
+- 스토리: `media_type=STORIES`(비즈니스 계정), 링크·투표·음악 스티커는 자동화 불가.
+- Threads: 지금 토큰 재사용 불가 — 별도 Threads API, `threads_basic`·`threads_content_publish` 권한·토큰·게시 기록 필요.
+- 릴스 커버: 지금 `thumb_offset="800"`(0.8초 프레임). `cover_url` 로 바꾸면 둘 중 하나만, Pages 배포 완료 확인 뒤.
+- 댓글 DM: 위 표 5번 행 참고(권한 2개 + 앱 검수, 비공개 답장 7일 안 1번).
+- **트라이얼 릴스 — 의견이 갈린다.** Codex: "공개 API 파라미터가 없어 앱에서 수동". Meta 개발 문서(검색 결과)에는 `graph.instagram.com/.../media` 에
+  `trial_params: {graduation_strategy: MANUAL | SS_PERFORMANCE}` 예시가 있다. → **게시하지 않는 컨테이너 하나로 먼저 확인**한 뒤에만 실험 설계에 넣는다.
