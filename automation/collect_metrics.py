@@ -59,7 +59,23 @@ def issue_facts(day):
         "weekday": weekday_ko(dt.date.fromisoformat(day)),
         "poll": bool(c.get("poll")),
         "source_mode": c.get("source_mode"),
+        # 실험 축(2026-10-02 성장 검토): 독자 축(content.audience)과 릴스 형식·게시 시각(게시 기록)
+        "audience": c.get("audience") or "전체",
+        **_reel_facts(day),
     }
+
+
+def _reel_facts(day):
+    """게시 기록에서 릴스 형식(세로·카드)·길이(초)·게시 시각대(아침·저녁)."""
+    log_path = AUTOMATION / "ig_posted" / f"{day}.json"
+    reel = (json.loads(log_path.read_text(encoding="utf-8")).get("reel") or {}) if log_path.exists() else {}
+    if not reel.get("id"):
+        return {"reel_style": None, "reel_seconds": None, "reel_slot": None}
+    style = reel.get("style") or ("cards" if day < "2026-10-03" else None)
+    hour = int(reel["at"][11:13]) if reel.get("at") else None
+    slot = None if hour is None else ("아침" if hour < 12 else "낮" if hour < 17 else "저녁")
+    seconds = reel.get("seconds") or (32.3 if day < "2026-10-01" else 19.6 if day < "2026-10-03" else None)
+    return {"reel_style": {"vertical": "세로", "cards": "카드"}.get(style, style), "reel_seconds": seconds, "reel_slot": slot}
 
 
 def _media_row(g, media_id, own_comments, out):
@@ -104,6 +120,7 @@ def instagram(days):
         if rid:   # 릴스는 피드 격자에 안 올려(릴스 탭 전용) 도달이 따로 잡힌다 — 호 점수에는 둘을 합친다
             try:
                 row["reel"] = _media_row(g, rid, 0, out)
+                row["reel"]["seconds"] = _reel_facts(day)["reel_seconds"]   # 시청 비율(평균 시청 ÷ 길이)용
             except IGError as e:
                 row["reel_error"] = str(e)[:120]
             if row.get("reel"):
@@ -202,6 +219,8 @@ def _reel_cell(p):
     cell = f"{r.get('views', '–')}·{r.get('reach', '–')}"
     if r.get("avg_watch_s") is not None:
         cell += f" · 평균 {r['avg_watch_s']}초"
+        if r.get("seconds"):
+            cell += f"/{r['seconds']:g}초({round(100 * r['avg_watch_s'] / r['seconds'])}%)"
     extra = (r.get("likes") or 0) + (r.get("comments") or 0) + (r.get("saved") or 0) + (r.get("shares") or 0)
     return cell + (f" (반응 {extra})" if extra else "")
 
@@ -218,6 +237,31 @@ def _at_age(day, snap, hours=24):
         if row and s.get("collected_at") and dt.datetime.fromisoformat(s["collected_at"]) >= due:
             return row
     return {}
+
+
+def _reel_compare(scored):
+    """릴스 형식(세로·카드)·게시 시각대별 — 게시 24시간 뒤 도달, 평균 시청 시간과 길이 대비 비율(2026-10-02 실험 축)."""
+    groups = {}
+    for d, f, sc, a in scored:
+        r = a.get("reel") or {}
+        if not f.get("reel_style") or r.get("reach") is None:
+            continue
+        key = f["reel_style"] + (f"·{f['reel_slot']}" if f.get("reel_slot") else "")
+        groups.setdefault(key, []).append((r.get("reach"), r.get("avg_watch_s"), f.get("reel_seconds")))
+    if not groups:
+        return []
+    parts = []
+    for k, v in sorted(groups.items()):
+        reach = sum(x[0] for x in v) / len(v)
+        watch = [x[1] for x in v if x[1] is not None]
+        ratio = [x[1] / x[2] for x in v if x[1] is not None and x[2]]
+        part = f"{k} 도달 {round(reach)}"
+        if watch:
+            part += f"·평균 시청 {sum(watch) / len(watch):.1f}초"
+        if ratio:
+            part += f"(길이의 {round(100 * sum(ratio) / len(ratio))}%)"
+        parts.append(part + f"({len(v)}호)")
+    return ["- 릴스 형식: " + ", ".join(parts)]
 
 
 def summary_md(snap):
@@ -277,6 +321,8 @@ def summary_md(snap):
                   f"- 제목 유형: {avg_by('title_style')}",
                   f"- 표지: {avg_by('cover')}",
                   f"- 요일: {avg_by('weekday')}",
+                  *([f"- 독자 축: {avg_by('audience')}"] if len({f.get('audience') for _, f, _, _ in scored}) > 1 else []),
+                  *_reel_compare(scored),
                   f"- 가장 좋았던 호: {best[0]} 「{best[1]['title']}」 {best[2]}점·도달 {best[3].get('reach', '–')}"
                   f" · 가장 약했던 호: {worst[0]} 「{worst[1]['title']}」 {worst[2]}점·도달 {worst[3].get('reach', '–')}",
                   "", "※ 호 수가 적을 때의 차이는 우연일 수 있다. 원칙은 같은 방향의 근거가 3호 이상 쌓였을 때만 바꾼다."]

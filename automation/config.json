@@ -40,6 +40,9 @@
     "_reel_note": "릴스: 영상을 instagram/{날짜}/reel.mp4 로 커밋해 GitHub Pages 공개 주소(video_url)로 게시한다(2026-09-25 사용자 허락 — Instagram 로그인 API 는 파일 직접 업로드를 받지 않음). 자동 게시가 실패하면 reel_delivery=email 로 영상·캡션을 운영자 메일로 보낸다. 영상은 keep_jpeg_days 뒤 사이트에서 정리된다.",
     "weekly_reel": true,
     "reel_share_to_feed": false,
+    "reel_time_kst": "19:30",
+    "reel_evening_from": "2026-10-08",
+    "_reel_time_note": "reel_evening_from 부터 아침(08:00)엔 캐러셀만, 릴스는 저녁 reel_time_kst 에 따로(automation/ig_plan.py). 끄려면 reel_evening_from 을 지우거나 먼 미래로. 2026-10-02 성장 검토 실험 3(세로 릴스 5호를 본 뒤 시작).",
     "reel_timing": {
       "first": 2.2,
       "card": 3.4,
@@ -47,6 +50,14 @@
       "fade": 0.35,
       "lift": 60,
       "zoom": 0.035,
+      "transition": "slideleft"
+    },
+    "reel_vertical_timing": {
+      "first": 2.4,
+      "card": 3.0,
+      "last": 2.6,
+      "fade": 0.3,
+      "zoom": 0.025,
       "transition": "slideleft"
     },
     "keep_jpeg_days": 14
