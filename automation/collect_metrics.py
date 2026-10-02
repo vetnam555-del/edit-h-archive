@@ -282,7 +282,7 @@ def summary_md(snap):
               f" · 최근 {DAYS}일 구독 신청 {mb.get('signups_14d', '–')} · 수신 거부 {mb.get('unsubs_14d', '–')}"]
     refs = mb.get("signup_refs_14d") or {}
     if refs:
-        names = {"share": "추천 메일", "letter": "뉴스레터 속 버튼", "web": "웹 아카이브", "ig": "인스타", "direct": "직접·알 수 없음"}
+        names = {"share": "추천 메일", "letter": "뉴스레터 속 버튼", "web": "웹 아카이브", "ig": "인스타", "threads": "스레드", "direct": "직접·알 수 없음"}
         lines.append("- 구독 경로(최근 %d일): " % DAYS + " · ".join(
             f"{names.get(k, k)} {v}" for k, v in sorted(refs.items(), key=lambda kv: -kv[1])))
     lines.append("")

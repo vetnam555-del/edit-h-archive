@@ -46,6 +46,8 @@ WHAT = {
     "Tally EDIT H poll": ("독자 투표 집계", "내일 06:20 에 다시 셉니다. 결과 공개일(금)에 실패하면 그날은 결과 없이 발행됩니다."),
     "Collect EDIT H metrics": ("성과 수집", "회고·제작은 직전 성과표로 진행하고, 다음 수집 때 따라잡습니다."),
     "Fetch reel music": ("릴스 음원 받기", "기존 음원으로 릴스를 만듭니다. 급하지 않아요."),
+    "Post EDIT H to Threads": ("스레드 게시", "13:40 예비 실행이 한 번 더 시도합니다. 계속 실패하면 THREADS_ACCESS_TOKEN 이 만료됐을 수 있어요"
+                               "(automation/OWNER_TODO.md 순서로 새 토큰)."),
     "EDIT H reserve issue": ("예비 호 발행", "오늘 호가 없는 채로 남았을 수 있어요. 08:20 점검 루틴이 확인하고, 필요하면 Actions → EDIT H reserve issue 를 "
                              "dry_run 을 끄고 다시 돌리면 됩니다."),
 }
@@ -53,7 +55,7 @@ WHAT = {
 
 HEADLINE = {"issue": "오늘 호 미발행", "send": "메일 미발송", "send_partial": "메일 일부 실패", "carousel": "인스타 카드뉴스 미게시",
             "reel": "릴스 미게시", "reel_manual": "릴스 직접 올려 주세요", "web": "웹 페이지 안 열림",
-            "metrics": "성과 수집 멈춤", "token": "인스타 토큰 연장 안 됨"}
+            "metrics": "성과 수집 멈춤", "token": "인스타 토큰 연장 안 됨", "threads": "스레드 미게시"}
 
 
 def send_mail(subject, body, dry=False):
@@ -147,6 +149,18 @@ def _site_ok(url):
         return False
 
 
+def _threads_due(date):
+    """스레드 게시를 확인할 때인가 — 켜져 있고(최근 7일 안에 게시 기록이 있음 = 토큰이 들어 있음) 14:10(KST, 13:40 예비 + 30분)이 지났을 때."""
+    d = parse_date(date)
+    recent = [d - dt.timedelta(days=i) for i in range(1, 8)]
+    if not any((AUTOMATION / "threads_posted" / f"{x.isoformat()}.json").exists() for x in recent):
+        return False
+    now = now_kst()
+    if now.date() != d:
+        return now.date() > d
+    return (now.hour, now.minute) >= (14, 10)
+
+
 def _reel_due(date):
     """오늘 릴스를 확인할 때가 됐나 — 저녁 게시(ig_plan.evening_reel)면 그 시각 + 70분 뒤부터."""
     from ig_plan import evening_reel
@@ -176,6 +190,7 @@ def problems(date, cfg, check_web=True):
     if publish_day and not ((ROOT / f"{date}.html").exists() and issue):
         out.append(("issue", f"오늘({date} {wd}) 호가 올라오지 않았습니다 — 07:00 제작 루틴이 원고를 못 올렸어요"
                              "(Claude 사용량 한도·오류 가능). 08:20 점검 루틴이 원인을 확인해 알려드려요."))
+    rewind_day = bool((_json(ROOT / "content" / f"{date}.json") or {}).get("rewind"))
     if issue:
         sent = _json(AUTOMATION / "sent" / f"{date}.json")
         if sent is None:
@@ -196,6 +211,8 @@ def problems(date, cfg, check_web=True):
                     out.append(("reel_manual", "릴스 자동 게시가 안 돼 영상·캡션을 이 메일함으로 보냈습니다 — 휴대폰에서 올려 주세요."))
                 else:
                     out.append(("reel", "인스타 릴스가 게시되지 않았습니다."))
+        if _threads_due(date) and not rewind_day and not (AUTOMATION / "threads_posted" / f"{date}.json").exists():
+            out.append(("threads", "스레드 게시물이 올라가지 않았습니다 — 12:30 게시·13:40 예비가 모두 빠졌거나 오늘 호를 못 찾았어요."))
         if check_web and not _site_ok(f"{cfg['site_url']}/{date}.html"):
             out.append(("web", "웹 아카이브에 오늘 호 페이지가 열리지 않습니다 — GitHub Pages 배포가 늦거나 실패했어요."))
 
@@ -224,6 +241,8 @@ def watch(date, dry=False):
     skip = {k for k, name in (("send", "Send EDIT H newsletter"), ("carousel", "Post EDIT H to Instagram"),
                               ("reel", "Post EDIT H to Instagram"), ("reel_manual", "Post EDIT H to Instagram"))
             if name in running}
+    if "Post EDIT H to Threads" in running:
+        skip.add("threads")
     if skip:
         print(f"  아직 진행 중인 실행이 있어 다음 점검으로 미룸: {', '.join(sorted(skip))}")
         found = [(k, t) for k, t in found if k not in skip]

@@ -1,0 +1,76 @@
+# EDIT H 스레드(Threads) 자동 게시 — 매일 12:30(KST) 그날 호를 글 + 카드 5장 캐러셀로(automation/post_threads.py).
+# THREADS_ACCESS_TOKEN Secret 이 없으면 아무것도 하지 않고 끝난다(설정: automation/OWNER_TODO.md).
+# 같은 호는 automation/threads_posted/ 기록으로 두 번 올리지 않는다. 예비 호(다시 보기)는 올리지 않는다.
+name: Post EDIT H to Threads
+
+on:
+  schedule:
+    - cron: "45 2 * * *"      # KST 11:45 → 12:30 까지 대기 후 게시
+    - cron: "40 4 * * *"      # KST 13:40 예비(이미 올렸으면 건너뜀)
+  workflow_dispatch:
+    inputs:
+      key:
+        description: "게시할 호 YYYY-MM-DD (비우면 오늘)"
+        required: false
+      mode:
+        description: "check = 토큰 확인만 · dry-run = 본문만 출력 · post = 실제 게시"
+        type: choice
+        options: [check, dry-run, post]
+        default: check
+
+permissions:
+  contents: write
+
+concurrency:
+  group: post-threads
+  cancel-in-progress: false
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Wait until 12:30 KST
+        env:
+          EVENT: ${{ github.event_name }}
+        run: python3 automation/wait_until_send.py "$EVENT" --at 12:30
+
+      - name: Refresh main
+        run: git pull --ff-only origin main
+
+      - name: Install PyNaCl (token refresh → GitHub Secret)
+        run: pip install -q pynacl
+
+      - name: Post
+        env:
+          THREADS_ACCESS_TOKEN: ${{ secrets.THREADS_ACCESS_TOKEN }}
+          GH_ADMIN_TOKEN: ${{ secrets.GH_ADMIN_TOKEN }}
+          IN_KEY: ${{ inputs.key }}
+          IN_MODE: ${{ inputs.mode }}
+        run: |
+          args=""
+          [ -n "$IN_KEY" ] && args="$args --key $IN_KEY"
+          [ "$IN_MODE" = "check" ] && args="$args --check"
+          [ "$IN_MODE" = "dry-run" ] && args="$args --dry-run"
+          python3 automation/post_threads.py $args
+
+      - name: Record post
+        if: always()
+        run: |
+          if [ -n "$(git status --porcelain automation/threads_posted)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add automation/threads_posted
+            git commit -m "Record Threads post ($(date -u +%F))"
+            pushed=""
+            for i in 1 2 3 4; do
+              git pull --rebase origin main && git push origin HEAD:main && pushed=1 && break
+              sleep $((i * 5))
+            done
+            # 기록이 main 에 안 올라가면 13:40 예비 실행이 같은 호를 또 올릴 수 있다 — 실패로 끝내 운영 알림을 받는다
+            [ -n "$pushed" ] || { echo "::error::스레드 게시 기록을 main 에 푸시하지 못했습니다"; exit 1; }
+          fi
