@@ -61,6 +61,7 @@ def issue_facts(day):
         "source_mode": c.get("source_mode"),
         # 실험 축(2026-10-02 성장 검토): 독자 축(content.audience)과 릴스 형식·게시 시각(게시 기록)
         "audience": c.get("audience") or "전체",
+        "series": (c.get("series") or {}).get("name") or "없음",   # 고정 연재(수요일 'H의 장부', 2026-10-21~)
         **_reel_facts(day),
     }
 
@@ -264,6 +265,35 @@ def _reel_compare(scored):
     return ["- 릴스 형식: " + ", ".join(parts)]
 
 
+def _series_compare(snap):
+    """고정 연재(E4, 수요일 'H의 장부') — 14일 창과 상관없이 config.series.from 부터 모든 호를 '게시 24시간 뒤' 숫자로 비교한다.
+    연재는 주 1편이라 14일 창에는 2편만 들어간다 — 4편을 다 내고 판정하려면 창 밖의 편도 지난 스냅숏에서 읽어야 한다."""
+    start = (load_config().get("series") or {}).get("from")
+    if not start:
+        return []
+    groups = {}
+    for p in sorted(CONTENT_DIR.glob("*.json")):
+        day = p.stem
+        if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", day) or day < start:
+            continue
+        f = issue_facts(day)
+        if not f or f.get("source_mode") == "rewind":
+            continue
+        a = _at_age(day, snap)
+        if a:
+            groups.setdefault(f["series"], []).append((score(a), a.get("reach"), a.get("views")))
+    if len(groups) < 2:
+        return []
+
+    def avg(vals, nd=0):
+        vals = [v for v in vals if v is not None]
+        return "–" if not vals else f"{sum(vals) / len(vals):.{nd}f}"
+
+    parts = [f"{k} 점수 {avg([x[0] for x in v], 1)}·도달 {avg([x[1] for x in v])}·조회 {avg([x[2] for x in v])}({len(v)}호)"
+             for k, v in sorted(groups.items(), key=lambda kv: kv[0] == "없음")]
+    return [f"- 연재({start}부터 모든 호, 게시 24시간 뒤): " + ", ".join(parts)]
+
+
 def summary_md(snap):
     ig = snap.get("instagram") or {}
     posts = ig.get("posts") or {}
@@ -322,6 +352,7 @@ def summary_md(snap):
                   f"- 표지: {avg_by('cover')}",
                   f"- 요일: {avg_by('weekday')}",
                   *([f"- 독자 축: {avg_by('audience')}"] if len({f.get('audience') for _, f, _, _ in scored}) > 1 else []),
+                  *_series_compare(snap),
                   *_reel_compare(scored),
                   f"- 가장 좋았던 호: {best[0]} 「{best[1]['title']}」 {best[2]}점·도달 {best[3].get('reach', '–')}"
                   f" · 가장 약했던 호: {worst[0]} 「{worst[1]['title']}」 {worst[2]}점·도달 {worst[3].get('reach', '–')}",

@@ -174,6 +174,8 @@ def cover(d, kicker=None, foot=None):
     stickers = [f'{it["tag"]} {hero_value(it)}' for it in issues[1:4]]
     spots = [("left:10px;top:0;", -3), ("right:0;top:230px;", 2), ("left:40px;top:430px;", -1.5)]
     sticker_html = "".join(f'<div style="position:absolute;{pos}">{_sticker(t, r)}</div>' for t, (pos, r) in zip(stickers, spots))
+    if not kicker and d.get("series"):   # 고정 연재 날(수요일 'H의 장부'): 이름·회차를 표지 머리말에 — '다음 편'을 기다리게
+        kicker = f"#{d['vol']} 매주 {d['weekday']}요일 연재 · {d['series']['label']}"
     kicker = kicker or f"#{d['vol']} {WEEKDAY_FULL[d['weekday']]}의 트렌드 브리프 | 오늘의 {len(issues)}가지"
     foot = foot or f"밀어서 {len(issues)}가지 보기 →"
     bg = ""
@@ -267,7 +269,7 @@ def issue_card(it, n):
              f'color:{"#000000" if dark else "#FFFFFF"};display:flex;align-items:center;justify-content:center;'
              f'font-weight:600;font-size:32px;line-height:1;">{n}</div>')
     pick = (f'<div style="margin-top:26px;font-weight:500;font-size:30px;line-height:1;color:#F5C84C;">'
-            f'(H PICK · 오늘의 핵심)</div>') if dark else ""
+            f'(H PICK · {esc(it.get("series_label") or "오늘의 핵심")})</div>') if dark else ""
     return _frame(f"""
 <div class="body" style="padding:0 80px 190px;justify-content:flex-end;align-items:center;text-align:center;">
   {bubble(it["tag"])}

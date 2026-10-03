@@ -152,6 +152,31 @@ def next_vol(date_str):
     return f"{last + 1:03d}"
 
 
+def series_no(name, date_str):
+    """연재(content.series.name) 회차 — 이 날짜 전에 같은 이름으로 나간 호 수 + 1."""
+    n = 0
+    for p in sorted(CONTENT_DIR.glob("*.json")):
+        if p.stem >= date_str or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", p.stem):
+            continue
+        try:
+            s = json.loads(p.read_text(encoding="utf-8")).get("series") or {}
+        except ValueError:
+            continue
+        n += isinstance(s, dict) and s.get("name") == name
+    return n + 1
+
+
+def _series(data, where):
+    """연재 표시(2026-10-21~ 수요일 'H의 장부'): series = {"name": …}. 회차(no)는 비우면 자동. 표지·H PICK 카드·뉴스레터·캡션에 붙는다."""
+    s = data.get("series")
+    if not s:
+        return
+    if not isinstance(s, dict) or not s.get("name"):
+        raise ContentError(f"{where}: series 는 {{\"name\": \"연재 이름\"}} 꼴이어야 합니다")
+    s.setdefault("no", series_no(s["name"], data["date"]))
+    s["label"] = f"{s['name']} #{s['no']}"
+
+
 def load(date_str):
     path = CONTENT_DIR / f"{date_str}.json"
     if not path.exists():
@@ -233,6 +258,9 @@ def prepare(data, date_str):
     data["all_items"] = [big] + items
 
     data["card_issues"] = _card_issues(data, where)
+    _series(data, where)
+    if data.get("series") and data["card_issues"]:
+        data["card_issues"][0]["series_label"] = data["series"]["label"]
     cards = data["cards"]
     if fmt == 2:
         deep = cards.get("deep") or {}

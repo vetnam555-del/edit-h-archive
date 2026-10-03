@@ -12,7 +12,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from edith.common import AUTOMATION, CONTENT_DIR, MANIFEST, ROOT, load_config, now_kst, parse_date, weekday_ko  # noqa: E402
-from edith.content import next_vol  # noqa: E402
+from edith.content import next_vol, series_no  # noqa: E402
 
 
 def holidays():
@@ -92,6 +92,11 @@ def main():
 
     poll_due, poll_result = poll_status(d, wd, cfg)
 
+    se = cfg.get("series") or {}
+    series_due = None
+    if reason is None and se.get("from") and date >= se["from"] and wd == se.get("weekday"):
+        series_due = {"name": se["name"], "no": series_no(se["name"], date), "about": se.get("about")}
+
     print(json.dumps({
         "date": date,
         "weekday": wd,
@@ -101,6 +106,7 @@ def main():
         "next_vol": next_vol(date),
         "send_time_kst": cfg["send_time_kst"],
         "weekly_special_due": weekly_due,  # true 면 데일리 발행 뒤 RUNBOOK '금요일 주간 특집'도 만든다
+        "series_due": series_due,          # 있으면 오늘 H PICK 을 연재 편으로(RUNBOOK '수요일 연재') — content.series = {"name": …}
         "poll_due": poll_due,              # true 면 오늘 호에 content.poll(A/B 투표)을 넣는다(그 주 첫 호)
         "poll_result": poll_result,        # 있으면 오늘 호에 content.poll_result 로 결과를 싣는다(RUNBOOK '독자 투표')
         "recent_issues": recent,
