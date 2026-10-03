@@ -1,6 +1,20 @@
 {
- "collected_at": "2026-10-03T02:55+09:00",
+ "collected_at": "2026-10-03T22:09+09:00",
  "issues": {
+  "2026-10-03": {
+   "title": "월 50만원 3년이면, 2255만원이라고?",
+   "format": 2,
+   "pick_tag": "청년미래적금",
+   "title_style": "질문형",
+   "cover": "사진",
+   "weekday": "토",
+   "poll": false,
+   "source_mode": "fallback",
+   "audience": "전체",
+   "reel_style": "세로",
+   "reel_seconds": 10.1,
+   "reel_slot": "아침"
+  },
   "2026-10-02": {
    "title": "프리랜서 세금, 3.3% 대신 2.2%라고?",
    "format": 2,
@@ -129,8 +143,8 @@
   }
  },
  "instagram": {
-  "followers": 101,
-  "media": 82,
+  "followers": 107,
+  "media": 83,
   "insights": true,
   "posts": {
    "2026-09-25": {
@@ -144,7 +158,7 @@
    "2026-09-26": {
     "likes": 0,
     "comments": 0,
-    "reach": 21,
+    "reach": 22,
     "saved": 0,
     "shares": 0,
     "views": 67,
@@ -162,10 +176,10 @@
    "2026-09-27": {
     "likes": 1,
     "comments": 0,
-    "reach": 10,
+    "reach": 11,
     "saved": 0,
     "shares": 0,
-    "views": 19,
+    "views": 20,
     "reel": {
      "likes": 0,
      "comments": 0,
@@ -183,7 +197,7 @@
     "reach": 10,
     "saved": 0,
     "shares": 0,
-    "views": 21,
+    "views": 22,
     "reel": {
      "likes": 0,
      "comments": 0,
@@ -234,17 +248,17 @@
    "2026-10-01": {
     "likes": 5,
     "comments": 0,
-    "reach": 15,
+    "reach": 16,
     "saved": 0,
     "shares": 0,
-    "views": 27,
+    "views": 29,
     "reel": {
      "likes": 0,
      "comments": 0,
-     "reach": 105,
+     "reach": 106,
      "saved": 0,
      "shares": 0,
-     "views": 119,
+     "views": 120,
      "seconds": 19.6,
      "avg_watch_s": 3.2
     }
@@ -252,19 +266,37 @@
    "2026-10-02": {
     "likes": 6,
     "comments": 0,
-    "reach": 15,
+    "reach": 16,
     "saved": 0,
     "shares": 0,
-    "views": 34,
+    "views": 35,
     "reel": {
      "likes": 0,
      "comments": 0,
-     "reach": 17,
+     "reach": 20,
      "saved": 0,
      "shares": 0,
-     "views": 23,
+     "views": 26,
      "seconds": 19.6,
-     "avg_watch_s": 3.6
+     "avg_watch_s": 3.2
+    }
+   },
+   "2026-10-03": {
+    "likes": 1,
+    "comments": 0,
+    "reach": 15,
+    "saved": 0,
+    "shares": 0,
+    "views": 51,
+    "reel": {
+     "likes": 0,
+     "comments": 0,
+     "reach": 109,
+     "saved": 0,
+     "shares": 0,
+     "views": 124,
+     "seconds": 10.1,
+     "avg_watch_s": 2.5
     }
    }
   }
@@ -279,7 +311,8 @@
    "2026-09-29": 0,
    "2026-09-30": 0,
    "2026-10-01": 0,
-   "2026-10-02": 0
+   "2026-10-02": 0,
+   "2026-10-03": 0
   },
   "signups_14d": 0,
   "unsubs_14d": 0,
