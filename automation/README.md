@@ -135,14 +135,19 @@ content/YYYY-MM-DD.json 호마다의 원본 콘텐츠(출처 URL 포함)
 ## 매일 발전하는 고리 (2026-09-25~)
 
 ```
-21:30  collect-metrics.yml  → automation/metrics/summary.md (최근 14호 성과표: 인스타 좋아요·댓글[권한 있으면 도달·저장·공유],
+21:30  collect-metrics.yml(18:13·19:43 에 일찍 걸고 21:30 까지 대기)  → automation/metrics/summary.md (최근 14호 성과표: 인스타 좋아요·댓글[권한 있으면 도달·저장·공유],
                                팔로워, 메일 답장·구독 신청·수신 거부, 발송 대상 수, 투표 참여, 제목 유형·표지·요일별 평균)
        (예약 실행이 늦으면 22:00 회고가 request_metrics.py 로 request.txt 를 푸시해 바로 돌리고 새 성과표를 기다린다)
 22:00  편집 회고(Claude, 발행 세션) → automation/learnings.md: 회고 기록 + '지금 원칙'(근거 3호 이상일 때만 변경) + 가설 + 개선 요청
 07:00  제작 루틴 → RUNBOOK 0단계에서 learnings.md·summary.md 를 읽고 주제·제목·표지에 반영
-일 21:00  개선 루틴(Claude, 작업 세션) → '시스템 개선 요청'·실패 기록을 코드·템플릿으로 고쳐 PR → 머지, 주간 리포트
-          + 레퍼런스·트렌드 조사(WebSearch) → automation/references.md: 진단·조사 요약(출처 링크)·'지금 시험 중'·다음 실험 후보
+14:10  매일 개선 루틴(Claude, 작업 세션, 2026-10-04~) → RUNBOOK_IMPROVE.md: 어제 실패·'시스템 개선 요청'·판정일이 된 실험 중 1~2건을
+          재현 → 수정 → selftest.py → PR(Codex 리뷰 + Actions 'EDIT H selftest') → 머지 → CHANGELOG.md(진화 일지)에 한 줄
+일 21:00  주간 루틴(Claude, 작업 세션) → 레퍼런스·트렌드 조사(WebSearch) → references.md(진단·조사·'지금 시험 중'·다음 실험 후보),
+          실험 판정, 큰 변경, 주간 리포트
 ```
+- **자동 점검** `python3 automation/selftest.py`(빠르게: `--quick`): 게시 계획·알림 날짜·오늘 할 일·연재·문장 점검·예비 호·성과표·스레드 본문을 확인하고,
+  최근 데일리 호 2개를 임시 폴더에서 다시 빌드해 뉴스레터·캡션이 발행본과 같은지 본다. 코드를 바꾸는 PR 마다 GitHub Actions 가 돌린다.
+- **진화 일지** `automation/CHANGELOG.md` — 날마다 무엇을 왜 바꿨는지.
 - 릴스(2026-10-03~): `build_issue.py` 가 같은 원고로 **세로 전용 프레임 4장**(1080×1920, `instagram/{날짜}/reel_frames/`, `edith/reel_frames.py` —
   질문 훅 → H PICK 숫자 → 결론 → 에디터 H)을 만들고, `make_reel.py` 가 그걸로 약 10초 영상을 만든다(`config.instagram.reel_vertical_timing`).
   프레임이 없거나 넘치면 예전처럼 카드 7장 약 20초(`REEL_PARTS`·`reel_timing`). 게시 기록에 형식(style)·길이(seconds)가 남고,

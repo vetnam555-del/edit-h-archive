@@ -1,0 +1,44 @@
+# EDIT H 자동 점검 — 코드를 바꾸는 PR 마다 08:00 발행 흐름이 깨지지 않았는지 본다(automation/selftest.py).
+# 판단 함수 점검 + 최근 데일리 호 2개를 다시 빌드(빌드 실패·카드 넘침이면 실패, 글이 발행본과 달라지면 요약에 표시).
+# 매일 개선 루틴(automation/RUNBOOK_IMPROVE.md)은 이 점검이 초록일 때만 머지한다.
+name: EDIT H selftest
+
+on:
+  pull_request:
+    paths:
+      - "automation/**.py"
+      - "automation/config.json"
+      - ".github/workflows/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: selftest-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  selftest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Playwright (card rendering)
+        run: |
+          npm install --no-save --no-package-lock playwright > /dev/null
+          npx playwright install --with-deps chromium > /dev/null
+
+      - name: Selftest
+        run: |
+          set +e
+          python3 automation/selftest.py > selftest.log 2>&1
+          code=$?
+          cat selftest.log
+          { echo '```'; cat selftest.log; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          exit $code

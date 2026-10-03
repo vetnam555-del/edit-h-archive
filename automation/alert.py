@@ -174,6 +174,18 @@ def _reel_due(date):
     return (now.hour * 60 + now.minute) >= hh * 60 + mm + 70
 
 
+ISSUE_DEADLINE = (8, 5)   # build_rewind.DEADLINE — 이 시각(KST) 전에는 오늘 호가 없어도 '미발행'이 아니다
+
+
+def watch_date(now=None):
+    """날짜를 주지 않은 watch 가 볼 날짜. 22:25 실행(저녁 릴스 확인)이 자정을 넘겨 밀려 돌면 '어제' 발행 흐름을 본다
+    — 2026-10-03 03:32 에 아직 만들 시각도 안 된 오늘 호를 '미발행'으로 알린 오알림을 막는다."""
+    now = now or now_kst()
+    if (now.hour, now.minute) < ISSUE_DEADLINE:
+        return (now.date() - dt.timedelta(days=1)).isoformat()
+    return now.date().isoformat()
+
+
 def problems(date, cfg, check_web=True):
     """[(알림 종류, 한 줄 설명)] — 오늘 발행 흐름에서 빠진 것."""
     out = []
@@ -187,7 +199,9 @@ def problems(date, cfg, check_web=True):
 
     manifest = _json(MANIFEST) or {"issues": []}
     issue = next((i for i in manifest["issues"] if i["date"] == date), None)
-    if publish_day and not ((ROOT / f"{date}.html").exists() and issue):
+    now = now_kst()
+    before_deadline = now.date() == d and (now.hour, now.minute) < ISSUE_DEADLINE
+    if publish_day and not before_deadline and not ((ROOT / f"{date}.html").exists() and issue):
         out.append(("issue", f"오늘({date} {wd}) 호가 올라오지 않았습니다 — 07:00 제작 루틴이 원고를 못 올렸어요"
                              "(Claude 사용량 한도·오류 가능). 08:20 점검 루틴이 원인을 확인해 알려드려요."))
     rewind_day = bool((_json(ROOT / "content" / f"{date}.json") or {}).get("rewind"))
@@ -289,7 +303,7 @@ def main():
                   "EDIT H 운영 알림이 이 메일함으로 옵니다.\n"
                   "발송·게시·집계가 실패하면 곧바로, 오늘 호·발송·게시가 빠지면 08:40(KST) 감시에서 알려드려요.", args.dry_run)
         return 0
-    return watch(args.date or now_kst().date().isoformat(), args.dry_run)
+    return watch(args.date or watch_date(), args.dry_run)
 
 
 if __name__ == "__main__":
