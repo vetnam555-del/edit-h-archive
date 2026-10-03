@@ -181,6 +181,11 @@ _LETTER_BRIEFS = [
     "출처랑 한 줄 뉴스 {n}개는 {when} 뉴스레터에 있어요. 구독은 프로필 링크에서요.",
 ]
 _REEL_TAIL = ["넘겨보는 카드는 피드에 올려뒀어요.", "카드 전체는 피드 게시물에 있어요.", "자세한 숫자는 피드 카드에서 볼 수 있어요."]
+# 저녁 릴스(config.instagram.reel_evening_from~): 짧은 영상 → 아침 카드 → 뉴스레터로 이어지게(머니그라피의 숏폼 → 본편 고리)
+_REEL_TAIL_EVENING = ["나머지 {n}가지는 아침에 올린 카드에 있어요.", "같은 날 아침 카드 게시물에 {n}가지가 더 있어요.",
+                      "아침에 올린 카드에서 나머지 {n}가지도 볼 수 있어요."]
+_SERIES_LINE = ["매주 {wd}요일은 「{name}」 — 다음 편도 {wd}요일 아침에 올려요.", "「{name}」 매주 {wd}요일 연재 — 다음 편도 {wd}요일 아침에요.",
+                "{wd}요일마다 「{name}」 한 편씩 — 다음 편은 다음 주 {wd}요일이에요."]
 # 누구나 붙이는 넓은 태그는 스팸처럼 보여 뺀다. 주제 태그 위주로 4개 + 브랜드 태그.
 _GENERIC_TAGS = {"트렌드", "트렌드뉴스", "뉴스브리핑", "경제뉴스", "소비트렌드", "카드뉴스", "뉴스", "이슈", "시사", "정보", "꿀팁",
                  "주간트렌드", "오늘의뉴스", "데일리뉴스"}
@@ -237,8 +242,17 @@ def instagram_caption(d, site):
     n_briefs = len(d.get("briefs") or [])
     letter = (_pick(_LETTER_BRIEFS, d).format(n=n_briefs, when=_when(d)) if n_briefs
               else _pick(_LETTER, d).format(when=_when(d)))
+    if d.get("series"):   # 고정 연재 날: 다음 편 예고(같은 요일·같은 이름 — 기다릴 이유)
+        lines += ["", _pick(_SERIES_LINE, d).format(wd=d["weekday"], name=d["series"]["name"])]
     lines += ["", letter, "— 에디터 H", "", _tags(d, ig.get("hashtags"))]
     return "\n".join(lines)
+
+
+def _evening_reel(d):
+    """이 호의 릴스를 저녁에 따로 올리는가(ig_plan.evening_reel 과 같은 기준 — 아침 카드가 먼저 올라가 있다)."""
+    ig = load_config().get("instagram") or {}
+    start = ig.get("reel_evening_from")
+    return bool(ig.get("reel_time_kst") and start and str(d["date"])[:10] >= start and "weekly" not in str(d["date"]))
 
 
 def reel_caption(d):
@@ -251,7 +265,9 @@ def reel_caption(d):
     if len(parts) > 1:
         m = re.match(r"(.+?[.?!])(\s|$)", parts[1].replace("\n", " "))
         teaser = (m.group(1) if m else parts[1]).strip()
-    lines = [hook, ""] + ([teaser] if teaser else []) + [_pick(_REEL_TAIL, d), _tags(d, ig.get("hashtags"), limit=3)]
+    tail = (_pick(_REEL_TAIL_EVENING, d).format(n=len(d["card_issues"]) - 1) if _evening_reel(d)
+            else _pick(_REEL_TAIL, d))
+    lines = [hook, ""] + ([teaser] if teaser else []) + [tail, _tags(d, ig.get("hashtags"), limit=3)]
     return "\n".join(lines)
 
 

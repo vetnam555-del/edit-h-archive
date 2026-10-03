@@ -89,7 +89,8 @@ def hook(d):
         bg_layer = (f'<div style="position:absolute;inset:0;background:url(\'{_photo_uri(cov["photo"])}\') '
                     f'{cov.get("focus") or "center"}/cover no-repeat;"></div>'
                     '<div style="position:absolute;inset:0;background:rgba(13,12,10,.74);"></div>')
-    kicker = f"오늘의 트렌드 {len(d['card_issues'])}가지 · {d['weekday']}요일 아침"
+    kicker = (f"매주 {d['weekday']}요일 연재 · {d['series']['label']}" if d.get("series")
+              else f"오늘의 트렌드 {len(d['card_issues'])}가지 · {d['weekday']}요일 아침")
     return _frame(f"""{bg_layer}{_wordmark("#FFFFFF")}
 <div class="body" style="justify-content:center;align-items:center;text-align:center;">
   <div style="font-weight:700;font-size:38px;line-height:1;color:rgba(255,255,255,.9);">{esc(kicker)}</div>

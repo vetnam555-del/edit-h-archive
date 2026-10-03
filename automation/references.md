@@ -13,13 +13,42 @@
 | **E1 세로 자막 릴스** | **10/03~10/07** | 4:5 카드 슬라이드쇼 → 1080×1920 전용 4장 약 10초(질문 훅 → 숫자 → 결론 → 에디터 H) | 5호 뒤 '릴스 형식' 줄: **평균 시청 ÷ 길이**(카드 릴스 기준 9%)·24시간 도달 |
 | **E2 편집 개편** | **10/06~10/15** | 독자 '2030 직장인의 돈·일·소비' + Smart Brevity 문장 + 두 번째 장에 H PICK | 10호 뒤 '독자 축' 줄: 캐러셀 24시간 도달·조회·참여, 뉴스레터 답장·구독 |
 | **E3 릴스 저녁 게시** | **10/08~10/12** | 릴스만 19:30 에 따로(아침엔 캐러셀만) | 5호 뒤 '릴스 형식' 줄의 세로·아침 vs 세로·저녁 |
+| 문장 점검(E2 에 묶음) | 10/06~ | 토스 라이팅 8원칙 — 빌드가 `↘ 문장 점검` 경고(`edith/style.py`) | E2 와 같이 본다(같은 '문장' 변수) |
+| **E4 수요일 연재 「H의 장부」** | **10/21~11/11 (4편)** | 수요일 H PICK = 소비 하나를 그 회사 숫자로 푸는 고정 연재(머니그라피 'B주류경제학' 차용) + 표지·카드·캡션에 '#회차 · 다음 편 예고' | 4편 뒤 성과표 '연재' 줄(점수·24시간 도달·조회): 연재 편 vs 그 밖의 호. 점수(저장·공유 포함)와 도달이 둘 다 앞서면 유지, 둘 다 뒤지면 되돌림 |
 
 - E2 는 캐러셀·뉴스레터, E1·E3 는 릴스 지표로 본다(겹치는 기간의 릴스 판정은 E2 영향을 감안).
 - 판정이 나면 일요일 개선 루틴이 유지·되돌림을 정하고 `learnings.md` 원칙/가설로 옮긴다. 되돌림 스위치:
-  E1 `make_reel.py --cards`(또는 `reel_frames/` 빼기) · E2 `cards.PICK_FIRST_FROM`·RUNBOOK 1-4 · E3 `config.instagram.reel_evening_from`.
+  E1 `make_reel.py --cards`(또는 `reel_frames/` 빼기) · E2 `cards.PICK_FIRST_FROM`·RUNBOOK 1-4·`style.STYLE_FROM` · E3 `config.instagram.reel_evening_from`
+  · E4 `config.series.from`.
 - 트라이얼 릴스: 10/02 확인 결과 **API 는 `trial_params` 를 받는다**(Codex 의 '앱 전용' 판단은 틀림). 다만 우리 계정은
   `account does not meet the trial reel follower requirement` — **팔로워 기준 미달**이라 아직 못 쓴다(`automation/ig_posted/trial_probe.json`).
   팔로워가 늘면 post-instagram `mode: probe-trial` 로 다시 확인하고, 되면 E1 변형(훅 문구 A/B)을 비팔로워에게 먼저 시험한다.
+
+## 토스·머니그라피 심층 (2026-10-03, 사용자 요청 '토스 머니그라피·토스 마케팅도 참고했나')
+
+그전엔 한 줄('진행자·연재 고정')만 적었었다. 이번에 따로 조사했다. 원문 사이트(toss.im·toss.tech·koreatimes·brunch 등)는 이 환경에서 열리지 않아
+**검색 결과에 실린 기사 요약**을 근거로 했다 — 숫자는 기사에 적힌 그대로이고, 시기마다 다르다.
+
+| 무엇 | 확인한 사실 | 우리에게 옮길 것 |
+|---|---|---|
+| 머니그라피 성장 | 2021-09 시작, 50만(2026-01) → 약 73만 구독·누적 조회 1억 회 이상. 광고보다 **자연 유입**으로 컸다는 평가 | 숫자를 키우는 건 광고보다 '다시 오게 하는 형식'이다 |
+| B주류경제학 | 웹툰·커피·스니커즈·**대형마트(최다 조회 편)**처럼 찐팬 많은 소비를 **그 회사 재무제표**로 푸는 토크쇼. 고정 패널(회계사) + 주제별 게스트, 시즌제(1~3) | **E4 수요일 연재 「H의 장부」** — 소비 하나 → 회사 숫자 → 내 지갑 |
+| 업로드 원칙 | 보도: **매주 같은 시각에 꾸준히** 올린 것이 확산을 키웠다. 토스 파란색·금융 채널 문법을 일부러 벗어났다(PD 인터뷰 — 브랜드 노출보다 이야기) | 같은 요일·같은 이름·회차 표시, 카드에 회사 홍보색을 빼고 우리 문법 유지 |
+| 진행자 | 'B주류초대석'은 출연자가 **눈치 보지 않고 솔직한 의견**을 내는 점이 인기 요인 — 2026-05 공연 1,500석 즉시 매진 | 연재 편 노트 끝에 **'H의 판정'**(확인한 숫자에서 나온 분명한 의견) |
+| 숏폼 | 긴 영상을 쇼츠로 잘라 **본편으로 다시 끌어오는** 고리, 본편 링크를 댓글에 | 저녁 릴스 캡션 → '아침 카드에 나머지 4가지' → 뉴스레터 |
+| 토스피드 | 2018 시작, 월 100만+ 방문. **처음엔 금융 초보만 겨냥**하고 팬이 생긴 뒤 주제를 넓힘. '돈 이야기'(사람들의 실제 돈 사연) 연재 | E2 독자 좁히기(2030 직장인)와 같은 방향 — 넓히는 건 팬이 생긴 뒤 |
+| 토스 라이팅 8원칙 | 다음 화면 예고 · 군더더기 빼기 · 빈 문장 빼기 · 핵심만 · 쉬운 말 · 강요 대신 제안 · 모두에게 통하는 말 · 숨은 감정 + 해요체·능동형 | RUNBOOK '토스 라이팅 원칙' + 빌드 경고(`edith/style.py`) |
+| 토스 마케팅 | 만보기·행운퀴즈 같은 **게임화**로 매일 들어오게, 마케팅팀은 **작게 많이 실험**하고 데이터로 판정 | 월요일 투표·실험 달력이 같은 방향. 퀴즈형 훅(질문 → 다음 장 정답)은 다음 후보 |
+
+따라 하지 않는 것: 영상 진행자·스튜디오 촬영·오프라인 공연(예산·사람 필요 — 팔로워가 생긴 뒤 OWNER_TODO 결정 항목), 토스 앱 안 노출(우리에겐 없음).
+
+출처: [머니그라피 50만 돌파(토스피드)](https://toss.im/tossfeed/article/44957) · [더밸류뉴스 — 소비와 금융 구조를 잇는 방식](https://www.thevaluenews.co.kr/news/196211) ·
+[Korea Times — Moneygraphy PD 인터뷰](https://www.koreatimes.co.kr/business/banking-finance/20240527/youtube-producer-behind-toss-successful-spin-off-channel-moneygraphy) ·
+[디지털투데이 — 금융사 유튜브 성과](https://www.digitaltoday.co.kr/en/view/50194/financial-groups-youtube-content-racks-up-hits-in-south-korea) ·
+[B주류경제학 기획 인터뷰(토스피드)](https://toss.im/tossfeed/article/interview-moneygraphy) · [경향신문 — B주류초대석 1500석](https://www.khan.co.kr/article/202605101558001) ·
+[토스의 8가지 라이팅 원칙(Toss Tech)](https://toss.tech/article/8-writing-principles-of-toss) · [토스 UX 라이팅 가이드](https://developers-apps-in-toss.toss.im/design/ux-writing.html) ·
+[오픈애즈 — 토스가 콘텐츠 마케팅에 진심인 이유](https://www.openads.co.kr/content/contentDetail?contsId=14607) · [토스 마케팅팀 인터뷰(토스피드)](https://toss.im/tossfeed/article/marketingteam-interview) ·
+[뉴스핌 — 머니그라피 구독자](https://www.newspim.com/news/view/20260122000186)
 
 ## 진단 — 2026-10-01 (조회수 저조)
 

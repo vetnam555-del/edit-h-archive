@@ -61,6 +61,7 @@ def issue_facts(day):
         "source_mode": c.get("source_mode"),
         # 실험 축(2026-10-02 성장 검토): 독자 축(content.audience)과 릴스 형식·게시 시각(게시 기록)
         "audience": c.get("audience") or "전체",
+        "series": (c.get("series") or {}).get("name") or "없음",   # 고정 연재(수요일 'H의 장부', 2026-10-21~)
         **_reel_facts(day),
     }
 
@@ -322,6 +323,7 @@ def summary_md(snap):
                   f"- 표지: {avg_by('cover')}",
                   f"- 요일: {avg_by('weekday')}",
                   *([f"- 독자 축: {avg_by('audience')}"] if len({f.get('audience') for _, f, _, _ in scored}) > 1 else []),
+                  *([f"- 연재: {avg_by('series')}"] if len({f.get('series') for _, f, _, _ in scored}) > 1 else []),
                   *_reel_compare(scored),
                   f"- 가장 좋았던 호: {best[0]} 「{best[1]['title']}」 {best[2]}점·도달 {best[3].get('reach', '–')}"
                   f" · 가장 약했던 호: {worst[0]} 「{worst[1]['title']}」 {worst[2]}점·도달 {worst[3].get('reach', '–')}",

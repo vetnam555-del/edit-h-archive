@@ -17,7 +17,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from edith import cards, content, newsletter, reel_frames, site  # noqa: E402
+from edith import cards, content, newsletter, reel_frames, site, style  # noqa: E402
 from edith.common import AUTOMATION, INSTAGRAM_DIR, ROOT, load_config  # noqa: E402
 
 
@@ -80,6 +80,15 @@ def render_reel_frames(d, out_dir):
     return [f.replace(".png", ".jpg") for f in files]
 
 
+def print_style(d):
+    """문장 점검(토스 라이팅 원칙, edith/style.py) — 경고만. 고칠지는 제작 세션이 판단한다."""
+    notes = style.lint(d)
+    if notes:
+        print("  ↘ 문장 점검(토스 라이팅 원칙 — RUNBOOK '짧고 세게') — 고칠 수 있으면 고쳐서 다시 빌드:")
+        for n in notes:
+            print(f"      {n}")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("date", help="YYYY-MM-DD (KST)")
@@ -95,6 +104,7 @@ def main():
         raise SystemExit(f"✗ 콘텐츠 검증 실패\n{e}")
     if args.check:
         print(f"✓ content/{args.date}.json 검증 통과 (VOL.{d['vol']}, 아이템 {len(d['all_items'])}개)")
+        print_style(d)
         return
 
     site_url = args.site_url or cfg["site_url"]
@@ -129,6 +139,7 @@ def main():
     shrunk = [c for c in card_report if c["k"] < 1 and not c["overflow"]]
     for c in shrunk:
         print(f"  ↘ {c['file']}: 글자 {round((1 - c['k']) * 100)}% 자동 축소 — 가능하면 문장을 줄이세요")
+    print_style(d)
     if d.get("format") == 2 and not d.get("rewind") and len(d["briefs"]) < content.BRIEFS_TARGET:
         note = "괜찮아요(확인된 소식이 부족한 날)" if len(d["briefs"]) >= content.BRIEFS_MIN_OK else "너무 적어요 — 확인된 소식을 더 찾아보세요"
         print(f"  ↘ 한 줄 뉴스 {len(d['briefs'])}개 — 목표 {content.BRIEFS_TARGET}개(메인 5 + 한 줄 뉴스 5 = 10개 주제). {note}")
