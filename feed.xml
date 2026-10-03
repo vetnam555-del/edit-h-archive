@@ -6,7 +6,14 @@
   <atom:link href="https://vetnam555-del.github.io/edit-h-archive/feed.xml" rel="self" type="application/rss+xml"/>
   <description>매일 아침 8시, 확인된 숫자로 읽는 트렌드 뉴스레터</description>
   <language>ko</language>
-  <lastBuildDate>Sat, 03 Oct 2026 08:00:00 +0900</lastBuildDate>
+  <lastBuildDate>Sun, 04 Oct 2026 08:00:00 +0900</lastBuildDate>
+  <item>
+    <title>VOL.103 카드 공제, 4분기엔 체크카드가 2배라고?</title>
+    <link>https://vetnam555-del.github.io/edit-h-archive/2026-10-04.html</link>
+    <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-10-04.html</guid>
+    <pubDate>Sun, 04 Oct 2026 08:00:00 +0900</pubDate>
+    <description>연말정산 카드 공제·금융권 해킹 확산·건보료 12회 분납·대형마트 반등·아시안게임 결산 — 오늘의 5가지</description>
+  </item>
   <item>
     <title>VOL.102 월 50만원 3년이면, 2255만원이라고?</title>
     <link>https://vetnam555-del.github.io/edit-h-archive/2026-10-03.html</link>
@@ -209,13 +216,6 @@
     <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-08-21.html</guid>
     <pubDate>Fri, 21 Aug 2026 08:00:00 +0900</pubDate>
     <description>생성형 AI 인용 출처 1위가 SNS(34.6%)로 나타난 AI 인용 최적화 과제와 마트 델리의 실적 견인, 환율 1300원대 복귀, 클로드의 단백질 설계 적중률 26.8%까지 읽은 10개 이슈</description>
-  </item>
-  <item>
-    <title>VOL.073 휴가 성수기가 — 9월로 옮겨갔다</title>
-    <link>https://vetnam555-del.github.io/edit-h-archive/2026-08-20.html</link>
-    <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-08-20.html</guid>
-    <pubDate>Thu, 20 Aug 2026 08:00:00 +0900</pubDate>
-    <description>8말9초 호텔 검색량 75% 증가로 깨진 7말8초 공식과 메가MGC의 스타벅스 결제액 94.9% 추격, 징둥 한국 구매법인 설립, 앤트로픽의 오픈AI 매출 첫 추월까지 읽은 10개 이슈</description>
   </item>
 </channel>
 </rss>
