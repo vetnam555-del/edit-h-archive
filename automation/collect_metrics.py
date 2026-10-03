@@ -31,6 +31,7 @@ from edith.common import AUTOMATION, CONTENT_DIR, load_config, now_kst, weekday_
 
 METRICS = AUTOMATION / "metrics"
 DAYS = 14
+FRESH_HOUR = "21"   # 이 시각(KST) 이후 스냅숏이 오늘 성과표(22:00 회고가 읽는다)
 INSIGHT_METRICS = "reach,saved,shares,views"
 REEL_WATCH_METRICS = "ig_reels_avg_watch_time,ig_reels_video_view_total_time"   # 밀리초 — 릴스 완주 정도를 가늠
 
@@ -368,8 +369,19 @@ def summary_md(snap):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--skip-if-fresh", action="store_true",
+                    help="오늘 21:00(KST) 이후 스냅숏이 이미 있으면 건너뛴다 — 일찍 걸어 둔 예약 실행이 겹칠 때")
     args = ap.parse_args()
     today = now_kst().date()
+    done = METRICS / "daily" / f"{today.isoformat()}.json"
+    if args.skip_if_fresh and done.exists():
+        at = json.loads(done.read_text(encoding="utf-8")).get("collected_at") or ""
+        failed = json.loads(done.read_text(encoding="utf-8")).get("failed") or []
+        if at[11:13] >= FRESH_HOUR and not failed:
+            print(f"오늘 {at[11:16]} 에 이미 모았습니다 — 건너뜀")
+            return
+        if failed:
+            print(f"오늘 {at[11:16]} 수집에서 {', '.join(failed)} 이(가) 실패했었습니다 — 다시 모읍니다")
     days = [(today - dt.timedelta(days=i)).isoformat() for i in range(DAYS)]
     issues = {d: f for d in days if (f := issue_facts(d))}
     snap = {"collected_at": now_kst().isoformat(timespec="minutes"), "issues": issues}
@@ -381,6 +393,7 @@ def main():
         except Exception as e:  # noqa: BLE001 — 한 곳이 막혀도 나머지는 모은다
             print(f"  {name}: 수집 실패({type(e).__name__}) — 이번엔 빼고 저장")
             snap[name] = None
+            snap.setdefault("failed", []).append(name)   # 다음 예약 실행·회고 수집 요청이 다시 모으게
     polls = {}
     for p in sorted((AUTOMATION / "polls").glob("20*.json")):
         t = json.loads(p.read_text(encoding="utf-8"))

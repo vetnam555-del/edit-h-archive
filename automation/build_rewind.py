@@ -84,8 +84,15 @@ def pool(date):
     return out
 
 
+def _solid(story):
+    """원칙 2(원 기사 2건 이상)를 채운 이야기인가."""
+    return len(story.get("sources") or []) >= 2
+
+
 def pick(date):
-    """(H PICK 후보, [아이템 4]) — 모자라면 ValueError."""
+    """(H PICK 후보, [아이템 4], 반응 근거가 있는가) — 모자라면 ValueError.
+    2026-10-03 회고: 9/30 예비 호가 이틀 전 한 호의 5개를 그대로 다시 실었고, 출처 1건짜리도 섞였다.
+    그래서 ① 출처 2건 이상을 먼저 ② 한 호에서 1개씩(모자라면 2개까지) 섞어 고르고, 둘 다 안 되면 조건을 하나씩 푼다."""
     scores = _scores()
     yesterday = (parse_date(date) - dt.timedelta(days=1)).isoformat()
     cands = pool(date)
@@ -96,23 +103,34 @@ def pick(date):
         stale = _stale(story.get("title"), story.get("body"), story.get("takeaway"), spec.get("headline"), spec.get("body"),
                        " ".join(story.get("paragraphs") or []))
         fresh = plain_title(c["title"] if is_pick else story["title"]) not in used
-        return (fresh, not stale, day != yesterday, scores.get(day, 0), day)
+        return (fresh, _solid(story), not stale, day != yesterday, scores.get(day, 0), day)
 
-    picks = sorted((x for x in cands if x[3]), key=rank, reverse=True)
+    # H PICK 은 출처 2건 이상을 먼저(지난 예비 호에 실렸어도) — 출처 기준이 '안 겹치기'보다 앞선다
+    picks = sorted((x for x in cands if x[3]), key=lambda x: (_solid(x[0]), rank(x)), reverse=True)
     if not picks:
         raise ValueError("H PICK 으로 쓸 형식 2 호(심층 포함)가 최근 3주 안에 없습니다")
     top = picks[0]
-    items, tags = [], {top[0]["tag"]}
-    for x in sorted((x for x in cands if not x[3]), key=rank, reverse=True):
-        if x[0]["tag"] in tags or any(x[0]["title"] == y[0]["title"] for y in items):
-            continue
-        items.append(x)
-        tags.add(x[0]["tag"])
+    ranked = sorted((x for x in cands if not x[3]), key=rank, reverse=True)
+    for per_issue, need_solid in ((1, True), (2, True), (2, False), (4, False)):
+        items, tags, per_day = [], {top[0]["tag"]}, {top[2]: 1}
+        for x in ranked:
+            if (x[0]["tag"] in tags or any(x[0]["title"] == y[0]["title"] for y in items)
+                    or per_day.get(x[2], 0) >= per_issue or (need_solid and not _solid(x[0]))):
+                continue
+            items.append(x)
+            tags.add(x[0]["tag"])
+            per_day[x[2]] = per_day.get(x[2], 0) + 1
+            if len(items) == 4:
+                break
         if len(items) == 4:
+            if not need_solid:
+                print("  ⚠ 예비 호: 출처 2건 이상인 이야기가 모자라 1건짜리를 섞었습니다")
             break
     if len(items) < 4:
         raise ValueError(f"다시 엮을 이야기가 모자랍니다(아이템 {len(items)}/4)")
-    return top, items, bool(scores)
+    # '반응이 좋았던'은 고른 다섯 이야기의 호 모두에 실제 반응(점수 > 0)이 있을 때만 쓴다(9/30: 모두 0인데 그렇게 썼다)
+    liked = all(scores.get(x[2], 0) > 0 for x in [top, *items])
+    return top, items, liked
 
 
 def build(date):

@@ -141,8 +141,14 @@ def main():
         print(f"  ↘ {c['file']}: 글자 {round((1 - c['k']) * 100)}% 자동 축소 — 가능하면 문장을 줄이세요")
     print_style(d)
     if d.get("format") == 2 and not d.get("rewind") and len(d["briefs"]) < content.BRIEFS_TARGET:
-        note = "괜찮아요(확인된 소식이 부족한 날)" if len(d["briefs"]) >= content.BRIEFS_MIN_OK else "너무 적어요 — 확인된 소식을 더 찾아보세요"
-        print(f"  ↘ 한 줄 뉴스 {len(d['briefs'])}개 — 목표 {content.BRIEFS_TARGET}개(메인 5 + 한 줄 뉴스 5 = 10개 주제). {note}")
+        # 2026-10-03 회고: '괜찮아요'라고 알려 줘서 10/2·10/3 이틀 연속 3개로 나갔다 — 원칙 1(5개)을 분명히 한다
+        print(f"  ↘ 한 줄 뉴스 {len(d['briefs'])}개 — 원칙 1은 {content.BRIEFS_TARGET}개(메인 5 + 한 줄 뉴스 5 = 10개 주제)."
+              " RUNBOOK 1-2 보강 소스(정부 보도자료·생활 제도 변경·교통·가격)로 한 번 더 찾고, 그래도 확인된 소식이 없으면"
+              " 6단계 보고 '한 줄 뉴스:' 줄에 사유를 적으세요")
+    thin = [f"{x.get('no', '?')} {str(x.get('title', ''))[:16]}" for x in d.get("all_items") or []
+            if len(x.get("sources") or []) < 2]
+    if d.get("format") == 2 and not d.get("rewind") and thin:
+        print(f"  ↘ 출처 1건뿐인 이야기: {', '.join(thin)} — 원칙 2(원 기사 2건 이상). 두 번째 원 기사를 찾아 sources 에 더하세요")
     if d.get("format") == 2 and not d.get("rewind") and files and not ((d.get("cards") or {}).get("cover") or {}).get("photo"):
         print("  ↘ 표지 사진 없음(핵심어 표지) — 2026-10-01 부터 실사 표지가 기본이에요. RUNBOOK '표지 사진'대로 검색어를 3개 이상 시도했는지 보고,"
               " 못 썼다면 6단계 보고 '표지:' 줄에 사유를 적으세요")
