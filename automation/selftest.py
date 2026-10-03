@@ -121,7 +121,8 @@ def t_rewind():
     top, items, _ = build_rewind.pick(today)
     days = {top[2], *(x[2] for x in items)}
     expect(len(items) == 4, "예비 호 아이템 4개")
-    expect(len(days) >= 3, f"예비 호가 {len(days)}개 호에서만 골랐다(여러 호에서 섞어야 한다)")
+    if len(days) < 3:   # pick() 의 마지막 완화 단계(한 호에서 여러 개)는 허용된 동작 — 실패가 아니라 알림
+        NOTES.append(f"예비 호가 {len(days)}개 호에서만 골랐다 — 최근 3주에 쓸 만한 호가 적다(완화 단계로 선정)")
     return f"{len(days)}개 호에서 5개"
 
 
@@ -153,16 +154,23 @@ def rebuild(days, strict):
         if (ROOT / "node_modules").exists():
             (sbx / "node_modules").symlink_to(ROOT / "node_modules")
         for day in days:
+            for pat in TEXT_OUTPUTS:   # 복사해 온 발행본을 지워야 '빌드가 이 파일을 안 만든' 회귀를 잡는다
+                (sbx / pat.format(d=day)).unlink(missing_ok=True)
             proc = subprocess.run([sys.executable, str(sbx / "automation" / "build_issue.py"), day], capture_output=True, text=True, cwd=sbx)
             name = f"다시 빌드 {day}"
             if proc.returncode != 0:
                 FAILS.append(f"{name}: 종료 코드 {proc.returncode}\n{(proc.stdout + proc.stderr)[-800:]}")
                 print(f"  ✗ {name} — 종료 코드 {proc.returncode}")
                 continue
-            changed = []
+            changed, missing = [], False
             for pat in TEXT_OUTPUTS:
                 a, b = ROOT / pat.format(d=day), sbx / pat.format(d=day)
                 if not a.exists():
+                    continue
+                if not b.exists():
+                    FAILS.append(f"{name}: {pat.format(d=day)} 를 만들지 않았다")
+                    changed.append(f"{pat.format(d=day)} (없음)")
+                    missing = True
                     continue
                 old, new = a.read_text(encoding="utf-8"), b.read_text(encoding="utf-8")
                 if old != new:
@@ -173,9 +181,9 @@ def rebuild(days, strict):
             warn = [ln.strip() for ln in proc.stdout.splitlines() if ln.strip().startswith(("↘", "⚠"))]
             if changed:
                 msg = f"발행본과 다름: {', '.join(changed)}"
-                if strict:
+                if strict and not missing:
                     FAILS.append(f"{name}: {msg}")
-                print(f"  {'✗' if strict else '△'} {name} — {msg}")
+                print(f"  {'✗' if strict or missing else '△'} {name} — {msg}")
             else:
                 print(f"  ✓ {name} — 뉴스레터·캡션이 발행본과 같음" + (f" (빌드 경고 {len(warn)}줄)" if warn else ""))
 

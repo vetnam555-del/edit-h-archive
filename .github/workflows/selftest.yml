@@ -4,11 +4,7 @@
 name: EDIT H selftest
 
 on:
-  pull_request:
-    paths:
-      - "automation/**.py"
-      - "automation/config.json"
-      - ".github/workflows/**"
+  pull_request:   # 모든 PR(경로 필터 없음 — 렌더러 .cjs·템플릿·설정 어디가 바뀌어도 돈다, 1분 남짓)
   workflow_dispatch:
 
 permissions:

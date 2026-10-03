@@ -105,7 +105,8 @@ def pick(date):
         fresh = plain_title(c["title"] if is_pick else story["title"]) not in used
         return (fresh, _solid(story), not stale, day != yesterday, scores.get(day, 0), day)
 
-    picks = sorted((x for x in cands if x[3]), key=rank, reverse=True)
+    # H PICK 은 출처 2건 이상을 먼저(지난 예비 호에 실렸어도) — 출처 기준이 '안 겹치기'보다 앞선다
+    picks = sorted((x for x in cands if x[3]), key=lambda x: (_solid(x[0]), rank(x)), reverse=True)
     if not picks:
         raise ValueError("H PICK 으로 쓸 형식 2 호(심층 포함)가 최근 3주 안에 없습니다")
     top = picks[0]

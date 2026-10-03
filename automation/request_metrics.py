@@ -11,6 +11,7 @@ collect-metrics.yml(push 트리거)을 돌리고, 새 성과표가 main 에 올�
 """
 import argparse
 import datetime as dt
+import json
 import re
 import subprocess
 import sys
@@ -56,9 +57,14 @@ def main():
     path = ROOT / SUMMARY
     have = collected_at(path.read_text(encoding="utf-8")) if path.exists() else None
     print(f"성과표 수집 시각: {have.isoformat(timespec='minutes') if have else '없음'} · 기준: {need.isoformat(timespec='minutes')} 이후")
-    if have and have >= need:
+    # 성과표를 만든 스냅숏(수집한 날)에 실패한 수집이 있었으면 신선해도 다시 모은다
+    snap = ROOT / "automation" / "metrics" / "daily" / f"{have.date().isoformat()}.json" if have else None
+    failed = (json.loads(snap.read_text(encoding="utf-8")).get("failed") or []) if snap and snap.exists() else []
+    if have and have >= need and not failed:
         print("✓ 신선함 — 요청하지 않음")
         return 0
+    if have and have >= need:
+        print(f"신선하지만 {', '.join(failed)} 수집이 실패했던 성과표 — 다시 요청")
     if args.check:
         print("✗ 오래됨")
         return 2
