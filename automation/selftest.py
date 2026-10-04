@@ -160,6 +160,8 @@ def t_gift():
     for grp in data["groups"]:
         for it in grp["items"]:
             expect((ROOT / f"{it['issue']}.html").exists(), f"선물 항목 '{it['do']}' 의 호 {it['issue']} 가 없다")
+    sub = (ROOT / "subscribe.html").read_text(encoding="utf-8")
+    expect(f'data-from="{g["from"]}" data-until="{g["until"]}"' in sub, "subscribe.html 선물 상자 날짜가 config.gift 와 다르다")
     gift = active_gift(g["from"])
     expect(gift and gift["url"].endswith(f"/gift/{g['slug']}.html"), "기간 첫날에 선물이 켜져야 한다")
     import sync_subscribers
