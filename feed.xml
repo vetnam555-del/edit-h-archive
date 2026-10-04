@@ -6,7 +6,14 @@
   <atom:link href="https://vetnam555-del.github.io/edit-h-archive/feed.xml" rel="self" type="application/rss+xml"/>
   <description>매일 아침 8시, 확인된 숫자로 읽는 트렌드 뉴스레터</description>
   <language>ko</language>
-  <lastBuildDate>Sun, 04 Oct 2026 08:00:00 +0900</lastBuildDate>
+  <lastBuildDate>Mon, 05 Oct 2026 08:00:00 +0900</lastBuildDate>
+  <item>
+    <title>VOL.104 전셋값 86주째, 39세도 청년 대출 된다고?</title>
+    <link>https://vetnam555-del.github.io/edit-h-archive/2026-10-05.html</link>
+    <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-10-05.html</guid>
+    <pubDate>Mon, 05 Oct 2026 08:00:00 +0900</pubDate>
+    <description>청년 전세대출보증 39세로·금융권 해킹 비상체제·1년 내 퇴사 60%·기차표 두 달 전 예매·코스피 7000 — 오늘의 5가지</description>
+  </item>
   <item>
     <title>VOL.103 카드 공제, 4분기엔 체크카드가 2배라고?</title>
     <link>https://vetnam555-del.github.io/edit-h-archive/2026-10-04.html</link>
@@ -209,13 +216,6 @@
     <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-08-24.html</guid>
     <pubDate>Mon, 24 Aug 2026 08:00:00 +0900</pubDate>
     <description>카카오 인적분할로 카톡·AI·광고·커머스가 순자산 36%의 신설법인에 묶인 재편과 폭염이 키운 퀵커머스, 입추 이튿날 트렌치코트 검색 465% 급증, 성인 독서율 38.5% 최저까지 읽은 10개 이슈</description>
-  </item>
-  <item>
-    <title>VOL.074 AI는 어디서 — 답을 가져올까?</title>
-    <link>https://vetnam555-del.github.io/edit-h-archive/2026-08-21.html</link>
-    <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-08-21.html</guid>
-    <pubDate>Fri, 21 Aug 2026 08:00:00 +0900</pubDate>
-    <description>생성형 AI 인용 출처 1위가 SNS(34.6%)로 나타난 AI 인용 최적화 과제와 마트 델리의 실적 견인, 환율 1300원대 복귀, 클로드의 단백질 설계 적중률 26.8%까지 읽은 10개 이슈</description>
   </item>
 </channel>
 </rss>
