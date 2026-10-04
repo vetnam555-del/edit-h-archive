@@ -195,6 +195,12 @@ content/YYYY-MM-DD.json 호마다의 원본 콘텐츠(출처 URL 포함)
   끄기: `config.series.from` 을 먼 미래로.
 - **저녁 릴스 캡션**(10/08~): '나머지 4가지는 아침에 올린 카드에' — 짧은 영상에서 카드·뉴스레터로 이어지게.
 
+## 구독 선물 (2026-10-05~, 실험 E5)
+
+- `automation/gifts/{slug}.json`(발행한 호의 확인된 사실만, 항목마다 그 호 날짜) → `python3 automation/build_gift.py` → `gift/{slug}.html`.
+- `config.gift`(slug·from·until) 기간 안이면 환영 메일 맨 앞(`sync_subscribers.welcome_message`)·인스타 캡션 마지막 안내 줄(`site.instagram_caption`)에 붙고,
+  `subscribe.html` 의 선물 상자는 until 이 지나면 스스로 숨는다. 내용을 고치면 build_gift.py 를 다시 돌린다(selftest 가 어긋남을 잡는다).
+
 ## 스레드(Threads) 자동 게시 (준비됨 — 토큰을 넣으면 시작)
 
 - `post-threads.yml`(매일 11:45 시작 → 12:30 게시, 13:40 예비) → `automation/post_threads.py`: 그날 호를 글(500자 안 — 질문 제목 →

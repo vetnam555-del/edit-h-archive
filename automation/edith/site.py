@@ -3,6 +3,7 @@ import json
 import re
 
 from .common import load_config, INDEX, MANIFEST, ROOT, esc, plain, send_time_ko
+from .gift import active_gift
 
 
 def update_manifest(d, site, n_cards, publish_time):
@@ -175,6 +176,11 @@ _LETTER = [
     "뉴스레터로 받아보시면 출처와 뒷이야기까지 볼 수 있어요. 매일 {when}, 프로필 링크에서 구독할 수 있어요.",
 ]
 # 한 줄 뉴스가 있는 날(메인 5가지 + 한 줄 뉴스 = 10개 주제)은 메일에만 있는 한 줄 뉴스를 구독 이유로 알린다.
+_LETTER_GIFT = [
+    "구독 선물: '{title}'({n}가지) — 프로필 링크에서 구독하면 환영 메일로 보내드려요.",
+    "프로필 링크에서 구독하면 '{title}'({n}가지)부터 보내드려요. 뉴스레터는 매일 {when}.",
+    "뉴스레터 구독 선물로 '{title}'({n}가지)를 준비했어요. 프로필 링크에서요.",
+]
 _LETTER_BRIEFS = [
     "메일로 받아보시면 한 줄 뉴스 {n}개가 더 있어요. 매일 {when}, 구독은 프로필 링크에서요.",
     "뉴스레터에는 한 줄 뉴스 {n}개와 출처까지 담았어요. {when}마다 보내드려요. (프로필 링크)",
@@ -242,6 +248,9 @@ def instagram_caption(d, site):
     n_briefs = len(d.get("briefs") or [])
     letter = (_pick(_LETTER_BRIEFS, d).format(n=n_briefs, when=_when(d)) if n_briefs
               else _pick(_LETTER, d).format(when=_when(d)))
+    gift = active_gift(d["date"])
+    if gift:   # 구독 선물(E5) 기간엔 뉴스레터 한 줄 대신 선물 안내 — 구독할 '지금 당장의 이유'
+        letter = _pick(_LETTER_GIFT, d).format(title=gift["title"], n=gift["count"], when=_when(d))
     if d.get("series"):   # 고정 연재 날: 다음 편 예고(같은 요일·같은 이름 — 기다릴 이유)
         lines += ["", _pick(_SERIES_LINE, d).format(wd=d["weekday"], name=d["series"]["name"])]
     lines += ["", letter, "— 에디터 H", "", _tags(d, ig.get("hashtags"))]

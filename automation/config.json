@@ -62,6 +62,12 @@
     },
     "keep_jpeg_days": 14
   },
+  "gift": {
+    "slug": "2026-q4",
+    "from": "2026-10-05",
+    "until": "2026-12-31",
+    "_note": "구독 선물(E5) — 환영 메일·구독 페이지·인스타 캡션에 붙는다. 내용은 automation/gifts/{slug}.json, 페이지는 build_gift.py. 끄려면 until 을 지난 날짜로"
+  },
   "series": {
     "name": "H의 장부",
     "weekday": "수",

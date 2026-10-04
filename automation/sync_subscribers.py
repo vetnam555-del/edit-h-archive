@@ -163,6 +163,13 @@ def welcome_message(sender, to_addr, cfg, now=None):
     unsub = f"{site}/unsubscribe.html?email={urllib.parse.quote(to_addr)}"
     insta = "https://www.instagram.com/edit.h.kr/"
     lead = "반응이 좋았던 지난 호" if by_score else "최근 호"
+    from edith.gift import active_gift
+    gift = active_gift(now.date().isoformat(), cfg)   # 구독 선물(E5) — 기간 안이면 맨 앞에
+    gift_txt = (f"구독 선물로 '{gift['title']}'({gift['count']}가지)를 준비했어요. 날짜별로 챙길 것만 모았어요.\n{gift['url']}\n\n"
+                if gift else "")
+    gift_html = (f'<p style="font-size:15px; line-height:1.8; color:#333; margin:0 0 18px; background:#F5F5EE; border-left:4px solid #B91C1C; '
+                 f'padding:12px 16px;">🎁 구독 선물 — <a href="{gift["url"]}" style="color:#B91C1C; font-weight:800; text-decoration:none;">'
+                 f'{html.escape(gift["title"])}</a>({gift["count"]}가지). 날짜별로 챙길 것만 모았어요.</p>' if gift else "")
 
     msg = EmailMessage()
     msg["Subject"] = f"{cfg['email']['subject_prefix']} 구독해 주셔서 고마워요 — {day} {when}에 만나요"
@@ -171,7 +178,7 @@ def welcome_message(sender, to_addr, cfg, now=None):
     msg["List-Unsubscribe"] = f"<{unsub}>"
     rows = [f"· VOL.{i['vol']} {i['title']}\n  {site}/{i['filename']}" for i in picks]
     msg.set_content(
-        "EDIT H를 구독해 주셔서 고마워요.\n\n"
+        "EDIT H를 구독해 주셔서 고마워요.\n\n" + gift_txt +
         f"{day} {when}에 첫 메일이 가요. 매일 아침, 알아두면 좋은 트렌드 5가지를 확인된 숫자로 정리하고 한 줄 뉴스 5개를 더해 보내드려요.\n"
         "그중 하나는 H PICK으로 조금 더 깊게 풀어요.\n\n"
         f"기다리는 동안 {lead}를 먼저 읽어보세요.\n" + "\n".join(rows) + "\n\n"
@@ -195,6 +202,7 @@ def welcome_message(sender, to_addr, cfg, now=None):
   <div style="font-size:34px; font-weight:900; letter-spacing:-1.5px;">EDIT<span style="color:#B91C1C;"> H</span></div>
   <div style="height:2px; background:#000; margin:18px 0 24px;"></div>
   <p style="font-size:19px; font-weight:800; margin:0 0 14px;">구독해 주셔서 고마워요.</p>
+  {gift_html}
   <p style="font-size:15px; line-height:1.8; color:#333; margin:0 0 12px;"><b>{day} {when}</b>에 첫 메일이 가요.
   매일 아침, 알아두면 좋은 트렌드 5가지를 확인된 숫자로 정리하고 한 줄 뉴스 5개를 더해 보내드려요. 그중 하나는 H PICK으로 조금 더 깊게 풀어요.</p>
   <p style="font-size:15px; line-height:1.8; color:#333; margin:18px 0 6px;">기다리는 동안 {lead}를 먼저 읽어보세요.</p>
