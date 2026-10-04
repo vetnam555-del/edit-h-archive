@@ -146,6 +146,32 @@ def t_threads():
     return f"{day[0]} 본문 {len(text)}자"
 
 
+def t_gift():
+    """구독 선물(E5): 페이지가 데이터와 맞고(build_gift.py 를 다시 돌렸는지), 기간 안의 환영 메일에 링크가 들어가는지."""
+    import build_gift
+    from edith.gift import active_gift
+    g = (load_config().get("gift") or {})
+    if not g.get("slug"):
+        return "선물 없음"
+    data = json.loads((AUTOMATION / "gifts" / f"{g['slug']}.json").read_text(encoding="utf-8"))
+    page = ROOT / "gift" / f"{g['slug']}.html"
+    expect(page.exists() and page.read_text(encoding="utf-8") == build_gift.render(data, load_config()["site_url"].rstrip("/")),
+           f"gift/{g['slug']}.html 이 데이터와 다르다 — python3 automation/build_gift.py 를 다시 돌리세요")
+    for grp in data["groups"]:
+        for it in grp["items"]:
+            expect((ROOT / f"{it['issue']}.html").exists(), f"선물 항목 '{it['do']}' 의 호 {it['issue']} 가 없다")
+    sub = (ROOT / "subscribe.html").read_text(encoding="utf-8")
+    expect(f'data-from="{g["from"]}" data-until="{g["until"]}"' in sub, "subscribe.html 선물 상자 날짜가 config.gift 와 다르다")
+    gift = active_gift(g["from"])
+    expect(gift and gift["url"].endswith(f"/gift/{g['slug']}.html"), "기간 첫날에 선물이 켜져야 한다")
+    import sync_subscribers
+    tz = now_kst().tzinfo
+    y, m, d = map(int, g["from"].split("-"))
+    msg = sync_subscribers.welcome_message("a@example.com", "b@example.com", load_config(), now=dt.datetime(y, m, d, 7, 10, tzinfo=tz))
+    expect(gift["url"] in msg.get_body(preferencelist=("plain",)).get_content(), "환영 메일에 선물 링크가 없다")
+    return f"{gift['title']} {gift['count']}가지"
+
+
 def rebuild(days, strict):
     """임시 복사본에서 다시 빌드해 글 결과물을 발행본과 비교한다."""
     with tempfile.TemporaryDirectory() as tmp:
@@ -203,6 +229,7 @@ def main():
     check("예비 호 고르기(build_rewind)", t_rewind)
     check("성과표(collect_metrics)", t_metrics)
     check("스레드 본문(post_threads)", t_threads)
+    check("구독 선물(gift)", t_gift)
     if not args.quick:
         rebuild(daily_issues(args.issues), args.strict)
     if NOTES:
