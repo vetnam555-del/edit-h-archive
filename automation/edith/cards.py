@@ -268,14 +268,15 @@ def issue_card(it, n):
     badge = (f'<div style="flex:none;width:60px;height:60px;border-radius:14px;background:{"#FFFFFF" if dark else TEXT};'
              f'color:{"#000000" if dark else "#FFFFFF"};display:flex;align-items:center;justify-content:center;'
              f'font-weight:600;font-size:32px;line-height:1;">{n}</div>')
-    pick = (f'<div style="margin-top:26px;font-weight:500;font-size:30px;line-height:1;color:#F5C84C;">'
+    # 검은 H PICK 카드는 '(H PICK · …)' 줄만큼 길어 9/29~10/4 5호 중 4호가 3% 자동 축소됐다 — 간격을 줄여 원래 크기로
+    pick = (f'<div style="margin-top:18px;font-weight:500;font-size:30px;line-height:1;color:#F5C84C;">'
             f'(H PICK · {esc(it.get("series_label") or "오늘의 핵심")})</div>') if dark else ""
     return _frame(f"""
 <div class="body" style="padding:0 80px 190px;justify-content:flex-end;align-items:center;text-align:center;">
   {bubble(it["tag"])}
   {hero}
   {tiles}
-  <div style="flex:none;height:38px;"></div>
+  <div style="flex:none;height:{20 if dark else 38}px;"></div>
   {badge}
   {pick}
   <div class="bal" style="margin-top:{22 if dark else 32}px;font-weight:700;font-size:{fs(56)};line-height:1.34;letter-spacing:-1px;color:{fg};">{mk(it["headline"], fg, dark)}</div>
