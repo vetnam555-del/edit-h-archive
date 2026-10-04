@@ -1,6 +1,21 @@
 {
- "collected_at": "2026-10-04T01:32+09:00",
+ "collected_at": "2026-10-04T22:09+09:00",
  "issues": {
+  "2026-10-04": {
+   "title": "카드 공제, 4분기엔 체크카드가 2배라고?",
+   "format": 2,
+   "pick_tag": "카드 소득공제",
+   "title_style": "질문형",
+   "cover": "사진",
+   "weekday": "일",
+   "poll": false,
+   "source_mode": "fallback",
+   "audience": "전체",
+   "series": "없음",
+   "reel_style": "세로",
+   "reel_seconds": 10.1,
+   "reel_slot": "아침"
+  },
   "2026-10-03": {
    "title": "월 50만원 3년이면, 2255만원이라고?",
    "format": 2,
@@ -153,8 +168,8 @@
   }
  },
  "instagram": {
-  "followers": 107,
-  "media": 83,
+  "followers": 113,
+  "media": 84,
   "insights": true,
   "posts": {
    "2026-09-25": {
@@ -258,10 +273,10 @@
    "2026-10-01": {
     "likes": 5,
     "comments": 0,
-    "reach": 16,
+    "reach": 17,
     "saved": 0,
     "shares": 0,
-    "views": 29,
+    "views": 31,
     "reel": {
      "likes": 0,
      "comments": 0,
@@ -274,12 +289,12 @@
     }
    },
    "2026-10-02": {
-    "likes": 6,
+    "likes": 7,
     "comments": 0,
-    "reach": 17,
+    "reach": 19,
     "saved": 0,
     "shares": 0,
-    "views": 37,
+    "views": 41,
     "reel": {
      "likes": 0,
      "comments": 0,
@@ -288,25 +303,43 @@
      "shares": 0,
      "views": 26,
      "seconds": 19.6,
-     "avg_watch_s": 3.2
+     "avg_watch_s": 3.1
     }
    },
    "2026-10-03": {
-    "likes": 1,
+    "likes": 2,
     "comments": 0,
-    "reach": 16,
+    "reach": 19,
     "saved": 0,
     "shares": 0,
-    "views": 53,
+    "views": 61,
     "reel": {
      "likes": 0,
      "comments": 0,
-     "reach": 109,
+     "reach": 110,
      "saved": 0,
      "shares": 0,
-     "views": 124,
+     "views": 129,
      "seconds": 10.1,
-     "avg_watch_s": 2.5
+     "avg_watch_s": 2.6
+    }
+   },
+   "2026-10-04": {
+    "likes": 0,
+    "comments": 0,
+    "reach": 8,
+    "saved": 0,
+    "shares": 0,
+    "views": 20,
+    "reel": {
+     "likes": 0,
+     "comments": 0,
+     "reach": 145,
+     "saved": 0,
+     "shares": 0,
+     "views": 154,
+     "seconds": 10.1,
+     "avg_watch_s": 1.5
     }
    }
   }
@@ -322,7 +355,8 @@
    "2026-09-30": 0,
    "2026-10-01": 0,
    "2026-10-02": 0,
-   "2026-10-03": 0
+   "2026-10-03": 0,
+   "2026-10-04": 0
   },
   "signups_14d": 0,
   "unsubs_14d": 0,
