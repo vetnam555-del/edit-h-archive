@@ -17,6 +17,7 @@ on:
       - Fetch reel music
       - Post EDIT H to Threads
       - EDIT H reserve issue
+      - EDIT H evening chain
     types: [completed]
   schedule:
     # GitHub 예약은 2~4시간 늦는다(10/4: 08:40 점검이 11:50, 22:25 점검이 02:26 에 돌았다) — 지연 폭보다 앞서 두 번씩 걸고

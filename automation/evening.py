@@ -43,16 +43,17 @@ def schedule(day, cfg=None):
     has_issue = (ROOT / f"{day}.html").exists()
     content = CONTENT_DIR / f"{day}.json"
     rewind = has_issue and content.exists() and bool(json.loads(content.read_text(encoding="utf-8")).get("rewind"))
+    ig = cfg.get("instagram") or {}
+    auto = ig.get("auto_post", True)   # 인스타 자동 게시를 끈 동안엔 사슬도 게시하지 않는다(수동 key 실행과 구분)
     ws = cfg.get("weekly_special") or {}
-    if (ws.get("enabled_from") and day >= ws["enabled_from"] and weekday_ko(parse_date(day)) == ws.get("weekday", "금")
+    if (auto and ws.get("enabled_from") and day >= ws["enabled_from"] and weekday_ko(parse_date(day)) == ws.get("weekday", "금")
             and (CONTENT_DIR / "weekly" / f"{day}.json").exists()):   # 07:00 루틴이 주간 특집 원고를 올린 날만
         out.append((_at(day, "18:00"), "주간 특집", "post-instagram.yml", {"mode": "post", "key": f"{day}-weekly", "only": "both"}))
-    ig = cfg.get("instagram") or {}
-    if has_issue and not rewind and ig.get("reel_time_kst") and ig.get("reel_evening_from") and day >= ig["reel_evening_from"]:
+    if auto and has_issue and not rewind and ig.get("reel_time_kst") and ig.get("reel_evening_from") and day >= ig["reel_evening_from"]:
         reel = _at(day, ig["reel_time_kst"])
         out.append((reel, "저녁 릴스", "post-instagram.yml", {"mode": "post", "key": day, "only": "reel"}))
         out.append((reel + dt.timedelta(minutes=CHECK_AFTER), "저녁 점검", "alerts.yml", {"mode": "watch", "date": day}))
-    out.append((_at(day, METRICS_AT), "성과 수집", "collect-metrics.yml", {}))
+    out.append((_at(day, METRICS_AT), "성과 수집", "collect-metrics.yml", {"skip_if_fresh": "true"}))   # 예약이 제때 모았으면 건너뜀
     return sorted(out, key=lambda x: x[0])
 
 

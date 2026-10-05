@@ -18,6 +18,10 @@ on:
         description: "모으기만 하고 저장하지 않음"
         type: boolean
         default: false
+      skip_if_fresh:
+        description: "마지막 21:00 이후 이미 모았으면 건너뜀(저녁 일정 사슬이 켠다)"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -42,11 +46,12 @@ jobs:
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
           SUBSCRIBERS: ${{ secrets.SUBSCRIBERS }}
           IN_DRY: ${{ inputs.dry_run }}
+          IN_SKIP: ${{ inputs.skip_if_fresh }}
           EVENT: ${{ github.event_name }}
         run: |
           git pull --ff-only origin main || true   # 늦게 도는 예약이면 그사이 다른 실행이 모았을 수 있다
           if [ "$IN_DRY" = "true" ]; then python3 automation/collect_metrics.py --dry-run
-          elif [ "$EVENT" = "schedule" ]; then python3 automation/collect_metrics.py --skip-if-fresh
+          elif [ "$EVENT" = "schedule" ] || [ "$IN_SKIP" = "true" ]; then python3 automation/collect_metrics.py --skip-if-fresh
           else python3 automation/collect_metrics.py; fi
 
       - name: Record metrics

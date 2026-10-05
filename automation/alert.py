@@ -46,6 +46,10 @@ WHAT = {
     "Tally EDIT H poll": ("독자 투표 집계", "내일 06:20 에 다시 셉니다. 결과 공개일(금)에 실패하면 그날은 결과 없이 발행됩니다."),
     "Collect EDIT H metrics": ("성과 수집", "회고·제작은 직전 성과표로 진행하고, 다음 수집 때 따라잡습니다."),
     "Fetch reel music": ("릴스 음원 받기", "기존 음원으로 릴스를 만듭니다. 급하지 않아요."),
+    "EDIT H evening chain": (
+        "저녁 일정(18:00 주간 특집·19:30 저녁 릴스·20:45 점검·21:30 성과 수집)",
+        "늦게 도는 예비 예약이 같은 일을 몇 시간 뒤에 합니다. 릴스가 급하면 Actions → Post EDIT H to Instagram 을 "
+        "mode=post, only=reel 로 직접 실행하세요. 다음 날 08:20 점검 루틴도 빠진 릴스를 올립니다."),
     "Post EDIT H to Threads": ("스레드 게시", "13:40 예비 실행이 한 번 더 시도합니다. 계속 실패하면 THREADS_ACCESS_TOKEN 이 만료됐을 수 있어요"
                                "(automation/OWNER_TODO.md 순서로 새 토큰)."),
     "EDIT H reserve issue": ("예비 호 발행", "오늘 호가 없는 채로 남았을 수 있어요. 08:20 점검 루틴이 확인하고, 필요하면 Actions → EDIT H reserve issue 를 "
