@@ -1,6 +1,21 @@
 {
- "collected_at": "2026-10-05T01:54+09:00",
+ "collected_at": "2026-10-05T21:30+09:00",
  "issues": {
+  "2026-10-05": {
+   "title": "전셋값 86주째, 39세도 청년 대출 된다고?",
+   "format": 2,
+   "pick_tag": "청년 전세대출",
+   "title_style": "질문형",
+   "cover": "핵심어",
+   "weekday": "월",
+   "poll": true,
+   "source_mode": "fallback",
+   "audience": "전체",
+   "series": "없음",
+   "reel_style": "세로",
+   "reel_seconds": 10.1,
+   "reel_slot": "아침"
+  },
   "2026-10-04": {
    "title": "카드 공제, 4분기엔 체크카드가 2배라고?",
    "format": 2,
@@ -168,8 +183,8 @@
   }
  },
  "instagram": {
-  "followers": 115,
-  "media": 84,
+  "followers": 124,
+  "media": 85,
   "insights": true,
   "posts": {
    "2026-09-25": {
@@ -183,10 +198,10 @@
    "2026-09-26": {
     "likes": 0,
     "comments": 0,
-    "reach": 22,
+    "reach": 23,
     "saved": 0,
     "shares": 0,
-    "views": 67,
+    "views": 68,
     "reel": {
      "likes": 0,
      "comments": 0,
@@ -201,10 +216,10 @@
    "2026-09-27": {
     "likes": 1,
     "comments": 0,
-    "reach": 11,
+    "reach": 12,
     "saved": 0,
     "shares": 0,
-    "views": 20,
+    "views": 21,
     "reel": {
      "likes": 0,
      "comments": 0,
@@ -219,10 +234,10 @@
    "2026-09-28": {
     "likes": 1,
     "comments": 0,
-    "reach": 10,
+    "reach": 11,
     "saved": 0,
     "shares": 0,
-    "views": 22,
+    "views": 24,
     "reel": {
      "likes": 0,
      "comments": 0,
@@ -235,12 +250,12 @@
     }
    },
    "2026-09-29": {
-    "likes": 2,
+    "likes": 4,
     "comments": 0,
-    "reach": 21,
+    "reach": 23,
     "saved": 0,
     "shares": 0,
-    "views": 45,
+    "views": 47,
     "reel": {
      "likes": 0,
      "comments": 0,
@@ -253,12 +268,12 @@
     }
    },
    "2026-09-30": {
-    "likes": 3,
+    "likes": 4,
     "comments": 0,
-    "reach": 14,
+    "reach": 15,
     "saved": 0,
     "shares": 0,
-    "views": 28,
+    "views": 29,
     "reel": {
      "likes": 0,
      "comments": 0,
@@ -271,12 +286,12 @@
     }
    },
    "2026-10-01": {
-    "likes": 5,
+    "likes": 6,
     "comments": 0,
-    "reach": 17,
+    "reach": 19,
     "saved": 0,
     "shares": 0,
-    "views": 31,
+    "views": 33,
     "reel": {
      "likes": 0,
      "comments": 0,
@@ -289,12 +304,12 @@
     }
    },
    "2026-10-02": {
-    "likes": 7,
+    "likes": 8,
     "comments": 0,
-    "reach": 19,
+    "reach": 20,
     "saved": 0,
     "shares": 0,
-    "views": 41,
+    "views": 42,
     "reel": {
      "likes": 0,
      "comments": 0,
@@ -307,12 +322,12 @@
     }
    },
    "2026-10-03": {
-    "likes": 2,
+    "likes": 5,
     "comments": 0,
-    "reach": 20,
+    "reach": 24,
     "saved": 0,
     "shares": 0,
-    "views": 63,
+    "views": 70,
     "reel": {
      "likes": 0,
      "comments": 0,
@@ -325,12 +340,12 @@
     }
    },
    "2026-10-04": {
-    "likes": 0,
+    "likes": 2,
     "comments": 0,
-    "reach": 10,
+    "reach": 14,
     "saved": 0,
     "shares": 0,
-    "views": 25,
+    "views": 30,
     "reel": {
      "likes": 0,
      "comments": 0,
@@ -340,6 +355,24 @@
      "views": 154,
      "seconds": 10.1,
      "avg_watch_s": 1.5
+    }
+   },
+   "2026-10-05": {
+    "likes": 2,
+    "comments": 0,
+    "reach": 10,
+    "saved": 0,
+    "shares": 0,
+    "views": 24,
+    "reel": {
+     "likes": 1,
+     "comments": 1,
+     "reach": 139,
+     "saved": 0,
+     "shares": 0,
+     "views": 148,
+     "seconds": 10.1,
+     "avg_watch_s": 1.7
     }
    }
   }
@@ -356,7 +389,8 @@
    "2026-10-01": 0,
    "2026-10-02": 0,
    "2026-10-03": 0,
-   "2026-10-04": 0
+   "2026-10-04": 0,
+   "2026-10-05": 0
   },
   "signups_14d": 0,
   "unsubs_14d": 0,
@@ -368,6 +402,7 @@
   "excluded": 1
  },
  "polls": {
-  "2026-09-28": 0
+  "2026-09-28": 0,
+  "2026-10-05": 0
  }
 }
