@@ -1,0 +1,73 @@
+# EDIT H 저녁 일정 사슬 — 낮·저녁 GitHub 예약(cron)은 3~6시간씩 늦게 돈다(2026-10-05 실측: 18:20 릴스 예약 → 23시대, 21:30 수집 → 01~02시).
+# 그래서 아침에 제시간에 오는 '오늘 호 push'(07:20 안팎)에서 출발해, 대기 작업을 이어 17:30 까지 기다린 뒤
+# 18:00 주간 특집 · 19:30 저녁 릴스 · 20:45 저녁 점검 · 21:30 성과 수집을 그 시각에 workflow_dispatch 로 실행한다(automation/evening.py).
+# GitHub 작업 하나는 6시간까지라 대기를 셋으로 나눴다. 기존 예약 실행은 예비로 남겨 둔다(기록이 있으면 건너뜀).
+name: EDIT H evening chain
+
+on:
+  push:
+    branches: [main]
+    paths: ["20[0-9][0-9]-[0-9][0-9]-[0-9][0-9].html"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: write   # 다른 워크플로를 workflow_dispatch 로 실행
+
+concurrency:
+  group: evening-chain
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      go: ${{ steps.plan.outputs.go }}
+      date: ${{ steps.plan.outputs.date }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          sparse-checkout: |
+            automation
+            content
+      - id: plan
+        run: python3 automation/evening.py plan
+
+  wait1:
+    needs: plan
+    if: needs.plan.outputs.go == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: automation
+      - run: python3 automation/evening.py sleep --date "${{ needs.plan.outputs.date }}" --until 17:30 --max-min 350
+
+  wait2:
+    needs: [plan, wait1]
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: automation
+      - run: python3 automation/evening.py sleep --date "${{ needs.plan.outputs.date }}" --until 17:30 --max-min 350
+
+  run:
+    needs: [plan, wait2]
+    runs-on: ubuntu-latest
+    timeout-minutes: 300   # 17:30 → 21:30 수집까지 240분
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          sparse-checkout: |
+            automation
+            content
+      - name: Evening schedule
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 automation/evening.py run --date "${{ needs.plan.outputs.date }}"

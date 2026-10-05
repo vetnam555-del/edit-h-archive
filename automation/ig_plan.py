@@ -4,6 +4,8 @@
 릴스 저녁 게시(2026-10-02 성장 검토 — 릴스는 19~21시가 강하다는 자료, 캐러셀과 2분 간격으로 같은 그림을 두 번 올리지 않게):
 config.instagram.reel_time_kst(예 "19:30")와 reel_evening_from(시작일)이 있고 오늘이 시작일 이후면
 아침 실행(예약·push)은 캐러셀만, 저녁 예약 실행은 reel_time_kst 까지 기다렸다 릴스만 올린다. 아니면 예전처럼 아침에 둘 다.
+저녁 예약은 실제로 3~6시간 늦게 돌아서(2026-10-05 실측) 19:30 게시는 저녁 일정 사슬(evening.py)이 수동 실행(workflow_dispatch)으로 하고,
+저녁 예약은 예비로 남는다(이미 올렸으면 게시 스크립트가 건너뛴다).
 
   python3 automation/ig_plan.py <event> "<cron>"     # GITHUB_OUTPUT 에 kind·at·only·skip 을 쓴다(없으면 출력만)
 """

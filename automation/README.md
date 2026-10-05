@@ -135,7 +135,7 @@ content/YYYY-MM-DD.json 호마다의 원본 콘텐츠(출처 URL 포함)
 ## 매일 발전하는 고리 (2026-09-25~)
 
 ```
-21:30  collect-metrics.yml(18:13·19:43 에 일찍 걸고 21:30 까지 대기)  → automation/metrics/summary.md (최근 14호 성과표: 인스타 좋아요·댓글[권한 있으면 도달·저장·공유],
+21:30  collect-metrics.yml(저녁 일정 사슬 evening.yml 이 제시간에 실행 — 예약은 예비)  → automation/metrics/summary.md (최근 14호 성과표: 인스타 좋아요·댓글[권한 있으면 도달·저장·공유],
                                팔로워, 메일 답장·구독 신청·수신 거부, 발송 대상 수, 투표 참여, 제목 유형·표지·요일별 평균)
        (예약 실행이 늦으면 22:00 회고가 request_metrics.py 로 request.txt 를 푸시해 바로 돌리고 새 성과표를 기다린다)
 22:00  편집 회고(Claude, 발행 세션) → automation/learnings.md: 회고 기록 + '지금 원칙'(근거 3호 이상일 때만 변경) + 가설 + 개선 요청
@@ -194,6 +194,13 @@ content/YYYY-MM-DD.json 호마다의 원본 콘텐츠(출처 URL 포함)
   content 에 `"series": {"name": "H의 장부"}` 만 쓰면 회차·표지 머리말·H PICK 카드·릴스 첫 화면·뉴스레터 칩·캡션 '다음 편 예고'가 자동.
   끄기: `config.series.from` 을 먼 미래로.
 - **저녁 릴스 캡션**(10/08~): '나머지 4가지는 아침에 올린 카드에' — 짧은 영상에서 카드·뉴스레터로 이어지게.
+
+## 저녁 일정 사슬 (2026-10-05~, `.github/workflows/evening.yml` · `automation/evening.py`)
+
+GitHub 예약(cron)은 아침(05~09시)엔 0~3시간, 낮·저녁엔 3~6시간 늦게 돈다(10/1~10/5 실측). 그래서 시각이 중요한 저녁 일은
+**오늘 호 push(07:20 안팎, 제시간)** 에서 출발한 사슬이 17:30 까지 기다렸다가(작업 하나 6시간 제한이라 대기 작업 둘)
+18:00 금요일 주간 특집 · 19:30 저녁 릴스 · 20:45 저녁 점검 · 21:30 성과 수집을 workflow_dispatch 로 바로 실행한다.
+기존 예약은 예비로 남고, 이미 한 일은 기록을 보고 건너뛴다. 확인: `python3 automation/evening.py run --date YYYY-MM-DD --dry-run`.
 
 ## 구독 선물 (2026-10-05~, 실험 E5)
 
