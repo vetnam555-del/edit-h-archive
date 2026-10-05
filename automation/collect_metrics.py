@@ -366,22 +366,34 @@ def summary_md(snap):
     return "\n".join(lines) + "\n"
 
 
+def latest_fresh(now=None):
+    """(collected_at, failed) — 가장 최근 '21:00(KST) 경계' 뒤에 모은 스냅숏이 있으면. 없으면 None.
+    자정을 넘겨 도는 늦은 예약 실행도 전날 밤 수집을 알아보게 날짜 파일이 아니라 수집 시각으로 본다(10/4 01:54 중복 수집)."""
+    now = now or now_kst()
+    edge = now.replace(hour=int(FRESH_HOUR), minute=0, second=0, microsecond=0)
+    if now < edge:
+        edge -= dt.timedelta(days=1)
+    for p in sorted((METRICS / "daily").glob("*.json"), reverse=True)[:3]:
+        snap = json.loads(p.read_text(encoding="utf-8"))
+        at = snap.get("collected_at") or ""
+        if at and dt.datetime.fromisoformat(at) >= edge:
+            return at, snap.get("failed") or []
+    return None
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--skip-if-fresh", action="store_true",
-                    help="오늘 21:00(KST) 이후 스냅숏이 이미 있으면 건너뛴다 — 일찍 걸어 둔 예약 실행이 겹칠 때")
+                    help="마지막 21:00(KST) 이후 스냅숏이 이미 있으면 건너뛴다 — 늦게 도는 예약 실행이 겹칠 때")
     args = ap.parse_args()
     today = now_kst().date()
-    done = METRICS / "daily" / f"{today.isoformat()}.json"
-    if args.skip_if_fresh and done.exists():
-        at = json.loads(done.read_text(encoding="utf-8")).get("collected_at") or ""
-        failed = json.loads(done.read_text(encoding="utf-8")).get("failed") or []
-        if at[11:13] >= FRESH_HOUR and not failed:
-            print(f"오늘 {at[11:16]} 에 이미 모았습니다 — 건너뜀")
+    if args.skip_if_fresh and (fresh := latest_fresh()):
+        at, failed = fresh
+        if not failed:
+            print(f"{at[5:16]} 에 이미 모았습니다(마지막 21:00 이후) — 건너뜀")
             return
-        if failed:
-            print(f"오늘 {at[11:16]} 수집에서 {', '.join(failed)} 이(가) 실패했었습니다 — 다시 모읍니다")
+        print(f"{at[5:16]} 수집에서 {', '.join(failed)} 이(가) 실패했었습니다 — 다시 모읍니다")
     days = [(today - dt.timedelta(days=i)).isoformat() for i in range(DAYS)]
     issues = {d: f for d in days if (f := issue_facts(d))}
     snap = {"collected_at": now_kst().isoformat(timespec="minutes"), "issues": issues}

@@ -17,12 +17,14 @@ on:
       - Fetch reel music
       - Post EDIT H to Threads
       - EDIT H reserve issue
+      - EDIT H evening chain
     types: [completed]
   schedule:
     # GitHub 예약은 2~4시간 늦는다(10/4: 08:40 점검이 11:50, 22:25 점검이 02:26 에 돌았다) — 지연 폭보다 앞서 두 번씩 걸고
     # 점검 시각까지 기다린다(wait 작업 — 점검 동시 실행 묶음 밖이라 수동 점검을 막지 않는다).
     - cron: "43 18 * * *"    # KST 03:43 → 08:40 까지 대기
     - cron: "13 20 * * *"    # KST 05:13 → 08:40 까지 대기(앞 예약이 빠졌을 때)
+    # 저녁 점검(릴스 확인)은 저녁 일정 사슬(evening.yml)이 20:45 에 workflow_dispatch 로 돌린다 — 아래 저녁 예약 둘과 22:25 는 예비(4~6시간 늦다).
     - cron: "43 8 * * *"     # KST 17:43 → 22:25 까지 대기
     - cron: "13 10 * * *"    # KST 19:13 → 22:25 까지 대기
     - cron: "40 23 * * *"    # UTC 23:40 = KST 08:40 매일

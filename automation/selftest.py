@@ -172,6 +172,21 @@ def t_gift():
     return f"{gift['title']} {gift['count']}가지"
 
 
+def t_evening():
+    """저녁 일정 사슬(evening.py): 매일 21:30 수집, 저녁 릴스 기간이면 19:30 릴스·20:45 점검. dispatch 대상 워크플로에 workflow_dispatch 가 있는지."""
+    import evening
+    day = daily_issues(1)[0]
+    items = {name: (t.strftime("%H:%M"), wf) for t, name, wf, _ in evening.schedule(day)}
+    expect(items.get("성과 수집", ("",))[0] == evening.METRICS_AT, "성과 수집이 21:30 일정에 없다")
+    ig = load_config().get("instagram") or {}
+    if ig.get("reel_evening_from") and day >= ig["reel_evening_from"]:
+        expect(items.get("저녁 릴스", ("",))[0] == ig.get("reel_time_kst"), "저녁 릴스가 reel_time_kst 일정에 없다")
+    for _, wf in items.values():
+        text = (ROOT / ".github" / "workflows" / wf).read_text(encoding="utf-8")
+        expect("workflow_dispatch:" in text, f"{wf} 에 workflow_dispatch 가 없어 사슬이 실행할 수 없다")
+    return f"{day}: " + ", ".join(f"{t} {n}" for n, (t, _) in sorted(items.items(), key=lambda kv: kv[1][0]))
+
+
 def rebuild(days, strict):
     """임시 복사본에서 다시 빌드해 글 결과물을 발행본과 비교한다."""
     with tempfile.TemporaryDirectory() as tmp:
@@ -230,6 +245,7 @@ def main():
     check("성과표(collect_metrics)", t_metrics)
     check("스레드 본문(post_threads)", t_threads)
     check("구독 선물(gift)", t_gift)
+    check("저녁 일정 사슬(evening)", t_evening)
     if not args.quick:
         rebuild(daily_issues(args.issues), args.strict)
     if NOTES:

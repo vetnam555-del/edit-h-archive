@@ -397,6 +397,8 @@ def main():
     ap.add_argument("--probe-trial", action="store_true",
                     help="트라이얼 릴스(trial_params)를 API 가 받는지 확인만 — 게시하지 않는 컨테이너 하나를 만들고 끝낸다")
     args = ap.parse_args()
+    if args.key and args.key.endswith("-weekly"):
+        args.kind = "weekly"   # 수동 실행·저녁 일정 사슬이 key 로 주간 특집을 지정해도 주간 규칙(weekly_reel 등)을 따른다
 
     cfg_all = load_config()
     cfg = cfg_all.get("instagram") or {}
