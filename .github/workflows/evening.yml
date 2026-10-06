@@ -20,7 +20,7 @@ concurrency:
 
 jobs:
   plan:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 5
     outputs:
       go: ${{ steps.plan.outputs.go }}
@@ -38,7 +38,7 @@ jobs:
   wait1:
     needs: plan
     if: needs.plan.outputs.go == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 360
     steps:
       - uses: actions/checkout@v4
@@ -48,7 +48,7 @@ jobs:
 
   wait2:
     needs: [plan, wait1]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 360
     steps:
       - uses: actions/checkout@v4
@@ -58,7 +58,7 @@ jobs:
 
   run:
     needs: [plan, wait2]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 300   # 17:30 → 21:30 수집까지 240분
     steps:
       - uses: actions/checkout@v4

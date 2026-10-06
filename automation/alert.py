@@ -83,19 +83,56 @@ def send_mail(subject, body, dry=False):
     return True
 
 
-def failed_steps(run_id):
-    """실패한 작업·단계 이름. 권한이 없거나 막히면 빈 목록."""
+def _api(method, path):
+    """GitHub API(GITHUB_TOKEN) — 응답 JSON(본문이 없으면 {}). 권한이 없거나 막히면 None."""
     repo, token = os.environ.get("GITHUB_REPOSITORY", ""), os.environ.get("GITHUB_TOKEN", "")
-    if not (repo and token and run_id):
-        return []
-    req = urllib.request.Request(f"https://api.github.com/repos/{repo}/actions/runs/{run_id}/jobs",
+    if not (repo and token):
+        return None
+    req = urllib.request.Request(f"https://api.github.com/repos/{repo}/{path}", method=method,
+                                 data=b"{}" if method == "POST" else None,
                                  headers={"Authorization": f"Bearer {token}", "Accept": "application/vnd.github+json"})
     try:
         with urllib.request.urlopen(req, timeout=20) as r:
-            jobs = json.loads(r.read()).get("jobs", [])
-    except (urllib.error.URLError, OSError, ValueError):
-        return []
+            body = r.read()
+    except (urllib.error.URLError, OSError):
+        return None
+    try:
+        return json.loads(body) if body else {}
+    except ValueError:
+        return None
+
+
+def run_jobs(run_id):
+    """그 실행(마지막 시도)의 작업 목록. 권한이 없거나 막히면 빈 목록."""
+    data = _api("GET", f"actions/runs/{run_id}/jobs") if run_id else None
+    return (data or {}).get("jobs", [])
+
+
+def failed_steps(jobs):
+    """실패한 단계 이름."""
     return [s["name"] for j in jobs for s in j.get("steps", []) if s.get("conclusion") in ("failure", "timed_out")]
+
+
+def never_started(jobs):
+    """GitHub 가 실행할 서버(러너)를 못 잡아 단계 하나 돌지 못하고 끝난 실패인가 — 코드·토큰 문제가 아니다.
+    2026-10-06 05:36 성과 수집 예약: 'The job was not acquired by Runner of type hosted even after multiple attempts'
+    (실행은 failure, 작업은 cancelled·단계 0·러너 없음)."""
+    bad = [j for j in jobs if j.get("conclusion") in ("failure", "cancelled", "timed_out")]
+    return bool(bad) and all(not j.get("steps") and not j.get("runner_name") for j in bad)
+
+
+def already_done(name):
+    """실패한 실행이 하려던 일을 다른 실행이 이미 끝냈는가. 성과 수집: 저녁 사슬이 21:30 에 모은 뒤 늦게 도는 예비 예약(10/6 05:36)."""
+    if name == "Collect EDIT H metrics":
+        import collect_metrics
+        fresh = collect_metrics.latest_fresh()
+        return bool(fresh) and not fresh[1]
+    return False
+
+
+def rerun(run_id):
+    """그 실행을 한 번 다시 돌린다(actions: write). 발송·게시·수집은 기록을 보고 이미 한 일을 건너뛰어서 다시 돌려도 겹치지 않는다."""
+    return bool(run_id) and _api("POST", f"actions/runs/{run_id}/rerun") is not None
 
 
 def busy():
@@ -118,20 +155,37 @@ def busy():
 def failed():
     name = os.environ.get("RUN_NAME", "(알 수 없는 작업)")
     what, todo = WHAT.get(name, (name, "GitHub Actions 에서 실행 기록을 확인해 주세요."))
+    run_id = os.environ.get("RUN_ID", "")
+    jobs = run_jobs(run_id)
+    # GitHub 서버 문제로 시작도 못 한 실패: 일이 이미 끝났으면 조용히, 아니면 한 번 다시 돌리고 그것도 못 시작하면 그때 알린다
+    infra = never_started(jobs)
+    retried = int(os.environ.get("RUN_ATTEMPT") or 1) >= 2
+    if infra:
+        if already_done(name):
+            print(f"{name}: GitHub 서버(러너)를 못 잡아 시작하지 못했지만 할 일은 이미 끝났다 — 알리지 않음")
+            return 0
+        if not retried and rerun(run_id):
+            print(f"{name}: GitHub 서버(러너)를 못 잡아 시작하지 못함 — 한 번 다시 실행했다(그것도 실패하면 알린다)")
+            return 0
     started = os.environ.get("RUN_STARTED", "")
     try:
         started = dt.datetime.fromisoformat(started.replace("Z", "+00:00")).astimezone(now_kst().tzinfo).strftime("%m/%d %H:%M")
     except ValueError:
         pass
     how = {"schedule": "예약 실행", "push": "원고 푸시", "workflow_dispatch": "수동·점검 실행"}.get(os.environ.get("RUN_EVENT", ""), "")
-    steps = failed_steps(os.environ.get("RUN_ID", ""))
+    steps = failed_steps(jobs)
     conclusion = {"timed_out": "시간 초과", "startup_failure": "시작 실패"}.get(os.environ.get("RUN_CONCLUSION", ""), "실패")
-    lines = [f"[{what}] 작업이 {conclusion}로 끝났습니다.", "",
-             f"· 작업: {name}" + (f" ({how})" if how else "")]
+    head = f"[{what}] 작업이 {conclusion}로 끝났습니다."
+    if infra:
+        conclusion, head = "시작 못 함(GitHub 서버 문제)", f"[{what}] GitHub 서버 문제로 작업이 시작되지 못했습니다."
+    lines = [head, "", f"· 작업: {name}" + (f" ({how})" if how else "")]
     if started:
         lines.append(f"· 시작: {started} (KST)")
     if steps:
         lines.append(f"· 실패한 단계: {', '.join(steps)}")
+    if infra:
+        lines.append("· 원인: GitHub 가 실행할 서버를 잡지 못해 단계 하나 돌지 못했습니다(코드·토큰 문제 아님). "
+                     + ("자동으로 다시 실행해도 같았어요." if retried else "자동 다시 실행을 요청하지 못했어요 — 실행 기록에서 Re-run 을 눌러 주세요."))
     lines += [f"· 실행 기록: {os.environ.get('RUN_URL', '')}", "", f"다음에 일어나는 일 / 할 일: {todo}"]
     send_mail(f"{SUBJECT} · {what} {conclusion}", "\n".join(lines))
     return 0

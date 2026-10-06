@@ -15,9 +15,12 @@
 저장소 파일은 바꾸지 않는다(빌드는 임시 폴더에서). 끝에 '✓ 자동 점검 통과' 또는 실패 목록을 찍고, 실패가 있으면 1 로 끝난다.
 """
 import argparse
+import contextlib
 import datetime as dt
 import difflib
+import io
 import json
+import os
 import py_compile
 import re
 import shutil
@@ -93,7 +96,47 @@ def t_alert():
     tz = now_kst().tzinfo
     expect(alert.watch_date(dt.datetime(2026, 10, 3, 3, 32, tzinfo=tz)) == "2026-10-02", "자정 넘긴 22:25 실행은 어제를 본다")
     expect(alert.watch_date(dt.datetime(2026, 10, 3, 8, 40, tzinfo=tz)) == "2026-10-03", "08:40 점검은 오늘을 본다")
+    # 실패 알림: GitHub 서버(러너)를 못 잡아 시작도 못 한 실행(10/6 05:36 성과 수집 예약) — 끝난 일이면 조용히, 아니면 한 번 다시 실행
+    no_runner = [{"conclusion": "cancelled", "steps": [], "runner_name": None}]
+    broke = [{"conclusion": "success", "steps": [{"name": "a", "conclusion": "success"}], "runner_name": "r1"},
+             {"conclusion": "failure", "steps": [{"name": "Send", "conclusion": "failure"}], "runner_name": "r2"}]
+    expect(alert.never_started(no_runner) and not alert.never_started(broke) and not alert.never_started([]), "시작 못 한 실패 구분")
+    saved = {k: getattr(alert, k) for k in ("run_jobs", "rerun", "send_mail", "already_done")}
+    env = {k: os.environ.get(k) for k in ("RUN_NAME", "RUN_ATTEMPT", "RUN_ID")}
+    try:
+        def run(jobs, attempt, done=False):
+            mails, reruns = [], []
+            alert.run_jobs, alert.already_done = (lambda _id: jobs), (lambda _name: done)
+            alert.rerun = lambda rid: reruns.append(rid) or True
+            alert.send_mail = lambda subject, body, dry=False: mails.append(subject + "\n" + body)
+            os.environ.update(RUN_NAME="Collect EDIT H metrics", RUN_ATTEMPT=str(attempt), RUN_ID="1")
+            with contextlib.redirect_stdout(io.StringIO()):
+                alert.failed()
+            return mails, reruns
+        expect(run(no_runner, 1, done=True) == ([], []), "이미 모은 날의 시작 못 한 수집 예약은 알리지도 다시 돌리지도 않는다")
+        expect(run(no_runner, 1) == ([], ["1"]), "시작 못 한 실행은 메일 대신 한 번 다시 실행")
+        mails, reruns = run(no_runner, 2)
+        expect(not reruns and len(mails) == 1 and "GitHub 서버" in mails[0], "다시 실행도 시작 못 하면 GitHub 서버 문제로 알린다")
+        mails, reruns = run(broke, 1)
+        expect(not reruns and len(mails) == 1 and "Send" in mails[0], "코드가 돌다 실패한 건 바로 알린다(실패한 단계와 함께)")
+    finally:
+        for k, v in saved.items():
+            setattr(alert, k, v)
+        for k, v in env.items():
+            os.environ.pop(k, None) if v is None else os.environ.__setitem__(k, v)
     return None
+
+
+def t_runners():
+    """워크플로 서버 고정 — ubuntu-latest 는 2026-10-19 부터 Ubuntu 26 으로 바뀐다. 08:00 발송·게시가 예고 없이 새 OS 에서 돌지 않게
+    지금 검증된 ubuntu-24.04 로 고정한다(올릴 때는 PR 로 selftest 를 거쳐서)."""
+    found = {}
+    for wf in sorted((ROOT / ".github" / "workflows").glob("*.yml")):
+        for ln in wf.read_text(encoding="utf-8").splitlines():
+            if ln.strip().startswith("runs-on:"):
+                found.setdefault(ln.split(":", 1)[1].strip(), []).append(wf.name)
+    expect("ubuntu-latest" not in found, f"ubuntu-latest 를 쓰는 워크플로: {', '.join(sorted(set(found.get('ubuntu-latest', []))))}")
+    return ", ".join(f"{k} {len(v)}개 작업" for k, v in sorted(found.items()))
 
 
 def t_check_today():
@@ -238,7 +281,8 @@ def main():
     print("EDIT H 자동 점검")
     check("파이썬 컴파일", compile_all)
     check("인스타 게시 계획(ig_plan)", t_ig_plan)
-    check("알림 날짜(alert)", t_alert)
+    check("알림(alert) — 날짜·시작 못 한 실패", t_alert)
+    check("워크플로 서버 고정", t_runners)
     check("오늘 할 일(check_today)", t_check_today)
     check("연재 회차·문장 점검", t_series_and_style)
     check("예비 호 고르기(build_rewind)", t_rewind)
