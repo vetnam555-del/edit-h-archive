@@ -19,6 +19,7 @@ import re
 import smtplib
 import ssl
 import sys
+import time
 import urllib.error
 import urllib.request
 from email.message import EmailMessage
@@ -135,6 +136,20 @@ def rerun(run_id):
     return bool(run_id) and _api("POST", f"actions/runs/{run_id}/rerun") is not None
 
 
+RERUN_WAIT_MIN = 40   # 러너를 못 잡은 실행은 15분쯤 뒤 실패로 끝난다(10/6 05:36→05:51) — 그 두 배 넘게 기다린다
+
+
+def wait_rerun(run_id, attempt, minutes=RERUN_WAIT_MIN, sleep=time.sleep):
+    """다시 실행(attempt+1)이 끝나면 (결론, 작업 목록), 시간 안에 안 끝나면 None.
+    GITHUB_TOKEN 으로 건 다시 실행은 끝나도 workflow_run 이벤트가 오지 않을 수 있어(GitHub 문서) 이 알림 작업이 직접 기다린다."""
+    for _ in range(minutes):
+        sleep(60)
+        run = _api("GET", f"actions/runs/{run_id}") or {}
+        if int(run.get("run_attempt") or 0) > attempt and run.get("status") == "completed":
+            return run.get("conclusion") or "", run_jobs(run_id)
+    return None
+
+
 def busy():
     """지금 돌고 있는(대기 포함) 워크플로 이름. 발송·게시가 아직 진행 중이면 '빠졌다'고 잘못 알리지 않으려고."""
     repo, token = os.environ.get("GITHUB_REPOSITORY", ""), os.environ.get("GITHUB_TOKEN", "")
@@ -156,17 +171,30 @@ def failed():
     name = os.environ.get("RUN_NAME", "(알 수 없는 작업)")
     what, todo = WHAT.get(name, (name, "GitHub Actions 에서 실행 기록을 확인해 주세요."))
     run_id = os.environ.get("RUN_ID", "")
+    attempt = int(os.environ.get("RUN_ATTEMPT") or 1)
+    run_conclusion = os.environ.get("RUN_CONCLUSION", "")
+    if attempt >= 2 and os.environ.get("RUN_TRIGGERED_BY") == "github-actions[bot]":
+        print(f"{name}: 알림 작업이 건 자동 다시 실행 — 결과는 그 작업이 기다려 본다(겹쳐 알리지 않음)")
+        return 0
     jobs = run_jobs(run_id)
-    # GitHub 서버 문제로 시작도 못 한 실패: 일이 이미 끝났으면 조용히, 아니면 한 번 다시 돌리고 그것도 못 시작하면 그때 알린다
+    # GitHub 서버 문제로 시작도 못 한 실패: 일이 이미 끝났으면 조용히, 아니면 한 번 다시 돌려 결과를 보고 그것도 실패하면 그때 알린다
     infra = never_started(jobs)
-    retried = int(os.environ.get("RUN_ATTEMPT") or 1) >= 2
+    retried = attempt >= 2
     if infra:
-        if already_done(name):
+        if os.environ.get("RUN_EVENT") == "schedule" and already_done(name):   # 수동 실행은 일부러 다시 모으는 것일 수 있다
             print(f"{name}: GitHub 서버(러너)를 못 잡아 시작하지 못했지만 할 일은 이미 끝났다 — 알리지 않음")
             return 0
         if not retried and rerun(run_id):
-            print(f"{name}: GitHub 서버(러너)를 못 잡아 시작하지 못함 — 한 번 다시 실행했다(그것도 실패하면 알린다)")
-            return 0
+            print(f"{name}: GitHub 서버(러너)를 못 잡아 시작하지 못함 — 한 번 다시 실행하고 결과를 기다린다(최대 {RERUN_WAIT_MIN}분)")
+            res = wait_rerun(run_id, attempt)
+            if res is None:
+                print("  다시 실행이 아직 끝나지 않았다 — 결과는 08:40·22:25 발행 점검이 본다")
+                return 0
+            run_conclusion, jobs = res
+            if run_conclusion not in ("failure", "timed_out", "startup_failure"):
+                print(f"  다시 실행: {run_conclusion} — 알리지 않음")
+                return 0
+            infra, retried = never_started(jobs), True
     started = os.environ.get("RUN_STARTED", "")
     try:
         started = dt.datetime.fromisoformat(started.replace("Z", "+00:00")).astimezone(now_kst().tzinfo).strftime("%m/%d %H:%M")
@@ -174,7 +202,7 @@ def failed():
         pass
     how = {"schedule": "예약 실행", "push": "원고 푸시", "workflow_dispatch": "수동·점검 실행"}.get(os.environ.get("RUN_EVENT", ""), "")
     steps = failed_steps(jobs)
-    conclusion = {"timed_out": "시간 초과", "startup_failure": "시작 실패"}.get(os.environ.get("RUN_CONCLUSION", ""), "실패")
+    conclusion = {"timed_out": "시간 초과", "startup_failure": "시작 실패"}.get(run_conclusion, "실패")
     head = f"[{what}] 작업이 {conclusion}로 끝났습니다."
     if infra:
         conclusion, head = "시작 못 함(GitHub 서버 문제)", f"[{what}] GitHub 서버 문제로 작업이 시작되지 못했습니다."
@@ -183,9 +211,11 @@ def failed():
         lines.append(f"· 시작: {started} (KST)")
     if steps:
         lines.append(f"· 실패한 단계: {', '.join(steps)}")
+    if retried and not infra:
+        lines.append("· 처음엔 GitHub 서버 문제로 시작하지 못해 자동으로 다시 실행했고, 다시 실행에서 위 단계가 실패했습니다.")
     if infra:
         lines.append("· 원인: GitHub 가 실행할 서버를 잡지 못해 단계 하나 돌지 못했습니다(코드·토큰 문제 아님). "
-                     + ("자동으로 다시 실행해도 같았어요." if retried else "자동 다시 실행을 요청하지 못했어요 — 실행 기록에서 Re-run 을 눌러 주세요."))
+                     + ("다시 실행해도 같았어요." if retried else "자동 다시 실행을 요청하지 못했어요 — 실행 기록에서 Re-run 을 눌러 주세요."))
     lines += [f"· 실행 기록: {os.environ.get('RUN_URL', '')}", "", f"다음에 일어나는 일 / 할 일: {todo}"]
     send_mail(f"{SUBJECT} · {what} {conclusion}", "\n".join(lines))
     return 0
