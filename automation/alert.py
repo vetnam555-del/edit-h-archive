@@ -19,7 +19,6 @@ import re
 import smtplib
 import ssl
 import sys
-import time
 import urllib.error
 import urllib.request
 from email.message import EmailMessage
@@ -60,7 +59,8 @@ WHAT = {
 
 HEADLINE = {"issue": "오늘 호 미발행", "send": "메일 미발송", "send_partial": "메일 일부 실패", "carousel": "인스타 카드뉴스 미게시",
             "reel": "릴스 미게시", "reel_manual": "릴스 직접 올려 주세요", "web": "웹 페이지 안 열림",
-            "metrics": "성과 수집 멈춤", "token": "인스타 토큰 연장 안 됨", "threads": "스레드 미게시"}
+            "metrics": "성과 수집 멈춤", "token": "인스타 토큰 연장 안 됨", "threads": "스레드 미게시",
+            "rerun": "자동 다시 실행도 실패"}
 
 
 def send_mail(subject, body, dry=False):
@@ -136,18 +136,24 @@ def rerun(run_id):
     return bool(run_id) and _api("POST", f"actions/runs/{run_id}/rerun") is not None
 
 
-RERUN_WAIT_MIN = 40   # 러너를 못 잡은 실행은 15분쯤 뒤 실패로 끝난다(10/6 05:36→05:51) — 그 두 배 넘게 기다린다
+RERUN_LOOKBACK_H = 30   # 발행 점검이 이만큼 지난 자동 다시 실행까지 본다(점검은 08:40·20:45·22:25 — 사이가 최대 10시간)
 
 
-def wait_rerun(run_id, attempt, minutes=RERUN_WAIT_MIN, sleep=time.sleep):
-    """다시 실행(attempt+1)이 끝나면 (결론, 작업 목록), 시간 안에 안 끝나면 None.
-    GITHUB_TOKEN 으로 건 다시 실행은 끝나도 workflow_run 이벤트가 오지 않을 수 있어(GitHub 문서) 이 알림 작업이 직접 기다린다."""
-    for _ in range(minutes):
-        sleep(60)
-        run = _api("GET", f"actions/runs/{run_id}") or {}
-        if int(run.get("run_attempt") or 0) > attempt and run.get("status") == "completed":
-            return run.get("conclusion") or "", run_jobs(run_id)
-    return None
+def rerun_failures(hours=RERUN_LOOKBACK_H):
+    """[(알림 종류, 한 줄)] — 알림 작업이 자동으로 다시 돌렸는데(github-actions[bot], 2번째 시도) 또 실패로 끝난 실행.
+    GITHUB_TOKEN 으로 건 다시 실행은 끝나도 workflow_run 이벤트가 오지 않을 수 있고, 저녁 사슬처럼 10시간 넘게 기다리는 실행도 있어
+    (Codex 리뷰) 실패 알림 작업이 기다리지 않고 발행 점검이 여기서 챙긴다."""
+    edge = dt.datetime.now(dt.timezone.utc) - dt.timedelta(hours=hours)
+    out = []
+    for status in ("failure", "timed_out"):
+        for r in (_api("GET", f"actions/runs?status={status}&per_page=50") or {}).get("workflow_runs", []):
+            ended = dt.datetime.fromisoformat((r.get("updated_at") or "1970-01-01T00:00:00Z").replace("Z", "+00:00"))
+            if (int(r.get("run_attempt") or 1) >= 2 and ((r.get("triggering_actor") or {}).get("login") == "github-actions[bot]")
+                    and ended >= edge):
+                what = WHAT.get(r.get("name"), (r.get("name"),))[0]
+                out.append((f"rerun:{r['id']}", f"[{what}] GitHub 서버 문제로 시작하지 못해 자동으로 다시 실행했는데 다시 실패했습니다"
+                                                f"({ended.astimezone(now_kst().tzinfo):%m/%d %H:%M} KST) — {r.get('html_url', '')}"))
+    return out
 
 
 def busy():
@@ -174,7 +180,7 @@ def failed():
     attempt = int(os.environ.get("RUN_ATTEMPT") or 1)
     run_conclusion = os.environ.get("RUN_CONCLUSION", "")
     if attempt >= 2 and os.environ.get("RUN_TRIGGERED_BY") == "github-actions[bot]":
-        print(f"{name}: 알림 작업이 건 자동 다시 실행 — 결과는 그 작업이 기다려 본다(겹쳐 알리지 않음)")
+        print(f"{name}: 알림 작업이 건 자동 다시 실행 — 결과는 발행 점검(rerun_failures)이 알린다(겹쳐 알리지 않음)")
         return 0
     jobs = run_jobs(run_id)
     # GitHub 서버 문제로 시작도 못 한 실패: 일이 이미 끝났으면 조용히, 아니면 한 번 다시 돌려 결과를 보고 그것도 실패하면 그때 알린다
@@ -185,16 +191,9 @@ def failed():
             print(f"{name}: GitHub 서버(러너)를 못 잡아 시작하지 못했지만 할 일은 이미 끝났다 — 알리지 않음")
             return 0
         if not retried and rerun(run_id):
-            print(f"{name}: GitHub 서버(러너)를 못 잡아 시작하지 못함 — 한 번 다시 실행하고 결과를 기다린다(최대 {RERUN_WAIT_MIN}분)")
-            res = wait_rerun(run_id, attempt)
-            if res is None:
-                print("  다시 실행이 아직 끝나지 않았다 — 결과는 08:40·22:25 발행 점검이 본다")
-                return 0
-            run_conclusion, jobs = res
-            if run_conclusion not in ("failure", "timed_out", "startup_failure"):
-                print(f"  다시 실행: {run_conclusion} — 알리지 않음")
-                return 0
-            infra, retried = never_started(jobs), True
+            print(f"{name}: GitHub 서버(러너)를 못 잡아 시작하지 못함 — 한 번 다시 실행했다. "
+                  "또 실패하면 발행 점검(08:40·20:45·22:25)이 알린다")
+            return 0
     started = os.environ.get("RUN_STARTED", "")
     try:
         started = dt.datetime.fromisoformat(started.replace("Z", "+00:00")).astimezone(now_kst().tzinfo).strftime("%m/%d %H:%M")
@@ -211,8 +210,6 @@ def failed():
         lines.append(f"· 시작: {started} (KST)")
     if steps:
         lines.append(f"· 실패한 단계: {', '.join(steps)}")
-    if retried and not infra:
-        lines.append("· 처음엔 GitHub 서버 문제로 시작하지 못해 자동으로 다시 실행했고, 다시 실행에서 위 단계가 실패했습니다.")
     if infra:
         lines.append("· 원인: GitHub 가 실행할 서버를 잡지 못해 단계 하나 돌지 못했습니다(코드·토큰 문제 아님). "
                      + ("다시 실행해도 같았어요." if retried else "자동 다시 실행을 요청하지 못했어요 — 실행 기록에서 Re-run 을 눌러 주세요."))
@@ -339,6 +336,8 @@ def problems(date, cfg, check_web=True):
 def watch(date, dry=False):
     cfg = load_config()
     found = problems(date, cfg)
+    prev = _json(ALERTS_DIR / f"{(parse_date(date) - dt.timedelta(days=1)).isoformat()}.json") or {}
+    found += [(k, t) for k, t in rerun_failures() if k not in prev.get("sent", [])]   # 날짜를 넘겨도 한 번만
     running = busy()
     skip = {k for k, name in (("send", "Send EDIT H newsletter"), ("carousel", "Post EDIT H to Instagram"),
                               ("reel", "Post EDIT H to Instagram"), ("reel_manual", "Post EDIT H to Instagram"))
@@ -361,7 +360,7 @@ def watch(date, dry=False):
     body = "\n".join(f"• {t}" for _, t in new)
     body += (f"\n\n발행 흐름 확인: {now_kst():%m/%d %H:%M} (KST)"
              f"\n실행 기록: https://github.com/{os.environ.get('GITHUB_REPOSITORY', 'vetnam555-del/edit-h-archive')}/actions")
-    head = f"{date[5:].replace('-', '/')} {HEADLINE.get(new[0][0], new[0][0])}"
+    head = f"{date[5:].replace('-', '/')} {HEADLINE.get(new[0][0].split(':')[0], new[0][0])}"
     if send_mail(f"{SUBJECT} · {head}" + (f" 외 {len(new) - 1}건" if len(new) > 1 else ""), body, dry) and not dry:
         rec["sent"] += [k for k, _ in new]
         ALERTS_DIR.mkdir(parents=True, exist_ok=True)
