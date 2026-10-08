@@ -16,6 +16,11 @@ CC BY-SA 는 글자를 얹은 표지 이미지까지 같은 라이선스로 공�
       → assets/photos/2026-09-28.jpg 저장 + content JSON 에 넣을 cards.cover 조각 출력
 
 고른 사진은 반드시 Read 도구로 눈으로 보고 쓴다(인물 얼굴·브랜드 로고·특정 매장 오인·사건 현장 사진 금지).
+
+대체 사진(2026-10-08 — 10/5 호가 사진 없이 핵심어 표지로 나가 캐러셀 도달 10, 실사 평균 14): 접속이 막혔거나(코드 2) 맞는 사진이
+없으면 핵심어 표지로 가기 전에, 이미 발행한 호에서 검수·출처 표기를 마친 사진(assets/photos/library.json)을 주제어로 골라 다시 쓴다.
+  python3 automation/fetch_photo.py --library "대출 금리"                          # 주제어가 맞는 순 · 최근에 안 쓴 순
+  python3 automation/fetch_photo.py --library "대출 금리" --use 1 --date 2026-10-09  # cards.cover 조각 출력(파일은 복사하지 않음)
 """
 import argparse
 import html
@@ -105,22 +110,92 @@ def download_url(c):
     return page["imageinfo"][0].get("thumburl") or page["imageinfo"][0]["url"]
 
 
+LIBRARY = ROOT / "assets" / "photos" / "library.json"
+RECENT_DAYS = 3   # 이 안에 쓴 사진은 대체 후보에서 뺀다(같은 표지가 연달아 보이지 않게)
+
+
+def _tokens(text):
+    return [t for t in re.split(r"[^0-9A-Za-z가-힣]+", text or "") if t]
+
+
+def library(day, words=""):
+    """대체 표지 후보 [{photo, credit, focus, subject, tags, last, score}] — 주제어가 많이 맞는 순, 같으면 오래전에 쓴 순.
+    library.json 에 있고, 발행한 호(예비 호 제외)가 실제로 표지로 쓴 사진만(출처·초점은 그 호의 content JSON)."""
+    import datetime as dt
+    lib = {k: v for k, v in json.loads(LIBRARY.read_text(encoding="utf-8")).items() if not k.startswith("_")}
+    today = dt.date.fromisoformat(day)
+    used = {}
+    for f in sorted((ROOT / "content").glob("20*.json")):
+        try:
+            d = json.loads(f.read_text(encoding="utf-8"))
+        except ValueError:
+            continue
+        cov = (d.get("cards") or {}).get("cover") or {}
+        if d.get("rewind") or cov.get("photo") not in lib or f.stem >= day:
+            continue
+        u = used.setdefault(cov["photo"], {"credit": cov.get("credit"), "focus": cov.get("focus"), "last": f.stem})
+        u["last"] = f.stem   # 파일 이름 순이라 마지막이 가장 최근
+    toks = _tokens(words)
+    out = []
+    for photo, meta in lib.items():
+        u = used.get(photo)
+        if not u or not u.get("credit") or not (ROOT / photo).exists():
+            continue
+        ago = (today - dt.date.fromisoformat(u["last"])).days
+        if ago < RECENT_DAYS:
+            continue
+        tags = meta.get("tags", [])
+        score = sum(2 if t in tags else 1 for t in toks if any(t in g or g in t for g in tags))
+        out.append({"photo": photo, "credit": u["credit"], "focus": u.get("focus"), "subject": meta.get("subject", ""),
+                    "tags": tags, "last": u["last"], "ago": ago, "score": score})
+    return sorted(out, key=lambda c: (-c["score"], -c["ago"]))
+
+
+def cmd_library(words, use=None, day=None):
+    import datetime as dt
+    day = day or dt.date.today().isoformat()
+    cands = library(day, words)
+    if not cands:
+        print("✗ 대체 사진 후보가 없습니다 — 핵심어 표지로 진행하고 6단계 보고 '표지:' 줄에 사유를 적으세요.")
+        return 1
+    if use is None:
+        for i, c in enumerate(cands, 1):
+            print(f"[{i}] {c['photo']} — {c['subject']} · 맞은 주제어 {c['score']} · 마지막 사용 {c['last']}({c['ago']}일 전)")
+        if not cands[0]["score"]:
+            print("  (주제어가 맞는 사진이 없습니다 — 제목 장면과 어울리는 사진이 없으면 핵심어 표지로 가고 보고 '표지:' 줄에 사유를 적으세요)")
+        print("고른 번호를 --use N --date YYYY-MM-DD 로 다시 실행하면 cards.cover 조각이 나옵니다. 표지 PNG 를 원본 크기로 보고 확인하세요.")
+        return 0
+    c = cands[use - 1]
+    snippet = {"photo": c["photo"], "credit": c["credit"]}
+    if c.get("focus"):
+        snippet["focus"] = c["focus"]
+    print(f"✓ 대체 사진: {c['photo']} — {c['subject']} ({c['last']} 호에 쓴 사진)")
+    print(json.dumps(snippet, ensure_ascii=False))
+    return 0
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("query", help="영어 검색어가 결과가 많다 (예: 'shopping mall crowd', 'delivery scooter')")
+    ap.add_argument("query", nargs="?", default="", help="영어 검색어가 결과가 많다 (예: 'shopping mall crowd', 'delivery scooter')")
     ap.add_argument("--pick", type=int, help="내려받을 후보 번호")
     ap.add_argument("--date", help="YYYY-MM-DD — 저장 파일명")
     ap.add_argument("--allow-sa", action="store_true", help="CC BY-SA 사진도 후보에 넣는다(표지도 같은 라이선스가 될 수 있음)")
+    ap.add_argument("--library", metavar="주제어", help="대체 사진 — 지난 호에서 검수한 사진을 한국어 주제어로 고른다")
+    ap.add_argument("--use", type=int, help="--library 후보 번호")
     args = ap.parse_args()
+    if args.library is not None:
+        sys.exit(cmd_library(args.library, args.use, args.date))
+    if not args.query:
+        ap.error("검색어(query) 또는 --library 가 필요합니다")
     try:
         cands = search(args.query, allow_sa=args.allow_sa)
     except OSError as e:
         print(f"✗ 위키미디어 커먼즈에 접속하지 못했습니다({type(e).__name__}) — 네트워크 허용 목록에 "
-              "*.wikimedia.org(commons·upload·thumb)가 있는지 확인하세요. 오늘은 사진 없이 발행합니다.")
+              "*.wikimedia.org(commons·upload·thumb)가 있는지 확인하세요. 대체 사진: --library \"한국어 주제어\"")
         sys.exit(2)
     if not cands:
         why = ", ".join(f"{k} {v}장" for k, v in getattr(search, "skipped", {}).items() if v) or "검색 결과 없음"
-        print(f"✗ 재사용 가능한 후보가 없습니다({why} 제외) — 더 일반적인 영어 검색어로 바꾸거나 사진 없이 발행하세요.")
+        print(f"✗ 재사용 가능한 후보가 없습니다({why} 제외) — 더 일반적인 영어 검색어로 바꾸거나 대체 사진(--library \"한국어 주제어\")을 쓰세요.")
         sys.exit(1)
     if args.pick is None:
         for i, c in enumerate(cands, 1):
@@ -135,7 +210,7 @@ def main():
     except OSError as e:
         # 위키미디어는 봇의 원본 요청을 막고 표준 크기 썸네일(thumb.wikimedia.org)만 허용한다
         print(f"✗ 사진을 내려받지 못했습니다({e}) — 네트워크 허용 목록에 thumb.wikimedia.org 가 있는지 확인하세요. "
-              "오늘은 사진 없이 발행합니다.")
+              "대체 사진: --library \"한국어 주제어\"")
         sys.exit(2)
     ext = ".png" if urllib.parse.urlsplit(url).path.lower().endswith(".png") else ".jpg"
     dest = ROOT / "assets" / "photos" / f"{args.date}{ext}"

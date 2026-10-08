@@ -149,9 +149,20 @@ def main():
             if len(x.get("sources") or []) < 2]
     if d.get("format") == 2 and not d.get("rewind") and thin:
         print(f"  ↘ 출처 1건뿐인 이야기: {', '.join(thin)} — 원칙 2(원 기사 2건 이상). 두 번째 원 기사를 찾아 sources 에 더하세요")
-    if d.get("format") == 2 and not d.get("rewind") and files and not ((d.get("cards") or {}).get("cover") or {}).get("photo"):
-        print("  ↘ 표지 사진 없음(핵심어 표지) — 2026-10-01 부터 실사 표지가 기본이에요. RUNBOOK '표지 사진'대로 검색어를 3개 이상 시도했는지 보고,"
-              " 못 썼다면 6단계 보고 '표지:' 줄에 사유를 적으세요")
+    cover = (d.get("cards") or {}).get("cover") or {}
+    if d.get("format") == 2 and not d.get("rewind") and files and not cover.get("photo"):
+        # 2026-10-05 호가 이 경고에도 사진 없이 나갔다(캐러셀 도달 10, 실사 평균 14) — 바로 쓸 대체 사진을 함께 알려 준다
+        import fetch_photo
+        words = " ".join(str(x) for x in (d.get("title"), cover.get("title"), d.get("hero_title")) if x)
+        alt = [c for c in fetch_photo.library(d["date"], words) if c["score"]][:2]
+        print("  ↘ 표지 사진 없음(핵심어 표지) — 원칙 9(표지는 실사 사진). 위키미디어 검색어를 3개 이상 시도했고 그래도 없으면"
+              " 지난 호에서 검수한 대체 사진을 쓰세요: python3 automation/fetch_photo.py --library \"주제어\""
+              + (" — 지금 맞는 후보: " + ", ".join(f"{c['photo']}({c['subject']})" for c in alt) if alt else "")
+              + ". 그래도 못 썼다면 6단계 보고 '표지:' 줄에 사유를 적으세요")
+    elif d.get("format") == 2 and not d.get("rewind") and cover.get("photo"):
+        import fetch_photo
+        if cover["photo"] not in json.loads(fetch_photo.LIBRARY.read_text(encoding="utf-8")):
+            print(f"  ↘ 새 표지 사진 {cover['photo']} — 대체 사진 목록(assets/photos/library.json)에 subject·tags 한 줄을 더해 두세요")
     if overflow:
         print("✗ 넘친 카드(20% 축소로도 안 들어감) — 해당 카드 문장을 줄인 뒤 다시 빌드하세요:")
         for c in overflow:
