@@ -1,6 +1,21 @@
 {
- "collected_at": "2026-10-08T03:59+09:00",
+ "collected_at": "2026-10-08T21:30+09:00",
  "issues": {
+  "2026-10-08": {
+   "title": "닭값 37.7% 내렸는데, 치킨은 그대로라고?",
+   "format": 2,
+   "pick_tag": "치킨값",
+   "title_style": "질문형",
+   "cover": "사진",
+   "weekday": "목",
+   "poll": false,
+   "source_mode": "fallback",
+   "audience": "2030직장인",
+   "series": "없음",
+   "reel_style": "세로",
+   "reel_seconds": 10.1,
+   "reel_slot": "저녁"
+  },
   "2026-10-07": {
    "title": "놓쳤다면, 다시 볼 만한 5가지",
    "format": 2,
@@ -198,8 +213,8 @@
   }
  },
  "instagram": {
-  "followers": 128,
-  "media": 87,
+  "followers": 130,
+  "media": 88,
   "insights": true,
   "posts": {
    "2026-09-25": {
@@ -346,7 +361,7 @@
     "reel": {
      "likes": 0,
      "comments": 0,
-     "reach": 112,
+     "reach": 113,
      "saved": 0,
      "shares": 0,
      "views": 132,
@@ -375,46 +390,64 @@
    "2026-10-05": {
     "likes": 2,
     "comments": 0,
-    "reach": 14,
+    "reach": 15,
     "saved": 0,
     "shares": 0,
-    "views": 39,
+    "views": 40,
     "reel": {
      "likes": 1,
      "comments": 1,
-     "reach": 140,
+     "reach": 141,
      "saved": 0,
      "shares": 0,
-     "views": 149,
+     "views": 150,
      "seconds": 10.1,
      "avg_watch_s": 1.7
     }
    },
    "2026-10-06": {
-    "likes": 0,
+    "likes": 1,
     "comments": 0,
-    "reach": 9,
+    "reach": 10,
     "saved": 0,
     "shares": 0,
-    "views": 20,
+    "views": 22,
     "reel": {
      "likes": 0,
      "comments": 0,
-     "reach": 111,
+     "reach": 112,
      "saved": 0,
      "shares": 0,
-     "views": 125,
+     "views": 126,
      "seconds": 10.1,
      "avg_watch_s": 2.8
     }
    },
    "2026-10-07": {
-    "likes": 0,
+    "likes": 2,
     "comments": 0,
-    "reach": 7,
+    "reach": 8,
     "saved": 0,
     "shares": 0,
-    "views": 19
+    "views": 23
+   },
+   "2026-10-08": {
+    "likes": 3,
+    "comments": 0,
+    "reach": 14,
+    "saved": 0,
+    "shares": 0,
+    "views": 39,
+    "reel": {
+     "likes": 0,
+     "comments": 0,
+     "reach": 12,
+     "saved": 0,
+     "shares": 0,
+     "views": 22,
+     "seconds": 10.1,
+     "avg_watch_s": 4.7
+    }
    }
   }
  },
@@ -432,7 +465,8 @@
    "2026-10-04": 0,
    "2026-10-05": 0,
    "2026-10-06": 0,
-   "2026-10-07": 0
+   "2026-10-07": 0,
+   "2026-10-08": 0
   },
   "signups_14d": 0,
   "unsubs_14d": 0,
