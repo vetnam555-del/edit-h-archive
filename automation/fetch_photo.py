@@ -114,6 +114,13 @@ LIBRARY = ROOT / "assets" / "photos" / "library.json"
 RECENT_DAYS = 3   # 이 안에 쓴 사진은 대체 후보에서 뺀다(같은 표지가 연달아 보이지 않게)
 
 
+def registered(photo):
+    """대체 사진 목록에 제대로 올라 있나 — subject 와 tags(비지 않은 목록)가 있어야 후보로 쓸 수 있다."""
+    meta = json.loads(LIBRARY.read_text(encoding="utf-8")).get(photo)
+    return (isinstance(meta, dict) and isinstance(meta.get("subject"), str) and meta["subject"].strip()
+            and isinstance(meta.get("tags"), list) and any(isinstance(g, str) and g.strip() for g in meta["tags"]))
+
+
 def _tokens(text):
     return [t for t in re.split(r"[^0-9A-Za-z가-힣]+", text or "") if t]
 
@@ -169,6 +176,9 @@ def cmd_library(words, use=None, day=None):
             print("  (주제어가 맞는 사진이 없습니다 — 제목 장면과 어울리는 사진이 없으면 핵심어 표지로 가고 보고 '표지:' 줄에 사유를 적으세요)")
         print("고른 번호를 --use N --date YYYY-MM-DD 로 다시 실행하면 cards.cover 조각이 나옵니다. 표지 PNG 를 원본 크기로 보고 확인하세요.")
         return 0
+    if not 1 <= use <= len(cands):
+        print(f"✗ --use 는 1~{len(cands)} 사이 번호여야 합니다(받은 값 {use})")
+        return 2
     c = cands[use - 1]
     snippet = {"photo": c["photo"], "credit": c["credit"]}
     if c.get("focus"):

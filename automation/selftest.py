@@ -234,6 +234,8 @@ def t_photo_library():
     """대체 표지 사진(fetch_photo --library): 목록의 사진이 모두 있고 지난 호의 출처가 붙는지, 주제어 순위·최근 사용 제외가 맞는지."""
     import fetch_photo
     lib = {k for k in json.loads(fetch_photo.LIBRARY.read_text(encoding="utf-8")) if not k.startswith("_")}
+    bad = sorted(p for p in lib if not fetch_photo.registered(p))
+    expect(not bad, f"대체 사진 목록에 subject·tags 가 빠진 줄: {', '.join(bad)}")
     every = fetch_photo.library("2999-01-01")
     missing = lib - {c["photo"] for c in every}
     expect(not missing, f"대체 사진 목록에 있지만 파일이나 출처(발행한 호의 credit)가 없다: {', '.join(sorted(missing))}")
@@ -242,6 +244,8 @@ def t_photo_library():
     for words, photo in (("내일부터 달라지는 제도", "2026-10-02.jpg"), ("시설 점검", "2026-09-25.jpg")):
         hit = [c for c in fetch_photo.library("2999-01-01", words) if c["photo"].endswith(photo)]
         expect(hit and hit[0]["score"] == 0, f"한 글자 태그가 '{words}' 에 걸려 {photo} 를 맞는 후보로 올린다")
+    with contextlib.redirect_stdout(io.StringIO()):
+        expect(fetch_photo.cmd_library("카드", use=0, day="2999-01-01") == 2, "--use 0 이 마지막 후보를 고른다")
     recent = {c["photo"] for c in fetch_photo.library("2026-10-09")}
     expect("assets/photos/2026-10-08.jpg" not in recent, "하루 전에 쓴 사진이 대체 후보에 나온다")
     return f"{len(every)}장"
