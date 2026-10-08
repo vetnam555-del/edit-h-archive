@@ -59,7 +59,8 @@ WHAT = {
 
 HEADLINE = {"issue": "오늘 호 미발행", "send": "메일 미발송", "send_partial": "메일 일부 실패", "carousel": "인스타 카드뉴스 미게시",
             "reel": "릴스 미게시", "reel_manual": "릴스 직접 올려 주세요", "web": "웹 페이지 안 열림",
-            "metrics": "성과 수집 멈춤", "token": "인스타 토큰 연장 안 됨", "threads": "스레드 미게시"}
+            "metrics": "성과 수집 멈춤", "token": "인스타 토큰 연장 안 됨", "threads": "스레드 미게시",
+            "rerun": "자동 다시 실행도 실패"}
 
 
 def send_mail(subject, body, dry=False):
@@ -83,19 +84,76 @@ def send_mail(subject, body, dry=False):
     return True
 
 
-def failed_steps(run_id):
-    """실패한 작업·단계 이름. 권한이 없거나 막히면 빈 목록."""
+def _api(method, path):
+    """GitHub API(GITHUB_TOKEN) — 응답 JSON(본문이 없으면 {}). 권한이 없거나 막히면 None."""
     repo, token = os.environ.get("GITHUB_REPOSITORY", ""), os.environ.get("GITHUB_TOKEN", "")
-    if not (repo and token and run_id):
-        return []
-    req = urllib.request.Request(f"https://api.github.com/repos/{repo}/actions/runs/{run_id}/jobs",
+    if not (repo and token):
+        return None
+    req = urllib.request.Request(f"https://api.github.com/repos/{repo}/{path}", method=method,
+                                 data=b"{}" if method == "POST" else None,
                                  headers={"Authorization": f"Bearer {token}", "Accept": "application/vnd.github+json"})
     try:
         with urllib.request.urlopen(req, timeout=20) as r:
-            jobs = json.loads(r.read()).get("jobs", [])
-    except (urllib.error.URLError, OSError, ValueError):
-        return []
+            body = r.read()
+    except (urllib.error.URLError, OSError):
+        return None
+    try:
+        return json.loads(body) if body else {}
+    except ValueError:
+        return None
+
+
+def run_jobs(run_id):
+    """그 실행(마지막 시도)의 작업 목록. 권한이 없거나 막히면 빈 목록."""
+    data = _api("GET", f"actions/runs/{run_id}/jobs") if run_id else None
+    return (data or {}).get("jobs", [])
+
+
+def failed_steps(jobs):
+    """실패한 단계 이름."""
     return [s["name"] for j in jobs for s in j.get("steps", []) if s.get("conclusion") in ("failure", "timed_out")]
+
+
+def never_started(jobs):
+    """GitHub 가 실행할 서버(러너)를 못 잡아 단계 하나 돌지 못하고 끝난 실패인가 — 코드·토큰 문제가 아니다.
+    2026-10-06 05:36 성과 수집 예약: 'The job was not acquired by Runner of type hosted even after multiple attempts'
+    (실행은 failure, 작업은 cancelled·단계 0·러너 없음)."""
+    bad = [j for j in jobs if j.get("conclusion") in ("failure", "cancelled", "timed_out")]
+    return bool(bad) and all(not j.get("steps") and not j.get("runner_name") for j in bad)
+
+
+def already_done(name):
+    """실패한 실행이 하려던 일을 다른 실행이 이미 끝냈는가. 성과 수집: 저녁 사슬이 21:30 에 모은 뒤 늦게 도는 예비 예약(10/6 05:36)."""
+    if name == "Collect EDIT H metrics":
+        import collect_metrics
+        fresh = collect_metrics.latest_fresh()
+        return bool(fresh) and not fresh[1]
+    return False
+
+
+def rerun(run_id):
+    """그 실행을 한 번 다시 돌린다(actions: write). 발송·게시·수집은 기록을 보고 이미 한 일을 건너뛰어서 다시 돌려도 겹치지 않는다."""
+    return bool(run_id) and _api("POST", f"actions/runs/{run_id}/rerun") is not None
+
+
+RERUN_LOOKBACK_H = 30   # 발행 점검이 이만큼 지난 자동 다시 실행까지 본다(점검은 08:40·20:45·22:25 — 사이가 최대 10시간)
+
+
+def rerun_failures(hours=RERUN_LOOKBACK_H):
+    """[(알림 종류, 한 줄)] — 알림 작업이 자동으로 다시 돌렸는데(github-actions[bot], 2번째 시도) 또 실패로 끝난 실행.
+    GITHUB_TOKEN 으로 건 다시 실행은 끝나도 workflow_run 이벤트가 오지 않을 수 있고, 저녁 사슬처럼 10시간 넘게 기다리는 실행도 있어
+    (Codex 리뷰) 실패 알림 작업이 기다리지 않고 발행 점검이 여기서 챙긴다."""
+    edge = dt.datetime.now(dt.timezone.utc) - dt.timedelta(hours=hours)
+    out = []
+    for status in ("failure", "timed_out"):
+        for r in (_api("GET", f"actions/runs?status={status}&per_page=50") or {}).get("workflow_runs", []):
+            ended = dt.datetime.fromisoformat((r.get("updated_at") or "1970-01-01T00:00:00Z").replace("Z", "+00:00"))
+            if (int(r.get("run_attempt") or 1) >= 2 and ((r.get("triggering_actor") or {}).get("login") == "github-actions[bot]")
+                    and ended >= edge):
+                what = WHAT.get(r.get("name"), (r.get("name"),))[0]
+                out.append((f"rerun:{r['id']}", f"[{what}] GitHub 서버 문제로 시작하지 못해 자동으로 다시 실행했는데 다시 실패했습니다"
+                                                f"({ended.astimezone(now_kst().tzinfo):%m/%d %H:%M} KST) — {r.get('html_url', '')}"))
+    return out
 
 
 def busy():
@@ -118,20 +176,43 @@ def busy():
 def failed():
     name = os.environ.get("RUN_NAME", "(알 수 없는 작업)")
     what, todo = WHAT.get(name, (name, "GitHub Actions 에서 실행 기록을 확인해 주세요."))
+    run_id = os.environ.get("RUN_ID", "")
+    attempt = int(os.environ.get("RUN_ATTEMPT") or 1)
+    run_conclusion = os.environ.get("RUN_CONCLUSION", "")
+    if attempt >= 2 and os.environ.get("RUN_TRIGGERED_BY") == "github-actions[bot]":
+        print(f"{name}: 알림 작업이 건 자동 다시 실행 — 결과는 발행 점검(rerun_failures)이 알린다(겹쳐 알리지 않음)")
+        return 0
+    jobs = run_jobs(run_id)
+    # GitHub 서버 문제로 시작도 못 한 실패: 일이 이미 끝났으면 조용히, 아니면 한 번 다시 돌려 결과를 보고 그것도 실패하면 그때 알린다
+    infra = never_started(jobs)
+    retried = attempt >= 2
+    if infra:
+        if os.environ.get("RUN_EVENT") == "schedule" and already_done(name):   # 수동 실행은 일부러 다시 모으는 것일 수 있다
+            print(f"{name}: GitHub 서버(러너)를 못 잡아 시작하지 못했지만 할 일은 이미 끝났다 — 알리지 않음")
+            return 0
+        if not retried and rerun(run_id):
+            print(f"{name}: GitHub 서버(러너)를 못 잡아 시작하지 못함 — 한 번 다시 실행했다. "
+                  "또 실패하면 발행 점검(08:40·20:45·22:25)이 알린다")
+            return 0
     started = os.environ.get("RUN_STARTED", "")
     try:
         started = dt.datetime.fromisoformat(started.replace("Z", "+00:00")).astimezone(now_kst().tzinfo).strftime("%m/%d %H:%M")
     except ValueError:
         pass
     how = {"schedule": "예약 실행", "push": "원고 푸시", "workflow_dispatch": "수동·점검 실행"}.get(os.environ.get("RUN_EVENT", ""), "")
-    steps = failed_steps(os.environ.get("RUN_ID", ""))
-    conclusion = {"timed_out": "시간 초과", "startup_failure": "시작 실패"}.get(os.environ.get("RUN_CONCLUSION", ""), "실패")
-    lines = [f"[{what}] 작업이 {conclusion}로 끝났습니다.", "",
-             f"· 작업: {name}" + (f" ({how})" if how else "")]
+    steps = failed_steps(jobs)
+    conclusion = {"timed_out": "시간 초과", "startup_failure": "시작 실패"}.get(run_conclusion, "실패")
+    head = f"[{what}] 작업이 {conclusion}로 끝났습니다."
+    if infra:
+        conclusion, head = "시작 못 함(GitHub 서버 문제)", f"[{what}] GitHub 서버 문제로 작업이 시작되지 못했습니다."
+    lines = [head, "", f"· 작업: {name}" + (f" ({how})" if how else "")]
     if started:
         lines.append(f"· 시작: {started} (KST)")
     if steps:
         lines.append(f"· 실패한 단계: {', '.join(steps)}")
+    if infra:
+        lines.append("· 원인: GitHub 가 실행할 서버를 잡지 못해 단계 하나 돌지 못했습니다(코드·토큰 문제 아님). "
+                     + ("다시 실행해도 같았어요." if retried else "자동 다시 실행을 요청하지 못했어요 — 실행 기록에서 Re-run 을 눌러 주세요."))
     lines += [f"· 실행 기록: {os.environ.get('RUN_URL', '')}", "", f"다음에 일어나는 일 / 할 일: {todo}"]
     send_mail(f"{SUBJECT} · {what} {conclusion}", "\n".join(lines))
     return 0
@@ -255,6 +336,8 @@ def problems(date, cfg, check_web=True):
 def watch(date, dry=False):
     cfg = load_config()
     found = problems(date, cfg)
+    prev = _json(ALERTS_DIR / f"{(parse_date(date) - dt.timedelta(days=1)).isoformat()}.json") or {}
+    found += [(k, t) for k, t in rerun_failures() if k not in prev.get("sent", [])]   # 날짜를 넘겨도 한 번만
     running = busy()
     skip = {k for k, name in (("send", "Send EDIT H newsletter"), ("carousel", "Post EDIT H to Instagram"),
                               ("reel", "Post EDIT H to Instagram"), ("reel_manual", "Post EDIT H to Instagram"))
@@ -277,7 +360,7 @@ def watch(date, dry=False):
     body = "\n".join(f"• {t}" for _, t in new)
     body += (f"\n\n발행 흐름 확인: {now_kst():%m/%d %H:%M} (KST)"
              f"\n실행 기록: https://github.com/{os.environ.get('GITHUB_REPOSITORY', 'vetnam555-del/edit-h-archive')}/actions")
-    head = f"{date[5:].replace('-', '/')} {HEADLINE.get(new[0][0], new[0][0])}"
+    head = f"{date[5:].replace('-', '/')} {HEADLINE.get(new[0][0].split(':')[0], new[0][0])}"
     if send_mail(f"{SUBJECT} · {head}" + (f" 외 {len(new) - 1}건" if len(new) > 1 else ""), body, dry) and not dry:
         rec["sent"] += [k for k, _ in new]
         ALERTS_DIR.mkdir(parents=True, exist_ok=True)

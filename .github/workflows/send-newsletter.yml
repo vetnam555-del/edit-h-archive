@@ -38,7 +38,7 @@ jobs:
   # 기다리기와 보내기를 작업 둘로 나눈다: Secret(SUBSCRIBERS)은 작업이 시작될 때 읽히므로, 보내는 작업이 08:00 에
   # 새로 시작해야 그 사이 반영된 구독 신청·수신 거부(sync-subscribers — 루틴이 오늘 호를 올린 직후 도는 실행 포함)가 들어간다.
   wait:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 370   # 새벽에 올린 오늘 호를 08:00 까지 기다려 보낼 수 있게(wait_until_send.MAX_WAIT)
     steps:
       - uses: actions/checkout@v4
@@ -52,7 +52,7 @@ jobs:
 
   send:
     needs: wait
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4

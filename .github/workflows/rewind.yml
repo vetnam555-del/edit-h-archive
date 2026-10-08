@@ -37,7 +37,7 @@ concurrency:
 jobs:
   # 기다리기와 만들기를 작업 둘로 나눈다: rewind 작업이 08:05 에 새로 시작해야 그 사이 루틴이 올린 main 을 받고, Secrets 도 그때 읽는다.
   wait:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 350   # build_rewind.MAX_WAIT(340분) + 여유
     outputs:
       go: ${{ steps.wait.outputs.go }}
@@ -60,7 +60,7 @@ jobs:
   rewind:
     needs: wait
     if: needs.wait.outputs.go == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
