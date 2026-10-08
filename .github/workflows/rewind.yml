@@ -127,6 +127,7 @@ jobs:
           # 인스타는 캐러셀만 — 이미 올렸던 카드를 다시 엮은 영상은 '재게시·비원본'으로 잡혀 계정 추천을 깎을 수 있다(9/30 예비 호 릴스 도달 1)
           gh workflow run post-instagram.yml --ref main -f key="$DATE" -f mode=post -f only=carousel
           # 저녁 일정 사슬도 — 평소엔 오늘 호 push 가 띄우는데 이 푸시는 못 띄운다(10/7 예비 호 날 21:30 성과 수집이 다음 날 03:59 로 밀렸다).
-          # 예비 호 날 사슬은 릴스 없이 21:30 성과 수집만 한다(evening.schedule).
-          gh workflow run evening.yml --ref main
+          # 예비 호 날 사슬은 릴스 없이 21:30 성과 수집만 한다(evening.schedule). 사슬은 오늘(KST) 일정만 짜므로
+          # 지난 날짜를 수동으로 낸 경우엔 띄우지 않는다(오늘 사슬을 한 번 더 띄우게 된다 — Codex 리뷰).
+          if [ "$DATE" = "$(TZ=Asia/Seoul date +%F)" ]; then gh workflow run evening.yml --ref main; fi
           python3 automation/alert.py rewind --date "$DATE"
