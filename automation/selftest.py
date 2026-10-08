@@ -230,6 +230,30 @@ def t_gift():
     return f"{gift['title']} {gift['count']}가지"
 
 
+def t_photo_library():
+    """대체 표지 사진(fetch_photo --library): 목록의 사진이 모두 있고 지난 호의 출처가 붙는지, 주제어 순위·최근 사용 제외가 맞는지."""
+    import fetch_photo
+    lib = {k for k in json.loads(fetch_photo.LIBRARY.read_text(encoding="utf-8")) if not k.startswith("_")}
+    bad = sorted(p for p in lib if not fetch_photo.registered(p))
+    expect(not bad, f"대체 사진 목록에 subject·tags 가 빠진 줄: {', '.join(bad)}")
+    every = fetch_photo.library("2999-01-01")
+    missing = lib - {c["photo"] for c in every}
+    expect(not missing, f"대체 사진 목록에 있지만 파일이나 출처(발행한 호의 credit)가 없다: {', '.join(sorted(missing))}")
+    top = fetch_photo.library("2999-01-01", "카드 공제 체크카드")[0]
+    expect(top["photo"].endswith("2026-10-04.jpg") and top["score"] > 0, "주제어 '카드' 가 카드 결제 사진을 1순위로 고르지 않는다")
+    for words in ("ai", "AI가 바꾼 세상", "IT업계 변화"):
+        top = fetch_photo.library("2999-01-01", words)[0]
+        expect(top["score"] > 0 and top["photo"].endswith(("2026-10-01.jpg", "2026-10-06.jpg")), f"'{words}' 가 AI·IT 태그에 맞지 않는다")
+    for words, photo in (("내일부터 달라지는 제도", "2026-10-02.jpg"), ("시설 점검", "2026-09-25.jpg"), ("mail 정리", "2026-10-01.jpg")):
+        hit = [c for c in fetch_photo.library("2999-01-01", words) if c["photo"].endswith(photo)]
+        expect(hit and hit[0]["score"] == 0, f"한 글자 태그가 '{words}' 에 걸려 {photo} 를 맞는 후보로 올린다")
+    with contextlib.redirect_stdout(io.StringIO()):
+        expect(fetch_photo.cmd_library("카드", use=0, day="2999-01-01") == 2, "--use 0 이 마지막 후보를 고른다")
+    recent = {c["photo"] for c in fetch_photo.library("2026-10-09")}
+    expect(not recent & {"assets/photos/2026-10-08.jpg", "assets/photos/2026-10-06.jpg"}, "사흘 안에 쓴 사진이 대체 후보에 나온다")
+    return f"{len(every)}장"
+
+
 def t_evening():
     """저녁 일정 사슬(evening.py): 매일 21:30 수집, 저녁 릴스 기간이면 19:30 릴스·20:45 점검. dispatch 대상 워크플로에 workflow_dispatch 가 있는지."""
     import evening
@@ -307,6 +331,7 @@ def main():
     check("성과표(collect_metrics)", t_metrics)
     check("스레드 본문(post_threads)", t_threads)
     check("구독 선물(gift)", t_gift)
+    check("대체 표지 사진(fetch_photo --library)", t_photo_library)
     check("저녁 일정 사슬(evening)", t_evening)
     if not args.quick:
         rebuild(daily_issues(args.issues), args.strict)
