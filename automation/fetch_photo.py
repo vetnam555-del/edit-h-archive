@@ -121,6 +121,9 @@ def registered(photo):
             and isinstance(meta.get("tags"), list) and any(isinstance(g, str) and g.strip() for g in meta["tags"]))
 
 
+_HANGUL = re.compile(r"[가-힣]")
+
+
 def _tokens(text):
     return [t for t in re.split(r"[^0-9A-Za-z가-힣]+", text or "") if t]
 
@@ -142,7 +145,7 @@ def library(day, words=""):
             continue
         u = used.setdefault(cov["photo"], {"credit": cov.get("credit"), "focus": cov.get("focus"), "last": f.stem})
         u["last"] = f.stem   # 파일 이름 순이라 마지막이 가장 최근
-    toks = _tokens(words)
+    toks = [t.lower() for t in _tokens(words)]   # 'ai'·'it' 도 AI·IT 태그에 맞게(Codex 리뷰)
     out = []
     for photo, meta in lib.items():
         u = used.get(photo)
@@ -152,9 +155,12 @@ def library(day, words=""):
         if ago < RECENT_DAYS:
             continue
         tags = meta.get("tags", [])
-        # 같은 낱말 2점, 조사·합성어로 붙은 경우 1점 — 한 글자 태그('일'·'설')는 '내일'·'시설'에 걸리므로 그대로 같을 때만(Codex 리뷰)
-        score = sum(2 if t in tags else 1 for t in toks
-                    if t in tags or (len(t) > 1 and any(len(g) > 1 and (t in g or g in t) for g in tags)))
+        low = [g.lower() for g in tags]
+        # 같은 낱말 2점, 조사·합성어로 붙은 한글 낱말 1점 — 한 글자 태그('일'·'설')는 '내일'·'시설'에, 영문 태그('ai')는 'mail' 에
+        # 걸리므로 그대로 같을 때만(Codex 리뷰)
+        score = sum(2 if t in low else 1 for t in toks
+                    if t in low or (len(t) > 1 and _HANGUL.search(t)
+                                    and any(len(g) > 1 and _HANGUL.search(g) and (t in g or g in t) for g in low)))
         out.append({"photo": photo, "credit": u["credit"], "focus": u.get("focus"), "subject": meta.get("subject", ""),
                     "tags": tags, "last": u["last"], "ago": ago, "score": score})
     return sorted(out, key=lambda c: (-c["score"], -c["ago"]))
