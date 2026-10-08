@@ -111,7 +111,7 @@ def download_url(c):
 
 
 LIBRARY = ROOT / "assets" / "photos" / "library.json"
-RECENT_DAYS = 3   # 이 안에 쓴 사진은 대체 후보에서 뺀다(같은 표지가 연달아 보이지 않게)
+RECENT_DAYS = 3   # 이 날수 안(당일 포함 사흘 전까지)에 쓴 사진은 대체 후보에서 뺀다(같은 표지가 연달아 보이지 않게)
 
 
 def registered(photo):
@@ -125,7 +125,8 @@ _HANGUL = re.compile(r"[가-힣]")
 
 
 def _tokens(text):
-    return [t for t in re.split(r"[^0-9A-Za-z가-힣]+", text or "") if t]
+    """낱말 — 영문·숫자와 한글 경계에서도 나눈다('AI가' → AI·가, 'IT업계' → IT·업계)."""
+    return re.findall(r"[0-9A-Za-z]+|[가-힣]+", text or "")
 
 
 def library(day, words=""):
@@ -152,7 +153,7 @@ def library(day, words=""):
         if not u or not u.get("credit") or not (ROOT / photo).exists():
             continue
         ago = (today - dt.date.fromisoformat(u["last"])).days
-        if ago < RECENT_DAYS:
+        if ago <= RECENT_DAYS:   # '3일 안에 쓴 사진은 뺀다' — 사흘 전 사진까지 뺀다(Codex 리뷰)
             continue
         tags = meta.get("tags", [])
         low = [g.lower() for g in tags]
