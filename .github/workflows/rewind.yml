@@ -1,6 +1,6 @@
 # EDIT H 예비 호(개선 A-2) — 07:00 제작 루틴이 멈춘 날, Claude 없이 GitHub 만으로 오늘 호를 낸다.
 # 발행일인데 08:05(KST)까지 오늘 호가 없으면 '놓쳤다면, 다시 볼 만한 5가지'(최근 3주 안에 이미 사실 확인을 거쳐 발행한
-# 이야기를 다시 엮은 호 — automation/build_rewind.py)를 빌드해 올리고, 메일 발송·인스타 게시를 이어서 돌리고, 운영 알림을 보낸다.
+# 이야기를 다시 엮은 호 — automation/build_rewind.py)를 빌드해 올리고, 메일 발송·인스타 게시·저녁 일정 사슬을 이어서 돌리고, 운영 알림을 보낸다.
 # GitHub 예약 실행은 2~3시간 늦거나 빠지기 쉬워(2026-09-30 08:07 예약이 11:03 에 돌아 예비 호가 3시간 늦음) 새벽 03:13·05:13·06:43 에
 # 미리 시작해 wait 작업이 08:05 까지 기다리게 하고(그 사이 오늘 호가 올라오면 일찍 끝남), 08:07 이후 네 번은 새벽 실행이 모두 빠졌을 때의 예비다.
 # 오늘 호가 있으면 곧바로 끝난다. 루틴이 늦게라도 올린 날은 아무것도 하지 않는다. 공개 저장소라 기다리는 시간은 무료다.
@@ -126,4 +126,8 @@ jobs:
           gh workflow run send-newsletter.yml --ref main -f date="$DATE"
           # 인스타는 캐러셀만 — 이미 올렸던 카드를 다시 엮은 영상은 '재게시·비원본'으로 잡혀 계정 추천을 깎을 수 있다(9/30 예비 호 릴스 도달 1)
           gh workflow run post-instagram.yml --ref main -f key="$DATE" -f mode=post -f only=carousel
+          # 저녁 일정 사슬도 — 평소엔 오늘 호 push 가 띄우는데 이 푸시는 못 띄운다(10/7 예비 호 날 21:30 성과 수집이 다음 날 03:59 로 밀렸다).
+          # 예비 호 날 사슬은 릴스 없이 21:30 성과 수집만 한다(evening.schedule). 사슬은 오늘(KST) 일정만 짜므로
+          # 지난 날짜를 수동으로 낸 경우엔 띄우지 않는다(오늘 사슬을 한 번 더 띄우게 된다 — Codex 리뷰).
+          if [ "$DATE" = "$(TZ=Asia/Seoul date +%F)" ]; then gh workflow run evening.yml --ref main; fi
           python3 automation/alert.py rewind --date "$DATE"

@@ -242,6 +242,9 @@ def t_evening():
     for _, wf in items.values():
         text = (ROOT / ".github" / "workflows" / wf).read_text(encoding="utf-8")
         expect("workflow_dispatch:" in text, f"{wf} 에 workflow_dispatch 가 없어 사슬이 실행할 수 없다")
+    # 예비 호는 GITHUB_TOKEN 으로 푸시해 push 로는 사슬이 안 뜬다 — rewind.yml 이 직접 띄워야 21:30 수집이 제때 돈다(10/7)
+    rewind = (ROOT / ".github" / "workflows" / "rewind.yml").read_text(encoding="utf-8")
+    expect("gh workflow run evening.yml" in rewind, "예비 호(rewind.yml)가 저녁 일정 사슬을 띄우지 않는다")
     return f"{day}: " + ", ".join(f"{t} {n}" for n, (t, _) in sorted(items.items(), key=lambda kv: kv[1][0]))
 
 

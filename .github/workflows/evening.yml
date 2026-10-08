@@ -8,7 +8,7 @@ on:
   push:
     branches: [main]
     paths: ["20[0-9][0-9]-[0-9][0-9]-[0-9][0-9].html"]
-  workflow_dispatch:
+  workflow_dispatch:   # 예비 호 날(rewind.yml — GITHUB_TOKEN 푸시는 위 push 를 못 띄운다)·수동
 
 permissions:
   contents: read
