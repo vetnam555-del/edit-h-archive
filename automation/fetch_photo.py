@@ -145,15 +145,19 @@ def library(day, words=""):
         if ago < RECENT_DAYS:
             continue
         tags = meta.get("tags", [])
-        score = sum(2 if t in tags else 1 for t in toks if any(t in g or g in t for g in tags))
+        # 같은 낱말 2점, 조사·합성어로 붙은 경우 1점 — 한 글자 태그('일'·'설')는 '내일'·'시설'에 걸리므로 그대로 같을 때만(Codex 리뷰)
+        score = sum(2 if t in tags else 1 for t in toks
+                    if t in tags or (len(t) > 1 and any(len(g) > 1 and (t in g or g in t) for g in tags)))
         out.append({"photo": photo, "credit": u["credit"], "focus": u.get("focus"), "subject": meta.get("subject", ""),
                     "tags": tags, "last": u["last"], "ago": ago, "score": score})
     return sorted(out, key=lambda c: (-c["score"], -c["ago"]))
 
 
 def cmd_library(words, use=None, day=None):
-    import datetime as dt
-    day = day or dt.date.today().isoformat()
+    # 07:00 KST 제작은 UTC 서버에선 아직 어제다 — 목록과 --use 가 같은 날짜로 계산돼야 번호가 같은 사진을 가리킨다(Codex 리뷰)
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from edith.common import now_kst
+    day = day or now_kst().date().isoformat()
     cands = library(day, words)
     if not cands:
         print("✗ 대체 사진 후보가 없습니다 — 핵심어 표지로 진행하고 6단계 보고 '표지:' 줄에 사유를 적으세요.")
