@@ -187,6 +187,9 @@ def t_rewind():
         try:
             expect(build_rewind._rewind_picks("2026-10-13") == {"가": "2026-10-12", "나": "2026-10-11", "다": "2026-10-12"},
                    "예비 호 H PICK 최근 날짜를 못 센다(늦게 낸 예비 호는 실제로 낸 날)")
+            # 9/29 호를 10/13 에 늦게 낼 때 — 9/29 뒤에 실린 H PICK 도 센다
+            expect(build_rewind._rewind_picks("2026-09-29", "2026-10-13") == {"가": "2026-10-12", "나": "2026-10-11", "다": "2026-10-12"},
+                   "지난 날짜 예비 호가 그 날짜 뒤에 실린 H PICK 을 안 센다")
         finally:
             build_rewind.CONTENT_DIR = saved
     for past in ("2026-09-30", "2026-10-07"):   # 실제 예비 호 날 — 이틀 전 H PICK 을 다시 실었던 날(10/8 회고)
@@ -250,6 +253,7 @@ def t_gift():
 
 def t_photo_library():
     """대체 표지 사진(fetch_photo --library): 목록의 사진이 모두 있고 지난 호의 출처가 붙는지, 주제어 순위·최근 사용 제외가 맞는지."""
+    import build_rewind
     import fetch_photo
     lib = {k for k in json.loads(fetch_photo.LIBRARY.read_text(encoding="utf-8")) if not k.startswith("_")}
     bad = sorted(p for p in lib if not fetch_photo.registered(p))
@@ -286,8 +290,13 @@ def t_photo_library():
         try:
             expect(not fetch_photo.library("2026-10-11", "돈"), "어제 예비 호가 쓴 표지가 다시 후보에 나온다")
             expect(not fetch_photo.library("2026-10-16", "돈"), "지난 날짜로 늦게 낸 예비 호의 표지를 다음 날 다시 고른다")
+            expect(not fetch_photo.library("2026-10-15", "돈"), "같은 날 늦게 낸 예비 호의 표지를 그날 일반 호가 또 고른다")
             later = fetch_photo.library("2026-10-20", "돈")
             expect(later and later[0]["credit"] == "출처 원본", "예비 호가 쓴 사진의 출처가 일반 호의 것이 아니다")
+            # 9/28 호를 10/12 에 늦게 낼 때 — 사흘 전(10/10) 예비 호 표지를 센다
+            with contextlib.redirect_stdout(io.StringIO()):
+                expect(not build_rewind.cover_photo("2026-09-28", ["돈"], "2026-10-12"), "지난 날짜 예비 호가 최근 쓴 표지를 또 고른다")
+                expect(build_rewind.cover_photo("2026-09-28", ["돈"], "2026-10-20"), "지난 날짜 예비 호가 쓸 수 있는 표지를 못 고른다")
         finally:
             fetch_photo.ROOT, fetch_photo.LIBRARY = saved_root, saved_lib
     recent = {c["photo"] for c in fetch_photo.library("2026-10-09")}

@@ -62,15 +62,16 @@ def _used(date):
     return used
 
 
-def _rewind_picks(date):
-    """{H PICK 제목: 그 이야기를 H PICK 으로 다시 실은 가장 최근 예비 호 날짜} — date 이전 예비 호만."""
+def _rewind_picks(date, on=None):
+    """{H PICK 제목: 그 이야기를 H PICK 으로 다시 실은 가장 최근 예비 호 날짜} — on(이 호를 내는 날)까지, 만드는 date 호 자신은 빼고."""
+    on = on or date
     out = {}
     for p in sorted(CONTENT_DIR.glob("20*.json")):
         c = json.loads(p.read_text(encoding="utf-8"))
         if not (c.get("rewind") and c.get("big_issue")):
             continue
         shown = (c.get("published_at_kst") or p.stem)[:10]   # 지난 날짜로 늦게 낸 예비 호는 실제로 낸 날로 센다(Codex 리뷰)
-        if shown < date:
+        if p.stem != date and shown <= on:
             key = plain_title(c["big_issue"]["title"])
             out[key] = max(out.get(key, ""), shown)
     return out
@@ -106,8 +107,9 @@ def _solid(story):
 PICK_GAP_DAYS = 3   # 예비 호 H PICK 은 이 날수 안(사흘 전까지)에 H PICK 으로 실린 이야기를 피한다
 
 
-def pick(date):
+def pick(date, on=None):
     """(H PICK 후보, [아이템 4], 반응 근거가 있는가) — 모자라면 ValueError.
+    재료는 date 호 기준 최근 3주, H PICK 간격은 on(실제로 내는 날, 기본 date) 기준 — 지난 날짜를 늦게 낼 때 그 사이 실린 H PICK 도 센다(Codex 리뷰).
     2026-10-03 회고: 9/30 예비 호가 이틀 전 한 호의 5개를 그대로 다시 실었고, 출처 1건짜리도 섞였다.
     그래서 ① 출처 2건 이상을 먼저 ② 한 호에서 1개씩(모자라면 2개까지) 섞어 고르고, 둘 다 안 되면 조건을 하나씩 푼다."""
     scores = _scores()
@@ -128,9 +130,10 @@ def pick(date):
         raise ValueError("H PICK 으로 쓸 형식 2 호(심층 포함)가 최근 3주 안에 없습니다")
     # 2026-10-08 회고: 9/30 은 9/28 호, 10/7 은 10/5 호 H PICK 을 이틀 만에 다시 실었다 — 최근 사흘 안의 H PICK 은 뒤로.
     # '최근'은 원래 호와 그 뒤 예비 호에 H PICK 으로 다시 실린 날 중 늦은 날로 센다(예비 호가 이어지는 날 같은 H PICK 반복 막기, Codex 리뷰)
-    again = _rewind_picks(date)
+    on = on or date
+    again = _rewind_picks(date, on)
     last = {id(x): max(x[2], again.get(plain_title(x[4]["title"]), "")) for x in picks}
-    older = [x for x in picks if (parse_date(date) - parse_date(last[id(x)])).days > PICK_GAP_DAYS]
+    older = [x for x in picks if (parse_date(on) - parse_date(last[id(x)])).days > PICK_GAP_DAYS]
     if older:
         picks = older
     else:   # 모두 사흘 안이면 출처 2건 이상을 먼저, 그 안에서 가장 오래전에 실린 H PICK 부터(어제 것을 또 쓰지 않게, Codex 리뷰)
@@ -160,12 +163,13 @@ def pick(date):
     return top, items, liked
 
 
-def cover_photo(date, titles):
+def cover_photo(date, titles, on=None):
     """예비 호 표지 실사 사진 — 지난 호에서 검수한 대체 사진(assets/photos/library.json) 중 다섯 이야기 제목과 맞는 것.
     2026-10-08 회고: 10/7 예비 호가 핵심어 표지로 나가 캐러셀 도달 8(원칙 9 '표지는 실사 사진').
     여러 주제를 엮는 호라 '돈·소비·경제' 를 더해, 맞는 주제어가 없으면 넓은 주제의 사진(동전·카드 결제 등)이 앞에 오게 한다."""
     import fetch_photo
-    cands = fetch_photo.library(date, " ".join(titles + ["돈 소비 경제"]))
+    # 최근 사용은 실제로 내는 날(on) 기준 — 지난 날짜를 늦게 낼 때 그 사이 쓴 표지도 센다(Codex 리뷰)
+    cands = fetch_photo.library(on or date, " ".join(titles + ["돈 소비 경제"]), skip=date)
     if not cands or not cands[0]["score"]:
         return None
     c = cands[0]
@@ -177,7 +181,9 @@ def cover_photo(date, titles):
 
 
 def build(date):
-    top, items, by_score = pick(date)
+    now = now_kst()
+    on = max(date, now.date().isoformat())   # 독자가 이 호를 받는 날 — 지난 날짜로 늦게 내면 오늘
+    top, items, by_score = pick(date, on)
     big = copy.deepcopy(top[0])
     big["title"] = top[4]["title"]   # H PICK 제목은 원래 호의 제목(예비 호 자체 제목은 '다시 볼 만한 5가지')
     content_items, card_issues = [], []
@@ -193,7 +199,7 @@ def build(date):
     what = "반응이 좋았던" if by_score else "다시 볼 만한"
     titles = [plain_title(top[4]["title"])] + [plain_title(s[0]["title"]) for s in items]
     cover = {"title": "놓쳤다면,\n다시 볼 만한 ==5가지==", "keyword": "다시보기"}
-    photo = cover_photo(date, titles)
+    photo = cover_photo(date, titles, on)
     if photo:
         cover.update(photo)
     return {
@@ -205,7 +211,7 @@ def build(date):
         "subtitle": "지난 호 다시 보기 — " + " · ".join(titles),
         "keywords": [big["tag"]] + [it["tag"] for it in content_items],
         "source_mode": "rewind",
-        "published_at_kst": now_kst().isoformat(timespec="seconds"),   # 08:05 뒤 실제로 만든 시각 — 검색엔진 발행 시각(NewsArticle)
+        "published_at_kst": now.isoformat(timespec="seconds"),   # 08:05 뒤 실제로 만든 시각 — 검색엔진 발행 시각(NewsArticle)
         "lead": (f"오늘은 새 소식을 준비하지 못해, 지난 호에서 {what} 이야기 다섯 가지를 다시 골랐어요. "
                  "출처 옆 날짜가 처음 실린 날이에요. 내일 아침엔 새 소식으로 돌아올게요."),
         "observation": "새 소식이 없는 날엔 다시 볼 이야기를 — 지난 숫자에도 오늘 쓸모가 남아 있어요.",
