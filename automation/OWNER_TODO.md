@@ -33,6 +33,9 @@
 
 ## 인스타 프로필 점검 (10분 — API 로는 못 바꾸는 것들)
 
+붙여넣을 글·이미지는 `assets/profile/`(사이트 주소 `…/edit-h-archive/assets/profile/파일명`)에 있다 —
+구독 스토리 `story_subscribe.png`, 하이라이트 커버 `highlight_cover_subscribe.png`, 프로필 사진(안경 마크) `profile_mark.png`.
+
 - [ ] **프로필 링크** = `https://vetnam555-del.github.io/edit-h-archive/subscribe.html?ref=ig` 인지(뒤의 `?ref=ig` 가 있어야 성과표가 인스타 경유 구독을 센다).
 - [ ] **카테고리** — 프로필 편집 → 카테고리 → '뉴스·미디어 웹사이트'(또는 '미디어/뉴스 회사'), 프로필에 표시 켜기. 처음 온 사람이 1초 안에 무슨 계정인지 안다.
 - [ ] **프로필 사진** — 작게 봐도 읽히는 안경 마크(EDIT H). 글자가 많은 로고는 동그라미 안에서 안 읽힌다.
