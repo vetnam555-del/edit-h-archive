@@ -1,5 +1,5 @@
 {
- "collected_at": "2026-10-09T16:24+09:00",
+ "collected_at": "2026-10-09T21:30+09:00",
  "issues": {
   "2026-10-09": {
    "title": "호프집, 1년 새 1894곳 사라졌다고?",
@@ -12,10 +12,11 @@
    "source_mode": "fallback",
    "audience": "2030직장인",
    "series": "없음",
-   "reel_style": null,
-   "reel_seconds": null,
-   "reel_slot": null,
-   "reel_feed": null
+   "reel_style": "세로",
+   "reel_seconds": 10.1,
+   "reel_slot": "저녁",
+   "reel_feed": false,
+   "reel_hook": false
   },
   "2026-10-08": {
    "title": "닭값 37.7% 내렸는데, 치킨은 그대로라고?",
@@ -31,7 +32,8 @@
    "reel_style": "세로",
    "reel_seconds": 10.1,
    "reel_slot": "저녁",
-   "reel_feed": false
+   "reel_feed": false,
+   "reel_hook": false
   },
   "2026-10-07": {
    "title": "놓쳤다면, 다시 볼 만한 5가지",
@@ -47,7 +49,8 @@
    "reel_style": null,
    "reel_seconds": null,
    "reel_slot": null,
-   "reel_feed": null
+   "reel_feed": null,
+   "reel_hook": null
   },
   "2026-10-06": {
    "title": "제미나이 프로, 이제 월 2.9만원부터라고?",
@@ -63,7 +66,8 @@
    "reel_style": "세로",
    "reel_seconds": 10.1,
    "reel_slot": "아침",
-   "reel_feed": false
+   "reel_feed": false,
+   "reel_hook": false
   },
   "2026-10-05": {
    "title": "전셋값 86주째, 39세도 청년 대출 된다고?",
@@ -79,7 +83,8 @@
    "reel_style": "세로",
    "reel_seconds": 10.1,
    "reel_slot": "아침",
-   "reel_feed": false
+   "reel_feed": false,
+   "reel_hook": false
   },
   "2026-10-04": {
    "title": "카드 공제, 4분기엔 체크카드가 2배라고?",
@@ -95,7 +100,8 @@
    "reel_style": "세로",
    "reel_seconds": 10.1,
    "reel_slot": "아침",
-   "reel_feed": false
+   "reel_feed": false,
+   "reel_hook": false
   },
   "2026-10-03": {
    "title": "월 50만원 3년이면, 2255만원이라고?",
@@ -111,7 +117,8 @@
    "reel_style": "세로",
    "reel_seconds": 10.1,
    "reel_slot": "아침",
-   "reel_feed": false
+   "reel_feed": false,
+   "reel_hook": false
   },
   "2026-10-02": {
    "title": "프리랜서 세금, 3.3% 대신 2.2%라고?",
@@ -127,7 +134,8 @@
    "reel_style": "카드",
    "reel_seconds": 19.6,
    "reel_slot": "아침",
-   "reel_feed": false
+   "reel_feed": false,
+   "reel_hook": false
   },
   "2026-10-01": {
    "title": "정부 사이트 해킹, 피해는 신고의 11배라고?",
@@ -143,7 +151,8 @@
    "reel_style": "카드",
    "reel_seconds": 19.6,
    "reel_slot": "아침",
-   "reel_feed": false
+   "reel_feed": false,
+   "reel_hook": false
   },
   "2026-09-30": {
    "title": "놓쳤다면, 다시 볼 만한 5가지",
@@ -159,7 +168,8 @@
    "reel_style": "카드",
    "reel_seconds": 32.3,
    "reel_slot": "아침",
-   "reel_feed": false
+   "reel_feed": false,
+   "reel_hook": false
   },
   "2026-09-29": {
    "title": "AI가 내 구독을, 알아서 해지해 준다고?",
@@ -175,7 +185,8 @@
    "reel_style": "카드",
    "reel_seconds": 32.3,
    "reel_slot": "아침",
-   "reel_feed": false
+   "reel_feed": false,
+   "reel_hook": false
   },
   "2026-09-28": {
    "title": "추석 끝나자, 10월부터 줄줄이 오른다고?",
@@ -191,7 +202,8 @@
    "reel_style": "카드",
    "reel_seconds": 32.3,
    "reel_slot": "아침",
-   "reel_feed": false
+   "reel_feed": false,
+   "reel_hook": false
   },
   "2026-09-27": {
    "title": "남은 연차, 돈으로 받을 수 있을까?",
@@ -207,7 +219,8 @@
    "reel_style": "카드",
    "reel_seconds": 32.3,
    "reel_slot": "아침",
-   "reel_feed": false
+   "reel_feed": false,
+   "reel_hook": false
   },
   "2026-09-26": {
    "title": "상어 한 마리에, 10만 명이 몰렸다고?",
@@ -223,7 +236,8 @@
    "reel_style": "카드",
    "reel_seconds": 32.3,
    "reel_slot": "아침",
-   "reel_feed": false
+   "reel_feed": false,
+   "reel_hook": false
   }
  },
  "instagram": {
@@ -484,18 +498,28 @@
    "2026-10-09": {
     "likes": 2,
     "comments": 0,
-    "reach": 6,
+    "reach": 7,
     "saved": 0,
     "shares": 0,
-    "views": 13,
+    "views": 17,
     "profile_visits": 0,
-    "follows": 0
+    "follows": 0,
+    "reel": {
+     "likes": 1,
+     "comments": 0,
+     "reach": 61,
+     "saved": 0,
+     "shares": 0,
+     "views": 70,
+     "seconds": 10.1,
+     "avg_watch_s": 1.2
+    }
    }
   },
   "account": {
    "days": 7,
    "reach": {
-    "NON_FOLLOWER": 503,
+    "NON_FOLLOWER": 561,
     "FOLLOWER": 36
    },
    "follows_and_unfollows": {
