@@ -312,6 +312,35 @@ def post_reel(g, uid, key, folder, cfg, dry, ffmpeg, site_url):
     return media_id, track
 
 
+def story_on(cfg, key):
+    """E9 아침 스토리를 올리는 날인가 — config.instagram.story_from 부터(2026-10-10~). 데일리 호만(주간 특집 키 제외)."""
+    start = cfg.get("story_from")
+    return bool(start and str(key)[:10] >= start and "weekly" not in str(key))
+
+
+def story_image(folder, key, site_url):
+    """스토리용 이미지 공개 주소 — 세로 릴스 첫 장(r1_hook.jpg, 1080×1920)이 있으면 그것, 없으면(예비 호) 표지 JPEG."""
+    if (folder / "reel_frames" / "r1_hook.jpg").exists():
+        return f"{site_url}/instagram/{key}/reel_frames/r1_hook.jpg"
+    jpgs = sorted((folder / "ig").glob("*.jpg"))
+    return f"{site_url}/instagram/{key}/ig/{jpgs[0].name}" if jpgs else None
+
+
+def post_story(g, uid, key, folder, site_url, dry):
+    """E9(2026-10-10~): 캐러셀을 올린 뒤 같은 날 훅 화면을 스토리로 — 스토리는 팔로워 홈 맨 위에 뜬다.
+    2026-10-09 진단: 팔로워 133명 중 이번 주 우리 게시물을 본 사람 36명. 스토리를 보고 프로필·피드로 오게."""
+    url = story_image(folder, key, site_url)
+    if not url:
+        return None
+    wait_public([url])
+    cid = g.call("POST", f"{uid}/media", media_type="STORIES", image_url=url)["id"]
+    g.wait_ready(cid, "스토리")
+    if dry:
+        print("  (dry-run) 스토리 컨테이너 준비 완료 — 게시하지 않음")
+        return None
+    return publish(g, uid, cid, "스토리")
+
+
 def reel_to_feed(cfg, key):
     """릴스를 피드(팔로워 홈·프로필 격자)에도 올리나 — reel_share_to_feed 이거나 reel_feed_from 날짜부터(E7, 2026-10-13~).
     릴스 탭에만 올리면 팔로워 홈 피드엔 안 보여, 초반 반응이 비팔로워 시험 노출(110~150명)에서만 나온다(2026-10-09 진단)."""
@@ -501,6 +530,22 @@ def main():
             failures.append(f"캐러셀: {e}")
     elif log.get("carousel"):
         print(f"캐러셀은 이미 게시됨 ({log['carousel'].get('permalink') or log['carousel']['id']})")
+
+    # 아침 스토리(E9) — 캐러셀이 올라간 뒤에만. 실패해도 게시 작업은 실패로 치지 않는다(기록만, 다음 실행이 다시 시도)
+    if (args.only != "reel" and args.kind == "daily" and log.get("carousel") and not log.get("story")
+            and story_on(cfg, key)):
+        try:
+            print("스토리 게시 중…")
+            sid = post_story(g, uid, key, folder, site_url, args.dry_run)
+            if sid:
+                log["story"] = {"id": sid, "at": now_kst().isoformat(timespec="seconds")}
+                log.pop("story_error", None)
+                save_log(key, log)
+                print("  ✓ 스토리")
+        except IGError as e:
+            log["story_error"] = str(e)[:200]
+            save_log(key, log)
+            print(f"  ⚠ 스토리 실패(게시는 계속): {e}")
 
     # 예비 호(다시 보기)는 릴스를 올리지 않는다 — 이미 올린 카드를 다시 엮은 영상은 재게시로 잡혀 추천을 깎을 수 있다.
     # 어느 경로(예약·수동·rewind.yml)로 돌든 여기서 막는다.

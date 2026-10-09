@@ -545,6 +545,52 @@ def t_reel_hook():
     return f"첫 장 {timing['first']}초 · {total:.1f}초"
 
 
+def t_story():
+    """E9 아침 스토리(2026-10-10~): 날짜·데일리만, 세로 훅 화면(없으면 표지), STORIES 로 올림, 24시간 뒤엔 지난 스냅숏 값."""
+    import collect_metrics
+    import post_instagram
+    cfg = {"story_from": "2026-10-10"}
+    expect([post_instagram.story_on(cfg, k) for k in ("2026-10-09", "2026-10-10", "2026-10-16-weekly")] == [False, True, False],
+           "스토리 시작 날짜·주간 특집 제외가 틀린다")
+    calls = []
+
+    class FakeGraph:
+        def call(self, method, path, **params):
+            calls.append((path, params))
+            if path.endswith("/insights"):
+                raise post_instagram.IGError("400 (code 10): insights expired")
+            return {"id": "s1"}
+
+        def wait_ready(self, *a, **k):
+            pass
+
+    saved_wait, saved_metrics = post_instagram.wait_public, collect_metrics.METRICS
+    post_instagram.wait_public = lambda urls, **k: None
+    try:
+        with tempfile.TemporaryDirectory() as tmp, contextlib.redirect_stdout(io.StringIO()):
+            folder = Path(tmp) / "k"
+            (folder / "ig").mkdir(parents=True)
+            (folder / "ig" / "01_cover.jpg").write_bytes(b"")
+            expect(post_instagram.story_image(folder, "k", "https://x").endswith("/ig/01_cover.jpg"), "훅 화면이 없을 때 표지로 안 간다")
+            (folder / "reel_frames").mkdir()
+            (folder / "reel_frames" / "r1_hook.jpg").write_bytes(b"")
+            expect(post_instagram.story_image(folder, "k", "https://x").endswith("/reel_frames/r1_hook.jpg"), "스토리가 세로 훅 화면을 안 쓴다")
+            expect(post_instagram.post_story(FakeGraph(), "u", "k", folder, "https://x", False) == "s1", "스토리를 게시하지 않는다")
+            media = [p for path, p in calls if path == "u/media"]
+            expect(media and media[0].get("media_type") == "STORIES" and media[0]["image_url"].endswith("r1_hook.jpg"), "STORIES 컨테이너가 아니다")
+            # 24시간이 지나 인사이트가 닫히면 지난 스냅숏의 스토리 값을 그대로 쓴다
+            daily = Path(tmp) / "m" / "daily"
+            daily.mkdir(parents=True)
+            (daily / "2026-10-10.json").write_text(json.dumps({"instagram": {"posts": {"2026-10-10": {"story": {"reach": 31}}}}}), encoding="utf-8")
+            collect_metrics.METRICS = Path(tmp) / "m"
+            got = collect_metrics._story_row(FakeGraph(), "2026-10-10", {"story": {"id": "s1"}})
+            expect(got == {"reach": 31}, f"닫힌 스토리 인사이트를 지난 스냅숏에서 못 가져온다: {got}")
+    finally:
+        post_instagram.wait_public, collect_metrics.METRICS = saved_wait, saved_metrics
+    expect(collect_metrics._story_cell({"story": {"reach": 31}}) == " (스토리 31)", "성과표에 스토리 도달이 안 붙는다")
+    return "날짜·이미지·게시·24시간 뒤 값"
+
+
 def t_evening():
     """저녁 일정 사슬(evening.py): 매일 21:30 수집, 저녁 릴스 기간이면 19:30 릴스·20:45 점검. dispatch 대상 워크플로에 workflow_dispatch 가 있는지."""
     import evening
@@ -629,6 +675,7 @@ def main():
     check("조회수 진단(보내기 한 줄·릴스 피드·계정 지표)", t_views_diag)
     check("구독 즉시 첫 메일(sync_subscribers)", t_first_issue)
     check("릴스 첫 장 훅(E8)", t_reel_hook)
+    check("아침 스토리(E9)", t_story)
     if not args.quick:
         rebuild(daily_issues(args.issues), args.strict)
     if NOTES:
