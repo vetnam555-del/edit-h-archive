@@ -62,6 +62,18 @@ def _used(date):
     return used
 
 
+def _rewind_picks(date):
+    """{H PICK 제목: 그 이야기를 H PICK 으로 다시 실은 가장 최근 예비 호 날짜} — date 이전 예비 호만."""
+    out = {}
+    for p in sorted(CONTENT_DIR.glob("20*.json")):
+        if p.stem >= date:
+            continue
+        c = json.loads(p.read_text(encoding="utf-8"))
+        if c.get("rewind") and c.get("big_issue"):
+            out[plain_title(c["big_issue"]["title"])] = p.stem
+    return out
+
+
 def pool(date):
     """[(이야기, 카드 스펙, 원고 날짜, 형식2 H PICK 여부, 원고)] — 오늘 이전 POOL_DAYS 일 안, 예비 호는 빼고."""
     today = parse_date(date)
@@ -112,8 +124,11 @@ def pick(date):
     picks = sorted((x for x in cands if x[3]), key=lambda x: (_solid(x[0]), rank(x)), reverse=True)
     if not picks:
         raise ValueError("H PICK 으로 쓸 형식 2 호(심층 포함)가 최근 3주 안에 없습니다")
-    # 2026-10-08 회고: 9/30 은 9/28 호, 10/7 은 10/5 호 H PICK 을 이틀 만에 다시 실었다 — 최근 사흘 안의 H PICK 은 뒤로
-    older = [x for x in picks if (parse_date(date) - parse_date(x[2])).days > PICK_GAP_DAYS]
+    # 2026-10-08 회고: 9/30 은 9/28 호, 10/7 은 10/5 호 H PICK 을 이틀 만에 다시 실었다 — 최근 사흘 안의 H PICK 은 뒤로.
+    # '최근'은 원래 호와 그 뒤 예비 호에 H PICK 으로 다시 실린 날 중 늦은 날로 센다(예비 호가 이어지는 날 같은 H PICK 반복 막기, Codex 리뷰)
+    again = _rewind_picks(date)
+    last = {id(x): max(x[2], again.get(plain_title(x[4]["title"]), "")) for x in picks}
+    older = [x for x in picks if (parse_date(date) - parse_date(last[id(x)])).days > PICK_GAP_DAYS]
     if older:
         picks = older
     else:
@@ -187,6 +202,7 @@ def build(date):
         "subtitle": "지난 호 다시 보기 — " + " · ".join(titles),
         "keywords": [big["tag"]] + [it["tag"] for it in content_items],
         "source_mode": "rewind",
+        "published_at_kst": now_kst().isoformat(timespec="seconds"),   # 08:05 뒤 실제로 만든 시각 — 검색엔진 발행 시각(NewsArticle)
         "lead": (f"오늘은 새 소식을 준비하지 못해, 지난 호에서 {what} 이야기 다섯 가지를 다시 골랐어요. "
                  "출처 옆 날짜가 처음 실린 날이에요. 내일 아침엔 새 소식으로 돌아올게요."),
         "observation": "새 소식이 없는 날엔 다시 볼 이야기를 — 지난 숫자에도 오늘 쓸모가 남아 있어요.",

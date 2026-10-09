@@ -401,16 +401,18 @@ def _footer(site, campaign):
             + "</td></tr>")
 
 
-def _ld_json(d, site, title):
+def _ld_json(d, site, title, has_cards=True):
     """검색엔진용 구조화 데이터(NewsArticle) — 웹 아카이브에만 쓴다(메일로 보낼 때 send_newsletter 가 뺀다).
-    2026-10-09: 호 페이지에 설명문·대표 주소·구조화 데이터가 없어 검색 결과에 제목만 나갔다."""
+    2026-10-09: 호 페이지에 설명문·대표 주소·구조화 데이터가 없어 검색 결과에 제목만 나갔다.
+    발행 시각은 원고에 적힌 실제 시각(예비 호는 08:05 뒤 만든 시각)이 있으면 그것, 없으면 발송 시각. 카드 없이 만든 호는 이미지를 넣지 않는다."""
     url = f"{site}/{d['date']}.html"
-    when = f"{d['date']}T{load_config().get('send_time_kst', '08:00')}:00+09:00"
+    when = d.get("published_at_kst") or f"{d['date']}T{load_config().get('send_time_kst', '08:00')}:00+09:00"
     org = {"@type": "Organization", "name": "EDIT H", "url": f"{site}/"}
     data = {"@context": "https://schema.org", "@type": "NewsArticle", "headline": f"[EDIT H] {title}"[:110],
             "description": plain(d["subtitle"]), "datePublished": when, "dateModified": when, "inLanguage": "ko",
-            "image": [f"{site}/instagram/{d['date']}/01_edit_h_{d['date']}_cover.png"],
             "mainEntityOfPage": url, "url": url, "author": org, "publisher": org}
+    if has_cards:
+        data["image"] = [f"{site}/instagram/{d['date']}/01_edit_h_{d['date']}_cover.png"]
     body = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
     return f'<script type="application/ld+json">{body}</script>'
 
@@ -452,7 +454,7 @@ def render(d, site, n_cards):
 <meta property="og:image" content="{site}/instagram/{d['date']}/01_edit_h_{d['date']}_cover.png">
 <meta name="twitter:card" content="summary_large_image">
 <title>[EDIT H] {esc(title)}</title>
-{_ld_json(d, site, title)}
+{_ld_json(d, site, title, bool(n_cards))}
 <style>
 :root{{color-scheme:light only;supported-color-schemes:light only;}}
 @media (max-width:480px){{.px{{padding-left:20px!important;padding-right:20px!important;}}.h-cover{{font-size:26px!important;}}}}

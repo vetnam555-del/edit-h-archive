@@ -176,6 +176,16 @@ def t_series_and_style():
 def t_rewind():
     import build_rewind
     today = now_kst().date().isoformat()
+    # 예비 호에 다시 실린 H PICK 도 '최근'으로 센다 — 예비 호가 이어질 때 같은 H PICK 반복 막기
+    saved = build_rewind.CONTENT_DIR
+    with tempfile.TemporaryDirectory() as tmp:
+        for day, title in (("2026-10-10", "가"), ("2026-10-11", "나"), ("2026-10-12", "가")):
+            Path(tmp, f"{day}.json").write_text(json.dumps({"rewind": True, "big_issue": {"title": title}}), encoding="utf-8")
+        build_rewind.CONTENT_DIR = Path(tmp)
+        try:
+            expect(build_rewind._rewind_picks("2026-10-13") == {"가": "2026-10-12", "나": "2026-10-11"}, "예비 호 H PICK 최근 날짜를 못 센다")
+        finally:
+            build_rewind.CONTENT_DIR = saved
     for past in ("2026-09-30", "2026-10-07"):   # 실제 예비 호 날 — 이틀 전 H PICK 을 다시 실었던 날(10/8 회고)
         gap = (parse_date(past) - parse_date(build_rewind.pick(past)[0][2])).days
         expect(gap > build_rewind.PICK_GAP_DAYS, f"{past} 예비 호 H PICK 이 {gap}일 전 호의 H PICK 이다")
@@ -289,7 +299,9 @@ def t_seo():
     for tag in ('<meta name="description"', f'<link rel="canonical" href="{site}/{day}.html">', 'application/ld+json'):
         expect(tag in page, f"호 페이지에 {tag} 가 없다")
     ld = json.loads(re.search(r'<script type="application/ld\+json">(.*?)</script>', page, re.S).group(1))
-    expect(ld["@type"] == "NewsArticle" and ld["datePublished"].startswith(day), "구조화 데이터가 NewsArticle·발행일이 아니다")
+    expect(ld["@type"] == "NewsArticle" and ld["datePublished"].startswith(day) and ld.get("image"), "구조화 데이터가 NewsArticle·발행일·이미지가 아니다")
+    bare = newsletter.render(content_mod.load(day), site, 0)   # --no-cards — 없는 표지 이미지를 알리지 않는다
+    expect('"image"' not in re.search(r'<script type="application/ld\+json">(.*?)</script>', bare, re.S).group(1), "카드 없는 호가 표지 이미지를 알린다")
     cfg = load_config()
     msg = send_newsletter.build_message({"title": "t", "filename": f"{day}.html"}, page, "a@example.com", cfg, "b@example.com")
     expect("application/ld+json" not in msg.get_body(preferencelist=("html",)).get_content(), "메일 본문에 구조화 데이터 스크립트가 남았다")
