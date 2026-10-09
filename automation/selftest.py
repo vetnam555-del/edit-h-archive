@@ -444,10 +444,11 @@ def t_views_diag():
             return {"data": [{"name": m, "total_value": {"value": 3}}, {"total_value": {"value": 9}}]}
 
     acc = collect_metrics.account_week(FakeGraph(), now=now_kst())
-    expect(acc.get("reach") == {"FOLLOWER": 40, "NON_FOLLOWER": 260, "UNKNOWN": 5} and acc.get("profile_views") == 3
+    expect(acc.get("reach") == {"FOLLOWER": 40, "NON_FOLLOWER": 260, "UNKNOWN": 5} and acc.get("accounts_engaged") == 3
            and "follows_and_unfollows" in acc.get("errors", {}), f"계정 7일 지표 해석이 틀린다: {acc}")
+    expect("profile_views" not in {m for m, _ in collect_metrics.ACCOUNT_METRICS}, "v21 에 없어진 profile_views 를 요청한다")
     lines = collect_metrics._account_lines({"account": acc}, {"2026-10-09": {"profile_visits": 2, "follows": 1}})
-    expect(lines and "팔로워 40" in lines[0] and "비팔로워 260(미분류 5)" in lines[0] and "프로필 조회 3" in lines[0]
+    expect(lines and "팔로워 40" in lines[0] and "비팔로워 260(미분류 5)" in lines[0] and "반응한 계정 3" in lines[0]
            and "프로필 방문 2" in lines[-1], f"성과표 계정 줄: {lines}")
     # 게시물이 없어도(게시 쉼) 계정 지표는 모은다
     saved_env = os.environ.get("IG_ACCESS_TOKEN")
@@ -470,7 +471,9 @@ def t_views_diag():
             os.environ.pop("IG_ACCESS_TOKEN", None)
         else:
             os.environ["IG_ACCESS_TOKEN"] = saved_env
-    expect((got.get("account") or {}).get("profile_views") == 3, f"게시물이 없을 때 계정 지표를 안 모은다: {got}")
+    expect((got.get("account") or {}).get("accounts_engaged") == 3, f"게시물이 없을 때 계정 지표를 안 모은다: {got}")
+    head = collect_metrics.summary_md({"collected_at": "x", "issues": {}, "instagram": got})
+    expect("권한 없음" not in head, "살펴본 게시물이 없을 뿐인데 '인사이트 권한 없음'이라고 쓴다")
     return "보내기 한 줄·피드 공유 날짜·계정 지표"
 
 

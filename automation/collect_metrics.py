@@ -39,8 +39,9 @@ ACCOUNT_DAYS = 7
 # 계정 단위 최근 7일(2026-10-09 진단: 팔로워 47→130 인데 캐러셀 도달 10~28 그대로 — 도달이 팔로워에게서 오는지, 새 팔로워가 보는지 가린다).
 # 하나가 막혀도 나머지는 남게 지표마다 따로 부른다.
 # follows_and_unfollows 의 follow_type 구분은 FOLLOWER = 새로 팔로우, NON_FOLLOWER = 언팔로우(Meta IG User Insights).
-# profile_links_taps 는 연락 버튼(전화·메일 등) 탭이라 소개글 링크 유입이 아니다 — 링크 유입은 구독 페이지 ?ref=ig 로 센다(Codex 리뷰).
-ACCOUNT_METRICS = (("reach", "follow_type"), ("follows_and_unfollows", "follow_type"), ("profile_views", None), ("accounts_engaged", None))
+# profile_links_taps 는 연락 버튼(전화·메일 등) 탭이라 소개글 링크 유입이 아니고(링크 유입은 구독 페이지 ?ref=ig), profile_views 는
+# v21 부터 없어졌다 — 프로필 방문은 캐러셀별 profile_visits 로 본다(Codex 리뷰).
+ACCOUNT_METRICS = (("reach", "follow_type"), ("follows_and_unfollows", "follow_type"), ("accounts_engaged", None))
 
 
 def _num(v):
@@ -104,7 +105,7 @@ def _values(data):
 
 
 def account_week(g, now=None):
-    """최근 7일 계정 단위 — 도달(팔로워/비팔로워)·팔로우/언팔로우·프로필 조회·반응한 계정. 실패한 지표는 errors 에."""
+    """최근 7일 계정 단위 — 도달(팔로워/비팔로워)·팔로우/언팔로우·반응한 계정. 실패한 지표는 errors 에."""
     from post_instagram import IGError
     now = now or now_kst()
     span = {"since": int((now - dt.timedelta(days=ACCOUNT_DAYS)).timestamp()), "until": int(now.timestamp()) - 300}
@@ -158,11 +159,10 @@ def instagram(days):
             continue
         own = 1 if (log.get("carousel") or {}).get("first_comment") else 0   # 우리 계정이 단 첫 댓글은 뺀다
         row = _media_row(g, cid, own, out)
-        if out["insights"]:
-            try:   # 프로필 방문·팔로우 — 지원 안 되면 이 두 칸만 빠진다
-                row.update(_values(g.call("GET", f"{cid}/insights", metric=FEED_EXTRA_METRICS).get("data")))
-            except Exception as e:  # noqa: BLE001 — 덤 지표가 이상해도 그 게시물의 기본 성과는 남긴다
-                row["extra_error"] = (str(e) if isinstance(e, IGError) else type(e).__name__)[:120]
+        try:   # 프로필 방문·팔로우 — 게시물 기본 지표와 따로(그쪽이 막혀도 시도), 지원 안 되면 이 두 칸만 빠진다(Codex 리뷰)
+            row.update(_values(g.call("GET", f"{cid}/insights", metric=FEED_EXTRA_METRICS).get("data")))
+        except Exception as e:  # noqa: BLE001 — 덤 지표가 이상해도 그 게시물의 기본 성과는 남긴다
+            row["extra_error"] = (str(e) if isinstance(e, IGError) else type(e).__name__)[:120]
         rid = (log.get("reel") or {}).get("id")
         if rid:   # 릴스는 피드 격자에 안 올려(릴스 탭 전용) 도달이 따로 잡힌다 — 호 점수에는 둘을 합친다
             try:
@@ -345,11 +345,11 @@ def _series_compare(snap):
 
 
 def _account_lines(ig, posts):
-    """한눈에: 최근 7일 계정 도달의 팔로워/비팔로워·팔로우 증감·프로필 조회, 14일 캐러셀 프로필 방문·팔로우 합."""
+    """한눈에: 최근 7일 계정 도달의 팔로워/비팔로워·팔로우 증감·반응한 계정, 14일 캐러셀 프로필 방문·팔로우 합."""
     acc = ig.get("account") or {}
     out = []
     reach, fol = acc.get("reach"), acc.get("follows_and_unfollows")
-    if isinstance(reach, dict) or isinstance(fol, dict) or acc.get("profile_views") is not None:
+    if isinstance(reach, dict) or isinstance(fol, dict) or acc.get("accounts_engaged") is not None:
         reach = reach if isinstance(reach, dict) else {}
         fol = fol if isinstance(fol, dict) else {}
 
@@ -359,7 +359,7 @@ def _account_lines(ig, posts):
 
         out.append(f"- 최근 {acc.get('days', ACCOUNT_DAYS)}일 계정: 도달 팔로워 {reach.get('FOLLOWER', '–')} · 비팔로워 {reach.get('NON_FOLLOWER', '–')}{other(reach)}"
                    f" · 팔로우 +{fol.get('FOLLOWER', '–')} / 언팔로우 −{fol.get('NON_FOLLOWER', '–')}{other(fol)}"
-                   f" · 프로필 조회 {acc.get('profile_views', '–')} · 반응한 계정 {acc.get('accounts_engaged', '–')}")
+                   f" · 반응한 계정 {acc.get('accounts_engaged', '–')}")
     visits = [p.get("profile_visits") for p in posts.values() if p.get("profile_visits") is not None]
     follows = [p.get("follows") for p in posts.values() if p.get("follows") is not None]
     if visits or follows:
@@ -380,7 +380,8 @@ def summary_md(snap):
     sub = snap.get("subscribers") or {}
     lines += ["## 한눈에", "",
               f"- 인스타 팔로워 **{ig.get('followers', '–')}** · 게시물 {ig.get('media', '–')}"
-              + ("" if ig.get("insights") else " · 도달·저장 인사이트 권한 없음(좋아요·댓글만)"),
+              # None 은 '살펴본 게시물 없음'(게시 쉼) — 권한이 없다는 뜻은 False 뿐(Codex 리뷰)
+              + (" · 도달·저장 인사이트 권한 없음(좋아요·댓글만)" if ig.get("insights") is False else ""),
               f"- 메일 발송 대상 **{sub.get('sending', '–')}**명 (명단 {sub.get('listed', '–')} · 수신 제외 {sub.get('excluded', '–')})"
               f" · 최근 {DAYS}일 구독 신청 {mb.get('signups_14d', '–')} · 수신 거부 {mb.get('unsubs_14d', '–')}"]
     lines += _account_lines(ig, posts)
