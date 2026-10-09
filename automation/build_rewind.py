@@ -66,11 +66,13 @@ def _rewind_picks(date):
     """{H PICK 제목: 그 이야기를 H PICK 으로 다시 실은 가장 최근 예비 호 날짜} — date 이전 예비 호만."""
     out = {}
     for p in sorted(CONTENT_DIR.glob("20*.json")):
-        if p.stem >= date:
-            continue
         c = json.loads(p.read_text(encoding="utf-8"))
-        if c.get("rewind") and c.get("big_issue"):
-            out[plain_title(c["big_issue"]["title"])] = p.stem
+        if not (c.get("rewind") and c.get("big_issue")):
+            continue
+        shown = (c.get("published_at_kst") or p.stem)[:10]   # 지난 날짜로 늦게 낸 예비 호는 실제로 낸 날로 센다(Codex 리뷰)
+        if shown < date:
+            key = plain_title(c["big_issue"]["title"])
+            out[key] = max(out.get(key, ""), shown)
     return out
 
 
@@ -131,8 +133,8 @@ def pick(date):
     older = [x for x in picks if (parse_date(date) - parse_date(last[id(x)])).days > PICK_GAP_DAYS]
     if older:
         picks = older
-    else:   # 모두 사흘 안이면 가장 오래전에 실린 H PICK 부터(어제 것을 또 쓰지 않게, Codex 리뷰)
-        picks = sorted(picks, key=lambda x: last[id(x)])
+    else:   # 모두 사흘 안이면 출처 2건 이상을 먼저, 그 안에서 가장 오래전에 실린 H PICK 부터(어제 것을 또 쓰지 않게, Codex 리뷰)
+        picks = sorted(picks, key=lambda x: (not _solid(x[0]), last[id(x)]))
         print(f"  ⚠ 예비 호: {PICK_GAP_DAYS}일보다 오래된 H PICK 이 없어 가장 오래전에 실린 H PICK 을 다시 씁니다")
     top = picks[0]
     ranked = sorted((x for x in cands if not x[3]), key=rank, reverse=True)

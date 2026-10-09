@@ -142,12 +142,13 @@ def library(day, words=""):
         except ValueError:
             continue
         cov = (d.get("cards") or {}).get("cover") or {}
-        if cov.get("photo") not in lib or f.stem >= day:
+        shown = (d.get("published_at_kst") or f.stem)[:10]   # 지난 날짜로 늦게 낸 예비 호는 실제로 낸 날(Codex 리뷰)
+        if cov.get("photo") not in lib or shown >= day:
             continue
-        u = used.setdefault(cov["photo"], {"credit": None, "focus": None, "last": f.stem})
+        u = used.setdefault(cov["photo"], {"credit": None, "focus": None, "last": shown})
         if not d.get("rewind") and not u["credit"]:   # 출처·초점은 처음 쓴 일반 호에서(예비 호는 그걸 다시 쓴 것)
             u["credit"], u["focus"] = cov.get("credit"), cov.get("focus")
-        u["last"] = f.stem   # 파일 이름 순이라 마지막이 가장 최근 — 예비 호도 '쓴 날'로 센다(연달아 같은 표지 막기, Codex 리뷰)
+        u["last"] = max(u["last"], shown)   # 예비 호도 '쓴 날'로 센다(연달아 같은 표지 막기, Codex 리뷰)
     toks = [t.lower() for t in _tokens(words)]   # 'ai'·'it' 도 AI·IT 태그에 맞게(Codex 리뷰)
     out = []
     for photo, meta in lib.items():
