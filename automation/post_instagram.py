@@ -124,13 +124,37 @@ def wait_public(urls, timeout=900, kind="jpeg"):
             time.sleep(20)
 
 
+def load_alts(folder):
+    """build_issue.py 가 만든 alt_text.json {jpg 파일명: 대체 텍스트} — 없거나 깨졌으면 빈 dict(대체 텍스트 없이 올린다)."""
+    try:
+        alts = json.loads((folder / "alt_text.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+    return {k: v for k, v in alts.items() if isinstance(v, str) and v.strip()} if isinstance(alts, dict) else {}
+
+
 def post_carousel(g, uid, key, folder, site_url, dry):
     jpgs = sorted((folder / "ig").glob("*.jpg"))
     if not 2 <= len(jpgs) <= 10:
         raise IGError(f"캐러셀은 JPEG 2~10장이어야 합니다(지금 {len(jpgs)}장, {folder / 'ig'})")
     urls = [f"{site_url}/instagram/{key}/ig/{p.name}" for p in jpgs]
     wait_public(urls)
-    children = [g.call("POST", f"{uid}/media", image_url=u, is_carousel_item="true")["id"] for u in urls]
+    alts = load_alts(folder)
+    children = []
+    for p, u in zip(jpgs, urls):
+        params = {"image_url": u, "is_carousel_item": "true"}
+        if alts.get(p.name):
+            params["alt_text"] = alts[p.name]
+        try:
+            children.append(g.call("POST", f"{uid}/media", **params)["id"])
+        except IGError as e:
+            if "alt_text" not in params:
+                raise
+            # 대체 텍스트 때문에 게시가 막히면 안 된다 — 빼고 다시, 남은 장도 빼고 올린다
+            print(f"  ⚠ 대체 텍스트를 받지 않아 빼고 올립니다({e})")
+            alts = {}
+            params.pop("alt_text")
+            children.append(g.call("POST", f"{uid}/media", **params)["id"])
     for n, child in enumerate(children, 1):   # 장마다 처리가 끝난 뒤에 묶어야 게시가 거절되지 않는다
         g.wait_ready(child, f"캐러셀 {n}번째 장")
     caption = (folder / "caption.txt").read_text(encoding="utf-8").strip()

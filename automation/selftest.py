@@ -344,6 +344,68 @@ def t_seo():
     return None
 
 
+def t_ig_seo():
+    """인스타 검색 노출(2026-10-09 운영자 자료): 해시태그 5개 이하·캡션 첫 화면 핵심어·'경제 뉴스레터' 한 줄·카드 대체 텍스트."""
+    import build_rewind
+    import post_instagram
+    from edith import content as content_mod
+    from edith import site as site_mod
+    from edith import style
+    day = daily_issues(1)[0]
+    d = content_mod.load(day)
+    d["send_time_kst"] = load_config()["send_time_kst"]
+    cap = site_mod.instagram_caption(d, load_config()["site_url"])
+    for name, text in (("캡션", cap), ("릴스 캡션", site_mod.reel_caption(d)),
+                       ("태그 9개 넣은 캡션", site_mod._tags({"keywords": [f"k{i}" for i in range(9)]}, [f"t{i}" for i in range(9)]))):
+        n = len(re.findall(r"(?<!\S)#\S+", text))
+        expect(n <= 5, f"{name} 해시태그 {n}개 — 인스타는 게시물당 5개까지(2025-12~)")
+    expect("경제 뉴스레터" in cap, "캡션 뉴스레터 한 줄에 계정 주제어 '경제 뉴스레터'가 없다")
+    expect(not style.caption_keyword({"instagram": {"hashtags": ["치킨값"], "caption": "치킨 한 마리 3만원 시대예요."}}),
+           "첫 줄에 핵심어가 있는데 경고한다")
+    expect(style.caption_keyword({"instagram": {"hashtags": ["치킨값"], "caption": "요즘 다들 어떠세요? " * 12 + "치킨"}}),
+           "첫 화면에 핵심어가 없는데 경고가 없다")
+    with contextlib.redirect_stdout(io.StringIO()):
+        rw = build_rewind.build(now_kst().date().isoformat())
+    expect(not style.caption_keyword(rw), f"예비 호 캡션 첫 화면에 주제어가 없다: {rw['instagram']['caption'][:60]}")
+    alts = site_mod.alt_texts([{"file": "01_x_cover.png", "text": "EDIT H.\n호프집\n1894\u2060곳\n1894\u2060곳\n1\n사라졌다"},
+                               {"file": "02_x_cta.png", "text": ""}])
+    expect(alts == {"01_x_cover.jpg": "EDIT H 경제 뉴스 카드 1/2 — 호프집 1894곳 사라졌다"}, f"대체 텍스트가 이상하다: {alts}")
+
+    class FakeGraph:   # 인스타 API 대신 — 요청만 적어 둔다(reject: alt_text 를 거절하는 경우)
+        def __init__(self, reject):
+            self.calls, self.reject = [], reject
+
+        def call(self, method, path, **params):
+            self.calls.append(params)
+            if self.reject and "alt_text" in params:
+                raise post_instagram.IGError("400 OAuthException (code 100): Invalid parameter")
+            return {"id": str(len(self.calls))}
+
+        def wait_ready(self, *a, **k):
+            pass
+
+    saved = post_instagram.wait_public
+    post_instagram.wait_public = lambda urls, **k: None
+    try:
+        with tempfile.TemporaryDirectory() as tmp, contextlib.redirect_stdout(io.StringIO()):
+            folder = Path(tmp)
+            (folder / "ig").mkdir()
+            for n in ("01_a.jpg", "02_b.jpg"):
+                (folder / "ig" / n).write_bytes(b"")
+            (folder / "caption.txt").write_text("c", encoding="utf-8")
+            (folder / "alt_text.json").write_text(json.dumps({"01_a.jpg": "가", "02_b.jpg": "나"}), encoding="utf-8")
+            ok, bad = FakeGraph(False), FakeGraph(True)
+            post_instagram.post_carousel(ok, "u", "k", folder, "https://x", True)
+            post_instagram.post_carousel(bad, "u", "k", folder, "https://x", True)
+    finally:
+        post_instagram.wait_public = saved
+    expect([c.get("alt_text") for c in ok.calls if c.get("is_carousel_item")] == ["가", "나"], "캐러셀 장에 대체 텍스트가 안 붙는다")
+    expect(["alt_text" in c for c in bad.calls if c.get("is_carousel_item")] == [True, False, False],
+           "대체 텍스트가 거절되면 빼고 다시 올리지 않는다")
+    built = ROOT / "instagram" / day / "alt_text.json"
+    return f"{day} 해시태그·첫 화면 핵심어·대체 텍스트" + ("" if built.exists() else " (발행본 alt_text.json 은 다음 빌드부터)")
+
+
 def t_evening():
     """저녁 일정 사슬(evening.py): 매일 21:30 수집, 저녁 릴스 기간이면 19:30 릴스·20:45 점검. dispatch 대상 워크플로에 workflow_dispatch 가 있는지."""
     import evening
@@ -424,6 +486,7 @@ def main():
     check("대체 표지 사진(fetch_photo --library)", t_photo_library)
     check("검색 노출(호 페이지 SEO)", t_seo)
     check("저녁 일정 사슬(evening)", t_evening)
+    check("인스타 검색 노출(해시태그·키워드·대체 텍스트)", t_ig_seo)
     if not args.quick:
         rebuild(daily_issues(args.issues), args.strict)
     if NOTES:

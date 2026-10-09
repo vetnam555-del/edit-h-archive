@@ -226,8 +226,10 @@ def build(date):
             "deep": copy.deepcopy(top[4]["cards"]["deep"]),
         },
         "instagram": {
+            # 첫 화면('더 보기' 전)에 주제어 — 인스타 검색은 캡션 글을 읽는다(2026-10-09 운영자 자료)
             "caption": ("오늘은 새 소식 대신, 지난 이야기 중 다시 볼 만한 다섯 가지를 골랐어요.\n\n"
-                        "놓쳤던 이야기가 있다면 넘겨보세요. 내일 아침엔 새 소식으로 돌아올게요."),
+                        f"{'·'.join([big['tag']] + [it['tag'] for it in content_items[:2]])} 이야기, 놓쳤다면 넘겨보세요. "
+                        "내일 아침엔 새 소식으로 돌아올게요."),
             "ask": "이 중에 더 자세히 알고 싶은 이야기가 있어요?",
             "hashtags": [big["tag"]] + [it["tag"] for it in content_items[:3]],
         },

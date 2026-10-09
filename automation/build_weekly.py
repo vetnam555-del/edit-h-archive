@@ -64,6 +64,7 @@ def main():
     comment = site.first_comment(w)
     (out / "caption.txt").write_text(cap + "\n", encoding="utf-8")
     (out / "first_comment.txt").write_text(comment + "\n", encoding="utf-8")
+    (out / "alt_text.json").write_text(json.dumps(site.alt_texts(report["cards"]), ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     (out / "index.html").write_text(site.gallery_page(w, load_config()["site_url"], files, cap, comment), encoding="utf-8")
 
     print(f"✓ 주간 특집 {w['week_label']} 빌드 완료 — {out}")

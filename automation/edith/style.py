@@ -71,11 +71,30 @@ def _clip(text, m, width=18):
     return ("…" if a else "") + text[a:b] + ("…" if b < len(text) else "")
 
 
+FOLD = 125   # 인스타 캡션이 '더 보기' 전에 보여 주는 대략의 글자 수
+
+
+def caption_keyword(d):
+    """캡션 첫 화면('더 보기' 전 약 125자)에 오늘 핵심어(해시태그 앞 3개)가 있는가 — 없으면 경고 한 줄.
+    2026-10-09 운영자 공유 자료: 인스타 대표(Mosseri)는 해시태그가 도달을 늘리는 수단이 아니라 분류용이라 했고(2025-12 부터 5개 제한),
+    검색은 이름·소개글·캡션 글을 읽는다 — 핵심어는 해시태그 나열 대신 첫 문장에 자연스럽게."""
+    ig = d.get("instagram") or {}
+    tags = [t for t in (re.sub(r"\s+", "", plain(str(t)).lstrip("#")) for t in (ig.get("hashtags") or [])[:3]) if t]
+    head = plain(ig.get("caption") or "")[:FOLD]
+    if not tags or not head:
+        return []
+    compact = re.sub(r"\s+", "", head)
+    words = re.findall(r"[0-9A-Za-z]+|[가-힣]+", head)
+    if any(t in compact or any(len(w) > 1 and w in t for w in words) for t in tags):
+        return []
+    return [f"인스타 캡션: 첫 {FOLD}자('더 보기' 전)에 오늘 핵심어({', '.join(tags)})가 없어요 — 검색에 걸리게 첫 줄이나 둘째 문장에 자연스럽게"]
+
+
 def lint(d):
     """경고 문장 목록(최대 MAX_LINES 개 + 남은 개수). 형식 2·데일리·STYLE_FROM 이후 호만."""
     if d.get("format") != 2 or d.get("rewind") or str(d.get("date", ""))[:10] < STYLE_FROM:
         return []
-    found, seen_acr = [], set()
+    found, seen_acr = caption_keyword(d), set()
     for where, text, kind in _texts(d):
         rules = _WEED + _FORCE + (_WEED_SOCIAL if kind in ("social", "card", "obs") else [])
         for rx, why in rules:
