@@ -524,6 +524,27 @@ def t_first_issue():
     return "최근 발송 호 바로 보내기·중복 방지·구독 페이지"
 
 
+def t_reel_hook():
+    """E8 릴스 첫 장 훅(2026-10-13~): 날짜부터 켜지고, 첫 장만 크게 시작해 제자리로(위쪽 고정 — 워드마크가 음악 출처 띠와 안 겹치게)."""
+    import make_reel
+    ig = {"reel_hook_from": "2026-10-13"}
+    expect([make_reel.hook_on(ig, k) for k in ("2026-10-12", "2026-10-13", "2026-10-16-weekly")] == [False, True, True],
+           "릴스 첫 장 훅 시작 날짜가 틀린다")
+    got = {}
+    saved = make_reel.subprocess.run
+    make_reel.subprocess.run = lambda cmd, check=True: got.setdefault("cmd", cmd)
+    try:
+        timing = {**make_reel.VERTICAL_TIMING, **load_config()["instagram"]["reel_hook_timing"]}
+        total = make_reel.build([Path(f"r{i}.jpg") for i in range(4)], Path("out.mp4"), {"file": "x.m4a"}, "ffmpeg", timing, None, True)
+    finally:
+        make_reel.subprocess.run = saved
+    graph = got["cmd"][got["cmd"].index("-filter_complex") + 1]
+    first, rest = graph.split("[v0]", 1)
+    expect("max(0,1-t/0.5)" in first and "(ih-1920)*0.1" in first and "max(0" not in rest, "확 다가오기가 첫 장에만 걸리지 않는다")
+    expect(total < 9, f"훅 릴스가 {total:.1f}초 — 첫 장을 줄인 길이(약 8초)가 아니다")
+    return f"첫 장 {timing['first']}초 · {total:.1f}초"
+
+
 def t_evening():
     """저녁 일정 사슬(evening.py): 매일 21:30 수집, 저녁 릴스 기간이면 19:30 릴스·20:45 점검. dispatch 대상 워크플로에 workflow_dispatch 가 있는지."""
     import evening
@@ -607,6 +628,7 @@ def main():
     check("인스타 검색 노출(해시태그·키워드·대체 텍스트)", t_ig_seo)
     check("조회수 진단(보내기 한 줄·릴스 피드·계정 지표)", t_views_diag)
     check("구독 즉시 첫 메일(sync_subscribers)", t_first_issue)
+    check("릴스 첫 장 훅(E8)", t_reel_hook)
     if not args.quick:
         rebuild(daily_issues(args.issues), args.strict)
     if NOTES:

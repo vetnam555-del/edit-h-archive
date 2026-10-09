@@ -202,7 +202,7 @@ def build_reel(key, folder, ffmpeg):
     info = json.loads(proc.stdout.strip().splitlines()[-1])
     # style(vertical=세로 전용 프레임 · cards=카드)·seconds 는 게시 기록에 남겨 성과표가 형식별로 비교한다
     track = {**info["track"], "credit_in_video": bool(info.get("credit_in_video")),
-             "style": info.get("style", "cards"), "seconds": info.get("seconds")}
+             "style": info.get("style", "cards"), "seconds": info.get("seconds"), "hook": bool(info.get("hook"))}
     print(f"  릴스 영상 {out.stat().st_size // 1024}KB — 음악: {track['title']} / {track['artist']}"
           + (" (출처는 영상 안에)" if track["credit_in_video"] else ""))
     return out, track
@@ -515,7 +515,8 @@ def main():
             media_id, track = post_reel(g, uid, key, folder, cfg, args.dry_run, args.ffmpeg, site_url)
             if media_id:
                 log["reel"] = {"id": media_id, "at": now_kst().isoformat(timespec="seconds"), "track": track["title"],
-                               "style": track.get("style"), "seconds": track.get("seconds"), "feed": track.get("feed")}
+                               "style": track.get("style"), "seconds": track.get("seconds"), "feed": track.get("feed"),
+                               "hook": track.get("hook")}
                 save_log(key, log)
                 try:
                     log["reel"]["permalink"] = g.call("GET", media_id, fields="permalink").get("permalink")
