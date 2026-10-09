@@ -406,6 +406,50 @@ def t_ig_seo():
     return f"{day} 해시태그·첫 화면 핵심어·대체 텍스트" + ("" if built.exists() else " (발행본 alt_text.json 은 다음 빌드부터)")
 
 
+def t_views_diag():
+    """조회수 저조 진단(2026-10-09): E6 보내기 한 줄·share_to 점검, E7 릴스 피드 공유 날짜, 계정 7일 지표 해석(한 지표가 막혀도 나머지 유지)."""
+    import collect_metrics
+    import post_instagram
+    from edith import content as content_mod
+    from edith import site as site_mod
+    from edith import style
+    day = daily_issues(1)[0]
+    d = content_mod.load(day)
+    d["send_time_kst"] = load_config()["send_time_kst"]
+    d.setdefault("instagram", {}).pop("share_to", None)
+    plain_cap = site_mod.instagram_caption(d, load_config()["site_url"])
+    expect("보내 주" not in plain_cap, "share_to 가 없는데 보내기 한 줄이 붙는다")
+    d["instagram"]["share_to"] = "프리랜서 친구"
+    cap, reel = site_mod.instagram_caption(d, load_config()["site_url"]), site_mod.reel_caption(d)
+    expect("프리랜서 친구" in cap and "프리랜서 친구" in reel, "보내기 한 줄이 캡션·릴스 캡션에 없다")
+    expect(len(re.findall(r"(?<!\S)#\S+", reel)) <= 5 and reel.rstrip().splitlines()[-1].startswith("#"), "릴스 캡션 끝이 해시태그 줄이 아니다")
+    for who, date, warn in (("", "2026-10-10", True), ("친구", "2026-10-10", True), ("프리랜서 친구", "2026-10-10", False), ("", "2026-10-09", False)):
+        got = bool(style.share_check({"date": date, "instagram": {"share_to": who}}))
+        expect(got == warn, f"share_to '{who}'({date}) 점검이 {'경고 안 함' if warn else '잘못 경고'}")
+    cfg = {"reel_feed_from": "2026-10-13"}
+    expect([post_instagram.reel_to_feed(cfg, k) for k in ("2026-10-12", "2026-10-13", "2026-10-16-weekly")] == [False, True, True],
+           "릴스 피드 공유 시작 날짜가 틀린다")
+    expect(post_instagram.reel_to_feed({"reel_share_to_feed": True}, "2026-10-01") and not post_instagram.reel_to_feed({}, "2026-12-01"),
+           "reel_share_to_feed 설정을 안 따른다")
+
+    class FakeGraph:   # 계정 인사이트 응답 흉내 — follows_and_unfollows 는 막힌 경우
+        def call(self, method, path, **params):
+            m = params["metric"]
+            if m == "follows_and_unfollows":
+                raise post_instagram.IGError("400 (code 100): unsupported")
+            if m == "reach":
+                return {"data": [{"name": "reach", "total_value": {"value": 300, "breakdowns": [{"results": [
+                    {"dimension_values": ["FOLLOWER"], "value": 40}, {"dimension_values": ["NON_FOLLOWER"], "value": 260}]}]}}]}
+            return {"data": [{"name": m, "total_value": {"value": 3}}, {"total_value": {"value": 9}}]}
+
+    acc = collect_metrics.account_week(FakeGraph(), now=now_kst())
+    expect(acc.get("reach") == {"FOLLOWER": 40, "NON_FOLLOWER": 260} and acc.get("profile_links_taps") == 3
+           and "follows_and_unfollows" in acc.get("errors", {}), f"계정 7일 지표 해석이 틀린다: {acc}")
+    lines = collect_metrics._account_lines({"account": acc}, {"2026-10-09": {"profile_visits": 2, "follows": 1}})
+    expect(lines and "팔로워 40" in lines[0] and "비팔로워 260" in lines[0] and "프로필 방문 2" in lines[-1], f"성과표 계정 줄: {lines}")
+    return "보내기 한 줄·피드 공유 날짜·계정 지표"
+
+
 def t_evening():
     """저녁 일정 사슬(evening.py): 매일 21:30 수집, 저녁 릴스 기간이면 19:30 릴스·20:45 점검. dispatch 대상 워크플로에 workflow_dispatch 가 있는지."""
     import evening
@@ -487,6 +531,7 @@ def main():
     check("검색 노출(호 페이지 SEO)", t_seo)
     check("저녁 일정 사슬(evening)", t_evening)
     check("인스타 검색 노출(해시태그·키워드·대체 텍스트)", t_ig_seo)
+    check("조회수 진단(보내기 한 줄·릴스 피드·계정 지표)", t_views_diag)
     if not args.quick:
         rebuild(daily_issues(args.issues), args.strict)
     if NOTES:

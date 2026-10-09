@@ -34,6 +34,12 @@ DAYS = 14
 FRESH_HOUR = "21"   # 이 시각(KST) 이후 스냅숏이 오늘 성과표(22:00 회고가 읽는다)
 INSIGHT_METRICS = "reach,saved,shares,views"
 REEL_WATCH_METRICS = "ig_reels_avg_watch_time,ig_reels_video_view_total_time"   # 밀리초 — 릴스 완주 정도를 가늠
+FEED_EXTRA_METRICS = "profile_visits,follows"   # 캐러셀(피드)만 — 게시물을 보고 프로필에 오고 팔로우했나(2026-10-09~)
+ACCOUNT_DAYS = 7
+# 계정 단위 최근 7일(2026-10-09 진단: 팔로워 47→130 인데 캐러셀 도달 10~28 그대로 — 도달이 팔로워에게서 오는지, 새 팔로워가 보는지 가린다).
+# 하나가 막혀도 나머지는 남게 지표마다 따로 부른다.
+# follows_and_unfollows 의 follow_type 구분은 FOLLOWER = 새로 팔로우, NON_FOLLOWER = 언팔로우(Meta IG User Insights).
+ACCOUNT_METRICS = (("reach", "follow_type"), ("follows_and_unfollows", "follow_type"), ("profile_links_taps", None), ("accounts_engaged", None))
 
 
 def _num(v):
@@ -72,12 +78,45 @@ def _reel_facts(day):
     log_path = AUTOMATION / "ig_posted" / f"{day}.json"
     reel = (json.loads(log_path.read_text(encoding="utf-8")).get("reel") or {}) if log_path.exists() else {}
     if not reel.get("id"):
-        return {"reel_style": None, "reel_seconds": None, "reel_slot": None}
+        return {"reel_style": None, "reel_seconds": None, "reel_slot": None, "reel_feed": None}
     style = reel.get("style") or ("cards" if day < "2026-10-03" else None)
     hour = int(reel["at"][11:13]) if reel.get("at") else None
     slot = None if hour is None else ("아침" if hour < 12 else "낮" if hour < 17 else "저녁")
     seconds = reel.get("seconds") or (32.3 if day < "2026-10-01" else 19.6 if day < "2026-10-03" else None)
-    return {"reel_style": {"vertical": "세로", "cards": "카드"}.get(style, style), "reel_seconds": seconds, "reel_slot": slot}
+    return {"reel_style": {"vertical": "세로", "cards": "카드"}.get(style, style), "reel_seconds": seconds, "reel_slot": slot,
+            "reel_feed": bool(reel.get("feed"))}   # E7 — 피드에도 올렸나(2026-10-13~)
+
+
+def _values(data):
+    """인사이트 응답 → {지표: 값}. total_value 에 구분(breakdown)이 있으면 {구분값: 값}."""
+    out = {}
+    for d in data or []:
+        if not d.get("name"):
+            continue
+        tv = d.get("total_value") or {}
+        results = ((tv.get("breakdowns") or [{}])[0] or {}).get("results")
+        if results:
+            out[d["name"]] = {"/".join(r.get("dimension_values") or []) or "?": _num(r.get("value")) for r in results}
+        else:
+            out[d["name"]] = _num(tv.get("value", (d.get("values") or [{}])[0].get("value")))
+    return out
+
+
+def account_week(g, now=None):
+    """최근 7일 계정 단위 — 도달(팔로워/비팔로워)·팔로우/언팔로우·프로필 링크 탭·반응한 계정. 실패한 지표는 errors 에."""
+    from post_instagram import IGError
+    now = now or now_kst()
+    span = {"since": int((now - dt.timedelta(days=ACCOUNT_DAYS)).timestamp()), "until": int(now.timestamp()) - 300}
+    out = {"days": ACCOUNT_DAYS}
+    for metric, breakdown in ACCOUNT_METRICS:
+        params = {"metric": metric, "period": "day", "metric_type": "total_value", **span}
+        if breakdown:
+            params["breakdown"] = breakdown
+        try:
+            out.update(_values(g.call("GET", "me/insights", **params).get("data")))
+        except IGError as e:
+            out.setdefault("errors", {})[metric] = str(e)[:120]
+    return out
 
 
 def _media_row(g, media_id, own_comments, out):
@@ -118,6 +157,11 @@ def instagram(days):
             continue
         own = 1 if (log.get("carousel") or {}).get("first_comment") else 0   # 우리 계정이 단 첫 댓글은 뺀다
         row = _media_row(g, cid, own, out)
+        if out["insights"]:
+            try:   # 프로필 방문·팔로우 — 지원 안 되면 이 두 칸만 빠진다
+                row.update(_values(g.call("GET", f"{cid}/insights", metric=FEED_EXTRA_METRICS).get("data")))
+            except Exception as e:  # noqa: BLE001 — 덤 지표가 이상해도 그 게시물의 기본 성과는 남긴다
+                row["extra_error"] = (str(e) if isinstance(e, IGError) else type(e).__name__)[:120]
         rid = (log.get("reel") or {}).get("id")
         if rid:   # 릴스는 피드 격자에 안 올려(릴스 탭 전용) 도달이 따로 잡힌다 — 호 점수에는 둘을 합친다
             try:
@@ -134,6 +178,11 @@ def instagram(days):
                 except IGError as e:
                     row["reel"]["watch_error"] = str(e)[:120]
         out["posts"][day] = row
+    if out["insights"]:
+        try:
+            out["account"] = account_week(g)
+        except Exception as e:  # noqa: BLE001 — 계정 지표가 이상해도 게시물 성과는 남긴다
+            out["account"] = {"errors": {"account": type(e).__name__}}
     return out
 
 
@@ -248,7 +297,7 @@ def _reel_compare(scored):
         r = a.get("reel") or {}
         if not f.get("reel_style") or r.get("reach") is None:
             continue
-        key = f["reel_style"] + (f"·{f['reel_slot']}" if f.get("reel_slot") else "")
+        key = f["reel_style"] + (f"·{f['reel_slot']}" if f.get("reel_slot") else "") + ("·피드" if f.get("reel_feed") else "")
         groups.setdefault(key, []).append((r.get("reach"), r.get("avg_watch_s"), f.get("reel_seconds")))
     if not groups:
         return []
@@ -295,6 +344,24 @@ def _series_compare(snap):
     return [f"- 연재({start}부터 모든 호, 게시 24시간 뒤): " + ", ".join(parts)]
 
 
+def _account_lines(ig, posts):
+    """한눈에: 최근 7일 계정 도달의 팔로워/비팔로워·팔로우 증감·프로필 링크 탭, 14일 캐러셀 프로필 방문·팔로우 합."""
+    acc = ig.get("account") or {}
+    out = []
+    reach, fol = acc.get("reach"), acc.get("follows_and_unfollows")
+    if isinstance(reach, dict) or isinstance(fol, dict) or acc.get("profile_links_taps") is not None:
+        reach = reach if isinstance(reach, dict) else {}
+        fol = fol if isinstance(fol, dict) else {}
+        out.append(f"- 최근 {acc.get('days', ACCOUNT_DAYS)}일 계정: 도달 팔로워 {reach.get('FOLLOWER', '–')} · 비팔로워 {reach.get('NON_FOLLOWER', '–')}"
+                   f" · 팔로우 +{fol.get('FOLLOWER', '–')} / 언팔로우 −{fol.get('NON_FOLLOWER', '–')}"
+                   f" · 프로필 링크 탭 {acc.get('profile_links_taps', '–')} · 반응한 계정 {acc.get('accounts_engaged', '–')}")
+    visits = [p.get("profile_visits") for p in posts.values() if p.get("profile_visits") is not None]
+    follows = [p.get("follows") for p in posts.values() if p.get("follows") is not None]
+    if visits or follows:
+        out.append(f"- 캐러셀 보고 프로필 방문 {sum(visits)} · 팔로우 {sum(follows)} (최근 {DAYS}일 {len(visits)}개 게시물 누적)")
+    return out
+
+
 def summary_md(snap):
     ig = snap.get("instagram") or {}
     posts = ig.get("posts") or {}
@@ -311,6 +378,7 @@ def summary_md(snap):
               + ("" if ig.get("insights") else " · 도달·저장 인사이트 권한 없음(좋아요·댓글만)"),
               f"- 메일 발송 대상 **{sub.get('sending', '–')}**명 (명단 {sub.get('listed', '–')} · 수신 제외 {sub.get('excluded', '–')})"
               f" · 최근 {DAYS}일 구독 신청 {mb.get('signups_14d', '–')} · 수신 거부 {mb.get('unsubs_14d', '–')}"]
+    lines += _account_lines(ig, posts)
     refs = mb.get("signup_refs_14d") or {}
     if refs:
         names = {"share": "추천 메일", "letter": "뉴스레터 속 버튼", "web": "웹 아카이브", "ig": "인스타", "threads": "스레드", "direct": "직접·알 수 없음"}
