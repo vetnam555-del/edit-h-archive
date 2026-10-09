@@ -98,10 +98,16 @@ def build(cards, out, track, ffmpeg="ffmpeg", timing=None, credit=None, full=Fal
 
     parts = []
     zoom = float(t.get("zoom") or 0)
+    punch, punch_s = float(t.get("punch") or 0), float(t.get("punch_s") or 0.5)
     for i in range(n):
-        # 합성한 화면을 장이 넘어가는 동안 zoom 만큼 천천히 키우고 가운데를 잘라 1080×1920 을 유지한다
-        grow = (f",scale=w='trunc({W}*(1+{zoom}*t/{durs[i]:.3f})/2)*2':h='trunc({H}*(1+{zoom}*t/{durs[i]:.3f})/2)*2'"
-                f":eval=frame,crop={W}:{H}") if zoom else ""
+        # 합성한 화면을 장이 넘어가는 동안 zoom 만큼 천천히 키우고 가운데를 잘라 1080×1920 을 유지한다.
+        # punch(E8, 2026-10-13~): 첫 장은 punch 만큼 크게 시작해 punch_s 초 만에 제자리로 — 0초부터 화면이 움직여 넘기기 전에 눈이 멈추게
+        hit = i == 0 and punch
+        k = f"1+{zoom}*t/{durs[i]:.3f}" + (f"+{punch}*max(0,1-t/{punch_s})" if hit else "")
+        # 확 다가오는 첫 장은 위쪽(워드마크·음악 출처 띠)을 고정하고 아래로 커지게 — 가운데 기준이면 워드마크가 출처 띠와 겹친다
+        crop = f"crop={W}:{H}:(iw-{W})/2:(ih-{H})*0.1" if hit else f"crop={W}:{H}"
+        grow = (f",scale=w='trunc({W}*({k})/2)*2':h='trunc({H}*({k})/2)*2'"
+                f":eval=frame,{crop}") if zoom or hit else ""
         if full:
             parts.append(f"[{i}:v]scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H},fps={FPS}{grow},format=yuv420p,setsar=1[v{i}]")
             continue
@@ -131,6 +137,12 @@ def build(cards, out, track, ffmpeg="ffmpeg", timing=None, credit=None, full=Fal
     return total
 
 
+def hook_on(ig, key):
+    """E8 릴스 첫 장 훅(짧게 + 확 다가오기)을 쓰는 날인가 — config.instagram.reel_hook_from 부터(2026-10-13~)."""
+    start = ig.get("reel_hook_from")
+    return bool(start and str(key)[:10] >= start)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("key", help="instagram/ 아래 폴더 이름 (YYYY-MM-DD 또는 YYYY-MM-DD-weekly)")
@@ -151,6 +163,9 @@ def main():
     out = Path(args.out) if args.out else folder / "reel.mp4"
     ig = load_config().get("instagram") or {}
     timing = ig.get("reel_vertical_timing") if full else ig.get("reel_timing")
+    hook = hook_on(ig, args.key) and full
+    if hook:   # E8: 첫 장을 짧게(평균 시청 1.5~2.8초 — 넘기기 전에 다음 장) + 첫 장 확 다가오기
+        timing = {**(timing or {}), **(ig.get("reel_hook_timing") or {})}
     with tempfile.TemporaryDirectory() as tmp:
         credit = credit_image(track, Path(tmp) / "credit.png")
         try:
@@ -158,12 +173,13 @@ def main():
         except subprocess.CalledProcessError:
             # 오래된 ffmpeg 는 scale 의 t 변수·slideleft 를 모를 수 있다 — 움직임 없이(예전 방식) 한 번 더
             print("  ↘ 확대·밀기 효과로 만들지 못해 효과 없이 다시 만듭니다", flush=True)
-            total = build(cards, out, track, args.ffmpeg, {**(timing or {}), "zoom": 0, "transition": "fade"}, credit, full)
+            total = build(cards, out, track, args.ffmpeg, {**(timing or {}), "zoom": 0, "punch": 0, "transition": "fade"}, credit, full)
+            hook = False
     style = "vertical" if full else "cards"
     print(f"✓ {out} ({'세로 프레임' if full else '카드'} {len(cards)}장 {total:.1f}초, {out.stat().st_size // 1024}KB)"
           f" — 음악: {track['title']} / {track['artist']} ({track['license']})" + (" · 영상에 출처 표시" if credit else ""))
     print(json.dumps({"reel": str(out), "track": track, "credit_in_video": bool(credit), "style": style,
-                      "seconds": round(total, 1)}, ensure_ascii=False))
+                      "seconds": round(total, 1), "hook": hook}, ensure_ascii=False))
 
 
 if __name__ == "__main__":

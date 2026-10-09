@@ -80,13 +80,14 @@ def _reel_facts(day):
     log_path = AUTOMATION / "ig_posted" / f"{day}.json"
     reel = (json.loads(log_path.read_text(encoding="utf-8")).get("reel") or {}) if log_path.exists() else {}
     if not reel.get("id"):
-        return {"reel_style": None, "reel_seconds": None, "reel_slot": None, "reel_feed": None}
+        return {"reel_style": None, "reel_seconds": None, "reel_slot": None, "reel_feed": None, "reel_hook": None}
     style = reel.get("style") or ("cards" if day < "2026-10-03" else None)
     hour = int(reel["at"][11:13]) if reel.get("at") else None
     slot = None if hour is None else ("아침" if hour < 12 else "낮" if hour < 17 else "저녁")
     seconds = reel.get("seconds") or (32.3 if day < "2026-10-01" else 19.6 if day < "2026-10-03" else None)
     return {"reel_style": {"vertical": "세로", "cards": "카드"}.get(style, style), "reel_seconds": seconds, "reel_slot": slot,
-            "reel_feed": bool(reel.get("feed"))}   # E7 — 피드에도 올렸나(2026-10-13~)
+            "reel_feed": bool(reel.get("feed")),   # E7 — 피드에도 올렸나(2026-10-13~)
+            "reel_hook": bool(reel.get("hook"))}   # E8 — 첫 장 훅(짧게 + 확 다가오기, 2026-10-13~)
 
 
 def _values(data):
@@ -297,7 +298,7 @@ def _reel_compare(scored):
         r = a.get("reel") or {}
         if not f.get("reel_style") or r.get("reach") is None:
             continue
-        key = f["reel_style"] + (f"·{f['reel_slot']}" if f.get("reel_slot") else "") + ("·피드" if f.get("reel_feed") else "")
+        key = f["reel_style"] + (f"·{f['reel_slot']}" if f.get("reel_slot") else "") + ("·피드" if f.get("reel_feed") else "") + ("·훅" if f.get("reel_hook") else "")
         groups.setdefault(key, []).append((r.get("reach"), r.get("avg_watch_s"), f.get("reel_seconds")))
     if not groups:
         return []
