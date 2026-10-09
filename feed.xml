@@ -6,7 +6,14 @@
   <atom:link href="https://vetnam555-del.github.io/edit-h-archive/feed.xml" rel="self" type="application/rss+xml"/>
   <description>매일 아침 8시, 확인된 숫자로 읽는 트렌드 뉴스레터</description>
   <language>ko</language>
-  <lastBuildDate>Fri, 09 Oct 2026 08:00:00 +0900</lastBuildDate>
+  <lastBuildDate>Sat, 10 Oct 2026 08:06:12 +0900</lastBuildDate>
+  <item>
+    <title>VOL.109 놓쳤다면, 다시 볼 만한 5가지</title>
+    <link>https://vetnam555-del.github.io/edit-h-archive/2026-10-10.html</link>
+    <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-10-10.html</guid>
+    <pubDate>Sat, 10 Oct 2026 08:06:12 +0900</pubDate>
+    <description>지난 호 다시 보기 — 월 50만원 3년이면, 2255만원이라고? · 무신사 한정판 거래 &#x27;솔드아웃&#x27;, 연말에 문 닫는다 · 새 가계대출 10건 중 7건, DSR 규제 밖 · 해킹 7개사로 번지자, 금융당국 &#x27;비상체제&#x27; · 미국 10년물 금리 5.36%, 24년 만에 최고</description>
+  </item>
   <item>
     <title>VOL.108 호프집, 1년 새 1894곳 사라졌다고?</title>
     <link>https://vetnam555-del.github.io/edit-h-archive/2026-10-09.html</link>
@@ -209,13 +216,6 @@
     <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-08-31.html</guid>
     <pubDate>Mon, 31 Aug 2026 08:00:00 +0900</pubDate>
     <description>배민B마트 무알코올·비알코올 판매량 65% 증가와 29CM 개인정보 15만9852건 유출, 로켓페이의 2.3조원 플랫폼 첫 외부 적용, X Ads MCP 23개 도구까지 읽은 10개 이슈</description>
-  </item>
-  <item>
-    <title>VOL.079 책이 팔리자 — 빵이 됐다</title>
-    <link>https://vetnam555-del.github.io/edit-h-archive/2026-08-28.html</link>
-    <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-08-28.html</guid>
-    <pubDate>Fri, 28 Aug 2026 08:00:00 +0900</pubDate>
-    <description>GS25×민음사 문학빵이 사흘 만에 5만개 팔린 IP 콜라보 열풍과 3100만원짜리 편의점 휴머노이드 로봇, 성심당발 대전 관광소비 27.2% 증가, 쿠팡 다이내믹 프라이싱을 둘러싼 공정위 조사까지 읽은 10개 이슈</description>
   </item>
 </channel>
 </rss>
