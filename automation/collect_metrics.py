@@ -39,7 +39,8 @@ ACCOUNT_DAYS = 7
 # 계정 단위 최근 7일(2026-10-09 진단: 팔로워 47→130 인데 캐러셀 도달 10~28 그대로 — 도달이 팔로워에게서 오는지, 새 팔로워가 보는지 가린다).
 # 하나가 막혀도 나머지는 남게 지표마다 따로 부른다.
 # follows_and_unfollows 의 follow_type 구분은 FOLLOWER = 새로 팔로우, NON_FOLLOWER = 언팔로우(Meta IG User Insights).
-ACCOUNT_METRICS = (("reach", "follow_type"), ("follows_and_unfollows", "follow_type"), ("profile_links_taps", None), ("accounts_engaged", None))
+# profile_links_taps 는 연락 버튼(전화·메일 등) 탭이라 소개글 링크 유입이 아니다 — 링크 유입은 구독 페이지 ?ref=ig 로 센다(Codex 리뷰).
+ACCOUNT_METRICS = (("reach", "follow_type"), ("follows_and_unfollows", "follow_type"), ("profile_views", None), ("accounts_engaged", None))
 
 
 def _num(v):
@@ -103,7 +104,7 @@ def _values(data):
 
 
 def account_week(g, now=None):
-    """최근 7일 계정 단위 — 도달(팔로워/비팔로워)·팔로우/언팔로우·프로필 링크 탭·반응한 계정. 실패한 지표는 errors 에."""
+    """최근 7일 계정 단위 — 도달(팔로워/비팔로워)·팔로우/언팔로우·프로필 조회·반응한 계정. 실패한 지표는 errors 에."""
     from post_instagram import IGError
     now = now or now_kst()
     span = {"since": int((now - dt.timedelta(days=ACCOUNT_DAYS)).timestamp()), "until": int(now.timestamp()) - 300}
@@ -178,11 +179,10 @@ def instagram(days):
                 except IGError as e:
                     row["reel"]["watch_error"] = str(e)[:120]
         out["posts"][day] = row
-    if out["insights"]:
-        try:
-            out["account"] = account_week(g)
-        except Exception as e:  # noqa: BLE001 — 계정 지표가 이상해도 게시물 성과는 남긴다
-            out["account"] = {"errors": {"account": type(e).__name__}}
+    try:   # 게시물 인사이트와 따로 — 게시가 쉬었거나 게시물 지표가 막혀도 계정 지표는 모은다(Codex 리뷰)
+        out["account"] = account_week(g)
+    except Exception as e:  # noqa: BLE001 — 계정 지표가 이상해도 게시물 성과는 남긴다
+        out["account"] = {"errors": {"account": type(e).__name__}}
     return out
 
 
@@ -345,16 +345,21 @@ def _series_compare(snap):
 
 
 def _account_lines(ig, posts):
-    """한눈에: 최근 7일 계정 도달의 팔로워/비팔로워·팔로우 증감·프로필 링크 탭, 14일 캐러셀 프로필 방문·팔로우 합."""
+    """한눈에: 최근 7일 계정 도달의 팔로워/비팔로워·팔로우 증감·프로필 조회, 14일 캐러셀 프로필 방문·팔로우 합."""
     acc = ig.get("account") or {}
     out = []
     reach, fol = acc.get("reach"), acc.get("follows_and_unfollows")
-    if isinstance(reach, dict) or isinstance(fol, dict) or acc.get("profile_links_taps") is not None:
+    if isinstance(reach, dict) or isinstance(fol, dict) or acc.get("profile_views") is not None:
         reach = reach if isinstance(reach, dict) else {}
         fol = fol if isinstance(fol, dict) else {}
-        out.append(f"- 최근 {acc.get('days', ACCOUNT_DAYS)}일 계정: 도달 팔로워 {reach.get('FOLLOWER', '–')} · 비팔로워 {reach.get('NON_FOLLOWER', '–')}"
-                   f" · 팔로우 +{fol.get('FOLLOWER', '–')} / 언팔로우 −{fol.get('NON_FOLLOWER', '–')}"
-                   f" · 프로필 링크 탭 {acc.get('profile_links_taps', '–')} · 반응한 계정 {acc.get('accounts_engaged', '–')}")
+
+        def other(buckets):   # FOLLOWER·NON_FOLLOWER 밖의 구분(UNKNOWN 등)도 버리지 않고 보인다(Codex 리뷰)
+            rest = sum(v or 0 for k, v in buckets.items() if k not in ("FOLLOWER", "NON_FOLLOWER"))
+            return f"(미분류 {rest})" if rest else ""
+
+        out.append(f"- 최근 {acc.get('days', ACCOUNT_DAYS)}일 계정: 도달 팔로워 {reach.get('FOLLOWER', '–')} · 비팔로워 {reach.get('NON_FOLLOWER', '–')}{other(reach)}"
+                   f" · 팔로우 +{fol.get('FOLLOWER', '–')} / 언팔로우 −{fol.get('NON_FOLLOWER', '–')}{other(fol)}"
+                   f" · 프로필 조회 {acc.get('profile_views', '–')} · 반응한 계정 {acc.get('accounts_engaged', '–')}")
     visits = [p.get("profile_visits") for p in posts.values() if p.get("profile_visits") is not None]
     follows = [p.get("follows") for p in posts.values() if p.get("follows") is not None]
     if visits or follows:

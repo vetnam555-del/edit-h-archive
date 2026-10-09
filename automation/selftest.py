@@ -438,15 +438,39 @@ def t_views_diag():
             if m == "follows_and_unfollows":
                 raise post_instagram.IGError("400 (code 100): unsupported")
             if m == "reach":
-                return {"data": [{"name": "reach", "total_value": {"value": 300, "breakdowns": [{"results": [
-                    {"dimension_values": ["FOLLOWER"], "value": 40}, {"dimension_values": ["NON_FOLLOWER"], "value": 260}]}]}}]}
+                return {"data": [{"name": "reach", "total_value": {"value": 305, "breakdowns": [{"results": [
+                    {"dimension_values": ["FOLLOWER"], "value": 40}, {"dimension_values": ["NON_FOLLOWER"], "value": 260},
+                    {"dimension_values": ["UNKNOWN"], "value": 5}]}]}}]}
             return {"data": [{"name": m, "total_value": {"value": 3}}, {"total_value": {"value": 9}}]}
 
     acc = collect_metrics.account_week(FakeGraph(), now=now_kst())
-    expect(acc.get("reach") == {"FOLLOWER": 40, "NON_FOLLOWER": 260} and acc.get("profile_links_taps") == 3
+    expect(acc.get("reach") == {"FOLLOWER": 40, "NON_FOLLOWER": 260, "UNKNOWN": 5} and acc.get("profile_views") == 3
            and "follows_and_unfollows" in acc.get("errors", {}), f"계정 7일 지표 해석이 틀린다: {acc}")
     lines = collect_metrics._account_lines({"account": acc}, {"2026-10-09": {"profile_visits": 2, "follows": 1}})
-    expect(lines and "팔로워 40" in lines[0] and "비팔로워 260" in lines[0] and "프로필 방문 2" in lines[-1], f"성과표 계정 줄: {lines}")
+    expect(lines and "팔로워 40" in lines[0] and "비팔로워 260(미분류 5)" in lines[0] and "프로필 조회 3" in lines[0]
+           and "프로필 방문 2" in lines[-1], f"성과표 계정 줄: {lines}")
+    # 게시물이 없어도(게시 쉼) 계정 지표는 모은다
+    saved_env = os.environ.get("IG_ACCESS_TOKEN")
+    saved_graph = post_instagram.Graph
+    os.environ["IG_ACCESS_TOKEN"] = "x"
+
+    class FakeMe(FakeGraph):
+        def __init__(self, *a):
+            pass
+
+        def call(self, method, path, **params):
+            return {"followers_count": 1, "media_count": 1} if path == "me" else super().call(method, path, **params)
+
+    post_instagram.Graph = FakeMe
+    try:
+        got = collect_metrics.instagram([])
+    finally:
+        post_instagram.Graph = saved_graph
+        if saved_env is None:
+            os.environ.pop("IG_ACCESS_TOKEN", None)
+        else:
+            os.environ["IG_ACCESS_TOKEN"] = saved_env
+    expect((got.get("account") or {}).get("profile_views") == 3, f"게시물이 없을 때 계정 지표를 안 모은다: {got}")
     return "보내기 한 줄·피드 공유 날짜·계정 지표"
 
 
