@@ -57,7 +57,7 @@ function loadPlaywright() {
       }
       card.querySelectorAll('.shrink').forEach(shrinkWrap);
       const fonts = [...new Set([...card.querySelectorAll('*')].map((e) => getComputedStyle(e).fontFamily.split(',')[0].replace(/['"]/g, '')))];
-      return { k, overflow: !fits(card), fonts };
+      return { k, overflow: !fits(card), fonts, text: card.innerText };   // text: 인스타 대체 텍스트(alt_text) 재료
     });
   });
 

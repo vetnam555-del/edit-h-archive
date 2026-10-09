@@ -25,6 +25,23 @@
   `account does not meet the trial reel follower requirement` — **팔로워 기준 미달**이라 아직 못 쓴다(`automation/ig_posted/trial_probe.json`).
   팔로워가 늘면 post-instagram `mode: probe-trial` 로 다시 확인하고, 되면 E1 변형(훅 문구 A/B)을 비팔로워에게 먼저 시험한다.
 
+## 인스타 검색 키워드 (2026-10-09, 운영자 공유 자료 '해시태그와 키워드 SEO')
+
+사실 확인:
+- **해시태그 5개 제한 — 사실.** 인스타가 2025년 12월 '캡션 해시태그를 5개까지로 차차 줄인다'고 발표(1년 가까이 3개 제한도 시험).
+  자료의 '12월 18일'이라는 날짜와 '넘기면 추천에서 빠진다'는 말은 공식 확인 못 함.
+- **'해시태그는 도달을 늘리는 수단이 아니다' — 사실.** Mosseri: 해시태그는 게시물이 무엇에 관한 것인지 이해하는 데 쓰여 해시태그 페이지·검색엔
+  걸릴 수 있지만 도달(distribution)을 늘리는 방법으로 생각하지 말라. 구체적인 몇 개가 넓은 태그 여러 개보다 낫다.
+- **이름·소개글·캡션의 키워드가 검색에 쓰인다 — 업계 공통 조언(인스타 공식 문서는 못 찾음).** 대체 텍스트도 신호로 꼽힌다(API 가 2025-03 부터 지원).
+- **'추천 제외 단어로 노출도가 오른다' — 근거 없음.** 그 설정은 보는 사람 자신의 피드를 거르는 기능이다.
+
+반영(2026-10-09): 우리는 이미 주제 태그 4개 + #EDITH = 5개였고 넓은 태그는 빼 왔다(유지, selftest 로 5개 상한 고정).
+캡션 뉴스레터 한 줄에 계정 주제어 '경제 뉴스레터', 첫 125자 핵심어 점검(빌드 경고), 예비 호 캡션 첫 화면에 주제어, 카드 장마다 대체 텍스트(카드 글자).
+이름·소개글은 OWNER_TODO. 문구 한 줄·대체 텍스트라 E2 판정을 흔들지 않아 따로 실험하지 않는다.
+출처: [Social Media Today — 해시태그 5개 제한](https://www.socialmediatoday.com/news/instagram-implements-new-limits-on-hashtag-use/808309/),
+[Inro — Mosseri 해시태그 발언 정리](https://www.inro.social/blog/instagram-hashtags), [Later — Instagram SEO](https://later.com/blog/instagram-seo/amp/),
+[Meta — IG User Media(alt_text)](https://developers.facebook.com/docs/instagram-platform/instagram-graph-api/reference/ig-user/media).
+
 ## 주간 진단·조사 (2026-10-04, 일요일 루틴)
 
 **숫자(성과표 10/4 01:32 수집, 24시간 뒤 캐러셀 기준)**: 팔로워 47(9/29) → 48(10/1) → **97(10/2) → 107(10/3)** — 한 주에 두 배 넘게 늘었다(원인은 특정 못 함,
