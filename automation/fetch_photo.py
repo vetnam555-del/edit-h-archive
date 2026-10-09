@@ -131,7 +131,7 @@ def _tokens(text):
 
 def library(day, words=""):
     """대체 표지 후보 [{photo, credit, focus, subject, tags, last, score}] — 주제어가 많이 맞는 순, 같으면 오래전에 쓴 순.
-    library.json 에 있고, 발행한 호(예비 호 제외)가 실제로 표지로 쓴 사진만(출처·초점은 그 호의 content JSON)."""
+    library.json 에 있고, 발행한 일반 호가 실제로 표지로 쓴 사진만(출처·초점은 그 호의 content JSON). 최근 사용은 예비 호까지 센다."""
     import datetime as dt
     lib = {k: v for k, v in json.loads(LIBRARY.read_text(encoding="utf-8")).items() if not k.startswith("_")}
     today = dt.date.fromisoformat(day)
@@ -142,10 +142,12 @@ def library(day, words=""):
         except ValueError:
             continue
         cov = (d.get("cards") or {}).get("cover") or {}
-        if d.get("rewind") or cov.get("photo") not in lib or f.stem >= day:
+        if cov.get("photo") not in lib or f.stem >= day:
             continue
-        u = used.setdefault(cov["photo"], {"credit": cov.get("credit"), "focus": cov.get("focus"), "last": f.stem})
-        u["last"] = f.stem   # 파일 이름 순이라 마지막이 가장 최근
+        u = used.setdefault(cov["photo"], {"credit": None, "focus": None, "last": f.stem})
+        if not d.get("rewind") and not u["credit"]:   # 출처·초점은 처음 쓴 일반 호에서(예비 호는 그걸 다시 쓴 것)
+            u["credit"], u["focus"] = cov.get("credit"), cov.get("focus")
+        u["last"] = f.stem   # 파일 이름 순이라 마지막이 가장 최근 — 예비 호도 '쓴 날'로 센다(연달아 같은 표지 막기, Codex 리뷰)
     toks = [t.lower() for t in _tokens(words)]   # 'ai'·'it' 도 AI·IT 태그에 맞게(Codex 리뷰)
     out = []
     for photo, meta in lib.items():

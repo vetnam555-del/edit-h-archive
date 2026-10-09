@@ -254,6 +254,25 @@ def t_photo_library():
         expect(hit and hit[0]["score"] == 0, f"한 글자 태그가 '{words}' 에 걸려 {photo} 를 맞는 후보로 올린다")
     with contextlib.redirect_stdout(io.StringIO()):
         expect(fetch_photo.cmd_library("카드", use=0, day="2999-01-01") == 2, "--use 0 이 마지막 후보를 고른다")
+    # 예비 호가 쓴 표지도 '최근 사용'에 든다 — 예비 호가 연달아 같은 사진을 고르지 않게(출처는 일반 호에서)
+    saved_root, saved_lib = fetch_photo.ROOT, fetch_photo.LIBRARY
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        (root / "content").mkdir()
+        (root / "assets" / "photos").mkdir(parents=True)
+        (root / "assets" / "photos" / "x.jpg").write_bytes(b"")
+        (root / "assets" / "photos" / "library.json").write_text(
+            json.dumps({"assets/photos/x.jpg": {"subject": "동전", "tags": ["돈"]}}), encoding="utf-8")
+        for day, rewind in (("2026-10-03", False), ("2026-10-10", True)):
+            cov = {"photo": "assets/photos/x.jpg", "credit": "출처 원본" if not rewind else "예비 호"}
+            (root / "content" / f"{day}.json").write_text(json.dumps({"rewind": rewind, "cards": {"cover": cov}}), encoding="utf-8")
+        fetch_photo.ROOT, fetch_photo.LIBRARY = root, root / "assets" / "photos" / "library.json"
+        try:
+            expect(not fetch_photo.library("2026-10-11", "돈"), "어제 예비 호가 쓴 표지가 다시 후보에 나온다")
+            later = fetch_photo.library("2026-10-20", "돈")
+            expect(later and later[0]["credit"] == "출처 원본", "예비 호가 쓴 사진의 출처가 일반 호의 것이 아니다")
+        finally:
+            fetch_photo.ROOT, fetch_photo.LIBRARY = saved_root, saved_lib
     recent = {c["photo"] for c in fetch_photo.library("2026-10-09")}
     expect(not recent & {"assets/photos/2026-10-08.jpg", "assets/photos/2026-10-06.jpg"}, "사흘 안에 쓴 사진이 대체 후보에 나온다")
     return f"{len(every)}장"
