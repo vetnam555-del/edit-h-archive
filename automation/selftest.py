@@ -300,6 +300,9 @@ def t_seo():
         expect(tag in page, f"호 페이지에 {tag} 가 없다")
     ld = json.loads(re.search(r'<script type="application/ld\+json">(.*?)</script>', page, re.S).group(1))
     expect(ld["@type"] == "NewsArticle" and ld["datePublished"].startswith(day) and ld.get("image"), "구조화 데이터가 NewsArticle·발행일·이미지가 아니다")
+    import inspect
+    from edith import site as site_mod
+    expect('d.get("published_at_kst")' in inspect.getsource(site_mod.update_manifest), "manifest 가 예비 호의 실제 발행 시각을 쓰지 않는다")
     bare = newsletter.render(content_mod.load(day), site, 0)   # --no-cards — 없는 표지 이미지를 알리지 않는다
     expect('"image"' not in re.search(r'<script type="application/ld\+json">(.*?)</script>', bare, re.S).group(1), "카드 없는 호가 표지 이미지를 알린다")
     cfg = load_config()

@@ -21,7 +21,8 @@ def update_manifest(d, site, n_cards, publish_time):
         "key_keywords": d["keywords"][:5],
         "source_count": len(sources),
         "source_mode": d.get("source_mode", "fallback"),
-        "published_at_kst": f"{d['date']}T{publish_time}:00+09:00",
+        # 예비 호는 원고에 실제로 만든 시각(08:05 뒤)이 있다 — manifest·RSS pubDate 도 그 시각으로(Codex 리뷰)
+        "published_at_kst": d.get("published_at_kst") or f"{d['date']}T{publish_time}:00+09:00",
         "public_url": f"{site}/{d['date']}.html",
         "card_count": n_cards,
         "cards_url": f"{site}/instagram/{d['date']}/" if n_cards else None,
