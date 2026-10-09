@@ -8,7 +8,9 @@
 색: 글자 #282F38 · 본문 #555558 · 보조 #767676 · 칩 #FFDCCB/#B23A0F · 형광펜 #FFC9AD · 회색 박스 #F3F3F3.
 VOL.092 대비 보강: 출처를 원문 링크로, '카드뉴스 보기' 링크 추가. 이메일 호환을 위해 table + 인라인 스타일만 쓴다.
 """
-from .common import esc, md, plain
+import json
+
+from .common import esc, load_config, md, plain
 
 F = "'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif"
 INK = "#282F38"
@@ -399,6 +401,22 @@ def _footer(site, campaign):
             + "</td></tr>")
 
 
+def _ld_json(d, site, title, has_cards=True):
+    """검색엔진용 구조화 데이터(NewsArticle) — 웹 아카이브에만 쓴다(메일로 보낼 때 send_newsletter 가 뺀다).
+    2026-10-09: 호 페이지에 설명문·대표 주소·구조화 데이터가 없어 검색 결과에 제목만 나갔다.
+    발행 시각은 원고에 적힌 실제 시각(예비 호는 08:05 뒤 만든 시각)이 있으면 그것, 없으면 발송 시각. 카드 없이 만든 호는 이미지를 넣지 않는다."""
+    url = f"{site}/{d['date']}.html"
+    when = d.get("published_at_kst") or f"{d['date']}T{load_config().get('send_time_kst', '08:00')}:00+09:00"
+    org = {"@type": "Organization", "name": "EDIT H", "url": f"{site}/"}
+    data = {"@context": "https://schema.org", "@type": "NewsArticle", "headline": f"[EDIT H] {title}"[:110],
+            "description": plain(d["subtitle"]), "datePublished": when, "dateModified": when, "inLanguage": "ko",
+            "mainEntityOfPage": url, "url": url, "author": org, "publisher": org}
+    if has_cards:
+        data["image"] = [f"{site}/instagram/{d['date']}/01_edit_h_{d['date']}_cover.png"]
+    body = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
+    return f'<script type="application/ld+json">{body}</script>'
+
+
 def render(d, site, n_cards):
     campaign = "daily_" + d["date"].replace("-", "")
     title = plain(d["title"])
@@ -418,6 +436,8 @@ def render(d, site, n_cards):
             body.extend(_item(it) for it in sec["items"])
         body += [_briefs(d), _question(d)]
     body += [_cta(d, site, campaign, n_cards), _footer(site, campaign)]
+    # --no-cards 로 만든 호는 표지 PNG 가 없다 — 공유 미리보기는 사이트 대표 이미지로(Codex 리뷰)
+    share_img = f"{site}/instagram/{d['date']}/01_edit_h_{d['date']}_cover.png" if n_cards else f"{site}/og_image.png"
     return f"""<!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -425,10 +445,18 @@ def render(d, site, n_cards):
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="light only">
 <meta name="supported-color-schemes" content="light only">
+<meta name="description" content="{esc(plain(d['subtitle']))}">
+<link rel="canonical" href="{site}/{d['date']}.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="EDIT H">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:url" content="{site}/{d['date']}.html">
 <meta property="og:title" content="[EDIT H] {esc(title)}">
 <meta property="og:description" content="{esc(plain(d['subtitle']))}">
-<meta property="og:image" content="{site}/instagram/{d['date']}/01_edit_h_{d['date']}_cover.png">
+<meta property="og:image" content="{share_img}">
+<meta name="twitter:card" content="summary_large_image">
 <title>[EDIT H] {esc(title)}</title>
+{_ld_json(d, site, title, bool(n_cards))}
 <style>
 :root{{color-scheme:light only;supported-color-schemes:light only;}}
 @media (max-width:480px){{.px{{padding-left:20px!important;padding-right:20px!important;}}.h-cover{{font-size:26px!important;}}}}

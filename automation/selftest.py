@@ -33,7 +33,7 @@ AUTOMATION = Path(__file__).resolve().parent
 ROOT = AUTOMATION.parent
 sys.path.insert(0, str(AUTOMATION))
 
-from edith.common import CONTENT_DIR, load_config, now_kst  # noqa: E402
+from edith.common import CONTENT_DIR, load_config, now_kst, parse_date  # noqa: E402
 
 FAILS, NOTES = [], []
 TEXT_OUTPUTS = ["{d}.html", "instagram/{d}/caption.txt", "instagram/{d}/reel_caption.txt", "instagram/{d}/first_comment.txt"]
@@ -176,6 +176,27 @@ def t_series_and_style():
 def t_rewind():
     import build_rewind
     today = now_kst().date().isoformat()
+    # 예비 호에 다시 실린 H PICK 도 '최근'으로 센다 — 예비 호가 이어질 때 같은 H PICK 반복 막기
+    saved = build_rewind.CONTENT_DIR
+    with tempfile.TemporaryDirectory() as tmp:
+        for day, title in (("2026-10-10", "가"), ("2026-10-11", "나"), ("2026-10-12", "가")):
+            Path(tmp, f"{day}.json").write_text(json.dumps({"rewind": True, "big_issue": {"title": title}}), encoding="utf-8")
+        Path(tmp, "2026-09-30.json").write_text(json.dumps(   # 지난 날짜로 10/12 에 늦게 낸 예비 호
+            {"rewind": True, "published_at_kst": "2026-10-12T15:00:00+09:00", "big_issue": {"title": "다"}}), encoding="utf-8")
+        build_rewind.CONTENT_DIR = Path(tmp)
+        try:
+            expect(build_rewind._rewind_picks("2026-10-13") == {"가": "2026-10-12", "나": "2026-10-11", "다": "2026-10-12"},
+                   "예비 호 H PICK 최근 날짜를 못 센다(늦게 낸 예비 호는 실제로 낸 날)")
+            # 9/29 호를 10/13 에 늦게 낼 때 — 9/29 뒤에 실린 H PICK 도 센다
+            expect(build_rewind._rewind_picks("2026-09-29", "2026-10-13") == {"가": "2026-10-12", "나": "2026-10-11", "다": "2026-10-12"},
+                   "지난 날짜 예비 호가 그 날짜 뒤에 실린 H PICK 을 안 센다")
+        finally:
+            build_rewind.CONTENT_DIR = saved
+    for past in ("2026-09-30", "2026-10-07"):   # 실제 예비 호 날 — 이틀 전 H PICK 을 다시 실었던 날(10/8 회고)
+        gap = (parse_date(past) - parse_date(build_rewind.pick(past)[0][2])).days
+        expect(gap > build_rewind.PICK_GAP_DAYS, f"{past} 예비 호 H PICK 이 {gap}일 전 호의 H PICK 이다")
+        with contextlib.redirect_stdout(io.StringIO()):
+            expect(build_rewind.cover_photo(past, ["다시 볼 이야기"]), f"{past} 예비 호 표지에 대체 사진이 안 붙는다")
     top, items, _ = build_rewind.pick(today)
     days = {top[2], *(x[2] for x in items)}
     expect(len(items) == 4, "예비 호 아이템 4개")
@@ -232,6 +253,7 @@ def t_gift():
 
 def t_photo_library():
     """대체 표지 사진(fetch_photo --library): 목록의 사진이 모두 있고 지난 호의 출처가 붙는지, 주제어 순위·최근 사용 제외가 맞는지."""
+    import build_rewind
     import fetch_photo
     lib = {k for k in json.loads(fetch_photo.LIBRARY.read_text(encoding="utf-8")) if not k.startswith("_")}
     bad = sorted(p for p in lib if not fetch_photo.registered(p))
@@ -249,9 +271,77 @@ def t_photo_library():
         expect(hit and hit[0]["score"] == 0, f"한 글자 태그가 '{words}' 에 걸려 {photo} 를 맞는 후보로 올린다")
     with contextlib.redirect_stdout(io.StringIO()):
         expect(fetch_photo.cmd_library("카드", use=0, day="2999-01-01") == 2, "--use 0 이 마지막 후보를 고른다")
+    # 예비 호가 쓴 표지도 '최근 사용'에 든다 — 예비 호가 연달아 같은 사진을 고르지 않게(출처는 일반 호에서)
+    saved_root, saved_lib = fetch_photo.ROOT, fetch_photo.LIBRARY
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        (root / "content").mkdir()
+        (root / "assets" / "photos").mkdir(parents=True)
+        (root / "assets" / "photos" / "x.jpg").write_bytes(b"")
+        (root / "assets" / "photos" / "library.json").write_text(
+            json.dumps({"assets/photos/x.jpg": {"subject": "동전", "tags": ["돈"]}}), encoding="utf-8")
+        for day, rewind in (("2026-10-03", False), ("2026-10-10", True)):
+            cov = {"photo": "assets/photos/x.jpg", "credit": "출처 원본" if not rewind else "예비 호"}
+            (root / "content" / f"{day}.json").write_text(json.dumps({"rewind": rewind, "cards": {"cover": cov}}), encoding="utf-8")
+        # 지난 날짜(9/30)로 10/15 에 늦게 낸 예비 호 — 쓴 날은 10/15 로 센다
+        (root / "content" / "2026-09-30.json").write_text(json.dumps(
+            {"rewind": True, "published_at_kst": "2026-10-15T15:00:00+09:00", "cards": {"cover": {"photo": "assets/photos/x.jpg"}}}), encoding="utf-8")
+        fetch_photo.ROOT, fetch_photo.LIBRARY = root, root / "assets" / "photos" / "library.json"
+        try:
+            expect(not fetch_photo.library("2026-10-11", "돈"), "어제 예비 호가 쓴 표지가 다시 후보에 나온다")
+            expect(not fetch_photo.library("2026-10-16", "돈"), "지난 날짜로 늦게 낸 예비 호의 표지를 다음 날 다시 고른다")
+            expect(not fetch_photo.library("2026-10-15", "돈"), "같은 날 늦게 낸 예비 호의 표지를 그날 일반 호가 또 고른다")
+            later = fetch_photo.library("2026-10-20", "돈")
+            expect(later and later[0]["credit"] == "출처 원본", "예비 호가 쓴 사진의 출처가 일반 호의 것이 아니다")
+            # 9/28 호를 10/12 에 늦게 낼 때 — 사흘 전(10/10) 예비 호 표지를 센다
+            with contextlib.redirect_stdout(io.StringIO()):
+                expect(not build_rewind.cover_photo("2026-09-28", ["돈"], "2026-10-12"), "지난 날짜 예비 호가 최근 쓴 표지를 또 고른다")
+                expect(build_rewind.cover_photo("2026-09-28", ["돈"], "2026-10-20"), "지난 날짜 예비 호가 쓸 수 있는 표지를 못 고른다")
+        finally:
+            fetch_photo.ROOT, fetch_photo.LIBRARY = saved_root, saved_lib
     recent = {c["photo"] for c in fetch_photo.library("2026-10-09")}
     expect(not recent & {"assets/photos/2026-10-08.jpg", "assets/photos/2026-10-06.jpg"}, "사흘 안에 쓴 사진이 대체 후보에 나온다")
     return f"{len(every)}장"
+
+
+def t_seo():
+    """호 페이지 검색 노출(2026-10-09): 설명문·canonical·NewsArticle 구조화 데이터가 웹 페이지엔 있고, 메일엔 스크립트가 빠진다."""
+    import send_newsletter
+    from edith import newsletter
+    from edith import content as content_mod
+    day = daily_issues(1)[0]
+    site = load_config()["site_url"].rstrip("/")
+    page = newsletter.render(content_mod.load(day), site, 8)
+    for tag in ('<meta name="description"', f'<link rel="canonical" href="{site}/{day}.html">', 'application/ld+json'):
+        expect(tag in page, f"호 페이지에 {tag} 가 없다")
+    ld = json.loads(re.search(r'<script type="application/ld\+json">(.*?)</script>', page, re.S).group(1))
+    expect(ld["@type"] == "NewsArticle" and ld["datePublished"].startswith(day) and ld.get("image"), "구조화 데이터가 NewsArticle·발행일·이미지가 아니다")
+    import inspect
+    from edith import site as site_mod
+    # 지난 날짜로 늦게 낸 예비 호가 RSS 맨 위·lastBuildDate 가 되는지(실제 발행 시각 순)
+    with tempfile.TemporaryDirectory() as tmp:
+        saved = site_mod.FEED, site_mod.SITEMAP
+        site_mod.FEED, site_mod.SITEMAP = Path(tmp, "feed.xml"), Path(tmp, "sitemap.xml")
+        try:
+            site_mod.write_feeds({"issues": [
+                {"date": "2026-10-09", "vol": "2", "title": "새 호", "filename": "2026-10-09.html"},
+                {"date": "2026-10-07", "vol": "1", "title": "늦게 낸 예비 호", "filename": "2026-10-07.html",
+                 "published_at_kst": "2026-10-09T15:00:00+09:00"}]}, "https://x")
+            feed = site_mod.FEED.read_text(encoding="utf-8")
+        finally:
+            site_mod.FEED, site_mod.SITEMAP = saved
+    expect(feed.index("늦게 낸 예비 호") < feed.index("새 호") and "15:00:00 +0900</lastBuildDate>" in feed,
+           "RSS 가 실제 발행 시각 순이 아니다")
+    expect('d.get("published_at_kst")' in inspect.getsource(site_mod.update_manifest), "manifest 가 예비 호의 실제 발행 시각을 쓰지 않는다")
+    bare = newsletter.render(content_mod.load(day), site, 0)   # --no-cards — 없는 표지 이미지를 알리지 않는다
+    expect('"image"' not in re.search(r'<script type="application/ld\+json">(.*?)</script>', bare, re.S).group(1), "카드 없는 호가 표지 이미지를 알린다")
+    expect(f'<meta property="og:image" content="{site}/og_image.png">' in bare and "_cover.png" not in bare,
+           "카드 없는 호의 공유 미리보기가 없는 표지 이미지를 가리킨다")
+    expect((ROOT / "og_image.png").exists(), "사이트 대표 이미지 og_image.png 가 없다")
+    cfg = load_config()
+    msg = send_newsletter.build_message({"title": "t", "filename": f"{day}.html"}, page, "a@example.com", cfg, "b@example.com")
+    expect("application/ld+json" not in msg.get_body(preferencelist=("html",)).get_content(), "메일 본문에 구조화 데이터 스크립트가 남았다")
+    return None
 
 
 def t_evening():
@@ -332,6 +422,7 @@ def main():
     check("스레드 본문(post_threads)", t_threads)
     check("구독 선물(gift)", t_gift)
     check("대체 표지 사진(fetch_photo --library)", t_photo_library)
+    check("검색 노출(호 페이지 SEO)", t_seo)
     check("저녁 일정 사슬(evening)", t_evening)
     if not args.quick:
         rebuild(daily_issues(args.issues), args.strict)

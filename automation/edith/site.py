@@ -21,7 +21,8 @@ def update_manifest(d, site, n_cards, publish_time):
         "key_keywords": d["keywords"][:5],
         "source_count": len(sources),
         "source_mode": d.get("source_mode", "fallback"),
-        "published_at_kst": f"{d['date']}T{publish_time}:00+09:00",
+        # 예비 호는 원고에 실제로 만든 시각(08:05 뒤)이 있다 — manifest·RSS pubDate 도 그 시각으로(Codex 리뷰)
+        "published_at_kst": d.get("published_at_kst") or f"{d['date']}T{publish_time}:00+09:00",
         "public_url": f"{site}/{d['date']}.html",
         "card_count": n_cards,
         "cards_url": f"{site}/instagram/{d['date']}/" if n_cards else None,
@@ -70,9 +71,11 @@ def write_feeds(manifest, site):
     import datetime as dt
     from email.utils import format_datetime
     issues = sorted(manifest["issues"], key=lambda i: i["date"])
-    now = format_datetime(dt.datetime.fromisoformat(_pub(issues[-1]))) if issues else ""
+    # RSS 는 실제 발행 시각 순 — 지난 날짜로 늦게 낸 예비 호도 새 글로 맨 위에(Codex 리뷰). 사이트맵은 날짜 순 그대로
+    by_pub = sorted(manifest["issues"], key=lambda i: dt.datetime.fromisoformat(_pub(i)))
+    now = format_datetime(dt.datetime.fromisoformat(_pub(by_pub[-1]))) if by_pub else ""
     items = []
-    for i in reversed(issues[-FEED_ITEMS:]):
+    for i in reversed(by_pub[-FEED_ITEMS:]):
         url = i.get("public_url") or f"{site}/{i['filename']}"
         title = f"VOL.{i['vol']} {plain(i['title'])}"
         items.append(

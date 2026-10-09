@@ -118,6 +118,9 @@ def check():
     return 0 if ok else 1
 
 
+LD_JSON = re.compile(r'<script type="application/ld\+json">.*?</script>\n?', re.S)
+
+
 def html_to_text(src):
     body = re.sub(r"(?is)<(style|head)[^>]*>.*?</\1>", "", src)
     body = re.sub(r"(?i)<br\s*/?>|</(div|p|tr|h\d)>", "\n", body)
@@ -142,6 +145,7 @@ def build_message(issue, page, to_addr, cfg, sender):
     q = urllib.parse.quote(to_addr)
     unsub = f"{site}/unsubscribe.html?email={q}"
     body = poll_links(page.replace("email=PLACEHOLDER", f"email={q}"), site, sender)
+    body = LD_JSON.sub("", body)   # 검색엔진용 구조화 데이터는 웹 아카이브에만 — 메일엔 스크립트를 넣지 않는다
     msg = EmailMessage()
     msg["Subject"] = f"{cfg['email']['subject_prefix']} {issue['title']}"
     msg["From"] = formataddr((cfg["email"]["from_name"], sender))

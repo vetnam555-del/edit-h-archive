@@ -31,6 +31,15 @@
 7. 확인: Actions → **Post EDIT H to Threads** → Run workflow(mode `check`) → '스레드 계정 @…' 이 나오면 끝.
    그 뒤로 매일 12:30 에 자동으로 올라가고, 토큰은 일주일마다 자동 연장된다(GH_ADMIN_TOKEN 이 이미 있어 Secret 도 자동 갱신).
 
+## 검색 노출 등록 (15분 — 2026-10-09 SEO 기본 적용 뒤)
+
+호 페이지마다 설명문·대표 주소(canonical)·기사 구조화 데이터(NewsArticle)를 넣었다. 검색엔진에 사이트를 알리는 건 운영자 계정이 필요하다.
+- [ ] **구글 서치 콘솔**(search.google.com/search-console) → 속성 추가 → 'URL 접두어'에 `https://vetnam555-del.github.io/edit-h-archive/`
+  → 확인 방법 'HTML 태그' 를 고르면 `<meta name="google-site-verification" content="…">` 가 나온다 — 그 content 값만 채팅으로 알려 주면
+  `index.html` 에 넣어 드린다(공개돼도 되는 값). 확인 뒤 Sitemaps 에 `sitemap.xml` 제출.
+- [ ] **네이버 서치어드바이저**(searchadvisor.naver.com) → 사이트 등록 → 같은 방식(HTML 태그 `naver-site-verification`) → 요청 → 사이트맵 제출에 `sitemap.xml`, RSS 제출에 `feed.xml`.
+- 참고: `github.io/edit-h-archive` 주소는 robots.txt 를 둘 수 없는 하위 경로라 사이트맵은 위 두 곳에 직접 제출해야 한다.
+
 ## 나중에 (조건이 되면)
 
 - [ ] **댓글 키워드 → 구독 링크 DM** — 인스타에서 구독 전환이 가장 높은 방식(조사 2026-10-04: 18~35%). 댓글 자체도 늘린다. 게시물에 댓글이 하루 몇 개씩 달리기 시작하면(또는 선물 E5 가 4주 뒤에도 0건이면 먼저). 인스타 앱(Meta 개발자 앱)에
