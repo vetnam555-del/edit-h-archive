@@ -42,7 +42,8 @@ WHAT = {
         "캐러셀까지 실패가 이어지면 인스타 토큰(IG_ACCESS_TOKEN)이 만료됐을 수 있어요."),
     "Sync EDIT H subscribers": (
         "구독 신청·수신 거부 반영",
-        "내일 07:10 실행이 밀린 신청까지 다시 반영합니다. 그 사이 수신 거부한 분에게 한 번 더 발송될 수 있어요."),
+        "다음 매시간 실행이 밀린 신청까지 다시 반영합니다. 그 사이 수신 거부한 분에게 한 번 더 발송될 수 있어요. "
+        "매시간 도는 작업이라 같은 실패가 이어져도 알림은 20시간에 한 번만 보냅니다 — 계속되면 Gmail 앱 비밀번호(SMTP_PASSWORD)를 확인해 주세요."),
     "Tally EDIT H poll": ("독자 투표 집계", "내일 06:20 에 다시 셉니다. 결과 공개일(금)에 실패하면 그날은 결과 없이 발행됩니다."),
     "Collect EDIT H metrics": ("성과 수집", "회고·제작은 직전 성과표로 진행하고, 다음 수집 때 따라잡습니다."),
     "Fetch reel music": ("릴스 음원 받기", "기존 음원으로 릴스를 만듭니다. 급하지 않아요."),
@@ -131,6 +132,21 @@ def already_done(name):
     return False
 
 
+HOURLY = {"Sync EDIT H subscribers"}   # 매시간 도는 작업(2026-10-09~) — 같은 실패를 매시간 메일로 보내지 않는다
+QUIET_H = 20
+
+
+def alerted_recently(name, run_id, hours=QUIET_H):
+    """같은 작업의 다른 실행이 최근 hours 시간 안에 실패로 끝났나 — 그때 이미 알렸으니 이번엔 조용히."""
+    edge = dt.datetime.now(dt.timezone.utc) - dt.timedelta(hours=hours)
+    for r in (_api("GET", "actions/runs?status=failure&per_page=50") or {}).get("workflow_runs", []):
+        if r.get("name") != name or str(r.get("id")) == str(run_id):
+            continue
+        if dt.datetime.fromisoformat((r.get("updated_at") or "1970-01-01T00:00:00Z").replace("Z", "+00:00")) >= edge:
+            return True
+    return False
+
+
 def rerun(run_id):
     """그 실행을 한 번 다시 돌린다(actions: write). 발송·게시·수집은 기록을 보고 이미 한 일을 건너뛰어서 다시 돌려도 겹치지 않는다."""
     return bool(run_id) and _api("POST", f"actions/runs/{run_id}/rerun") is not None
@@ -194,6 +210,9 @@ def failed():
             print(f"{name}: GitHub 서버(러너)를 못 잡아 시작하지 못함 — 한 번 다시 실행했다. "
                   "또 실패하면 발행 점검(08:40·20:45·22:25)이 알린다")
             return 0
+    if name in HOURLY and alerted_recently(name, run_id):
+        print(f"{name}: {QUIET_H}시간 안에 같은 작업의 실패를 이미 알렸다 — 매시간 반복 알림은 보내지 않음")
+        return 0
     started = os.environ.get("RUN_STARTED", "")
     try:
         started = dt.datetime.fromisoformat(started.replace("Z", "+00:00")).astimezone(now_kst().tzinfo).strftime("%m/%d %H:%M")

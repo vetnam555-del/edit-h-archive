@@ -1,5 +1,7 @@
 # EDIT H 구독 신청·수신 거부 자동 반영 — Formspree 알림 메일(Gmail IMAP, 읽기 전용) → Secret SUBSCRIBERS.
-# 매일 07:10(KST, 발송 20분 전). 새 구독자에게 환영 메일. 바꾸기 전 값은 SUBSCRIBERS_BACKUP 에 남긴다.
+# 새 구독자에게 환영 메일 + 가장 최근 호를 바로(2026-10-09~). 바꾸기 전 값은 SUBSCRIBERS_BACKUP 에 남긴다.
+# 언제 도나: ① 신청 알림이 오면 1분 안에 — 운영자 Gmail 의 Apps Script(automation/relay/subscribe_relay.gs)가 workflow_dispatch 로,
+# ② 매시간(예비 — GitHub 예약은 늦기도 한다), ③ 07:10·오늘 호 푸시 직후(08:00 발송 전에 새 구독자를 넣는다).
 # 공개 로그라 주소는 찍지 않고 건수만 남긴다(automation/sync_subscribers.py).
 # 필요한 Secrets: SMTP_USER · SMTP_PASSWORD · SUBSCRIBERS · GH_ADMIN_TOKEN(Secrets 쓰기)
 name: Sync EDIT H subscribers
@@ -7,6 +9,7 @@ name: Sync EDIT H subscribers
 on:
   schedule:
     - cron: "10 22 * * *"    # UTC 22:10 = KST 07:10 매일(예비 — GitHub 예약은 2시간 넘게 늦기도 한다)
+    - cron: "37 * * * *"     # 매시간 37분(예비) — 신청 뒤 오래 기다리지 않게. 새 알림이 없으면 아무것도 바꾸지 않는다
   push:
     branches: [main]
     paths: ["20[0-9][0-9]-[0-9][0-9]-[0-9][0-9].html"]   # 제작 루틴이 오늘 호를 올린 직후(07:20 무렵) — 08:00 발송 전에 새 구독자를 넣는다

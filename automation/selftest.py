@@ -104,12 +104,12 @@ def t_alert():
     saved = {k: getattr(alert, k) for k in ("run_jobs", "rerun", "send_mail", "already_done", "_api")}
     env = {k: os.environ.get(k) for k in ("RUN_NAME", "RUN_ATTEMPT", "RUN_ID", "RUN_EVENT", "RUN_CONCLUSION", "RUN_TRIGGERED_BY")}
     try:
-        def run(jobs, attempt=1, done=False, event="schedule", by="vetnam555-del"):
+        def run(jobs, attempt=1, done=False, event="schedule", by="vetnam555-del", name="Collect EDIT H metrics"):
             mails, reruns = [], []
             alert.run_jobs, alert.already_done = (lambda _id: jobs), (lambda _name: done)
             alert.rerun = lambda rid: reruns.append(rid) or True
             alert.send_mail = lambda subject, body, dry=False: mails.append(subject + "\n" + body)
-            os.environ.update(RUN_NAME="Collect EDIT H metrics", RUN_ATTEMPT=str(attempt), RUN_ID="1", RUN_EVENT=event,
+            os.environ.update(RUN_NAME=name, RUN_ATTEMPT=str(attempt), RUN_ID="1", RUN_EVENT=event,
                               RUN_CONCLUSION="failure", RUN_TRIGGERED_BY=by)
             with contextlib.redirect_stdout(io.StringIO()):
                 alert.failed()
@@ -123,8 +123,13 @@ def t_alert():
         expect(not reruns and len(mails) == 1 and "GitHub 서버" in mails[0], "사람이 다시 돌린 것도 시작 못 하면 알린다")
         mails, reruns = run(broke)
         expect(not reruns and len(mails) == 1 and "Send" in mails[0], "코드가 돌다 실패한 건 바로 알린다(실패한 단계와 함께)")
-        # 자동 다시 실행이 또 실패한 건 발행 점검이 알린다 — 저녁 사슬처럼 10시간 넘게 걸리는 실행도 놓치지 않게(Codex 리뷰)
+        # 매시간 도는 구독 반영은 같은 실패를 20시간에 한 번만 알린다(2026-10-09 매시간 예비 실행)
         recent = dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        alert._api = lambda method, path: {"workflow_runs": [{"id": 5, "name": "Sync EDIT H subscribers", "updated_at": recent}]}
+        expect(run(broke, name="Sync EDIT H subscribers") == ([], []), "매시간 구독 반영이 같은 실패를 또 알린다")
+        alert._api = lambda method, path: {"workflow_runs": [{"id": 5, "name": "Sync EDIT H subscribers", "updated_at": "2026-01-01T00:00:00Z"}]}
+        expect(len(run(broke, name="Sync EDIT H subscribers")[0]) == 1, "구독 반영의 첫 실패를 알리지 않는다")
+        # 자동 다시 실행이 또 실패한 건 발행 점검이 알린다 — 저녁 사슬처럼 10시간 넘게 걸리는 실행도 놓치지 않게(Codex 리뷰)
         runs = [{"id": 7, "name": "EDIT H evening chain", "run_attempt": 2, "updated_at": recent, "html_url": "u7",
                  "triggering_actor": {"login": "github-actions[bot]"}},
                 {"id": 8, "name": "Send EDIT H newsletter", "run_attempt": 2, "updated_at": recent, "triggering_actor": {"login": "someone"}},
@@ -477,6 +482,48 @@ def t_views_diag():
     return "보내기 한 줄·피드 공유 날짜·계정 지표"
 
 
+def t_first_issue():
+    """구독 즉시 첫 메일(2026-10-09): 이미 발송된 가장 최근 호를 바로, 오늘 호가 곧 나갈 참이면 안 보냄(두 번 받지 않게), 맨 위 안내·제목."""
+    import sync_subscribers as ss
+    tz = now_kst().tzinfo
+    saved = ss.MANIFEST, ss.SENT_DIR, ss.ROOT
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        (root / "sent").mkdir()
+        page = ('<html><body><table role="presentation" width="100%"><tr><td>'
+                '<table role="presentation" width="600" cellpadding="0" cellspacing="0"><tr><td>본문 email=PLACEHOLDER</td></tr></table>'
+                '</td></tr></table></body></html>')
+        issues = [{"date": d, "vol": v, "title": f"{d} 호", "filename": f"{d}.html"} for d, v in (("2026-10-08", "107"), ("2026-10-09", "108"))]
+        for i in issues:
+            (root / i["filename"]).write_text(page, encoding="utf-8")
+        (root / "manifest.json").write_text(json.dumps({"issues": issues}), encoding="utf-8")
+        (root / "sent" / "2026-10-08.json").write_text(json.dumps({"sent": 11}), encoding="utf-8")
+        ss.MANIFEST, ss.SENT_DIR, ss.ROOT = root / "manifest.json", root / "sent", root
+        try:
+            expect(ss.first_issue(dt.datetime(2026, 10, 9, 7, 30, tzinfo=tz)) is None,
+                   "오늘 호가 올라왔고 아직 안 나갔는데 지난 호를 바로 보낸다(곧 두 번째 메일이 간다)")
+            expect((ss.first_issue(dt.datetime(2026, 10, 10, 6, 0, tzinfo=tz)) or {}).get("date") == "2026-10-08",
+                   "발송된 적 없는 호를 첫 메일로 보낸다")
+            (root / "sent" / "2026-10-09.json").write_text(json.dumps({"sent": 11}), encoding="utf-8")
+            first = ss.first_issue(dt.datetime(2026, 10, 9, 9, 0, tzinfo=tz))
+            expect((first or {}).get("date") == "2026-10-09", "오늘 호가 나간 뒤엔 오늘 호를 바로 보내야 한다")
+            msg = ss.first_issue_message("a@example.com", "new@example.com", load_config(), first)
+            body = msg.get_body(preferencelist=("html",)).get_content()
+            expect("첫 메일" in msg["Subject"] and msg["To"] == "new@example.com" and "가장 최근 호(10/9)" in body
+                   and "email=new%40example.com" in body, "첫 메일 제목·받는 사람·맨 위 안내·수신 거부 주소가 이상하다")
+            w = ss.welcome_message("a@example.com", "new@example.com", load_config(), now=dt.datetime(2026, 10, 9, 9, 0, tzinfo=tz), first=first)
+            expect("바로 보내드려요" in w.get_body(preferencelist=("plain",)).get_content(), "환영 메일이 최근 호를 바로 보낸다고 알리지 않는다")
+        finally:
+            ss.MANIFEST, ss.SENT_DIR, ss.ROOT = saved
+    sub = (ROOT / "subscribe.html").read_text(encoding="utf-8")
+    expect(sub.index('id="successMsg"') > sub.index("</form>"), "구독 완료 문구가 폼 안에 있다 — 폼을 숨기면 같이 숨는다")
+    expect(sub.index('id="email"') < sub.index('class="features"'), "이메일 칸이 기능 소개보다 아래 있다(작은 화면에서 안 보임)")
+    relay = (AUTOMATION / "relay" / "subscribe_relay.gs").read_text(encoding="utf-8")
+    expect("sync-subscribers.yml" in relay and "dry_run: 'false'" in relay and "ghp_" not in relay and "github_pat_" not in relay,
+           "구독 즉시 반영 스크립트가 다른 작업을 부르거나 토큰이 들어 있다")
+    return "최근 발송 호 바로 보내기·중복 방지·구독 페이지"
+
+
 def t_evening():
     """저녁 일정 사슬(evening.py): 매일 21:30 수집, 저녁 릴스 기간이면 19:30 릴스·20:45 점검. dispatch 대상 워크플로에 workflow_dispatch 가 있는지."""
     import evening
@@ -559,6 +606,7 @@ def main():
     check("저녁 일정 사슬(evening)", t_evening)
     check("인스타 검색 노출(해시태그·키워드·대체 텍스트)", t_ig_seo)
     check("조회수 진단(보내기 한 줄·릴스 피드·계정 지표)", t_views_diag)
+    check("구독 즉시 첫 메일(sync_subscribers)", t_first_issue)
     if not args.quick:
         rebuild(daily_issues(args.issues), args.strict)
     if NOTES:

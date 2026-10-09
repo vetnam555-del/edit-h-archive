@@ -34,7 +34,7 @@ from email.utils import formataddr
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from edith.common import AUTOMATION, MANIFEST, load_config, now_kst, send_time_ko  # noqa: E402
+from edith.common import AUTOMATION, MANIFEST, ROOT, load_config, now_kst, send_time_ko  # noqa: E402
 from send_newsletter import EMAIL, notice  # noqa: E402
 
 STATE = AUTOMATION / "subscribers_sync.json"
@@ -149,8 +149,48 @@ def best_issues(n=3):
     return ranked, any(scores.get(i["date"], 0) > 0 for i in ranked)
 
 
-def welcome_message(sender, to_addr, cfg, now=None):
-    """새 구독자 환영 메일(텍스트 + HTML). 첫 호가 언제 오는지, 먼저 읽어볼 지난 호 3개, 인스타, 스팸함 방지 부탁."""
+SENT_DIR = AUTOMATION / "sent"
+
+
+def _delivered(day):
+    """그 호가 구독자에게 실제로 발송됐나(automation/sent/{날짜}.json 의 sent > 0)."""
+    try:
+        return (json.loads((SENT_DIR / f"{day}.json").read_text(encoding="utf-8")).get("sent") or 0) > 0
+    except (OSError, ValueError):
+        return False
+
+
+def first_issue(now=None):
+    """새 구독자에게 바로 보낼 호 — 구독자 모두에게 이미 발송된 가장 최근 호(2026-10-09 운영자 요청 '이메일을 적으면 바로 뉴스레터').
+    오늘 호가 올라왔는데 아직 안 나갔으면 None — 방금 명단에 넣었으니 곧 정기 발송으로 받는다(같은 호를 두 번 받지 않게)."""
+    today = (now or now_kst()).date().isoformat()
+    issues = sorted((i for i in json.loads(MANIFEST.read_text(encoding="utf-8")).get("issues", [])
+                     if re.fullmatch(r"\d{4}-\d{2}-\d{2}", str(i.get("date", "")))), key=lambda i: i["date"], reverse=True)
+    if any(i["date"] == today for i in issues) and not _delivered(today):
+        return None
+    return next((i for i in issues if _delivered(i["date"]) and (ROOT / i["filename"]).exists()), None)
+
+
+def first_issue_message(sender, to_addr, cfg, issue):
+    """가장 최근 호를 그대로(정기 발송과 같은 메일) — 맨 위에 '구독 첫 메일' 한 줄."""
+    from send_newsletter import build_message
+    page = (ROOT / issue["filename"]).read_text(encoding="utf-8")
+    when = send_time_ko(cfg["send_time_kst"]).replace("오전", "아침")
+    m = re.search(r'<table role="presentation" width="600"[^>]*>', page)
+    if m:
+        _, mo, d = issue["date"].split("-")
+        banner = ('<tr><td class="px" style="padding:16px 36px; background:#F5F5EE; font-size:14px; line-height:1.7; color:#333;">'
+                  f'구독 고마워요! 기다리지 않게 가장 최근 호({int(mo)}/{int(d)})를 바로 보내드려요. 새 호는 매일 {when}에 가요.</td></tr>')
+        page = page[:m.end()] + banner + page[m.end():]
+    msg = build_message(issue, page, to_addr, cfg, sender)
+    del msg["Subject"]
+    msg["Subject"] = f"{cfg['email']['subject_prefix']} 첫 메일 — {issue['title']}"
+    return msg
+
+
+def welcome_message(sender, to_addr, cfg, now=None, first=None):
+    """새 구독자 환영 메일(텍스트 + HTML). 첫 호가 언제 오는지, 먼저 읽어볼 지난 호 3개, 인스타, 스팸함 방지 부탁.
+    first(바로 보내는 최근 호)가 있으면 '이어서 보내드렸어요'로 알린다."""
     import html
     import urllib.parse
     site = cfg["site_url"]
@@ -171,6 +211,9 @@ def welcome_message(sender, to_addr, cfg, now=None):
                  f'padding:12px 16px;">🎁 구독 선물 — <a href="{gift["url"]}" style="color:#B91C1C; font-weight:800; text-decoration:none;">'
                  f'{html.escape(gift["title"])}</a>({gift["count"]}가지). 날짜별로 챙길 것만 모았어요.</p>' if gift else "")
 
+    first_html = (f"가장 최근 호(VOL.{html.escape(str(first['vol']))})를 이어서 <b>바로</b> 보내드려요. 새 호는 <b>{day} {when}</b>부터 매일 가요."
+                  if first else f"<b>{day} {when}</b>에 첫 메일이 가요.")
+
     msg = EmailMessage()
     msg["Subject"] = f"{cfg['email']['subject_prefix']} 구독해 주셔서 고마워요 — {day} {when}에 만나요"
     msg["From"] = formataddr((cfg["email"]["from_name"], sender))
@@ -179,7 +222,9 @@ def welcome_message(sender, to_addr, cfg, now=None):
     rows = [f"· VOL.{i['vol']} {i['title']}\n  {site}/{i['filename']}" for i in picks]
     msg.set_content(
         "EDIT H를 구독해 주셔서 고마워요.\n\n" + gift_txt +
-        f"{day} {when}에 첫 메일이 가요. 매일 아침, 알아두면 좋은 트렌드 5가지를 확인된 숫자로 정리하고 한 줄 뉴스 5개를 더해 보내드려요.\n"
+        (f"가장 최근 호(VOL.{first['vol']})를 이어서 바로 보내드려요. 새 호는 {day} {when}부터 매일 가요.\n" if first else
+         f"{day} {when}에 첫 메일이 가요.\n") +
+        "매일 아침, 알아두면 좋은 트렌드 5가지를 확인된 숫자로 정리하고 한 줄 뉴스 5개를 더해 보내드려요.\n"
         "그중 하나는 H PICK으로 조금 더 깊게 풀어요.\n\n"
         f"기다리는 동안 {lead}를 먼저 읽어보세요.\n" + "\n".join(rows) + "\n\n"
         f"인스타그램에서는 같은 이야기를 카드로 넘겨볼 수 있어요: {insta}\n\n"
@@ -203,7 +248,7 @@ def welcome_message(sender, to_addr, cfg, now=None):
   <div style="height:2px; background:#000; margin:18px 0 24px;"></div>
   <p style="font-size:19px; font-weight:800; margin:0 0 14px;">구독해 주셔서 고마워요.</p>
   {gift_html}
-  <p style="font-size:15px; line-height:1.8; color:#333; margin:0 0 12px;"><b>{day} {when}</b>에 첫 메일이 가요.
+  <p style="font-size:15px; line-height:1.8; color:#333; margin:0 0 12px;">{first_html}
   매일 아침, 알아두면 좋은 트렌드 5가지를 확인된 숫자로 정리하고 한 줄 뉴스 5개를 더해 보내드려요. 그중 하나는 H PICK으로 조금 더 깊게 풀어요.</p>
   <p style="font-size:15px; line-height:1.8; color:#333; margin:18px 0 6px;">기다리는 동안 {lead}를 먼저 읽어보세요.</p>
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0">{li}</table>
@@ -219,8 +264,13 @@ def welcome_message(sender, to_addr, cfg, now=None):
     return msg
 
 
-def welcome(smtp, sender, to_addr, cfg):
-    smtp.send_message(welcome_message(sender, to_addr, cfg))
+def welcome(smtp, sender, to_addr, cfg, first=None):
+    """환영 메일, 그리고 first 가 있으면 가장 최근 호를 바로 이어서. 바로 보낸 호 수(0/1)."""
+    smtp.send_message(welcome_message(sender, to_addr, cfg, first=first))
+    if first:
+        smtp.send_message(first_issue_message(sender, to_addr, cfg, first))
+        return 1
+    return 0
 
 
 def main():
@@ -276,17 +326,21 @@ def main():
     STATE.write_text(json.dumps(new_state) + "\n", encoding="utf-8")
 
     if adds and cfg.get("email", {}).get("welcome", True):
-        sent = 0
+        sent = firsts = 0
+        first = first_issue() if cfg.get("email", {}).get("first_issue", True) else None
+        from send_newsletter import excluded
+        allowed = {a.lower() for a in excluded(adds)[0]}   # 수신 제외 규칙에 걸린 주소엔 호를 보내지 않는다(정기 발송과 같게)
         with smtplib.SMTP_SSL(os.environ.get("SMTP_HOST") or "smtp.gmail.com", int(os.environ.get("SMTP_PORT") or 465),
                               context=ssl.create_default_context()) as smtp:
             smtp.login(user, pw)
             for a in adds:
                 try:
-                    welcome(smtp, os.environ.get("MAIL_FROM") or user, a, cfg)
+                    firsts += welcome(smtp, os.environ.get("MAIL_FROM") or user, a, cfg, first if a.lower() in allowed else None)
                     sent += 1
                 except smtplib.SMTPException:
                     pass
-        notice(f"환영 메일 {sent}/{len(adds)}건 발송 ({now_kst():%H:%M} KST)")
+        notice(f"환영 메일 {sent}/{len(adds)}건 발송 ({now_kst():%H:%M} KST)"
+               + (f" · 가장 최근 호 VOL.{first['vol']} 바로 보냄 {firsts}건" if first else " · 오늘 호가 곧 나가 최근 호는 따로 안 보냄"))
     return 0
 
 
