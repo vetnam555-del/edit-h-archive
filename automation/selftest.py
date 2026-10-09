@@ -335,6 +335,9 @@ def t_seo():
     expect('d.get("published_at_kst")' in inspect.getsource(site_mod.update_manifest), "manifest 가 예비 호의 실제 발행 시각을 쓰지 않는다")
     bare = newsletter.render(content_mod.load(day), site, 0)   # --no-cards — 없는 표지 이미지를 알리지 않는다
     expect('"image"' not in re.search(r'<script type="application/ld\+json">(.*?)</script>', bare, re.S).group(1), "카드 없는 호가 표지 이미지를 알린다")
+    expect(f'<meta property="og:image" content="{site}/og_image.png">' in bare and "_cover.png" not in bare,
+           "카드 없는 호의 공유 미리보기가 없는 표지 이미지를 가리킨다")
+    expect((ROOT / "og_image.png").exists(), "사이트 대표 이미지 og_image.png 가 없다")
     cfg = load_config()
     msg = send_newsletter.build_message({"title": "t", "filename": f"{day}.html"}, page, "a@example.com", cfg, "b@example.com")
     expect("application/ld+json" not in msg.get_body(preferencelist=("html",)).get_content(), "메일 본문에 구조화 데이터 스크립트가 남았다")

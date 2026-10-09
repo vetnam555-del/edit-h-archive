@@ -436,6 +436,8 @@ def render(d, site, n_cards):
             body.extend(_item(it) for it in sec["items"])
         body += [_briefs(d), _question(d)]
     body += [_cta(d, site, campaign, n_cards), _footer(site, campaign)]
+    # --no-cards 로 만든 호는 표지 PNG 가 없다 — 공유 미리보기는 사이트 대표 이미지로(Codex 리뷰)
+    share_img = f"{site}/instagram/{d['date']}/01_edit_h_{d['date']}_cover.png" if n_cards else f"{site}/og_image.png"
     return f"""<!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -451,7 +453,7 @@ def render(d, site, n_cards):
 <meta property="og:url" content="{site}/{d['date']}.html">
 <meta property="og:title" content="[EDIT H] {esc(title)}">
 <meta property="og:description" content="{esc(plain(d['subtitle']))}">
-<meta property="og:image" content="{site}/instagram/{d['date']}/01_edit_h_{d['date']}_cover.png">
+<meta property="og:image" content="{share_img}">
 <meta name="twitter:card" content="summary_large_image">
 <title>[EDIT H] {esc(title)}</title>
 {_ld_json(d, site, title, bool(n_cards))}
