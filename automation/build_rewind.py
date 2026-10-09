@@ -89,6 +89,9 @@ def _solid(story):
     return len(story.get("sources") or []) >= 2
 
 
+PICK_GAP_DAYS = 3   # 예비 호 H PICK 은 이 날수 안(사흘 전까지)에 H PICK 으로 실린 이야기를 피한다
+
+
 def pick(date):
     """(H PICK 후보, [아이템 4], 반응 근거가 있는가) — 모자라면 ValueError.
     2026-10-03 회고: 9/30 예비 호가 이틀 전 한 호의 5개를 그대로 다시 실었고, 출처 1건짜리도 섞였다.
@@ -109,6 +112,12 @@ def pick(date):
     picks = sorted((x for x in cands if x[3]), key=lambda x: (_solid(x[0]), rank(x)), reverse=True)
     if not picks:
         raise ValueError("H PICK 으로 쓸 형식 2 호(심층 포함)가 최근 3주 안에 없습니다")
+    # 2026-10-08 회고: 9/30 은 9/28 호, 10/7 은 10/5 호 H PICK 을 이틀 만에 다시 실었다 — 최근 사흘 안의 H PICK 은 뒤로
+    older = [x for x in picks if (parse_date(date) - parse_date(x[2])).days > PICK_GAP_DAYS]
+    if older:
+        picks = older
+    else:
+        print(f"  ⚠ 예비 호: {PICK_GAP_DAYS}일보다 오래된 H PICK 이 없어 최근 호의 H PICK 을 다시 씁니다")
     top = picks[0]
     ranked = sorted((x for x in cands if not x[3]), key=rank, reverse=True)
     for per_issue, need_solid in ((1, True), (2, True), (2, False), (4, False)):
@@ -133,6 +142,22 @@ def pick(date):
     return top, items, liked
 
 
+def cover_photo(date, titles):
+    """예비 호 표지 실사 사진 — 지난 호에서 검수한 대체 사진(assets/photos/library.json) 중 다섯 이야기 제목과 맞는 것.
+    2026-10-08 회고: 10/7 예비 호가 핵심어 표지로 나가 캐러셀 도달 8(원칙 9 '표지는 실사 사진').
+    여러 주제를 엮는 호라 '돈·소비·경제' 를 더해, 맞는 주제어가 없으면 넓은 주제의 사진(동전·카드 결제 등)이 앞에 오게 한다."""
+    import fetch_photo
+    cands = fetch_photo.library(date, " ".join(titles + ["돈 소비 경제"]))
+    if not cands or not cands[0]["score"]:
+        return None
+    c = cands[0]
+    out = {"photo": c["photo"], "credit": c["credit"]}
+    if c.get("focus"):
+        out["focus"] = c["focus"]
+    print(f"  예비 호 표지 사진: {c['photo']} — {c['subject']}")
+    return out
+
+
 def build(date):
     top, items, by_score = pick(date)
     big = copy.deepcopy(top[0])
@@ -149,6 +174,10 @@ def build(date):
         card_issues.append(sp)
     what = "반응이 좋았던" if by_score else "다시 볼 만한"
     titles = [plain_title(top[4]["title"])] + [plain_title(s[0]["title"]) for s in items]
+    cover = {"title": "놓쳤다면,\n다시 볼 만한 ==5가지==", "keyword": "다시보기"}
+    photo = cover_photo(date, titles)
+    if photo:
+        cover.update(photo)
     return {
         "date": date,
         "rewind": True,   # 예비 호 표시 — 성과표·회고가 구분한다
@@ -167,7 +196,7 @@ def build(date):
         "question": {"text": "지난 이야기 중\n==더 알고 싶은 주제==가 있나요?",
                      "closing": "내일 아침엔 새 소식으로 찾아갈게요. — 에디터 H 드림"},
         "cards": {
-            "cover": {"title": "놓쳤다면,\n다시 볼 만한 ==5가지==", "keyword": "다시보기"},
+            "cover": cover,
             "issues": card_issues,
             "deep": copy.deepcopy(top[4]["cards"]["deep"]),
         },

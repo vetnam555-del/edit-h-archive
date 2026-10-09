@@ -33,7 +33,7 @@ AUTOMATION = Path(__file__).resolve().parent
 ROOT = AUTOMATION.parent
 sys.path.insert(0, str(AUTOMATION))
 
-from edith.common import CONTENT_DIR, load_config, now_kst  # noqa: E402
+from edith.common import CONTENT_DIR, load_config, now_kst, parse_date  # noqa: E402
 
 FAILS, NOTES = [], []
 TEXT_OUTPUTS = ["{d}.html", "instagram/{d}/caption.txt", "instagram/{d}/reel_caption.txt", "instagram/{d}/first_comment.txt"]
@@ -176,6 +176,11 @@ def t_series_and_style():
 def t_rewind():
     import build_rewind
     today = now_kst().date().isoformat()
+    for past in ("2026-09-30", "2026-10-07"):   # 실제 예비 호 날 — 이틀 전 H PICK 을 다시 실었던 날(10/8 회고)
+        gap = (parse_date(past) - parse_date(build_rewind.pick(past)[0][2])).days
+        expect(gap > build_rewind.PICK_GAP_DAYS, f"{past} 예비 호 H PICK 이 {gap}일 전 호의 H PICK 이다")
+        with contextlib.redirect_stdout(io.StringIO()):
+            expect(build_rewind.cover_photo(past, ["다시 볼 이야기"]), f"{past} 예비 호 표지에 대체 사진이 안 붙는다")
     top, items, _ = build_rewind.pick(today)
     days = {top[2], *(x[2] for x in items)}
     expect(len(items) == 4, "예비 호 아이템 4개")
@@ -252,6 +257,24 @@ def t_photo_library():
     recent = {c["photo"] for c in fetch_photo.library("2026-10-09")}
     expect(not recent & {"assets/photos/2026-10-08.jpg", "assets/photos/2026-10-06.jpg"}, "사흘 안에 쓴 사진이 대체 후보에 나온다")
     return f"{len(every)}장"
+
+
+def t_seo():
+    """호 페이지 검색 노출(2026-10-09): 설명문·canonical·NewsArticle 구조화 데이터가 웹 페이지엔 있고, 메일엔 스크립트가 빠진다."""
+    import send_newsletter
+    from edith import newsletter
+    from edith import content as content_mod
+    day = daily_issues(1)[0]
+    site = load_config()["site_url"].rstrip("/")
+    page = newsletter.render(content_mod.load(day), site, 8)
+    for tag in ('<meta name="description"', f'<link rel="canonical" href="{site}/{day}.html">', 'application/ld+json'):
+        expect(tag in page, f"호 페이지에 {tag} 가 없다")
+    ld = json.loads(re.search(r'<script type="application/ld\+json">(.*?)</script>', page, re.S).group(1))
+    expect(ld["@type"] == "NewsArticle" and ld["datePublished"].startswith(day), "구조화 데이터가 NewsArticle·발행일이 아니다")
+    cfg = load_config()
+    msg = send_newsletter.build_message({"title": "t", "filename": f"{day}.html"}, page, "a@example.com", cfg, "b@example.com")
+    expect("application/ld+json" not in msg.get_body(preferencelist=("html",)).get_content(), "메일 본문에 구조화 데이터 스크립트가 남았다")
+    return None
 
 
 def t_evening():
@@ -332,6 +355,7 @@ def main():
     check("스레드 본문(post_threads)", t_threads)
     check("구독 선물(gift)", t_gift)
     check("대체 표지 사진(fetch_photo --library)", t_photo_library)
+    check("검색 노출(호 페이지 SEO)", t_seo)
     check("저녁 일정 사슬(evening)", t_evening)
     if not args.quick:
         rebuild(daily_issues(args.issues), args.strict)
