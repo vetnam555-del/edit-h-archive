@@ -34,6 +34,7 @@ DAYS = 14
 FRESH_HOUR = "21"   # 이 시각(KST) 이후 스냅숏이 오늘 성과표(22:00 회고가 읽는다)
 INSIGHT_METRICS = "reach,saved,shares,views"
 REEL_WATCH_METRICS = "ig_reels_avg_watch_time,ig_reels_video_view_total_time"   # 밀리초 — 릴스 완주 정도를 가늠
+STORY_METRICS = "reach,views,replies"   # 스토리 인사이트는 올린 지 24시간까지만 열린다 — 21:30 수집이 그날 아침 스토리를 잡는다
 FEED_EXTRA_METRICS = "profile_visits,follows"   # 캐러셀(피드)만 — 게시물을 보고 프로필에 오고 팔로우했나(2026-10-09~)
 ACCOUNT_DAYS = 7
 # 계정 단위 최근 7일(2026-10-09 진단: 팔로워 47→130 인데 캐러셀 도달 10~28 그대로 — 도달이 팔로워에게서 오는지, 새 팔로워가 보는지 가린다).
@@ -122,6 +123,28 @@ def account_week(g, now=None):
     return out
 
 
+def _story_row(g, day, log):
+    """E9 스토리 도달·조회·답장. 24시간이 지나 인사이트가 닫혔으면 지난 스냅숏에 남긴 값을 그대로 쓴다."""
+    from post_instagram import IGError
+    sid = (log.get("story") or {}).get("id")
+    if not sid:
+        return None
+    try:
+        got = _values(g.call("GET", f"{sid}/insights", metric=STORY_METRICS).get("data"))
+        if got:
+            return got
+    except IGError:
+        pass
+    for p in sorted((METRICS / "daily").glob("20*.json"), reverse=True):
+        try:
+            old = ((json.loads(p.read_text(encoding="utf-8")).get("instagram") or {}).get("posts") or {}).get(day, {}).get("story")
+        except ValueError:
+            continue
+        if old:
+            return old
+    return None
+
+
 def _media_row(g, media_id, own_comments, out):
     """게시물 하나의 좋아요·댓글(+ 권한이 있으면 도달·저장·공유·조회)."""
     from post_instagram import IGError
@@ -179,6 +202,9 @@ def instagram(days):
                         row["reel"]["avg_watch_s"] = round(ms["ig_reels_avg_watch_time"] / 1000, 1)
                 except IGError as e:
                     row["reel"]["watch_error"] = str(e)[:120]
+        story = _story_row(g, day, log)
+        if story:
+            row["story"] = story
         out["posts"][day] = row
     try:   # 게시물 인사이트와 따로 — 게시가 쉬었거나 게시물 지표가 막혀도 계정 지표는 모은다(Codex 리뷰)
         out["account"] = account_week(g)
@@ -345,6 +371,12 @@ def _series_compare(snap):
     return [f"- 연재({start}부터 모든 호, 게시 24시간 뒤): " + ", ".join(parts)]
 
 
+def _story_cell(p):
+    """도달 칸 뒤 '(스토리 N)' — E9 아침 스토리의 도달."""
+    st = p.get("story") or {}
+    return f" (스토리 {st['reach']})" if st.get("reach") is not None else ""
+
+
 def _account_lines(ig, posts):
     """한눈에: 최근 7일 계정 도달의 팔로워/비팔로워·팔로우 증감·반응한 계정, 14일 캐러셀 프로필 방문·팔로우 합."""
     acc = ig.get("account") or {}
@@ -399,7 +431,7 @@ def summary_md(snap):
         rep = (mb.get("replies") or {}).get(day, "–")
         lines.append(f"| {day} | {f['weekday']} | {f['title'][:28]} | {f['title_style']} | {f['cover']} | {f['pick_tag'] or '–'} | "
                      f"{p.get('likes', '–')} | {p.get('comments', '–')} | {p.get('saved', '–')} | {p.get('shares', '–')} | "
-                     f"{p.get('reach', '–')} | {_reel_cell(p)} | {rep} | {sc if sc is not None else '–'} |")
+                     f"{p.get('reach', '–')}{_story_cell(p)} | {_reel_cell(p)} | {rep} | {sc if sc is not None else '–'} |")
     # 예비 호(다시 보기)는 편집 선택이 아니라 비교에서 뺀다. 좋아요·저장이 아직 0 인 날이 많아 캐러셀 도달·조회도 함께 보되,
     # 누적 숫자는 오래된 게시물일수록 커지므로 '게시 24시간 뒤 첫 스냅숏'의 값으로 나이를 맞춘다(없으면 그 호는 도달 비교에서 빠진다).
     scored = [(d, f, sc, _at_age(d, snap)) for d, f, p, sc in rows if sc is not None and f.get("source_mode") != "rewind"]
