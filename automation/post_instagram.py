@@ -312,10 +312,14 @@ def post_reel(g, uid, key, folder, cfg, dry, ffmpeg, site_url):
     return media_id, track
 
 
-def story_on(cfg, key):
-    """E9 아침 스토리를 올리는 날인가 — config.instagram.story_from 부터(2026-10-10~). 데일리 호만(주간 특집 키 제외)."""
+CREATOR = "MEDIA_CREATOR"   # API 스토리 게시는 비즈니스 계정만 된다(Meta) — 크리에이터 계정이면 시도하지 않는다(Codex 리뷰)
+
+
+def story_on(cfg, key, account_type=None):
+    """E9 아침 스토리를 올리는 날인가 — config.instagram.story_from 부터(2026-10-10~). 데일리 호만(주간 특집 키 제외),
+    크리에이터 계정이면 아니다(account_type 을 모르면 시도해 보고 실패를 기록한다)."""
     start = cfg.get("story_from")
-    return bool(start and str(key)[:10] >= start and "weekly" not in str(key))
+    return bool(start and str(key)[:10] >= start and "weekly" not in str(key) and account_type != CREATOR)
 
 
 def story_image(folder, key, site_url):
@@ -532,8 +536,18 @@ def main():
         print(f"캐러셀은 이미 게시됨 ({log['carousel'].get('permalink') or log['carousel']['id']})")
 
     # 아침 스토리(E9) — 캐러셀이 올라간 뒤에만. 실패해도 게시 작업은 실패로 치지 않는다(기록만, 다음 실행이 다시 시도)
-    if (args.only != "reel" and args.kind == "daily" and log.get("carousel") and not log.get("story")
-            and story_on(cfg, key)):
+    want_story = args.only != "reel" and args.kind == "daily" and log.get("carousel") and not log.get("story")
+    account_type = None
+    if want_story:
+        try:   # 계정 종류 — 이 필드를 못 읽어도 게시는 계속(모르면 한 번 시도)
+            account_type = g.call("GET", "me", fields="account_type").get("account_type")
+        except IGError:
+            pass
+        if story_on(cfg, key) and account_type == CREATOR and log.get("story_error") != "creator":
+            log["story_error"] = "creator"
+            save_log(key, log)
+            print("  ⚠ 크리에이터 계정이라 API 로 스토리를 올릴 수 없습니다 — 비즈니스 계정 전환은 automation/OWNER_TODO.md")
+    if want_story and story_on(cfg, key, account_type):
         try:
             print("스토리 게시 중…")
             sid = post_story(g, uid, key, folder, site_url, args.dry_run)

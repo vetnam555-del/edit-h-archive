@@ -552,6 +552,8 @@ def t_story():
     cfg = {"story_from": "2026-10-10"}
     expect([post_instagram.story_on(cfg, k) for k in ("2026-10-09", "2026-10-10", "2026-10-16-weekly")] == [False, True, False],
            "스토리 시작 날짜·주간 특집 제외가 틀린다")
+    expect(post_instagram.story_on(cfg, "2026-10-10", "BUSINESS") and not post_instagram.story_on(cfg, "2026-10-10", "MEDIA_CREATOR"),
+           "크리에이터 계정에서도 스토리를 시도한다(API 스토리는 비즈니스 계정만)")
     calls = []
 
     class FakeGraph:
