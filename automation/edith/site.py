@@ -71,9 +71,11 @@ def write_feeds(manifest, site):
     import datetime as dt
     from email.utils import format_datetime
     issues = sorted(manifest["issues"], key=lambda i: i["date"])
-    now = format_datetime(dt.datetime.fromisoformat(_pub(issues[-1]))) if issues else ""
+    # RSS 는 실제 발행 시각 순 — 지난 날짜로 늦게 낸 예비 호도 새 글로 맨 위에(Codex 리뷰). 사이트맵은 날짜 순 그대로
+    by_pub = sorted(manifest["issues"], key=lambda i: dt.datetime.fromisoformat(_pub(i)))
+    now = format_datetime(dt.datetime.fromisoformat(_pub(by_pub[-1]))) if by_pub else ""
     items = []
-    for i in reversed(issues[-FEED_ITEMS:]):
+    for i in reversed(by_pub[-FEED_ITEMS:]):
         url = i.get("public_url") or f"{site}/{i['filename']}"
         title = f"VOL.{i['vol']} {plain(i['title'])}"
         items.append(

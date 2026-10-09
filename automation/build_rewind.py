@@ -131,8 +131,9 @@ def pick(date):
     older = [x for x in picks if (parse_date(date) - parse_date(last[id(x)])).days > PICK_GAP_DAYS]
     if older:
         picks = older
-    else:
-        print(f"  ⚠ 예비 호: {PICK_GAP_DAYS}일보다 오래된 H PICK 이 없어 최근 호의 H PICK 을 다시 씁니다")
+    else:   # 모두 사흘 안이면 가장 오래전에 실린 H PICK 부터(어제 것을 또 쓰지 않게, Codex 리뷰)
+        picks = sorted(picks, key=lambda x: last[id(x)])
+        print(f"  ⚠ 예비 호: {PICK_GAP_DAYS}일보다 오래된 H PICK 이 없어 가장 오래전에 실린 H PICK 을 다시 씁니다")
     top = picks[0]
     ranked = sorted((x for x in cands if not x[3]), key=rank, reverse=True)
     for per_issue, need_solid in ((1, True), (2, True), (2, False), (4, False)):

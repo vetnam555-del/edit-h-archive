@@ -302,6 +302,20 @@ def t_seo():
     expect(ld["@type"] == "NewsArticle" and ld["datePublished"].startswith(day) and ld.get("image"), "구조화 데이터가 NewsArticle·발행일·이미지가 아니다")
     import inspect
     from edith import site as site_mod
+    # 지난 날짜로 늦게 낸 예비 호가 RSS 맨 위·lastBuildDate 가 되는지(실제 발행 시각 순)
+    with tempfile.TemporaryDirectory() as tmp:
+        saved = site_mod.FEED, site_mod.SITEMAP
+        site_mod.FEED, site_mod.SITEMAP = Path(tmp, "feed.xml"), Path(tmp, "sitemap.xml")
+        try:
+            site_mod.write_feeds({"issues": [
+                {"date": "2026-10-09", "vol": "2", "title": "새 호", "filename": "2026-10-09.html"},
+                {"date": "2026-10-07", "vol": "1", "title": "늦게 낸 예비 호", "filename": "2026-10-07.html",
+                 "published_at_kst": "2026-10-09T15:00:00+09:00"}]}, "https://x")
+            feed = site_mod.FEED.read_text(encoding="utf-8")
+        finally:
+            site_mod.FEED, site_mod.SITEMAP = saved
+    expect(feed.index("늦게 낸 예비 호") < feed.index("새 호") and "15:00:00 +0900</lastBuildDate>" in feed,
+           "RSS 가 실제 발행 시각 순이 아니다")
     expect('d.get("published_at_kst")' in inspect.getsource(site_mod.update_manifest), "manifest 가 예비 호의 실제 발행 시각을 쓰지 않는다")
     bare = newsletter.render(content_mod.load(day), site, 0)   # --no-cards — 없는 표지 이미지를 알리지 않는다
     expect('"image"' not in re.search(r'<script type="application/ld\+json">(.*?)</script>', bare, re.S).group(1), "카드 없는 호가 표지 이미지를 알린다")
