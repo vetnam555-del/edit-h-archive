@@ -90,11 +90,27 @@ def caption_keyword(d):
     return [f"인스타 캡션: 첫 {FOLD}자('더 보기' 전)에 오늘 핵심어({', '.join(tags)})가 없어요 — 검색에 걸리게 첫 줄이나 둘째 문장에 자연스럽게"]
 
 
+SHARE_FROM = "2026-10-10"   # E6 — 이 날부터 데일리 호는 instagram.share_to 를 쓴다
+_BROAD_WHO = {"친구", "지인", "모두", "여러분", "누구나", "가족", "사람", "주변 사람"}
+
+
+def share_check(d):
+    """instagram.share_to(누구에게 보낼지) — 비었거나 너무 넓으면 경고 한 줄."""
+    if str(d.get("date", ""))[:10] < SHARE_FROM:
+        return []
+    who = plain((d.get("instagram") or {}).get("share_to") or "").strip()
+    if not who:
+        return ["인스타 share_to 가 비었어요 — 이 소식이 꼭 필요한 사람(예: '프리랜서 친구', '청약 준비하는 친구')을 적으세요"]
+    if who in _BROAD_WHO or len(who) > 14:
+        return [f"인스타 share_to '{who}' — 너무 넓거나 길어요. 이 소식이 꼭 필요한 사람을 2~14자로 콕 집어 주세요"]
+    return []
+
+
 def lint(d):
     """경고 문장 목록(최대 MAX_LINES 개 + 남은 개수). 형식 2·데일리·STYLE_FROM 이후 호만."""
     if d.get("format") != 2 or d.get("rewind") or str(d.get("date", ""))[:10] < STYLE_FROM:
         return []
-    found, seen_acr = caption_keyword(d), set()
+    found, seen_acr = caption_keyword(d) + share_check(d), set()
     for where, text, kind in _texts(d):
         rules = _WEED + _FORCE + (_WEED_SOCIAL if kind in ("social", "card", "obs") else [])
         for rx, why in rules:

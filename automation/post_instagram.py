@@ -297,8 +297,10 @@ def post_reel(g, uid, key, folder, cfg, dry, ffmpeg, site_url):
     url = f"{site_url}/instagram/{key}/{out.name}"
     wait_public([url], timeout=900, kind="video")
     print(f"  영상 공개 주소 {url}")
+    feed = reel_to_feed(cfg, key)
+    track["feed"] = feed
     cid = g.call("POST", f"{uid}/media", media_type="REELS", video_url=url, caption=reel_caption(folder, track),
-                 share_to_feed="true" if cfg.get("reel_share_to_feed") else "false", thumb_offset="800")["id"]
+                 share_to_feed="true" if feed else "false", thumb_offset="800")["id"]
     g.wait_ready(cid, "릴스", timeout=900)
     media_id = publish(g, uid, cid, "릴스")
     if track.get("license", "").upper() != "CC0" and not track.get("credit_in_video"):
@@ -308,6 +310,13 @@ def post_reel(g, uid, key, folder, cfg, dry, ffmpeg, site_url):
         except IGError as e:
             print(f"  ⚠ 음악 출처 댓글 실패: {e}")
     return media_id, track
+
+
+def reel_to_feed(cfg, key):
+    """릴스를 피드(팔로워 홈·프로필 격자)에도 올리나 — reel_share_to_feed 이거나 reel_feed_from 날짜부터(E7, 2026-10-13~).
+    릴스 탭에만 올리면 팔로워 홈 피드엔 안 보여, 초반 반응이 비팔로워 시험 노출(110~150명)에서만 나온다(2026-10-09 진단)."""
+    start = cfg.get("reel_feed_from")
+    return bool(cfg.get("reel_share_to_feed") or (start and str(key)[:10] >= start))
 
 
 def _tracked(path):
@@ -506,7 +515,7 @@ def main():
             media_id, track = post_reel(g, uid, key, folder, cfg, args.dry_run, args.ffmpeg, site_url)
             if media_id:
                 log["reel"] = {"id": media_id, "at": now_kst().isoformat(timespec="seconds"), "track": track["title"],
-                               "style": track.get("style"), "seconds": track.get("seconds")}
+                               "style": track.get("style"), "seconds": track.get("seconds"), "feed": track.get("feed")}
                 save_log(key, log)
                 try:
                     log["reel"]["permalink"] = g.call("GET", media_id, fields="permalink").get("permalink")

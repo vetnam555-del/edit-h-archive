@@ -221,6 +221,16 @@ def _tags(d, spec_tags, limit=4):
     return " ".join("#" + t for t in tags[:limit] + ["EDITH"])
 
 
+# E6(2026-10-10~): 이 소식이 필요한 사람에게 보내 달라는 한 줄 — 인스타는 DM 공유(도달당 보내기)를 비팔로워 확산의 가장 큰 신호로 본다.
+# 9/25~10/8 14호 내내 공유·저장 0. 누구에게 보낼지(content instagram.share_to)를 콕 집어야 '공유해 주세요' 같은 빈말이 안 된다.
+_SHARE = ["{who}에게 이 글 보내 주세요.", "{who}한테 보내 주면 도움이 될 거예요.", "주변에 {who} 있으면 보내 주세요."]
+
+
+def _share(d):
+    who = plain((d.get("instagram") or {}).get("share_to") or "").strip()
+    return [_pick(_SHARE, d).format(who=who)] if who else []
+
+
 def _ask(d):
     """독자에게 건네는 질문 한 줄. 투표가 있으면 투표 안내(댓글 A/B 를 tally_poll.py 가 센다)."""
     if d.get("poll"):
@@ -243,7 +253,7 @@ def instagram_caption(d, site):
     head = (ig.get("caption") or "").strip() or f"{plain(d['title'])}\n\n{plain(d['lead'])}"
     lines = [head, "", _pick(_LIST_HEAD, d).format(n=len(issues))]
     lines += [f"{i}. {plain(it['headline'])}" for i, it in enumerate(issues, 1)]
-    ask = _ask(d)
+    ask = _ask(d) + _share(d)
     if ask:
         lines += ["", *ask]
     if dm_line():
@@ -280,7 +290,7 @@ def reel_caption(d):
         teaser = (m.group(1) if m else parts[1]).strip()
     tail = (_pick(_REEL_TAIL_EVENING, d).format(n=len(d["card_issues"]) - 1) if _evening_reel(d)
             else _pick(_REEL_TAIL, d))
-    lines = [hook, ""] + ([teaser] if teaser else []) + [tail, _tags(d, ig.get("hashtags"), limit=3)]
+    lines = [hook, ""] + ([teaser] if teaser else []) + [tail, *_share(d), _tags(d, ig.get("hashtags"), limit=3)]
     return "\n".join(lines)
 
 
