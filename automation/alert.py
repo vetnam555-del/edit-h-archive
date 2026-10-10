@@ -61,7 +61,7 @@ WHAT = {
 HEADLINE = {"issue": "오늘 호 미발행", "send": "메일 미발송", "send_partial": "메일 일부 실패", "carousel": "인스타 카드뉴스 미게시",
             "reel": "릴스 미게시", "reel_manual": "릴스 직접 올려 주세요", "web": "웹 페이지 안 열림",
             "metrics": "성과 수집 멈춤", "token": "인스타 토큰 연장 안 됨", "threads": "스레드 미게시",
-            "rerun": "자동 다시 실행도 실패"}
+            "rerun": "자동 다시 실행도 실패", "retro": "어제 편집 회고 빠짐"}
 
 
 def send_mail(subject, body, dry=False):
@@ -290,6 +290,22 @@ def watch_date(now=None):
     return now.date().isoformat()
 
 
+def retro_missing(date, now=None):
+    """어제 편집 회고 커밋('Editor retrospective {어제}')이 main 에 없나 — 아침 점검(오늘 날짜를 정오 전에 볼 때)만, 어제 호가 있던 날만.
+    2026-10-08 회고 요청: 예약 알림이 늦어 회고가 조용히 빠진 날(10/6·10/7)을 하루 안에 알기. API 를 못 쓰면 알리지 않는다."""
+    now = now or now_kst()
+    d = parse_date(date)
+    if now.date() != d or now.hour >= 12:
+        return False
+    y = (d - dt.timedelta(days=1)).isoformat()
+    if not any(i["date"] == y for i in (_json(MANIFEST) or {"issues": []})["issues"]):
+        return False
+    commits = _api("GET", f"commits?sha=main&since={y}T11:00:00Z&per_page=100")   # 어제 20:00 KST 이후
+    if not isinstance(commits, list):
+        return False
+    return not any(((c.get("commit") or {}).get("message") or "").startswith(f"Editor retrospective {y}") for c in commits)
+
+
 def problems(date, cfg, check_web=True):
     """[(알림 종류, 한 줄 설명)] — 오늘 발행 흐름에서 빠진 것."""
     out = []
@@ -333,6 +349,11 @@ def problems(date, cfg, check_web=True):
             out.append(("threads", "스레드 게시물이 올라가지 않았습니다 — 12:30 게시·13:40 예비가 모두 빠졌거나 오늘 호를 못 찾았어요."))
         if check_web and not _site_ok(f"{cfg['site_url']}/{date}.html"):
             out.append(("web", "웹 아카이브에 오늘 호 페이지가 열리지 않습니다 — GitHub Pages 배포가 늦거나 실패했어요."))
+
+    if retro_missing(date):
+        y = (d - dt.timedelta(days=1)).isoformat()
+        out.append(("retro", f"어제({y}) 편집 회고가 main 에 없습니다 — 22:00 회고 루틴이 돌지 않았거나 늦었어요. "
+                             "오늘 제작은 어제 반성 없이 진행됩니다. 회고 세션 상태를 확인해 주세요."))
 
     # 성과표 첫 줄의 수집 시각('2026-09-25T21:31+09:00 수집')으로 본다(체크아웃은 파일 시각을 새로 쓴다)
     summary = AUTOMATION / "metrics" / "summary.md"
