@@ -6,7 +6,14 @@
   <atom:link href="https://vetnam555-del.github.io/edit-h-archive/feed.xml" rel="self" type="application/rss+xml"/>
   <description>매일 아침 8시, 확인된 숫자로 읽는 트렌드 뉴스레터</description>
   <language>ko</language>
-  <lastBuildDate>Sat, 10 Oct 2026 08:06:12 +0900</lastBuildDate>
+  <lastBuildDate>Sun, 11 Oct 2026 08:00:00 +0900</lastBuildDate>
+  <item>
+    <title>VOL.110 OTT·AI 4개면, 매달 9만원이라고?</title>
+    <link>https://vetnam555-del.github.io/edit-h-archive/2026-10-11.html</link>
+    <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-10-11.html</guid>
+    <pubDate>Sun, 11 Oct 2026 08:00:00 +0900</pubDate>
+    <description>구독료 월 9만원·월세 세액공제 최대 170만원·안 쓰는 마통이 주담대 깎는다·이번 주 미국 물가·부산불꽃축제 숙박 5배 — 오늘의 5가지</description>
+  </item>
   <item>
     <title>VOL.109 놓쳤다면, 다시 볼 만한 5가지</title>
     <link>https://vetnam555-del.github.io/edit-h-archive/2026-10-10.html</link>
@@ -209,13 +216,6 @@
     <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-09-01.html</guid>
     <pubDate>Tue, 01 Sep 2026 08:00:00 +0900</pubDate>
     <description>챗GPT 광고 연환산 매출 10억달러와 구글 검색 매출 17% 증가, 컬리N마트 월 거래액 10배, GS리테일 개인정보 과징금 128억3600만원까지 읽은 10개 이슈</description>
-  </item>
-  <item>
-    <title>VOL.080 술은 줄었는데 — 왜 65% 더 팔렸을까?</title>
-    <link>https://vetnam555-del.github.io/edit-h-archive/2026-08-31.html</link>
-    <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-08-31.html</guid>
-    <pubDate>Mon, 31 Aug 2026 08:00:00 +0900</pubDate>
-    <description>배민B마트 무알코올·비알코올 판매량 65% 증가와 29CM 개인정보 15만9852건 유출, 로켓페이의 2.3조원 플랫폼 첫 외부 적용, X Ads MCP 23개 도구까지 읽은 10개 이슈</description>
   </item>
 </channel>
 </rss>
