@@ -123,6 +123,23 @@ def t_alert():
         expect(not reruns and len(mails) == 1 and "GitHub 서버" in mails[0], "사람이 다시 돌린 것도 시작 못 하면 알린다")
         mails, reruns = run(broke)
         expect(not reruns and len(mails) == 1 and "Send" in mails[0], "코드가 돌다 실패한 건 바로 알린다(실패한 단계와 함께)")
+        # 어제 편집 회고가 main 에 없으면 아침 점검이 알린다(2026-10-08 회고 요청) — 오후·밤 점검이나 어제 호가 없던 날은 보지 않는다
+        tz = now_kst().tzinfo
+        y = "2000-01-02"   # 전날(2000-01-01) 호가 manifest 에 없는 날
+        alert._api = lambda method, path: []
+        expect(not alert.retro_missing(y, dt.datetime.combine(parse_date(y), dt.time(8, 40), tz)), "어제 호가 없던 날까지 회고를 찾는다")
+        last = json.loads((ROOT / "manifest.json").read_text(encoding="utf-8"))["issues"]
+        day = (parse_date(max(i["date"] for i in last)) + dt.timedelta(days=1)).isoformat()   # 어제 = 마지막 발행일
+        prev = (parse_date(day) - dt.timedelta(days=1)).isoformat()
+        morning = dt.datetime.combine(parse_date(day), dt.time(8, 40), tz)
+        alert._api = lambda method, path: [{"commit": {"message": "Record newsletter send"}}]
+        expect(alert.retro_missing(day, morning), "어제 회고 커밋이 없는데 알리지 않는다")
+        alert._api = lambda method, path: [{"commit": {"message": f"Editor retrospective {prev}"}}]
+        expect(not alert.retro_missing(day, morning), "어제 회고가 있는데 알린다")
+        alert._api = lambda method, path: []
+        expect(not alert.retro_missing(day, morning.replace(hour=22)), "밤 점검이 어제 회고를 다시 찾는다")
+        alert._api = lambda method, path: None
+        expect(not alert.retro_missing(day, morning), "API 를 못 쓰는데 회고 빠짐으로 알린다")
         # 매시간 도는 구독 반영은 같은 실패를 20시간에 한 번만 알린다(2026-10-09 매시간 예비 실행)
         recent = dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
         alert._api = lambda method, path: {"workflow_runs": [{"id": 5, "name": "Sync EDIT H subscribers", "updated_at": recent}]}
