@@ -51,7 +51,7 @@ jobs:
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git add automation/polls
-            git commit -m "Tally EDIT H poll ($(date -u +%F))"
+            git commit -m "Tally EDIT H poll ($(TZ=Asia/Seoul date +%F))"
             for i in 1 2 3 4; do
               git pull --rebase origin main && git push origin HEAD:main && break
               sleep $((i * 5))

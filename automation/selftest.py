@@ -176,6 +176,17 @@ def t_runners():
     return ", ".join(f"{k} {len(v)}개 작업" for k, v in sorted(found.items()))
 
 
+
+def t_commit_dates():
+    """봇 기록 커밋 이름은 KST 날짜 — UTC 로 찍으면 08:00 게시 기록이 '어제' 이름으로 남는다(2026-10-11 'Record Instagram post (2026-10-10)')."""
+    bad = []
+    for wf in sorted((ROOT / ".github" / "workflows").glob("*.yml")):
+        for ln in wf.read_text(encoding="utf-8").splitlines():
+            if "git commit" in ln and "date -u" in ln:
+                bad.append(wf.name)
+    expect(not bad, f"커밋 이름에 UTC 날짜를 쓰는 워크플로: {', '.join(bad)}")
+    return None
+
 def t_check_today():
     out = subprocess.run([sys.executable, str(AUTOMATION / "check_today.py")], capture_output=True, text=True, check=True).stdout
     d = json.loads(out)
@@ -681,6 +692,7 @@ def main():
     check("인스타 게시 계획(ig_plan)", t_ig_plan)
     check("알림(alert) — 날짜·시작 못 한 실패", t_alert)
     check("워크플로 서버 고정", t_runners)
+    check("봇 커밋 이름은 KST 날짜", t_commit_dates)
     check("오늘 할 일(check_today)", t_check_today)
     check("연재 회차·문장 점검", t_series_and_style)
     check("예비 호 고르기(build_rewind)", t_rewind)

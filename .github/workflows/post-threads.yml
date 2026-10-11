@@ -65,7 +65,7 @@ jobs:
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git add automation/threads_posted
-            git commit -m "Record Threads post ($(date -u +%F))"
+            git commit -m "Record Threads post ($(TZ=Asia/Seoul date +%F))"
             pushed=""
             for i in 1 2 3 4; do
               git pull --rebase origin main && git push origin HEAD:main && pushed=1 && break
