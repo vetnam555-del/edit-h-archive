@@ -5,5 +5,15 @@
   "permalink": "https://www.instagram.com/p/DeVNzIlj_nB/",
   "first_comment": true
  },
- "story_error": "creator"
+ "story_error": "creator",
+ "reel": {
+  "id": "18129729916754951",
+  "at": "2026-10-11T19:32:44+09:00",
+  "track": "Bright New Day",
+  "style": "vertical",
+  "seconds": 10.1,
+  "feed": false,
+  "hook": false,
+  "permalink": "https://www.instagram.com/reel/DeWc4Q6iewS/"
+ }
 }
