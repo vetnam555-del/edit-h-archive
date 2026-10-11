@@ -64,7 +64,7 @@ jobs:
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git add automation/subscribers_sync.json
-            git commit -m "Record subscriber sync position ($(date -u +%F))"
+            git commit -m "Record subscriber sync position ($(TZ=Asia/Seoul date +%F))"
             for i in 1 2 3 4; do
               git pull --rebase origin main && git push origin HEAD:main && break
               sleep $((i * 5))
