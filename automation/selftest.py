@@ -243,6 +243,16 @@ def t_rewind():
         expect(gap > build_rewind.PICK_GAP_DAYS, f"{past} 예비 호 H PICK 이 {gap}일 전 호의 H PICK 이다")
         with contextlib.redirect_stdout(io.StringIO()):
             expect(build_rewind.cover_photo(past, ["다시 볼 이야기"]), f"{past} 예비 호 표지에 대체 사진이 안 붙는다")
+    # 박힌 날짜가 지난 할 일 — 10/10 예비 호가 10/3 호 결론 '7일 전에'를 그대로 실었다(10/10 회고)
+    expect(build_rewind._expired("만 19~34세라면 7일 전에 동의부터 받아 두세요", "2026-10-03", "2026-10-10"), "'7일 전에'(10/3 호)가 10/10 에 지난 줄 모른다")
+    expect(not build_rewind._expired("최근 7일 도달·7일간 무료", "2026-10-03", "2026-10-10"), "기간(최근 7일·7일간)을 날짜로 읽는다")
+    expect(build_rewind._live_checklist(["7일 홀수·8일 짝수, 12~16일엔 누구나", "11월 16~27일에 꼭 계좌 개설"], "2026-10-03", "2026-10-17")
+           == ["11월 16~27일에 꼭 계좌 개설"], "체크리스트에서 지난 날짜 줄을 못 뺀다(범위는 끝 날짜)")
+    expect(build_rewind._live_checklist(["7일 홀수·8일 짝수, 12~16일엔 누구나"], "2026-10-03", "2026-10-10"),
+           "아직 남은 날짜(12~16일)가 있는 줄을 뺐다")
+    with contextlib.redirect_stdout(io.StringIO()):
+        t10 = build_rewind.pick("2026-10-10")[0]
+    expect(not build_rewind._expired(t10[0].get("takeaway"), t10[2], "2026-10-10"), f"10/10 예비 호 H PICK 결론 날짜가 지났다: {t10[0].get('takeaway')}")
     top, items, _ = build_rewind.pick(today)
     days = {top[2], *(x[2] for x in items)}
     expect(len(items) == 4, "예비 호 아이템 4개")

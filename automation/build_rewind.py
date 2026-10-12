@@ -49,6 +49,46 @@ def _stale(*texts):
     return any(_STALE.search(t or "") for t in texts)
 
 
+# 박힌 날짜: '10월 7일', '7일', '12~16일'(끝 날짜), '11월 16~27일'. '7일간·7일 동안·최근 7일'처럼 기간은 날짜가 아니다.
+_DAY = re.compile(r"(?:(\d{1,2})월\s*)?(?:\d{1,2}\s*[~∼–-]\s*)?(\d{1,2})일(?!\s*(?:간|동안|이내|안에|째|마다|치|연속|만에|이상))")
+
+
+def _dates(text, base):
+    """text 에 박힌 날짜들(범위는 끝 날짜) — base(원래 호 날짜) 기준으로 연·월을 채운다. 월이 없으면 앞에 나온 월, 그것도 없으면 base 의 월
+    (base 의 날보다 작으면 다음 달). 2026-10-10 회고: 10/3 호 결론 '7일 전에'가 10/10 예비 호에 그대로 나갔다."""
+    out, month = [], None
+    for m in _DAY.finditer(text or ""):
+        if re.search(r"최근\s*$", text[:m.start()]):
+            continue
+        day = int(m.group(2))
+        if m.group(1):
+            month = int(m.group(1))
+        mon, year = month or base.month, base.year
+        if month is None and day < base.day:
+            mon += 1
+        if mon > 12:
+            mon, year = mon - 12, year + 1
+        try:
+            d = dt.date(year, mon, day)
+        except ValueError:
+            continue
+        if (base - d).days > 180:   # 12월 호의 '1월 5일'
+            d = d.replace(year=d.year + 1)
+        out.append(d)
+    return out
+
+
+def _expired(text, base, on):
+    """날짜가 박힌 문장인데 그 날짜가 모두 on(독자가 받는 날)보다 앞이다 — 이미 지난 할 일."""
+    ds = _dates(text, parse_date(base))
+    return bool(ds) and max(ds) < parse_date(on)
+
+
+def _live_checklist(lines, base, on):
+    """체크리스트에서 이미 지난 날짜의 줄을 뺀다(같은 줄에 아직 남은 날짜가 있으면 둔다 — '7일 홀수·8일 짝수, 12~16일엔 누구나')."""
+    return [ln for ln in lines or [] if not _expired(ln, base, on)]
+
+
 def _used(date):
     """앞선 예비 호(POOL_DAYS 일 안)에 이미 실린 이야기 제목."""
     today = parse_date(date)
@@ -116,30 +156,36 @@ def pick(date, on=None):
     yesterday = (parse_date(date) - dt.timedelta(days=1)).isoformat()
     cands = pool(date)
     used = _used(date)
+    on = on or date
+
+    def gone(x):
+        """결론(할 일)에 박힌 날짜가 이미 지났다 — 그런 이야기는 맨 뒤로(2026-10-10 회고)."""
+        return _expired(x[0].get("takeaway"), x[2], on)
 
     def rank(x):
         story, spec, day, is_pick, c = x
         stale = _stale(story.get("title"), story.get("body"), story.get("takeaway"), spec.get("headline"), spec.get("body"),
                        " ".join(story.get("paragraphs") or []))
         fresh = plain_title(c["title"] if is_pick else story["title"]) not in used
-        return (fresh, _solid(story), not stale, day != yesterday, scores.get(day, 0), day)
+        return (not gone(x), fresh, _solid(story), not stale, day != yesterday, scores.get(day, 0), day)
 
-    # H PICK 은 출처 2건 이상을 먼저(지난 예비 호에 실렸어도) — 출처 기준이 '안 겹치기'보다 앞선다
-    picks = sorted((x for x in cands if x[3]), key=lambda x: (_solid(x[0]), rank(x)), reverse=True)
+    # H PICK 은 출처 2건 이상을 먼저(지난 예비 호에 실렸어도) — 출처 기준이 '안 겹치기'보다 앞선다. 다만 결론 날짜가 지난 것은 그보다 뒤
+    picks = sorted((x for x in cands if x[3]), key=lambda x: (not gone(x), _solid(x[0]), rank(x)), reverse=True)
     if not picks:
         raise ValueError("H PICK 으로 쓸 형식 2 호(심층 포함)가 최근 3주 안에 없습니다")
     # 2026-10-08 회고: 9/30 은 9/28 호, 10/7 은 10/5 호 H PICK 을 이틀 만에 다시 실었다 — 최근 사흘 안의 H PICK 은 뒤로.
     # '최근'은 원래 호와 그 뒤 예비 호에 H PICK 으로 다시 실린 날 중 늦은 날로 센다(예비 호가 이어지는 날 같은 H PICK 반복 막기, Codex 리뷰)
-    on = on or date
     again = _rewind_picks(date, on)
     last = {id(x): max(x[2], again.get(plain_title(x[4]["title"]), "")) for x in picks}
     older = [x for x in picks if (parse_date(on) - parse_date(last[id(x)])).days > PICK_GAP_DAYS]
     if older:
         picks = older
     else:   # 모두 사흘 안이면 출처 2건 이상을 먼저, 그 안에서 가장 오래전에 실린 H PICK 부터(어제 것을 또 쓰지 않게, Codex 리뷰)
-        picks = sorted(picks, key=lambda x: (not _solid(x[0]), last[id(x)]))
+        picks = sorted(picks, key=lambda x: (gone(x), not _solid(x[0]), last[id(x)]))
         print(f"  ⚠ 예비 호: {PICK_GAP_DAYS}일보다 오래된 H PICK 이 없어 가장 오래전에 실린 H PICK 을 다시 씁니다")
     top = picks[0]
+    if gone(top):
+        print(f"  ⚠ 예비 호: H PICK 결론의 날짜가 이미 지났습니다 — {top[0].get('takeaway')}")
     ranked = sorted((x for x in cands if not x[3]), key=rank, reverse=True)
     for per_issue, need_solid in ((1, True), (2, True), (2, False), (4, False)):
         items, tags, per_day = [], {top[0]["tag"]}, {top[2]: 1}
@@ -186,6 +232,10 @@ def build(date):
     top, items, by_score = pick(date, on)
     big = copy.deepcopy(top[0])
     big["title"] = top[4]["title"]   # H PICK 제목은 원래 호의 제목(예비 호 자체 제목은 '다시 볼 만한 5가지')
+    if big.get("checklist"):   # 이미 지난 날짜의 할 일 줄은 빼고 싣는다(2026-10-10 회고)
+        big["checklist"] = _live_checklist(big["checklist"], top[2], on)
+        if not big["checklist"]:
+            big.pop("checklist")
     content_items, card_issues = [], []
     spec = copy.deepcopy(top[1])
     spec["no"] = 1
