@@ -243,6 +243,37 @@ def t_rewind():
         expect(gap > build_rewind.PICK_GAP_DAYS, f"{past} 예비 호 H PICK 이 {gap}일 전 호의 H PICK 이다")
         with contextlib.redirect_stdout(io.StringIO()):
             expect(build_rewind.cover_photo(past, ["다시 볼 이야기"]), f"{past} 예비 호 표지에 대체 사진이 안 붙는다")
+    # 박힌 날짜가 지난 할 일 — 10/10 예비 호가 10/3 호 결론 '7일 전에'를 그대로 실었다(10/10 회고)
+    expect(build_rewind._expired("만 19~34세라면 7일 전에 동의부터 받아 두세요", "2026-10-03", "2026-10-10"), "'7일 전에'(10/3 호)가 10/10 에 지난 줄 모른다")
+    expect(not build_rewind._expired("최근 7일 도달·7일간 무료", "2026-10-03", "2026-10-10"), "기간(최근 7일·7일간)을 날짜로 읽는다")
+    expect(build_rewind._live_checklist(["7일 홀수·8일 짝수, 12~16일엔 누구나", "11월 16~27일에 꼭 계좌 개설"], "2026-10-03", "2026-10-17")
+           == ["11월 16~27일에 꼭 계좌 개설"], "체크리스트에서 지난 날짜 줄을 못 뺀다(범위는 끝 날짜)")
+    expect(build_rewind._live_checklist(["7일 홀수·8일 짝수, 12~16일엔 누구나"], "2026-10-03", "2026-10-10"),
+           "아직 남은 날짜(12~16일)가 있는 줄을 뺐다")
+    expect(not build_rewind._dates("상환 정보 반영엔 영업일 2~3일이 걸려요", parse_date("2026-10-01")), "기간(영업일 2~3일)을 날짜로 읽는다")
+    expect(not build_rewind._expired("2027년 5월 1일까지 신청", "2026-08-01", "2026-08-10"), "명시한 연도(2027년)를 무시한다")
+    expect(build_rewind._expired("7일 전에 동의부터", "2026-10-03", "2026-10-07"), "'7일 전에'를 7일 당일엔 아직 된다고 본다")
+    expect(not build_rewind._expired("16일까지 신청", "2026-10-03", "2026-10-16"), "'16일까지'를 16일 당일에 지났다고 본다")
+    # 살아 있는 H PICK 이 사흘 안에 실렸어도, 결론 날짜가 지난 오래된 H PICK 보다 먼저(Codex 리뷰)
+    src = ["a", "b"]
+    old_pick = ({"tag": "가", "title": "가", "takeaway": "5일 전에 신청하세요", "sources": src}, {}, "2026-10-01", True, {"title": "가"})
+    new_pick = ({"tag": "나", "title": "나", "takeaway": "명세서를 훑어보세요", "sources": src}, {}, "2026-10-10", True, {"title": "나"})
+    filler = [({"tag": f"t{i}", "title": f"t{i}", "takeaway": "확인하세요", "sources": src}, {}, f"2026-10-0{i}", False, {"title": f"x{i}"})
+              for i in range(2, 6)]
+    saved = (build_rewind.pool, build_rewind._scores, build_rewind._used, build_rewind._rewind_picks)
+    build_rewind.pool = lambda d: [old_pick, new_pick, *filler]
+    build_rewind._scores = lambda: {}
+    build_rewind._used = lambda d: set()
+    build_rewind._rewind_picks = lambda d, on=None: {}
+    try:
+        with contextlib.redirect_stdout(io.StringIO()):
+            got = build_rewind.pick("2026-10-12")[0]
+        expect(got[2] == "2026-10-10", f"살아 있는 H PICK 대신 결론 날짜가 지난 {got[2]} H PICK 을 골랐다")
+    finally:
+        build_rewind.pool, build_rewind._scores, build_rewind._used, build_rewind._rewind_picks = saved
+    with contextlib.redirect_stdout(io.StringIO()):
+        t10 = build_rewind.pick("2026-10-10")[0]
+    expect(not build_rewind._expired(t10[0].get("takeaway"), t10[2], "2026-10-10"), f"10/10 예비 호 H PICK 결론 날짜가 지났다: {t10[0].get('takeaway')}")
     top, items, _ = build_rewind.pick(today)
     days = {top[2], *(x[2] for x in items)}
     expect(len(items) == 4, "예비 호 아이템 4개")
