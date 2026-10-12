@@ -49,31 +49,42 @@ def _stale(*texts):
     return any(_STALE.search(t or "") for t in texts)
 
 
-# 박힌 날짜: '10월 7일', '7일', '12~16일'(끝 날짜), '11월 16~27일'. '7일간·7일 동안·최근 7일'처럼 기간은 날짜가 아니다.
-_DAY = re.compile(r"(?:(\d{1,2})월\s*)?(?:\d{1,2}\s*[~∼–-]\s*)?(\d{1,2})일(?!\s*(?:간|동안|이내|안에|째|마다|치|연속|만에|이상))")
+# 박힌 날짜: '10월 7일', '7일', '12~16일'(끝 날짜), '11월 16~27일', '2027년 5월 1일', '내년 1월 5일'.
+# '7일간·7일 동안·최근 7일·영업일 2~3일이 걸려요'처럼 기간은 날짜가 아니다(Codex 리뷰).
+_DAY = re.compile(r"(?:(\d{4})년\s*|(내년)\s*)?(?:(\d{1,2})월\s*)?(?:\d{1,2}\s*[~∼–-]\s*)?(\d{1,2})일"
+                  r"(?!\s*(?:간|동안|이내|안에|째|마다|치|연속|만에|이상|정도|쯤|씩|분|[이가]\s*(?:걸|지나|남)))")
+_SPAN_BEFORE = re.compile(r"(?:최근|영업일|약|최대|최소|평균|매|하루|무려)\s*$")
 
 
 def _dates(text, base):
     """text 에 박힌 날짜들(범위는 끝 날짜) — base(원래 호 날짜) 기준으로 연·월을 채운다. 월이 없으면 앞에 나온 월, 그것도 없으면 base 의 월
-    (base 의 날보다 작으면 다음 달). 2026-10-10 회고: 10/3 호 결론 '7일 전에'가 10/10 예비 호에 그대로 나갔다."""
-    out, month = [], None
-    for m in _DAY.finditer(text or ""):
-        if re.search(r"최근\s*$", text[:m.start()]):
+    (base 의 날보다 작으면 다음 달), 연이 없으면 base 의 연(반년 넘게 앞이면 다음 해). '7일 전에'는 그 전날까지(Codex 리뷰).
+    2026-10-10 회고: 10/3 호 결론 '7일 전에'가 10/10 예비 호에 그대로 나갔다."""
+    text = text or ""
+    out, month, year = [], None, None
+    for m in _DAY.finditer(text):
+        if _SPAN_BEFORE.search(text[:m.start()]):
             continue
-        day = int(m.group(2))
         if m.group(1):
-            month = int(m.group(1))
-        mon, year = month or base.month, base.year
+            year = int(m.group(1))
+        elif m.group(2):
+            year = base.year + 1
+        if m.group(3):
+            month = int(m.group(3))
+        day = int(m.group(4))
+        y, mon = year or base.year, month or base.month
         if month is None and day < base.day:
             mon += 1
         if mon > 12:
-            mon, year = mon - 12, year + 1
+            mon, y = mon - 12, y + 1
         try:
-            d = dt.date(year, mon, day)
+            d = dt.date(y, mon, day)
         except ValueError:
             continue
-        if (base - d).days > 180:   # 12월 호의 '1월 5일'
+        if year is None and (base - d).days > 180:   # 12월 호의 '1월 5일'
             d = d.replace(year=d.year + 1)
+        if re.match(r"\s*전(?:에|까지)?", text[m.end():]):   # '7일 전에' — 7일엔 이미 늦다
+            d -= dt.timedelta(days=1)
         out.append(d)
     return out
 
@@ -175,6 +186,10 @@ def pick(date, on=None):
         raise ValueError("H PICK 으로 쓸 형식 2 호(심층 포함)가 최근 3주 안에 없습니다")
     # 2026-10-08 회고: 9/30 은 9/28 호, 10/7 은 10/5 호 H PICK 을 이틀 만에 다시 실었다 — 최근 사흘 안의 H PICK 은 뒤로.
     # '최근'은 원래 호와 그 뒤 예비 호에 H PICK 으로 다시 실린 날 중 늦은 날로 센다(예비 호가 이어지는 날 같은 H PICK 반복 막기, Codex 리뷰)
+    # 결론 날짜가 지난 H PICK 은 살아 있는 후보가 하나도 없을 때만 — 사흘 간격보다 앞선다(Codex 리뷰)
+    live = [x for x in picks if not gone(x)]
+    if live:
+        picks = live
     again = _rewind_picks(date, on)
     last = {id(x): max(x[2], again.get(plain_title(x[4]["title"]), "")) for x in picks}
     older = [x for x in picks if (parse_date(on) - parse_date(last[id(x)])).days > PICK_GAP_DAYS]
