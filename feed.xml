@@ -6,7 +6,14 @@
   <atom:link href="https://vetnam555-del.github.io/edit-h-archive/feed.xml" rel="self" type="application/rss+xml"/>
   <description>매일 아침 8시, 확인된 숫자로 읽는 트렌드 뉴스레터</description>
   <language>ko</language>
-  <lastBuildDate>Mon, 12 Oct 2026 08:00:00 +0900</lastBuildDate>
+  <lastBuildDate>Tue, 13 Oct 2026 09:34:50 +0900</lastBuildDate>
+  <item>
+    <title>VOL.112 놓쳤다면, 다시 볼 만한 5가지</title>
+    <link>https://vetnam555-del.github.io/edit-h-archive/2026-10-13.html</link>
+    <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-10-13.html</guid>
+    <pubDate>Tue, 13 Oct 2026 09:34:50 +0900</pubDate>
+    <description>지난 호 다시 보기 — 닭값 37.7% 내렸는데, 치킨은 그대로라고? · 카톡 이용자 4명 중 3명, 원치 않는 광고 받았다 · 알아서 일하는 AI, 월 68만원짜리도 나왔다 · 새 직장 10명 중 6명, 1년 안에 떠난다 · 10월 분양 물량 쏟아지는데, 서울은 수백 가구</description>
+  </item>
   <item>
     <title>VOL.111 승인받은 연차 취소, 위약금은 누가 낼까?</title>
     <link>https://vetnam555-del.github.io/edit-h-archive/2026-10-12.html</link>
@@ -209,13 +216,6 @@
     <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-09-03.html</guid>
     <pubDate>Thu, 03 Sep 2026 10:12:22 +0900</pubDate>
     <description>무료 거래 앱의 중개매출이 24.8배 뛴 이유</description>
-  </item>
-  <item>
-    <title>VOL.082 온라인은 10.7% 컸는데, 왜 매장은 커질까?</title>
-    <link>https://vetnam555-del.github.io/edit-h-archive/2026-09-02.html</link>
-    <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-09-02.html</guid>
-    <pubDate>Wed, 02 Sep 2026 08:20:42 +0900</pubDate>
-    <description>온라인은 10.7% 컸는데, 왜 매장은 커질까?</description>
   </item>
 </channel>
 </rss>
