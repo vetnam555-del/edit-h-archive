@@ -6,7 +6,14 @@
   <atom:link href="https://vetnam555-del.github.io/edit-h-archive/feed.xml" rel="self" type="application/rss+xml"/>
   <description>매일 아침 8시, 확인된 숫자로 읽는 트렌드 뉴스레터</description>
   <language>ko</language>
-  <lastBuildDate>Wed, 14 Oct 2026 08:06:10 +0900</lastBuildDate>
+  <lastBuildDate>Thu, 15 Oct 2026 08:00:00 +0900</lastBuildDate>
+  <item>
+    <title>VOL.114 첫째 낳으면 1000만원, 결혼 페널티도 없앤다고?</title>
+    <link>https://vetnam555-del.github.io/edit-h-archive/2026-10-15.html</link>
+    <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-10-15.html</guid>
+    <pubDate>Thu, 15 Oct 2026 08:00:00 +0900</pubDate>
+    <description>국가인구전략 첫째 1000만원·은행 영업시간 30분 단축·카톡 AI가 주문까지·AI 추천 종목 15개 중 8개 하락 — 오늘의 5가지</description>
+  </item>
   <item>
     <title>VOL.113 놓쳤다면, 다시 볼 만한 5가지</title>
     <link>https://vetnam555-del.github.io/edit-h-archive/2026-10-14.html</link>
@@ -209,13 +216,6 @@
     <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-09-07.html</guid>
     <pubDate>Mon, 07 Sep 2026 13:42:07 +0900</pubDate>
     <description>무료로 키운 서비스가 값을 매기는 순간은 언제일까요? 크림 수수료·GPT-6·네이버 새벽배송을 7분 안에 짚습니다.</description>
-  </item>
-  <item>
-    <title>VOL.084 불꽃 한 번에, 매출 850%라고?</title>
-    <link>https://vetnam555-del.github.io/edit-h-archive/2026-09-04.html</link>
-    <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-09-04.html</guid>
-    <pubDate>Fri, 04 Sep 2026 08:00:00 +0900</pubDate>
-    <description>서울세계불꽃축제 하루 앞두고 편의점 매출 850% 급증한 사례와 티빙 3954만 계정 개인정보 유출, 구글의 국내 앱 이용자수 네이버 두달째 추월, 챗GPT·클로드·그록 동시 장애까지 읽은 10개 이슈</description>
   </item>
 </channel>
 </rss>
