@@ -335,6 +335,12 @@ def t_rewind():
     expect(not build_rewind._live_checklist(["금요일까지 신청하세요"], "2026-10-12", "2026-10-17"), "지난 금요일 줄을 남긴다")
     expect(build_rewind._live_checklist(["내년 설 연휴(2월 6~9일) 캠페인 시작일을 역산해 두기"], "2026-09-24", "2026-10-10"),
            "미래 날짜가 박힌 연휴 줄('2월 6~9일')을 뺀다")
+    expect(build_rewind._live_checklist(["한글날 전에 신청하세요"], "2026-10-01", "2026-10-02"), "아직 오지 않은 한글날 줄을 뺀다")
+    expect(not build_rewind._live_checklist(["한글날 전에 신청하세요"], "2026-10-01", "2026-10-10"), "지난 한글날 줄을 남긴다")
+    expect(build_rewind._live_checklist(["다음 금요일까지 신청하세요"], "2026-10-16", "2026-10-17"), "'다음 금요일'을 그날 금요일로 본다")
+    expect(not build_rewind._live_checklist(["주말에 방문하세요"], "2026-10-03", "2026-10-10"), "맨 '주말' 줄을 주말이 지나도 남긴다")
+    expect(build_rewind._dated({"tag": "디지털 효도", "title": "부모님 폰"}, {"takeaway": "이번 연휴에 같이 봐요"}),
+           "카드 말풍선의 '이번 연휴에'를 못 본다")
     expect(not build_rewind._dated({"tag": "은행", "title": "은행 문 늦게 연다", "takeaway": "창구 일은 저녁·주말에"}, {}),
            "'저녁·주말에' 같은 일반 표현까지 뺀다")
     # 박힌 날짜가 지난 할 일 — 10/10 예비 호가 10/3 호 결론 '7일 전에'를 그대로 실었다(10/10 회고)

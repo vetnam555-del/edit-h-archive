@@ -62,7 +62,7 @@ _DATED = re.compile(r"[월화수목금토일]요일|연휴|명절|(?:이번|지�
 def _dated(story, spec, title=None):
     """그날·그 연휴에만 맞는 이야기인가 — 예비 호에선 다른 후보가 모자랄 때만 싣는다."""
     return bool(_DATED_TAG.search(story.get("tag") or "")) or any(
-        _DATED.search(t or "") for t in (title or story.get("title"), story.get("takeaway"), spec.get("headline")))
+        _DATED.search(t or "") for t in (title or story.get("title"), story.get("takeaway"), spec.get("headline"), spec.get("takeaway")))
 
 
 # 박힌 날짜: '10월 7일', '7일', '12~16일'(끝 날짜), '11월 16~27일', '2027년 5월 1일', '내년 1월 5일'.
@@ -111,28 +111,64 @@ def _expired(text, base, on):
     return bool(ds) and max(ds) < parse_date(on)
 
 
-_WEEKDAY = re.compile(r"([월화수목금토일])요일|(주말)")
+_WEEKDAY = re.compile(r"(?:(다음|지난|이번|오는|이)\s?)?(?:([월화수목금토일])요일|(주말))")
+# 날짜가 해마다 같은 날 — 체크리스트의 '한글날 전에'를 실제 날짜로 풀어 아직 남았는지 본다(Codex 리뷰). 설날·추석·부처님오신날은 holidays_kr.json 에서
+_FIXED_DAYS = {"신정": (1, 1), "삼일절": (3, 1), "어린이날": (5, 5), "현충일": (6, 6), "제헌절": (7, 17), "광복절": (8, 15), "개천절": (10, 3),
+               "한글날": (10, 9), "성탄절": (12, 25), "크리스마스": (12, 25), "핼러윈": (10, 31), "할로윈": (10, 31), "빼빼로데이": (11, 11)}
+_LUNAR = ("설날", "추석", "부처님오신날")
+
+
+def _holiday_dates(name, base):
+    """name(공휴일 이름)이 base 뒤 처음 오는 날(연휴면 그 끝날) — 모르면 None."""
+    if name in _FIXED_DAYS:
+        m, d = _FIXED_DAYS[name]
+        day = dt.date(base.year, m, d)
+        return day if day >= base else dt.date(base.year + 1, m, d)
+    hol = json.loads((AUTOMATION / "holidays_kr.json").read_text(encoding="utf-8"))
+    key = "설" if name == "설날" else name
+    days = sorted(dt.date.fromisoformat(k) for y, v in hol.items() if y[:1] == "2" for k, n in v.items() if key in n)
+    days = [x for x in days if x >= base]
+    if not days:
+        return None
+    return max(x for x in days if (x - days[0]).days <= 5)
 
 
 def _dated_line_live(ln, base, on):
     """요일·주말·연휴·공휴일에 묶인 체크리스트 줄이 on(독자가 받는 날)에도 아직 유효한가(Codex 리뷰).
-    박힌 날짜가 있으면 그것으로('내년 설 연휴(2월 6~9일)'), 요일·주말뿐이면 원래 호 날짜부터 다음 그 요일(주말은 일요일)로 본다
-    ('금요일까지' — 월요일 호를 화요일에 다시 실으면 아직 된다). 연휴·공휴일 이름뿐이면 날을 알 수 없어 지난 것으로 본다."""
+    박힌 날짜가 있으면 그것으로('내년 설 연휴(2월 6~9일)'), 요일·주말은 원래 호 날짜부터 다음 그 요일(주말은 일요일, '다음'은 한 주 뒤),
+    공휴일 이름은 그 날짜로('한글날 전에' → 10/9) 본다. '연휴'·'명절'처럼 날을 알 수 없는 말만 있으면 지난 것으로 본다."""
     b, o = parse_date(base), parse_date(on)
     ds = _dates(ln, b)
     if ds:
         return max(ds) >= o
-    days = [6 if m.group(2) else "월화수목금토일".index(m.group(1)) for m in _WEEKDAY.finditer(ln)]
-    rest = re.sub(r"(?:이번|지난|다음|오는|이)\s?주말|[월화수목금토일]요일", "", ln)
-    if not days or _DATED.search(rest):   # 요일 말고도 연휴·공휴일 이름이 있으면 날을 알 수 없다
+    targets = []
+    for m in _WEEKDAY.finditer(ln):
+        wd = 6 if m.group(3) else "월화수목금토일".index(m.group(2))
+        day = b + dt.timedelta(days=(wd - b.weekday()) % 7)
+        if m.group(1) == "다음":
+            day += dt.timedelta(days=7)
+        elif m.group(1) == "지난":
+            day -= dt.timedelta(days=7)
+        targets.append(day)
+    rest = _WEEKDAY.sub("", ln)
+    names = [n for n in (*_FIXED_DAYS, *_LUNAR) if n in rest.replace(" ", "")]
+    for n in names:
+        day = _holiday_dates(n, b)
+        if day:
+            targets.append(day)
+            rest = rest.replace(n, "")
+    if names:
+        rest = re.sub(r"연휴|명절", "", rest)
+    if not targets or _DATED.search(rest):   # 날을 알 수 없는 말('연휴에 같이 봐요')이 남았다
         return False
-    return max(b + dt.timedelta(days=(d - b.weekday()) % 7) for d in days) >= o
+    return max(targets) >= o
 
 
 def _live_checklist(lines, base, on):
     """체크리스트에서 이미 지난 날짜의 줄을 뺀다(같은 줄에 아직 남은 날짜가 있으면 둔다 — '7일 홀수·8일 짝수, 12~16일엔 누구나').
     요일·주말·연휴·공휴일에 묶인 줄('이번 주말에 방문하세요'·'일요일까지 신청')도 그날이 지났으면 뺀다(Codex 리뷰)."""
-    return [ln for ln in lines or [] if not _expired(ln, base, on) and (not _DATED.search(ln) or _dated_line_live(ln, base, on))]
+    return [ln for ln in lines or [] if not _expired(ln, base, on)
+            and (not (_DATED.search(ln) or _WEEKDAY.search(ln)) or _dated_line_live(ln, base, on))]
 
 
 def _used(date):
