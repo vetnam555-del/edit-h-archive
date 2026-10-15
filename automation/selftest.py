@@ -327,6 +327,9 @@ def t_rewind():
     expect(build_rewind._dated({"tag": "소비", "title": "일요일 밤부터 비"}, {}), "제목의 요일을 못 본다")
     expect(not build_rewind._dated({"tag": "편의점 매출", "title": "편의점 성장률 1.5%", "body": "주말 매출이 줄었어요"}, {}),
            "본문에만 '주말'이 든 이야기까지 뺀다")
+    expect(build_rewind._dated({"tag": "축제", "title": "이번 주말 축제"}, {}), "'이번 주말'을 그날 이야기로 못 본다")
+    expect(not build_rewind._dated({"tag": "은행", "title": "은행 문 늦게 연다", "takeaway": "창구 일은 저녁·주말에"}, {}),
+           "'저녁·주말에' 같은 일반 표현까지 뺀다")
     # 박힌 날짜가 지난 할 일 — 10/10 예비 호가 10/3 호 결론 '7일 전에'를 그대로 실었다(10/10 회고)
     expect(build_rewind._expired("만 19~34세라면 7일 전에 동의부터 받아 두세요", "2026-10-03", "2026-10-10"), "'7일 전에'(10/3 호)가 10/10 에 지난 줄 모른다")
     expect(not build_rewind._expired("최근 7일 도달·7일간 무료", "2026-10-03", "2026-10-10"), "기간(최근 7일·7일간)을 날짜로 읽는다")
