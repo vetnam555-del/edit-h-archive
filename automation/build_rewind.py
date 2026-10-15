@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """예비 호(개선 A-2) — 제작 루틴이 멈춘 날, Claude 없이 GitHub Actions 만으로 발행할 '지난 호 다시 보기' 원고를 만든다.
 
-07:00 제작 루틴이 사용량 한도·오류로 08:05(KST)까지 오늘 호를 올리지 못하면 rewind.yml 이 이 스크립트로
+07:40 제작 루틴이 사용량 한도·오류로 08:35(KST)까지 오늘 호를 올리지 못하면 rewind.yml 이 이 스크립트로
 content/{날짜}.json 을 만들고 build_issue.py 로 뉴스레터·카드를 빌드한 뒤 발송·게시를 돌린다.
 **새로 취재하지 않는다** — 최근 3주 안에 이미 사실 확인을 거쳐 발행한 이야기(원고 JSON)만 다시 엮는다(주간 특집과 같은 원칙).
 출처 옆 날짜가 처음 실린 날이라, 에디터 H 노트에서 '다시 보기'임을 밝힌다.
 
-  python3 automation/build_rewind.py --wait            # 새벽 예약 실행: 08:05 까지 기다린다(그 사이 오늘 호가 main 에 오면 일찍 끝냄) → go=true/false
-  python3 automation/build_rewind.py --need            # 오늘 예비 호가 필요한지(발행일인데 08:05 까지 오늘 호가 없음) → need=true/false
+  python3 automation/build_rewind.py --wait            # 새벽 예약 실행: 08:35 까지 기다린다(그 사이 오늘 호가 main 에 오면 일찍 끝냄) → go=true/false
+  python3 automation/build_rewind.py --need            # 오늘 예비 호가 필요한지(발행일인데 08:35 까지 오늘 호가 없음) → need=true/false
   python3 automation/build_rewind.py [--date YYYY-MM-DD] [--dry-run]   # content/{날짜}.json 작성(드라이런은 출력만)
 
 고르는 법: H PICK = 형식 2 호의 H PICK(심층 필드가 있어야 한다) 중 성과표 점수가 가장 높은 것, 나머지 4개 = 카드가 있던
@@ -29,7 +29,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from edith.common import AUTOMATION, CONTENT_DIR, MANIFEST, ROOT, load_config, now_kst, parse_date, weekday_ko  # noqa: E402
 
 POOL_DAYS = 21
-DEADLINE = (8, 5)   # 이 시각(KST)까지 오늘 호가 없으면 예비 호를 낸다(루틴 목표 07:45 + 20분 여유)
+DEADLINE = (8, 35)   # 이 시각(KST)까지 오늘 호가 없으면 예비 호를 낸다(07:40 제작 루틴 목표 08:15 + 20분 여유, 발송 08:30 — 2026-10-16~)
 MAX_WAIT = dt.timedelta(minutes=340)   # --wait 최대 대기(rewind.yml wait 작업 timeout 350분 안)
 POLL = 300   # --wait 중 오늘 호가 올라왔는지 보는 간격(초)
 _STALE = re.compile(r"오늘|내일|어제|모레|이번\s?주|다음\s?주|주말|지금 바로")
@@ -276,7 +276,7 @@ def build(date):
         "subtitle": "지난 호 다시 보기 — " + " · ".join(titles),
         "keywords": [big["tag"]] + [it["tag"] for it in content_items],
         "source_mode": "rewind",
-        "published_at_kst": now.isoformat(timespec="seconds"),   # 08:05 뒤 실제로 만든 시각 — 검색엔진 발행 시각(NewsArticle)
+        "published_at_kst": now.isoformat(timespec="seconds"),   # 08:35 뒤 실제로 만든 시각 — 검색엔진 발행 시각(NewsArticle)
         "lead": (f"오늘은 새 소식을 준비하지 못해, 지난 호에서 {what} 이야기 다섯 가지를 다시 골랐어요. "
                  "출처 옆 날짜가 처음 실린 날이에요. 내일 아침엔 새 소식으로 돌아올게요."),
         "observation": "새 소식이 없는 날엔 다시 볼 이야기를 — 지난 숫자에도 오늘 쓸모가 남아 있어요.",
@@ -313,7 +313,7 @@ def published(date):
 
 
 def wait(date):
-    """(계속할까, 이유) — 새벽 예약 실행이 08:05 까지 기다린다. GitHub 예약은 2~3시간 늦기 일쑤라(2026-09-30 08:07 예약이
+    """(계속할까, 이유) — 새벽 예약 실행이 08:35 까지 기다린다. GitHub 예약은 2~3시간 늦기 일쑤라(2026-09-30 08:07 예약이
     11:03 에 돌아 예비 호가 3시간 늦음) 새벽에 미리 시작해 두고 제시간에 판단한다. 기다리는 사이 오늘 호가 오면 일찍 끝낸다."""
     wd = weekday_ko(parse_date(date))
     if wd not in load_config()["publish_days"]:
@@ -349,9 +349,9 @@ def need(date, now=None, respect_deadline=True):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--date", default="")
-    ap.add_argument("--wait", action="store_true", help="08:05 까지 기다린 뒤 이어갈지(GITHUB_OUTPUT 에 go=true/false)")
+    ap.add_argument("--wait", action="store_true", help="08:35 까지 기다린 뒤 이어갈지(GITHUB_OUTPUT 에 go=true/false)")
     ap.add_argument("--need", action="store_true", help="예비 호가 필요한지만 판단(GITHUB_OUTPUT 에 need=true/false)")
-    ap.add_argument("--no-deadline", action="store_true", help="수동 실행: 08:05 기준을 보지 않음")
+    ap.add_argument("--no-deadline", action="store_true", help="수동 실행: 08:35 기준을 보지 않음")
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
     date = args.date or now_kst().date().isoformat()
