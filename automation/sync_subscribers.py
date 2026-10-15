@@ -224,7 +224,7 @@ def welcome_message(sender, to_addr, cfg, now=None, first=None):
         "EDIT H를 구독해 주셔서 고마워요.\n\n" + gift_txt +
         (f"가장 최근 호(VOL.{first['vol']})를 이어서 바로 보내드려요. 새 호는 {day} {when}부터 매일 가요.\n" if first else
          f"{day} {when}에 첫 메일이 가요.\n") +
-        "매일 아침, 알아두면 좋은 트렌드 5가지를 확인된 숫자로 정리하고 짧게 읽는 소식 5개를 더해 10가지로 보내드려요.\n"
+        "매일 아침, 알아두면 좋은 트렌드 5가지를 확인된 숫자로 정리하고 짧게 읽는 소식을 더해 보내드려요(평일 10가지, 주말·공휴일은 조금 적게).\n"
         "그중 하나는 H PICK으로 조금 더 깊게 풀어요.\n\n"
         f"기다리는 동안 {lead}를 먼저 읽어보세요.\n" + "\n".join(rows) + "\n\n"
         f"인스타그램에서는 같은 이야기를 카드로 넘겨볼 수 있어요: {insta}\n\n"
@@ -249,7 +249,7 @@ def welcome_message(sender, to_addr, cfg, now=None, first=None):
   <p style="font-size:19px; font-weight:800; margin:0 0 14px;">구독해 주셔서 고마워요.</p>
   {gift_html}
   <p style="font-size:15px; line-height:1.8; color:#333; margin:0 0 12px;">{first_html}
-  매일 아침, 알아두면 좋은 트렌드 5가지를 확인된 숫자로 정리하고 짧게 읽는 소식 5개를 더해 10가지로 보내드려요. 그중 하나는 H PICK으로 조금 더 깊게 풀어요.</p>
+  매일 아침, 알아두면 좋은 트렌드 5가지를 확인된 숫자로 정리하고 짧게 읽는 소식을 더해 보내드려요(평일 10가지, 주말·공휴일은 조금 적게). 그중 하나는 H PICK으로 조금 더 깊게 풀어요.</p>
   <p style="font-size:15px; line-height:1.8; color:#333; margin:18px 0 6px;">기다리는 동안 {lead}를 먼저 읽어보세요.</p>
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0">{li}</table>
   <p style="font-size:15px; line-height:1.8; color:#333; margin:22px 0 12px;">인스타그램에서는 같은 이야기를 카드로 넘겨볼 수 있어요 —

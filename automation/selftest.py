@@ -216,6 +216,8 @@ def t_brief_check():
     expect(any("1문장" in x for x in one), "'주요·필요'가 든 한 문장을 두 문장으로 셌다")
     title_only = style.brief_check({"date": "2026-10-17", "briefs": three[:2] + [b("14개 은행에서 신청해요", "앱에서 신청해요. 서류를 내면 돼요.")]})
     expect(any("숫자가 없어요" in x for x in title_only), "숫자가 제목에만 있는 소식을 통과시켰다")
+    both = style.brief_check({"date": "2026-10-17", "briefs": three[:2] + [b("둘 다 문제예요", "숫자도 없고 한 문장이에요.")]})
+    expect(any("숫자가 없어요" in x for x in both) and any("1문장" in x for x in both), "숫자·문장 수 점검이 서로를 가린다")
     four = style.brief_check({"date": "2026-10-17", "briefs": three[:2] + [b("길어요", "1개예요. 2개예요. 3개예요. 4개예요.")]})
     expect(any("4문장" in x for x in four), "4문장짜리 짧은 소식을 통과시켰다")
     return None
