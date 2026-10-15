@@ -119,8 +119,10 @@ def brief_check(d):
         body = b.get("body") or ""
         if not re.search(r"\d", body):   # 본문(2~3문장)에 숫자 — 제목에만 있으면 안 된다(Codex 리뷰)
             out.append(f"짧게 읽는 소식 '{plain(b.get('title') or '')[:14]}': 숫자가 없어요 — 원 기사에서 숫자 1개를 더하세요")
-        elif len([s for s in re.split(r"(?<=[.!?])\s+", body.strip()) if s.strip()]) < 2:   # '주요·필요'의 '요'는 문장 끝이 아니다(Codex 리뷰)
-            out.append(f"짧게 읽는 소식 '{plain(b.get('title') or '')[:14]}': 본문이 한 문장 — 2~3문장(무엇이·얼마나·언제)으로")
+        else:
+            n = len([s for s in re.split(r"(?<=[.!?])\s+", body.strip()) if s.strip()])   # '주요·필요'의 '요'는 문장 끝이 아니다(Codex 리뷰)
+            if not 2 <= n <= 3:   # 2~3문장 — 넘치면 '짧게'가 아니다(Codex 리뷰)
+                out.append(f"짧게 읽는 소식 '{plain(b.get('title') or '')[:14]}': 본문이 {n}문장 — 2~3문장(무엇이·얼마나·언제)으로")
     return out
 
 
