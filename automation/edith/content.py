@@ -47,6 +47,7 @@ ITEMS = {1: 9, 2: 4}         # 형식별 H PICK(빅이슈) 뒤 아이템 수
 BRIEFS_MAX, BRIEFS_TARGET, BRIEFS_MIN_OK = 5, 5, 3
 TODO_FROM, TODO_MAX = "2026-10-16", 3   # 메일 맨 위 '오늘 챙길 것'(10/15 운영자 선택) — content.todo, 없으면 결론 문장 앞 3개
 BRIEFS_FROM = "2026-10-16"   # 이 날부터 짧은 소식은 2~3문장·숫자 1개 이상, 평일엔 늘 5개(style.brief_check 가 알린다)
+BRIEF_BODY_OLD = 100         # BRIEFS_FROM 전 호(한 줄 뉴스 1~2문장)의 본문 한도 — 지난 호는 그때 기준으로 검증한다(Codex 리뷰)
 
 
 def _need(obj, key, where):
@@ -319,7 +320,8 @@ def prepare(data, date_str):
             _len_check(n["label"], CARD_LIMITS["metric_label"], f"big_issue.numbers[{j}].label", problems)
         for i, b in enumerate(data["briefs"], 1):
             _len_check(b["title"], CARD_LIMITS["brief_title"], f"briefs[{i}].title", problems)
-            _len_check(b["body"], CARD_LIMITS["brief_body"], f"briefs[{i}].body", problems)
+            _len_check(b["body"], CARD_LIMITS["brief_body"] if date_str >= BRIEFS_FROM else BRIEF_BODY_OLD,
+                       f"briefs[{i}].body", problems)
         for i, x in enumerate(data.get("todo") or [], 1):
             _len_check(x, CARD_LIMITS["todo"], f"todo[{i}](오늘 챙길 것)", problems)
     if data.get("poll"):

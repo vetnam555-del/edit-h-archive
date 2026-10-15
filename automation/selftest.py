@@ -223,6 +223,19 @@ def t_brief_check():
     marked = style.brief_check({"date": "2026-10-17", "briefs": three[:2] + [b("신청해요", "**16일까지 신청해요.** 앱에서 서류 2개를 내면 돼요."),
                                                                          b("받아요", "은행은 “16일까지 받아요.” 앱에서 서류 2개를 내면 돼요.")]})
     expect(not any("문장" in x for x in marked), f"굵게·따옴표 뒤 마침표를 문장 끝으로 못 셌다: {marked}")
+    import copy
+    from edith import content
+    base = json.loads((AUTOMATION / "examples" / "format2.json").read_text(encoding="utf-8"))
+    long_body = "가" * 60 + "1개예요. " + "나" * 50 + "예요."   # 119자 — 10/16~ 은 되고 지난 호(100자)는 안 된다
+    for day, ok in (("2026-10-15", False), ("2026-10-16", True)):
+        x = copy.deepcopy(base)
+        x["date"], x["briefs"][0]["body"] = day, long_body
+        try:
+            content.prepare(x, day)
+            passed = True
+        except content.ContentError:
+            passed = False
+        expect(passed == ok, f"{day} 짧은 소식 본문 119자 검증이 {'막혔다' if ok else '통과했다'}(지난 호는 100자 한도)")
     return None
 
 
