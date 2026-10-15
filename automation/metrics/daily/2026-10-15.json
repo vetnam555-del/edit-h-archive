@@ -1,5 +1,5 @@
 {
- "collected_at": "2026-10-15T11:38+09:00",
+ "collected_at": "2026-10-15T21:30+09:00",
  "issues": {
   "2026-10-15": {
    "title": "첫째 낳으면 1000만원, 결혼 페널티도 없앤다고?",
@@ -12,11 +12,11 @@
    "source_mode": "fallback",
    "audience": "2030직장인",
    "series": "없음",
-   "reel_style": null,
-   "reel_seconds": null,
-   "reel_slot": null,
-   "reel_feed": null,
-   "reel_hook": null
+   "reel_style": "세로",
+   "reel_seconds": 7.9,
+   "reel_slot": "저녁",
+   "reel_feed": true,
+   "reel_hook": true
   },
   "2026-10-14": {
    "title": "놓쳤다면, 다시 볼 만한 5가지",
@@ -242,7 +242,7 @@
  },
  "instagram": {
   "followers": 141,
-  "media": 95,
+  "media": 96,
   "insights": true,
   "posts": {
    "2026-10-02": {
@@ -448,10 +448,10 @@
    "2026-10-13": {
     "likes": 0,
     "comments": 0,
-    "reach": 23,
+    "reach": 24,
     "saved": 0,
     "shares": 0,
-    "views": 53,
+    "views": 58,
     "profile_visits": 0,
     "follows": 0
    },
@@ -461,32 +461,42 @@
     "reach": 9,
     "saved": 0,
     "shares": 0,
-    "views": 23,
+    "views": 25,
     "profile_visits": 0,
     "follows": 0
    },
    "2026-10-15": {
-    "likes": 0,
+    "likes": 2,
     "comments": 0,
-    "reach": 3,
+    "reach": 8,
     "saved": 0,
     "shares": 0,
-    "views": 8,
+    "views": 20,
     "profile_visits": 0,
-    "follows": 0
+    "follows": 0,
+    "reel": {
+     "likes": 0,
+     "comments": 0,
+     "reach": 2,
+     "saved": 0,
+     "shares": 0,
+     "views": 5,
+     "seconds": 7.9,
+     "avg_watch_s": 10.6
+    }
    }
   },
   "account": {
    "days": 7,
    "reach": {
-    "NON_FOLLOWER": 479,
-    "FOLLOWER": 31
+    "FOLLOWER": 31,
+    "NON_FOLLOWER": 372
    },
    "follows_and_unfollows": {
-    "FOLLOWER": 11,
+    "FOLLOWER": 6,
     "NON_FOLLOWER": 0
    },
-   "accounts_engaged": 10
+   "accounts_engaged": 9
   }
  },
  "mail": {
