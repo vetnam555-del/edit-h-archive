@@ -90,6 +90,22 @@ def caption_keyword(d):
     return [f"인스타 캡션: 첫 {FOLD}자('더 보기' 전)에 오늘 핵심어({', '.join(tags)})가 없어요 — 검색에 걸리게 첫 줄이나 둘째 문장에 자연스럽게"]
 
 
+def brief_check(d):
+    """짧게 읽는 소식(2026-10-16~): 5개, 소식마다 본문 2문장 이상·숫자 1개 이상 — 한 문장짜리면 독자에겐 '5가지 호'로 보인다(10/15 운영자)."""
+    from .content import BRIEFS_FROM, BRIEFS_TARGET
+    if str(d.get("date", ""))[:10] < BRIEFS_FROM:
+        return []
+    briefs = d.get("briefs") or []
+    out = [f"짧게 읽는 소식 {len(briefs)}개 — {BRIEFS_TARGET}개를 채우세요(평일엔 안장출근길 남은 헤드라인에서)"] if len(briefs) < BRIEFS_TARGET else []
+    for b in briefs:
+        body = b.get("body") or ""
+        if not re.search(r"\d", f"{b.get('title', '')} {body}"):
+            out.append(f"짧게 읽는 소식 '{plain(b.get('title') or '')[:14]}': 숫자가 없어요 — 원 기사에서 숫자 1개를 더하세요")
+        elif len([s for s in re.split(r"(?<=[.!?요])\s+", body.strip()) if s]) < 2:
+            out.append(f"짧게 읽는 소식 '{plain(b.get('title') or '')[:14]}': 본문이 한 문장 — 2~3문장(무엇이·얼마나·언제)으로")
+    return out
+
+
 SHARE_FROM = "2026-10-10"   # E6 — 이 날부터 데일리 호는 instagram.share_to 를 쓴다
 _BROAD_WHO = {"친구", "지인", "모두", "여러분", "누구나", "가족", "사람", "주변 사람"}
 
@@ -110,7 +126,7 @@ def lint(d):
     """경고 문장 목록(최대 MAX_LINES 개 + 남은 개수). 형식 2·데일리·STYLE_FROM 이후 호만."""
     if d.get("format") != 2 or d.get("rewind") or str(d.get("date", ""))[:10] < STYLE_FROM:
         return []
-    found, seen_acr = caption_keyword(d) + share_check(d), set()
+    found, seen_acr = caption_keyword(d) + share_check(d) + brief_check(d), set()
     for where, text, kind in _texts(d):
         rules = _WEED + _FORCE + (_WEED_SOCIAL if kind in ("social", "card", "obs") else [])
         for rx, why in rules:

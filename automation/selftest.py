@@ -198,6 +198,20 @@ def t_send_time():
     return None
 
 
+def t_brief_check():
+    """짧게 읽는 소식(10/16~): 5개·숫자 1개·2문장 이상을 알린다 — 10/15 이전 호는 보지 않는다."""
+    from edith import style
+    b = lambda t, body: {"title": t, "body": body, "source": "s", "url": "u"}
+    d = {"date": "2026-10-16", "briefs": [b("은행 문이 늦게 열려요", "영업시간이 바뀌어요."),
+                                          b("적금 신청이 16일 마감이에요", "출생연도와 상관없어요. 14개 은행 앱에서 해요.")]}
+    notes = " ".join(style.brief_check(d))
+    for w in ("2개 — 5개를", "숫자가 없어요"):
+        expect(w in notes, f"짧은 소식 점검이 '{w}' 를 못 잡는다: {notes}")
+    expect("적금" not in notes, "숫자·2문장을 채운 소식을 경고했다")
+    expect(not style.brief_check({**d, "date": "2026-10-15"}), "10/15 호까지 짧은 소식 점검을 했다")
+    return None
+
+
 def t_commit_dates():
     """봇 기록 커밋 이름은 KST 날짜 — UTC 로 찍으면 08:00 게시 기록이 '어제' 이름으로 남는다(2026-10-11 'Record Instagram post (2026-10-10)')."""
     bad = []
@@ -760,6 +774,7 @@ def main():
     check("봇 커밋 이름은 KST 날짜", t_commit_dates)
     check("안장출근길 비교(회고 잣대)", t_compare_anjang)
     check("발송 시각(지난 호는 08:00)", t_send_time)
+    check("짧게 읽는 소식 점검", t_brief_check)
     check("오늘 할 일(check_today)", t_check_today)
     check("연재 회차·문장 점검", t_series_and_style)
     check("예비 호 고르기(build_rewind)", t_rewind)
