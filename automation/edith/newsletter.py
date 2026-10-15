@@ -409,7 +409,8 @@ def _cta(d, site, campaign, n_cards):
                  f'<span style="color:#C4C4C4;"> &nbsp;|&nbsp; </span>' + links)
     return (_divider(30) + f'<tr><td class="px" style="padding:0 36px;">'
             + _div(f"font-size:19px;font-weight:700;line-height:1.45;color:{INK};",
-                   (f"매일 아침 10가지 소식을<br>깊게 5 · 짧게 5로 정리해 드려요!" if str(d.get("date", "")) >= BRIEFS_FROM and d.get("format") == 2
+                   (f"오늘 아침 {n_topics}가지 소식을 정리했어요<br>깊게 {len(d['all_items'])} · 짧게 {len(d['briefs'])}"   # 실제 개수(주말 3개 허용 — Codex 리뷰), 조사 없이(3·6 뒤 '으로')
+                    if str(d.get("date", "")) >= BRIEFS_FROM and d.get("format") == 2
                     else f"매일 아침 {n_topics}가지 트렌드 이슈를<br>한 번에 정리해 드려요!"), True)
             + f"""<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:16px;background:#FFFFFF;border:1px solid {RULE};border-radius:18px;box-shadow:0 2px 6px rgba(0,0,0,.08);"><tr><td style="padding:18px 16px;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
