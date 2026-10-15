@@ -205,10 +205,15 @@ def t_brief_check():
     d = {"date": "2026-10-16", "briefs": [b("은행 문이 늦게 열려요", "영업시간이 바뀌어요."),
                                           b("적금 신청이 16일 마감이에요", "출생연도와 상관없어요. 14개 은행 앱에서 해요.")]}
     notes = " ".join(style.brief_check(d))
-    for w in ("2개 — 5개를", "숫자가 없어요"):
+    for w in ("2개 — 5개 이상", "숫자가 없어요"):
         expect(w in notes, f"짧은 소식 점검이 '{w}' 를 못 잡는다: {notes}")
     expect("적금" not in notes, "숫자·2문장을 채운 소식을 경고했다")
     expect(not style.brief_check({**d, "date": "2026-10-15"}), "10/15 호까지 짧은 소식 점검을 했다")
+    three = [b("소식 1이에요", "1개예요. 두 문장이에요."), b("소식 2예요", "2개예요. 두 문장이에요."), b("소식 3이에요", "3개예요. 두 문장이에요.")]
+    expect(not style.brief_check({"date": "2026-10-17", "briefs": three}), "토요일 3개를 5개 미만으로 경고했다(주말은 3개까지)")
+    expect(style.brief_check({"date": "2026-10-16", "briefs": three}), "평일 3개를 경고하지 않았다")
+    one = style.brief_check({"date": "2026-10-17", "briefs": three[:2] + [b("서류 내요", "주요 14개 은행 앱에서 필요 서류 2개를 내면 돼요.")]})
+    expect(any("한 문장" in x for x in one), "'주요·필요'가 든 한 문장을 두 문장으로 셌다")
     return None
 
 

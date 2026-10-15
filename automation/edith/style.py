@@ -90,18 +90,36 @@ def caption_keyword(d):
     return [f"인스타 캡션: 첫 {FOLD}자('더 보기' 전)에 오늘 핵심어({', '.join(tags)})가 없어요 — 검색에 걸리게 첫 줄이나 둘째 문장에 자연스럽게"]
 
 
+def _rest_day(date):
+    """주말·공휴일(holidays_kr.json) — 안장출근길이 쉬고 확인된 소식이 적은 날."""
+    import datetime as _dt
+    import json as _json
+    from .common import AUTOMATION
+    try:
+        day = _dt.date.fromisoformat(date)
+    except ValueError:
+        return False
+    if day.weekday() >= 5:
+        return True
+    data = _json.loads((AUTOMATION / "holidays_kr.json").read_text(encoding="utf-8"))
+    return any(date in v for k, v in data.items() if not k.startswith("_") and isinstance(v, dict))
+
+
 def brief_check(d):
     """짧게 읽는 소식(2026-10-16~): 5개, 소식마다 본문 2문장 이상·숫자 1개 이상 — 한 문장짜리면 독자에겐 '5가지 호'로 보인다(10/15 운영자)."""
     from .content import BRIEFS_FROM, BRIEFS_TARGET
     if str(d.get("date", ""))[:10] < BRIEFS_FROM:
         return []
+    from .content import BRIEFS_MIN_OK
     briefs = d.get("briefs") or []
-    out = [f"짧게 읽는 소식 {len(briefs)}개 — {BRIEFS_TARGET}개를 채우세요(평일엔 안장출근길 남은 헤드라인에서)"] if len(briefs) < BRIEFS_TARGET else []
+    # 주말·공휴일은 확인된 소식이 적어 RUNBOOK 이 3개까지 허용한다(Codex 리뷰) — 평일만 5개를 요구
+    need = BRIEFS_MIN_OK if _rest_day(str(d.get("date", ""))[:10]) else BRIEFS_TARGET
+    out = [f"짧게 읽는 소식 {len(briefs)}개 — {need}개 이상 채우세요(평일엔 안장출근길 남은 헤드라인에서)"] if len(briefs) < need else []
     for b in briefs:
         body = b.get("body") or ""
         if not re.search(r"\d", f"{b.get('title', '')} {body}"):
             out.append(f"짧게 읽는 소식 '{plain(b.get('title') or '')[:14]}': 숫자가 없어요 — 원 기사에서 숫자 1개를 더하세요")
-        elif len([s for s in re.split(r"(?<=[.!?요])\s+", body.strip()) if s]) < 2:
+        elif len([s for s in re.split(r"(?<=[.!?])\s+", body.strip()) if s.strip()]) < 2:   # '주요·필요'의 '요'는 문장 끝이 아니다(Codex 리뷰)
             out.append(f"짧게 읽는 소식 '{plain(b.get('title') or '')[:14]}': 본문이 한 문장 — 2~3문장(무엇이·얼마나·언제)으로")
     return out
 
