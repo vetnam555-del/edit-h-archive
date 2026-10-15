@@ -106,6 +106,14 @@ def brief_check(d):
     return out
 
 
+def todo_check(d):
+    """오늘 챙길 것(2026-10-16~): content.todo 3줄을 직접 쓰게 — 없으면 결론 문장 앞 3개로 채워져 길고 겹친다."""
+    from .content import TODO_FROM
+    if str(d.get("date", ""))[:10] < TODO_FROM or d.get("todo"):
+        return []
+    return ["오늘 챙길 것(todo)이 없어 결론 문장 앞 3개로 채웠어요 — 10가지 중 오늘 할 일 3줄(마감·신청·확인, 40자 안)을 직접 쓰세요"]
+
+
 SHARE_FROM = "2026-10-10"   # E6 — 이 날부터 데일리 호는 instagram.share_to 를 쓴다
 _BROAD_WHO = {"친구", "지인", "모두", "여러분", "누구나", "가족", "사람", "주변 사람"}
 
@@ -126,7 +134,7 @@ def lint(d):
     """경고 문장 목록(최대 MAX_LINES 개 + 남은 개수). 형식 2·데일리·STYLE_FROM 이후 호만."""
     if d.get("format") != 2 or d.get("rewind") or str(d.get("date", ""))[:10] < STYLE_FROM:
         return []
-    found, seen_acr = caption_keyword(d) + share_check(d) + brief_check(d), set()
+    found, seen_acr = caption_keyword(d) + share_check(d) + brief_check(d) + todo_check(d), set()
     for where, text, kind in _texts(d):
         rules = _WEED + _FORCE + (_WEED_SOCIAL if kind in ("social", "card", "obs") else [])
         for rx, why in rules:

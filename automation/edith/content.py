@@ -36,7 +36,8 @@ CARD_LIMITS = {
     "poll_question": 34,     # 투표 질문(마무리 카드에 크게)
     "poll_comment": 70,      # 투표 결과에 붙이는 에디터 H 한마디
     "brief_title": 32,       # 형식 2: 짧게 읽는 소식 제목(한 문장)
-    "brief_body": 170,       # 형식 2: 짧게 읽는 소식 본문(2~3문장, 숫자 1개 이상 — 2026-10-16~, 예전 한 줄 뉴스는 1~2문장 100자)
+    "brief_body": 170,
+    "todo": 40,              # 오늘 챙길 것 한 줄(동사로 끝나는 할 일, 마감·날짜가 있으면 넣는다)       # 형식 2: 짧게 읽는 소식 본문(2~3문장, 숫자 1개 이상 — 2026-10-16~, 예전 한 줄 뉴스는 1~2문장 100자)
 }
 CARD_ISSUES = {1: 6, 2: 5}   # 형식별 카드 이슈 수(형식 2 는 5가지 모두 카드로)
 ITEMS = {1: 9, 2: 4}         # 형식별 H PICK(빅이슈) 뒤 아이템 수
@@ -44,6 +45,7 @@ ITEMS = {1: 9, 2: 4}         # 형식별 H PICK(빅이슈) 뒤 아이템 수
 # 2026-10-15 운영자: '왜 5개냐' — 짧은 5개가 한 문장(평균 70자)이라 독자에겐 5개로 보였다 → 2~3문장·숫자 1개로 키우고 늘 5개(BRIEFS_FROM~).
 # 확인된 소식이 모자란 날(주말 등)은 3개까지 줄여도 된다 — 빌드는 막지 않고 알려만 준다(build_issue.py).
 BRIEFS_MAX, BRIEFS_TARGET, BRIEFS_MIN_OK = 5, 5, 3
+TODO_FROM, TODO_MAX = "2026-10-16", 3   # 메일 맨 위 '오늘 챙길 것'(10/15 운영자 선택) — content.todo, 없으면 결론 문장 앞 3개
 BRIEFS_FROM = "2026-10-16"   # 이 날부터 짧은 소식은 2~3문장·숫자 1개 이상, 평일엔 늘 5개(style.brief_check 가 알린다)
 
 
@@ -239,6 +241,9 @@ def prepare(data, date_str):
         for i, b in enumerate(briefs, 1):
             for key in ("title", "body", "source", "url"):
                 _need(b, key, f"{where} briefs[{i}]")
+        todo = data.get("todo")
+        if todo is not None and (not isinstance(todo, list) or len(todo) > TODO_MAX or not all(isinstance(x, str) and x.strip() for x in todo)):
+            raise ContentError(f"{where}: todo(오늘 챙길 것)는 {TODO_MAX}줄 이하의 문장 목록이어야 합니다")
 
     # 번호: 빅이슈(H PICK)가 01, 나머지가 02~ (빅이슈를 목록에서 다시 반복하지 않는다)
     big["no"] = "01"
@@ -315,6 +320,8 @@ def prepare(data, date_str):
         for i, b in enumerate(data["briefs"], 1):
             _len_check(b["title"], CARD_LIMITS["brief_title"], f"briefs[{i}].title", problems)
             _len_check(b["body"], CARD_LIMITS["brief_body"], f"briefs[{i}].body", problems)
+        for i, x in enumerate(data.get("todo") or [], 1):
+            _len_check(x, CARD_LIMITS["todo"], f"todo[{i}](오늘 챙길 것)", problems)
     if data.get("poll"):
         _len_check(data["poll"]["question"], CARD_LIMITS["poll_question"], "poll.question", problems)
         for j, o in enumerate(data["poll"]["options"], 1):

@@ -212,6 +212,20 @@ def t_brief_check():
     return None
 
 
+def t_todo_box():
+    """오늘 챙길 것(10/16~): content.todo 가 있으면 그것, 없으면 결론 문장 앞 3개 — 10/15 호·예비 호엔 없다."""
+    from edith import content, newsletter
+    d = content.load("2026-10-15")
+    expect(newsletter._todo(d) == "", "10/15 호에 '오늘 챙길 것'이 붙었다")
+    d["date"] = "2026-10-16"
+    box = newsletter._todo(d)
+    expect("오늘 챙길 것" in box and box.count("☐") == 3, "10/16~ 결론 문장으로 3줄을 못 채운다")
+    d["todo"] = ["청년미래적금 2차, 16일 마감 전 신청"]
+    expect("16일 마감 전 신청" in newsletter._todo(d) and newsletter._todo(d).count("☐") == 1, "content.todo 를 안 쓴다")
+    expect(newsletter._todo({**d, "rewind": True}) == "", "예비 호에 '오늘 챙길 것'이 붙었다")
+    return None
+
+
 def t_commit_dates():
     """봇 기록 커밋 이름은 KST 날짜 — UTC 로 찍으면 08:00 게시 기록이 '어제' 이름으로 남는다(2026-10-11 'Record Instagram post (2026-10-10)')."""
     bad = []
@@ -775,6 +789,7 @@ def main():
     check("안장출근길 비교(회고 잣대)", t_compare_anjang)
     check("발송 시각(지난 호는 08:00)", t_send_time)
     check("짧게 읽는 소식 점검", t_brief_check)
+    check("오늘 챙길 것", t_todo_box)
     check("오늘 할 일(check_today)", t_check_today)
     check("연재 회차·문장 점검", t_series_and_style)
     check("예비 호 고르기(build_rewind)", t_rewind)

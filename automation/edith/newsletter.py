@@ -11,7 +11,7 @@ VOL.092 대비 보강: 출처를 원문 링크로, '카드뉴스 보기' 링크 
 import json
 
 from .common import esc, load_config, md, plain, send_time_ko, send_time_on
-from .content import BRIEFS_FROM
+from .content import BRIEFS_FROM, TODO_FROM, TODO_MAX
 
 F = "'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif"
 INK = "#282F38"
@@ -231,6 +231,26 @@ def _label(text, mt=22):
     return _div(f"font-size:13px;font-weight:800;line-height:1.3;color:{CHIP_FG};margin-top:{mt}px;letter-spacing:.2px;", esc(text))
 
 
+def todo_lines(d):
+    """오늘 챙길 것 — 원고의 todo(최대 3줄), 없으면 H PICK·메인의 '그래서 뭐가 달라져'(takeaway) 앞 3개."""
+    lines = [x for x in d.get("todo") or [] if str(x).strip()]
+    if not lines:
+        lines = [it["takeaway"] for it in d.get("all_items") or [] if it.get("takeaway")]
+    return lines[:TODO_MAX]
+
+
+def _todo(d):
+    """메일 첫 화면의 '오늘 챙길 것'(2026-10-16~) — 10가지 중 오늘 할 일만 체크리스트로. 안장출근길엔 없는 우리 강점(10/15 운영자 선택).
+    예비 호(지난 이야기 다시 보기)는 할 일이 지났을 수 있어 싣지 않는다."""
+    if d.get("format") != 2 or d.get("rewind") or str(d.get("date", "")) < TODO_FROM:
+        return ""
+    lines = todo_lines(d)
+    if not lines:
+        return ""
+    rows = "".join(_div(f"font-size:14.5px;font-weight:400;line-height:1.65;color:{INK};margin-top:6px;", "☐ " + md(x)) for x in lines)
+    return _box(_div(f"font-size:12.5px;font-weight:700;line-height:1.3;color:{CHIP_FG};", "오늘 챙길 것") + rows, mt=16)
+
+
 def _note(d):
     """에디터 H 노트 — 고정 코너. 안경 마크 + 1인칭 편지 + 오늘의 목록(10/16~ 짧게 읽는 소식까지 10가지) + H의 한 줄."""
     head = (f'<table role="presentation" cellpadding="0" cellspacing="0"><tr><td valign="middle">{_mini_avatar()}</td>'
@@ -270,7 +290,7 @@ def _note(d):
                       f'+ {"짧게 읽는 소식" if str(d.get("date", "")) >= BRIEFS_FROM else "한 줄 뉴스"} {len(d["briefs"])}개({first:02d}–{last:02d})는 아래에서 짧게 볼 수 있어요.')
     obs = _box(_div(f"font-size:14.5px;font-weight:400;line-height:1.7;color:{INK};",
                     f'<b style="font-weight:700;color:{INK};">H의 한 줄 ·</b> ' + md(d["observation"])), mt=14)
-    return f'\n<tr><td class="px" style="padding:0 36px;">{head}\n  {lead}\n  {today}\n  {obs}</td></tr>'
+    return f'\n<tr><td class="px" style="padding:0 36px;">{head}\n  {lead}\n  {_todo(d)}\n  {today}\n  {obs}</td></tr>'
 
 
 def _numbers(nums):
