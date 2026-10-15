@@ -111,10 +111,28 @@ def _expired(text, base, on):
     return bool(ds) and max(ds) < parse_date(on)
 
 
+_WEEKDAY = re.compile(r"([월화수목금토일])요일|(주말)")
+
+
+def _dated_line_live(ln, base, on):
+    """요일·주말·연휴·공휴일에 묶인 체크리스트 줄이 on(독자가 받는 날)에도 아직 유효한가(Codex 리뷰).
+    박힌 날짜가 있으면 그것으로('내년 설 연휴(2월 6~9일)'), 요일·주말뿐이면 원래 호 날짜부터 다음 그 요일(주말은 일요일)로 본다
+    ('금요일까지' — 월요일 호를 화요일에 다시 실으면 아직 된다). 연휴·공휴일 이름뿐이면 날을 알 수 없어 지난 것으로 본다."""
+    b, o = parse_date(base), parse_date(on)
+    ds = _dates(ln, b)
+    if ds:
+        return max(ds) >= o
+    days = [6 if m.group(2) else "월화수목금토일".index(m.group(1)) for m in _WEEKDAY.finditer(ln)]
+    rest = re.sub(r"(?:이번|지난|다음|오는|이)\s?주말|[월화수목금토일]요일", "", ln)
+    if not days or _DATED.search(rest):   # 요일 말고도 연휴·공휴일 이름이 있으면 날을 알 수 없다
+        return False
+    return max(b + dt.timedelta(days=(d - b.weekday()) % 7) for d in days) >= o
+
+
 def _live_checklist(lines, base, on):
     """체크리스트에서 이미 지난 날짜의 줄을 뺀다(같은 줄에 아직 남은 날짜가 있으면 둔다 — '7일 홀수·8일 짝수, 12~16일엔 누구나').
-    요일·주말·연휴·공휴일에 묶인 줄('이번 주말에 방문하세요'·'일요일까지 신청')도 뺀다 — 다시 보는 날엔 그 요일이 아니다(Codex 리뷰)."""
-    return [ln for ln in lines or [] if not _expired(ln, base, on) and not _DATED.search(ln)]
+    요일·주말·연휴·공휴일에 묶인 줄('이번 주말에 방문하세요'·'일요일까지 신청')도 그날이 지났으면 뺀다(Codex 리뷰)."""
+    return [ln for ln in lines or [] if not _expired(ln, base, on) and (not _DATED.search(ln) or _dated_line_live(ln, base, on))]
 
 
 def _used(date):
