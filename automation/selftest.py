@@ -198,6 +198,61 @@ def t_send_time():
     return None
 
 
+def t_brief_check():
+    """짧게 읽는 소식(10/16~): 5개·숫자 1개·2문장 이상을 알린다 — 10/15 이전 호는 보지 않는다."""
+    from edith import style
+    b = lambda t, body: {"title": t, "body": body, "source": "s", "url": "u"}
+    d = {"date": "2026-10-16", "briefs": [b("은행 문이 늦게 열려요", "영업시간이 바뀌어요."),
+                                          b("적금 신청이 16일 마감이에요", "출생연도와 상관없어요. 14개 은행 앱에서 해요.")]}
+    notes = " ".join(style.brief_check(d))
+    for w in ("2개 — 5개 이상", "숫자가 없어요"):
+        expect(w in notes, f"짧은 소식 점검이 '{w}' 를 못 잡는다: {notes}")
+    expect("적금" not in notes, "숫자·2문장을 채운 소식을 경고했다")
+    expect(not style.brief_check({**d, "date": "2026-10-15"}), "10/15 호까지 짧은 소식 점검을 했다")
+    three = [b("소식 1이에요", "1개예요. 두 문장이에요."), b("소식 2예요", "2개예요. 두 문장이에요."), b("소식 3이에요", "3개예요. 두 문장이에요.")]
+    expect(not style.brief_check({"date": "2026-10-17", "briefs": three}), "토요일 3개를 5개 미만으로 경고했다(주말은 3개까지)")
+    expect(style.brief_check({"date": "2026-10-16", "briefs": three}), "평일 3개를 경고하지 않았다")
+    one = style.brief_check({"date": "2026-10-17", "briefs": three[:2] + [b("서류 내요", "주요 14개 은행 앱에서 필요 서류 2개를 내면 돼요.")]})
+    expect(any("1문장" in x for x in one), "'주요·필요'가 든 한 문장을 두 문장으로 셌다")
+    title_only = style.brief_check({"date": "2026-10-17", "briefs": three[:2] + [b("14개 은행에서 신청해요", "앱에서 신청해요. 서류를 내면 돼요.")]})
+    expect(any("숫자가 없어요" in x for x in title_only), "숫자가 제목에만 있는 소식을 통과시켰다")
+    both = style.brief_check({"date": "2026-10-17", "briefs": three[:2] + [b("둘 다 문제예요", "숫자도 없고 한 문장이에요.")]})
+    expect(any("숫자가 없어요" in x for x in both) and any("1문장" in x for x in both), "숫자·문장 수 점검이 서로를 가린다")
+    four = style.brief_check({"date": "2026-10-17", "briefs": three[:2] + [b("길어요", "1개예요. 2개예요. 3개예요. 4개예요.")]})
+    expect(any("4문장" in x for x in four), "4문장짜리 짧은 소식을 통과시켰다")
+    marked = style.brief_check({"date": "2026-10-17", "briefs": three[:2] + [b("신청해요", "**16일까지 신청해요.** 앱에서 서류 2개를 내면 돼요."),
+                                                                         b("받아요", "은행은 “16일까지 받아요.” 앱에서 서류 2개를 내면 돼요.")]})
+    expect(not any("문장" in x for x in marked), f"굵게·따옴표 뒤 마침표를 문장 끝으로 못 셌다: {marked}")
+    import copy
+    from edith import content
+    base = json.loads((AUTOMATION / "examples" / "format2.json").read_text(encoding="utf-8"))
+    long_body = "가" * 60 + "1개예요. " + "나" * 50 + "예요."   # 119자 — 10/16~ 은 되고 지난 호(100자)는 안 된다
+    for day, ok in (("2026-10-15", False), ("2026-10-16", True)):
+        x = copy.deepcopy(base)
+        x["date"], x["briefs"][0]["body"] = day, long_body
+        try:
+            content.prepare(x, day)
+            passed = True
+        except content.ContentError:
+            passed = False
+        expect(passed == ok, f"{day} 짧은 소식 본문 119자 검증이 {'막혔다' if ok else '통과했다'}(지난 호는 100자 한도)")
+    return None
+
+
+def t_todo_box():
+    """오늘 챙길 것(10/16~): content.todo 가 있으면 그것, 없으면 결론 문장 앞 3개 — 10/15 호·예비 호엔 없다."""
+    from edith import content, newsletter
+    d = content.load("2026-10-15")
+    expect(newsletter._todo(d) == "", "10/15 호에 '오늘 챙길 것'이 붙었다")
+    d["date"] = "2026-10-16"
+    box = newsletter._todo(d)
+    expect("오늘 챙길 것" in box and box.count("☐") == 3, "10/16~ 결론 문장으로 3줄을 못 채운다")
+    d["todo"] = ["청년미래적금 2차, 16일 마감 전 신청"]
+    expect("16일 마감 전 신청" in newsletter._todo(d) and newsletter._todo(d).count("☐") == 1, "content.todo 를 안 쓴다")
+    expect(newsletter._todo({**d, "rewind": True}) == "", "예비 호에 '오늘 챙길 것'이 붙었다")
+    return None
+
+
 def t_commit_dates():
     """봇 기록 커밋 이름은 KST 날짜 — UTC 로 찍으면 08:00 게시 기록이 '어제' 이름으로 남는다(2026-10-11 'Record Instagram post (2026-10-10)')."""
     bad = []
@@ -760,6 +815,8 @@ def main():
     check("봇 커밋 이름은 KST 날짜", t_commit_dates)
     check("안장출근길 비교(회고 잣대)", t_compare_anjang)
     check("발송 시각(지난 호는 08:00)", t_send_time)
+    check("짧게 읽는 소식 점검", t_brief_check)
+    check("오늘 챙길 것", t_todo_box)
     check("오늘 할 일(check_today)", t_check_today)
     check("연재 회차·문장 점검", t_series_and_style)
     check("예비 호 고르기(build_rewind)", t_rewind)

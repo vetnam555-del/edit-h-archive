@@ -179,16 +179,21 @@ _LETTER = [
     "{when}마다 경제 뉴스레터로도 보내드려요. 출처까지 다 담아서요. (프로필 링크)",
     "경제 뉴스레터로 받아보시면 출처와 뒷이야기까지 볼 수 있어요. 매일 {when}, 프로필 링크에서 구독할 수 있어요.",
 ]
-# 한 줄 뉴스가 있는 날(메인 5가지 + 한 줄 뉴스 = 10개 주제)은 메일에만 있는 한 줄 뉴스를 구독 이유로 알린다.
+# 짧게 읽는 소식(옛 한 줄 뉴스)이 있는 날(메인 5가지 + 짧게 5 = 10개 주제)은 메일에만 있는 짧은 소식을 구독 이유로 알린다.
 _LETTER_GIFT = [
     "구독 선물: '{title}'({n}가지) — 프로필 링크에서 경제 뉴스레터를 구독하면 환영 메일로 보내드려요.",
     "프로필 링크에서 구독하면 '{title}'({n}가지)부터 보내드려요. 경제 뉴스레터는 매일 {when}.",
     "경제 뉴스레터 구독 선물로 '{title}'({n}가지)를 준비했어요. 프로필 링크에서요.",
 ]
-_LETTER_BRIEFS = [
+_LETTER_BRIEFS_OLD = [   # 2026-10-15 까지 호(다시 빌드해도 게시된 캡션과 같게 — Codex 리뷰)
     "경제 뉴스레터로 받아보시면 한 줄 뉴스 {n}개가 더 있어요. 매일 {when}, 구독은 프로필 링크에서요.",
     "경제 뉴스레터에는 한 줄 뉴스 {n}개와 출처까지 담았어요. {when}마다 보내드려요. (프로필 링크)",
     "출처랑 한 줄 뉴스 {n}개는 {when} 경제 뉴스레터에 있어요. 구독은 프로필 링크에서요.",
+]
+_LETTER_BRIEFS = [
+    "경제 뉴스레터로 받아보시면 짧게 읽는 소식 {n}개가 더 있어요. 매일 {when}, 구독은 프로필 링크에서요.",
+    "경제 뉴스레터에는 짧게 읽는 소식 {n}개와 출처까지 담았어요. {when}마다 보내드려요. (프로필 링크)",
+    "출처랑 짧게 읽는 소식 {n}개는 {when} 경제 뉴스레터에 있어요. 구독은 프로필 링크에서요.",
 ]
 _REEL_TAIL = ["넘겨보는 카드는 피드에 올려뒀어요.", "카드 전체는 피드 게시물에 있어요.", "자세한 숫자는 피드 카드에서 볼 수 있어요."]
 # 저녁 릴스(config.instagram.reel_evening_from~): 짧은 영상 → 아침 카드 → 뉴스레터로 이어지게(머니그라피의 숏폼 → 본편 고리)
@@ -260,7 +265,8 @@ def instagram_caption(d, site):
         lines += ["", dm_line()]
     # 표지 사진·음악 출처는 캡션에 쓰지 않는다(2026-09-25 요청) — 사진 출처는 표지 카드 안에, 음악 출처는 릴스 영상 안에 있다.
     n_briefs = len(d.get("briefs") or [])
-    letter = (_pick(_LETTER_BRIEFS, d).format(n=n_briefs, when=_when(d)) if n_briefs
+    from .content import BRIEFS_FROM
+    letter = (_pick(_LETTER_BRIEFS if str(d.get("date", "")) >= BRIEFS_FROM else _LETTER_BRIEFS_OLD, d).format(n=n_briefs, when=_when(d)) if n_briefs
               else _pick(_LETTER, d).format(when=_when(d)))
     gift = active_gift(d["date"])
     if gift:   # 구독 선물(E5) 기간엔 뉴스레터 한 줄 대신 선물 안내 — 구독할 '지금 당장의 이유'

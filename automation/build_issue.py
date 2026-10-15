@@ -108,7 +108,7 @@ def main():
         return
 
     site_url = args.site_url or cfg["site_url"]
-    d["send_time_kst"] = cfg["send_time_kst"]  # 뉴스레터 푸터·카드 하단·캡션의 발송 시각 문구
+    d["send_time_kst"] = send_time_on(d["date"], cfg)  # 뉴스레터 푸터·카드 하단·캡션의 발송 시각 문구(지난 호는 그때 시각)
     files, card_report = [], []
     if not args.no_cards:
         out_dir = INSTAGRAM_DIR / args.date
@@ -142,7 +142,8 @@ def main():
     for c in shrunk:
         print(f"  ↘ {c['file']}: 글자 {round((1 - c['k']) * 100)}% 자동 축소 — 가능하면 문장을 줄이세요")
     print_style(d)
-    if d.get("format") == 2 and not d.get("rewind") and len(d["briefs"]) < content.BRIEFS_TARGET:
+    if (d.get("format") == 2 and not d.get("rewind") and len(d["briefs"]) < content.BRIEFS_TARGET
+            and str(d["date"]) < content.BRIEFS_FROM):   # 10/16~ 는 style.brief_check 가 알린다(주말·공휴일 3개 허용 — Codex 리뷰)
         # 2026-10-03 회고: '괜찮아요'라고 알려 줘서 10/2·10/3 이틀 연속 3개로 나갔다 — 원칙 1(5개)을 분명히 한다
         print(f"  ↘ 한 줄 뉴스 {len(d['briefs'])}개 — 원칙 1은 {content.BRIEFS_TARGET}개(메인 5 + 한 줄 뉴스 5 = 10개 주제)."
               " RUNBOOK 1-2 보강 소스(정부 보도자료·생활 제도 변경·교통·가격)로 한 번 더 찾고, 그래도 확인된 소식이 없으면"

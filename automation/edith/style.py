@@ -90,6 +90,55 @@ def caption_keyword(d):
     return [f"인스타 캡션: 첫 {FOLD}자('더 보기' 전)에 오늘 핵심어({', '.join(tags)})가 없어요 — 검색에 걸리게 첫 줄이나 둘째 문장에 자연스럽게"]
 
 
+def _rest_day(date):
+    """주말·공휴일(holidays_kr.json) — 안장출근길이 쉬고 확인된 소식이 적은 날."""
+    import datetime as _dt
+    import json as _json
+    from .common import AUTOMATION
+    try:
+        day = _dt.date.fromisoformat(date)
+    except ValueError:
+        return False
+    if day.weekday() >= 5:
+        return True
+    data = _json.loads((AUTOMATION / "holidays_kr.json").read_text(encoding="utf-8"))
+    return any(date in v for k, v in data.items() if not k.startswith("_") and isinstance(v, dict))
+
+
+def brief_check(d):
+    """짧게 읽는 소식(2026-10-16~): 5개, 소식마다 본문 2문장 이상·숫자 1개 이상 — 한 문장짜리면 독자에겐 '5가지 호'로 보인다(10/15 운영자)."""
+    from .content import BRIEFS_FROM, BRIEFS_TARGET
+    if str(d.get("date", ""))[:10] < BRIEFS_FROM:
+        return []
+    from .content import BRIEFS_MIN_OK
+    briefs = d.get("briefs") or []
+    # 주말·공휴일은 확인된 소식이 적어 RUNBOOK 이 3개까지 허용한다(Codex 리뷰) — 평일만 5개를 요구
+    need = BRIEFS_MIN_OK if _rest_day(str(d.get("date", ""))[:10]) else BRIEFS_TARGET
+    out = [f"짧게 읽는 소식 {len(briefs)}개 — {need}개 이상 채우세요(평일엔 안장출근길 남은 헤드라인에서)"] if len(briefs) < need else []
+    for b in briefs:
+        body = b.get("body") or ""
+        if not re.search(r"\d", body):   # 본문(2~3문장)에 숫자 — 제목에만 있으면 안 된다(Codex 리뷰)
+            out.append(f"짧게 읽는 소식 '{plain(b.get('title') or '')[:14]}': 숫자가 없어요 — 원 기사에서 숫자 1개를 더하세요")
+        # '주요·필요'의 '요'는 문장 끝이 아니다. 굵게(**…**)·닫는 따옴표가 마침표 뒤에 와도 문장 끝으로 센다(Codex 리뷰)
+        n = len([s for s in re.split(r"[.!?][\"'”’」』)\]]*\s+", plain(body).strip()) if s.strip()])
+        if not 2 <= n <= 3:   # 2~3문장 — 넘치면 '짧게'가 아니다. 숫자 점검과 따로 본다(한쪽이 다른 쪽을 가리지 않게 — Codex 리뷰)
+            out.append(f"짧게 읽는 소식 '{plain(b.get('title') or '')[:14]}': 본문이 {n}문장 — 2~3문장(무엇이·얼마나·언제)으로")
+    return out
+
+
+def todo_check(d):
+    """오늘 챙길 것(2026-10-16~): content.todo 3줄을 직접 쓰게 — 없으면 결론 문장 앞 3개로 채워져 길고 겹친다."""
+    from .content import TODO_FROM, TODO_MAX
+    if str(d.get("date", ""))[:10] < TODO_FROM or d.get("rewind") or d.get("format") != 2:
+        return []
+    todo = [x for x in d.get("todo") or [] if str(x).strip()]
+    if not todo:
+        return ["오늘 챙길 것(todo)이 없어 결론 문장 앞 3개로 채웠어요 — 10가지 중 오늘 할 일 3줄(마감·신청·확인, 40자 안)을 직접 쓰세요"]
+    if len(todo) < TODO_MAX:   # 1~2줄만 쓴 것도 알린다(Codex 리뷰)
+        return [f"오늘 챙길 것(todo)이 {len(todo)}줄 — {TODO_MAX}줄을 채우세요(10가지 중 오늘 할 일)"]
+    return []
+
+
 SHARE_FROM = "2026-10-10"   # E6 — 이 날부터 데일리 호는 instagram.share_to 를 쓴다
 _BROAD_WHO = {"친구", "지인", "모두", "여러분", "누구나", "가족", "사람", "주변 사람"}
 
@@ -110,7 +159,7 @@ def lint(d):
     """경고 문장 목록(최대 MAX_LINES 개 + 남은 개수). 형식 2·데일리·STYLE_FROM 이후 호만."""
     if d.get("format") != 2 or d.get("rewind") or str(d.get("date", ""))[:10] < STYLE_FROM:
         return []
-    found, seen_acr = caption_keyword(d) + share_check(d), set()
+    found, seen_acr = caption_keyword(d) + share_check(d) + brief_check(d) + todo_check(d), set()
     for where, text, kind in _texts(d):
         rules = _WEED + _FORCE + (_WEED_SOCIAL if kind in ("social", "card", "obs") else [])
         for rx, why in rules:

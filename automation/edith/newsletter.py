@@ -11,6 +11,7 @@ VOL.092 대비 보강: 출처를 원문 링크로, '카드뉴스 보기' 링크 
 import json
 
 from .common import esc, load_config, md, plain, send_time_ko, send_time_on
+from .content import BRIEFS_FROM, TODO_FROM, TODO_MAX
 
 F = "'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif"
 INK = "#282F38"
@@ -230,8 +231,28 @@ def _label(text, mt=22):
     return _div(f"font-size:13px;font-weight:800;line-height:1.3;color:{CHIP_FG};margin-top:{mt}px;letter-spacing:.2px;", esc(text))
 
 
+def todo_lines(d):
+    """오늘 챙길 것 — 원고의 todo(최대 3줄), 없으면 H PICK·메인의 '그래서 뭐가 달라져'(takeaway) 앞 3개."""
+    lines = [x for x in d.get("todo") or [] if str(x).strip()]
+    if not lines:
+        lines = [it["takeaway"] for it in d.get("all_items") or [] if it.get("takeaway")]
+    return lines[:TODO_MAX]
+
+
+def _todo(d):
+    """메일 첫 화면의 '오늘 챙길 것'(2026-10-16~) — 10가지 중 오늘 할 일만 체크리스트로. 안장출근길엔 없는 우리 강점(10/15 운영자 선택).
+    예비 호(지난 이야기 다시 보기)는 할 일이 지났을 수 있어 싣지 않는다."""
+    if d.get("format") != 2 or d.get("rewind") or str(d.get("date", "")) < TODO_FROM:
+        return ""
+    lines = todo_lines(d)
+    if not lines:
+        return ""
+    rows = "".join(_div(f"font-size:14.5px;font-weight:400;line-height:1.65;color:{INK};margin-top:6px;", "☐ " + md(x)) for x in lines)
+    return _box(_div(f"font-size:12.5px;font-weight:700;line-height:1.3;color:{CHIP_FG};", "오늘 챙길 것") + rows, mt=16)
+
+
 def _note(d):
-    """에디터 H 노트 — 고정 코너. 안경 마크 + 1인칭 편지 + 오늘의 5가지 목록 + H의 한 줄."""
+    """에디터 H 노트 — 고정 코너. 안경 마크 + 1인칭 편지 + 오늘의 목록(10/16~ 짧게 읽는 소식까지 10가지) + H의 한 줄."""
     head = (f'<table role="presentation" cellpadding="0" cellspacing="0"><tr><td valign="middle">{_mini_avatar()}</td>'
             f'<td valign="middle" style="padding-left:10px;">'
             + _div(f"font-size:17px;font-weight:700;line-height:1.3;color:{INK};",
@@ -250,15 +271,27 @@ def _note(d):
             + _div(f"font-size:14.5px;font-weight:400;line-height:1.6;color:{BODY};",
                    f'<b style="font-weight:700;color:{INK};">{esc(plain(it["headline"]).replace(chr(10), " "))}</b>{pick}')
             + "</td></tr>")
-    today = (_div(f"font-size:12.5px;font-weight:700;line-height:1.3;color:{INK};margin-top:18px;", f"오늘의 {len(rows)}가지")
+    short = str(d.get("date", "")) >= BRIEFS_FROM and d["briefs"]
+    if short:   # 2026-10-16~: 목차에 짧게 읽는 소식(06~10)까지 — 첫 화면에서 '10가지'가 보이게(10/15 운영자: '왜 5개냐')
+        for n, b in enumerate(d["briefs"], len(rows) + 1):
+            rows.append(
+                f'<tr><td valign="top" style="width:26px;padding:4px 0;"><div style="width:20px;height:20px;text-align:center;font-family:{F};'
+                f'font-size:11px;font-weight:800;line-height:20px;color:{CHIP_FG};">{n:02d}</div></td>'
+                f'<td valign="top" style="padding:4px 0;">'
+                + _div(f"font-size:14px;font-weight:400;line-height:1.6;color:{BODY};", esc(plain(b["title"])))
+                + "</td></tr>")
+    label = (f"오늘의 {len(rows)}가지 <span style=\"font-weight:400;color:{MUTED};\">· 깊게 {len(d['card_issues'])} · 짧게 {len(d['briefs'])}</span>"
+             if short else f"오늘의 {len(rows)}가지")
+    today = (_div(f"font-size:12.5px;font-weight:700;line-height:1.3;color:{INK};margin-top:18px;", label)
              + f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:6px;">{"".join(rows)}</table>')
-    if d["briefs"]:   # 메인 5가지 + 한 줄 뉴스 = 오늘 다루는 주제 전부(2026-09-26 절충안)
+    if d["briefs"] and not short:   # 메인 5가지 + 한 줄 뉴스 = 오늘 다루는 주제 전부(2026-09-26 절충안)
         first, last = len(rows) + 1, len(rows) + len(d["briefs"])
         today += _div(f"font-size:13.5px;font-weight:400;line-height:1.6;color:{MUTED};margin-top:4px;padding-left:26px;",
-                      f'+ 한 줄 뉴스 {len(d["briefs"])}개({first:02d}–{last:02d})는 아래에서 짧게 볼 수 있어요.')
+                      f'+ {"짧게 읽는 소식" if str(d.get("date", "")) >= BRIEFS_FROM else "한 줄 뉴스"} {len(d["briefs"])}개({first:02d}–{last:02d})는 아래에서 짧게 볼 수 있어요.')
     obs = _box(_div(f"font-size:14.5px;font-weight:400;line-height:1.7;color:{INK};",
                     f'<b style="font-weight:700;color:{INK};">H의 한 줄 ·</b> ' + md(d["observation"])), mt=14)
-    return f'\n<tr><td class="px" style="padding:0 36px;">{head}\n  {lead}\n  {today}\n  {obs}</td></tr>'
+    todo = _todo(d)   # 없는 호(10/15 이전·예비 호)는 빈 줄도 남기지 않는다 — 지난 호를 다시 빌드해도 발행본과 같게
+    return f'\n<tr><td class="px" style="padding:0 36px;">{head}\n  {lead}\n  {todo + chr(10) + "  " if todo else ""}{today}\n  {obs}</td></tr>'
 
 
 def _numbers(nums):
@@ -377,7 +410,9 @@ def _cta(d, site, campaign, n_cards):
                  f'<span style="color:#C4C4C4;"> &nbsp;|&nbsp; </span>' + links)
     return (_divider(30) + f'<tr><td class="px" style="padding:0 36px;">'
             + _div(f"font-size:19px;font-weight:700;line-height:1.45;color:{INK};",
-                   f"매일 아침 {n_topics}가지 트렌드 이슈를<br>한 번에 정리해 드려요!", True)
+                   (f"오늘 아침 {n_topics}가지 소식을 정리했어요<br>깊게 {len(d['all_items'])} · 짧게 {len(d['briefs'])}"   # 실제 개수(주말 3개 허용 — Codex 리뷰), 조사 없이(3·6 뒤 '으로')
+                    if str(d.get("date", "")) >= BRIEFS_FROM and d.get("format") == 2
+                    else f"매일 아침 {n_topics}가지 트렌드 이슈를<br>한 번에 정리해 드려요!"), True)
             + f"""<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:16px;background:#FFFFFF;border:1px solid {RULE};border-radius:18px;box-shadow:0 2px 6px rgba(0,0,0,.08);"><tr><td style="padding:18px 16px;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
     <td valign="middle" style="width:70px;">{AVATAR_MARK}</td>
@@ -424,7 +459,7 @@ def render(d, site, n_cards):
         body = [_header(d), _divider(), _note(d), _divider(30), _pick(d), _divider(0),
                 f'<tr><td class="px" style="padding:30px 36px 0;">{_chips([("02–05", True), ("함께 볼 4가지", False)])}</td></tr>']
         body.extend(_item(it) for it in d["items"])
-        body.append(_briefs(d, "한 줄 뉴스", start=len(d["all_items"]) + 1))
+        body.append(_briefs(d, "짧게 읽는 소식" if str(d.get("date", "")) >= BRIEFS_FROM else "한 줄 뉴스", start=len(d["all_items"]) + 1))
         if d.get("poll_result"):
             body.append(_poll_result(d))
         body.append(_poll_block(d, site) if d.get("poll") else _question(d))
