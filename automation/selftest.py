@@ -190,6 +190,14 @@ def t_compare_anjang():
     return None
 
 
+def t_send_time():
+    """발송 08:30(2026-10-16~) — 그 전 호의 발행 시각은 08:00 그대로(지난 호를 다시 빌드해도, Codex 리뷰)."""
+    from edith.common import send_time_on
+    expect(send_time_on("2026-10-15") == "08:00", "10/15 호 발행 시각이 08:00 이 아니다")
+    expect(send_time_on("2026-10-16") == load_config()["send_time_kst"] == "08:30", "10/16 부터 발송 08:30")
+    return None
+
+
 def t_commit_dates():
     """봇 기록 커밋 이름은 KST 날짜 — UTC 로 찍으면 08:00 게시 기록이 '어제' 이름으로 남는다(2026-10-11 'Record Instagram post (2026-10-10)')."""
     bad = []
@@ -751,6 +759,7 @@ def main():
     check("워크플로 서버 고정", t_runners)
     check("봇 커밋 이름은 KST 날짜", t_commit_dates)
     check("안장출근길 비교(회고 잣대)", t_compare_anjang)
+    check("발송 시각(지난 호는 08:00)", t_send_time)
     check("오늘 할 일(check_today)", t_check_today)
     check("연재 회차·문장 점검", t_series_and_style)
     check("예비 호 고르기(build_rewind)", t_rewind)

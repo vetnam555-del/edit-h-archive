@@ -56,6 +56,16 @@ def load_config():
     return json.loads((AUTOMATION / "config.json").read_text(encoding="utf-8"))
 
 
+SEND_TIME_BEFORE = ("2026-10-16", "08:00")   # 이 날짜 전 호는 08:00 에 나갔다(10/16~ 08:30 — config.send_time_kst)
+
+
+def send_time_on(date, cfg=None):
+    """그 호가 실제로 나간(나갈) 발송 시각 — 지난 호를 다시 빌드해도 발행 시각·구조화 데이터가 바뀌지 않게."""
+    if str(date) < SEND_TIME_BEFORE[0]:
+        return SEND_TIME_BEFORE[1]
+    return (cfg or load_config())["send_time_kst"]
+
+
 def send_time_ko(t):
     """'09:00' → '오전 9시', '08:30' → '오전 8시 30분' (뉴스레터·카드 문구용)."""
     h, m = map(int, t.split(":"))

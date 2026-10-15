@@ -10,7 +10,7 @@ VOL.092 대비 보강: 출처를 원문 링크로, '카드뉴스 보기' 링크 
 """
 import json
 
-from .common import esc, load_config, md, plain, send_time_ko
+from .common import esc, load_config, md, plain, send_time_ko, send_time_on
 
 F = "'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif"
 INK = "#282F38"
@@ -406,7 +406,7 @@ def _ld_json(d, site, title, has_cards=True):
     2026-10-09: 호 페이지에 설명문·대표 주소·구조화 데이터가 없어 검색 결과에 제목만 나갔다.
     발행 시각은 원고에 적힌 실제 시각(예비 호는 08:05 뒤 만든 시각)이 있으면 그것, 없으면 발송 시각. 카드 없이 만든 호는 이미지를 넣지 않는다."""
     url = f"{site}/{d['date']}.html"
-    when = d.get("published_at_kst") or f"{d['date']}T{load_config().get('send_time_kst', '08:30')}:00+09:00"
+    when = d.get("published_at_kst") or f"{d['date']}T{send_time_on(d['date'])}:00+09:00"
     org = {"@type": "Organization", "name": "EDIT H", "url": f"{site}/"}
     data = {"@context": "https://schema.org", "@type": "NewsArticle", "headline": f"[EDIT H] {title}"[:110],
             "description": plain(d["subtitle"]), "datePublished": when, "dateModified": when, "inLanguage": "ko",
