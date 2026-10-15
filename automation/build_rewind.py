@@ -112,8 +112,9 @@ def _expired(text, base, on):
 
 
 def _live_checklist(lines, base, on):
-    """체크리스트에서 이미 지난 날짜의 줄을 뺀다(같은 줄에 아직 남은 날짜가 있으면 둔다 — '7일 홀수·8일 짝수, 12~16일엔 누구나')."""
-    return [ln for ln in lines or [] if not _expired(ln, base, on)]
+    """체크리스트에서 이미 지난 날짜의 줄을 뺀다(같은 줄에 아직 남은 날짜가 있으면 둔다 — '7일 홀수·8일 짝수, 12~16일엔 누구나').
+    요일·주말·연휴·공휴일에 묶인 줄('이번 주말에 방문하세요'·'일요일까지 신청')도 뺀다 — 다시 보는 날엔 그 요일이 아니다(Codex 리뷰)."""
+    return [ln for ln in lines or [] if not _expired(ln, base, on) and not _DATED.search(ln)]
 
 
 def _used(date):
