@@ -128,10 +128,15 @@ def brief_check(d):
 
 def todo_check(d):
     """오늘 챙길 것(2026-10-16~): content.todo 3줄을 직접 쓰게 — 없으면 결론 문장 앞 3개로 채워져 길고 겹친다."""
-    from .content import TODO_FROM
-    if str(d.get("date", ""))[:10] < TODO_FROM or d.get("todo"):
+    from .content import TODO_FROM, TODO_MAX
+    if str(d.get("date", ""))[:10] < TODO_FROM or d.get("rewind") or d.get("format") != 2:
         return []
-    return ["오늘 챙길 것(todo)이 없어 결론 문장 앞 3개로 채웠어요 — 10가지 중 오늘 할 일 3줄(마감·신청·확인, 40자 안)을 직접 쓰세요"]
+    todo = [x for x in d.get("todo") or [] if str(x).strip()]
+    if not todo:
+        return ["오늘 챙길 것(todo)이 없어 결론 문장 앞 3개로 채웠어요 — 10가지 중 오늘 할 일 3줄(마감·신청·확인, 40자 안)을 직접 쓰세요"]
+    if len(todo) < TODO_MAX:   # 1~2줄만 쓴 것도 알린다(Codex 리뷰)
+        return [f"오늘 챙길 것(todo)이 {len(todo)}줄 — {TODO_MAX}줄을 채우세요(10가지 중 오늘 할 일)"]
+    return []
 
 
 SHARE_FROM = "2026-10-10"   # E6 — 이 날부터 데일리 호는 instagram.share_to 를 쓴다
