@@ -338,6 +338,8 @@ def t_rewind():
     expect(build_rewind._live_checklist(["한글날 전에 신청하세요"], "2026-10-01", "2026-10-02"), "아직 오지 않은 한글날 줄을 뺀다")
     expect(not build_rewind._live_checklist(["한글날 전에 신청하세요"], "2026-10-01", "2026-10-10"), "지난 한글날 줄을 남긴다")
     expect(build_rewind._live_checklist(["다음 금요일까지 신청하세요"], "2026-10-16", "2026-10-17"), "'다음 금요일'을 그날 금요일로 본다")
+    for ln in ("노동절 전에 신청하세요", "석가탄신일 전에 신청하세요", "부처님 오신 날 전에 신청하세요"):   # _DATED 의 이름은 모두 날짜로 풀린다
+        expect(build_rewind._live_checklist([ln], "2026-04-01", "2026-04-02"), f"아직 오지 않은 공휴일 줄을 뺀다: {ln}")
     expect(not build_rewind._live_checklist(["주말에 방문하세요"], "2026-10-03", "2026-10-10"), "맨 '주말' 줄을 주말이 지나도 남긴다")
     expect(build_rewind._dated({"tag": "디지털 효도", "title": "부모님 폰"}, {"takeaway": "이번 연휴에 같이 봐요"}),
            "카드 말풍선의 '이번 연휴에'를 못 본다")

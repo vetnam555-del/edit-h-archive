@@ -113,9 +113,9 @@ def _expired(text, base, on):
 
 _WEEKDAY = re.compile(r"(?:(다음|지난|이번|오는|이)\s?)?(?:([월화수목금토일])요일|(주말))")
 # 날짜가 해마다 같은 날 — 체크리스트의 '한글날 전에'를 실제 날짜로 풀어 아직 남았는지 본다(Codex 리뷰). 설날·추석·부처님오신날은 holidays_kr.json 에서
-_FIXED_DAYS = {"신정": (1, 1), "삼일절": (3, 1), "어린이날": (5, 5), "현충일": (6, 6), "제헌절": (7, 17), "광복절": (8, 15), "개천절": (10, 3),
+_FIXED_DAYS = {"신정": (1, 1), "삼일절": (3, 1), "노동절": (5, 1), "어린이날": (5, 5), "현충일": (6, 6), "제헌절": (7, 17), "광복절": (8, 15), "개천절": (10, 3),
                "한글날": (10, 9), "성탄절": (12, 25), "크리스마스": (12, 25), "핼러윈": (10, 31), "할로윈": (10, 31), "빼빼로데이": (11, 11)}
-_LUNAR = ("설날", "추석", "부처님오신날")
+_LUNAR = ("설날", "추석", "부처님오신날", "석가탄신일")   # _DATED 가 알아보는 이름은 모두 날짜로 풀 수 있어야 한다(Codex 리뷰)
 
 
 def _holiday_dates(name, base):
@@ -125,7 +125,7 @@ def _holiday_dates(name, base):
         day = dt.date(base.year, m, d)
         return day if day >= base else dt.date(base.year + 1, m, d)
     hol = json.loads((AUTOMATION / "holidays_kr.json").read_text(encoding="utf-8"))
-    key = "설" if name == "설날" else name
+    key = {"설날": "설", "석가탄신일": "부처님오신날"}.get(name, name)
     days = sorted(dt.date.fromisoformat(k) for y, v in hol.items() if y[:1] == "2" for k, n in v.items() if key in n)
     days = [x for x in days if x >= base]
     if not days:
@@ -150,8 +150,8 @@ def _dated_line_live(ln, base, on):
         elif m.group(1) == "지난":
             day -= dt.timedelta(days=7)
         targets.append(day)
-    rest = _WEEKDAY.sub("", ln)
-    names = [n for n in (*_FIXED_DAYS, *_LUNAR) if n in rest.replace(" ", "")]
+    rest = _WEEKDAY.sub("", ln).replace(" ", "")   # '부처님 오신 날'처럼 띄어 써도 찾고 지운다(Codex 리뷰)
+    names = [n for n in (*_FIXED_DAYS, *_LUNAR) if n in rest]
     for n in names:
         day = _holiday_dates(n, b)
         if day:
