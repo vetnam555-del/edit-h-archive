@@ -343,6 +343,10 @@ def t_rewind():
     expect(build_rewind._live_checklist(["블랙 프라이데이 전에 신청하세요"], "2026-11-01", "2026-11-02"), "블랙프라이데이(11/27) 줄을 미리 뺀다")
     expect(build_rewind._live_checklist(["개천절 연휴에 방문하세요"], "2026-09-28", "2026-10-05"), "대체공휴일(10/5)까지 이어지는 개천절 연휴 줄을 10/3 에 끝났다고 본다")
     expect(build_rewind._live_checklist(["금요일부터 신청하세요"], "2026-10-12", "2026-10-17"), "'금요일부터'(시작일)를 마감으로 본다")
+    expect(not build_rewind._live_checklist(["개천절 전에 신청하세요"], "2026-09-28", "2026-10-03"), "'개천절 전에'를 대체공휴일까지 늘린다")
+    expect(build_rewind._holiday_dates("크리스마스", parse_date("2027-12-20"), period=True) == parse_date("2027-12-27"),
+           "'크리스마스 연휴'가 성탄절 대체공휴일(2027-12-27)을 못 찾는다")
+    expect(build_rewind._dated({"tag": "위고비", "title": "위고비, 이르면 이번 주 건강보험 신청"}, {}), "제목의 '이번 주'를 그날 이야기로 못 본다")
     for ln in ("노동절 전에 신청하세요", "석가탄신일 전에 신청하세요", "부처님 오신 날 전에 신청하세요"):   # _DATED 의 이름은 모두 날짜로 풀린다
         expect(build_rewind._live_checklist([ln], "2026-04-01", "2026-04-02"), f"아직 오지 않은 공휴일 줄을 뺀다: {ln}")
     expect(not build_rewind._live_checklist(["주말에 방문하세요"], "2026-10-03", "2026-10-10"), "맨 '주말' 줄을 주말이 지나도 남긴다")

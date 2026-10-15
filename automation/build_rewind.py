@@ -55,7 +55,7 @@ def _stale(*texts):
 # 본문은 보지 않는다('주말 매출'처럼 배경으로 나온 말까지 막으면 후보가 너무 준다).
 _DATED_TAG = re.compile(r"날씨|일정|연휴|명절|추석|설날|이번\s?주|주말")
 # 공휴일·기념일 이름도('한글날 휴장'·'개천절 할인' — Codex 리뷰). 맨 '주말'은 '저녁·주말에' 같은 일반 표현이라 뺀다
-_DATED = re.compile(r"[월화수목금토일]요일|연휴|명절|(?:이번|지난|다음|오는|이)\s?주말|신정|설날|삼일절|노동절|어린이날|부처님\s?오신\s?날|석가탄신일"
+_DATED = re.compile(r"[월화수목금토일]요일|연휴|명절|(?:이번|지난|다음|오는|이)\s?주말|(?:이번|지난|다음)\s?주(?![말간])|신정|설날|삼일절|노동절|어린이날|부처님\s?오신\s?날|석가탄신일"
                     r"|현충일|제헌절|광복절|추석|개천절|한글날|성탄절|크리스마스|(?:대체|임시)\s?공휴일|핼러윈|할로윈|블랙\s?프라이데이|빼빼로\s?데이")
 
 
@@ -124,8 +124,8 @@ def _black_friday(year):
     return first + dt.timedelta(days=(3 - first.weekday()) % 7 + 21 + 1)
 
 
-def _holiday_dates(name, base):
-    """name(공휴일 이름)이 base 뒤 처음 오는 날(연휴면 그 끝날) — 모르면 None."""
+def _holiday_dates(name, base, period=False):
+    """name(공휴일 이름)이 base 뒤 처음 오는 날 — 모르면 None. period(‘개천절 연휴’)면 붙은 대체공휴일까지(Codex 리뷰)."""
     if name == "블랙프라이데이":
         day = _black_friday(base.year)
         return day if day >= base else _black_friday(base.year + 1)
@@ -134,8 +134,11 @@ def _holiday_dates(name, base):
         m, d = _FIXED_DAYS[name]
         day = dt.date(base.year, m, d)
         day = day if day >= base else dt.date(base.year + 1, m, d)
-        # 대체공휴일이 붙은 해는 그날까지가 그 연휴다(2026 개천절 10/3 → 대체공휴일 10/5 — Codex 리뷰)
-        subs = [dt.date.fromisoformat(k) for y, v in hol.items() if y[:1] == "2" for k, n in v.items() if name in n]
+        if not period:   # '개천절 전에·까지'는 그날 기준 — 대체공휴일로 늘리지 않는다
+            return day
+        # '개천절 연휴'는 대체공휴일이 붙은 해면 그날까지(2026 개천절 10/3 → 대체공휴일 10/5)
+        canon = {"크리스마스": "성탄절", "할로윈": "핼러윈"}.get(name, name)
+        subs = [dt.date.fromisoformat(k) for y, v in hol.items() if y[:1] == "2" for k, n in v.items() if canon in n]
         return max([day, *[x for x in subs if 0 <= (x - day).days <= 5]])
     key = {"설날": "설", "석가탄신일": "부처님오신날"}.get(name, name)
     days = sorted(dt.date.fromisoformat(k) for y, v in hol.items() if y[:1] == "2" for k, n in v.items() if key in n)
@@ -168,7 +171,7 @@ def _dated_line_live(ln, base, on):
     rest = _WEEKDAY.sub("", ln).replace(" ", "")   # '부처님 오신 날'처럼 띄어 써도 찾고 지운다(Codex 리뷰)
     names = [n for n in (*_FIXED_DAYS, *_LUNAR) if n in rest]
     for n in names:
-        day = _holiday_dates(n, b)
+        day = _holiday_dates(n, b, period=bool(re.search(re.escape(n) + r"연휴", rest)))
         if day and re.search(re.escape(n) + r"(?:연휴)?(?:부터|이후|후)", rest):   # '한글날부터' — 시작일
             starts += 1
             rest = rest.replace(n, "")
