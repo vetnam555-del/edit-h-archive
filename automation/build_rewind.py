@@ -12,6 +12,7 @@ content/{날짜}.json 을 만들고 build_issue.py 로 뉴스레터·카드를 �
 
 고르는 법: H PICK = 형식 2 호의 H PICK(심층 필드가 있어야 한다) 중 성과표 점수가 가장 높은 것, 나머지 4개 = 카드가 있던
 이야기 중 태그가 겹치지 않게 점수·최신 순. '오늘·내일·어제·이번 주'처럼 시점이 지난 표현이 든 이야기와 어제 호는 되도록 뺀다.
+그날·그 연휴에만 맞는 이야기(날씨·이번 주 일정 태그, 제목·결론에 요일·연휴·명절)는 다른 후보로 다섯을 채울 수 있으면 싣지 않는다.
 앞선 예비 호에 이미 실린 이야기도 되도록 뺀다(사용량 한도처럼 며칠 이어지는 장애에 같은 호가 되풀이되지 않게).
 """
 import argparse
@@ -47,6 +48,21 @@ def _scores():
 
 def _stale(*texts):
     return any(_STALE.search(t or "") for t in texts)
+
+
+# 2026-10-14 회고: 10/3 호 '연휴 날씨'(아침 5도, 일요일 밤부터 비)가 열하루 뒤 평일 예비 호에 그대로 나갔다 — 숫자 날짜만 거르고
+# 요일·연휴는 못 봤다. 그날·그 연휴에만 맞는 이야기는 태그(날씨·이번 주 일정…)나 제목·결론·카드 제목의 요일·연휴·명절로 알아본다.
+# 본문은 보지 않는다('주말 매출'처럼 배경으로 나온 말까지 막으면 후보가 너무 준다).
+_DATED_TAG = re.compile(r"날씨|일정|연휴|명절|추석|설날|이번\s?주|주말")
+# 공휴일·기념일 이름도('한글날 휴장'·'개천절 할인' — Codex 리뷰). 맨 '주말'은 '저녁·주말에' 같은 일반 표현이라 뺀다
+_DATED = re.compile(r"[월화수목금토일]요일|연휴|명절|(?:이번|지난|다음|오는|이)\s?주말|(?:이번|지난|다음)\s?주(?![말간])|신정|설날|삼일절|노동절|어린이날|부처님\s?오신\s?날|석가탄신일"
+                    r"|현충일|제헌절|광복절|추석|개천절|한글날|성탄절|크리스마스|(?:대체|임시)\s?공휴일|핼러윈|할로윈|블랙\s?프라이데이|빼빼로\s?데이")
+
+
+def _dated(story, spec, title=None):
+    """그날·그 연휴에만 맞는 이야기인가 — 예비 호에선 다른 후보가 모자랄 때만 싣는다."""
+    return bool(_DATED_TAG.search(story.get("tag") or "")) or any(
+        _DATED.search(t or "") for t in (title or story.get("title"), story.get("takeaway"), spec.get("headline"), spec.get("takeaway")))
 
 
 # 박힌 날짜: '10월 7일', '7일', '12~16일'(끝 날짜), '11월 16~27일', '2027년 5월 1일', '내년 1월 5일'.
@@ -95,9 +111,87 @@ def _expired(text, base, on):
     return bool(ds) and max(ds) < parse_date(on)
 
 
+_WEEKDAY = re.compile(r"(?:(다음|지난|이번|오는|이)\s?)?(?:([월화수목금토일])요일|(주말))")
+# 날짜가 해마다 같은 날 — 체크리스트의 '한글날 전에'를 실제 날짜로 풀어 아직 남았는지 본다(Codex 리뷰). 설날·추석·부처님오신날은 holidays_kr.json 에서
+_FIXED_DAYS = {"신정": (1, 1), "삼일절": (3, 1), "노동절": (5, 1), "어린이날": (5, 5), "현충일": (6, 6), "제헌절": (7, 17), "광복절": (8, 15), "개천절": (10, 3),
+               "한글날": (10, 9), "성탄절": (12, 25), "크리스마스": (12, 25), "핼러윈": (10, 31), "할로윈": (10, 31), "빼빼로데이": (11, 11)}
+_LUNAR = ("설날", "추석", "부처님오신날", "석가탄신일", "블랙프라이데이")   # _DATED 가 알아보는 이름은 모두 날짜로 풀 수 있어야 한다(Codex 리뷰)
+
+
+def _black_friday(year):
+    """11월 넷째 목요일 다음 날."""
+    first = dt.date(year, 11, 1)
+    return first + dt.timedelta(days=(3 - first.weekday()) % 7 + 21 + 1)
+
+
+def _holiday_dates(name, base, period=False):
+    """name(공휴일 이름)이 base 뒤 처음 오는 날 — 모르면 None. period(‘개천절 연휴’)면 붙은 대체공휴일까지(Codex 리뷰)."""
+    if name == "블랙프라이데이":
+        day = _black_friday(base.year)
+        return day if day >= base else _black_friday(base.year + 1)
+    hol = json.loads((AUTOMATION / "holidays_kr.json").read_text(encoding="utf-8"))
+    if name in _FIXED_DAYS:
+        m, d = _FIXED_DAYS[name]
+        day = dt.date(base.year, m, d)
+        day = day if day >= base else dt.date(base.year + 1, m, d)
+        if not period:   # '개천절 전에·까지'는 그날 기준 — 대체공휴일로 늘리지 않는다
+            return day
+        # '개천절 연휴'는 대체공휴일이 붙은 해면 그날까지(2026 개천절 10/3 → 대체공휴일 10/5)
+        canon = {"크리스마스": "성탄절", "할로윈": "핼러윈"}.get(name, name)
+        subs = [dt.date.fromisoformat(k) for y, v in hol.items() if y[:1] == "2" for k, n in v.items() if canon in n]
+        return max([day, *[x for x in subs if 0 <= (x - day).days <= 5]])
+    key = {"설날": "설", "석가탄신일": "부처님오신날"}.get(name, name)
+    days = sorted(dt.date.fromisoformat(k) for y, v in hol.items() if y[:1] == "2" for k, n in v.items() if key in n)
+    days = [x for x in days if x >= base]
+    if not days:
+        return None
+    return max(x for x in days if (x - days[0]).days <= 5)
+
+
+def _dated_line_live(ln, base, on):
+    """요일·주말·연휴·공휴일에 묶인 체크리스트 줄이 on(독자가 받는 날)에도 아직 유효한가(Codex 리뷰).
+    박힌 날짜가 있으면 그것으로('내년 설 연휴(2월 6~9일)'), 요일·주말은 원래 호 날짜부터 다음 그 요일(주말은 일요일, '다음'은 그 요일이 이번 주 안이면 한 주 뒤),
+    공휴일 이름은 그 날짜로('한글날까지' → 10/9, '한글날 전에' → 10/8) 본다. '연휴'·'명절'처럼 날을 알 수 없는 말만 있으면 지난 것으로 본다."""
+    b, o = parse_date(base), parse_date(on)
+    ds = _dates(ln, b)
+    if ds:
+        return max(ds) >= o
+    targets, starts = [], 0
+    for m in _WEEKDAY.finditer(ln):
+        if re.match(r"\s*(?:부터|이후|후에|후부터)", ln[m.end():]):   # '금요일부터' — 시작일이지 마감이 아니다(Codex 리뷰)
+            starts += 1
+            continue
+        wd = 6 if m.group(3) else "월화수목금토일".index(m.group(2))
+        day = b + dt.timedelta(days=(wd - b.weekday()) % 7)
+        if m.group(1) == "다음" and day.isocalendar()[:2] == b.isocalendar()[:2]:   # 이번 주 안이면 한 주 뒤(토요일의 '다음 금요일'은 바로 그 금요일 — Codex 리뷰)
+            day += dt.timedelta(days=7)
+        elif m.group(1) == "지난":
+            day -= dt.timedelta(days=7)
+        targets.append(day)
+    rest = _WEEKDAY.sub("", ln).replace(" ", "")   # '부처님 오신 날'처럼 띄어 써도 찾고 지운다(Codex 리뷰)
+    names = [n for n in (*_FIXED_DAYS, *_LUNAR) if n in rest]
+    for n in names:
+        day = _holiday_dates(n, b, period=bool(re.search(re.escape(n) + r"연휴", rest)))
+        if day and re.search(re.escape(n) + r"(?:연휴)?(?:부터|이후|후)", rest):   # '한글날부터' — 시작일
+            starts += 1
+            rest = rest.replace(n, "")
+        elif day:
+            if re.search(re.escape(n) + r"(?:연휴)?(?:당일)?전", rest):   # '한글날 전에·전까지' — 숫자 날짜처럼 그 전날까지(Codex 리뷰)
+                day -= dt.timedelta(days=1)
+            targets.append(day)
+            rest = rest.replace(n, "")
+    if names:
+        rest = re.sub(r"연휴|명절", "", rest)
+    if _DATED.search(rest) or not (targets or starts):   # 날을 알 수 없는 말('연휴에 같이 봐요')이 남았다 — 애매하면 뺀다
+        return False
+    return not targets or max(targets) >= o   # 시작일뿐이면('금요일부터 신청') 끝이 없으니 둔다
+
+
 def _live_checklist(lines, base, on):
-    """체크리스트에서 이미 지난 날짜의 줄을 뺀다(같은 줄에 아직 남은 날짜가 있으면 둔다 — '7일 홀수·8일 짝수, 12~16일엔 누구나')."""
-    return [ln for ln in lines or [] if not _expired(ln, base, on)]
+    """체크리스트에서 이미 지난 날짜의 줄을 뺀다(같은 줄에 아직 남은 날짜가 있으면 둔다 — '7일 홀수·8일 짝수, 12~16일엔 누구나').
+    요일·주말·연휴·공휴일에 묶인 줄('이번 주말에 방문하세요'·'일요일까지 신청')도 그날이 지났으면 뺀다(Codex 리뷰)."""
+    return [ln for ln in lines or [] if not _expired(ln, base, on)
+            and (not (_DATED.search(ln) or _WEEKDAY.search(ln)) or _dated_line_live(ln, base, on))]
 
 
 def _used(date):
@@ -173,6 +267,9 @@ def pick(date, on=None):
         """결론(할 일)에 박힌 날짜가 이미 지났다 — 그런 이야기는 맨 뒤로(2026-10-10 회고)."""
         return _expired(x[0].get("takeaway"), x[2], on)
 
+    def dated(x):
+        return _dated(x[0], x[1], x[4]["title"] if x[3] else None)
+
     def rank(x):
         story, spec, day, is_pick, c = x
         stale = _stale(story.get("title"), story.get("body"), story.get("takeaway"), spec.get("headline"), spec.get("body"),
@@ -198,15 +295,24 @@ def pick(date, on=None):
     else:   # 모두 사흘 안이면 출처 2건 이상을 먼저, 그 안에서 가장 오래전에 실린 H PICK 부터(어제 것을 또 쓰지 않게, Codex 리뷰)
         picks = sorted(picks, key=lambda x: (gone(x), not _solid(x[0]), last[id(x)]))
         print(f"  ⚠ 예비 호: {PICK_GAP_DAYS}일보다 오래된 H PICK 이 없어 가장 오래전에 실린 H PICK 을 다시 씁니다")
+    # 지난 연휴·요일에 묶인 H PICK 은 같은 조건의 다른 후보가 있으면 뒤로 — 사흘 간격(같은 H PICK 반복 막기)이 먼저다(2026-10-14 회고)
+    timely = [x for x in picks if not dated(x)]
+    if timely:
+        picks = timely
     top = picks[0]
+    if dated(top):
+        print(f"  ⚠ 예비 호: H PICK 이 요일·연휴에 묶인 이야기입니다 — {top[4]['title']}")
     if gone(top):
         print(f"  ⚠ 예비 호: H PICK 결론의 날짜가 이미 지났습니다 — {top[0].get('takeaway')}")
     ranked = sorted((x for x in cands if not x[3]), key=rank, reverse=True)
-    for per_issue, need_solid in ((1, True), (2, True), (2, False), (4, False)):
+    # 그날·그 연휴에만 맞는 이야기는 마지막 단계에서만 허용한다 — 출처·한 호 한 개 조건을 다 풀어도 모자랄 때(2026-10-14 회고)
+    # 마지막 두 단계는 한 호 제한을 푼다(H PICK 의 호가 1에서 시작해 4로는 그 호 이야기를 3개까지만 담는다 — Codex 리뷰)
+    for per_issue, need_solid, allow_dated in ((1, True, False), (2, True, False), (2, False, False), (5, False, False), (5, False, True)):
         items, tags, per_day = [], {top[0]["tag"]}, {top[2]: 1}
         for x in ranked:
             if (x[0]["tag"] in tags or any(x[0]["title"] == y[0]["title"] for y in items)
-                    or per_day.get(x[2], 0) >= per_issue or (need_solid and not _solid(x[0]))):
+                    or per_day.get(x[2], 0) >= per_issue or (need_solid and not _solid(x[0]))
+                    or (not allow_dated and dated(x))):
                 continue
             items.append(x)
             tags.add(x[0]["tag"])
@@ -216,6 +322,8 @@ def pick(date, on=None):
         if len(items) == 4:
             if not need_solid:
                 print("  ⚠ 예비 호: 출처 2건 이상인 이야기가 모자라 1건짜리를 섞었습니다")
+            if any(dated(x) for x in items):
+                print("  ⚠ 예비 호: 후보가 모자라 요일·연휴에 묶인 이야기를 섞었습니다 — " + ", ".join(x[0]["tag"] for x in items if dated(x)))
             break
     if len(items) < 4:
         raise ValueError(f"다시 엮을 이야기가 모자랍니다(아이템 {len(items)}/4)")
