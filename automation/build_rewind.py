@@ -54,7 +54,9 @@ def _stale(*texts):
 # 요일·연휴는 못 봤다. 그날·그 연휴에만 맞는 이야기는 태그(날씨·이번 주 일정…)나 제목·결론·카드 제목의 요일·연휴·명절로 알아본다.
 # 본문은 보지 않는다('주말 매출'처럼 배경으로 나온 말까지 막으면 후보가 너무 준다).
 _DATED_TAG = re.compile(r"날씨|일정|연휴|명절|추석|설날|이번\s?주|주말")
-_DATED = re.compile(r"[월화수목금토일]요일|연휴|명절|추석|설날|(?:이번|지난|다음|오는|이)\s?주말")   # 맨 '주말'은 '저녁·주말에' 같은 일반 표현이라 뺀다
+# 공휴일·기념일 이름도('한글날 휴장'·'개천절 할인' — Codex 리뷰). 맨 '주말'은 '저녁·주말에' 같은 일반 표현이라 뺀다
+_DATED = re.compile(r"[월화수목금토일]요일|연휴|명절|(?:이번|지난|다음|오는|이)\s?주말|신정|설날|삼일절|노동절|어린이날|부처님\s?오신\s?날|석가탄신일"
+                    r"|현충일|제헌절|광복절|추석|개천절|한글날|성탄절|크리스마스|(?:대체|임시)\s?공휴일|핼러윈|할로윈|블랙\s?프라이데이|빼빼로\s?데이")
 
 
 def _dated(story, spec, title=None):
@@ -226,7 +228,8 @@ def pick(date, on=None):
         print(f"  ⚠ 예비 호: H PICK 결론의 날짜가 이미 지났습니다 — {top[0].get('takeaway')}")
     ranked = sorted((x for x in cands if not x[3]), key=rank, reverse=True)
     # 그날·그 연휴에만 맞는 이야기는 마지막 단계에서만 허용한다 — 출처·한 호 한 개 조건을 다 풀어도 모자랄 때(2026-10-14 회고)
-    for per_issue, need_solid, allow_dated in ((1, True, False), (2, True, False), (2, False, False), (4, False, False), (4, False, True)):
+    # 마지막 두 단계는 한 호 제한을 푼다(H PICK 의 호가 1에서 시작해 4로는 그 호 이야기를 3개까지만 담는다 — Codex 리뷰)
+    for per_issue, need_solid, allow_dated in ((1, True, False), (2, True, False), (2, False, False), (5, False, False), (5, False, True)):
         items, tags, per_day = [], {top[0]["tag"]}, {top[2]: 1}
         for x in ranked:
             if (x[0]["tag"] in tags or any(x[0]["title"] == y[0]["title"] for y in items)

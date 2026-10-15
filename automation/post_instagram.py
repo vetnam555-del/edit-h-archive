@@ -316,7 +316,7 @@ CREATOR = "MEDIA_CREATOR"   # API 스토리 게시는 비즈니스 계정만 된
 
 
 def story_on(cfg, key, account_type=None):
-    """E9 아침 스토리를 올리는 날인가 — config.instagram.story_from 부터(2026-10-18~, E7 뒤로 미룸). 데일리 호만(주간 특집 키 제외),
+    """E9 아침 스토리를 올리는 날인가 — config.instagram.story_from 부터(2026-10-19~, E7 뒤로 미룸). 데일리 호만(주간 특집 키 제외),
     크리에이터 계정이면 아니다(account_type 을 모르면 시도해 보고 실패를 기록한다)."""
     start = cfg.get("story_from")
     return bool(start and str(key)[:10] >= start and "weekly" not in str(key) and account_type != CREATOR)
