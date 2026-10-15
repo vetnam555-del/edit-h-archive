@@ -129,11 +129,14 @@ def _holiday_dates(name, base):
     if name == "블랙프라이데이":
         day = _black_friday(base.year)
         return day if day >= base else _black_friday(base.year + 1)
+    hol = json.loads((AUTOMATION / "holidays_kr.json").read_text(encoding="utf-8"))
     if name in _FIXED_DAYS:
         m, d = _FIXED_DAYS[name]
         day = dt.date(base.year, m, d)
-        return day if day >= base else dt.date(base.year + 1, m, d)
-    hol = json.loads((AUTOMATION / "holidays_kr.json").read_text(encoding="utf-8"))
+        day = day if day >= base else dt.date(base.year + 1, m, d)
+        # 대체공휴일이 붙은 해는 그날까지가 그 연휴다(2026 개천절 10/3 → 대체공휴일 10/5 — Codex 리뷰)
+        subs = [dt.date.fromisoformat(k) for y, v in hol.items() if y[:1] == "2" for k, n in v.items() if name in n]
+        return max([day, *[x for x in subs if 0 <= (x - day).days <= 5]])
     key = {"설날": "설", "석가탄신일": "부처님오신날"}.get(name, name)
     days = sorted(dt.date.fromisoformat(k) for y, v in hol.items() if y[:1] == "2" for k, n in v.items() if key in n)
     days = [x for x in days if x >= base]
@@ -150,8 +153,11 @@ def _dated_line_live(ln, base, on):
     ds = _dates(ln, b)
     if ds:
         return max(ds) >= o
-    targets = []
+    targets, starts = [], 0
     for m in _WEEKDAY.finditer(ln):
+        if re.match(r"\s*(?:부터|이후|후에|후부터)", ln[m.end():]):   # '금요일부터' — 시작일이지 마감이 아니다(Codex 리뷰)
+            starts += 1
+            continue
         wd = 6 if m.group(3) else "월화수목금토일".index(m.group(2))
         day = b + dt.timedelta(days=(wd - b.weekday()) % 7)
         if m.group(1) == "다음" and day.isocalendar()[:2] == b.isocalendar()[:2]:   # 이번 주 안이면 한 주 뒤(토요일의 '다음 금요일'은 바로 그 금요일 — Codex 리뷰)
@@ -163,16 +169,19 @@ def _dated_line_live(ln, base, on):
     names = [n for n in (*_FIXED_DAYS, *_LUNAR) if n in rest]
     for n in names:
         day = _holiday_dates(n, b)
-        if day:
+        if day and re.search(re.escape(n) + r"(?:연휴)?(?:부터|이후|후)", rest):   # '한글날부터' — 시작일
+            starts += 1
+            rest = rest.replace(n, "")
+        elif day:
             if re.search(re.escape(n) + r"(?:연휴)?(?:당일)?전", rest):   # '한글날 전에·전까지' — 숫자 날짜처럼 그 전날까지(Codex 리뷰)
                 day -= dt.timedelta(days=1)
             targets.append(day)
             rest = rest.replace(n, "")
     if names:
         rest = re.sub(r"연휴|명절", "", rest)
-    if not targets or _DATED.search(rest):   # 날을 알 수 없는 말('연휴에 같이 봐요')이 남았다
+    if _DATED.search(rest) or not (targets or starts):   # 날을 알 수 없는 말('연휴에 같이 봐요')이 남았다 — 애매하면 뺀다
         return False
-    return max(targets) >= o
+    return not targets or max(targets) >= o   # 시작일뿐이면('금요일부터 신청') 끝이 없으니 둔다
 
 
 def _live_checklist(lines, base, on):
