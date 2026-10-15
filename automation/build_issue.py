@@ -108,7 +108,7 @@ def main():
         return
 
     site_url = args.site_url or cfg["site_url"]
-    d["send_time_kst"] = cfg["send_time_kst"]  # 뉴스레터 푸터·카드 하단·캡션의 발송 시각 문구
+    d["send_time_kst"] = send_time_on(d["date"], cfg)  # 뉴스레터 푸터·카드 하단·캡션의 발송 시각 문구(지난 호는 그때 시각)
     files, card_report = [], []
     if not args.no_cards:
         out_dir = INSTAGRAM_DIR / args.date

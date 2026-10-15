@@ -220,6 +220,9 @@ def t_brief_check():
     expect(any("숫자가 없어요" in x for x in both) and any("1문장" in x for x in both), "숫자·문장 수 점검이 서로를 가린다")
     four = style.brief_check({"date": "2026-10-17", "briefs": three[:2] + [b("길어요", "1개예요. 2개예요. 3개예요. 4개예요.")]})
     expect(any("4문장" in x for x in four), "4문장짜리 짧은 소식을 통과시켰다")
+    marked = style.brief_check({"date": "2026-10-17", "briefs": three[:2] + [b("신청해요", "**16일까지 신청해요.** 앱에서 서류 2개를 내면 돼요."),
+                                                                         b("받아요", "은행은 “16일까지 받아요.” 앱에서 서류 2개를 내면 돼요.")]})
+    expect(not any("문장" in x for x in marked), f"굵게·따옴표 뒤 마침표를 문장 끝으로 못 셌다: {marked}")
     return None
 
 

@@ -290,7 +290,8 @@ def _note(d):
                       f'+ {"짧게 읽는 소식" if str(d.get("date", "")) >= BRIEFS_FROM else "한 줄 뉴스"} {len(d["briefs"])}개({first:02d}–{last:02d})는 아래에서 짧게 볼 수 있어요.')
     obs = _box(_div(f"font-size:14.5px;font-weight:400;line-height:1.7;color:{INK};",
                     f'<b style="font-weight:700;color:{INK};">H의 한 줄 ·</b> ' + md(d["observation"])), mt=14)
-    return f'\n<tr><td class="px" style="padding:0 36px;">{head}\n  {lead}\n  {_todo(d)}\n  {today}\n  {obs}</td></tr>'
+    todo = _todo(d)   # 없는 호(10/15 이전·예비 호)는 빈 줄도 남기지 않는다 — 지난 호를 다시 빌드해도 발행본과 같게
+    return f'\n<tr><td class="px" style="padding:0 36px;">{head}\n  {lead}\n  {todo + chr(10) + "  " if todo else ""}{today}\n  {obs}</td></tr>'
 
 
 def _numbers(nums):
