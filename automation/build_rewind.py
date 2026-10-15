@@ -115,11 +115,20 @@ _WEEKDAY = re.compile(r"(?:(다음|지난|이번|오는|이)\s?)?(?:([월화수�
 # 날짜가 해마다 같은 날 — 체크리스트의 '한글날 전에'를 실제 날짜로 풀어 아직 남았는지 본다(Codex 리뷰). 설날·추석·부처님오신날은 holidays_kr.json 에서
 _FIXED_DAYS = {"신정": (1, 1), "삼일절": (3, 1), "노동절": (5, 1), "어린이날": (5, 5), "현충일": (6, 6), "제헌절": (7, 17), "광복절": (8, 15), "개천절": (10, 3),
                "한글날": (10, 9), "성탄절": (12, 25), "크리스마스": (12, 25), "핼러윈": (10, 31), "할로윈": (10, 31), "빼빼로데이": (11, 11)}
-_LUNAR = ("설날", "추석", "부처님오신날", "석가탄신일")   # _DATED 가 알아보는 이름은 모두 날짜로 풀 수 있어야 한다(Codex 리뷰)
+_LUNAR = ("설날", "추석", "부처님오신날", "석가탄신일", "블랙프라이데이")   # _DATED 가 알아보는 이름은 모두 날짜로 풀 수 있어야 한다(Codex 리뷰)
+
+
+def _black_friday(year):
+    """11월 넷째 목요일 다음 날."""
+    first = dt.date(year, 11, 1)
+    return first + dt.timedelta(days=(3 - first.weekday()) % 7 + 21 + 1)
 
 
 def _holiday_dates(name, base):
     """name(공휴일 이름)이 base 뒤 처음 오는 날(연휴면 그 끝날) — 모르면 None."""
+    if name == "블랙프라이데이":
+        day = _black_friday(base.year)
+        return day if day >= base else _black_friday(base.year + 1)
     if name in _FIXED_DAYS:
         m, d = _FIXED_DAYS[name]
         day = dt.date(base.year, m, d)
@@ -135,8 +144,8 @@ def _holiday_dates(name, base):
 
 def _dated_line_live(ln, base, on):
     """요일·주말·연휴·공휴일에 묶인 체크리스트 줄이 on(독자가 받는 날)에도 아직 유효한가(Codex 리뷰).
-    박힌 날짜가 있으면 그것으로('내년 설 연휴(2월 6~9일)'), 요일·주말은 원래 호 날짜부터 다음 그 요일(주말은 일요일, '다음'은 한 주 뒤),
-    공휴일 이름은 그 날짜로('한글날 전에' → 10/9) 본다. '연휴'·'명절'처럼 날을 알 수 없는 말만 있으면 지난 것으로 본다."""
+    박힌 날짜가 있으면 그것으로('내년 설 연휴(2월 6~9일)'), 요일·주말은 원래 호 날짜부터 다음 그 요일(주말은 일요일, '다음'은 그 요일이 이번 주 안이면 한 주 뒤),
+    공휴일 이름은 그 날짜로('한글날까지' → 10/9, '한글날 전에' → 10/8) 본다. '연휴'·'명절'처럼 날을 알 수 없는 말만 있으면 지난 것으로 본다."""
     b, o = parse_date(base), parse_date(on)
     ds = _dates(ln, b)
     if ds:
@@ -145,7 +154,7 @@ def _dated_line_live(ln, base, on):
     for m in _WEEKDAY.finditer(ln):
         wd = 6 if m.group(3) else "월화수목금토일".index(m.group(2))
         day = b + dt.timedelta(days=(wd - b.weekday()) % 7)
-        if m.group(1) == "다음":
+        if m.group(1) == "다음" and day.isocalendar()[:2] == b.isocalendar()[:2]:   # 이번 주 안이면 한 주 뒤(토요일의 '다음 금요일'은 바로 그 금요일 — Codex 리뷰)
             day += dt.timedelta(days=7)
         elif m.group(1) == "지난":
             day -= dt.timedelta(days=7)
@@ -155,6 +164,8 @@ def _dated_line_live(ln, base, on):
     for n in names:
         day = _holiday_dates(n, b)
         if day:
+            if re.search(re.escape(n) + r"(?:연휴)?(?:당일)?전", rest):   # '한글날 전에·전까지' — 숫자 날짜처럼 그 전날까지(Codex 리뷰)
+                day -= dt.timedelta(days=1)
             targets.append(day)
             rest = rest.replace(n, "")
     if names:
