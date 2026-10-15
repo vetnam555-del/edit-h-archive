@@ -232,7 +232,7 @@ def _label(text, mt=22):
 
 
 def _note(d):
-    """에디터 H 노트 — 고정 코너. 안경 마크 + 1인칭 편지 + 오늘의 5가지 목록 + H의 한 줄."""
+    """에디터 H 노트 — 고정 코너. 안경 마크 + 1인칭 편지 + 오늘의 목록(10/16~ 짧게 읽는 소식까지 10가지) + H의 한 줄."""
     head = (f'<table role="presentation" cellpadding="0" cellspacing="0"><tr><td valign="middle">{_mini_avatar()}</td>'
             f'<td valign="middle" style="padding-left:10px;">'
             + _div(f"font-size:17px;font-weight:700;line-height:1.3;color:{INK};",
@@ -251,9 +251,20 @@ def _note(d):
             + _div(f"font-size:14.5px;font-weight:400;line-height:1.6;color:{BODY};",
                    f'<b style="font-weight:700;color:{INK};">{esc(plain(it["headline"]).replace(chr(10), " "))}</b>{pick}')
             + "</td></tr>")
-    today = (_div(f"font-size:12.5px;font-weight:700;line-height:1.3;color:{INK};margin-top:18px;", f"오늘의 {len(rows)}가지")
+    short = str(d.get("date", "")) >= BRIEFS_FROM and d["briefs"]
+    if short:   # 2026-10-16~: 목차에 짧게 읽는 소식(06~10)까지 — 첫 화면에서 '10가지'가 보이게(10/15 운영자: '왜 5개냐')
+        for n, b in enumerate(d["briefs"], len(rows) + 1):
+            rows.append(
+                f'<tr><td valign="top" style="width:26px;padding:4px 0;"><div style="width:20px;height:20px;text-align:center;font-family:{F};'
+                f'font-size:11px;font-weight:800;line-height:20px;color:{CHIP_FG};">{n:02d}</div></td>'
+                f'<td valign="top" style="padding:4px 0;">'
+                + _div(f"font-size:14px;font-weight:400;line-height:1.6;color:{BODY};", esc(plain(b["title"])))
+                + "</td></tr>")
+    label = (f"오늘의 {len(rows)}가지 <span style=\"font-weight:400;color:{MUTED};\">· 깊게 {len(d['card_issues'])} · 짧게 {len(d['briefs'])}</span>"
+             if short else f"오늘의 {len(rows)}가지")
+    today = (_div(f"font-size:12.5px;font-weight:700;line-height:1.3;color:{INK};margin-top:18px;", label)
              + f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:6px;">{"".join(rows)}</table>')
-    if d["briefs"]:   # 메인 5가지 + 한 줄 뉴스 = 오늘 다루는 주제 전부(2026-09-26 절충안)
+    if d["briefs"] and not short:   # 메인 5가지 + 한 줄 뉴스 = 오늘 다루는 주제 전부(2026-09-26 절충안)
         first, last = len(rows) + 1, len(rows) + len(d["briefs"])
         today += _div(f"font-size:13.5px;font-weight:400;line-height:1.6;color:{MUTED};margin-top:4px;padding-left:26px;",
                       f'+ {"짧게 읽는 소식" if str(d.get("date", "")) >= BRIEFS_FROM else "한 줄 뉴스"} {len(d["briefs"])}개({first:02d}–{last:02d})는 아래에서 짧게 볼 수 있어요.')
@@ -378,7 +389,8 @@ def _cta(d, site, campaign, n_cards):
                  f'<span style="color:#C4C4C4;"> &nbsp;|&nbsp; </span>' + links)
     return (_divider(30) + f'<tr><td class="px" style="padding:0 36px;">'
             + _div(f"font-size:19px;font-weight:700;line-height:1.45;color:{INK};",
-                   f"매일 아침 {n_topics}가지 트렌드 이슈를<br>한 번에 정리해 드려요!", True)
+                   (f"매일 아침 10가지 소식을<br>깊게 5 · 짧게 5로 정리해 드려요!" if str(d.get("date", "")) >= BRIEFS_FROM and d.get("format") == 2
+                    else f"매일 아침 {n_topics}가지 트렌드 이슈를<br>한 번에 정리해 드려요!"), True)
             + f"""<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:16px;background:#FFFFFF;border:1px solid {RULE};border-radius:18px;box-shadow:0 2px 6px rgba(0,0,0,.08);"><tr><td style="padding:18px 16px;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
     <td valign="middle" style="width:70px;">{AVATAR_MARK}</td>
