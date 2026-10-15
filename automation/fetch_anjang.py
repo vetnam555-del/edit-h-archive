@@ -137,7 +137,7 @@ def main():
     try:
         posts = list_posts(load_config()["primary_source"]["url"])
         while args.wait_until and _should_wait(posts, until, args.wait_until):
-            print(f"… 오늘({until}) 안장출근길 글이 아직 없어 2분 뒤 다시 봅니다(최대 {args.wait_until} KST)", flush=True)
+            print(f"… 오늘({until}) 안장출근길 글이 아직 없어 2분 뒤 다시 봅니다(최대 {args.wait_until} KST)", file=sys.stderr, flush=True)
             time.sleep(WAIT_POLL)
             posts = list_posts(load_config()["primary_source"]["url"])
     except (urllib.error.URLError, OSError) as e:

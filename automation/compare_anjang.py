@@ -56,14 +56,20 @@ def ours(content):
     return out
 
 
+def _match(it, m):
+    """안장 소식 it 과 우리 소식 m 이 같은 이야기인가 — 안장 제목 ↔ 우리 제목·본문 앞부분, 안장 제목·요약 ↔ 우리 제목.
+    '겹침'과 '우리만'이 같은 판정을 쓰게 한 곳에 둔다(한 소식이 두 칸에 동시에 들어가지 않게 — Codex 리뷰)."""
+    text = it["headline"] + " " + " ".join(it.get("summary") or [])[:200]
+    return _same(it["headline"], m[1] + " " + m[2][:200]) or _same(text, m[1])
+
+
 def compare(anjang_items, content):
     mine = ours(content)
     covered, missed = [], []
     for it in anjang_items:
-        text = it["headline"] + " " + " ".join(it.get("summary") or [])[:200]
-        hit = next((m for m in mine if _same(it["headline"], m[1] + " " + m[2][:200]) or _same(text, m[1])), None)
+        hit = next((m for m in mine if _match(it, m)), None)
         (covered if hit else missed).append((it["headline"], hit[0] if hit else None))
-    ours_only = [m for m in mine if not any(_same(m[1] + " " + m[2][:200], it["headline"]) for it in anjang_items)]
+    ours_only = [m for m in mine if not any(_match(it, m) for it in anjang_items)]
     main_text = " ".join(m[2] for m in mine if m[0] != "한 줄")
     return {"covered": covered, "missed": missed, "ours_only": ours_only,
             "numbers": len(_NUM.findall(main_text)), "source_mode": content.get("source_mode")}
