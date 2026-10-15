@@ -6,11 +6,12 @@
   1 hook    질문 제목(표지 제목 두 줄)을 화면 가득 — 0초부터 보인다(릴스 커버도 이 장: thumb_offset 0.8초)
   2 number  H PICK 의 핵심 숫자(이전→이후 비교면 둘 다)와 한 줄 설명
   3 answer  '그래서 뭐가 달라져?' — H PICK 카드의 결론 한 줄
-  4 cta     에디터 H(안경 마크)와 '매일 아침 8시, 트렌드 5가지' — 팔로우·프로필 링크
+  4 cta     에디터 H(안경 마크)와 '매일 아침 8시 30분, 트렌드 5가지'(config.send_time_kst) — 팔로우·프로필 링크
 
 안전 영역: 인스타 릴스는 위쪽(약 220px)에 상단 표시, 아래쪽(약 420px)에 캡션·버튼, 오른쪽 아래에 좋아요·댓글 단추가 덮는다.
 글자는 세로 260~1480px, 가로 가운데 860px 안에 둔다. make_reel.py 가 이 JPEG 들로 약 10초 영상을 만든다.
 """
+from .common import send_time_ko
 from .cards import (ACC, ACC_FILL, CSS, INK, PAPER, TEXT, _MARK, _photo_uri, avatar, esc, fs, hero_value, mk, plain)
 
 W, H = 1080, 1920
@@ -154,13 +155,12 @@ def plain_marks(text):
 
 def cta(d):
     """에디터 H(안경 마크) — 누가 매일 말하는지 보이게. 팔로우·프로필 링크로."""
-    send = d.get("send_time_kst") or "08:00"
-    hour = int(send.split(":")[0])
+    when = send_time_ko(d.get("send_time_kst") or "08:30").replace("오전 ", "")   # '8시 30분'(분을 버리지 않는다 — Codex 리뷰)
     return _frame(f"""
 <div class="body" style="justify-content:center;align-items:center;text-align:center;">
   {avatar(260)}
   <div style="margin-top:44px;font-weight:900;font-size:72px;line-height:1;letter-spacing:-2px;color:{TEXT};">에디터 H</div>
-  <div class="bal" style="margin-top:36px;font-weight:700;font-size:{fs(50)};line-height:1.4;color:{TEXT};">매일 아침 {hour}시,<br>트렌드 {len(d['card_issues'])}가지를 넘겨드려요</div>
+  <div class="bal" style="margin-top:36px;font-weight:700;font-size:{fs(50)};line-height:1.4;color:{TEXT};">매일 아침 {when},<br>트렌드 {len(d['card_issues'])}가지를 넘겨드려요</div>
   <div style="margin-top:56px;display:inline-block;background:{TEXT};color:#FFFFFF;font-weight:800;font-size:42px;line-height:1;padding:26px 44px;border-radius:999px;">팔로우하고 내일 아침에 받기</div>
   <div style="margin-top:34px;font-weight:500;font-size:32px;line-height:1.5;color:#55555A;">숫자·출처 전문은 프로필 링크 뉴스레터에서</div>
 </div>""", "#FFFFFF")

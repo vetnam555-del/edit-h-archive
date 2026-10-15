@@ -197,7 +197,7 @@ def welcome_message(sender, to_addr, cfg, now=None, first=None):
     now = now or now_kst()
     hh, mm = map(int, cfg["send_time_kst"].split(":"))
     when = send_time_ko(cfg["send_time_kst"]).replace("오전", "아침")
-    # 발송 작업은 08:00 에 새로 시작하며 그때 Secret 을 읽는다(send-newsletter.yml wait → send). 반영이 08:00 전이면 오늘 호부터 간다.
+    # 발송 작업은 08:30 에 새로 시작하며 그때 Secret 을 읽는다(send-newsletter.yml wait → send). 반영이 08:30 전이면 오늘 호부터 간다.
     day = "오늘" if now.hour * 60 + now.minute < hh * 60 + mm - 5 else "내일"
     picks, by_score = best_issues()
     unsub = f"{site}/unsubscribe.html?email={urllib.parse.quote(to_addr)}"

@@ -7,6 +7,7 @@ Claude Code 의 WebFetch 는 네이버 도메인을 열지 못해서(2026-09-24 
   python3 automation/fetch_anjang.py                         # 오늘(KST) 글
   python3 automation/fetch_anjang.py --since 2026-09-24      # 직전 발행일 다음 날~오늘 글 전부(연휴 뒤 첫 호)
   python3 automation/fetch_anjang.py --date 2026-09-23 --json
+  python3 automation/fetch_anjang.py --since 2026-10-14 --wait-until 07:55   # 오늘 글이 없으면 07:55 까지 2분마다 다시 본다(평일)
 
 출력은 주제를 고르는 '단서'다. 문장을 옮겨 쓰지 않고, 사실은 원 기사로 확인해 원 기사를 출처로 단다
 (원 기사 읽기: automation/read_article.py).
@@ -18,6 +19,7 @@ import html
 import json
 import re
 import sys
+import time
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -109,17 +111,35 @@ def parse_post(page):
     return {"insight": insight, "items": [items[n] for n in sorted(items)], "extras": extras}
 
 
+WAIT_POLL = 120
+
+
+def _should_wait(posts, day, wait_until, now=None):
+    """오늘(day) 글을 더 기다릴까 — 오늘 날짜를 볼 때, 평일(안장출근길은 주말에 쉰다), 아직 오늘 글이 없고 wait_until 전."""
+    now = now or now_kst()
+    if day != now.date() or day.weekday() >= 5 or any(p[0] == day for p in posts or []):
+        return False
+    hh, mm = map(int, wait_until.split(":"))
+    return (now.hour, now.minute) < (hh, mm)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--date", help="YYYY-MM-DD (기본: 오늘 KST)")
     ap.add_argument("--since", help="YYYY-MM-DD — 이 날짜 다음 날부터 --date 까지 모든 글(직전 발행일을 넣는다)")
     ap.add_argument("--json", action="store_true")
+    ap.add_argument("--wait-until", metavar="HH:MM",
+                    help="평일인데 오늘 글이 아직 없으면 이 시각(KST)까지 2분마다 다시 본다 — 안장출근길은 07:29~07:40 에 올라온다(10/8~10/15 실측)")
     args = ap.parse_args()
     until = dt.date.fromisoformat(args.date) if args.date else now_kst().date()
     since = dt.date.fromisoformat(args.since) if args.since else until - dt.timedelta(days=1)
 
     try:
         posts = list_posts(load_config()["primary_source"]["url"])
+        while args.wait_until and _should_wait(posts, until, args.wait_until):
+            print(f"… 오늘({until}) 안장출근길 글이 아직 없어 2분 뒤 다시 봅니다(최대 {args.wait_until} KST)", file=sys.stderr, flush=True)
+            time.sleep(WAIT_POLL)
+            posts = list_posts(load_config()["primary_source"]["url"])
     except (urllib.error.URLError, OSError) as e:
         print(f"✗ 안장출근길에 접속하지 못했습니다({e}) — 네트워크 허용 목록에 *.naver.com 이 있는지 확인하세요. "
               "오늘은 WebSearch 로 소스를 모읍니다(RUNBOOK 1-2).")

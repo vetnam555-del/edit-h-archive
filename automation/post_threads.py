@@ -94,7 +94,7 @@ def compose(c, site_url):
     if len(text) > MAX_TEXT:
         text = re.sub(r"\n*오늘 나머지:[^\n]*", "", text)
     text = text[:MAX_TEXT]
-    reply = f"숫자·출처 전문은 매일 아침 8시 뉴스레터로 보내드려요 → {site_url}/subscribe.html?ref=threads"
+    reply = f"숫자·출처 전문은 매일 아침 8시 30분 뉴스레터로 보내드려요 → {site_url}/subscribe.html?ref=threads"
     return text, reply
 
 

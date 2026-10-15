@@ -39,6 +39,9 @@ def main():
     if dt.timedelta(0) < wait <= MAX_WAIT:
         print(f"발송 시각 {target:%H:%M} KST 까지 {int(wait.total_seconds())}초 대기")
         time.sleep(wait.total_seconds())
+    elif wait > MAX_WAIT:
+        print(f"발송 시각 {target:%H:%M} 까지 {int(wait.total_seconds() // 60)}분 — 작업 한도(6시간) 안에 못 기다려 07:30 예약 실행에 맡김"
+              " (발송·게시 스크립트가 발송 시각 전 push 는 보내지 않는다)")
     else:
         print(f"대기 없음 (지금 {now:%H:%M} KST, 발송 시각 {target:%H:%M})")
 

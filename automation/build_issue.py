@@ -18,7 +18,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from edith import cards, content, newsletter, reel_frames, site, style  # noqa: E402
-from edith.common import AUTOMATION, INSTAGRAM_DIR, ROOT, load_config  # noqa: E402
+from edith.common import AUTOMATION, INSTAGRAM_DIR, ROOT, load_config, send_time_on  # noqa: E402
 
 
 def render_cards(d, out_dir):
@@ -129,7 +129,7 @@ def main():
     # 뉴스레터 프로필의 'N장 카드뉴스'는 이슈 카드 수(표지·마무리 제외, VOL.092 와 같은 기준)
     n_issue_cards = len(d["card_issues"]) if files else 0
     (ROOT / f"{args.date}.html").write_text(newsletter.render(d, site_url, n_issue_cards), encoding="utf-8")
-    manifest = site.update_manifest(d, site_url, len(files), cfg["send_time_kst"])
+    manifest = site.update_manifest(d, site_url, len(files), send_time_on(d["date"], cfg))
     site.regenerate_index(manifest)
     site.write_feeds(manifest, site_url)   # feed.xml(RSS)·sitemap.xml
 

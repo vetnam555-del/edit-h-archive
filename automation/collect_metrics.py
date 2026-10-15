@@ -9,7 +9,7 @@
 - 콘텐츠: 호마다 H PICK 태그·제목 유형(질문형/숫자형)·표지(사진/핵심어)·요일.
 
 결과: automation/metrics/daily/{날짜}.json(그날 스냅숏) + automation/metrics/summary.md(최근 14호 성과표·순위).
-07:00 제작 루틴과 22:00 편집 회고가 summary.md 를 읽는다(RUNBOOK 0단계, automation/learnings.md).
+07:40 제작 루틴과 22:00 편집 회고가 summary.md 를 읽는다(RUNBOOK 0단계, automation/learnings.md).
 
   python3 automation/collect_metrics.py            # 수집 + 저장
   python3 automation/collect_metrics.py --dry-run  # 수집만(파일 안 씀)
@@ -409,7 +409,7 @@ def summary_md(snap):
         p = posts.get(day) or {}
         rows.append((day, f, p, score(p)))
     lines = [f"# EDIT H 성과표 (최근 {DAYS}일, {snap['collected_at']} 수집)", "",
-             "자동 생성 — automation/collect_metrics.py. 숫자만 있고 개인 정보는 없다. 07:00 제작·22:00 회고가 읽는다.", ""]
+             "자동 생성 — automation/collect_metrics.py. 숫자만 있고 개인 정보는 없다. 07:40 제작·22:00 회고가 읽는다.", ""]
     sub = snap.get("subscribers") or {}
     lines += ["## 한눈에", "",
               f"- 인스타 팔로워 **{ig.get('followers', '–')}** · 게시물 {ig.get('media', '–')}"

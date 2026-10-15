@@ -1,7 +1,8 @@
 {
   "site_url": "https://vetnam555-del.github.io/edit-h-archive",
-  "send_time_kst": "08:00",
-  "routine_start_kst": "07:00",
+  "send_time_kst": "08:30",
+  "routine_start_kst": "07:40",
+  "_send_time_note": "2026-10-16~ 발송 08:30·제작 07:40(10/15 운영자 결정). 1순위 소스 안장출근길이 07:29~07:40 에 올라와(10/8~10/15 실측) 07:00 제작은 매일 대체 소스(fallback)로 갔다. 제작은 안장 글을 07:55 까지 기다린다(fetch_anjang.py --wait-until).",
   "publish_days": ["월", "화", "수", "목", "금", "토", "일"],
   "skip_kr_public_holidays": false,
   "_publish_note": "2026-09-25 요청: 주말·공휴일 상관없이 매일 발행. 영업일만 내려면 publish_days 를 월~금, skip_kr_public_holidays 를 true 로.",
@@ -32,7 +33,7 @@
     "dm_keyword": "에디트",
     "dm_auto_reply": false,
     "_dm_note": "dm_auto_reply 가 true 일 때만 캡션에 '댓글 남기면 DM' 약속을 넣는다. 자동 답장을 만들기 전에는 false(지키지 못할 약속 금지).",
-    "_note": "게시: .github/workflows/post-instagram.yml(매일 08:00 = send_time_kst, 금 주간 특집 18:00). 릴스는 피드 격자에 캐러셀과 겹치지 않게 릴스 탭에만(reel_share_to_feed=false) — reel_feed_from(E7) 부터는 피드에도.",
+    "_note": "게시: .github/workflows/post-instagram.yml(매일 08:30 = send_time_kst, 금 주간 특집 18:00). 릴스는 피드 격자에 캐러셀과 겹치지 않게 릴스 탭에만(reel_share_to_feed=false) — reel_feed_from(E7) 부터는 피드에도.",
     "auto_post": true,
     "api_version": "v23.0",
     "reel": true,
@@ -49,7 +50,7 @@
     "_reel_feed_note": "E7(2026-10-13~): 이 날짜부터 릴스를 피드에도 올린다(share_to_feed). 팔로워 홈 피드에 릴스가 보여 초반 반응을 팔로워에게서도 받게. 끄려면 지우거나 먼 미래로.",
     "reel_time_kst": "19:30",
     "reel_evening_from": "2026-10-08",
-    "_reel_time_note": "reel_evening_from 부터 아침(08:00)엔 캐러셀만, 릴스는 저녁 reel_time_kst 에 따로(automation/ig_plan.py). 끄려면 reel_evening_from 을 지우거나 먼 미래로. 2026-10-02 성장 검토 실험 3(세로 릴스 5호를 본 뒤 시작).",
+    "_reel_time_note": "reel_evening_from 부터 아침(08:30)엔 캐러셀만, 릴스는 저녁 reel_time_kst 에 따로(automation/ig_plan.py). 끄려면 reel_evening_from 을 지우거나 먼 미래로. 2026-10-02 성장 검토 실험 3(세로 릴스 5호를 본 뒤 시작).",
     "reel_timing": {
       "first": 2.2,
       "card": 3.4,

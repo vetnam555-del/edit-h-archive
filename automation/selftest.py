@@ -177,6 +177,27 @@ def t_runners():
 
 
 
+def t_compare_anjang():
+    """안장출근길 비교(회고 잣대) — 같은 소식은 고유 낱말 2개 이상, 'AI·주문' 같은 흔한 말만 겹치면 다른 소식(10/15 오판)."""
+    import compare_anjang
+    content = {"title": "카톡이 결제까지", "big_issue": {"tag": "카카오 AI", "paragraphs": ["카카오톡 AI 에이전트가 메시지 답장과 생수 주문까지 한다"]},
+               "items": [{"tag": "은행", "title": "은행 문, 30분 늦게", "body": "영업시간 조정"}], "briefs": []}
+    items = [{"headline": '카톡에 "답장 보내줘" 말하면 AI비서가 척척', "summary": ["카카오톡이 에이전트를 품습니다"]},
+             {"headline": "[단독] AI, 새책도 노리나…교보문고에 들어온 '10만권' 주문", "summary": ["AI 학습용 주문"]}]
+    r = compare_anjang.compare(items, content)
+    expect([h for h, _ in r["covered"]] == [items[0]["headline"]], f"안장 비교 겹침 판정: {r['covered']}")
+    expect(len(r["missed"]) == 1 and len(r["ours_only"]) == 1, "안장 비교: 놓친 것·우리만")
+    return None
+
+
+def t_send_time():
+    """발송 08:30(2026-10-16~) — 그 전 호의 발행 시각은 08:00 그대로(지난 호를 다시 빌드해도, Codex 리뷰)."""
+    from edith.common import send_time_on
+    expect(send_time_on("2026-10-15") == "08:00", "10/15 호 발행 시각이 08:00 이 아니다")
+    expect(send_time_on("2026-10-16") == load_config()["send_time_kst"] == "08:30", "10/16 부터 발송 08:30")
+    return None
+
+
 def t_commit_dates():
     """봇 기록 커밋 이름은 KST 날짜 — UTC 로 찍으면 08:00 게시 기록이 '어제' 이름으로 남는다(2026-10-11 'Record Instagram post (2026-10-10)')."""
     bad = []
@@ -737,6 +758,8 @@ def main():
     check("알림(alert) — 날짜·시작 못 한 실패", t_alert)
     check("워크플로 서버 고정", t_runners)
     check("봇 커밋 이름은 KST 날짜", t_commit_dates)
+    check("안장출근길 비교(회고 잣대)", t_compare_anjang)
+    check("발송 시각(지난 호는 08:00)", t_send_time)
     check("오늘 할 일(check_today)", t_check_today)
     check("연재 회차·문장 점검", t_series_and_style)
     check("예비 호 고르기(build_rewind)", t_rewind)
