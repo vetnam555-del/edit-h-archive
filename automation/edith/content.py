@@ -53,14 +53,21 @@ BRIEF_BODY_OLD = 100         # BRIEFS_FROM 전 호(한 줄 뉴스 1~2문장)의 
 STRICT_FROM = "2026-10-17"
 
 
+_TRACKING = ("utm_", "fbclid", "gclid", "ref", "from", "sns", "cmp")
+
+
 def _urls(story):
-    """출처 URL 모음 — 끝 '/'·쿼리를 떼어 같은 기사를 같게 본다."""
+    """출처 URL 모음 — 추적용 쿼리(utm_·fbclid 등)·'#'·끝 '/'만 떼어 같은 기사를 같게 본다.
+    'articleView.html?idxno=…'·'/view/?no=…'처럼 쿼리가 기사 번호인 곳이 있어 쿼리 전체는 지우지 않는다(Codex 리뷰)."""
+    from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
     out = set()
     for s in story.get("sources") or []:
-        u = (s.get("url") if isinstance(s, dict) else s) or ""
-        u = u.split("?")[0].split("#")[0].rstrip("/")
-        if u:
-            out.add(u)
+        u = ((s.get("url") if isinstance(s, dict) else s) or "").strip()
+        if not u:
+            continue
+        p = urlsplit(u)
+        q = urlencode(sorted((k, v) for k, v in parse_qsl(p.query, keep_blank_values=True) if not k.lower().startswith(_TRACKING)))
+        out.add(urlunsplit((p.scheme.lower(), p.netloc.lower(), p.path.rstrip("/"), q, "")))
     return out
 
 

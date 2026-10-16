@@ -262,6 +262,10 @@ def t_strict_content():
     sat = {**copy.deepcopy(c), "date": "2026-10-17"}
     sat["items"][3]["sources"] = mon["items"][3]["sources"]
     expect(ok(sat, "2026-10-17") is None, "토요일 짧은 소식 4개를 막았다(주말은 3개까지)")
+    view = lambda n: {"name": "n", "url": f"https://www.example.co.kr/news/articleView.html?idxno={n}&utm_source=naver"}
+    expect(content._urls({"sources": [view(1), view(2)]}) == {"https://www.example.co.kr/news/articleView.html?idxno=1",
+                                                            "https://www.example.co.kr/news/articleView.html?idxno=2"},
+           "쿼리가 기사 번호(idxno)인 주소를 하나로 합쳤다")
     rew = {**copy.deepcopy(c), "date": "2026-10-19", "rewind": True}
     expect(ok(rew, "2026-10-19") is None, "예비 호까지 새 점검으로 막았다")
     return None
