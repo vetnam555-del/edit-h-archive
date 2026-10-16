@@ -268,6 +268,11 @@ def t_strict_content():
            "쿼리가 기사 번호(idxno)인 주소를 하나로 합쳤거나 추적용 쿼리(utm_)를 남겼다")
     expect(content._urls({"sources": [{"url": "http://www.a.com/n/1"}]}) == content._urls({"sources": [{"url": "https://a.com/n/1/"}]}),
            "http/https·www 만 다른 같은 기사를 다르게 본다")
+    expect(len(content._urls({"sources": [{"url": "https://a.com/v?ref_id=1"}, {"url": "https://a.com/v?ref_id=2&ref=naver"}]})) == 2,
+           "'ref_id' 같은 기사 번호를 추적용 쿼리로 지웠다")
+    for bad in (True, 42, ["사유"], "첫 줄\n둘째 줄", "  "):
+        expect("briefs_short_reason 은 사유 한 줄" in (ok({**copy.deepcopy(c), "date": "2026-10-19", "briefs_short_reason": bad}, "2026-10-19") or ""),
+               f"잘못된 briefs_short_reason({bad!r})을 사유로 받았다")
     rew = {**copy.deepcopy(c), "date": "2026-10-19", "rewind": True}
     expect(ok(rew, "2026-10-19") is None, "예비 호까지 새 점검으로 막았다")
     return None

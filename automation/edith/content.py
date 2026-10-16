@@ -53,7 +53,7 @@ BRIEF_BODY_OLD = 100         # BRIEFS_FROM 전 호(한 줄 뉴스 1~2문장)의 
 STRICT_FROM = "2026-10-17"
 
 
-_TRACKING = ("utm_", "fbclid", "gclid", "ref", "from", "sns", "cmp")
+_TRACKING = {"fbclid", "gclid", "ref", "from", "sns", "cmp"}   # 이름이 똑같을 때만 — 'ref_id'·'fromArticle'은 기사 번호일 수 있다(Codex 리뷰)
 
 
 def _urls(story):
@@ -66,7 +66,7 @@ def _urls(story):
         if not u:
             continue
         p = urlsplit(u)
-        q = urlencode(sorted((k, v) for k, v in parse_qsl(p.query, keep_blank_values=True) if not k.lower().startswith(_TRACKING)))
+        q = urlencode(sorted((k, v) for k, v in parse_qsl(p.query, keep_blank_values=True) if not (k.lower().startswith("utm_") or k.lower() in _TRACKING)))
         host = p.netloc.lower().removeprefix("www.")   # http/https·www 유무는 같은 기사(Codex 리뷰)
         out.add(urlunsplit(("", host, p.path.rstrip("/"), q, "")))
     return out
@@ -76,7 +76,10 @@ def _strict_checks(data, items, briefs, date_str, where):
     """STRICT_FROM 부터 형식 2 정규 호: 짧은 소식 개수(평일 5·주말·공휴일 3)와 H PICK 중복을 빌드 전에 막는다."""
     from .style import _rest_day
     need = BRIEFS_MIN_OK if _rest_day(date_str) else BRIEFS_TARGET
-    reason = str(data.get("briefs_short_reason") or "").strip()
+    raw = data.get("briefs_short_reason")
+    reason = raw.strip() if isinstance(raw, str) else ""
+    if raw is not None and (not reason or "\n" in reason):   # 막는 점검을 푸는 칸이라 한 줄 문장만 받는다(Codex 리뷰)
+        raise ContentError(f"{where}: briefs_short_reason 은 사유 한 줄(문장)이어야 합니다 — 지금 {raw!r}")
     if len(briefs) < need and not reason:
         raise ContentError(f"{where}: 짧게 읽는 소식이 {len(briefs)}개 — {'주말·공휴일' if need == BRIEFS_MIN_OK else '평일'}엔 {need}개 이상"
                            "(원칙 1, 2026-10-15 운영자). 안장출근길 남은 헤드라인·RUNBOOK 1-2 보강 소스에서 더 채우고, "
