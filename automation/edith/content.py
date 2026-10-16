@@ -67,7 +67,8 @@ def _urls(story):
             continue
         p = urlsplit(u)
         q = urlencode(sorted((k, v) for k, v in parse_qsl(p.query, keep_blank_values=True) if not k.lower().startswith(_TRACKING)))
-        out.add(urlunsplit((p.scheme.lower(), p.netloc.lower(), p.path.rstrip("/"), q, "")))
+        host = p.netloc.lower().removeprefix("www.")   # http/https·www 유무는 같은 기사(Codex 리뷰)
+        out.add(urlunsplit(("", host, p.path.rstrip("/"), q, "")))
     return out
 
 
