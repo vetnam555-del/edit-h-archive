@@ -48,6 +48,49 @@ BRIEFS_MAX, BRIEFS_TARGET, BRIEFS_MIN_OK = 5, 5, 3
 TODO_FROM, TODO_MAX = "2026-10-16", 3   # 메일 맨 위 '오늘 챙길 것'(10/15 운영자 선택) — content.todo, 없으면 결론 문장 앞 3개
 BRIEFS_FROM = "2026-10-16"   # 이 날부터 짧은 소식은 2~3문장·숫자 1개 이상, 평일엔 늘 5개(style.brief_check 가 알린다)
 BRIEF_BODY_OLD = 100         # BRIEFS_FROM 전 호(한 줄 뉴스 1~2문장)의 본문 한도 — 지난 호는 그때 기준으로 검증한다(Codex 리뷰)
+# 2026-10-15 회고: 짧은 소식이 경고 뒤에도 4개로 나갔고(10/8·10/15), 메인 항목이 H PICK 과 같은 소식이었다(10/15 청년미래보금자리론 —
+# 같은 원 기사 2건). 이 날부터 둘 다 빌드를 막는다 — 채우거나, 정말 확인된 소식이 없으면 briefs_short_reason 에 사유 한 줄.
+STRICT_FROM = "2026-10-17"
+
+
+_TRACKING = {"fbclid", "gclid", "ref", "from", "sns", "cmp"}   # 이름이 똑같을 때만 — 'ref_id'·'fromArticle'은 기사 번호일 수 있다(Codex 리뷰)
+
+
+def _urls(story):
+    """출처 URL 모음 — 추적용 쿼리(utm_·fbclid 등)·'#'·끝 '/'만 떼어 같은 기사를 같게 본다.
+    'articleView.html?idxno=…'·'/view/?no=…'처럼 쿼리가 기사 번호인 곳이 있어 쿼리 전체는 지우지 않는다(Codex 리뷰)."""
+    from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
+    out = set()
+    for s in story.get("sources") or []:
+        u = ((s.get("url") if isinstance(s, dict) else s) or "").strip()
+        if not u:
+            continue
+        p = urlsplit(u)
+        q = urlencode(sorted((k, v) for k, v in parse_qsl(p.query, keep_blank_values=True) if not (k.lower().startswith("utm_") or k.lower() in _TRACKING)))
+        host = p.netloc.lower().removeprefix("www.")   # http/https·www 유무는 같은 기사(Codex 리뷰)
+        out.add(urlunsplit(("", host, p.path.rstrip("/"), q, "")))
+    return out
+
+
+def _strict_checks(data, items, briefs, date_str, where):
+    """STRICT_FROM 부터 형식 2 정규 호: 짧은 소식 개수(평일 5·주말·공휴일 3)와 H PICK 중복을 빌드 전에 막는다."""
+    from .style import _rest_day
+    need = BRIEFS_MIN_OK if _rest_day(date_str) else BRIEFS_TARGET
+    raw = data.get("briefs_short_reason")
+    reason = raw.strip() if isinstance(raw, str) else ""
+    if raw is not None and (not reason or "\n" in reason):   # 막는 점검을 푸는 칸이라 한 줄 문장만 받는다(Codex 리뷰)
+        raise ContentError(f"{where}: briefs_short_reason 은 사유 한 줄(문장)이어야 합니다 — 지금 {raw!r}")
+    if len(briefs) < need and not reason:
+        raise ContentError(f"{where}: 짧게 읽는 소식이 {len(briefs)}개 — {'주말·공휴일' if need == BRIEFS_MIN_OK else '평일'}엔 {need}개 이상"
+                           "(원칙 1, 2026-10-15 운영자). 안장출근길 남은 헤드라인·RUNBOOK 1-2 보강 소스에서 더 채우고, "
+                           "정말 확인된 소식이 없으면 briefs_short_reason 에 사유 한 줄을 적으세요")
+    big = _urls(data.get("big_issue") or {})
+    for it in items:
+        mine = _urls(it)
+        same = mine & big
+        if big and mine and (len(same) >= 2 or mine <= big):
+            raise ContentError(f"{where}: 메인 「{str(it.get('title', ''))[:24]}」 — H PICK 과 같은 원 기사 {len(same)}건을 써요. "
+                               "같은 소식을 두 번 싣지 말고 다른 주제로 바꾸세요(10/15 청년미래보금자리론)")
 
 
 def _need(obj, key, where):
@@ -242,6 +285,8 @@ def prepare(data, date_str):
         for i, b in enumerate(briefs, 1):
             for key in ("title", "body", "source", "url"):
                 _need(b, key, f"{where} briefs[{i}]")
+        if date_str >= STRICT_FROM and not data.get("rewind"):
+            _strict_checks(data, items, briefs, date_str, where)
         todo = data.get("todo")
         if todo is not None and (not isinstance(todo, list) or len(todo) > TODO_MAX or not all(isinstance(x, str) and x.strip() for x in todo)):
             raise ContentError(f"{where}: todo(오늘 챙길 것)는 {TODO_MAX}줄 이하의 문장 목록이어야 합니다")

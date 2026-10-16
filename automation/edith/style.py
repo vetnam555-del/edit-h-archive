@@ -114,7 +114,10 @@ def brief_check(d):
     briefs = d.get("briefs") or []
     # 주말·공휴일은 확인된 소식이 적어 RUNBOOK 이 3개까지 허용한다(Codex 리뷰) — 평일만 5개를 요구
     need = BRIEFS_MIN_OK if _rest_day(str(d.get("date", ""))[:10]) else BRIEFS_TARGET
-    out = [f"짧게 읽는 소식 {len(briefs)}개 — {need}개 이상 채우세요(평일엔 안장출근길 남은 헤드라인에서)"] if len(briefs) < need else []
+    # STRICT_FROM 부터는 content.prepare 가 개수 부족을 막는다(사유를 적은 날만 통과) — 여기선 그 전 호만 알린다
+    from .content import STRICT_FROM
+    short = len(briefs) < need and str(d.get("date", ""))[:10] < STRICT_FROM
+    out = [f"짧게 읽는 소식 {len(briefs)}개 — {need}개 이상 채우세요(평일엔 안장출근길 남은 헤드라인에서)"] if short else []
     for b in briefs:
         body = b.get("body") or ""
         if not re.search(r"\d", body):   # 본문(2~3문장)에 숫자 — 제목에만 있으면 안 된다(Codex 리뷰)
