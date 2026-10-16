@@ -239,6 +239,34 @@ def t_brief_check():
     return None
 
 
+def t_strict_content():
+    """2026-10-17~: 짧은 소식 부족(평일 5·주말 3)과 H PICK 과 같은 원 기사를 쓴 메인을 빌드 전에 막는다 — 사유를 적은 날·예비 호·지난 호는 통과."""
+    import copy
+    from edith import content
+    c = json.loads((CONTENT_DIR / "2026-10-15.json").read_text(encoding="utf-8"))   # 짧은 소식 4개 + 메인 05 가 H PICK 과 같은 기사 2건
+    def ok(x, day):
+        try:
+            content.prepare(copy.deepcopy(x), day)
+            return None
+        except content.ContentError as e:
+            return str(e)
+    expect(ok(c, "2026-10-15") is None, "지난 호(10/15)까지 새 점검으로 막았다")
+    mon = {**copy.deepcopy(c), "date": "2026-10-19"}
+    err = ok(mon, "2026-10-19") or ""
+    expect("짧게 읽는 소식이 4개" in err, f"평일 짧은 소식 4개를 막지 않았다: {err[:80]}")
+    mon["briefs_short_reason"] = "확인된 소식 부족"
+    err = ok(mon, "2026-10-19") or ""
+    expect("H PICK 과 같은 원 기사 2건" in err, f"H PICK 과 같은 원 기사를 쓴 메인을 막지 않았다: {err[:80]}")
+    mon["items"][3]["sources"] = [mon["items"][3]["sources"][0], {"name": "다른 기사", "url": "https://example.com/other"}]
+    expect(ok(mon, "2026-10-19") is None, "원 기사 1건만 겹치는 메인까지 막았다")
+    sat = {**copy.deepcopy(c), "date": "2026-10-17"}
+    sat["items"][3]["sources"] = mon["items"][3]["sources"]
+    expect(ok(sat, "2026-10-17") is None, "토요일 짧은 소식 4개를 막았다(주말은 3개까지)")
+    rew = {**copy.deepcopy(c), "date": "2026-10-19", "rewind": True}
+    expect(ok(rew, "2026-10-19") is None, "예비 호까지 새 점검으로 막았다")
+    return None
+
+
 def t_todo_box():
     """오늘 챙길 것(10/16~): content.todo 가 있으면 그것, 없으면 결론 문장 앞 3개 — 10/15 호·예비 호엔 없다."""
     from edith import content, newsletter
@@ -851,6 +879,7 @@ def main():
     check("안장출근길 비교(회고 잣대)", t_compare_anjang)
     check("발송 시각(지난 호는 08:00)", t_send_time)
     check("짧게 읽는 소식 점검", t_brief_check)
+    check("새 호 막는 점검(짧은 소식 개수·H PICK 중복)", t_strict_content)
     check("오늘 챙길 것", t_todo_box)
     check("오늘 할 일(check_today)", t_check_today)
     check("연재 회차·문장 점검", t_series_and_style)
