@@ -6,7 +6,14 @@
   <atom:link href="https://vetnam555-del.github.io/edit-h-archive/feed.xml" rel="self" type="application/rss+xml"/>
   <description>매일 아침 8시 30분, 확인된 숫자로 읽는 트렌드 뉴스레터</description>
   <language>ko</language>
-  <lastBuildDate>Fri, 16 Oct 2026 08:30:00 +0900</lastBuildDate>
+  <lastBuildDate>Sat, 17 Oct 2026 08:30:00 +0900</lastBuildDate>
+  <item>
+    <title>VOL.116 코스피 18.8% 빠질 때, 개미는 7조 샀다고?</title>
+    <link>https://vetnam555-del.github.io/edit-h-archive/2026-10-17.html</link>
+    <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-10-17.html</guid>
+    <pubDate>Sat, 17 Oct 2026 08:30:00 +0900</pubDate>
+    <description>코스피 급락에 개인 7조 매수·건보 환급금 221억 소멸·전세 갱신 58.9%·임금체불·한우 반값 — 오늘의 5가지</description>
+  </item>
   <item>
     <title>VOL.115 커피 17잔이면, 50유로 스피커라고?</title>
     <link>https://vetnam555-del.github.io/edit-h-archive/2026-10-16.html</link>
@@ -209,13 +216,6 @@
     <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-09-09.html</guid>
     <pubDate>Wed, 09 Sep 2026 10:40:00 +0900</pubDate>
     <description>강남언니 22만·위버스 42만 개인정보 유출·카카오 인적분할·지그재그 쇼핑 골든타임·스레드 MAU 5억 등 10개 이슈</description>
-  </item>
-  <item>
-    <title>VOL.086 아이폰 쓰던 사람들, 갤럭시로 갈아탔다</title>
-    <link>https://vetnam555-del.github.io/edit-h-archive/2026-09-08.html</link>
-    <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-09-08.html</guid>
-    <pubDate>Tue, 08 Sep 2026 01:37:34 +0900</pubDate>
-    <description>갤럭시Z폴드8 환승 2배·AI 글라스 안전 가이드라인·무신사 파머시 뷰티·오늘의집 4300평 매장 등 10개 이슈</description>
   </item>
 </channel>
 </rss>
