@@ -658,6 +658,10 @@ def t_views_diag():
            "릴스 피드 공유 시작 날짜가 틀린다")
     expect(post_instagram.reel_to_feed({"reel_share_to_feed": True}, "2026-10-01") and not post_instagram.reel_to_feed({}, "2026-12-01"),
            "reel_share_to_feed 설정을 안 따른다")
+    cfg = {"reel_feed_from": "2026-10-13", "reel_feed_until": "2026-10-16"}   # E7 은 10/16 릴스까지(10/17 끔)
+    expect([post_instagram.reel_to_feed(cfg, k) for k in ("2026-10-16", "2026-10-16-weekly", "2026-10-17")] == [True, True, False],
+           "reel_feed_until 뒤에도 릴스를 피드에 올린다")
+    expect(not post_instagram.reel_to_feed(load_config()["instagram"], "2026-10-17"), "config 의 E7 끄기(10/17~)가 적용되지 않는다")
 
     class FakeGraph:   # 계정 인사이트 응답 흉내 — follows_and_unfollows 는 막힌 경우
         def call(self, method, path, **params):
