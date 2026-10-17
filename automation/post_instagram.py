@@ -346,10 +346,12 @@ def post_story(g, uid, key, folder, site_url, dry):
 
 
 def reel_to_feed(cfg, key):
-    """릴스를 피드(팔로워 홈·프로필 격자)에도 올리나 — reel_share_to_feed 이거나 reel_feed_from 날짜부터(E7, 2026-10-13~).
-    릴스 탭에만 올리면 팔로워 홈 피드엔 안 보여, 초반 반응이 비팔로워 시험 노출(110~150명)에서만 나온다(2026-10-09 진단)."""
-    start = cfg.get("reel_feed_from")
-    return bool(cfg.get("reel_share_to_feed") or (start and str(key)[:10] >= start))
+    """릴스를 피드(팔로워 홈·프로필 격자)에도 올리나 — reel_share_to_feed 이거나 reel_feed_from ~ reel_feed_until(E7, 2026-10-13~10-16).
+    릴스 탭에만 올리면 팔로워 홈 피드엔 안 보여, 초반 반응이 비팔로워 시험 노출(110~150명)에서만 나온다(2026-10-09 진단).
+    2026-10-16 회고: 피드에도 올린 뒤 도달이 4분의 1 아래(10/15 하루 28, 10/16 2시간 3)로 떨어져 10/17 부터 끈다(reel_feed_until)."""
+    start, until = cfg.get("reel_feed_from"), cfg.get("reel_feed_until")
+    day = str(key)[:10]
+    return bool(cfg.get("reel_share_to_feed") or (start and day >= start and (not until or day <= until)))
 
 
 def _tracked(path):
