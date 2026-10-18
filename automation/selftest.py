@@ -301,6 +301,12 @@ def t_repeat_check():
     # 영문 약칭은 낱말 전체로만 — KT 와 KTX 는 다르다
     kt = style.repeat_check({**base, "items": [{"tag": "KT 통신", "title": "KT 요금제 1만원 내린다"}], "briefs": [{"title": "KTX 예매가 11월 1일 열려요."}]})
     expect(not kt, f"'KT'를 'KTX' 안에서 잡는다: {kt}")
+    # 짧은 소식끼리도 — 태그가 없어 제목 첫 낱말(주어)로 본다
+    br = style.repeat_check({**base, "big_issue": {"tag": "주담대"}, "items": [], "briefs": [{"title": "스타벅스가 새 음료를 내요."}, {"title": "스타벅스가 할인 행사를 열어요."}]})
+    expect(len(br) == 1 and br[0].startswith("02·03 ") and "'스타벅스'" in br[0], f"짧은 소식끼리 같은 회사를 못 잡는다: {br}")
+    # 조사처럼 끝나는 이름('11번가')도 그대로 견준다
+    st = style.repeat_check({**base, "items": [{"tag": "11번가", "title": "새벽 배송 시작"}], "briefs": [{"title": "11번가가 새 할인을 시작해요."}]})
+    expect(len(st) == 1 and "'11번가'" in st[0], f"'11번가'를 못 잡는다: {st}")
     return None
 
 

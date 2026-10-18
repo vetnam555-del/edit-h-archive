@@ -159,7 +159,7 @@ def share_check(d):
 
 
 # 한 호 안에서 같은 회사·주제를 두 칸에 쓰지 않는다 — 10/16 회고: 스타벅스가 H PICK(e-프리퀀시)과 짧은 소식 08(에스프레소 런)에 함께 나가
-# '10가지'가 9가지로 보였다. 칸마다 tag(주제 이름)의 낱말이 다른 칸의 제목·태그에 또 나오면 알린다. 흔한 낱말·날짜는 뺀다(같은 소식이 아니어도 나온다).
+# '10가지'가 9가지로 보였다. 칸마다 tag(주제 이름, 짧은 소식은 제목의 주어)의 낱말이 다른 칸의 제목·태그에 또 나오면 알린다. 흔한 낱말·날짜는 뺀다(같은 소식이 아니어도 나온다).
 REPEAT_FROM = "2026-10-19"
 _TOPIC_STOP = {"AI", "정부", "시장", "서비스", "가격", "금리", "매출", "실적", "투자", "고객", "혜택", "국내", "해외", "신청", "출시", "확대",
                "소비", "소비자", "이용자", "기업", "오늘", "내일", "이번", "지난", "올해", "내년", "청년", "직장인", "연말", "주식", "대출",
@@ -171,12 +171,21 @@ _TOPIC_NUM = re.compile(r"\d+(?:월|일|년|주|분기|차|시|만|억|원|개|�
 
 
 def _tokens(text):
-    """낱말마다 끝의 조사 하나를 뗀 것('카카오뱅크가' → '카카오뱅크', 'KT가' → 'KT')."""
-    return {_TOPIC_TAIL.sub("", w) if len(w) > 2 else w for w in _TOPIC_WORD.findall(plain(text or ""))}
+    """낱말 그대로와 끝의 조사 하나를 뗀 것 둘 다('카카오뱅크가' → '카카오뱅크', '11번가가' → '11번가' — '11번가' 자체도 남는다)."""
+    out = set()
+    for w in _TOPIC_WORD.findall(plain(text or "")):
+        out |= {w, _TOPIC_TAIL.sub("", w) if len(w) > 2 else w}
+    return out
 
 
-def _topic_words(text):
-    return {w for w in _tokens(text) if len(w) >= 2 and w not in _TOPIC_STOP and not _TOPIC_NUM.fullmatch(w)}
+def _topic_words(words):
+    return {w for w in words if len(w) >= 2 and w not in _TOPIC_STOP and not _TOPIC_NUM.fullmatch(w)}
+
+
+def _subject(title):
+    """짧은 소식엔 태그가 없어 제목 첫 낱말(주어 — '스타벅스가', '이마트24가')을 주제 이름으로 본다(조사를 뗀 것과 그대로 둘 다)."""
+    first = _TOPIC_WORD.findall(plain(title or ""))[:1]
+    return _tokens(first[0]) if first else set()
 
 
 def _mentions(word, tokens):
@@ -194,7 +203,8 @@ def repeat_check(d):
     slots = [("H PICK", big.get("tag", ""), d.get("title", ""))]
     slots += [(f"{n:02d}", it.get("tag", ""), it.get("title", "")) for n, it in enumerate(items, 2)]
     slots += [(f"{n:02d}", "", b.get("title", "")) for n, b in enumerate(d.get("briefs") or [], 2 + len(items))]
-    words = [_topic_words(tag) for _, tag, _ in slots]
+    # 태그는 이름이라 조사를 떼지 않는다('11번가'), 짧은 소식은 제목의 주어로
+    words = [_topic_words(_TOPIC_WORD.findall(plain(tag))) if tag else _topic_words(_subject(title)) for _, tag, title in slots]
     tokens = [_tokens(title) | _tokens(tag) for _, tag, title in slots]  # 제목이 태그를 풀어 써도 태그끼리 견준다
     out = []
     for i in range(len(slots)):
