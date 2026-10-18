@@ -304,6 +304,9 @@ def t_repeat_check():
     # 짧은 소식끼리도 — 태그가 없어 제목 첫 낱말(주어)로 본다
     br = style.repeat_check({**base, "big_issue": {"tag": "주담대"}, "items": [], "briefs": [{"title": "스타벅스가 새 음료를 내요."}, {"title": "스타벅스가 할인 행사를 열어요."}]})
     expect(len(br) == 1 and br[0].startswith("02·03 ") and "'스타벅스'" in br[0], f"짧은 소식끼리 같은 회사를 못 잡는다: {br}")
+    # 흔한 말 주어는 조사가 붙어도 넘긴다('정부가'·'오늘은')
+    gen = style.repeat_check({**base, "big_issue": {"tag": "주담대"}, "items": [], "briefs": [{"title": "정부가 새 정책을 발표해요."}, {"title": "정부가 세법을 바꿔요."}, {"title": "오늘은 금통위가 열려요."}, {"title": "오늘은 배당 기준일이에요."}]})
+    expect(not gen, f"조사 붙은 흔한 주어로 잘못 잡는다: {gen}")
     # 조사처럼 끝나는 이름('11번가')도 그대로 견준다
     st = style.repeat_check({**base, "items": [{"tag": "11번가", "title": "새벽 배송 시작"}], "briefs": [{"title": "11번가가 새 할인을 시작해요."}]})
     expect(len(st) == 1 and "'11번가'" in st[0], f"'11번가'를 못 잡는다: {st}")

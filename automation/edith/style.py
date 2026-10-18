@@ -183,9 +183,13 @@ def _topic_words(words):
 
 
 def _subject(title):
-    """짧은 소식엔 태그가 없어 제목 첫 낱말(주어 — '스타벅스가', '이마트24가')을 주제 이름으로 본다(조사를 뗀 것과 그대로 둘 다)."""
+    """짧은 소식엔 태그가 없어 제목 첫 낱말(주어 — '스타벅스가', '이마트24가')을 주제 이름으로 본다(조사를 뗀 것과 그대로 둘 다).
+    조사를 떼면 흔한 말·날짜인 주어('정부가'·'오늘은'·'은행이')는 아예 뺀다."""
     first = _TOPIC_WORD.findall(plain(title or ""))[:1]
-    return _tokens(first[0]) if first else set()
+    if not first:
+        return set()
+    bare = _TOPIC_TAIL.sub("", first[0]) if len(first[0]) > 2 else first[0]
+    return set() if bare in _TOPIC_STOP or _TOPIC_NUM.fullmatch(bare) else {first[0], bare}
 
 
 def _mentions(word, tokens):
