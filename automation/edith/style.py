@@ -158,11 +158,73 @@ def share_check(d):
     return []
 
 
+# 한 호 안에서 같은 회사·주제를 두 칸에 쓰지 않는다 — 10/16 회고: 스타벅스가 H PICK(e-프리퀀시)과 짧은 소식 08(에스프레소 런)에 함께 나가
+# '10가지'가 9가지로 보였다. 칸마다 tag(주제 이름, 짧은 소식은 제목의 주어)의 낱말이 다른 칸의 제목·태그에 또 나오면 알린다. 흔한 낱말·날짜는 뺀다(같은 소식이 아니어도 나온다).
+REPEAT_FROM = "2026-10-19"
+_TOPIC_STOP = {"AI", "정부", "시장", "서비스", "가격", "금리", "매출", "실적", "투자", "고객", "혜택", "국내", "해외", "신청", "출시", "확대",
+               "소비", "소비자", "이용자", "기업", "오늘", "내일", "이번", "지난", "올해", "내년", "청년", "직장인", "연말", "주식", "대출",
+               "은행", "카드", "서울", "정책", "지원", "할인", "인상", "인하", "전망", "발표", "분기", "물가", "세금",
+               "연휴", "명절", "주말", "날씨", "일정", "정보", "소식", "뉴스", "기간", "마감", "시작", "기준", "최대", "무료", "이번주", "다음주"}
+_TOPIC_WORD = re.compile(r"[가-힣A-Za-z0-9]{2,}")
+_TOPIC_TAIL = re.compile(r"(?:으로|에서|까지|부터|이라|에게|이|가|을|를|은|는|에|의|도|로|와|과|만)$")
+_TOPIC_NUM = re.compile(r"\d+(?:월|일|년|주|분기|차|시|만|억|원|개|명|곳|배)?")  # '10월'·'2차'·'16일' — 날짜·숫자는 주제가 아니다
+
+
+def _tokens(text):
+    """낱말 그대로와 끝의 조사 하나를 뗀 것 둘 다('카카오뱅크가' → '카카오뱅크', '11번가가' → '11번가' — '11번가' 자체도 남는다)."""
+    out = set()
+    for w in _TOPIC_WORD.findall(plain(text or "")):
+        out |= {w, _TOPIC_TAIL.sub("", w) if len(w) > 2 else w}
+    return out
+
+
+def _topic_words(words):
+    return {w for w in words if len(w) >= 2 and w not in _TOPIC_STOP and not _TOPIC_NUM.fullmatch(w)}
+
+
+def _subject(title):
+    """짧은 소식엔 태그가 없어 제목 첫 낱말(주어 — '스타벅스가', '이마트24가')을 주제 이름으로 본다(조사를 뗀 것과 그대로 둘 다).
+    조사를 떼면 흔한 말·날짜인 주어('정부가'·'오늘은'·'은행이')는 아예 뺀다."""
+    first = _TOPIC_WORD.findall(plain(title or ""))[:1]
+    if not first:
+        return set()
+    bare = _TOPIC_TAIL.sub("", first[0]) if len(first[0]) > 2 else first[0]
+    return set() if bare in _TOPIC_STOP or _TOPIC_NUM.fullmatch(bare) else {first[0], bare}
+
+
+def _mentions(word, tokens):
+    """한글 낱말은 붙여 쓴 합성어('카카오뱅크')까지, 영문·숫자 약칭은 낱말 전체로만('KT' 와 'KTX' 는 다르다)."""
+    if re.fullmatch(r"[가-힣]+", word):
+        return any(t.startswith(word) for t in tokens)
+    return any(t.lower() == word.lower() for t in tokens)
+
+
+def repeat_check(d):
+    """같은 회사·주제가 두 칸(H PICK·메인 02~05·짧은 소식 06~10)에 나오면 칸 쌍마다 한 번 알린다 — 뒤 칸을 바꾸라고(REPEAT_FROM~, 경고만)."""
+    if str(d.get("date", ""))[:10] < REPEAT_FROM:
+        return []
+    big, items = d.get("big_issue") or {}, d.get("items") or []
+    slots = [("H PICK", big.get("tag", ""), d.get("title", ""))]
+    slots += [(f"{n:02d}", it.get("tag", ""), it.get("title", "")) for n, it in enumerate(items, 2)]
+    slots += [(f"{n:02d}", "", b.get("title", "")) for n, b in enumerate(d.get("briefs") or [], 2 + len(items))]
+    # 태그는 이름이라 조사를 떼지 않는다('11번가'), 짧은 소식은 제목의 주어로
+    words = [_topic_words(_TOPIC_WORD.findall(plain(tag))) if tag else _topic_words(_subject(title)) for _, tag, title in slots]
+    tokens = [_tokens(title) | _tokens(tag) for _, tag, title in slots]  # 제목이 태그를 풀어 써도 태그끼리 견준다
+    out = []
+    for i in range(len(slots)):
+        for j in range(i + 1, len(slots)):
+            hit = sorted(w for w in words[i] if _mentions(w, tokens[j])) or sorted(w for w in words[j] if _mentions(w, tokens[i]))
+            if hit:
+                a, b = slots[i][0], slots[j][0]
+                out.append(f"{a}·{b} 두 칸에 '{hit[0]}' — 한 호에선 같은 회사·주제를 한 칸에만(10/16 회고). {b} 자리에 다른 소식을")
+    return out
+
+
 def lint(d):
     """경고 문장 목록(최대 MAX_LINES 개 + 남은 개수). 형식 2·데일리·STYLE_FROM 이후 호만."""
     if d.get("format") != 2 or d.get("rewind") or str(d.get("date", ""))[:10] < STYLE_FROM:
         return []
-    found, seen_acr = caption_keyword(d) + share_check(d) + brief_check(d) + todo_check(d), set()
+    found, seen_acr = caption_keyword(d) + share_check(d) + brief_check(d) + todo_check(d) + repeat_check(d), set()
     for where, text, kind in _texts(d):
         rules = _WEED + _FORCE + (_WEED_SOCIAL if kind in ("social", "card", "obs") else [])
         for rx, why in rules:

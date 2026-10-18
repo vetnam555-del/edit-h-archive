@@ -278,6 +278,41 @@ def t_strict_content():
     return None
 
 
+def t_repeat_check():
+    """같은 회사·주제가 두 칸에 나오면 칸 쌍마다 한 번 알린다(10/19~) — 10/16 호의 스타벅스(H PICK·08)는 잡고, 흔한 낱말·날짜('서울'·'10월'·'연휴')는 넘긴다."""
+    from edith import style
+    c = json.loads((CONTENT_DIR / "2026-10-16.json").read_text(encoding="utf-8"))
+    c["date"] = "2026-10-19"
+    notes = style.repeat_check(c)
+    expect(any("'스타벅스'" in n and n.startswith("H PICK·08 ") for n in notes), f"스타벅스 중복(H PICK·짧은 소식 08)을 못 잡는다: {notes}")
+    expect(not any("'서울'" in n for n in notes), f"흔한 낱말 '서울'까지 잡는다: {notes}")
+    for day in ("2026-10-08", "2026-10-09", "2026-09-28", "2026-10-03"):  # 9/28 은 '10월'이 세 칸, 10/3 은 '연휴'가 두 칸에 — 다른 소식이다
+        x = json.loads((CONTENT_DIR / f"{day}.json").read_text(encoding="utf-8"))
+        x["date"] = "2026-10-19"
+        expect(not style.repeat_check(x), f"{day} 원고에서 흔한 낱말·날짜로 잘못 잡는다: {style.repeat_check(x)}")
+    expect(not style.repeat_check({**c, "date": "2026-10-16"}), "10/19 전 호까지 경고한다")
+    base = {"date": "2026-10-19", "title": "커피 17잔이면?", "big_issue": {"tag": "스타벅스"}, "briefs": []}
+    # 두 칸 제목에 다 나와도 한 번만, 뒤 칸을 바꾸라고
+    both = style.repeat_check({**base, "items": [{"tag": "카카오 선물하기", "title": "카카오 선물하기 수수료 9%"}, {"tag": "카카오 AI", "title": "카카오, 말로 주문"}]})
+    expect(both == [n for n in both if n.startswith("02·03 ")] and len(both) == 1, f"같은 칸 쌍을 두 번(거꾸로도) 알린다: {both}")
+    # 제목이 태그를 풀어 써도 태그끼리 같은 회사면 잡는다
+    tags = style.repeat_check({**base, "items": [{"tag": "카카오", "title": "생수도 말로 주문해요"}, {"tag": "카카오", "title": "추천하고 돈 벌어요"}]})
+    expect(len(tags) == 1 and "'카카오'" in tags[0], f"태그끼리 같은 회사를 못 잡는다: {tags}")
+    # 영문 약칭은 낱말 전체로만 — KT 와 KTX 는 다르다
+    kt = style.repeat_check({**base, "items": [{"tag": "KT 통신", "title": "KT 요금제 1만원 내린다"}], "briefs": [{"title": "KTX 예매가 11월 1일 열려요."}]})
+    expect(not kt, f"'KT'를 'KTX' 안에서 잡는다: {kt}")
+    # 짧은 소식끼리도 — 태그가 없어 제목 첫 낱말(주어)로 본다
+    br = style.repeat_check({**base, "big_issue": {"tag": "주담대"}, "items": [], "briefs": [{"title": "스타벅스가 새 음료를 내요."}, {"title": "스타벅스가 할인 행사를 열어요."}]})
+    expect(len(br) == 1 and br[0].startswith("02·03 ") and "'스타벅스'" in br[0], f"짧은 소식끼리 같은 회사를 못 잡는다: {br}")
+    # 흔한 말 주어는 조사가 붙어도 넘긴다('정부가'·'오늘은')
+    gen = style.repeat_check({**base, "big_issue": {"tag": "주담대"}, "items": [], "briefs": [{"title": "정부가 새 정책을 발표해요."}, {"title": "정부가 세법을 바꿔요."}, {"title": "오늘은 금통위가 열려요."}, {"title": "오늘은 배당 기준일이에요."}]})
+    expect(not gen, f"조사 붙은 흔한 주어로 잘못 잡는다: {gen}")
+    # 조사처럼 끝나는 이름('11번가')도 그대로 견준다
+    st = style.repeat_check({**base, "items": [{"tag": "11번가", "title": "새벽 배송 시작"}], "briefs": [{"title": "11번가가 새 할인을 시작해요."}]})
+    expect(len(st) == 1 and "'11번가'" in st[0], f"'11번가'를 못 잡는다: {st}")
+    return None
+
+
 def t_poll_paused():
     """월요일 투표는 2026-10-19 부터 쉰다(세 번 모두 참여 0명) — poll_due 를 내지 않고, 원고의 poll 은 빌드가 막는다."""
     import check_today
@@ -923,6 +958,7 @@ def main():
     check("짧게 읽는 소식 점검", t_brief_check)
     check("새 호 막는 점검(짧은 소식 개수·H PICK 중복)", t_strict_content)
     check("월요일 투표 쉼(2026-10-19~)", t_poll_paused)
+    check("같은 회사·주제 두 칸(2026-10-19~)", t_repeat_check)
     check("오늘 챙길 것", t_todo_box)
     check("오늘 할 일(check_today)", t_check_today)
     check("연재 회차·문장 점검", t_series_and_style)
