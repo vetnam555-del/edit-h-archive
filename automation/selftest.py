@@ -278,6 +278,33 @@ def t_strict_content():
     return None
 
 
+def t_poll_paused():
+    """월요일 투표는 2026-10-19 부터 쉰다(세 번 모두 참여 0명) — poll_due 를 내지 않고, 원고의 poll 은 빌드가 막는다."""
+    import check_today
+    from edith import content
+    cfg = load_config()
+    expect(cfg["poll"].get("paused_from") == "2026-10-19", "config.poll.paused_from 이 없다")
+    due, _ = check_today.poll_status(parse_date("2026-10-19"), "월", cfg)
+    expect(not due, "10/19(월) 에 투표를 내라고 한다")
+    due, _ = check_today.poll_status(parse_date("2026-10-12"), "월", {"poll": {"min_votes": 5}})
+    expect(due, "쉬기 전(스위치 없음) 월요일에 투표를 안 낸다")
+    c = json.loads((CONTENT_DIR / "2026-10-12.json").read_text(encoding="utf-8"))
+    expect(c.get("poll"), "10/12 원고에 poll 이 없다(점검 전제)")
+    content.prepare(json.loads(json.dumps(c)), "2026-10-12")   # 지난 호는 그대로 통과
+    x = {**json.loads(json.dumps(c)), "date": "2026-10-19", "briefs_short_reason": "점검용"}
+    try:
+        content.prepare(x, "2026-10-19")
+        expect(False, "10/19 원고의 poll 을 막지 않았다")
+    except content.ContentError as e:
+        expect("독자 투표는 2026-10-19 부터 쉽니다" in str(e), f"poll 이 아닌 다른 이유로 막혔다: {e}")
+    x.pop("poll")
+    try:
+        content.prepare(x, "2026-10-19")
+    except content.ContentError as e:
+        expect("투표" not in str(e), f"poll 을 뺐는데도 투표 때문에 막혔다: {e}")
+    return None
+
+
 def t_todo_box():
     """오늘 챙길 것(10/16~): content.todo 가 있으면 그것, 없으면 결론 문장 앞 3개 — 10/15 호·예비 호엔 없다."""
     from edith import content, newsletter
@@ -895,6 +922,7 @@ def main():
     check("발송 시각(지난 호는 08:00)", t_send_time)
     check("짧게 읽는 소식 점검", t_brief_check)
     check("새 호 막는 점검(짧은 소식 개수·H PICK 중복)", t_strict_content)
+    check("월요일 투표 쉼(2026-10-19~)", t_poll_paused)
     check("오늘 챙길 것", t_todo_box)
     check("오늘 할 일(check_today)", t_check_today)
     check("연재 회차·문장 점검", t_series_and_style)

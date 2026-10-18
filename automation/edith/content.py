@@ -6,7 +6,7 @@
 import json
 import re
 
-from .common import AUTOMATION, CONTENT_DIR, MANIFEST, ROOT, cover_photo_problem, parse_date, plain, source_label, weekday_ko
+from .common import AUTOMATION, CONTENT_DIR, MANIFEST, ROOT, cover_photo_problem, load_config, parse_date, plain, source_label, weekday_ko
 
 POLLS_DIR = AUTOMATION / "polls"
 
@@ -169,6 +169,9 @@ def _poll(data, where):
     """투표(형식 2, 주 첫 호) 와 투표 결과(주 마지막 호) 검증. 결과 숫자는 사람이 적지 않고
     automation/polls/{id}.json(tally_poll.py 가 메일·인스타 댓글로 집계)에서 읽는다."""
     poll = data.get("poll")
+    paused = (load_config().get("poll") or {}).get("paused_from")
+    if poll and paused and str(data.get("date", "")) >= paused:
+        raise ContentError(f"{where}: 독자 투표는 {paused} 부터 쉽니다(세 번 모두 참여 0명) — poll 을 빼고 question(일반 질문)을 넣으세요")
     if poll:
         if data["format"] != 2:
             raise ContentError(f"{where}: poll 은 형식 2(5가지) 호에서만 씁니다")

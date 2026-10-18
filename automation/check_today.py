@@ -30,7 +30,8 @@ def poll_status(d, wd, cfg):
     monday = d - dt.timedelta(days=d.weekday())
     files = {p.stem: p for p in CONTENT_DIR.glob("20*.json")}
     this_week = [k for k in files if monday.isoformat() <= k < d.isoformat()]
-    poll_due = not this_week
+    paused = (cfg.get("poll") or {}).get("paused_from")
+    poll_due = not this_week and not (paused and d.isoformat() >= paused)   # 2026-10-19~ 쉼(세 번 모두 참여 0명)
 
     polls = sorted(k for k in files if k < d.isoformat() and (d - parse_date(k)).days <= 14
                    and json.loads(files[k].read_text(encoding="utf-8")).get("poll"))
