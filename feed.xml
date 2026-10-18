@@ -6,7 +6,14 @@
   <atom:link href="https://vetnam555-del.github.io/edit-h-archive/feed.xml" rel="self" type="application/rss+xml"/>
   <description>매일 아침 8시 30분, 확인된 숫자로 읽는 트렌드 뉴스레터</description>
   <language>ko</language>
-  <lastBuildDate>Sun, 18 Oct 2026 08:30:00 +0900</lastBuildDate>
+  <lastBuildDate>Mon, 19 Oct 2026 08:30:00 +0900</lastBuildDate>
+  <item>
+    <title>VOL.118 4% 예금 1000만원, 1년 이자 40만원이라고?</title>
+    <link>https://vetnam555-del.github.io/edit-h-archive/2026-10-19.html</link>
+    <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-10-19.html</guid>
+    <pubDate>Mon, 19 Oct 2026 08:30:00 +0900</pubDate>
+    <description>4%대 예금 귀환·위스키 매출 소주 추월·12월 초진 비대면진료·취업 준비 월 58만원·사우나 검색 25배 — 오늘의 5가지</description>
+  </item>
   <item>
     <title>VOL.117 2%대에 빌린 3억, 월 29만원 더 낸다고?</title>
     <link>https://vetnam555-del.github.io/edit-h-archive/2026-10-18.html</link>
@@ -209,13 +216,6 @@
     <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-09-11.html</guid>
     <pubDate>Fri, 11 Sep 2026 10:26:00 +0900</pubDate>
     <description>개인정보보호법 매출 10% 과징금 오늘 시행·클로드 4번째 무단접근 공개·삼성-애플 SNS 디스전·AI 뷰티 브랜드 순위 등 10개 이슈</description>
-  </item>
-  <item>
-    <title>VOL.088 팀 쿡 없이 낸, 첫 폴더블폰이라고?</title>
-    <link>https://vetnam555-del.github.io/edit-h-archive/2026-09-10.html</link>
-    <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-09-10.html</guid>
-    <pubDate>Thu, 10 Sep 2026 10:05:00 +0900</pubDate>
-    <description>애플 CEO 교체(팀 쿡→존 터너스) 후 첫 신제품 아이폰 듀오·개인정보 유출 열흘새 8건·쿠팡 결제액 5조 돌파·챗GPT 기업이용 28배 등 10개 이슈</description>
   </item>
 </channel>
 </rss>
