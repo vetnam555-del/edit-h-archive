@@ -278,6 +278,22 @@ def t_strict_content():
     return None
 
 
+def t_repeat_check():
+    """같은 회사·주제가 두 칸에 나오면 알린다(10/19~) — 10/16 호의 스타벅스(H PICK·08)는 잡고, 흔한 낱말('2차'·'서울')은 넘긴다."""
+    from edith import style
+    c = json.loads((CONTENT_DIR / "2026-10-16.json").read_text(encoding="utf-8"))
+    c["date"] = "2026-10-19"
+    notes = style.repeat_check(c)
+    expect(any("'스타벅스'" in n and n.startswith("H PICK·08 ") for n in notes), f"스타벅스 중복(H PICK·짧은 소식 08)을 못 잡는다: {notes}")
+    expect(not any("'서울'" in n for n in notes), f"흔한 낱말 '서울'까지 잡는다: {notes}")
+    for day in ("2026-10-08", "2026-10-09"):
+        x = json.loads((CONTENT_DIR / f"{day}.json").read_text(encoding="utf-8"))
+        x["date"] = "2026-10-19"
+        expect(not style.repeat_check(x), f"{day} 원고에서 흔한 낱말로 잘못 잡는다: {style.repeat_check(x)}")
+    expect(not style.repeat_check({**c, "date": "2026-10-16"}), "10/19 전 호까지 경고한다")
+    return None
+
+
 def t_poll_paused():
     """월요일 투표는 2026-10-19 부터 쉰다(세 번 모두 참여 0명) — poll_due 를 내지 않고, 원고의 poll 은 빌드가 막는다."""
     import check_today
@@ -923,6 +939,7 @@ def main():
     check("짧게 읽는 소식 점검", t_brief_check)
     check("새 호 막는 점검(짧은 소식 개수·H PICK 중복)", t_strict_content)
     check("월요일 투표 쉼(2026-10-19~)", t_poll_paused)
+    check("같은 회사·주제 두 칸(2026-10-19~)", t_repeat_check)
     check("오늘 챙길 것", t_todo_box)
     check("오늘 할 일(check_today)", t_check_today)
     check("연재 회차·문장 점검", t_series_and_style)

@@ -158,11 +158,48 @@ def share_check(d):
     return []
 
 
+# 한 호 안에서 같은 회사·주제를 두 칸에 쓰지 않는다 — 10/16 회고: 스타벅스가 H PICK(e-프리퀀시)과 짧은 소식 08(에스프레소 런)에 함께 나가
+# '10가지'가 9가지로 보였다. 칸마다 tag(주제 이름)의 낱말이 다른 칸 제목에 또 나오면 알린다. 흔한 낱말은 뺀다(같은 소식이 아니어도 나온다).
+REPEAT_FROM = "2026-10-19"
+_TOPIC_STOP = {"AI", "정부", "시장", "서비스", "가격", "금리", "매출", "실적", "투자", "고객", "혜택", "국내", "해외", "신청", "출시", "확대",
+               "소비", "소비자", "이용자", "기업", "오늘", "내일", "이번", "지난", "올해", "내년", "청년", "직장인", "연말", "주식", "대출",
+               "은행", "카드", "서울", "정책", "지원", "할인", "2차", "1차", "인상", "인하", "전망", "발표", "분기", "물가", "세금"}
+_TOPIC_WORD = re.compile(r"[가-힣A-Za-z0-9]{2,}")
+_TOPIC_TAIL = re.compile(r"(?:으로|에서|까지|부터|이라|에게|이|가|을|를|은|는|에|의|도|로|와|과|만)$")
+
+
+def _topic_words(text):
+    out = set()
+    for w in _TOPIC_WORD.findall(plain(text or "")):
+        w = _TOPIC_TAIL.sub("", w) if len(w) > 2 else w
+        if len(w) >= 2 and w not in _TOPIC_STOP and not w.isdigit():
+            out.add(w)
+    return out
+
+
+def repeat_check(d):
+    """같은 회사·주제가 두 칸(H PICK·메인 02~05·짧은 소식 06~10)에 나오면 알린다(REPEAT_FROM~, 경고만)."""
+    if str(d.get("date", ""))[:10] < REPEAT_FROM:
+        return []
+    big = d.get("big_issue") or {}
+    slots = [("H PICK", big.get("tag", ""), plain(d.get("title", "")))]
+    slots += [(f"{n:02d}", it.get("tag", ""), plain(it.get("title", ""))) for n, it in enumerate(d.get("items") or [], 2)]
+    slots += [(f"{n:02d}", "", plain(b.get("title", ""))) for n, b in enumerate(d.get("briefs") or [], 2 + len(d.get("items") or []))]
+    out, seen = [], set()
+    for i, (a, tag, _) in enumerate(slots):
+        for w in sorted(_topic_words(tag)):
+            for j, (b, _, title) in enumerate(slots):
+                if j != i and w in title and (w, b) not in seen:
+                    seen.add((w, b))
+                    out.append(f"{a}·{b} 두 칸에 '{w}' — 한 호에선 같은 회사·주제를 한 칸에만(10/16 회고). {b} 자리에 다른 소식을")
+    return out
+
+
 def lint(d):
     """경고 문장 목록(최대 MAX_LINES 개 + 남은 개수). 형식 2·데일리·STYLE_FROM 이후 호만."""
     if d.get("format") != 2 or d.get("rewind") or str(d.get("date", ""))[:10] < STYLE_FROM:
         return []
-    found, seen_acr = caption_keyword(d) + share_check(d) + brief_check(d) + todo_check(d), set()
+    found, seen_acr = caption_keyword(d) + share_check(d) + brief_check(d) + todo_check(d) + repeat_check(d), set()
     for where, text, kind in _texts(d):
         rules = _WEED + _FORCE + (_WEED_SOCIAL if kind in ("social", "card", "obs") else [])
         for rx, why in rules:
