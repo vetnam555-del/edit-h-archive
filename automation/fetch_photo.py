@@ -19,6 +19,7 @@ CC BY-SA 는 글자를 얹은 표지 이미지까지 같은 라이선스로 공�
 
 대체 사진(2026-10-08 — 10/5 호가 사진 없이 핵심어 표지로 나가 캐러셀 도달 10, 실사 평균 14): 접속이 막혔거나(코드 2) 맞는 사진이
 없으면 핵심어 표지로 가기 전에, 이미 발행한 호에서 검수·출처 표기를 마친 사진(assets/photos/library.json)을 주제어로 골라 다시 쓴다.
+목록엔 개선 루틴이 미리 눈으로 검수한 아직 안 쓴 사진(assets/photos/lib-*.jpg — credit·photo_source 를 목록에 적는다)도 있다(2026-10-19~).
   python3 automation/fetch_photo.py --library "대출 금리"                          # 주제어가 맞는 순 · 최근에 안 쓴 순
   python3 automation/fetch_photo.py --library "대출 금리" --use 1 --date 2026-10-09  # cards.cover 조각 출력(파일은 복사하지 않음)
 """
@@ -130,8 +131,10 @@ def _tokens(text):
 
 
 def library(day, words="", skip=None):
-    """대체 표지 후보 [{photo, credit, focus, subject, tags, last, score}] — 주제어가 많이 맞는 순, 같으면 오래전에 쓴 순.
-    library.json 에 있고, 발행한 일반 호가 실제로 표지로 쓴 사진만(출처·초점은 그 호의 content JSON). 최근 사용은 예비 호까지 센다.
+    """대체 표지 후보 [{photo, credit, focus, subject, tags, last, score}] — 주제어가 많이 맞는 순, 같으면 오래전에 쓴 순(아직 안 쓴 사진이 먼저).
+    library.json 에 있고, 발행한 일반 호가 실제로 표지로 쓴 사진(출처·초점은 그 호의 content JSON) 또는 개선 루틴이 미리 눈으로 검수해
+    출처(credit·photo_source)를 목록에 적어 둔 아직 안 쓴 사진(2026-10-19 — 돈 사진이 하나뿐이라 10/18 에 쓰자 10/19 '예금' 호가 핵심어 표지로 나갔다).
+    최근 사용은 예비 호까지 센다.
     day 는 독자가 이 표지를 보는 날(그날까지 쓴 것을 센다), skip 은 만드는 호의 날짜(그 파일 자신은 뺀다, 기본 day)."""
     import datetime as dt
     lib = {k: v for k, v in json.loads(LIBRARY.read_text(encoding="utf-8")).items() if not k.startswith("_")}
@@ -154,10 +157,12 @@ def library(day, words="", skip=None):
     out = []
     for photo, meta in lib.items():
         u = used.get(photo)
+        if not u and meta.get("credit"):   # 미리 검수한 아직 안 쓴 사진 — 출처는 목록에 적힌 것
+            u = {"credit": meta["credit"], "focus": meta.get("focus"), "last": None}
         if not u or not u.get("credit") or not (ROOT / photo).exists():
             continue
-        ago = (today - dt.date.fromisoformat(u["last"])).days
-        if ago <= RECENT_DAYS:   # '3일 안에 쓴 사진은 뺀다' — 사흘 전 사진까지 뺀다(Codex 리뷰)
+        ago = (today - dt.date.fromisoformat(u["last"])).days if u["last"] else None
+        if ago is not None and ago <= RECENT_DAYS:   # '3일 안에 쓴 사진은 뺀다' — 사흘 전 사진까지 뺀다(Codex 리뷰)
             continue
         tags = meta.get("tags", [])
         low = [g.lower() for g in tags]
@@ -167,8 +172,8 @@ def library(day, words="", skip=None):
                     if t in low or (len(t) > 1 and _HANGUL.search(t)
                                     and any(len(g) > 1 and _HANGUL.search(g) and (t in g or g in t) for g in low)))
         out.append({"photo": photo, "credit": u["credit"], "focus": u.get("focus"), "subject": meta.get("subject", ""),
-                    "tags": tags, "last": u["last"], "ago": ago, "score": score})
-    return sorted(out, key=lambda c: (-c["score"], -c["ago"]))
+                    "tags": tags, "last": u["last"], "ago": ago, "score": score, "photo_source": meta.get("photo_source")})
+    return sorted(out, key=lambda c: (-c["score"], -(c["ago"] if c["ago"] is not None else 10 ** 6)))
 
 
 def cmd_library(words, use=None, day=None):
@@ -182,7 +187,8 @@ def cmd_library(words, use=None, day=None):
         return 1
     if use is None:
         for i, c in enumerate(cands, 1):
-            print(f"[{i}] {c['photo']} — {c['subject']} · 맞은 주제어 {c['score']} · 마지막 사용 {c['last']}({c['ago']}일 전)")
+            when = f"마지막 사용 {c['last']}({c['ago']}일 전)" if c["last"] else "아직 안 쓴 사진(미리 검수)"
+            print(f"[{i}] {c['photo']} — {c['subject']} · 맞은 주제어 {c['score']} · {when}")
         if not cands[0]["score"]:
             print("  (주제어가 맞는 사진이 없습니다 — 제목 장면과 어울리는 사진이 없으면 핵심어 표지로 가고 보고 '표지:' 줄에 사유를 적으세요)")
         print("고른 번호를 --use N --date YYYY-MM-DD 로 다시 실행하면 cards.cover 조각이 나옵니다. 표지 PNG 를 원본 크기로 보고 확인하세요.")
@@ -194,7 +200,9 @@ def cmd_library(words, use=None, day=None):
     snippet = {"photo": c["photo"], "credit": c["credit"]}
     if c.get("focus"):
         snippet["focus"] = c["focus"]
-    print(f"✓ 대체 사진: {c['photo']} — {c['subject']} ({c['last']} 호에 쓴 사진)")
+    if c.get("photo_source"):
+        snippet["photo_source"] = c["photo_source"]
+    print(f"✓ 대체 사진: {c['photo']} — {c['subject']} ({c['last'] + ' 호에 쓴 사진' if c['last'] else '아직 안 쓴 사진 — 미리 검수'})")
     print(json.dumps(snippet, ensure_ascii=False))
     return 0
 

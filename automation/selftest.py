@@ -590,6 +590,30 @@ def t_photo_library():
             fetch_photo.ROOT, fetch_photo.LIBRARY = saved_root, saved_lib
     recent = {c["photo"] for c in fetch_photo.library("2026-10-09")}
     expect(not recent & {"assets/photos/2026-10-08.jpg", "assets/photos/2026-10-06.jpg"}, "사흘 안에 쓴 사진이 대체 후보에 나온다")
+    # 10/19 '예금' 호 — 하나뿐인 돈 사진(10/3 동전)을 10/18 에 써서 핵심어 표지로 나갔다. 미리 검수한 아직 안 쓴 돈 사진이 이제 1순위
+    top = fetch_photo.library("2026-10-19", "4% 예금 1000만원 이자")[0]
+    expect(top["score"] > 0 and top["last"] is None and top["credit"] and top["photo_source"],
+           f"10/19 '예금' 에 미리 검수한 돈 사진(출처 포함)이 1순위가 아니다: {top['photo']}")
+    with tempfile.TemporaryDirectory() as tmp:   # 안 쓴 사진은 목록에 출처가 있을 때만, 같은 점수면 쓴 사진보다 먼저
+        root = Path(tmp)
+        (root / "content").mkdir()
+        (root / "assets" / "photos").mkdir(parents=True)
+        for f in ("old.jpg", "new.jpg", "nocredit.jpg"):
+            (root / "assets" / "photos" / f).write_bytes(b"")
+        (root / "assets" / "photos" / "library.json").write_text(json.dumps({
+            "assets/photos/old.jpg": {"subject": "동전", "tags": ["돈"]},
+            "assets/photos/new.jpg": {"subject": "저금통", "tags": ["돈"], "credit": "사진 = A / Wikimedia Commons (CC0)", "photo_source": "https://x"},
+            "assets/photos/nocredit.jpg": {"subject": "지갑", "tags": ["돈"]}}), encoding="utf-8")
+        (root / "content" / "2026-10-01.json").write_text(json.dumps({"cards": {"cover": {"photo": "assets/photos/old.jpg", "credit": "출처"}}}), encoding="utf-8")
+        fetch_photo.ROOT, fetch_photo.LIBRARY = root, root / "assets" / "photos" / "library.json"
+        try:
+            got = [c["photo"] for c in fetch_photo.library("2026-10-20", "돈")]
+            expect(got == ["assets/photos/new.jpg", "assets/photos/old.jpg"], f"미리 검수한 사진 순서·출처 없는 사진 제외가 틀렸다: {got}")
+            with contextlib.redirect_stdout(io.StringIO()) as out:
+                fetch_photo.cmd_library("돈", use=1, day="2026-10-20")
+            expect('"photo_source": "https://x"' in out.getvalue(), "미리 검수한 사진의 cards.cover 조각에 photo_source 가 없다")
+        finally:
+            fetch_photo.ROOT, fetch_photo.LIBRARY = saved_root, saved_lib
     return f"{len(every)}장"
 
 

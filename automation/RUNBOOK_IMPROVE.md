@@ -23,7 +23,8 @@ python3 automation/selftest.py --quick      # 시작 전에 이미 깨진 게 �
 3. **실험 판정일** — `automation/references.md` '지금 시험 중'에서 기간이 끝난 실험. 성과표 줄을 읽고 유지·되돌림을 정해
    `learnings.md` 원칙/가설로 옮긴다(되돌림 스위치는 references.md 에 적혀 있다).
 4. **빌드 경고가 매일 반복되는 것** — 최근 제작 보고·`↘` 경고(카드 자동 축소, 문장 점검, 한 줄 뉴스 부족 등)에서 같은 것이 3일 이상이면
-   규칙·템플릿·검사를 고친다.
+   규칙·템플릿·검사를 고친다. 표지가 핵심어로 나간 날은 `fetch_photo.py --library "그날 주제어" --date {날짜}` 로 맞는 사진이 모두 빠졌는지 보고,
+   그 주제 사진을 위키미디어에서 골라 눈으로 검수한 뒤 `assets/photos/lib-*.jpg` + library.json 한 줄(subject·tags·credit·photo_source·focus)로 더한다.
 5. 위가 비어 있으면 `references.md` '다음 실험 후보'에서 **지금 시험 중인 실험과 같은 지표를 건드리지 않는** 작은 것 하나를 준비한다
    (시작일을 다음 실험이 끝난 뒤로 잡는다 — 한 번에 한 변수).
 
