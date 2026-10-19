@@ -157,8 +157,9 @@ def library(day, words="", skip=None):
     out = []
     for photo, meta in lib.items():
         u = used.get(photo)
-        if not u and meta.get("credit"):   # 미리 검수한 아직 안 쓴 사진 — 출처는 목록에 적힌 것
-            u = {"credit": meta["credit"], "focus": meta.get("focus"), "last": None}
+        if meta.get("credit") and meta.get("photo_source") and not (u or {}).get("credit"):
+            # 미리 검수한 사진 — 일반 호가 아직 안 썼으면(예비 호가 먼저 써도) 출처·초점은 목록에 적힌 것, 출처 주소가 없으면 받지 않는다
+            u = {"last": None, **(u or {}), "credit": meta["credit"], "focus": (u or {}).get("focus") or meta.get("focus")}
         if not u or not u.get("credit") or not (ROOT / photo).exists():
             continue
         ago = (today - dt.date.fromisoformat(u["last"])).days if u["last"] else None
