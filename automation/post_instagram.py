@@ -11,7 +11,7 @@
                 · GH_ADMIN_TOKEN(권장 — 교환·연장한 토큰을 Secret 에 다시 저장. 없으면 60일마다 직접 새 토큰을 넣어야 함)
   python3 automation/post_instagram.py --key 2026-09-24                 # 게시
   python3 automation/post_instagram.py --key 2026-09-24 --dry-run       # 토큰·이미지·영상 확인만(게시하지 않음)
-  python3 automation/post_instagram.py --check                          # 토큰이 어느 계정인지만 확인
+  python3 automation/post_instagram.py --check                          # 토큰이 어느 계정인지·계정 종류(BUSINESS/MEDIA_CREATOR)만 확인
 """
 import argparse
 import base64
@@ -490,6 +490,11 @@ def main():
     uid = me.get("user_id") or me.get("id")
     print(f"인스타 계정 @{me.get('username')} (id {uid})")
     if args.check:
+        try:   # 계정 종류 — 아침 스토리(E9)는 비즈니스(BUSINESS)만 된다. 못 읽어도 토큰 확인은 통과
+            kind = g.call("GET", "me", fields="account_type").get("account_type")
+            print(f"계정 종류 {kind}" + (" — 스토리 자동 게시 안 됨(비즈니스 전환은 automation/OWNER_TODO.md)" if kind == CREATOR else ""))
+        except IGError as e:
+            print(f"계정 종류를 읽지 못했습니다: {e}")
         return
     if args.probe_trial:
         probe_trial(g, uid, cfg_all["site_url"].rstrip("/"))
