@@ -746,7 +746,12 @@ def t_views_diag():
     cap, reel = site_mod.instagram_caption(d, load_config()["site_url"]), site_mod.reel_caption(d)
     expect("프리랜서 친구" in cap and "프리랜서 친구" in reel, "보내기 한 줄이 캡션·릴스 캡션에 없다")
     expect(len(re.findall(r"(?<!\S)#\S+", reel)) <= 5 and reel.rstrip().splitlines()[-1].startswith("#"), "릴스 캡션 끝이 해시태그 줄이 아니다")
-    for who, date, warn in (("", "2026-10-10", True), ("친구", "2026-10-10", True), ("프리랜서 친구", "2026-10-10", False), ("", "2026-10-09", False)):
+    # E6 판정(2026-10-20, 정규 8호 공유 0 — 되돌림): 10/21 호부터는 share_to 가 있어도 한 줄을 붙이지 않고 점검도 하지 않는다
+    late = {**d, "date": "2026-10-21"}
+    expect("프리랜서 친구" not in site_mod.instagram_caption(late, load_config()["site_url"]) and "프리랜서 친구" not in site_mod.reel_caption(late),
+           "E6 를 끈 뒤(10/21~)에도 보내기 한 줄이 붙는다")
+    for who, date, warn in (("", "2026-10-10", True), ("친구", "2026-10-10", True), ("프리랜서 친구", "2026-10-10", False), ("", "2026-10-09", False),
+                            ("", "2026-10-21", False)):
         got = bool(style.share_check({"date": date, "instagram": {"share_to": who}}))
         expect(got == warn, f"share_to '{who}'({date}) 점검이 {'경고 안 함' if warn else '잘못 경고'}")
     cfg = {"reel_feed_from": "2026-10-13"}

@@ -228,10 +228,15 @@ def _tags(d, spec_tags, limit=4):
 
 # E6(2026-10-10~): 이 소식이 필요한 사람에게 보내 달라는 한 줄 — 인스타는 DM 공유(도달당 보내기)를 비팔로워 확산의 가장 큰 신호로 본다.
 # 9/25~10/8 14호 내내 공유·저장 0. 누구에게 보낼지(content instagram.share_to)를 콕 집어야 '공유해 주세요' 같은 빈말이 안 된다.
+# 판정(2026-10-20 개선 루틴): 정규 8호(10/11·10/12·10/15~10/20) 공유 0 — 그 전 14호와 같다. 권유 한 줄은 원칙 7(캡션은 사람이 말하듯)과도
+# 어긋나 SHARE_UNTIL 뒤 호엔 붙이지 않는다(지난 호를 다시 빌드해도 그대로). share_to 를 적어도 무시한다.
 _SHARE = ["{who}에게 이 글 보내 주세요.", "{who}한테 보내 주면 도움이 될 거예요.", "주변에 {who} 있으면 보내 주세요."]
+SHARE_UNTIL = "2026-10-20"
 
 
 def _share(d):
+    if str(d.get("date", ""))[:10] > SHARE_UNTIL:
+        return []
     who = plain((d.get("instagram") or {}).get("share_to") or "").strip()
     return [_pick(_SHARE, d).format(who=who)] if who else []
 

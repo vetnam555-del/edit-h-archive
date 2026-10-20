@@ -147,8 +147,9 @@ _BROAD_WHO = {"친구", "지인", "모두", "여러분", "누구나", "가족", 
 
 
 def share_check(d):
-    """instagram.share_to(누구에게 보낼지) — 비었거나 너무 넓으면 경고 한 줄."""
-    if str(d.get("date", ""))[:10] < SHARE_FROM:
+    """instagram.share_to(누구에게 보낼지) — 비었거나 너무 넓으면 경고 한 줄. E6 기간(SHARE_FROM~site.SHARE_UNTIL)만."""
+    from .site import SHARE_UNTIL
+    if not SHARE_FROM <= str(d.get("date", ""))[:10] <= SHARE_UNTIL:
         return []
     who = plain((d.get("instagram") or {}).get("share_to") or "").strip()
     if not who:
