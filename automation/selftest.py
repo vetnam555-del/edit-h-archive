@@ -743,6 +743,7 @@ def t_views_diag():
     plain_cap = site_mod.instagram_caption(d, load_config()["site_url"])
     expect("보내 주" not in plain_cap, "share_to 가 없는데 보내기 한 줄이 붙는다")
     d["instagram"]["share_to"] = "프리랜서 친구"
+    d["date"] = min(d["date"], site_mod.SHARE_UNTIL)   # 보내기 한 줄은 E6 기간(~10/20) 호에만 — 최근 호가 그 뒤여도 기간 안 날짜로 본다
     cap, reel = site_mod.instagram_caption(d, load_config()["site_url"]), site_mod.reel_caption(d)
     expect("프리랜서 친구" in cap and "프리랜서 친구" in reel, "보내기 한 줄이 캡션·릴스 캡션에 없다")
     expect(len(re.findall(r"(?<!\S)#\S+", reel)) <= 5 and reel.rstrip().splitlines()[-1].startswith("#"), "릴스 캡션 끝이 해시태그 줄이 아니다")
