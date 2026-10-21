@@ -6,7 +6,14 @@
   <atom:link href="https://vetnam555-del.github.io/edit-h-archive/feed.xml" rel="self" type="application/rss+xml"/>
   <description>매일 아침 8시 30분, 확인된 숫자로 읽는 트렌드 뉴스레터</description>
   <language>ko</language>
-  <lastBuildDate>Wed, 21 Oct 2026 08:36:05 +0900</lastBuildDate>
+  <lastBuildDate>Thu, 22 Oct 2026 08:30:00 +0900</lastBuildDate>
+  <item>
+    <title>VOL.121 부모님 연말정산, 26세 자녀까지 공제라고?</title>
+    <link>https://vetnam555-del.github.io/edit-h-archive/2026-10-22.html</link>
+    <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-10-22.html</guid>
+    <pubDate>Thu, 22 Oct 2026 08:30:00 +0900</pubDate>
+    <description>자녀공제 26세로 확대 추진·AI 구독료 월 3.7만원 자비·2030 채무조정 65%↑·창고형 할인점 역대 최대·리멤버 명함 노출 — 오늘의 5가지</description>
+  </item>
   <item>
     <title>VOL.120 놓쳤다면, 다시 볼 만한 5가지</title>
     <link>https://vetnam555-del.github.io/edit-h-archive/2026-10-21.html</link>
@@ -209,13 +216,6 @@
     <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-09-18.html</guid>
     <pubDate>Fri, 18 Sep 2026 21:01:57 +0900</pubDate>
     <description>토스x오아시스 300억원 투자 / 지식서비스 적자 8.9조원 / 유통대금 60일→35일 / 네이버AI쇼핑 82%↑ — 금요일의 10가지.</description>
-  </item>
-  <item>
-    <title>VOL.091 살 빼려다, 머리가 빠진다고?</title>
-    <link>https://vetnam555-del.github.io/edit-h-archive/2026-09-15.html</link>
-    <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-09-15.html</guid>
-    <pubDate>Tue, 15 Sep 2026 16:48:32 +0900</pubDate>
-    <description>올리브영 탈모관리 매출 42%↑·문학동네 매각 속 민음사빵 완판·떡지순례 26만개·CJ온스타일 숏폼 300만개 등 10개 이슈</description>
   </item>
 </channel>
 </rss>
