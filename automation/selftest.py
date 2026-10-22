@@ -348,6 +348,57 @@ def t_releases():
     expect([fr.is_primary(u) for u in ("https://www.fsc.go.kr/no010101/1", "https://www.korea.kr/briefing/x", "https://ecos.bok.or.kr/",
                                        "https://n.news.naver.com/mnews/article/1", "https://evil-go.kr.example.com/")] == [True, True, True, False, False],
            "원문 주소 판정이 틀렸다")
+    # 쪽 넘기기·빈 목록·끊긴 응답(Codex 리뷰) — 실제 접속 없이 예시 페이지로
+    page = {k: (ex / f"{k}_list.html").read_text(encoding="utf-8") for k in ("fsc", "moel", "fss", "korea")}
+    calls = []
+
+    def fake_get(url, tries=4):
+        calls.append(url)
+        if "fsc.go.kr" in url:
+            return page["fsc"]
+        if "moel.go.kr" in url:   # 2쪽은 하루 전 글
+            return page["moel"].replace("2026.10.22", "2026.10.21") if "pageIndex=2" in url else page["moel"]
+        if "fss.or.kr" in url:
+            if "pageIndex=2" in url:
+                raise OSError("끊김")   # 2쪽에서 끊겨도 1쪽 글은 남는다
+            return page["fss"].replace("2026-10-21", "2026-10-22")
+        if "mofe.go.kr" in url:
+            return "<html>시스템 점검 중</html>"
+        return page["korea"]   # 정책브리핑: 계속 같은 날짜 → 쪽 한도
+    real_get = fr.get
+    fr.get = fake_get
+    try:
+        found, failed = fr.releases(["2026-10-22"])
+    finally:
+        fr.get = real_get
+    per = lambda host: sum(host in u for u in calls)
+    expect((per("fsc.go.kr"), per("moel.go.kr"), per("fss.or.kr"), per("mofe.go.kr"), per("korea.kr")) == (1, 2, 2, 1, 8)
+           and any("pageIndex=2" in u and "moel" in u for u in calls), f"쪽 넘기기가 틀렸다: {calls}")
+    expect(sorted(failed) == ["금융감독원(2쪽부터 못 읽음)", "재정경제부(목록을 못 알아봄)", "정책브리핑(앞 8쪽까지만)"],
+           f"끊김·빈 목록·쪽 한도를 알리지 않는다: {failed}")
+    expect(sum(i["org"] == "고용노동부" for i in found) == 3 and sum(i["org"] == "금융감독원" for i in found) == 3
+           and all(i["date"] == "2026-10-22" for i in found), "기간 밖 글이 섞였거나 끊기기 전 글을 잃었다")
+    import http.client
+    import urllib.request
+
+    class _Resp:
+        headers = type("H", (), {"get_content_charset": lambda self: "utf-8"})()
+        def __enter__(self): return self
+        def __exit__(self, *a): return False
+        def read(self): return "본문".encode()
+    tries = []
+
+    def flaky(req, timeout=0):
+        tries.append(1)
+        if len(tries) == 1:
+            raise http.client.IncompleteRead(b"")
+        return _Resp()
+    real_open, real_sleep = urllib.request.urlopen, fr.time.sleep
+    urllib.request.urlopen, fr.time.sleep = flaky, (lambda s: None)
+    try:
+        expect(fr.get("https://www.fsc.go.kr/x") == "본문" and len(tries) == 2, "응답 도중 끊기면 다시 받지 않는다")
+    finally:
+        urllib.request.urlopen, fr.time.sleep = real_open, real_sleep
     c = json.loads((CONTENT_DIR / "2026-10-22.json").read_text(encoding="utf-8"))
     expect(not style.primary_check(c), "원문 점검이 시작일(10/23) 전 호까지 본다")
     c["date"] = "2026-10-23"

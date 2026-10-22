@@ -20,6 +20,7 @@
 import argparse
 import datetime as dt
 import html
+import http.client
 import re
 import sys
 import time
@@ -39,6 +40,8 @@ SOURCES = {
     "재정경제부": "https://www.mofe.go.kr/nw/nes/nesdta.do?bbsId=MOSFBBS_000000000028&menuNo=4010100",
     "정책브리핑": "https://www.korea.kr/briefing/pressReleaseList.do",
 }
+NEXT_PAGE = {"금융위원회": "?curPage={n}", "고용노동부": "?pageIndex={n}", "금융감독원": "&pageIndex={n}",
+             "재정경제부": "&pageIndex={n}", "정책브리핑": "?pageIndex={n}"}   # 2쪽부터 붙인다
 
 
 def get(url, tries=4):
@@ -49,7 +52,7 @@ def get(url, tries=4):
         try:
             with urllib.request.urlopen(req, timeout=25) as r:
                 return r.read().decode(r.headers.get_content_charset() or "utf-8", errors="replace")
-        except (urllib.error.URLError, OSError) as e:
+        except (urllib.error.URLError, OSError, http.client.HTTPException) as e:   # 응답 도중 끊김(IncompleteRead)도 다시
             last = e
             if attempt < tries - 1:
                 time.sleep(4 * (attempt + 1))
@@ -117,19 +120,29 @@ def parse_korea(page, base="https://www.korea.kr"):
 PARSERS = {"금융위원회": parse_fsc, "고용노동부": parse_moel, "금융감독원": parse_fss, "재정경제부": parse_mofe, "정책브리핑": parse_korea}
 
 
-def releases(days, pages=3):
-    """days(YYYY-MM-DD 목록)에 올라온 보도자료 — 기관별로 읽히는 것만. 실패한 기관은 이름만 따로 돌려준다."""
+def releases(days, pages=None):
+    """days(YYYY-MM-DD 목록)에 올라온 보도자료 — 기관별로 읽히는 것만. 실패한 기관은 이름과 까닭을 따로 돌려준다.
+    기간 앞쪽 날짜보다 오래된 글이 나올 때까지 쪽을 넘긴다(쪽마다 10~20건, 정책브리핑은 하루 100건 안팎)."""
     found, failed = [], []
     for name, url in SOURCES.items():
-        try:
-            items = []
-            for n in range(1, (pages if name == "정책브리핑" else 1) + 1):   # 정책브리핑은 하루 100건 넘게 올라와 몇 쪽 본다
-                items += PARSERS[name](get(url + (f"?pageIndex={n}" if name == "정책브리핑" else "")))
-                if items and min(i["date"] for i in items) < min(days):
-                    break
-            found += [i for i in items if i["date"] in days]
-        except OSError as e:
-            failed.append(f"{name}({type(e).__name__})")
+        limit = pages or (6 if name == "정책브리핑" else 2) * len(days) + 2
+        items = []
+        for n in range(1, limit + 1):
+            try:
+                got = PARSERS[name](get(url + (NEXT_PAGE[name].format(n=n) if n > 1 else "")))
+            except OSError as e:   # 앞쪽에서 읽은 글은 살린다
+                failed.append(f"{name}({type(e).__name__})" if n == 1 else f"{name}({n}쪽부터 못 읽음)")
+                break
+            if not got:   # 오류·차단 화면이거나 사이트 모양이 바뀌었다 — 조용히 빠지지 않게 알린다
+                if n == 1:
+                    failed.append(f"{name}(목록을 못 알아봄)")
+                break
+            items += got
+            if min(i["date"] for i in got) < min(days):
+                break
+        else:
+            failed.append(f"{name}(앞 {limit}쪽까지만)")
+        found += [i for i in items if i["date"] in days]
     return found, failed
 
 
