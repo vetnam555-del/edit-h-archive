@@ -580,12 +580,15 @@ def t_photo_library():
             expect(not fetch_photo.library("2026-10-11", "돈"), "어제 예비 호가 쓴 표지가 다시 후보에 나온다")
             expect(not fetch_photo.library("2026-10-16", "돈"), "지난 날짜로 늦게 낸 예비 호의 표지를 다음 날 다시 고른다")
             expect(not fetch_photo.library("2026-10-15", "돈"), "같은 날 늦게 낸 예비 호의 표지를 그날 일반 호가 또 고른다")
-            later = fetch_photo.library("2026-10-20", "돈")
+            later = fetch_photo.library("2026-11-20", "돈")   # 마지막 사용(10/15)에서 RECENT_DAYS(30일)가 지난 뒤
             expect(later and later[0]["credit"] == "출처 원본", "예비 호가 쓴 사진의 출처가 일반 호의 것이 아니다")
             # 9/28 호를 10/12 에 늦게 낼 때 — 사흘 전(10/10) 예비 호 표지를 센다
             with contextlib.redirect_stdout(io.StringIO()):
                 expect(not build_rewind.cover_photo("2026-09-28", ["돈"], "2026-10-12"), "지난 날짜 예비 호가 최근 쓴 표지를 또 고른다")
-                expect(build_rewind.cover_photo("2026-09-28", ["돈"], "2026-10-20"), "지난 날짜 예비 호가 쓸 수 있는 표지를 못 고른다")
+                expect(build_rewind.cover_photo("2026-09-28", ["돈"], "2026-11-20"), "지난 날짜 예비 호가 쓸 수 있는 표지를 못 고른다")
+            # 2026-10-22 운영자 '이미지도 중복되는 거 아니야?' — 30일 안에 쓴 사진은 다시 고르지 않는다(3일 → 30일)
+            expect(not fetch_photo.library("2026-11-10", "돈"), "30일 안(10/15 → 11/10)에 쓴 표지를 다시 고른다")
+            expect(fetch_photo.last_used("assets/photos/x.jpg", "2026-11-10") == "2026-10-15", "표지 마지막 사용 날짜를 잘못 읽는다")
         finally:
             fetch_photo.ROOT, fetch_photo.LIBRARY = saved_root, saved_lib
     recent = {c["photo"] for c in fetch_photo.library("2026-10-09")}
@@ -612,10 +615,10 @@ def t_photo_library():
         (root / "content" / "2026-10-10.json").write_text(json.dumps({"rewind": True, "cards": {"cover": {"photo": "assets/photos/rew.jpg"}}}), encoding="utf-8")
         fetch_photo.ROOT, fetch_photo.LIBRARY = root, root / "assets" / "photos" / "library.json"
         try:
-            got = [c["photo"] for c in fetch_photo.library("2026-10-20", "돈")]
+            got = [c["photo"] for c in fetch_photo.library("2026-11-20", "돈")]
             expect(got[:2] == ["assets/photos/new.jpg", "assets/photos/old.jpg"] and "assets/photos/nocredit.jpg" not in got
                    and "assets/photos/nosource.jpg" not in got, f"미리 검수한 사진 순서·출처(주소) 없는 사진 제외가 틀렸다: {got}")
-            rew = [c for c in fetch_photo.library("2026-10-20", "이자") if c["photo"].endswith("rew.jpg")]
+            rew = [c for c in fetch_photo.library("2026-11-20", "이자") if c["photo"].endswith("rew.jpg")]
             expect(rew and rew[0]["credit"] == vet["credit"] and rew[0]["focus"] == "center 40%" and rew[0]["last"] == "2026-10-10",
                    f"예비 호가 먼저 쓴 미리 검수 사진이 출처를 잃는다: {rew}")
             expect(not [c for c in fetch_photo.library("2026-10-11", "이자") if c["photo"].endswith("rew.jpg")], "어제 예비 호가 쓴 미리 검수 사진이 다시 후보에 나온다")

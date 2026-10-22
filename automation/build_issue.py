@@ -164,6 +164,12 @@ def main():
               + ". 그래도 못 썼다면 6단계 보고 '표지:' 줄에 사유를 적으세요")
     elif d.get("format") == 2 and not d.get("rewind") and cover.get("photo"):
         import fetch_photo
+        import datetime as _dt
+        last = fetch_photo.last_used(cover["photo"], d["date"])
+        if last and (_dt.date.fromisoformat(d["date"]) - _dt.date.fromisoformat(last)).days <= fetch_photo.RECENT_DAYS:
+            # 2026-10-22 운영자: 같은 표지가 1~2주 간격으로 반복됐다 — 30일 안에 쓴 사진이면 알린다
+            print(f"  ↘ 표지 사진 {cover['photo']} 을 {last} 호에도 썼어요 — {fetch_photo.RECENT_DAYS}일 안에 같은 표지는 피드에서 반복으로 보인다."
+                  " 위키미디어에서 새 사진을 찾거나 --library 가 주는 다른 후보를 쓰세요")
         if not fetch_photo.registered(cover["photo"]):
             print(f"  ↘ 새 표지 사진 {cover['photo']} — 대체 사진 목록(assets/photos/library.json)에 subject·tags 한 줄을 더해 두세요")
     if overflow:
