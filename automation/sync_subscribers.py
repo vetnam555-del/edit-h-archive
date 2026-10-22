@@ -193,6 +193,7 @@ def welcome_message(sender, to_addr, cfg, now=None, first=None):
     first(바로 보내는 최근 호)가 있으면 '이어서 보내드렸어요'로 알린다."""
     import html
     import urllib.parse
+    from send_newsletter import plain_refs
     site = cfg["site_url"]
     now = now or now_kst()
     hh, mm = map(int, cfg["send_time_kst"].split(":"))
@@ -238,7 +239,7 @@ def welcome_message(sender, to_addr, cfg, now=None, first=None):
         f'<span style="font-size:12px; color:#B91C1C; font-weight:800;">VOL.{i["vol"]}</span><br>'
         f'<span style="font-size:16px; font-weight:800; line-height:1.5;">{html.escape(i["title"])}</span></a></td></tr>'
         for i in picks)
-    msg.add_alternative(f"""<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8">
+    msg.add_alternative(plain_refs(f"""<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8">
 <meta name="color-scheme" content="light only"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
 <body style="margin:0; padding:0; background:#FAFAF7;">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FAFAF7;"><tr><td align="center" style="padding:28px 12px;">
@@ -260,7 +261,7 @@ def welcome_message(sender, to_addr, cfg, now=None, first=None):
 </td></tr>
 <tr><td style="padding:16px 32px 28px; font-size:12px; color:#999; border-top:1px solid #EEE;">
   신청하지 않으셨다면 <a href="{html.escape(unsub)}" style="color:#999;">여기서 수신을 거부</a>할 수 있어요.
-</td></tr></table></td></tr></table></body></html>""", subtype="html")
+</td></tr></table></td></tr></table></body></html>"""), subtype="html")   # 숫자 문자 참조 → 글자(메일 필터가 &#x 를 깨뜨린다)
     return msg
 
 

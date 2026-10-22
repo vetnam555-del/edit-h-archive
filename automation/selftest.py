@@ -667,6 +667,14 @@ def t_seo():
     cfg = load_config()
     msg = send_newsletter.build_message({"title": "t", "filename": f"{day}.html"}, page, "a@example.com", cfg, "b@example.com")
     expect("application/ld+json" not in msg.get_body(preferencelist=("html",)).get_content(), "메일 본문에 구조화 데이터 스크립트가 남았다")
+    # 2026-10-22 운영자: 메일에서 '부캉이' 의 따옴표가 '&#-27;' 로 보였다(메일 보안 필터가 '&#x' 를 바꾼다) — 메일 HTML 엔 16진수 문자 참조가 없어야 한다
+    html_part = msg.get_body(preferencelist=("html",)).get_content()
+    expect("&#x" not in html_part.lower(), "메일 HTML 에 16진수 문자 참조(&#x27; 등)가 남았다")
+    sample = send_newsletter.plain_refs('<p title="a&#x27;b" class="c">흑상어 &#x27;부캉이&#x27;, 1&lt;2 &amp; &#34;인용&#34; &#39;끝&#39;</p>')
+    expect(sample == '<p title="a&#39;b" class="c">흑상어 \'부캉이\', 1&lt;2 &amp; &#34;인용&#34; \'끝\'</p>', f"plain_refs 결과가 틀렸다: {sample}")
+    import sync_subscribers
+    welcome = sync_subscribers.welcome_message("b@example.com", "a@example.com", cfg)
+    expect("&#x" not in welcome.get_body(preferencelist=("html",)).get_content().lower(), "환영 메일 HTML 에 16진수 문자 참조가 남았다")
     return None
 
 

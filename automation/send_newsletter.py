@@ -119,6 +119,24 @@ def check():
 
 
 LD_JSON = re.compile(r'<script type="application/ld\+json">.*?</script>\n?', re.S)
+_NUMREF = re.compile(r"&#(x[0-9a-fA-F]+|\d+);")
+_TAG = re.compile(r"(<[^>]*>)")
+
+
+def plain_refs(page):
+    """메일 HTML 의 숫자 문자 참조를 글자로 — 2026-10-22 운영자: '부캉이' 의 따옴표가 '&#-27;부캉이&#-27;' 로 보였다.
+    html.escape 가 ' 를 &#x27; 로 쓰는데, 일부 메일(네이버 등)의 보안 필터가 '&#x' 를 '&#-' 로 바꿔 깨진 글자가 그대로 보인다.
+    본문 글자 사이에선 그 글자 자체로(<·>·&·" 는 그대로 둔다), 태그 안(속성값)에선 10진수(&#39;)로만 바꾼다 — 따옴표로 감싼 속성을 깨지 않게."""
+    def text(seg):
+        def sub(m):
+            v = m.group(1)
+            ch = chr(int(v[1:], 16) if v[0] in "xX" else int(v))
+            return m.group(0) if ch in '<>&"' else ch
+        return _NUMREF.sub(sub, seg)
+
+    def tag(seg):
+        return re.sub(r"&#[xX]([0-9a-fA-F]+);", lambda m: f"&#{int(m.group(1), 16)};", seg)
+    return "".join(tag(s) if s.startswith("<") else text(s) for s in _TAG.split(page))
 
 
 def html_to_text(src):
@@ -145,7 +163,7 @@ def build_message(issue, page, to_addr, cfg, sender):
     q = urllib.parse.quote(to_addr)
     unsub = f"{site}/unsubscribe.html?email={q}"
     body = poll_links(page.replace("email=PLACEHOLDER", f"email={q}"), site, sender)
-    body = LD_JSON.sub("", body)   # 검색엔진용 구조화 데이터는 웹 아카이브에만 — 메일엔 스크립트를 넣지 않는다
+    body = plain_refs(LD_JSON.sub("", body))   # 검색엔진용 구조화 데이터는 웹 아카이브에만 — 메일엔 스크립트를 넣지 않는다
     msg = EmailMessage()
     msg["Subject"] = f"{cfg['email']['subject_prefix']} {issue['title']}"
     msg["From"] = formataddr((cfg["email"]["from_name"], sender))
