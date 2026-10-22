@@ -322,12 +322,15 @@ def t_releases():
     moel = fr.parse_moel((ex / "moel_list.html").read_text(encoding="utf-8"))
     korea = fr.parse_korea((ex / "korea_list.html").read_text(encoding="utf-8"))
     fss = fr.parse_fss((ex / "fss_list.html").read_text(encoding="utf-8"))
+    mofe = fr.parse_mofe((ex / "mofe_list.html").read_text(encoding="utf-8"))
     expect(len(fsc) == 3 and fsc[0]["date"] == "2026-10-22" and fsc[0]["url"].startswith("https://www.fsc.go.kr/no010101/")
            and "국민성장펀드" in fsc[0]["title"], f"금융위원회 보도자료 목록을 못 읽는다: {fsc[:1]}")
     expect(len(moel) == 3 and moel[1]["title"].startswith("쿠팡 산업안전") and "news_seq=" in moel[1]["url"], f"고용노동부 목록을 못 읽는다: {moel[:2]}")
     expect(len(korea) == 3 and korea[0]["org"] == "외교부" and korea[0]["lead"], f"정책브리핑 목록(부처·요약)을 못 읽는다: {korea[:1]}")
     expect(len(fss) == 3 and fss[0]["date"] == "2026-10-22" and fss[0]["url"].endswith("view.do?nttId=243282&menuNo=200218")
            and "가짜 체인" in fss[0]["title"], f"금융감독원 목록을 못 읽는다: {fss[:1]}")
+    expect(len(mofe) == 3 and mofe[1]["date"] == "2026-10-21" and mofe[1]["url"].endswith("searchNttId1=MOSF_000000000079710")
+           and mofe[1]["title"].startswith("아시아·태평양"), f"재정경제부 목록을 못 읽는다: {mofe[:2]}")
     body = fr.read_page((ex / "fsc_view.html").read_text(encoding="utf-8"))
     expect("국민성장펀드" in body and "<" not in body, "금융위원회 보도자료 본문을 글자로 못 읽는다")
     body = fr.read_page((ex / "moel_view.html").read_text(encoding="utf-8"))
@@ -338,6 +341,10 @@ def t_releases():
            f"정책브리핑 본문(제목·첨부 PDF 주소)을 못 읽는다: {body[:200]}")
     body = fr.read_page((ex / "fss_view.html").read_text(encoding="utf-8"))
     expect(body.startswith("유명 가상자산거래소") and "소비자경보" in body and "<span" not in body, "금융감독원 보도자료 본문을 못 읽는다")
+    body = fr.read_page((ex / "mofe_view.html").read_text(encoding="utf-8"))
+    expect(body.startswith("(보도설명) 정부는 할당관세") and body.count("첨부 PDF") == 1 and "jsessionid" not in body
+           and "https://www.mofe.go.kr/com/cmm/fms/FileDown.do?atchFileId=ATCH_000000000032967&fileSn=2" in body,
+           f"재정경제부 보도자료(제목·첨부 PDF 주소)를 못 읽는다: {body[:300]}")
     expect([fr.is_primary(u) for u in ("https://www.fsc.go.kr/no010101/1", "https://www.korea.kr/briefing/x", "https://ecos.bok.or.kr/",
                                        "https://n.news.naver.com/mnews/article/1", "https://evil-go.kr.example.com/")] == [True, True, True, False, False],
            "원문 주소 판정이 틀렸다")
@@ -347,7 +354,7 @@ def t_releases():
     expect(style.primary_check(c), "H PICK 출처가 모두 기사인데 원문 경고가 없다")
     c["big_issue"]["sources"] = c["big_issue"]["sources"] + [{"name": "금융위원회 보도자료", "url": "https://www.fsc.go.kr/no010101/87977"}]
     expect(not style.primary_check(c), "원문 출처가 있는데도 경고한다")
-    return f"금융위 {len(fsc)}·고용부 {len(moel)}·금감원 {len(fss)}·정책브리핑 {len(korea)}건(예시)"
+    return f"금융위 {len(fsc)}·고용부 {len(moel)}·금감원 {len(fss)}·재경부 {len(mofe)}·정책브리핑 {len(korea)}건(예시)"
 
 
 def t_poll_paused():

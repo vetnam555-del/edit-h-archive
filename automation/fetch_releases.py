@@ -4,15 +4,16 @@
 2026-10-22 운영자 '기사 소스가 부족하다': 최근 정규 11호 메인·H PICK 55건의 출처가 모두 네이버뉴스 기사였고 원문은 0건이었다.
 클라우드 환경 네트워크 허용 목록에 원문 도메인을 넣은 뒤(같은 날) 실제로 읽히는 곳만 쓴다:
   · 금융위원회(www.fsc.go.kr) · 고용노동부(www.moel.go.kr) · 금융감독원(www.fss.or.kr — 소비자경보 등) 보도자료 — 목록·본문 모두 읽힌다
+  · 재정경제부(www.mofe.go.kr — 옛 기획재정부, 세금·물가·예산) — 목록과 첨부 PDF 주소(본문은 늘 첨부 문서)
   · 정책브리핑(www.korea.kr, 모든 부처 보도자료) — 자주 503·연결 끊김이라 다시 시도하고, 안 되면 건너뛴다
-  (한국은행 보도자료 목록은 자바스크립트로 그려져 읽히지 않고, 국토부·공정위 사이트는 연결을 끊고, 기획재정부는 mofe.go.kr 로 옮겨 허용 밖이다
+  (한국은행 보도자료 목록은 자바스크립트로 그려져 읽히지 않고, 국토부·공정위 사이트는 연결을 끊는다
    — 그 부처 보도자료는 정책브리핑에 함께 올라온다.)
 
   python3 automation/fetch_releases.py                       # 어제·오늘 보도자료 목록(기관 · 날짜 · 제목 · 주소)
   python3 automation/fetch_releases.py --date 2026-10-22 --days 1
   python3 automation/fetch_releases.py --grep 대출 금리      # 제목·요약에 낱말이 든 것만
   python3 automation/fetch_releases.py --read "https://www.fsc.go.kr/no010101/87977"   # 본문(숫자 확인용)
-  (정책브리핑은 본문이 첨부에만 있는 게 많다 — '첨부 PDF' 주소를 curl -sSL -o 로 받아 PDF 로 읽는다)
+  (정책브리핑·재정경제부는 본문이 첨부에만 있는 게 많다 — '첨부 PDF' 주소를 curl -sSL -o 로 받아 PDF 로 읽는다)
 
 본문은 사실 확인용으로만 읽는다. 뉴스레터에는 문장을 옮기지 않고 우리 말로 다시 쓴다.
 """
@@ -35,6 +36,7 @@ SOURCES = {
     "금융위원회": "https://www.fsc.go.kr/no010101",
     "고용노동부": "https://www.moel.go.kr/news/enews/report/enewsList.do",
     "금융감독원": "https://www.fss.or.kr/fss/bbs/B0000188/list.do?menuNo=200218",
+    "재정경제부": "https://www.mofe.go.kr/nw/nes/nesdta.do?bbsId=MOSFBBS_000000000028&menuNo=4010100",
     "정책브리핑": "https://www.korea.kr/briefing/pressReleaseList.do",
 }
 
@@ -91,6 +93,14 @@ def parse_fss(page, base="https://www.fss.or.kr"):
     return out
 
 
+def parse_mofe(page, base="https://www.mofe.go.kr/nw/nes/detailNesDtaView.do?searchBbsId1=MOSFBBS_000000000028&menuNo=4010100&searchNttId1="):
+    out = []
+    for ntt, title, y, m, d in re.findall(r"<h3><a href=\"javascript:fn_egov_select\('(MOSF_\d+)'\);\">(.*?)</a></h3>\s*<div class=\"boardInfo\">"
+                                          r"\s*<div class=\"infoLeft\">\s*<span class=\"date\">(\d{4})\.(\d{2})\.(\d{2})\.</span>", page, re.S):
+        out.append({"org": "재정경제부", "date": f"{y}-{m}-{d}", "title": _text(title), "url": base + ntt})
+    return out
+
+
 def parse_korea(page, base="https://www.korea.kr"):
     out = []
     for li in re.findall(r"<li>\s*<a href=\"(/briefing/pressReleaseView\.do\?newsId=\d+)[^\"]*\">(.*?)</a>\s*</li>", page, re.S):
@@ -104,7 +114,7 @@ def parse_korea(page, base="https://www.korea.kr"):
     return out
 
 
-PARSERS = {"금융위원회": parse_fsc, "고용노동부": parse_moel, "금융감독원": parse_fss, "정책브리핑": parse_korea}
+PARSERS = {"금융위원회": parse_fsc, "고용노동부": parse_moel, "금융감독원": parse_fss, "재정경제부": parse_mofe, "정책브리핑": parse_korea}
 
 
 def releases(days, pages=3):
@@ -127,6 +137,16 @@ def read(url):
     return read_page(get(url))
 
 
+def _pdfs(page, host, href_rx):
+    """본문이 첨부 문서에만 있는 보도자료 — 첨부 PDF 주소(받아서 PDF 로 읽는다). 같은 파일이 두 번 걸려도 한 줄."""
+    out = []
+    for href, name in re.findall(r'<a href="(' + href_rx + r')">\s*(?:<img[^>]*>)?\s*([^<]+?\.pdf)\s*</a>', page):
+        line = f"첨부 PDF: {name.strip()}\n    {host}{html.unescape(re.sub(r';jsessionid=[^?]*', '', href))}"
+        if line not in out:
+            out.append(line)
+    return out
+
+
 def read_page(page):
     for pat in (r'class="board-view-wrap"[^>]*>(.*?)<div class="board-btn',      # 금융위원회
                 r'class="board_view_wrap"[^>]*>(.*?)<div class="(?:synap_view|file)',   # 고용노동부(본문 뒤 미리보기·첨부 전까지)
@@ -137,10 +157,14 @@ def read_page(page):
     title = re.search(r'<div class="view_title">\s*<h1>(.*?)</h1>', page, re.S)   # 정책브리핑 — 제목·본문만(메뉴·글자크기 버튼 빼고)
     if title:
         body = re.search(r'class="view_cont"[^>]*>(.*?)<div class="article_footer', page, re.S)
-        # 본문이 문서 보기 창(자바스크립트)에만 있는 보도자료가 많다 — 첨부 PDF 주소를 함께 준다(받아서 PDF 로 읽는다)
-        pdfs = [f"첨부 PDF: {name.strip()}\n    https://www.korea.kr{html.unescape(href)}"
-                for href, name in re.findall(r'<a href="(/common/download\.do\?fileId=\d+[^"]*)">\s*<img[^>]*>([^<]+?\.pdf)\s*</a>', page)]
+        # 본문이 문서 보기 창(자바스크립트)에만 있는 보도자료가 많다 — 첨부 PDF 주소를 함께 준다
+        pdfs = _pdfs(page, "https://www.korea.kr", r'/common/download\.do\?fileId=\d+[^"]*')
         return "\n".join([_text(title.group(1)), _text(body.group(1)) if body else "", *pdfs]).strip()
+    title = re.search(r'<div class="detailBoard">\s*<h3>(.*?)</h3>', page, re.S)   # 재정경제부 — 본문은 늘 첨부 문서
+    if title:
+        day = re.search(r'<span class="date">([\d.]+)</span>', page)
+        pdfs = _pdfs(page, "https://www.mofe.go.kr", r'/com/cmm/fms/FileDown\.do[^"]*')
+        return "\n".join([_text(title.group(1)), day.group(1) if day else "", *pdfs]).strip()
     return _text(page)[:6000]
 
 
