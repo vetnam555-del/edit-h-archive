@@ -1,5 +1,5 @@
 {
- "collected_at": "2026-10-22T20:59+09:00",
+ "collected_at": "2026-10-22T21:30+09:00",
  "issues": {
   "2026-10-22": {
    "title": "부모님 연말정산, 26세 자녀까지 공제라고?",
@@ -477,12 +477,12 @@
     "reel": {
      "likes": 0,
      "comments": 0,
-     "reach": 12,
+     "reach": 19,
      "saved": 0,
      "shares": 0,
-     "views": 14,
+     "views": 26,
      "seconds": 7.9,
-     "avg_watch_s": 2.0
+     "avg_watch_s": 1.6
     },
     "story": {
      "reach": 31,
@@ -494,8 +494,8 @@
   "account": {
    "days": 7,
    "reach": {
-    "FOLLOWER": 48,
-    "NON_FOLLOWER": 589
+    "NON_FOLLOWER": 596,
+    "FOLLOWER": 48
    },
    "follows_and_unfollows": {
     "FOLLOWER": 10,
