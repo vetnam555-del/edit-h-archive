@@ -221,11 +221,32 @@ def repeat_check(d):
     return out
 
 
+# 원문(1차 자료) 출처 — 2026-10-22 운영자 '기사 소스가 부족하다': 정규 11호 메인·H PICK 55건이 모두 기사 출처, 원문 0건.
+# 허용 도메인을 연 뒤(같은 날) H PICK 출처에 정부·기관 주소가 하나도 없으면 알린다(경고만 — 회사 소식처럼 원문이 없는 이야기도 있다).
+PRIMARY_FROM = "2026-10-23"
+PRIMARY_HOSTS = ("korea.kr", "go.kr", "bok.or.kr", "fss.or.kr", "kosis.kr", "kdi.re.kr")   # 정부·기관 주소(fetch_releases 도 쓴다)
+
+
+def is_primary(url):
+    host = re.sub(r"^https?://", "", str(url or "")).split("/")[0].lower()
+    return any(host == h or host.endswith("." + h) for h in PRIMARY_HOSTS)
+
+
+def primary_check(d):
+    if str(d.get("date", ""))[:10] < PRIMARY_FROM:
+        return []
+    srcs = (d.get("big_issue") or {}).get("sources") or []
+    if any(is_primary(s.get("url")) for s in srcs if isinstance(s, dict)):
+        return []
+    return ["원문: H PICK 출처에 원문(보도자료·통계·공시 — 정부·기관 주소)이 없어요. 발표에서 나온 이야기면 "
+            "`python3 automation/fetch_releases.py --grep 핵심어` 로 원문을 찾아 출처 1건으로(숫자는 원문 기준). 원문이 없는 이야기면 6단계 보고에 한 줄"]
+
+
 def lint(d):
     """경고 문장 목록(최대 MAX_LINES 개 + 남은 개수). 형식 2·데일리·STYLE_FROM 이후 호만."""
     if d.get("format") != 2 or d.get("rewind") or str(d.get("date", ""))[:10] < STYLE_FROM:
         return []
-    found, seen_acr = caption_keyword(d) + share_check(d) + brief_check(d) + todo_check(d) + repeat_check(d), set()
+    found, seen_acr = caption_keyword(d) + share_check(d) + brief_check(d) + todo_check(d) + repeat_check(d) + primary_check(d), set()
     for where, text, kind in _texts(d):
         rules = _WEED + _FORCE + (_WEED_SOCIAL if kind in ("social", "card", "obs") else [])
         for rx, why in rules:
