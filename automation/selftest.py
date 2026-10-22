@@ -408,6 +408,46 @@ def t_releases():
     return f"금융위 {len(fsc)}·고용부 {len(moel)}·금감원 {len(fss)}·재경부 {len(mofe)}·정책브리핑 {len(korea)}건(예시)"
 
 
+def t_headlines():
+    """큰 소식(네이버 섹션 묶음·많이 본 뉴스)·회고의 놓침 비교·성과표 출처 품질(2026-10-23 운영자 '경쟁사와 비교해도 부족함 없이')."""
+    import collect_metrics
+    import compare_anjang
+    import fetch_headlines as fh
+    from edith import style
+    ex = ROOT / "automation" / "examples" / "headlines"
+    sec = fh.parse_section((ex / "section_101.html").read_text(encoding="utf-8"), "경제")
+    expect(len(sec) == 5 and sec[0]["count"] == 21 and sec[0]["press"] == "KBS" and sec[0]["url"].startswith("https://n.news.naver.com/")
+           and sec[0]["cluster"].startswith("https://news.naver.com/cluster/"), f"섹션 헤드라인 묶음을 못 읽는다: {sec[:1]}")
+    ranked = fh.parse_ranking((ex / "ranking.html").read_text(encoding="utf-8"))
+    expect(len(ranked) == 30 and "JTBC" not in {r["press"] for r in ranked}, "많이 본 뉴스를 경제·IT 매체로 거르지 못한다")
+    groups = fh.popular_groups(ranked)
+    expect(groups[0]["title"].startswith("[속보]AI 투자 불안에 나스닥") and len(groups[0]["presses"]) == 3,
+           f"여러 매체에 함께 오른 소식이 맨 위가 아니다: {groups[:1]}")
+    clu = fh.parse_cluster((ex / "cluster.html").read_text(encoding="utf-8"))
+    expect(len(clu) == 5 and clu[0]["press"] == "뉴시스" and clu[0]["press"] in fh.WIRE, f"기사 묶음(언론사별)을 못 읽는다: {clu[:1]}")
+    expect((ROOT / "automation" / "headlines").is_dir(), "automation/headlines/ 가 없다 — 제작 5단계 git add 가 실패한다")
+    c = json.loads((CONTENT_DIR / "2026-10-22.json").read_text(encoding="utf-8"))
+    snap = {"clusters": [{"section": "경제", "count": 40, "title": c["items"][0]["title"], "lede": "", "url": "u1"},
+                         {"section": "사회", "count": 90, "title": "역삼동 방화범 살인미수 적용 검토", "lede": "", "url": "u2"},
+                         {"section": "IT", "count": 5, "title": "작은 소식", "lede": "", "url": "u3"}],
+            "popular": [{"title": "나스닥 급락 반도체주 투매", "url": "u4", "presses": ["이데일리 1위", "조선비즈 4위"]},
+                        {"title": "한 곳만", "url": "u5", "presses": ["매일경제 1위"]}]}
+    clusters, popular = compare_anjang.compare_big(snap, c)
+    expect([w is not None for _, w in clusters] == [True, False] and [w for _, w in popular] == [None],
+           f"큰 소식 놓침 판정(20건 미만·한 곳만은 빼고): {clusters} {popular}")
+    q = style.source_quality(c)
+    expect(q == {"main": 5, "primary": 0, "pick_primary": False, "outlets": 10, "wire": 20, "solo": 0}, f"출처 품질 계산: {q}")
+    c2 = json.loads(json.dumps(c))
+    c2["big_issue"]["sources"] = [{"name": "금융위원회 보도자료", "url": "https://www.fsc.go.kr/no010101/1"}]
+    q2 = style.source_quality(c2)
+    expect(q2["primary"] == 1 and q2["pick_primary"] and q2["solo"] == 1, f"원문·한 곳뿐 판정: {q2}")
+    lines = "\n".join(collect_metrics.source_lines([("2026-10-22", {"src": q, "big": [3, 5]}), ("2026-10-20", {"src": q2})]))
+    expect("| 2026-10-22 | 0/5 | × | 10 | 20% | 0 | 3/5 |" in lines and "H PICK 원문 **1/2**" in lines and "큰 소식 다룸 3/5" in lines,
+           f"성과표 출처 품질 칸: {lines}")
+    expect("src" not in collect_metrics.issue_facts("2026-10-21"), "예비 호까지 출처 품질을 잰다")
+    return f"묶음 {len(sec)}·많이 본 {len(ranked)}건→{len(groups)}묶음·기사 묶음 {len(clu)}건"
+
+
 def t_poll_paused():
     """월요일 투표는 2026-10-19 부터 쉰다(세 번 모두 참여 0명) — poll_due 를 내지 않고, 원고의 poll 은 빌드가 막는다."""
     import check_today
@@ -1105,6 +1145,7 @@ def main():
     check("새 호 막는 점검(짧은 소식 개수·H PICK 중복)", t_strict_content)
     check("월요일 투표 쉼(2026-10-19~)", t_poll_paused)
     check("원문(보도자료)·H PICK 원문 점검(2026-10-23~)", t_releases)
+    check("큰 소식·놓침 비교·출처 품질(2026-10-23~)", t_headlines)
     check("같은 회사·주제 두 칸(2026-10-19~)", t_repeat_check)
     check("오늘 챙길 것", t_todo_box)
     check("오늘 할 일(check_today)", t_check_today)
