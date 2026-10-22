@@ -112,7 +112,9 @@ def download_url(c):
 
 
 LIBRARY = ROOT / "assets" / "photos" / "library.json"
-RECENT_DAYS = 3   # 이 날수 안(당일 포함 사흘 전까지)에 쓴 사진은 대체 후보에서 뺀다(같은 표지가 연달아 보이지 않게)
+# 이 날수 안에 쓴 사진은 대체 후보에서 뺀다. 3일 → 30일(2026-10-22 운영자 '이미지도 중복되는 거 아니야?'): 사흘만 막으니 10/2 사진이
+# 10/2·10/14·10/22, 10/3 동전이 10/3·10/10·10/18 에 나가 피드 격자에서 같은 표지가 1~2주 간격으로 보였다(30일 안 재게시를 '독창성' 감점으로 본다는 분석도).
+RECENT_DAYS = 30
 
 
 def registered(photo):
@@ -163,7 +165,7 @@ def library(day, words="", skip=None):
         if not u or not u.get("credit") or not (ROOT / photo).exists():
             continue
         ago = (today - dt.date.fromisoformat(u["last"])).days if u["last"] else None
-        if ago is not None and ago <= RECENT_DAYS:   # '3일 안에 쓴 사진은 뺀다' — 사흘 전 사진까지 뺀다(Codex 리뷰)
+        if ago is not None and ago <= RECENT_DAYS:   # 'RECENT_DAYS 안에 쓴 사진은 뺀다' — 그날 전 사진까지 뺀다(Codex 리뷰)
             continue
         tags = meta.get("tags", [])
         low = [g.lower() for g in tags]
@@ -175,6 +177,22 @@ def library(day, words="", skip=None):
         out.append({"photo": photo, "credit": u["credit"], "focus": u.get("focus"), "subject": meta.get("subject", ""),
                     "tags": tags, "last": u["last"], "ago": ago, "score": score, "photo_source": meta.get("photo_source")})
     return sorted(out, key=lambda c: (-c["score"], -(c["ago"] if c["ago"] is not None else 10 ** 6)))
+
+
+def last_used(photo, day):
+    """이 사진을 day 전에 표지로 쓴 가장 최근 날(예비 호 포함, 실제로 낸 날 기준) — 없으면 None. 빌드의 '표지 재사용' 경고용."""
+    last = None
+    for f in sorted((ROOT / "content").glob("20*.json")):
+        if f.stem == day:
+            continue
+        try:
+            d = json.loads(f.read_text(encoding="utf-8"))
+        except ValueError:
+            continue
+        shown = (d.get("published_at_kst") or f.stem)[:10]
+        if ((d.get("cards") or {}).get("cover") or {}).get("photo") == photo and shown <= day and (last is None or shown > last):
+            last = shown
+    return last
 
 
 def cmd_library(words, use=None, day=None):

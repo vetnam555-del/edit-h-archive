@@ -6,6 +6,13 @@
 
 ## 지금 바로 (10분)
 
+- [ ] **클라우드 환경 네트워크 허용 도메인 추가(2026-10-22 — '기사 소스·이미지가 부족하다')** — 세션 제목 줄의 클라우드 환경 메뉴 → Edit → Network access →
+  Allowed domains 에 아래를 넣는다('Allow package managers' 체크는 그대로). 안내: https://code.claude.com/docs/en/cloud-environments#network-access
+  · 원문(1차 자료): `www.korea.kr` `www.bok.or.kr` `ecos.bok.or.kr` `dart.fss.or.kr` `opendart.fss.or.kr` `kosis.kr` `www.fss.or.kr` `www.fsc.go.kr` `www.moef.go.kr` `www.molit.go.kr` `www.moel.go.kr` `www.ftc.go.kr`
+    — 지금은 모두 '정책 거부(403)'라 제작 세션이 보도자료·통계·공시를 열지 못한다. 최근 정규 11호 메인·H PICK 55건 중 원문 출처 0건.
+  · 표지 사진 두 번째 공급처: `api.openverse.org` — 위키미디어와 플리커의 CC 사진을 함께 찾는다(키 불필요). 위키미디어는 클라우드 공용 IP 라 자주 429 로 막힌다.
+  넣은 뒤 알려 주시면 접속을 확인하고 원문 출처 규칙·사진 검색을 바로 붙인다.
+
 > **2026-10-09 조회수 진단 결과, 아래 첫 두 항목이 가장 급하다**(`references.md` '진단 — 2026-10-09').
 > 팔로워는 47→130 으로 세 배가 됐는데 캐러셀 도달은 10~28 그대로다 — 계정이 추천에서 빠졌거나, 새 팔로워가 실제로 안 보는 계정일 수 있다.
 
