@@ -313,6 +313,43 @@ def t_repeat_check():
     return None
 
 
+def t_releases():
+    """원문(보도자료) 읽기·H PICK 원문 점검(2026-10-22 운영자 '기사 소스가 부족하다' — 정규 11호 55건 중 원문 0건)."""
+    import fetch_releases as fr
+    from edith import style
+    ex = ROOT / "automation" / "examples" / "releases"
+    fsc = fr.parse_fsc((ex / "fsc_list.html").read_text(encoding="utf-8"))
+    moel = fr.parse_moel((ex / "moel_list.html").read_text(encoding="utf-8"))
+    korea = fr.parse_korea((ex / "korea_list.html").read_text(encoding="utf-8"))
+    fss = fr.parse_fss((ex / "fss_list.html").read_text(encoding="utf-8"))
+    expect(len(fsc) == 3 and fsc[0]["date"] == "2026-10-22" and fsc[0]["url"].startswith("https://www.fsc.go.kr/no010101/")
+           and "국민성장펀드" in fsc[0]["title"], f"금융위원회 보도자료 목록을 못 읽는다: {fsc[:1]}")
+    expect(len(moel) == 3 and moel[1]["title"].startswith("쿠팡 산업안전") and "news_seq=" in moel[1]["url"], f"고용노동부 목록을 못 읽는다: {moel[:2]}")
+    expect(len(korea) == 3 and korea[0]["org"] == "외교부" and korea[0]["lead"], f"정책브리핑 목록(부처·요약)을 못 읽는다: {korea[:1]}")
+    expect(len(fss) == 3 and fss[0]["date"] == "2026-10-22" and fss[0]["url"].endswith("view.do?nttId=243282&menuNo=200218")
+           and "가짜 체인" in fss[0]["title"], f"금융감독원 목록을 못 읽는다: {fss[:1]}")
+    body = fr.read_page((ex / "fsc_view.html").read_text(encoding="utf-8"))
+    expect("국민성장펀드" in body and "<" not in body, "금융위원회 보도자료 본문을 글자로 못 읽는다")
+    body = fr.read_page((ex / "moel_view.html").read_text(encoding="utf-8"))
+    expect("206건 위반" in body and "누리집" not in body and "<" not in body, "고용노동부 보도자료 본문 대신 사이트 메뉴를 읽는다")
+    body = fr.read_page((ex / "korea_view.html").read_text(encoding="utf-8"))
+    expect(body.startswith("김진아 외교부 2차관") and "글자크기" not in body
+           and "https://www.korea.kr/common/download.do?fileId=198575699&tblKey=GMN" in body and ".hwpx" not in body,
+           f"정책브리핑 본문(제목·첨부 PDF 주소)을 못 읽는다: {body[:200]}")
+    body = fr.read_page((ex / "fss_view.html").read_text(encoding="utf-8"))
+    expect(body.startswith("유명 가상자산거래소") and "소비자경보" in body and "<span" not in body, "금융감독원 보도자료 본문을 못 읽는다")
+    expect([fr.is_primary(u) for u in ("https://www.fsc.go.kr/no010101/1", "https://www.korea.kr/briefing/x", "https://ecos.bok.or.kr/",
+                                       "https://n.news.naver.com/mnews/article/1", "https://evil-go.kr.example.com/")] == [True, True, True, False, False],
+           "원문 주소 판정이 틀렸다")
+    c = json.loads((CONTENT_DIR / "2026-10-22.json").read_text(encoding="utf-8"))
+    expect(not style.primary_check(c), "원문 점검이 시작일(10/23) 전 호까지 본다")
+    c["date"] = "2026-10-23"
+    expect(style.primary_check(c), "H PICK 출처가 모두 기사인데 원문 경고가 없다")
+    c["big_issue"]["sources"] = c["big_issue"]["sources"] + [{"name": "금융위원회 보도자료", "url": "https://www.fsc.go.kr/no010101/87977"}]
+    expect(not style.primary_check(c), "원문 출처가 있는데도 경고한다")
+    return f"금융위 {len(fsc)}·고용부 {len(moel)}·금감원 {len(fss)}·정책브리핑 {len(korea)}건(예시)"
+
+
 def t_poll_paused():
     """월요일 투표는 2026-10-19 부터 쉰다(세 번 모두 참여 0명) — poll_due 를 내지 않고, 원고의 poll 은 빌드가 막는다."""
     import check_today
@@ -1009,6 +1046,7 @@ def main():
     check("짧게 읽는 소식 점검", t_brief_check)
     check("새 호 막는 점검(짧은 소식 개수·H PICK 중복)", t_strict_content)
     check("월요일 투표 쉼(2026-10-19~)", t_poll_paused)
+    check("원문(보도자료)·H PICK 원문 점검(2026-10-23~)", t_releases)
     check("같은 회사·주제 두 칸(2026-10-19~)", t_repeat_check)
     check("오늘 챙길 것", t_todo_box)
     check("오늘 할 일(check_today)", t_check_today)
