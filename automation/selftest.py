@@ -416,8 +416,8 @@ def t_headlines():
     from edith import style
     ex = ROOT / "automation" / "examples" / "headlines"
     sec = fh.parse_section((ex / "section_101.html").read_text(encoding="utf-8"), "경제")
-    expect(len(sec) == 5 and sec[0]["count"] == 21 and sec[0]["press"] == "KBS" and sec[0]["url"].startswith("https://n.news.naver.com/")
-           and sec[0]["cluster"].startswith("https://news.naver.com/cluster/"), f"섹션 헤드라인 묶음을 못 읽는다: {sec[:1]}")
+    expect(len(sec) == 10 and max(c["count"] for c in sec) == 129 and sec[0]["count"] == 21 and sec[0]["press"] == "KBS" and sec[0]["url"].startswith("https://n.news.naver.com/")
+           and sec[0]["cluster"].startswith("https://news.naver.com/cluster/"), f"섹션 헤드라인 묶음(숨은 뒤 절반 포함)을 못 읽는다: {sec[:1]}")
     ranked = fh.parse_ranking((ex / "ranking.html").read_text(encoding="utf-8"))
     expect(len(ranked) == 30 and "JTBC" not in {r["press"] for r in ranked}, "많이 본 뉴스를 경제·IT 매체로 거르지 못한다")
     groups = fh.popular_groups(ranked)
@@ -431,18 +431,20 @@ def t_headlines():
                          {"section": "사회", "count": 90, "title": "역삼동 방화범 살인미수 적용 검토", "lede": "", "url": "u2"},
                          {"section": "IT", "count": 5, "title": "작은 소식", "lede": "", "url": "u3"}],
             "popular": [{"title": "나스닥 급락 반도체주 투매", "url": "u4", "presses": ["이데일리 1위", "조선비즈 4위"]},
-                        {"title": "한 곳만", "url": "u5", "presses": ["매일경제 1위"]}]}
+                        {"title": "한 곳만", "url": "u5", "presses": ["매일경제 1위"]},
+                        {"title": "역삼동 방화범 살인미수 적용", "url": "u6", "presses": ["머니투데이 1위", "이데일리 2위"]}]}
     clusters, popular = compare_anjang.compare_big(snap, c)
     expect([w is not None for _, w in clusters] == [True, False] and [w for _, w in popular] == [None],
-           f"큰 소식 놓침 판정(20건 미만·한 곳만은 빼고): {clusters} {popular}")
+           f"큰 소식 놓침 판정(20건 미만·한 곳만·묶음과 같은 소식은 빼고): {clusters} {popular}")
     q = style.source_quality(c)
     expect(q == {"main": 5, "primary": 0, "pick_primary": False, "outlets": 10, "wire": 20, "solo": 0}, f"출처 품질 계산: {q}")
     c2 = json.loads(json.dumps(c))
     c2["big_issue"]["sources"] = [{"name": "금융위원회 보도자료", "url": "https://www.fsc.go.kr/no010101/1"}]
     q2 = style.source_quality(c2)
     expect(q2["primary"] == 1 and q2["pick_primary"] and q2["solo"] == 1, f"원문·한 곳뿐 판정: {q2}")
-    lines = "\n".join(collect_metrics.source_lines([("2026-10-22", {"src": q, "big": [3, 5]}), ("2026-10-20", {"src": q2})]))
-    expect("| 2026-10-22 | 0/5 | × | 10 | 20% | 0 | 3/5 |" in lines and "H PICK 원문 **1/2**" in lines and "큰 소식 다룸 3/5" in lines,
+    lines = "\n".join(collect_metrics.source_lines([("2026-10-22", {"src": q, "big": [3, 5, False]}), ("2026-10-20", {"src": q2, "big": [4, 4, True]})]))
+    expect("| 2026-10-22 | 0/5 | × | 10 | 20% | 0 | 3/5 |" in lines and "4/4(일부 못 읽음)" in lines
+           and "H PICK 원문 **1/2**" in lines and "큰 소식 다룸 3/5" in lines,
            f"성과표 출처 품질 칸: {lines}")
     expect("src" not in collect_metrics.issue_facts("2026-10-21"), "예비 호까지 출처 품질을 잰다")
     return f"묶음 {len(sec)}·많이 본 {len(ranked)}건→{len(groups)}묶음·기사 묶음 {len(clu)}건"

@@ -79,14 +79,19 @@ def compare(anjang_items, content):
 
 
 def compare_big(snapshot, content, big=BIG):
-    """[(큰 소식, 우리 쪽 구분 또는 None)], [(많이 본 소식 묶음, 우리 쪽 구분 또는 None)] — 많이 본 것은 두 곳 이상에 오른 것만."""
+    """[(큰 소식, 우리 쪽 구분 또는 None)], [(많이 본 소식 묶음, 우리 쪽 구분 또는 None)] — 많이 본 것은 두 곳 이상에 오른 것만.
+    같은 소식이 묶음과 많이 본 목록에 함께 오르면 한 번만 센다(Codex 리뷰 — 분모가 부풀지 않게)."""
     mine = ours(content)
 
     def where(title, lede=""):
         it = {"headline": title, "summary": [lede] if lede else []}
         return next((m[0] for m in mine if _match(it, m)), None)
-    clusters = [(c, where(c["title"], c.get("lede", ""))) for c in snapshot.get("clusters") or [] if c.get("count", 0) >= big]
-    popular = [(g, where(g["title"])) for g in snapshot.get("popular") or [] if len(g.get("presses") or []) >= 2]
+    clusters = []
+    for c in snapshot.get("clusters") or []:
+        if c.get("count", 0) >= big and not any(_same(c["title"], x["title"]) for x, _ in clusters):
+            clusters.append((c, where(c["title"], c.get("lede", ""))))
+    popular = [(g, where(g["title"])) for g in snapshot.get("popular") or []
+               if len(g.get("presses") or []) >= 2 and not any(_same(g["title"], c["title"]) for c, _ in clusters)]
     return clusters, popular
 
 
@@ -96,9 +101,11 @@ def big_report(day, content):
     if not path.exists():
         print(f"… {day} 큰 소식 기록(automation/headlines/{day}.json)이 없어 견주지 않습니다 — 제작 1-1c 에서 --save 를 빠뜨렸나 확인")
         return False
-    clusters, popular = compare_big(json.loads(path.read_text(encoding="utf-8")), content)
+    snap = json.loads(path.read_text(encoding="utf-8"))
+    clusters, popular = compare_big(snap, content)
     hit = sum(1 for _, w in clusters + popular if w)
-    print(f"■ {day} 큰 소식 비교 — 다룸 {hit}/{len(clusters) + len(popular)} (여러 언론 {BIG}건+ {len(clusters)}개 · 경제·IT 매체 많이 본 {len(popular)}개)")
+    print(f"■ {day} 큰 소식 비교 — 다룸 {hit}/{len(clusters) + len(popular)} (여러 언론 {BIG}건+ {len(clusters)}개 · 경제·IT 매체 많이 본 {len(popular)}개)"
+          + (f" — 일부 못 읽은 기록({', '.join(snap['failed'])}): 분모가 작을 수 있다" if snap.get("failed") else ""))
     for c, w in clusters:
         print(f"  {'=' if w else '-'} [{c['section']} {c['count']}] {c['title']}" + (f"  ← 우리 {w}" if w else ""))
     for g, w in popular:

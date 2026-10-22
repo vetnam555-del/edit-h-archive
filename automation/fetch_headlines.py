@@ -42,7 +42,7 @@ def _clean(s):
 
 def parse_section(page, name):
     out = []
-    for li in page.split('<li class="sa_item _SECTION_HEADLINE">')[1:]:
+    for li in re.split(r'<li class="sa_item _SECTION_HEADLINE(?: [^"]*)?">', page)[1:]:   # 뒤 절반은 'is_blind'(펼치기)로 숨어 있다(Codex 리뷰)
         li = li.split("</li>")[0] if "</li>" in li else li
         title = re.search(r'<strong class="sa_text_strong">(.*?)</strong>', li, re.S)
         url = re.search(r'href="(https://n\.news\.naver\.com/mnews/article/\d+/\d+)"', li)
@@ -144,7 +144,7 @@ def main():
         now = now_kst()
         OUT_DIR.mkdir(parents=True, exist_ok=True)
         path = OUT_DIR / f"{now.date().isoformat()}.json"
-        path.write_text(json.dumps({"fetched_at": now.isoformat(timespec="minutes"), "clusters": clusters, "popular": popular},
+        path.write_text(json.dumps({"fetched_at": now.isoformat(timespec="minutes"), "failed": failed, "clusters": clusters, "popular": popular},
                                    ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
         print(f"저장: {path.relative_to(ROOT)}", file=sys.stderr)
     print(f"— 묶음 {len(clusters)}개 · 많이 본 {len(popular)}개" + (f" · 못 읽음: {', '.join(failed)}" if failed else ""), file=sys.stderr)

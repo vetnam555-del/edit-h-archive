@@ -86,8 +86,10 @@ def _source_facts(day, c):
     out = {"src": style.source_quality(c)}
     snap = AUTOMATION / "headlines" / f"{day}.json"
     if snap.exists():
-        clusters, popular = compare_big(json.loads(snap.read_text(encoding="utf-8")), c)
-        out["big"] = [sum(1 for _, w in clusters + popular if w), len(clusters) + len(popular)]
+        data = json.loads(snap.read_text(encoding="utf-8"))
+        clusters, popular = compare_big(data, c)
+        # 일부 섹션을 못 읽은 기록은 표에 표시만 하고 평균에서는 뺀다(Codex 리뷰 — 분모가 작아 다룸 비율이 부풀 수 있다)
+        out["big"] = [sum(1 for _, w in clusters + popular if w), len(clusters) + len(popular), bool(data.get("failed"))]
     return out
 
 
@@ -101,9 +103,9 @@ def source_lines(rows, n=7):
            "|---|---|---|---|---|---|---|"]
     for d, q, big in rows:
         out.append(f"| {d} | {q['primary']}/{q['main']} | {'○' if q['pick_primary'] else '×'} | {q['outlets']} | {q['wire']}% | {q['solo']} | "
-                   f"{f'{big[0]}/{big[1]}' if big else '–'} |")
+                   f"{f'{big[0]}/{big[1]}' + ('(일부 못 읽음)' if big[2:3] == [True] else '') if big else '–'} |")
     last = rows[:n]
-    bigs = [b for _, _, b in last if b and b[1]]
+    bigs = [b for _, _, b in last if b and b[1] and b[2:3] != [True]]
     out += ["", f"- 최근 {len(last)}호: H PICK 원문 **{sum(q['pick_primary'] for _, q, _ in last)}/{len(last)}**(목표 5/7 이상) · "
             f"메인 원문 평균 {sum(q['primary'] for _, q, _ in last) / len(last):.1f}개 · 매체 평균 {sum(q['outlets'] for _, q, _ in last) / len(last):.0f}곳 · "
             f"통신사 평균 {sum(q['wire'] for _, q, _ in last) / len(last):.0f}%(목표 30% 아래) · 출처 한 곳뿐 {sum(q['solo'] for _, q, _ in last)}건(목표 0)"
