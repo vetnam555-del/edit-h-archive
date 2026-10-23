@@ -242,6 +242,33 @@ def primary_check(d):
             "`python3 automation/fetch_releases.py --grep 핵심어` 로 원문을 찾아 출처 1건으로(숫자는 원문 기준). 원문이 없는 이야기면 6단계 보고에 한 줄"]
 
 
+WIRE = ("연합뉴스", "연합뉴스TV", "뉴시스", "뉴스1")   # 통신사 — 다른 매체가 받아 쓰는 일이 많아 '두 번째 출처'로는 약하다
+
+
+def source_quality(d):
+    """출처 품질(경쟁 잣대, 2026-10-23 운영자 '경쟁사와 비교해도 부족함 없이') — 성과표가 호마다 적는다.
+    main: 메인 5가지(H PICK 포함) 수 · primary: 그중 원문(정부·기관 주소) 출처가 있는 것 · pick_primary: H PICK 원문 여부 ·
+    outlets: 서로 다른 매체·기관 수(짧은 소식 포함) · wire: 기사 출처 중 통신사 비율(%) · solo: 출처가 한 곳뿐인 메인."""
+    main = [d.get("big_issue") or {}] + list(d.get("items") or [])
+    names, articles, wires, primary, solo = set(), 0, 0, 0, 0
+    for i, x in enumerate(main):
+        srcs = [s for s in x.get("sources") or [] if isinstance(s, dict)]
+        prim = any(is_primary(s.get("url")) for s in srcs)
+        primary += prim
+        solo += len({s.get("name") for s in srcs}) < 2
+        if i == 0:
+            pick = prim
+    for x in main + list(d.get("briefs") or []):
+        srcs = [s for s in x.get("sources") or [] if isinstance(s, dict)] or ([{"name": x.get("source"), "url": x.get("url")}] if x.get("source") else [])
+        for s in srcs:
+            names.add(s.get("name"))
+            if not is_primary(s.get("url")):
+                articles += 1
+                wires += s.get("name") in WIRE
+    return {"main": len(main), "primary": primary, "pick_primary": pick, "outlets": len(names - {None, ""}),
+            "wire": round(100 * wires / articles) if articles else 0, "solo": solo}
+
+
 def lint(d):
     """경고 문장 목록(최대 MAX_LINES 개 + 남은 개수). 형식 2·데일리·STYLE_FROM 이후 호만."""
     if d.get("format") != 2 or d.get("rewind") or str(d.get("date", ""))[:10] < STYLE_FROM:

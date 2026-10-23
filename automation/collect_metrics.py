@@ -73,7 +73,44 @@ def issue_facts(day):
         "audience": c.get("audience") or "전체",
         "series": (c.get("series") or {}).get("name") or "없음",   # 고정 연재(수요일 'H의 장부', 2026-10-21~)
         **_reel_facts(day),
+        **_source_facts(day, c),
     }
+
+
+def _source_facts(day, c):
+    """출처 품질과 큰 소식 다룸(2026-10-23 운영자 '경쟁사와 비교해도 부족함 없이') — 형식 2 데일리 호만."""
+    if "items" not in c or c.get("rewind"):
+        return {}
+    from compare_anjang import compare_big
+    from edith import style
+    out = {"src": style.source_quality(c)}
+    snap = AUTOMATION / "headlines" / f"{day}.json"
+    if snap.exists():
+        data = json.loads(snap.read_text(encoding="utf-8"))
+        clusters, popular = compare_big(data, c)
+        # 일부 섹션을 못 읽은 기록은 표에 표시만 하고 평균에서는 뺀다(Codex 리뷰 — 분모가 작아 다룸 비율이 부풀 수 있다)
+        out["big"] = [sum(1 for _, w in clusters + popular if w), len(clusters) + len(popular), bool(data.get("failed"))]
+    return out
+
+
+def source_lines(rows, n=7):
+    """'## 출처 품질' 칸 — 호마다 한 줄 + 최근 n호 평균과 목표. 경쟁 뉴스레터와 견주는 잣대(RUNBOOK 1-1b·1-1c·1-3)."""
+    rows = [(d, f["src"], f.get("big")) for d, f, *_ in rows if f.get("src")]
+    if not rows:
+        return []
+    out = ["", "## 출처 품질 (경쟁 잣대 — 원문·여러 매체·큰 소식, 2026-10-23~)", "",
+           "| 날짜 | 원문(메인 5 중) | H PICK 원문 | 매체·기관 수 | 통신사 비율 | 출처 한 곳뿐 | 큰 소식 다룸 |",
+           "|---|---|---|---|---|---|---|"]
+    for d, q, big in rows:
+        out.append(f"| {d} | {q['primary']}/{q['main']} | {'○' if q['pick_primary'] else '×'} | {q['outlets']} | {q['wire']}% | {q['solo']} | "
+                   f"{f'{big[0]}/{big[1]}' + ('(일부 못 읽음)' if big[2:3] == [True] else '') if big else '–'} |")
+    last = rows[:n]
+    bigs = [b for _, _, b in last if b and b[1] and b[2:3] != [True]]
+    out += ["", f"- 최근 {len(last)}호: H PICK 원문 **{sum(q['pick_primary'] for _, q, _ in last)}/{len(last)}**(목표 5/7 이상) · "
+            f"메인 원문 평균 {sum(q['primary'] for _, q, _ in last) / len(last):.1f}개 · 매체 평균 {sum(q['outlets'] for _, q, _ in last) / len(last):.0f}곳 · "
+            f"통신사 평균 {sum(q['wire'] for _, q, _ in last) / len(last):.0f}%(목표 30% 아래) · 출처 한 곳뿐 {sum(q['solo'] for _, q, _ in last)}건(목표 0)"
+            + (f" · 큰 소식 다룸 {sum(b[0] for b in bigs)}/{sum(b[1] for b in bigs)}" if bigs else "")]
+    return out
 
 
 def _reel_facts(day):
@@ -432,6 +469,7 @@ def summary_md(snap):
         lines.append(f"| {day} | {f['weekday']} | {f['title'][:28]} | {f['title_style']} | {f['cover']} | {f['pick_tag'] or '–'} | "
                      f"{p.get('likes', '–')} | {p.get('comments', '–')} | {p.get('saved', '–')} | {p.get('shares', '–')} | "
                      f"{p.get('reach', '–')}{_story_cell(p)} | {_reel_cell(p)} | {rep} | {sc if sc is not None else '–'} |")
+    lines += source_lines(rows)
     # 예비 호(다시 보기)는 편집 선택이 아니라 비교에서 뺀다. 좋아요·저장이 아직 0 인 날이 많아 캐러셀 도달·조회도 함께 보되,
     # 누적 숫자는 오래된 게시물일수록 커지므로 '게시 24시간 뒤 첫 스냅숏'의 값으로 나이를 맞춘다(없으면 그 호는 도달 비교에서 빠진다).
     scored = [(d, f, sc, _at_age(d, snap)) for d, f, p, sc in rows if sc is not None and f.get("source_mode") != "rewind"]
