@@ -6,7 +6,14 @@
   <atom:link href="https://vetnam555-del.github.io/edit-h-archive/feed.xml" rel="self" type="application/rss+xml"/>
   <description>매일 아침 8시 30분, 확인된 숫자로 읽는 트렌드 뉴스레터</description>
   <language>ko</language>
-  <lastBuildDate>Fri, 23 Oct 2026 08:30:00 +0900</lastBuildDate>
+  <lastBuildDate>Sat, 24 Oct 2026 08:30:00 +0900</lastBuildDate>
+  <item>
+    <title>VOL.123 경기 버스 4130대, 30일 첫차부터 멈춘다고?</title>
+    <link>https://vetnam555-del.github.io/edit-h-archive/2026-10-24.html</link>
+    <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-10-24.html</guid>
+    <pubDate>Sat, 24 Oct 2026 08:30:00 +0900</pubDate>
+    <description>경기 버스 30일 파업 가결·기준금리 3% 동결·환율 2년 만 최저·솔리다임 상장 철회·에어비앤비 청소 요구 금지 — 오늘의 5가지</description>
+  </item>
   <item>
     <title>VOL.122 쿠팡 105곳 감독, 법 위반 206건이라고?</title>
     <link>https://vetnam555-del.github.io/edit-h-archive/2026-10-23.html</link>
@@ -209,13 +216,6 @@
     <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-09-25.html</guid>
     <pubDate>Fri, 25 Sep 2026 08:00:00 +0900</pubDate>
     <description>가족 만남 63%·차례 27.3%·3093만명 이동·인천공항 역대 최다·차례상 24만원 차이·명절 현금 17.9%↓·메타 AI 안경 등 10개 이슈</description>
-  </item>
-  <item>
-    <title>VOL.093 추석은 9월인데, 대목은 8월이었다고?</title>
-    <link>https://vetnam555-del.github.io/edit-h-archive/2026-09-24.html</link>
-    <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-09-24.html</guid>
-    <pubDate>Thu, 24 Sep 2026 09:00:00 +0900</pubDate>
-    <description>8월 유통 매출 7.7%↑·추석 지출 평균 73만원·근거리 해외여행 90%·우버의 배민 인수 심사·GPT-6 반값 등 10개 이슈</description>
   </item>
 </channel>
 </rss>
