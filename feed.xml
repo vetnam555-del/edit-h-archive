@@ -6,7 +6,14 @@
   <atom:link href="https://vetnam555-del.github.io/edit-h-archive/feed.xml" rel="self" type="application/rss+xml"/>
   <description>매일 아침 8시 30분, 확인된 숫자로 읽는 트렌드 뉴스레터</description>
   <language>ko</language>
-  <lastBuildDate>Thu, 22 Oct 2026 08:30:00 +0900</lastBuildDate>
+  <lastBuildDate>Fri, 23 Oct 2026 08:30:00 +0900</lastBuildDate>
+  <item>
+    <title>VOL.122 쿠팡 105곳 감독, 법 위반 206건이라고?</title>
+    <link>https://vetnam555-del.github.io/edit-h-archive/2026-10-23.html</link>
+    <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-10-23.html</guid>
+    <pubDate>Fri, 23 Oct 2026 08:30:00 +0900</pubDate>
+    <description>쿠팡 감독 위반 206건·지방세 환급 12월부터 앱으로·직장인 53% 직무 후회·일본 면세 출국 때 정산·AI 워싱 광고 기준 — 오늘의 5가지</description>
+  </item>
   <item>
     <title>VOL.121 부모님 연말정산, 26세 자녀까지 공제라고?</title>
     <link>https://vetnam555-del.github.io/edit-h-archive/2026-10-22.html</link>
@@ -209,13 +216,6 @@
     <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-09-24.html</guid>
     <pubDate>Thu, 24 Sep 2026 09:00:00 +0900</pubDate>
     <description>8월 유통 매출 7.7%↑·추석 지출 평균 73만원·근거리 해외여행 90%·우버의 배민 인수 심사·GPT-6 반값 등 10개 이슈</description>
-  </item>
-  <item>
-    <title>VOL.092 토스가 이번엔, 새벽배송을 품었다고?</title>
-    <link>https://vetnam555-del.github.io/edit-h-archive/2026-09-18.html</link>
-    <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-09-18.html</guid>
-    <pubDate>Fri, 18 Sep 2026 21:01:57 +0900</pubDate>
-    <description>토스x오아시스 300억원 투자 / 지식서비스 적자 8.9조원 / 유통대금 60일→35일 / 네이버AI쇼핑 82%↑ — 금요일의 10가지.</description>
   </item>
 </channel>
 </rss>
