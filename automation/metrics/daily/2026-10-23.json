@@ -1,5 +1,5 @@
 {
- "collected_at": "2026-10-23T08:15+09:00",
+ "collected_at": "2026-10-23T21:30+09:00",
  "issues": {
   "2026-10-23": {
    "title": "쿠팡 105곳 감독, 법 위반 206건이라고?",
@@ -12,11 +12,19 @@
    "source_mode": "anjang",
    "audience": "2030직장인",
    "series": "없음",
-   "reel_style": null,
-   "reel_seconds": null,
-   "reel_slot": null,
-   "reel_feed": null,
-   "reel_hook": null
+   "reel_style": "세로",
+   "reel_seconds": 7.9,
+   "reel_slot": "저녁",
+   "reel_feed": false,
+   "reel_hook": true,
+   "src": {
+    "main": 5,
+    "primary": 2,
+    "pick_primary": true,
+    "outlets": 15,
+    "wire": 0,
+    "solo": 0
+   }
   },
   "2026-10-22": {
    "title": "부모님 연말정산, 26세 자녀까지 공제라고?",
@@ -33,7 +41,15 @@
    "reel_seconds": 7.9,
    "reel_slot": "저녁",
    "reel_feed": false,
-   "reel_hook": true
+   "reel_hook": true,
+   "src": {
+    "main": 5,
+    "primary": 0,
+    "pick_primary": false,
+    "outlets": 10,
+    "wire": 20,
+    "solo": 0
+   }
   },
   "2026-10-21": {
    "title": "놓쳤다면, 다시 볼 만한 5가지",
@@ -67,7 +83,15 @@
    "reel_seconds": 7.9,
    "reel_slot": "저녁",
    "reel_feed": false,
-   "reel_hook": true
+   "reel_hook": true,
+   "src": {
+    "main": 5,
+    "primary": 0,
+    "pick_primary": false,
+    "outlets": 16,
+    "wire": 6,
+    "solo": 0
+   }
   },
   "2026-10-19": {
    "title": "4% 예금 1000만원, 1년 이자 40만원이라고?",
@@ -84,7 +108,15 @@
    "reel_seconds": 7.9,
    "reel_slot": "저녁",
    "reel_feed": false,
-   "reel_hook": true
+   "reel_hook": true,
+   "src": {
+    "main": 5,
+    "primary": 0,
+    "pick_primary": false,
+    "outlets": 12,
+    "wire": 19,
+    "solo": 1
+   }
   },
   "2026-10-18": {
    "title": "2%대에 빌린 3억, 월 29만원 더 낸다고?",
@@ -101,7 +133,15 @@
    "reel_seconds": 7.9,
    "reel_slot": "저녁",
    "reel_feed": false,
-   "reel_hook": true
+   "reel_hook": true,
+   "src": {
+    "main": 5,
+    "primary": 0,
+    "pick_primary": false,
+    "outlets": 12,
+    "wire": 24,
+    "solo": 0
+   }
   },
   "2026-10-17": {
    "title": "코스피 18.8% 빠질 때, 개미는 7조 샀다고?",
@@ -118,7 +158,15 @@
    "reel_seconds": 7.9,
    "reel_slot": "저녁",
    "reel_feed": false,
-   "reel_hook": true
+   "reel_hook": true,
+   "src": {
+    "main": 5,
+    "primary": 0,
+    "pick_primary": false,
+    "outlets": 13,
+    "wire": 20,
+    "solo": 0
+   }
   },
   "2026-10-16": {
    "title": "커피 17잔이면, 50유로 스피커라고?",
@@ -135,7 +183,15 @@
    "reel_seconds": 7.9,
    "reel_slot": "저녁",
    "reel_feed": true,
-   "reel_hook": true
+   "reel_hook": true,
+   "src": {
+    "main": 5,
+    "primary": 0,
+    "pick_primary": false,
+    "outlets": 11,
+    "wire": 25,
+    "solo": 0
+   }
   },
   "2026-10-15": {
    "title": "첫째 낳으면 1000만원, 결혼 페널티도 없앤다고?",
@@ -152,7 +208,15 @@
    "reel_seconds": 7.9,
    "reel_slot": "저녁",
    "reel_feed": true,
-   "reel_hook": true
+   "reel_hook": true,
+   "src": {
+    "main": 5,
+    "primary": 0,
+    "pick_primary": false,
+    "outlets": 11,
+    "wire": 0,
+    "solo": 0
+   }
   },
   "2026-10-14": {
    "title": "놓쳤다면, 다시 볼 만한 5가지",
@@ -203,7 +267,15 @@
    "reel_seconds": 10.1,
    "reel_slot": "저녁",
    "reel_feed": false,
-   "reel_hook": false
+   "reel_hook": false,
+   "src": {
+    "main": 5,
+    "primary": 0,
+    "pick_primary": false,
+    "outlets": 10,
+    "wire": 12,
+    "solo": 0
+   }
   },
   "2026-10-11": {
    "title": "OTT·AI 4개면, 매달 9만원이라고?",
@@ -220,7 +292,15 @@
    "reel_seconds": 10.1,
    "reel_slot": "저녁",
    "reel_feed": false,
-   "reel_hook": false
+   "reel_hook": false,
+   "src": {
+    "main": 5,
+    "primary": 0,
+    "pick_primary": false,
+    "outlets": 10,
+    "wire": 12,
+    "solo": 0
+   }
   },
   "2026-10-10": {
    "title": "놓쳤다면, 다시 볼 만한 5가지",
@@ -241,17 +321,17 @@
   }
  },
  "instagram": {
-  "followers": 152,
-  "media": 103,
+  "followers": 154,
+  "media": 105,
   "insights": true,
   "posts": {
    "2026-10-10": {
     "likes": 2,
     "comments": 0,
-    "reach": 16,
+    "reach": 17,
     "saved": 0,
     "shares": 0,
-    "views": 48,
+    "views": 49,
     "profile_visits": 0,
     "follows": 0
    },
@@ -278,10 +358,10 @@
    "2026-10-12": {
     "likes": 1,
     "comments": 0,
-    "reach": 14,
+    "reach": 15,
     "saved": 0,
     "shares": 0,
-    "views": 34,
+    "views": 35,
     "profile_visits": 0,
     "follows": 0,
     "reel": {
@@ -301,7 +381,7 @@
     "reach": 33,
     "saved": 0,
     "shares": 0,
-    "views": 73,
+    "views": 74,
     "profile_visits": 1,
     "follows": 0
    },
@@ -318,10 +398,10 @@
    "2026-10-15": {
     "likes": 2,
     "comments": 0,
-    "reach": 15,
+    "reach": 16,
     "saved": 0,
     "shares": 0,
-    "views": 39,
+    "views": 42,
     "profile_visits": 0,
     "follows": 0,
     "reel": {
@@ -418,10 +498,10 @@
    "2026-10-20": {
     "likes": 0,
     "comments": 0,
-    "reach": 8,
+    "reach": 10,
     "saved": 0,
     "shares": 0,
-    "views": 27,
+    "views": 31,
     "profile_visits": 1,
     "follows": 0,
     "reel": {
@@ -438,20 +518,20 @@
    "2026-10-21": {
     "likes": 1,
     "comments": 0,
-    "reach": 7,
+    "reach": 9,
     "saved": 0,
     "shares": 0,
-    "views": 19,
+    "views": 25,
     "profile_visits": 1,
     "follows": 0
    },
    "2026-10-22": {
     "likes": 0,
     "comments": 0,
-    "reach": 7,
+    "reach": 9,
     "saved": 0,
     "shares": 0,
-    "views": 21,
+    "views": 25,
     "profile_visits": 0,
     "follows": 0,
     "reel": {
@@ -469,19 +549,44 @@
      "views": 51,
      "replies": 0
     }
+   },
+   "2026-10-23": {
+    "likes": 1,
+    "comments": 1,
+    "reach": 7,
+    "saved": 0,
+    "shares": 0,
+    "views": 15,
+    "profile_visits": 0,
+    "follows": 0,
+    "reel": {
+     "likes": 0,
+     "comments": 0,
+     "reach": 68,
+     "saved": 0,
+     "shares": 0,
+     "views": 97,
+     "seconds": 7.9,
+     "avg_watch_s": 1.8
+    },
+    "story": {
+     "reach": 34,
+     "views": 52,
+     "replies": 0
+    }
    }
   },
   "account": {
    "days": 7,
    "reach": {
-    "FOLLOWER": 53,
-    "NON_FOLLOWER": 686
+    "FOLLOWER": 60,
+    "NON_FOLLOWER": 678
    },
    "follows_and_unfollows": {
-    "FOLLOWER": 11,
+    "FOLLOWER": 10,
     "NON_FOLLOWER": 2
    },
-   "accounts_engaged": 9
+   "accounts_engaged": 12
   }
  },
  "mail": {
