@@ -87,7 +87,7 @@ def _source_facts(day, c):
     snap = AUTOMATION / "headlines" / f"{day}.json"
     if snap.exists():
         data = json.loads(snap.read_text(encoding="utf-8"))
-        clusters, popular = compare_big(data, c)
+        clusters, popular, _ = compare_big(data, c)   # 사회·세계(사건·정치)는 점수 밖
         # 일부 섹션을 못 읽은 기록은 표에 표시만 하고 평균에서는 뺀다(Codex 리뷰 — 분모가 작아 다룸 비율이 부풀 수 있다)
         out["big"] = [sum(1 for _, w in clusters + popular if w), len(clusters) + len(popular), bool(data.get("failed"))]
     return out
