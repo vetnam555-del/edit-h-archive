@@ -6,7 +6,14 @@
   <atom:link href="https://vetnam555-del.github.io/edit-h-archive/feed.xml" rel="self" type="application/rss+xml"/>
   <description>매일 아침 8시 30분, 확인된 숫자로 읽는 트렌드 뉴스레터</description>
   <language>ko</language>
-  <lastBuildDate>Sat, 24 Oct 2026 08:30:00 +0900</lastBuildDate>
+  <lastBuildDate>Sun, 25 Oct 2026 08:30:00 +0900</lastBuildDate>
+  <item>
+    <title>VOL.124 대한항공·아시아나, 예약번호까지 털렸다고?</title>
+    <link>https://vetnam555-del.github.io/edit-h-archive/2026-10-25.html</link>
+    <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-10-25.html</guid>
+    <pubDate>Sun, 25 Oct 2026 08:30:00 +0900</pubDate>
+    <description>대한항공·아시아나 예약정보 유출·휘발유 23주째 하락·금값 29% 하락·퇴직연금 501조·동전주 첫 상폐 절차 — 오늘의 5가지</description>
+  </item>
   <item>
     <title>VOL.123 경기 버스 4130대, 30일 첫차부터 멈춘다고?</title>
     <link>https://vetnam555-del.github.io/edit-h-archive/2026-10-24.html</link>
@@ -209,13 +216,6 @@
     <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-09-26.html</guid>
     <pubDate>Sat, 26 Sep 2026 08:00:00 +0900</pubDate>
     <description>부캉이 10만명·비수기 결혼 200만원↓·주담대 7% 턱밑·내일 마트 휴무·60대 피싱 31.2% — 오늘의 5가지</description>
-  </item>
-  <item>
-    <title>VOL.094 추석인데, 가족 대신 쉬러 간다고?</title>
-    <link>https://vetnam555-del.github.io/edit-h-archive/2026-09-25.html</link>
-    <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-09-25.html</guid>
-    <pubDate>Fri, 25 Sep 2026 08:00:00 +0900</pubDate>
-    <description>가족 만남 63%·차례 27.3%·3093만명 이동·인천공항 역대 최다·차례상 24만원 차이·명절 현금 17.9%↓·메타 AI 안경 등 10개 이슈</description>
   </item>
 </channel>
 </rss>
