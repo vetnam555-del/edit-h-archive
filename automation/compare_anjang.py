@@ -11,7 +11,7 @@
   · 놓친 것: 안장에만 있는 헤드라인(우리 독자에게 맞았는데 빠진 게 있는지 회고가 고른다)
   · 우리만: 우리 호에만 있는 주제
   · 숫자: 우리 메인 본문에 나온 숫자 개수(안장 요약은 소식마다 숫자 2~4개)
-  · 큰 소식 놓침(2026-10-23~): 제작 때 저장한 네이버 '여러 언론이 함께 다룬 소식'(관련 기사 BIG 건 이상)과
+  · 큰 소식 놓침(2026-10-23~): 제작 때 저장한 네이버 '여러 언론이 함께 다룬 소식'(경제·IT·생활 섹션, 관련 기사 BIG 건 이상)과
     '경제·IT 매체 여러 곳에서 많이 읽힌 소식' 중 우리 호에 없는 것 — 주말·공휴일(안장 없음)에도 본다
 종료 코드: 0 = 비교함, 3 = 그날 안장 글도 큰 소식 기록도 없음, 2 = 접속 실패.
 """
@@ -27,6 +27,8 @@ from edith.common import CONTENT_DIR, now_kst, plain  # noqa: E402
 
 AUTOMATION = Path(__file__).resolve().parent
 BIG = 20   # 관련 기사 이만큼이면 '큰 소식'(fetch_headlines 도 쓴다)
+# 점수에 넣는 섹션 — 사회(사건·정치)·세계는 목록엔 보이되 '다룸 N/M' 에선 뺀다(10/24 첫 측정 5/31 중 절반 넘게 사건·정치·해외 재난이었다)
+SCORED = ("경제", "IT", "생활")
 _NUM = re.compile(r"\d[\d,.]*\s*(?:%|원|만|억|조|명|곳|개|배|건|kL|p)?")
 _WORD = re.compile(r"[가-힣A-Za-z0-9]{2,}")
 _STOP = {"그래서", "이번", "오늘", "지난", "올해", "내년", "있어요", "이라고", "라고", "이다", "한다", "단독",
@@ -78,21 +80,24 @@ def compare(anjang_items, content):
             "numbers": len(_NUM.findall(main_text)), "source_mode": content.get("source_mode")}
 
 
-def compare_big(snapshot, content, big=BIG):
-    """[(큰 소식, 우리 쪽 구분 또는 None)], [(많이 본 소식 묶음, 우리 쪽 구분 또는 None)] — 많이 본 것은 두 곳 이상에 오른 것만.
-    같은 소식이 묶음과 많이 본 목록에 함께 오르면 한 번만 센다(Codex 리뷰 — 분모가 부풀지 않게)."""
+def compare_big(snapshot, content, big=BIG, scored=SCORED):
+    """(점수 묶음, 점수 많이 본, 참고 묶음) — 각각 [(소식, 우리 쪽 구분 또는 None)].
+    점수 묶음은 경제·IT·생활 섹션의 관련 기사 big 건 이상, 많이 본 것은 경제·IT 매체 두 곳 이상에 오른 것, 참고는 사회·세계(점수 밖).
+    같은 소식이 묶음끼리·묶음과 많이 본 목록에 함께 오르면 한 번만 센다(Codex 리뷰 — 분모가 부풀지 않게).
+    많이 본 소식이 사회·세계 묶음과 같은 소식(사건·정치)이면 점수에서 뺀다."""
     mine = ours(content)
 
     def where(title, lede=""):
         it = {"headline": title, "summary": [lede] if lede else []}
         return next((m[0] for m in mine if _match(it, m)), None)
-    clusters = []
+    picked = []
     for c in snapshot.get("clusters") or []:
-        if c.get("count", 0) >= big and not any(_same(c["title"], x["title"]) for x, _ in clusters):
-            clusters.append((c, where(c["title"], c.get("lede", ""))))
+        if c.get("count", 0) >= big and not any(_same(c["title"], x["title"]) for x, _ in picked):
+            picked.append((c, where(c["title"], c.get("lede", ""))))
     popular = [(g, where(g["title"])) for g in snapshot.get("popular") or []
-               if len(g.get("presses") or []) >= 2 and not any(_same(g["title"], c["title"]) for c, _ in clusters)]
-    return clusters, popular
+               if len(g.get("presses") or []) >= 2 and not any(_same(g["title"], c["title"]) for c, _ in picked)]
+    return ([x for x in picked if x[0].get("section") in scored], popular,
+            [x for x in picked if x[0].get("section") not in scored])
 
 
 def big_report(day, content):
@@ -102,14 +107,19 @@ def big_report(day, content):
         print(f"… {day} 큰 소식 기록(automation/headlines/{day}.json)이 없어 견주지 않습니다 — 제작 1-1c 에서 --save 를 빠뜨렸나 확인")
         return False
     snap = json.loads(path.read_text(encoding="utf-8"))
-    clusters, popular = compare_big(snap, content)
+    clusters, popular, other = compare_big(snap, content)
     hit = sum(1 for _, w in clusters + popular if w)
-    print(f"■ {day} 큰 소식 비교 — 다룸 {hit}/{len(clusters) + len(popular)} (여러 언론 {BIG}건+ {len(clusters)}개 · 경제·IT 매체 많이 본 {len(popular)}개)"
+    print(f"■ {day} 큰 소식 비교 — 다룸 {hit}/{len(clusters) + len(popular)} "
+          f"({'·'.join(SCORED)} 섹션 {BIG}건+ {len(clusters)}개 · 경제·IT 매체 많이 본 {len(popular)}개)"
           + (f" — 일부 못 읽은 기록({', '.join(snap['failed'])}): 분모가 작을 수 있다" if snap.get("failed") else ""))
     for c, w in clusters:
         print(f"  {'=' if w else '-'} [{c['section']} {c['count']}] {c['title']}" + (f"  ← 우리 {w}" if w else ""))
     for g, w in popular:
         print(f"  {'=' if w else '-'} [많이 본 {len(g['presses'])}곳] {g['title']}" + (f"  ← 우리 {w}" if w else ""))
+    if other:
+        print(f"  (참고·점수 밖 — 사회·세계 {len(other)}개, 다룸 {sum(1 for _, w in other if w)})")
+        for c, w in other[:8]:
+            print(f"    {'=' if w else '·'} [{c['section']} {c['count']}] {c['title']}")
     print("회고 기록 한 줄: '큰 소식: 다룸 N/M · 놓친 것 중 우리 독자(2030 돈·일·소비)에게 맞았던 것 …' (사건·정치는 놓쳐도 된다)")
     return True
 

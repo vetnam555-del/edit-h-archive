@@ -433,9 +433,10 @@ def t_headlines():
             "popular": [{"title": "나스닥 급락 반도체주 투매", "url": "u4", "presses": ["이데일리 1위", "조선비즈 4위"]},
                         {"title": "한 곳만", "url": "u5", "presses": ["매일경제 1위"]},
                         {"title": "역삼동 방화범 살인미수 적용", "url": "u6", "presses": ["머니투데이 1위", "이데일리 2위"]}]}
-    clusters, popular = compare_anjang.compare_big(snap, c)
-    expect([w is not None for _, w in clusters] == [True, False] and [w for _, w in popular] == [None],
-           f"큰 소식 놓침 판정(20건 미만·한 곳만·묶음과 같은 소식은 빼고): {clusters} {popular}")
+    clusters, popular, other = compare_anjang.compare_big(snap, c)
+    expect([w is not None for _, w in clusters] == [True] and [w for _, w in popular] == [None]
+           and [x["section"] for x, _ in other] == ["사회"],
+           f"큰 소식 놓침 판정(20건 미만·한 곳만·묶음과 같은 소식은 빼고, 사회·세계는 점수 밖 참고로): {clusters} {popular} {other}")
     q = style.source_quality(c)
     expect(q == {"main": 5, "primary": 0, "pick_primary": False, "outlets": 10, "wire": 20, "solo": 0}, f"출처 품질 계산: {q}")
     c2 = json.loads(json.dumps(c))
