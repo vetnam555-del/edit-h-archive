@@ -455,6 +455,17 @@ def t_headlines():
     return f"묶음 {len(sec)}·많이 본 {len(ranked)}건→{len(groups)}묶음·기사 묶음 {len(clu)}건"
 
 
+def t_agents_doc():
+    """AGENTS.md(자비스·Codex 등 GPT 에이전트 인수인계, 2026-10-25)가 가리키는 파일·워크플로가 실제로 있는지 — 이름이 바뀌면 여기서 걸린다."""
+    import re as _re
+    text = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
+    paths = {m for m in _re.findall(r"`((?:automation|content|instagram)/[^`{}*\s]+)`", text) if not m.endswith("/")}
+    flows = set(_re.findall(r"`([a-z-]+\.yml)`", text))
+    missing = sorted(x for x in paths if not (ROOT / x).exists()) + sorted(f for f in flows if not (ROOT / ".github" / "workflows" / f).exists())
+    expect(paths and flows and not missing, f"AGENTS.md 가 없는 파일·워크플로를 가리킨다: {missing}")
+    return f"파일 {len(paths)}개·워크플로 {len(flows)}개"
+
+
 def t_poll_paused():
     """월요일 투표는 2026-10-19 부터 쉰다(세 번 모두 참여 0명) — poll_due 를 내지 않고, 원고의 poll 은 빌드가 막는다."""
     import check_today
@@ -1158,6 +1169,7 @@ def main():
     check("월요일 투표 쉼(2026-10-19~)", t_poll_paused)
     check("원문(보도자료)·H PICK 원문 점검(2026-10-23~)", t_releases)
     check("큰 소식·놓침 비교·출처 품질(2026-10-23~)", t_headlines)
+    check("AGENTS.md(GPT 인수인계)가 가리키는 파일", t_agents_doc)
     check("같은 회사·주제 두 칸(2026-10-19~)", t_repeat_check)
     check("오늘 챙길 것", t_todo_box)
     check("오늘 할 일(check_today)", t_check_today)
