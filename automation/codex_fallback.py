@@ -160,14 +160,24 @@ def allowed(path, patterns):
     return any(fnmatch.fnmatch(path, p) for p in patterns)
 
 
+def _changed():
+    """바뀐 경로(작업 트리·인덱스 모두, 이름 바꿈은 옛·새 이름 둘 다)."""
+    out = []
+    for ln in _git("status", "--porcelain", "--untracked-files=all").stdout.splitlines():
+        if ln.strip():
+            out += [x.strip().strip('"') for x in ln[3:].split(" -> ")]
+    return out
+
+
 def restore(patterns):
-    """허용 밖에서 바뀐 추적 파일은 되돌리고, 허용 밖 새 파일은 지운다 — Codex 가 코드를 고쳐 빌드를 바꾸지 못하게."""
-    changed = [ln[3:].strip() for ln in _git("status", "--porcelain", "--untracked-files=all").stdout.splitlines() if ln.strip()]
-    bad = [p for p in changed if not allowed(p, patterns)]
+    """허용 밖 변경을 HEAD 로 되돌린다 — 작업 트리와 인덱스 모두(스테이징한 변경도, Codex 리뷰). 허용 밖 새 파일은 인덱스에서 빼고 지운다.
+    Codex 가 코드·설정을 고쳐 빌드나 커밋을 바꾸지 못하게."""
+    bad = [p for p in _changed() if not allowed(p, patterns)]
     for p in bad:
-        if _git("ls-files", "--error-unmatch", p).returncode == 0:
-            _git("checkout", "--", p)
+        if _git("cat-file", "-e", f"HEAD:{p}").returncode == 0:
+            _git("restore", "--source=HEAD", "--staged", "--worktree", "--", p)
         else:
+            _git("rm", "-q", "--cached", "--ignore-unmatch", "--", p)
             (ROOT / p).unlink(missing_ok=True)
     return bad
 
@@ -212,8 +222,16 @@ def main():
         if "codex" in other and args.who == "claude":
             print(f"■ Codex 가 오늘({date}) 제작을 맡았습니다 — 이 세션은 제작하지 말고 그대로 보고하고 끝내세요")
             return 3
+        if args.who == "codex" and ("claude" in other or published(date)):
+            # 07:55 판단 뒤 이 작업이 시작되기 전에 Claude 가 늦게 시작했거나 오늘 호가 올라왔다(Codex 리뷰) — 제작하지 않는다
+            print(f"■ 오늘({date}) 이미 {'Claude 가 제작을 시작했다' if 'claude' in other else '오늘 호가 올라왔다'} — Codex 는 제작하지 않습니다")
+            return 3
         ok, msg = claim(args.who, date)
         print(f"{'✓' if ok else '… 표시 실패(제작은 계속)'} {PREFIX}{date}-{args.who}" + ("" if ok else f" — {msg[:200]}"))
+        if ok and args.who == "codex" and "claude" in claims(date):   # 거의 동시에 Claude 도 표시했다 — 물러난다
+            _git("push", "-q", "origin", "--delete", f"{PREFIX}{date}-codex")
+            print("■ 거의 동시에 Claude 도 시작했다 — Codex 표시를 거두고 제작하지 않습니다")
+            return 3
         return 0
     if args.cmd == "claims":
         print(", ".join(sorted(claims(date))) or "없음")

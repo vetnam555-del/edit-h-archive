@@ -93,30 +93,37 @@ jobs:
           ref: main
           persist-credentials: false   # Codex 가 일하는 동안 저장소 토큰이 작업 폴더에 남지 않게 — 올리기는 마지막 단계만 한다
 
-      - name: Claim today's issue for Codex
-        if: env.DRY == ''
+      # 07:55 판단 뒤 Claude 가 늦게 시작했거나 오늘 호가 올라왔으면 여기서 멈춘다(코드 3) — 맡았을 때만 PROCEED=yes
+      - name: Claim today's issue
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          if [ -n "$DRY" ]; then echo "PROCEED=yes" >> "$GITHUB_ENV"; exit 0; fi
           git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
-          python3 automation/codex_fallback.py claim codex --date "$EDITH_DATE"
+          set +e; python3 automation/codex_fallback.py claim codex --date "$EDITH_DATE"; code=$?; set -e
           git remote set-url origin "https://github.com/${GITHUB_REPOSITORY}.git"
+          [ "$code" = "0" ] && echo "PROCEED=yes" >> "$GITHUB_ENV"
+          [ "$code" = "0" ] || [ "$code" = "3" ]
 
       - uses: actions/setup-node@v4
+        if: env.PROCEED == 'yes'
         with:
           node-version: "20"
 
       - name: Install Playwright (card rendering)
+        if: env.PROCEED == 'yes'
         run: |
           npm install --no-save --no-package-lock playwright > /dev/null
           npx playwright install --with-deps chromium > /dev/null
 
       - name: Prepare prompt
+        if: env.PROCEED == 'yes'
         run: |
           { echo "오늘 날짜(EDITH_DATE): $EDITH_DATE"; echo; cat automation/codex_prompts/produce.md; } > .codex-prompt.md
 
       - name: Codex makes today's issue (RUNBOOK 0~4)
         id: codex
+        if: env.PROCEED == 'yes'
         uses: openai/codex-action@v1
         with:
           openai-api-key: ${{ secrets.OPENAI_API_KEY }}
@@ -127,6 +134,7 @@ jobs:
           output-file: codex-report.md
 
       - name: Keep only issue files and rebuild
+        if: env.PROCEED == 'yes'
         run: |
           python3 automation/codex_fallback.py restore --produce --date "$EDITH_DATE" --allow codex-report.md
           python3 - <<'EOF'
@@ -139,7 +147,7 @@ jobs:
           python3 automation/build_issue.py "$EDITH_DATE"
 
       - name: Publish, send, post, alert
-        if: env.DRY == ''
+        if: env.PROCEED == 'yes' && env.DRY == ''
         env:
           GH_TOKEN: ${{ github.token }}
           SMTP_USER: ${{ secrets.SMTP_USER }}
@@ -155,9 +163,10 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git reset -q   # 인덱스를 비우고 발행 경로만 담는다
           git add "content/$DATE.json" "$DATE.html" "instagram/$DATE" manifest.json index.html feed.xml sitemap.xml assets/photos automation/headlines
           TITLE=$(python3 -c "import json;c=json.load(open('content/$DATE.json',encoding='utf-8'));print(c.get('title','').replace('**','').replace('==',''))")
-          git commit -m "Publish EDIT H $DATE — $TITLE (Codex 대체 제작)"
+          git commit -m "Publish EDIT H $DATE — $TITLE (대체 제작)"
           pushed=""
           for i in 1 2 3 4; do
             git pull --rebase origin main && git push origin HEAD:main && pushed=1 && break
@@ -171,7 +180,7 @@ jobs:
           python3 automation/alert.py codex --date "$DATE"
 
       - name: Release claim on failure (so the reserve issue does not wait)
-        if: failure() && env.DRY == ''
+        if: failure() && env.PROCEED == 'yes' && env.DRY == ''
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -198,6 +207,22 @@ jobs:
         with:
           ref: main
           persist-credentials: false
+
+      # 21:30 성과 수집이 늦거나 빠진 날 지난 성과표로 회고하지 않게 먼저 모은다(Codex 리뷰). GITHUB_TOKEN 푸시는 수집을 못 깨워
+      # request_metrics.py 대신 직접 실행하고 끝날 때까지(최대 12분) 기다린다. 실패하면 있는 성과표로 진행하고 회고에 '성과표 지연'.
+      - name: Refresh metrics first
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          before=$(gh run list --workflow collect-metrics.yml --limit 1 --json databaseId --jq '.[0].databaseId' || echo 0)
+          gh workflow run collect-metrics.yml --ref main -f skip_if_fresh=true || { echo "수집 실행 실패 — 있는 성과표로 진행"; exit 0; }
+          for i in $(seq 1 20); do
+            sleep 15
+            id=$(gh run list --workflow collect-metrics.yml --limit 1 --json databaseId --jq '.[0].databaseId' || echo 0)
+            [ "$id" != "$before" ] && [ "$id" != "0" ] && break
+          done
+          if [ "$id" != "$before" ] && [ "$id" != "0" ]; then timeout 720 gh run watch "$id" > /dev/null || echo "수집이 12분 안에 끝나지 않음 — 있는 성과표로 진행"; fi
+          git pull -q --ff-only origin main || true
 
       - name: Prepare prompt
         run: |
@@ -227,8 +252,9 @@ jobs:
           git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git reset -q   # 인덱스를 비우고 learnings.md 만 담는다
           git add automation/learnings.md
-          git commit -m "Editor retrospective $EDITH_DATE (Codex 대체 회고)"
+          git commit -m "Editor retrospective $EDITH_DATE (대체 회고)"
           for i in 1 2 3 4; do
             git pull --rebase origin main && git push origin HEAD:main && exit 0
             sleep $((i * 5))

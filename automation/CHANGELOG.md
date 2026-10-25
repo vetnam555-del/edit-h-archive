@@ -10,7 +10,7 @@
   (`persist-credentials: false`), 끝나면 워크플로가 허용 경로 밖 변경을 되돌리고(`codex_fallback.py restore`) 다시 빌드해 올린 뒤
   발송·인스타·저녁 사슬을 돌리고 알림 메일(`alert.py codex`)을 보낸다. 늦게 깨어난 Claude 는 Codex 표시를 보고 손을 떼고(종료 코드 3),
   푸시 전에 오늘 호가 이미 있으면 올리지 않는다(RUNBOOK 5). 예비 호(rewind.yml)는 Codex 표시가 있으면 09:15 까지 기다린다.
-  회고: 22:00 회고 커밋이 23:30 까지 없으면 Codex 가 learnings.md 만 고쳐 'Editor retrospective {날짜} (Codex 대체 회고)'로 올린다.
+  회고: 22:00 회고 커밋이 23:30 까지 없으면 Codex 가 learnings.md 만 고쳐 'Editor retrospective {날짜} (대체 회고)'로 올린다.
   `OPENAI_API_KEY` 시크릿이 없으면 아무것도 하지 않는다 — API 사용료가 들어 운영자가 키를 넣어야 켜진다(OWNER_TODO).
   확인: selftest 'Codex 대체' — 시작 판단(키·발행일·오늘 호·Claude/Codex 표시·07:55~08:25), 표시 가지 읽기, 회고 날짜·완료 판단, 허용 경로,
   워크플로·RUNBOOK·rewind 연결. 실제 Codex 실행은 키를 넣은 뒤 dry_run 으로 시험한다.

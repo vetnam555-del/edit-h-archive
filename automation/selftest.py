@@ -488,9 +488,34 @@ def t_codex_fallback():
     expect(all(cf.allowed(x, pats) for x in (f"{d}.html", f"content/{d}.json", f"instagram/{d}/01.png", "manifest.json", "assets/photos/x.jpg"))
            and not any(cf.allowed(x, pats) for x in ("automation/build_issue.py", "content/2026-10-25.json", ".github/workflows/x.yml")),
            "Codex 가 남길 수 있는 경로 판단이 틀렸다")
+    # 되돌리기: 스테이징한 변경까지 HEAD 로, 허용 밖 새 파일은 인덱스·디스크에서(Codex 리뷰) — 임시 저장소에서
+    import subprocess
+    import tempfile
+    with tempfile.TemporaryDirectory() as tmp:
+        tdir = Path(tmp)
+        run = lambda *a: subprocess.run(["git", "-C", tmp, *a], capture_output=True, text=True, check=True)   # noqa: E731
+        run("init", "-q")
+        run("config", "user.email", "t@t"), run("config", "user.name", "t")
+        (tdir / "code.py").write_text("ok\n")
+        (tdir / "content").mkdir()
+        run("add", "."), run("commit", "-q", "-m", "base")
+        (tdir / "code.py").write_text("bad\n")
+        (tdir / "evil.py").write_text("x\n")
+        (tdir / "content" / "2026-10-26.json").write_text("{}\n")
+        run("add", "code.py", "evil.py")
+        real_root = cf.ROOT
+        cf.ROOT = tdir
+        try:
+            bad = cf.restore(["content/*"])
+        finally:
+            cf.ROOT = real_root
+        status = run("status", "--porcelain", "--untracked-files=all").stdout
+        expect(sorted(bad) == ["code.py", "evil.py"] and (tdir / "code.py").read_text() == "ok\n" and not (tdir / "evil.py").exists()
+               and status.strip() == "?? content/2026-10-26.json", f"허용 밖 변경(스테이징 포함)을 되돌리지 못한다: {bad} / {status!r}")
     wf = (ROOT / ".github" / "workflows" / "codex-fallback.yml").read_text(encoding="utf-8")
     expect("openai/codex-action@v1" in wf and wf.count("persist-credentials: false") == 2 and "secrets.OPENAI_API_KEY != ''" in wf
-           and "restore --produce" in wf and "alert.py codex" in wf, "codex-fallback.yml 의 안전장치(토큰 없이·키 확인·되돌림·알림)가 빠졌다")
+           and "restore --produce" in wf and "alert.py codex" in wf and wf.count("git reset -q") == 2 and "collect-metrics.yml" in wf
+           and not any("Codex" in ln for ln in wf.splitlines() if "git commit -m" in ln), "codex-fallback.yml 의 안전장치(토큰 없이·키 확인·되돌림·인덱스 비우기·성과표·커밋에 AI 이름 없음)가 빠졌다")
     expect("codex_fallback.py wait-codex" in (ROOT / ".github" / "workflows" / "rewind.yml").read_text(encoding="utf-8"),
            "예비 호가 Codex 제작을 기다리지 않는다")
     rb = (ROOT / "automation" / "RUNBOOK.md").read_text(encoding="utf-8")
