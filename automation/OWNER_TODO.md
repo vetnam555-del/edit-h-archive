@@ -17,6 +17,13 @@
   `feeds.bbci.co.uk` `www.bbc.com` `www.cnbc.com` `apnews.com` `techcrunch.com` `www.theverge.com` `openai.com` `blog.google` `about.fb.com` `nvidianews.nvidia.com`
   — 모두 무료로 읽히는 곳만 골랐다(블룸버그·WSJ·FT 는 유료라 뺐다). 넣어 주시면 해외 소식 목록·본문 읽기를 붙인다.
 
+- [ ] **자비스(GPT) 이어받기 준비(2026-10-25 — 'Claude 토큰이 부족하면 자비스에서 이어서')** — 인수인계 문서는 저장소 맨 위 `AGENTS.md` 다
+  (GPT·Codex 에이전트는 이 파일을 먼저 읽는다). 자비스 쪽에서 한 번만:
+  1. 자비스가 이 저장소(`vetnam555-del/edit-h-archive`)를 열고 푸시할 수 있게 GitHub 연결 — ChatGPT 의 Codex 라면 PR 리뷰용으로 이미 연결돼 있다.
+  2. 자비스 실행 환경의 인터넷 허용에 `AGENTS.md` 5절의 도메인(네이버·정부 보도자료·위키미디어·npm·GitHub)을 넣는다.
+  3. Claude 가 멈췄을 때(08:40 알림 메일 '제작 빠짐', 예비 호 발행 등) 자비스에게: **"AGENTS.md 읽고 지금 시각에 맞는 일 이어서 해줘"**.
+  Claude 가 사용량 바닥을 미리 알 수는 없어서 자동으로 넘기지는 못한다 — 다만 07:40 제작이 빠져도 08:35 예비 호와 08:30 발송은 GitHub Actions 가 한다.
+
 > **2026-10-09 조회수 진단 결과, 아래 첫 두 항목이 가장 급하다**(`references.md` '진단 — 2026-10-09').
 > 팔로워는 47→130 으로 세 배가 됐는데 캐러셀 도달은 10~28 그대로다 — 계정이 추천에서 빠졌거나, 새 팔로워가 실제로 안 보는 계정일 수 있다.
 
