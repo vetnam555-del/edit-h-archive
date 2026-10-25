@@ -515,6 +515,7 @@ def t_codex_fallback():
     wf = (ROOT / ".github" / "workflows" / "codex-fallback.yml").read_text(encoding="utf-8")
     expect("openai/codex-action@v1" in wf and wf.count("persist-credentials: false") == 2 and "secrets.OPENAI_API_KEY != ''" in wf
            and "restore --produce" in wf and "alert.py codex" in wf and wf.count("git reset -q") == 2 and "collect-metrics.yml" in wf
+           and wf.index("wait_until_send.py schedule") < wf.index("gh workflow run send-newsletter.yml")
            and not any("Codex" in ln for ln in wf.splitlines() if "git commit -m" in ln), "codex-fallback.yml 의 안전장치(토큰 없이·키 확인·되돌림·인덱스 비우기·성과표·커밋에 AI 이름 없음)가 빠졌다")
     expect("codex_fallback.py wait-codex" in (ROOT / ".github" / "workflows" / "rewind.yml").read_text(encoding="utf-8"),
            "예비 호가 Codex 제작을 기다리지 않는다")

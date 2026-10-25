@@ -83,7 +83,7 @@ jobs:
     needs: decide
     if: needs.decide.outputs.task == 'produce' && needs.decide.outputs.go == 'true'
     runs-on: ubuntu-24.04
-    timeout-minutes: 60
+    timeout-minutes: 80   # 07:55 시작 + 설치 + Codex 30분 + 08:30 발송 시각까지 기다림
     env:
       EDITH_DATE: ${{ needs.decide.outputs.date }}
       DRY: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run && 'yes' || '' }}
@@ -174,6 +174,8 @@ jobs:
           done
           [ -n "$pushed" ] || { echo "::error::Codex 호를 main 에 푸시하지 못했습니다"; exit 1; }
           sleep 60   # GitHub Pages 가 새 카드 이미지를 올릴 시간
+          # 발송 시각(config.send_time_kst, 08:30) 전이면 그때까지 기다린다 — workflow_dispatch 로 부른 발송·게시는 스스로 기다리지 않는다(Codex 리뷰)
+          if [ "$DATE" = "$(TZ=Asia/Seoul date +%F)" ]; then python3 automation/wait_until_send.py schedule; fi
           gh workflow run send-newsletter.yml --ref main -f date="$DATE"
           gh workflow run post-instagram.yml --ref main -f key="$DATE" -f mode=post -f only=carousel
           if [ "$DATE" = "$(TZ=Asia/Seoul date +%F)" ]; then gh workflow run evening.yml --ref main; fi
@@ -211,6 +213,7 @@ jobs:
       # 21:30 성과 수집이 늦거나 빠진 날 지난 성과표로 회고하지 않게 먼저 모은다(Codex 리뷰). GITHUB_TOKEN 푸시는 수집을 못 깨워
       # request_metrics.py 대신 직접 실행하고 끝날 때까지(최대 12분) 기다린다. 실패하면 있는 성과표로 진행하고 회고에 '성과표 지연'.
       - name: Refresh metrics first
+        if: env.DRY == ''   # 시험 실행은 있는 성과표로 — 수집은 main 에 커밋한다(Codex 리뷰)
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
