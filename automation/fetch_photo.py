@@ -175,8 +175,11 @@ def library(day, words="", skip=None):
                     if t in low or (len(t) > 1 and _HANGUL.search(t)
                                     and any(len(g) > 1 and _HANGUL.search(g) and (t in g or g in t) for g in low)))
         out.append({"photo": photo, "credit": u["credit"], "focus": u.get("focus"), "subject": meta.get("subject", ""),
-                    "tags": tags, "last": u["last"], "ago": ago, "score": score, "photo_source": meta.get("photo_source")})
-    return sorted(out, key=lambda c: (-c["score"], -(c["ago"] if c["ago"] is not None else 10 ** 6)))
+                    "tags": tags, "last": u["last"], "ago": ago, "score": score, "photo_source": meta.get("photo_source"),
+                    "neutral": bool(meta.get("neutral"))})
+    # 점수가 같으면 중립 사진(도시·출근길처럼 어느 주제에나 맞는 장면, library.json "neutral") 먼저 — 주제어가 하나도 안 맞을 때
+    # 핵심어 표지 대신 쓰는 마지막 대안(2026-10-25 — 6일 사이 세 번 핵심어 표지, 10/23·10/24 회고)
+    return sorted(out, key=lambda c: (-c["score"], not c["neutral"], -(c["ago"] if c["ago"] is not None else 10 ** 6)))
 
 
 def last_used(photo, day):
@@ -207,9 +210,10 @@ def cmd_library(words, use=None, day=None):
     if use is None:
         for i, c in enumerate(cands, 1):
             when = f"마지막 사용 {c['last']}({c['ago']}일 전)" if c["last"] else "아직 안 쓴 사진(미리 검수)"
-            print(f"[{i}] {c['photo']} — {c['subject']} · 맞은 주제어 {c['score']} · {when}")
+            print(f"[{i}] {c['photo']} — {c['subject']}{' ★중립' if c['neutral'] else ''} · 맞은 주제어 {c['score']} · {when}")
         if not cands[0]["score"]:
-            print("  (주제어가 맞는 사진이 없습니다 — 제목 장면과 어울리는 사진이 없으면 핵심어 표지로 가고 보고 '표지:' 줄에 사유를 적으세요)")
+            print("  (주제어가 맞는 사진이 없습니다 — ★중립 사진(어느 주제에나 맞는 도시·출근길 장면)을 쓰세요. 중립 사진도 없을 때만"
+                  " 핵심어 표지로 가고 보고 '표지:' 줄에 사유를 적으세요)")
         print("고른 번호를 --use N --date YYYY-MM-DD 로 다시 실행하면 cards.cover 조각이 나옵니다. 표지 PNG 를 원본 크기로 보고 확인하세요.")
         return 0
     if not 1 <= use <= len(cands):

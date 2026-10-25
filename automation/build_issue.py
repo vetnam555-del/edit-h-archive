@@ -157,10 +157,11 @@ def main():
         # 2026-10-05 호가 이 경고에도 사진 없이 나갔다(캐러셀 도달 10, 실사 평균 14) — 바로 쓸 대체 사진을 함께 알려 준다
         import fetch_photo
         words = " ".join(str(x) for x in (d.get("title"), cover.get("title"), cover.get("keyword"), d.get("hero_title")) if x)
-        alt = [c for c in fetch_photo.library(d["date"], words) if c["score"]][:2]
+        cands = fetch_photo.library(d["date"], words)
+        alt = [c for c in cands if c["score"]][:2] or [c for c in cands if c.get("neutral")][:1]   # 맞는 게 없으면 중립 사진(2026-10-25)
         print("  ↘ 표지 사진 없음(핵심어 표지) — 원칙 9(표지는 실사 사진). 위키미디어 검색어를 3개 이상 시도했고 그래도 없으면"
               " 지난 호에서 검수한 대체 사진을 쓰세요: python3 automation/fetch_photo.py --library \"주제어\""
-              + (" — 지금 맞는 후보: " + ", ".join(f"{c['photo']}({c['subject']})" for c in alt) if alt else "")
+              + (" — 지금 쓸 수 있는 후보: " + ", ".join(f"{c['photo']}({c['subject']}{', 중립' if not c['score'] else ''})" for c in alt) if alt else "")
               + ". 그래도 못 썼다면 6단계 보고 '표지:' 줄에 사유를 적으세요")
     elif d.get("format") == 2 and not d.get("rewind") and cover.get("photo"):
         import fetch_photo

@@ -448,6 +448,10 @@ def t_headlines():
            and "H PICK 원문 **1/2**" in lines and "큰 소식 다룸 3/5" in lines,
            f"성과표 출처 품질 칸: {lines}")
     expect("src" not in collect_metrics.issue_facts("2026-10-21"), "예비 호까지 출처 품질을 잰다")
+    late = {**c, "date": "2999-01-01"}
+    expect(not style.headlines_check(c) and not style.headlines_check({**c, "date": "2026-10-24"})
+           and style.headlines_check(late) and "fetch_headlines.py --save" in style.headlines_check(late)[0],
+           "큰 소식 기록이 없을 때 빌드가 알리지 않는다(시작 전·기록 있는 날은 조용히)")
     return f"묶음 {len(sec)}·많이 본 {len(ranked)}건→{len(groups)}묶음·기사 묶음 {len(clu)}건"
 
 
@@ -688,6 +692,11 @@ def t_photo_library():
     every = fetch_photo.library("2999-01-01")
     missing = lib - {c["photo"] for c in every}
     expect(not missing, f"대체 사진 목록에 있지만 파일이나 출처(발행한 호의 credit)가 없다: {', '.join(sorted(missing))}")
+    # 주제어가 하나도 안 맞으면 중립 사진(도시·출근길)이 맨 위 — 핵심어 표지 대신 쓰는 마지막 대안(2026-10-25)
+    blank = fetch_photo.library("2999-01-01", "주말 날씨 추위")
+    expect(blank and blank[0]["neutral"] and not blank[0]["score"], f"맞는 주제어가 없을 때 중립 사진이 먼저가 아니다: {blank[:1]}")
+    expect([c["photo"] for c in fetch_photo.library("2999-01-01", "버스 파업 출근")][:1] == ["assets/photos/lib-light-trails.jpg"],
+           "'버스 파업' 이 교통 사진을 고르지 않는다")
     top = fetch_photo.library("2999-01-01", "카드 공제 체크카드")[0]
     expect(top["photo"].endswith("2026-10-04.jpg") and top["score"] > 0, "주제어 '카드' 가 카드 결제 사진을 1순위로 고르지 않는다")
     for words in ("ai", "AI가 바꾼 세상", "IT업계 변화"):
