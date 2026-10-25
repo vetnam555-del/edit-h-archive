@@ -23,6 +23,9 @@ python3 automation/check_today.py              # 오늘(KST). 리허설·재빌�
 ```
 
 - `publish: false` 면 `skip_reason` 을 한 줄로 보고하고 **끝낸다**(이미 발행 등. 2026-09-25 부터 주말·공휴일도 발행한다).
+- `publish: true` 면 **바로** `python3 automation/codex_fallback.py claim claude` — '제작 시작' 표시(2026-10-25~). 07:55 까지 이 표시가 없으면
+  Claude 가 멈춘 것으로 보고 ChatGPT Codex 가 GitHub Actions 에서 대신 만든다(`.github/workflows/codex-fallback.yml`). 표시가 실패해도 제작은 계속한다.
+  **종료 코드 3**('Codex 가 오늘 제작을 맡았습니다')이면 늦게 깨어난 것이다 — 제작하지 말고 그 한 줄로 보고하고 끝낸다.
 - `warnings` 가 있으면 최종 보고에 그대로 적는다(예: 다음 해 공휴일 미등록).
 - `next_vol`, `recent_item_titles`(최근 5호에서 다룬 주제), `recent_issues` 의 **마지막 발행일**을 메모해 둔다.
 - `series_due` 가 있으면(수요일, 2026-10-21~) 오늘 H PICK 은 고정 연재 편이다 — 아래 '수요일 연재 「H의 장부」'.
@@ -362,6 +365,7 @@ git commit -m "Publish EDIT H {날짜} (VOL.{vol}) — {title}"
 git push origin HEAD:main
 ```
 
+- 푸시 전에 `git fetch origin main && git cat-file -e origin/main:{날짜}.html` 이 성공하면(Codex 대체 제작이나 예비 호가 먼저 냄) 푸시하지 말고 그대로 보고한다.
 - 푸시가 거절되면(non-fast-forward) `git pull --rebase origin main` 후 다시 푸시.
   네트워크 오류면 2·4·8·16초 간격으로 최대 4번 재시도.
 - 위 경로 외의 변경은 커밋하지 않는다. 파이프라인 코드 수정이 필요해 보이면 고치지 말고 보고에 적는다.

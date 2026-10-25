@@ -410,7 +410,7 @@ def watch(date, dry=False):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("mode", choices=["failed", "watch", "test", "rewind"])
+    ap.add_argument("mode", choices=["failed", "watch", "test", "rewind", "codex"])
     ap.add_argument("--date", default="", help="watch: 확인할 날짜(비우면 오늘 KST)")
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
@@ -423,6 +423,15 @@ def main():
                   "대신 발행했어요. 메일 발송과 인스타 게시도 이어서 돌렸습니다.\n\n"
                   "원인은 대개 Claude 사용량 한도나 루틴 오류예요. 08:50 점검 루틴이 원인을 확인해 알려드려요.\n"
                   f"실행 기록: https://github.com/{os.environ.get('GITHUB_REPOSITORY', 'vetnam555-del/edit-h-archive')}/actions",
+                  args.dry_run)
+        return 0
+    if args.mode == "codex":   # codex-fallback.yml — Claude 제작 루틴이 시작하지 않아 Codex 가 대신 만든 날
+        date = args.date or now_kst().date().isoformat()
+        send_mail(f"{SUBJECT} · {date[5:].replace('-', '/')} Codex 가 대신 제작",
+                  "07:55 까지 Claude 제작 루틴이 시작하지 않아(대개 사용량 한도), ChatGPT Codex 가 오늘 호를 대신 만들어 올렸어요.\n"
+                  "메일 발송·인스타 캐러셀·저녁 일정도 이어서 돌렸습니다. 지난 호 다시 보기(예비 호)가 아니라 오늘 새 소식이에요.\n\n"
+                  f"뉴스레터: https://vetnam555-del.github.io/edit-h-archive/{date}.html\n"
+                  f"실행 기록(Codex 보고서 포함): https://github.com/{os.environ.get('GITHUB_REPOSITORY', 'vetnam555-del/edit-h-archive')}/actions",
                   args.dry_run)
         return 0
     if args.mode == "test":

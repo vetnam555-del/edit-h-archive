@@ -18,6 +18,16 @@
 
 그래서 **가장 중요한 일은 07:40 '제작'** 이다. 이게 빠지면 예비 호가 나가 새 소식이 없는 날이 된다.
 
+### 0-1. 자동 대체 — ChatGPT Codex 가 GitHub Actions 에서 (`.github/workflows/codex-fallback.yml`, 2026-10-25~)
+
+`OPENAI_API_KEY` 시크릿이 있으면 사람이 부르지 않아도 Codex 가 이어받는다:
+- **제작**: Claude 제작 루틴은 시작하자마자 `run-claim/{날짜}-claude` 표시를 남긴다(RUNBOOK 0단계). **07:55 까지 그 표시도 오늘 호도 없으면**
+  Codex 가 `run-claim/{날짜}-codex` 를 남기고 `automation/codex_prompts/produce.md` 대로 RUNBOOK 0~4단계를 한다. 워크플로가 허용 경로 밖 변경을
+  되돌리고 다시 빌드해 main 에 올린 뒤 발송·인스타·저녁 사슬을 돌리고 알림 메일을 보낸다. 예비 호는 Codex 표시가 있으면 09:15 까지 기다린다.
+- **회고**: 22:00 Claude 회고 커밋이 23:30 까지 없으면 Codex 가 `automation/codex_prompts/retro.md` 대로 learnings.md 회고를 쓴다.
+- 08:50 점검·14:10 개선·일요일 주간 루틴은 자동 대체하지 않는다(발송·게시는 GitHub Actions 가 하고, 개선은 하루 쉬어도 된다).
+- 수동으로 시험: Actions → 'EDIT H Codex fallback' → Run workflow(task, dry_run=true 면 만들고 검사까지만).
+
 ## 1. 이어받을 때 순서
 
 1. `git fetch origin main && git checkout main && git pull --ff-only origin main`
@@ -82,6 +92,7 @@
 | `automation/CHANGELOG.md` | 날마다 무엇을 바꿨나(최신이 위) |
 | `automation/OWNER_TODO.md` | 운영자만 할 수 있는 일 |
 | `automation/metrics/summary.md` | 최근 14호 성과표·출처 품질 |
+| `automation/codex_fallback.py` | Codex 자동 대체의 판단(표시·기다림·회고 빠짐·허용 경로) |
 
 ## 5. 실행 환경이 갖춰야 할 것
 
