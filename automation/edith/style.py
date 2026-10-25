@@ -245,6 +245,20 @@ def primary_check(d):
 WIRE = ("연합뉴스", "연합뉴스TV", "뉴시스", "뉴스1")   # 통신사 — 다른 매체가 받아 쓰는 일이 많아 '두 번째 출처'로는 약하다
 
 
+HEADLINES_FROM = "2026-10-24"
+
+
+def headlines_check(d):
+    """그날 큰 소식 기록(RUNBOOK 1-1c `fetch_headlines.py --save`)이 없으면 알린다 — 없으면 22:00 회고가 '큰 소식 다룸'을 못 잰다
+    (10/23 첫날 빠짐, 10/23 회고). 경고만 — 기록이 없어도 발행은 한다."""
+    from .common import ROOT
+    day = str(d.get("date", ""))[:10]
+    if day < HEADLINES_FROM or (ROOT / "automation" / "headlines" / f"{day}.json").exists():
+        return []
+    return [f"큰 소식: automation/headlines/{day}.json 이 없어요 — `python3 automation/fetch_headlines.py --save` 로 오늘 목록을 남기고"
+            " 5단계 커밋에 함께 넣어요(회고가 '큰 소식 다룸'을 잰다)"]
+
+
 def source_quality(d):
     """출처 품질(경쟁 잣대, 2026-10-23 운영자 '경쟁사와 비교해도 부족함 없이') — 성과표가 호마다 적는다.
     main: 메인 5가지(H PICK 포함) 수 · primary: 그중 원문(정부·기관 주소) 출처가 있는 것 · pick_primary: H PICK 원문 여부 ·
@@ -273,7 +287,7 @@ def lint(d):
     """경고 문장 목록(최대 MAX_LINES 개 + 남은 개수). 형식 2·데일리·STYLE_FROM 이후 호만."""
     if d.get("format") != 2 or d.get("rewind") or str(d.get("date", ""))[:10] < STYLE_FROM:
         return []
-    found, seen_acr = caption_keyword(d) + share_check(d) + brief_check(d) + todo_check(d) + repeat_check(d) + primary_check(d), set()
+    found, seen_acr = caption_keyword(d) + share_check(d) + brief_check(d) + todo_check(d) + repeat_check(d) + primary_check(d) + headlines_check(d), set()
     for where, text, kind in _texts(d):
         rules = _WEED + _FORCE + (_WEED_SOCIAL if kind in ("social", "card", "obs") else [])
         for rx, why in rules:

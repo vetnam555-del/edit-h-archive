@@ -297,7 +297,8 @@ python3 automation/fetch_photo.py "영어 검색어" --pick 3 --date {날짜}  #
   python3 automation/fetch_photo.py --library "대출 금리"                       # 주제어가 맞는 순 · 30일 안에 쓴 사진은 빠짐(2026-10-22~, 그 전엔 3일)
   python3 automation/fetch_photo.py --library "대출 금리" --use 1 --date {날짜}  # cards.cover 에 넣을 photo·credit·focus
   ```
-  대체 사진도 제목의 장면과 어울리지 않을 때만 핵심어 표지로 진행하고, 6단계 보고 `표지:` 줄에 사유를 적는다.
+  주제어가 맞는 대체 사진이 없으면 **★중립 사진**(도시 야경·출근길 도로처럼 어느 주제에나 맞는 장면, 2026-10-25~)을 쓴다 —
+  핵심어 표지는 중립 사진도 30일 안에 써서 없을 때만이고, 그때 6단계 보고 `표지:` 줄에 사유를 적는다.
   사진 때문에 발행을 늦추지 않는다(10분을 넘기면 대체 사진 → 핵심어 표지).
 - 새 사진을 표지로 쓴 날은 `assets/photos/library.json` 에 한 줄(`subject` 무엇이 찍혔나 · `tags` 어울리는 한국어 주제어)을 더한다 —
   빌드가 '새 표지 사진' 경고로 알려 준다. 목록이 늘수록 대체 사진이 잘 맞는다.
