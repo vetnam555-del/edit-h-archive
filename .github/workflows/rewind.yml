@@ -4,6 +4,7 @@
 # GitHub 예약 실행은 2~3시간 늦거나 빠지기 쉬워(2026-09-30 08:07 예약이 11:03 에 돌아 예비 호가 3시간 늦음) 새벽 03:13·05:13·06:43 에
 # 미리 시작해 wait 작업이 08:35 까지 기다리게 하고(그 사이 오늘 호가 올라오면 일찍 끝남), 08:37 이후 네 번은 새벽 실행이 모두 빠졌을 때의 예비다.
 # 오늘 호가 있으면 곧바로 끝난다. 루틴이 늦게라도 올린 날은 아무것도 하지 않는다. 공개 저장소라 기다리는 시간은 무료다.
+# Claude 가 멈춘 날 Codex 가 대신 만들고 있으면(codex-fallback.yml) 09:15 까지 그 호를 기다린다(2026-10-25~).
 # 필요한 Secrets: SMTP_USER · SMTP_PASSWORD(알림 메일). 발송·게시는 각 워크플로가 자기 Secrets 로 한다.
 name: EDIT H reserve issue
 
@@ -61,11 +62,19 @@ jobs:
     needs: wait
     if: needs.wait.outputs.go == 'true'
     runs-on: ubuntu-24.04
-    timeout-minutes: 25
+    timeout-minutes: 75   # Codex 대체 제작을 09:15 까지 기다릴 수 있다(아래)
     steps:
       - uses: actions/checkout@v4
         with:
           ref: main
+
+      # Claude 가 멈춰 Codex 가 오늘 호를 만들고 있으면(run-claim/{날짜}-codex, codex-fallback.yml) 예비 호 대신 그 호를 기다린다 — 09:15 까지
+      - name: Wait for Codex fallback issue
+        env:
+          IN_DATE: ${{ inputs.date }}
+        run: |
+          python3 automation/codex_fallback.py wait-codex ${IN_DATE:+--date "$IN_DATE"}
+          git pull -q --ff-only origin main
 
       - name: Need a reserve issue?
         id: need

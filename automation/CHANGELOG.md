@@ -3,6 +3,18 @@
 시스템이 날마다 무엇을 바꿨는지 한 줄씩 남긴다 — **바꾼 것 — 왜(근거) — 어떻게 판정·확인**. 최신이 위.
 매일 14:10 개선 루틴(`RUNBOOK_IMPROVE.md`)과 일요일 21:00 주간 루틴이 적는다. 편집 회고는 `learnings.md`, 조사·실험은 `references.md`.
 
+### 2026-10-25 (운영자 — '자비스는 ChatGPT Codex, Claude 토큰이 부족하면 그 머신으로 이어서')
+- **Codex 자동 대체 `codex-fallback.yml`** — Claude 는 사용량 바닥을 미리 알 수 없어 '제작 시작 표시'로 판단한다: 제작 루틴이 시작하자마자
+  `run-claim/{날짜}-claude` 가지를 남기고(RUNBOOK 0단계 — main 이 아니라 워크플로를 깨우지 않는다), 07:55 까지 표시도 오늘 호도 없으면
+  GitHub Actions 러너에서 `openai/codex-action` 이 `codex_prompts/produce.md` 대로 RUNBOOK 0~4단계를 한다. Codex 는 저장소 토큰 없이 일하고
+  (`persist-credentials: false`), 끝나면 워크플로가 허용 경로 밖 변경을 되돌리고(`codex_fallback.py restore`) 다시 빌드해 올린 뒤
+  발송·인스타·저녁 사슬을 돌리고 알림 메일(`alert.py codex`)을 보낸다. 늦게 깨어난 Claude 는 Codex 표시를 보고 손을 떼고(종료 코드 3),
+  푸시 전에 오늘 호가 이미 있으면 올리지 않는다(RUNBOOK 5). 예비 호(rewind.yml)는 Codex 표시가 있으면 09:15 까지 기다린다.
+  회고: 22:00 회고 커밋이 23:30 까지 없으면 Codex 가 learnings.md 만 고쳐 'Editor retrospective {날짜} (대체 회고)'로 올린다.
+  `OPENAI_API_KEY` 시크릿이 없으면 아무것도 하지 않는다 — API 사용료가 들어 운영자가 키를 넣어야 켜진다(OWNER_TODO).
+  확인: selftest 'Codex 대체' — 시작 판단(키·발행일·오늘 호·Claude/Codex 표시·07:55~08:25), 표시 가지 읽기, 회고 날짜·완료 판단, 허용 경로,
+  워크플로·RUNBOOK·rewind 연결. 실제 Codex 실행은 키를 넣은 뒤 dry_run 으로 시험한다.
+
 ### 2026-10-25 (운영자 — 'Claude 토큰이 부족하면 자비스(GPT)에서 이어서')
 - **GPT 에이전트 인수인계 문서 `AGENTS.md`(저장소 맨 위)** — GPT·Codex 에이전트가 먼저 읽는 파일. AI 없이도 도는 부분(08:30 발송·인스타, 08:35 예비 호,
   저녁 사슬)과, Claude 예약 작업 5개(07:40 제작·08:50 점검·14:10 개선·22:00 회고·일요일 21:00 주간)의 내용을 예약 지시문에서 그대로 옮겼다 —

@@ -1,0 +1,275 @@
+# EDIT H Codex 대체 작업 — Claude 가 멈춘 날 ChatGPT Codex 가 GitHub Actions 에서 이어서 한다(2026-10-25 운영자 결정).
+# · 제작: 07:40 Claude 제작 루틴은 시작하자마자 'run-claim/{날짜}-claude' 표시를 남긴다(RUNBOOK 0단계). 07:55 까지 그 표시도 오늘 호도
+#   없으면 Codex 가 'run-claim/{날짜}-codex' 를 남기고 RUNBOOK 0~4단계로 오늘 호를 만든다. 워크플로가 허용 경로 밖 변경을 되돌리고
+#   다시 빌드해 main 에 올린 뒤 발송·인스타·저녁 사슬을 직접 돌린다(GITHUB_TOKEN 푸시는 다른 워크플로를 못 깨운다). 예비 호(rewind.yml)는
+#   Codex 표시가 있으면 09:15 까지 기다린다.
+# · 회고: 그날 22:00 Claude 회고 커밋('Editor retrospective {날짜}')이 23:30 이 지나도 없으면 Codex 가 learnings.md 회고를 쓴다.
+# 필요한 Secret: OPENAI_API_KEY(없으면 아무것도 하지 않는다 — 키를 넣어야 켜진다. API 사용료는 Codex 가 일한 날만 든다),
+#               SMTP_USER·SMTP_PASSWORD(알림 메일, 이미 있음).
+# GitHub 예약 실행은 늦거나 빠지기 쉬워 새벽에 미리 시작해 07:55 까지 기다린다(rewind.yml 과 같은 방식). 기다리는 시간은 무료다.
+name: EDIT H Codex fallback
+
+on:
+  schedule:
+    - cron: "28 18 * * *"    # KST 03:28 → 07:55 까지 대기(제작)
+    - cron: "28 20 * * *"    # KST 05:28 → 07:55 까지 대기(제작)
+    - cron: "58 21 * * *"    # KST 06:58 → 07:55 까지 대기(제작)
+    - cron: "35 22 * * *"    # KST 07:35 → 07:55 까지 대기(제작, 예비)
+    - cron: "50 14 * * *"    # KST 23:50 회고 확인
+    - cron: "20 17 * * *"    # KST 02:20 회고 확인(예비)
+  workflow_dispatch:
+    inputs:
+      task:
+        description: "produce = 오늘 호 대체 제작 · retro = 편집 회고 대체"
+        type: choice
+        options: [produce, retro]
+        default: produce
+      date:
+        description: "날짜 YYYY-MM-DD (비우면 제작은 오늘, 회고는 판단한 날)"
+        required: false
+      dry_run:
+        description: "만들고 검사까지만 — 표시·커밋·발송·게시 없이 확인"
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: codex-fallback-${{ (github.event.schedule == '50 14 * * *' || github.event.schedule == '20 17 * * *' || inputs.task == 'retro') && 'retro' || 'produce' }}
+  cancel-in-progress: false
+
+jobs:
+  decide:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 340
+    outputs:
+      task: ${{ steps.decide.outputs.task }}
+      go: ${{ steps.decide.outputs.go }}
+      date: ${{ steps.decide.outputs.date }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Decide (and wait for 07:55 KST on morning runs)
+        id: decide
+        env:
+          OPENAI_API_KEY_SET: ${{ secrets.OPENAI_API_KEY != '' && 'yes' || '' }}
+          EVENT: ${{ github.event_name }}
+          SCHEDULE: ${{ github.event.schedule }}
+          IN_TASK: ${{ inputs.task }}
+          IN_DATE: ${{ inputs.date }}
+        run: |
+          task=produce
+          case "$SCHEDULE" in "50 14 * * *"|"20 17 * * *") task=retro;; esac
+          [ "$EVENT" = "workflow_dispatch" ] && task="$IN_TASK"
+          echo "task=$task" >> "$GITHUB_OUTPUT"
+          if [ "$EVENT" = "workflow_dispatch" ]; then
+            if [ -z "$OPENAI_API_KEY_SET" ]; then echo "OPENAI_API_KEY 시크릿이 없어 꺼져 있음"; echo "go=false" >> "$GITHUB_OUTPUT"; exit 0; fi
+            if [ "$task" = "retro" ] && [ -z "$IN_DATE" ]; then python3 automation/codex_fallback.py need-retro; exit 0; fi
+            echo "go=true" >> "$GITHUB_OUTPUT"
+            echo "date=${IN_DATE:-$(TZ=Asia/Seoul date +%F)}" >> "$GITHUB_OUTPUT"
+          elif [ "$task" = "retro" ]; then
+            python3 automation/codex_fallback.py need-retro
+          else
+            python3 automation/codex_fallback.py prune || true
+            python3 automation/codex_fallback.py wait-produce
+          fi
+
+  produce:
+    needs: decide
+    if: needs.decide.outputs.task == 'produce' && needs.decide.outputs.go == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 80   # 07:55 시작 + 설치 + Codex 30분 + 08:30 발송 시각까지 기다림
+    env:
+      EDITH_DATE: ${{ needs.decide.outputs.date }}
+      DRY: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run && 'yes' || '' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: false   # Codex 가 일하는 동안 저장소 토큰이 작업 폴더에 남지 않게 — 올리기는 마지막 단계만 한다
+
+      # 07:55 판단 뒤 Claude 가 늦게 시작했거나 오늘 호가 올라왔으면 여기서 멈춘다(코드 3) — 맡았을 때만 PROCEED=yes
+      - name: Claim today's issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ -n "$DRY" ]; then echo "PROCEED=yes" >> "$GITHUB_ENV"; exit 0; fi
+          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          set +e; python3 automation/codex_fallback.py claim codex --date "$EDITH_DATE"; code=$?; set -e
+          git remote set-url origin "https://github.com/${GITHUB_REPOSITORY}.git"
+          [ "$code" = "0" ] && echo "PROCEED=yes" >> "$GITHUB_ENV"
+          [ "$code" = "0" ] || [ "$code" = "3" ]
+
+      - uses: actions/setup-node@v4
+        if: env.PROCEED == 'yes'
+        with:
+          node-version: "20"
+
+      - name: Install Playwright (card rendering)
+        if: env.PROCEED == 'yes'
+        run: |
+          npm install --no-save --no-package-lock playwright > /dev/null
+          npx playwright install --with-deps chromium > /dev/null
+
+      - name: Prepare prompt
+        if: env.PROCEED == 'yes'
+        run: |
+          { echo "오늘 날짜(EDITH_DATE): $EDITH_DATE"; echo; cat automation/codex_prompts/produce.md; } > .codex-prompt.md
+
+      - name: Codex makes today's issue (RUNBOOK 0~4)
+        id: codex
+        if: env.PROCEED == 'yes'
+        uses: openai/codex-action@v1
+        with:
+          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+          prompt-file: .codex-prompt.md
+          sandbox: danger-full-access   # 뉴스·보도자료를 읽으려면 인터넷이 필요하다(일회용 러너, 저장소 토큰 없음)
+          safety-strategy: drop-sudo
+          allow-bots: "true"
+          output-file: codex-report.md
+
+      - name: Keep only issue files and rebuild
+        if: env.PROCEED == 'yes'
+        run: |
+          python3 automation/codex_fallback.py restore --produce --date "$EDITH_DATE" --allow codex-report.md
+          python3 - <<'EOF'
+          import json, os, sys
+          d = os.environ["EDITH_DATE"]
+          c = json.load(open(f"content/{d}.json", encoding="utf-8"))
+          if c.get("date") != d or c.get("rewind"):
+              sys.exit(f"content/{d}.json 이 오늘 정규 호가 아니다(date={c.get('date')}, rewind={c.get('rewind')})")
+          EOF
+          python3 automation/build_issue.py "$EDITH_DATE"
+
+      - name: Publish, send, post, alert
+        if: env.PROCEED == 'yes' && env.DRY == ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+        run: |
+          DATE="$EDITH_DATE"
+          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git fetch -q origin main
+          if git cat-file -e "origin/main:$DATE.html" 2>/dev/null; then
+            echo "오늘 호가 이미 main 에 있습니다(Claude·예비 호가 먼저 냄) — Codex 호는 올리지 않습니다"; exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git reset -q   # 인덱스를 비우고 발행 경로만 담는다
+          git add "content/$DATE.json" "$DATE.html" "instagram/$DATE" manifest.json index.html feed.xml sitemap.xml assets/photos automation/headlines
+          # 금요일 주간 특집(RUNBOOK 4-1)을 만들었으면 함께 — 저녁 사슬이 이 원고가 있어야 18:00 게시를 건다
+          [ -f "content/weekly/$DATE.json" ] && git add "content/weekly/$DATE.json" "instagram/$DATE-weekly"
+          TITLE=$(python3 -c "import json;c=json.load(open('content/$DATE.json',encoding='utf-8'));print(c.get('title','').replace('**','').replace('==',''))")
+          git commit -m "Publish EDIT H $DATE — $TITLE (대체 제작)"
+          pushed=""
+          for i in 1 2 3 4; do
+            git pull --rebase origin main && git push origin HEAD:main && pushed=1 && break
+            sleep $((i * 5))
+          done
+          [ -n "$pushed" ] || { echo "::error::Codex 호를 main 에 푸시하지 못했습니다"; exit 1; }
+          sleep 60   # GitHub Pages 가 새 카드 이미지를 올릴 시간
+          # 발송 시각(config.send_time_kst, 08:30) 전이면 그때까지 기다린다 — workflow_dispatch 로 부른 발송·게시는 스스로 기다리지 않는다(Codex 리뷰)
+          if [ "$DATE" = "$(TZ=Asia/Seoul date +%F)" ]; then python3 automation/wait_until_send.py schedule; fi
+          gh workflow run send-newsletter.yml --ref main -f date="$DATE"
+          gh workflow run post-instagram.yml --ref main -f key="$DATE" -f mode=post -f only=carousel
+          if [ "$DATE" = "$(TZ=Asia/Seoul date +%F)" ]; then gh workflow run evening.yml --ref main; fi
+          python3 automation/alert.py codex --date "$DATE"
+
+      - name: Release claim on failure (so the reserve issue does not wait)
+        if: failure() && env.PROCEED == 'yes' && env.DRY == ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git push "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" --delete "run-claim/$EDITH_DATE-codex" || true
+
+      - name: Keep Codex report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: codex-produce-${{ env.EDITH_DATE }}
+          path: codex-report.md
+          if-no-files-found: ignore
+
+  retro:
+    needs: decide
+    if: needs.decide.outputs.task == 'retro' && needs.decide.outputs.go == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      EDITH_DATE: ${{ needs.decide.outputs.date }}
+      DRY: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run && 'yes' || '' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: false
+
+      # 21:30 성과 수집이 늦거나 빠진 날 지난 성과표로 회고하지 않게 먼저 모은다(Codex 리뷰). GITHUB_TOKEN 푸시는 수집을 못 깨워
+      # request_metrics.py 대신 직접 실행하고 끝날 때까지(최대 12분) 기다린다. 실패하면 있는 성과표로 진행하고 회고에 '성과표 지연'.
+      - name: Refresh metrics first
+        if: env.DRY == ''   # 시험 실행은 있는 성과표로 — 수집은 main 에 커밋한다(Codex 리뷰)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          before=$(gh run list --workflow collect-metrics.yml --limit 1 --json databaseId --jq '.[0].databaseId' || echo 0)
+          gh workflow run collect-metrics.yml --ref main -f skip_if_fresh=true || { echo "수집 실행 실패 — 있는 성과표로 진행"; exit 0; }
+          for i in $(seq 1 20); do
+            sleep 15
+            id=$(gh run list --workflow collect-metrics.yml --limit 1 --json databaseId --jq '.[0].databaseId' || echo 0)
+            [ "$id" != "$before" ] && [ "$id" != "0" ] && break
+          done
+          if [ "$id" != "$before" ] && [ "$id" != "0" ]; then timeout 720 gh run watch "$id" > /dev/null || echo "수집이 12분 안에 끝나지 않음 — 있는 성과표로 진행"; fi
+          git pull -q --ff-only origin main || true
+
+      - name: Prepare prompt
+        run: |
+          { echo "회고할 호의 날짜(EDITH_DATE): $EDITH_DATE"; echo; cat automation/codex_prompts/retro.md; } > .codex-prompt.md
+
+      - name: Codex writes the retrospective (learnings.md only)
+        uses: openai/codex-action@v1
+        with:
+          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+          prompt-file: .codex-prompt.md
+          sandbox: danger-full-access
+          safety-strategy: drop-sudo
+          allow-bots: "true"
+          output-file: codex-report.md
+
+      - name: Keep only learnings.md
+        run: |
+          python3 automation/codex_fallback.py restore --allow automation/learnings.md codex-report.md
+          grep -q "^### $EDITH_DATE" automation/learnings.md || { echo "::error::learnings.md 에 $EDITH_DATE 회고가 없습니다"; exit 1; }
+
+      - name: Commit retrospective
+        if: env.DRY == ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git diff --quiet HEAD -- automation/learnings.md && { echo "바뀐 것 없음(이미 회고가 있었음)"; exit 0; }   # 스테이징한 변경도 본다(Codex 리뷰)
+          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git reset -q   # 인덱스를 비우고 learnings.md 만 담는다
+          git add automation/learnings.md
+          git commit -m "Editor retrospective $EDITH_DATE (대체 회고)"
+          for i in 1 2 3 4; do
+            git pull --rebase origin main && git push origin HEAD:main && exit 0
+            sleep $((i * 5))
+          done
+          echo "::error::회고를 main 에 푸시하지 못했습니다"; exit 1
+
+      - name: Keep Codex report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: codex-retro-${{ env.EDITH_DATE }}
+          path: codex-report.md
+          if-no-files-found: ignore

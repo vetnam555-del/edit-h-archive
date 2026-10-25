@@ -466,6 +466,66 @@ def t_agents_doc():
     return f"파일 {len(paths)}개·워크플로 {len(flows)}개"
 
 
+def t_codex_fallback():
+    """Claude 가 멈춘 날 Codex 자동 대체(codex-fallback.yml, 2026-10-25): 시작 판단·표시·회고 판단·허용 경로·워크플로 연결."""
+    import codex_fallback as cf
+    from edith.common import now_kst
+    t = now_kst().replace(year=2026, month=10, day=26, hour=7, minute=56, second=0, microsecond=0)
+    d = "2026-10-26"
+    expect(cf.produce_decision(d, t, False, set(), True)[0], "07:55 뒤 표시·오늘 호 없으면 Codex 가 시작해야 한다")
+    for args, why in [((d, t, False, {"claude"}, True), "Claude 표시"), ((d, t, False, {"codex"}, True), "Codex 표시"),
+                      ((d, t, True, set(), True), "오늘 호 있음"), ((d, t, False, set(), False), "키 없음"),
+                      ((d, t.replace(hour=8, minute=26), False, set(), True), "08:25 뒤"),
+                      ((d, t.replace(minute=40), False, set(), True), "07:55 전")]:
+        expect(not cf.produce_decision(*args)[0], f"{why}인데 Codex 가 시작한다")
+    ls = "a\trefs/heads/run-claim/2026-10-26-claude\nb\trefs/heads/run-claim/2026-10-25-codex\nc\trefs/heads/main\n"
+    expect(cf.parse_claims(ls, d) == {"claude"} and cf.parse_claims(ls, "2026-10-25") == {"codex"}, "표시 가지를 날짜별로 못 읽는다")
+    expect(cf.retro_target(t.replace(hour=3)) == ("2026-10-25", True) and cf.retro_target(t.replace(hour=22, minute=10)) == (d, False)
+           and cf.retro_target(t.replace(hour=23, minute=40)) == (d, True), "회고 날짜·기다림 판단이 틀렸다")
+    expect(cf.retro_done(d, f"Collect metrics\nEditor retrospective {d} (Codex 대체 회고)\n") and not cf.retro_done(d, "Editor retrospective 2026-10-25\n"),
+           "회고 커밋 판단이 틀렸다")
+    pats = [x.format(d=d) for x in cf.PRODUCE_PATHS]
+    expect(all(cf.allowed(x, pats) for x in (f"{d}.html", f"content/{d}.json", f"instagram/{d}/01.png", "manifest.json", "assets/photos/x.jpg",
+                                             f"content/weekly/{d}.json", f"instagram/{d}-weekly/01.png"))
+           and not any(cf.allowed(x, pats) for x in ("automation/build_issue.py", "content/2026-10-25.json", ".github/workflows/x.yml")),
+           "Codex 가 남길 수 있는 경로 판단이 틀렸다")
+    # 되돌리기: 스테이징한 변경까지 HEAD 로, 허용 밖 새 파일은 인덱스·디스크에서(Codex 리뷰) — 임시 저장소에서
+    import subprocess
+    import tempfile
+    with tempfile.TemporaryDirectory() as tmp:
+        tdir = Path(tmp)
+        run = lambda *a: subprocess.run(["git", "-C", tmp, *a], capture_output=True, text=True, check=True)   # noqa: E731
+        run("init", "-q")
+        run("config", "user.email", "t@t"), run("config", "user.name", "t")
+        (tdir / "code.py").write_text("ok\n")
+        (tdir / "content").mkdir()
+        run("add", "."), run("commit", "-q", "-m", "base")
+        (tdir / "code.py").write_text("bad\n")
+        (tdir / "evil.py").write_text("x\n")
+        (tdir / "content" / "2026-10-26.json").write_text("{}\n")
+        run("add", "code.py", "evil.py")
+        real_root = cf.ROOT
+        cf.ROOT = tdir
+        try:
+            bad = cf.restore(["content/*"])
+        finally:
+            cf.ROOT = real_root
+        status = run("status", "--porcelain", "--untracked-files=all").stdout
+        expect(sorted(bad) == ["code.py", "evil.py"] and (tdir / "code.py").read_text() == "ok\n" and not (tdir / "evil.py").exists()
+               and status.strip() == "?? content/2026-10-26.json", f"허용 밖 변경(스테이징 포함)을 되돌리지 못한다: {bad} / {status!r}")
+    wf = (ROOT / ".github" / "workflows" / "codex-fallback.yml").read_text(encoding="utf-8")
+    expect("openai/codex-action@v1" in wf and wf.count("persist-credentials: false") == 2 and "secrets.OPENAI_API_KEY != ''" in wf
+           and "restore --produce" in wf and "alert.py codex" in wf and wf.count("git reset -q") == 2 and "collect-metrics.yml" in wf
+           and wf.index("wait_until_send.py schedule") < wf.index("gh workflow run send-newsletter.yml")
+           and 'git add "content/weekly/$DATE.json"' in wf and "git diff --quiet HEAD --" in wf
+           and not any("Codex" in ln for ln in wf.splitlines() if "git commit -m" in ln), "codex-fallback.yml 의 안전장치(토큰 없이·키 확인·되돌림·인덱스 비우기·성과표·커밋에 AI 이름 없음)가 빠졌다")
+    expect("codex_fallback.py wait-codex" in (ROOT / ".github" / "workflows" / "rewind.yml").read_text(encoding="utf-8"),
+           "예비 호가 Codex 제작을 기다리지 않는다")
+    rb = (ROOT / "automation" / "RUNBOOK.md").read_text(encoding="utf-8")
+    expect("codex_fallback.py claim claude" in rb and "origin/main:{날짜}.html" in rb, "RUNBOOK 에 제작 시작 표시·푸시 전 확인이 없다")
+    return "시작 판단 7가지·표시·회고·허용 경로·워크플로 연결"
+
+
 def t_poll_paused():
     """월요일 투표는 2026-10-19 부터 쉰다(세 번 모두 참여 0명) — poll_due 를 내지 않고, 원고의 poll 은 빌드가 막는다."""
     import check_today
@@ -1170,6 +1230,7 @@ def main():
     check("원문(보도자료)·H PICK 원문 점검(2026-10-23~)", t_releases)
     check("큰 소식·놓침 비교·출처 품질(2026-10-23~)", t_headlines)
     check("AGENTS.md(GPT 인수인계)가 가리키는 파일", t_agents_doc)
+    check("Codex 자동 대체(Claude 가 멈춘 날)", t_codex_fallback)
     check("같은 회사·주제 두 칸(2026-10-19~)", t_repeat_check)
     check("오늘 챙길 것", t_todo_box)
     check("오늘 할 일(check_today)", t_check_today)
