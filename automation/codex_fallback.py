@@ -37,7 +37,8 @@ RETRO_AFTER = (23, 30)   # 그날 22:00 회고를 이때까지 기다린 뒤에�
 POLL = 60
 # 제작 산출물(RUNBOOK 5단계 git add 와 같은 경로) — 이 밖의 변경은 되돌린다
 PRODUCE_PATHS = ["{d}.html", "content/{d}.json", "instagram/{d}/*", "manifest.json", "index.html", "feed.xml", "sitemap.xml",
-                 "assets/photos/*", "automation/headlines/*"]
+                 "assets/photos/*", "automation/headlines/*",
+                 "content/weekly/{d}.json", "instagram/{d}-weekly/*"]   # 금요일 주간 특집(RUNBOOK 4-1, Codex 리뷰)
 
 
 def _git(*args, check=False):

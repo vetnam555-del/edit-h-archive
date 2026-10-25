@@ -485,7 +485,8 @@ def t_codex_fallback():
     expect(cf.retro_done(d, f"Collect metrics\nEditor retrospective {d} (Codex 대체 회고)\n") and not cf.retro_done(d, "Editor retrospective 2026-10-25\n"),
            "회고 커밋 판단이 틀렸다")
     pats = [x.format(d=d) for x in cf.PRODUCE_PATHS]
-    expect(all(cf.allowed(x, pats) for x in (f"{d}.html", f"content/{d}.json", f"instagram/{d}/01.png", "manifest.json", "assets/photos/x.jpg"))
+    expect(all(cf.allowed(x, pats) for x in (f"{d}.html", f"content/{d}.json", f"instagram/{d}/01.png", "manifest.json", "assets/photos/x.jpg",
+                                             f"content/weekly/{d}.json", f"instagram/{d}-weekly/01.png"))
            and not any(cf.allowed(x, pats) for x in ("automation/build_issue.py", "content/2026-10-25.json", ".github/workflows/x.yml")),
            "Codex 가 남길 수 있는 경로 판단이 틀렸다")
     # 되돌리기: 스테이징한 변경까지 HEAD 로, 허용 밖 새 파일은 인덱스·디스크에서(Codex 리뷰) — 임시 저장소에서
@@ -516,6 +517,7 @@ def t_codex_fallback():
     expect("openai/codex-action@v1" in wf and wf.count("persist-credentials: false") == 2 and "secrets.OPENAI_API_KEY != ''" in wf
            and "restore --produce" in wf and "alert.py codex" in wf and wf.count("git reset -q") == 2 and "collect-metrics.yml" in wf
            and wf.index("wait_until_send.py schedule") < wf.index("gh workflow run send-newsletter.yml")
+           and 'git add "content/weekly/$DATE.json"' in wf and "git diff --quiet HEAD --" in wf
            and not any("Codex" in ln for ln in wf.splitlines() if "git commit -m" in ln), "codex-fallback.yml 의 안전장치(토큰 없이·키 확인·되돌림·인덱스 비우기·성과표·커밋에 AI 이름 없음)가 빠졌다")
     expect("codex_fallback.py wait-codex" in (ROOT / ".github" / "workflows" / "rewind.yml").read_text(encoding="utf-8"),
            "예비 호가 Codex 제작을 기다리지 않는다")

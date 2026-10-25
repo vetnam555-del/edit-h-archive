@@ -165,6 +165,8 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git reset -q   # 인덱스를 비우고 발행 경로만 담는다
           git add "content/$DATE.json" "$DATE.html" "instagram/$DATE" manifest.json index.html feed.xml sitemap.xml assets/photos automation/headlines
+          # 금요일 주간 특집(RUNBOOK 4-1)을 만들었으면 함께 — 저녁 사슬이 이 원고가 있어야 18:00 게시를 건다
+          [ -f "content/weekly/$DATE.json" ] && git add "content/weekly/$DATE.json" "instagram/$DATE-weekly"
           TITLE=$(python3 -c "import json;c=json.load(open('content/$DATE.json',encoding='utf-8'));print(c.get('title','').replace('**','').replace('==',''))")
           git commit -m "Publish EDIT H $DATE — $TITLE (대체 제작)"
           pushed=""
@@ -251,7 +253,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          git diff --quiet -- automation/learnings.md && { echo "바뀐 것 없음(이미 회고가 있었음)"; exit 0; }
+          git diff --quiet HEAD -- automation/learnings.md && { echo "바뀐 것 없음(이미 회고가 있었음)"; exit 0; }   # 스테이징한 변경도 본다(Codex 리뷰)
           git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
