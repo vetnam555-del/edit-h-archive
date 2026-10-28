@@ -6,7 +6,14 @@
   <atom:link href="https://vetnam555-del.github.io/edit-h-archive/feed.xml" rel="self" type="application/rss+xml"/>
   <description>매일 아침 8시 30분, 확인된 숫자로 읽는 트렌드 뉴스레터</description>
   <language>ko</language>
-  <lastBuildDate>Wed, 28 Oct 2026 08:36:12 +0900</lastBuildDate>
+  <lastBuildDate>Thu, 29 Oct 2026 08:30:00 +0900</lastBuildDate>
+  <item>
+    <title>VOL.128 하이닉스 주당 2만원 배당, 기준일은 11월 30일?</title>
+    <link>https://vetnam555-del.github.io/edit-h-archive/2026-10-29.html</link>
+    <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-10-29.html</guid>
+    <pubDate>Thu, 29 Oct 2026 08:30:00 +0900</pubDate>
+    <description>SK하이닉스 주당 2만원 배당·출생아 26개월 연속 증가·구글·애플 과징금 637억·대신증권 정보 유출·미국 금리 동결 — 오늘의 5가지</description>
+  </item>
   <item>
     <title>VOL.127 놓쳤다면, 다시 볼 만한 5가지</title>
     <link>https://vetnam555-del.github.io/edit-h-archive/2026-10-28.html</link>
@@ -209,13 +216,6 @@
     <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-09-30.html</guid>
     <pubDate>Wed, 30 Sep 2026 08:00:00 +0900</pubDate>
     <description>지난 호 다시 보기 — 추석 끝나자, 10월부터 줄줄이 오른다고? · 짝퉁 판매글, 인스타에서 가장 많이 잡혔다 · AI로 만들었으면, 밝혀 달라 · 공구 시장 4년 새 18배, 세금은 깜깜 · 명문대 졸업생 B학점 이상, 100%에 육박</description>
-  </item>
-  <item>
-    <title>VOL.098 AI가 내 구독을, 알아서 해지해 준다고?</title>
-    <link>https://vetnam555-del.github.io/edit-h-archive/2026-09-29.html</link>
-    <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-09-29.html</guid>
-    <pubDate>Tue, 29 Sep 2026 08:00:00 +0900</pubDate>
-    <description>구독 해지 1.8배·한은 직원 186명 유출·스타벅스 결제액 78%·휘발유 19주 하락·생성형 AI 40.6% — 오늘의 5가지</description>
   </item>
 </channel>
 </rss>

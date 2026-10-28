@@ -1,0 +1,511 @@
+{
+ "fetched_at": "2026-10-29T07:07+09:00",
+ "failed": [],
+ "clusters": [
+  {
+   "section": "경제",
+   "count": 148,
+   "title": "‘역대급 실적’ 낸 SK하이닉스, 주당 2만원 현금배당… 배당 기준일 11월 30일",
+   "press": "여성신문",
+   "lede": "3분기 역대 최대 실적을 낸 SK하이닉스가 28일 주당 2만원의 현금배당과 추가 자사주 매입을 포함해 올해 약 100조원 규모의 주주환원을 추진한다고 밝혔다. SK하이닉스는 이날 2026년 회계연도 주주환원 예상 규",
+   "url": "https://n.news.naver.com/mnews/article/310/0000141222",
+   "cluster": "https://news.naver.com/cluster/c_202610260640_00000114/section/101"
+  },
+  {
+   "section": "사회",
+   "count": 139,
+   "title": "지방선거 147일만에… ‘올공’ 투표지 공개검증",
+   "press": "동아일보",
+   "lede": "중앙선거관리위원회를 둘러싼 각종 의혹을 규명하는 선관위 특검(특별검사 이태한)이 28일 서울 송파구 올림픽공원 핸드볼경기장에 보관된 투표용지 247만 장을 공개 검증했다. 6·3 지방선거가 치러진 지 147일 만이다",
+   "url": "https://n.news.naver.com/mnews/article/020/0003758545",
+   "cluster": "https://news.naver.com/cluster/c_202610181510_00000002/section/102"
+  },
+  {
+   "section": "세계",
+   "count": 106,
+   "title": "네타냐후 '과반' 확보 실패…정권 교체되나",
+   "press": "SBS",
+   "lede": "어제(27일) 치러진 이스라엘 총선에서 네타냐후 총리가 이끄는 여당이 과반 확보에 실패할 가능성이 커졌습니다. 18년 넘게 장기 집권해 온 네타냐후 정권이 무너질 수도 있는 위기에 놓였습니다. 김영아 기자입니다. <",
+   "url": "https://n.news.naver.com/mnews/article/055/0001398889",
+   "cluster": "https://news.naver.com/cluster/c_202610231610_00001112/section/104"
+  },
+  {
+   "section": "IT",
+   "count": 94,
+   "title": "구글·애플에 인앱결제 과징금 637억원…양사 “동의 못 해” [비즈360]",
+   "press": "헤럴드경제",
+   "lede": "방송미디어통신위원회가 특정 인앱결제(앱 내부에서 결제할 수 있도록 구글과 애플이 자체적으로 제공하는 결제방식) 방식 강제와 부당한 앱 심사 지연 등으로 전기통신사업법을 위반한 구글과 애플에 637억원의 과징금을 부과",
+   "url": "https://n.news.naver.com/mnews/article/016/0002715714",
+   "cluster": "https://news.naver.com/cluster/c_202610281640_00000004/section/105"
+  },
+  {
+   "section": "세계",
+   "count": 89,
+   "title": "스페인 중부서 고속열차 충돌로 최소 30명 사망…한국인 6명 경상",
+   "press": "SBS",
+   "lede": "▲ 스페인 열차 충돌 현지시간 28일 오전 스페인 수도 마드리드 남쪽 톨레도 인근에서 고속열차 충돌 사고가 발생해 최소 30명이 사망했습니다. AP와 AFP, 로이터 통신에 따르면 이날 오전 9시쯤 카스티야라만차 광",
+   "url": "https://n.news.naver.com/mnews/article/055/0001398866",
+   "cluster": "https://news.naver.com/cluster/c_202610281900_00000005/section/104"
+  },
+  {
+   "section": "사회",
+   "count": 86,
+   "title": "임이자 \"응급실 압수수색은 경찰 '막무가내 완장질'…감찰해야\"",
+   "press": "머니투데이",
+   "lede": "임이자 국민의힘 정책위의장은 경찰의 압수수색을 받은 아주대병원 소아전문응급의료센터 전문의 7명이 사직 의사를 밝힌 것을 두고 김종철 경찰청장 직무대행을 향해 \"즉각 감찰에 착수하라\"고 비판했다. 임 정책위의장은 28",
+   "url": "https://n.news.naver.com/mnews/article/008/0005433095",
+   "cluster": "https://news.naver.com/cluster/c_202610271720_00000134/section/102"
+  },
+  {
+   "section": "사회",
+   "count": 81,
+   "title": "구로 시신유기 피의자들 \"시체인지 몰랐다\"‥경찰, 구속영장 신청 예정",
+   "press": "MBC",
+   "lede": "서울 구로구에서 발생한 시신유기 사건의 피의자 2명이 경찰 조사에서 \"시체인지 몰랐다\"는 취지로 진술했습니다. 서울 구로경찰서는 시신유기 사건의 두 피의자를 체포해 1차 신문한 결과, 시신을 유기하라고 시킨 혐의를",
+   "url": "https://n.news.naver.com/mnews/article/214/0001531928",
+   "cluster": "https://news.naver.com/cluster/c_202610271620_00000180/section/102"
+  },
+  {
+   "section": "경제",
+   "count": 78,
+   "title": "빗썸·미래에셋 잇단 해킹…청와대, 긴급 대응회의 소집",
+   "press": "서울경제",
+   "lede": "청와대가 28일 가상자산 거래소와 금융투자업계에서 잇따라 발생한 해킹 침해사고에 대응하기 위해 긴급회의를 개최한다. 청와대 국가안보실은 이날 송기호 3차장 주재로 금융위원회 관계자들이 참석하는 긴급 대응회의를 연다.",
+   "url": "https://n.news.naver.com/mnews/article/011/0004676150",
+   "cluster": "https://news.naver.com/cluster/c_202610280950_00000002/section/101"
+  },
+  {
+   "section": "세계",
+   "count": 77,
+   "title": "美 연준, 기준금리 3.75~4.00% 동결…지난달 인상 후 숨 고르기",
+   "press": "조선비즈",
+   "lede": "미국 중앙은행인 연방준비제도(Fed·연준)가 28일(현지 시각) 기준금리를 동결했다. 이에 따라 한국(3.00%)과 미국의 기준금리 격차는 미국 금리 상단을 기준으로 1.00%포인트로 유지됐다. 연준은 이날 연방공개",
+   "url": "https://n.news.naver.com/mnews/article/366/0001201059",
+   "cluster": "https://news.naver.com/cluster/c_202610250100_00000002/section/104"
+  },
+  {
+   "section": "세계",
+   "count": 65,
+   "title": "브라질 대선 패배 보우소나루, 출국금지 뚫고 美 도피",
+   "press": "파이낸셜뉴스",
+   "lede": "브라질 대통령 선거에서 패배한 플라비우 보우소나루 상원의원이 자금세탁 수사로 여권이 무효화되고 출국금지 조치까지 내려진 상황에서 미국으로 도피했다. 도널드 트럼프 미국 행정부가 보우소나루와 가족들의 입국을 지원한 것",
+   "url": "https://n.news.naver.com/mnews/article/014/0005596116",
+   "cluster": "https://news.naver.com/cluster/c_202610120920_00001209/section/104"
+  },
+  {
+   "section": "경제",
+   "count": 62,
+   "title": "HD한국조선해양, 3분기 영업이익 1조4472억원…전년比 37%↑",
+   "press": "더팩트",
+   "lede": "3분기 매출 8조2862억원, 전년比 9%↑ 조선·해양플랜트 수주 호조가 성장 견인 HD한국조선해양이 고부가가치 선박의 매출 확대와 생산성 개선에 힘입어 3분기 수익성을 끌어올렸다. 엔진기계와 해양플랜트 사업의 호조",
+   "url": "https://n.news.naver.com/mnews/article/629/0000546442",
+   "cluster": "https://news.naver.com/cluster/c_202610281340_00000001/section/101"
+  },
+  {
+   "section": "경제",
+   "count": 53,
+   "title": "삼성전기, 3분기 역대 최대 실적…반도체 기판·MLCC 수요 폭발",
+   "press": "한국경제",
+   "lede": "삼성전기가 올 3분기에 역대 최대 매출 및 영업이익을 기록했다. 인공지능(AI) 데이터센터용 적층세라믹커패시터(MLCC)와 AI 반도체 패키지 기판인 플립칩 볼그리드어레이(FC-BGA) 수요 폭발에 힘입은 결과다.",
+   "url": "https://n.news.naver.com/mnews/article/015/0005347677",
+   "cluster": "https://news.naver.com/cluster/c_202610281210_00000001/section/101"
+  },
+  {
+   "section": "생활",
+   "count": 53,
+   "title": "출근길 기온 0도까지 '뚝'…오후부터 곳곳 비 소식[내일날씨]",
+   "press": "아시아경제",
+   "lede": "목요일인 29일은 전국 내륙을 중심으로 일교차가 큰 가운데 오후부터 전국 곳곳에 빗방울이 떨어지겠다. 비는 오후 수도권 북부와 강원 영서 중·북부에서 시작돼 밤에는 수도권과 충청권 등으로 확대되겠다. 기상청에 따르면",
+   "url": "https://n.news.naver.com/mnews/article/277/0005834861",
+   "cluster": "https://news.naver.com/cluster/c_202610281730_00001394/section/103"
+  },
+  {
+   "section": "경제",
+   "count": 49,
+   "title": "코스피, 앤트로픽·하닉 훈풍에 6.6%↑…10거래일만 6천피 탈환(종합)",
+   "press": "연합뉴스",
+   "lede": "앤트로픽 IPO 호재로 투심 개선…하이닉스, 역대급 실적·추가 주주환원 이틀 연속 매수 사이드카 발동…외국인·기관, 이틀째 동반 '매수' 삼전닉스 9~10%대 급등…코스피 상승률, 3개월만에 최대 코스닥도 3.6%",
+   "url": "https://n.news.naver.com/mnews/article/001/0016406914",
+   "cluster": "https://news.naver.com/cluster/c_202610281550_00000025/section/101"
+  },
+  {
+   "section": "경제",
+   "count": 46,
+   "title": "경제·과학기술 정책 ‘한몸’…7대 미래기술 내년 투자",
+   "press": "디지털타임스",
+   "lede": "정부가 경제·산업정책과 과학기술정책을 연계해 미래 성장동력 확보에 나선다. 소형모듈원자로(SMR)와 양자, 우주항공 등 7대 미래기술의 추진전략을 연내 마련하고 내년부터 투자와 실증, 사업화를 본격 추진한다. 이형일",
+   "url": "https://n.news.naver.com/mnews/article/029/0003055732",
+   "cluster": "https://news.naver.com/cluster/c_202610281010_00000010/section/101"
+  },
+  {
+   "section": "사회",
+   "count": 43,
+   "title": "역삼동 연쇄 방화범 신상 공개…다음 달 3일부터 한 달간",
+   "press": "연합뉴스TV",
+   "lede": "서울 강남구 역삼동 건물 두 곳에 불을 질러 19명을 다치게 한 70대 남성의 신상이 공개됩니다. 서울경찰청은 오늘(28일) 오후 신상정보공개 심의위원회를 열어, 다음달 3일 오전 9시부터 한 달 동안 홈페이지에 피",
+   "url": "https://n.news.naver.com/mnews/article/422/0000920478",
+   "cluster": "https://news.naver.com/cluster/c_202610201840_00000002/section/102"
+  },
+  {
+   "section": "사회",
+   "count": 39,
+   "title": "'완공은 코앞인데…' 위례선 트램 내년 개통?",
+   "press": "비즈워치",
+   "lede": "올해 12월 개통을 목표로 했던 위례선 노면전차(트램) 개통이 내년으로 밀렸다. 관계기관 간 협의가 최근 마무리된 상황에서 교통시설안전진단 및 교통안전심의 등 개통 전 필수 절차 소요 기간을 고려할 때 연내 개통은",
+   "url": "https://n.news.naver.com/mnews/article/648/0000052042",
+   "cluster": "https://news.naver.com/cluster/c_202610281010_00000011/section/102"
+  },
+  {
+   "section": "사회",
+   "count": 36,
+   "title": "'얼굴 화상' 검색 후 '끓는 물' 부었는데…감형 받고도 \"더 줄여달라\" 상고",
+   "press": "SBS",
+   "lede": "잠든 태국인 아내의 얼굴에 끓는 물을 부어 2도 화상을 입힌 40대 남성이 항소심에서 감형받았습니다. 의정부지법은 특수상해 혐의로 구속기소된 A씨에게 징역 3년 6개월을 선고한 원심을 깨고 징역 3년을 선고했습니다.",
+   "url": "https://n.news.naver.com/mnews/article/055/0001398825",
+   "cluster": "https://news.naver.com/cluster/c_202610280940_00000166/section/102"
+  },
+  {
+   "section": "세계",
+   "count": 33,
+   "title": "“한국, 우리와 뜻 같지 않아” 러 밀착 우려하는 유럽…그래도 “대체 불가” [배틀라인]",
+   "press": "서울신문",
+   "lede": "● 파이낸셜타임스(FT)는 한국의 북극항로 운항과 대러시아 석유제품 운송, 한러 비공개 접촉 등을 계기로 서울 주재 유럽 외교관들 사이에서 한국의 러시아 밀착에 대한 우려와 외교적 신뢰성에 대한 의문이 커지고 있다고",
+   "url": "https://n.news.naver.com/mnews/article/081/0003693395",
+   "cluster": "https://news.naver.com/cluster/c_202610280650_00000581/section/104"
+  },
+  {
+   "section": "사회",
+   "count": 31,
+   "title": "'실종신고 허위 종결' 부 경장 첫 재판…\"혐의 인정\"",
+   "press": "뉴시스",
+   "lede": "실종신고를 받고도 제대로 수사하지 않고 허위로 종결 처리해 실종자를 숨지게 한 혐의 등으로 구속 기소된 전직 경찰관이 첫 재판에서 혐의를 모두 인정했다. 제주지법 형사3단독 김희진 부장판사는 28일 오후 직무유기,",
+   "url": "https://n.news.naver.com/mnews/article/003/0014284910",
+   "cluster": "https://news.naver.com/cluster/c_202610281010_00000690/section/102"
+  },
+  {
+   "section": "IT",
+   "count": 30,
+   "title": "\"삼성보다 7년 늦었는데 왜 이래?\"…애플 첫 '접는 아이폰' 왜 이런 문제가[AFTER 8NEWS]",
+   "press": "SBS",
+   "lede": "00:00 출시하자마자 \"화면 파손\" 왜 이런 일이? 01:26 중요한 건 '힌지'? 02:49 아이폰에 무슨 문제가? 04:49 \"제품 결함 인정..무상교체\" 꼬리 내린 애플, 왜? 06:22 '결함 논란' 애플에",
+   "url": "https://n.news.naver.com/mnews/article/055/0001398860",
+   "cluster": "https://news.naver.com/cluster/c_202610230830_00000001/section/105"
+  },
+  {
+   "section": "경제",
+   "count": 29,
+   "title": "신한금융, 차기 신한·제주은행장 1차 후보군 선정…12월 초 최종 추천",
+   "press": "조선비즈",
+   "lede": "신한지주가 올해 말 임기가 만료되는 신한은행장과 제주은행장의 후임 인선 절차에 착수했다. 신한금융지주는 28일 자회사 최고경영자 후보추천위원회(자경위)를 열고 신한은행장과 제주은행장 선임을 위한 1차 압축 후보군을",
+   "url": "https://n.news.naver.com/mnews/article/366/0001200823",
+   "cluster": "https://news.naver.com/cluster/c_202610280920_00000012/section/101"
+  },
+  {
+   "section": "경제",
+   "count": 29,
+   "title": "수출 호황에 기업 달러예금 두 달째 1000억 달러 상회",
+   "press": "뉴시스",
+   "lede": "수출 호황이 이어지며 기업 달러예금이 두 달 연속 1000억 달러를 웃돌았다. 28일 한국은행이 발표한 '9월 거주자 외화예금 동향'에 따르면 거주자 외화예금은 1547억1000만 달러다. 전월(1406억2000만",
+   "url": "https://n.news.naver.com/mnews/article/003/0014284142",
+   "cluster": "https://news.naver.com/cluster/c_202610281210_00000008/section/101"
+  },
+  {
+   "section": "사회",
+   "count": 28,
+   "title": "\"지역·필수 의료 강화 위해 건보 재정 2조7천억 우선 집행\"",
+   "press": "YTN",
+   "lede": "정부가 지역·필수의료 인프라 강화를 위해 투입하기로 한 건강보험 재정 3조6천억 원 중 2조7천억 원을 내년 1월부터 우선 집행합니다. 내년 1월부터 분만과 신생아 중환자 치료 분야를 시작으로 비수도권과 수도권 내",
+   "url": "https://n.news.naver.com/mnews/article/052/0002425061",
+   "cluster": "https://news.naver.com/cluster/c_202610281650_00000007/section/102"
+  },
+  {
+   "section": "사회",
+   "count": 28,
+   "title": "새만금 매립 15년 앞당긴다는데…“희망고문 시즌2” 반발, 왜",
+   "press": "중앙일보",
+   "lede": "한성숙 총리, 기본계획 변경안 심의·확정 새만금 개발 완료 목표가 2050년에서 2035년으로 15년 앞당겨졌다. 민간 투자 유치에 의존하던 개발 방식도 공공 주도로 바뀐다. 현대차그룹의 9조원 규모 투자를 발판으로",
+   "url": "https://n.news.naver.com/mnews/article/025/0003561331",
+   "cluster": "https://news.naver.com/cluster/c_202610231100_00001954/section/102"
+  },
+  {
+   "section": "생활",
+   "count": 27,
+   "title": "K관광 3000만 시대로… 내년 예산 19% 증액",
+   "press": "파이낸셜뉴스",
+   "lede": "정부가 외국인 관광객 3000만명 시대를 열기 위해 내년 관광 분야 예산을 19% 늘리고 지방공항을 중심으로 지역관광 활성화에 나선다. 최휘영 문화체육관광부 장관은 28일 서울 종로구 아트코리아랩에서 관광 분야 기자",
+   "url": "https://n.news.naver.com/mnews/article/014/0005596098",
+   "cluster": "https://news.naver.com/cluster/c_202610281210_00000021/section/103"
+  },
+  {
+   "section": "사회",
+   "count": 26,
+   "title": "현실에서는 더 하네…막장 부모, 협박에 욕하고 학교까지 찾아가더니 결국",
+   "press": "매일경제",
+   "lede": "강원지역 한 초등학교에서 교사의 교육활동을 반복적으로 침해한 혐의를 받는 학부모가 결국 경찰에 고발됐다. 28일 강삼영 강원교육감은 학부모 A씨를 ‘정보통신망법상 허위 사실 적시 명예훼손(모욕) 및 협박, 건조물침입",
+   "url": "https://n.news.naver.com/mnews/article/009/0005755152",
+   "cluster": "https://news.naver.com/cluster/c_202610281040_00000002/section/102"
+  },
+  {
+   "section": "세계",
+   "count": 22,
+   "title": "젤렌스키 \"美·러·우크라 3자 종전 협상, 11월 10일 열릴 수도\"",
+   "press": "뉴스1",
+   "lede": "유철종 전문위원 = 볼로디미르 젤렌스키 우크라이나 대통령이 우크라이나 전쟁 종식을 위한 미국·러시아·우크라이나 3자 실무협상이 오는 11월 10일 아랍에미리트(UAE) 아부다비에서 열릴 수 있다고 28일(현지시간)",
+   "url": "https://n.news.naver.com/mnews/article/421/0009256567",
+   "cluster": "https://news.naver.com/cluster/c_202610281550_00000114/section/104"
+  },
+  {
+   "section": "IT",
+   "count": 20,
+   "title": "SKT 해킹사고 1년 만에… 해지율 1.6→0.8% ‘원상 회복’",
+   "press": "국민일보",
+   "lede": "지난해 4월 사이버 침해 사고로 위기를 맞았던 SK텔레콤이 1년여 만에 가입자와 해지율, 영업이익 등 주요 경영 지표를 사고 이전 수준으로 되돌렸다. 위약금 면제와 1조2000억원 규모 보상·보안 투자 등 적극적인",
+   "url": "https://n.news.naver.com/mnews/article/005/0001881559",
+   "cluster": "https://news.naver.com/cluster/c_202610281140_00000273/section/105"
+  },
+  {
+   "section": "IT",
+   "count": 20,
+   "title": "LGU+·한국이콜랩, AI 데이터센터 액체냉각 운영표준 개발 맞손",
+   "press": "헤럴드경제",
+   "lede": "AIDC 냉각시스템 운영 최적화 MOU 체결 평촌2센터 내 실증으로 유체 품질관리 실증 AI 유지보수 체계 구축도…인프라 경쟁력 강화 [헤럴드경제=차민주 기자] LG유플러스가 글로벌 수처리 설루션 기업 한국이콜랩과",
+   "url": "https://n.news.naver.com/mnews/article/016/0002715275",
+   "cluster": "https://news.naver.com/cluster/c_202610271000_00001263/section/105"
+  },
+  {
+   "section": "경제",
+   "count": 19,
+   "title": "반도체 초호황...제조업 기업심리 52개월만에 최고 [Pick코노미]",
+   "press": "서울경제",
+   "lede": "기업들의 체감 경기가 반도체 등 주력 산업 호조로 4년 여 만에 최고 수준으로 올랐다. 한국은행이 29일 발표한 ‘10월 기업경기조사 및 경제심리지수’에 따르면 이달 전산업 기업심리지수(CBSI)는 104.2로 전월",
+   "url": "https://n.news.naver.com/mnews/article/011/0004676326",
+   "cluster": "https://news.naver.com/cluster/c_202610290610_00000007/section/101"
+  },
+  {
+   "section": "생활",
+   "count": 18,
+   "title": "종일 쌀쌀해, 내일도 춥다...내일 서쪽 중심 가을비[날씨]",
+   "press": "YTN",
+   "lede": "오늘은 종일 찬바람이 불면서 쌀쌀했습니다. 내일도 기온이 예년 수준을 밑도는 가운데, 서쪽을 중심으로는 비가 내리겠습니다. 자세한 날씨 기상캐스터 연결해 알아봅니다. 이혜민 캐스터! [캐스터] 네, 광화문광장에 나와",
+   "url": "https://n.news.naver.com/mnews/article/052/0002424994",
+   "cluster": "https://news.naver.com/cluster/c_202610281210_00000740/section/103"
+  },
+  {
+   "section": "IT",
+   "count": 17,
+   "title": "M6 심은 맥북 프로·아이맥 출시…AI·그래픽 성능 끌어올렸다",
+   "press": "뉴시스",
+   "lede": "애플이 차세대 M6 칩을 탑재한 신형 맥북 프로 14와 아이맥을 동시에 공개했다. 두 제품 모두 중앙처리장치(CPU)·그래픽처리장치(GPU) 성능과 온디바이스 인공지능(AI) 처리 능력을 끌어올리고 와이파이7·블루투",
+   "url": "https://n.news.naver.com/mnews/article/003/0014283051",
+   "cluster": "https://news.naver.com/cluster/c_202610272320_00000003/section/105"
+  },
+  {
+   "section": "세계",
+   "count": 15,
+   "title": "“알래스카에서는 건설 비용 더 들어”…LNG사업 현지전문가 조언은? [특파원 현장]",
+   "press": "KBS",
+   "lede": "알래스카가 미국 중간 상원의원 선거의 핵심 경합지로 떠올랐습니다. 공화당의 텃밭이었던 곳에 민주당 후보의 선전이 이어지면서 트럼프 대통령과 밴스 부통령이 잇따라 지원에 나서기도 했습니다. 트럼프 대통령은 특히 알래스",
+   "url": "https://n.news.naver.com/mnews/article/056/0012282606",
+   "cluster": "https://news.naver.com/cluster/c_202610280720_00000011/section/104"
+  },
+  {
+   "section": "생활",
+   "count": 14,
+   "title": "튀르키예서 돋보인 ‘K-고고학’…3D 디지털 실측 등 첨단 과학 동원",
+   "press": "헤럴드경제",
+   "lede": "한국 고고학 연구진이 튀르키예 중부 아나톨리아 퀴테페 유적 조사에서 결실을 거두고 있다. 실크로드 인접지와 북방 지역 위주였던 기존 국외 조사를 고대 문명지로 확장한 가운데, 정밀 지하 물리탐사와 3D 디지털 실측,",
+   "url": "https://n.news.naver.com/mnews/article/016/0002715750",
+   "cluster": "https://news.naver.com/cluster/c_202610290010_00000003/section/103"
+  },
+  {
+   "section": "세계",
+   "count": 14,
+   "title": "43세에 재산 134조 원…틱톡 모회사 창업자 '중국 갑부 1위'",
+   "press": "연합뉴스TV",
+   "lede": "인공지능(AI) 붐에 힘입어 올해 중국 갑부 리스트에 테크 기업 경영자들이 대거 이름을 올린 것으로 나타났습니다. 중국 기업 조사 기관인 후룬연구원이 현지시간 27일 발표한 '2026년 후룬 부호 순위'에 따르면 바",
+   "url": "https://n.news.naver.com/mnews/article/422/0000920382",
+   "cluster": "https://news.naver.com/cluster/c_202610280540_00000636/section/104"
+  },
+  {
+   "section": "세계",
+   "count": 13,
+   "title": "SK하이닉스 ADR 13% '급등' 실적에 나스닥도 환호…美기술주 훈풍 확산",
+   "press": "한국경제TV",
+   "lede": "미국 연방준비제도(Fed·연준)가 시장의 예상대로 기준금리를 동결한 28일(현지시간) 뉴욕증시가 일제히 상승했다. 이날 뉴욕증권거래소에서 다우존스30산업평균지수는 전 거래일보다 97.53포인트(0.19%) 상승한 5",
+   "url": "https://n.news.naver.com/mnews/article/215/0001270880",
+   "cluster": "https://news.naver.com/cluster/c_202610290530_00000001/section/104"
+  },
+  {
+   "section": "IT",
+   "count": 12,
+   "title": "깃허브 \"AI 작업 배분까지 자동화…개발자, 목표·결과 검토에 집중\"",
+   "press": "지디넷코리아",
+   "lede": "그동안 개발자는 여러 인공지능(AI) 에이전트에 작업을 맡기고 진행 상황까지 챙겨야 했습니다. 이제는 이런 조율까지 AI가 합니다. 개발자는 작업 목표 설정과 결과 검토에만 집중하면 됩니다.\" 제이 파리크 마이크로",
+   "url": "https://n.news.naver.com/mnews/article/092/0002442853",
+   "cluster": "https://news.naver.com/cluster/c_202610290120_00000001/section/105"
+  },
+  {
+   "section": "IT",
+   "count": 11,
+   "title": "유튜브 숏폼 드라마 상반기 65억회…한국 시청시간 2배로",
+   "press": "연합뉴스",
+   "lede": "글로벌 시청시간 전년 동기 대비 50%↑…한국은 최근 1년 조회수 130%↑ 시즌·에피소드 묶는 '쇼츠 시리즈' 도입…연속 재생 지원 유튜브에서 짧은 호흡으로 이야기를 전개하는 '숏폼 드라마'가 전 세계적인 인기를",
+   "url": "https://n.news.naver.com/mnews/article/001/0016405624",
+   "cluster": "https://news.naver.com/cluster/c_202610281110_00000010/section/105"
+  },
+  {
+   "section": "경제",
+   "count": 8,
+   "title": "“올해 3분기 등록 ABS 발행 12.5조…부동산 PF 급감에 전년비 5.7%↓”",
+   "press": "이데일리",
+   "lede": "올 3분기 자산유동화증권(ABS) 발행액이 부동산 프로젝트파이낸싱(PF) 기초 ABS 발행 급감 등의 영향으로 전년 동기 대비 5% 넘게 줄어든 것으로 나타났다. 반면 카드채권을 기초로 한 ABS 발행은 2배 이상",
+   "url": "https://n.news.naver.com/mnews/article/018/0006398395",
+   "cluster": "https://news.naver.com/cluster/c_202610290610_00000012/section/101"
+  },
+  {
+   "section": "생활",
+   "count": 8,
+   "title": "\"우리가 부흥의 파도를 타야 한다\"…CGI 50주년 세계교회성장대회 개막",
+   "press": "노컷뉴스",
+   "lede": "전 세계 오순절 성령운동 지도자들이 28일 각 국의 교회 성장에 대한 경험을 나누기위해 여의도순복음교회에 모였다. 올해로 창립 50주년을 맞은 국제교회성장연구원(Church Growth International, 대",
+   "url": "https://n.news.naver.com/mnews/article/079/0004203941",
+   "cluster": "https://news.naver.com/cluster/c_202610251320_00000027/section/103"
+  },
+  {
+   "section": "생활",
+   "count": 7,
+   "title": "오늘도 초겨울 추위…오후부터 중부에서 전국으로 비[날씨클릭]",
+   "press": "연합뉴스TV",
+   "lede": "오늘도 예년 기온을 밑돌며 초겨울 추위가 나타나겠습니다. 오후부터는 중부 지방을 시작으로 비가 점차 확대되겠는데요. 자세한 날씨 기상캐스터와 함께 알아보겠습니다. 양윤진 캐스터, 오늘 아침도 두꺼운 옷을 입어야 할까",
+   "url": "https://n.news.naver.com/mnews/article/422/0000920603",
+   "cluster": "https://news.naver.com/cluster/c_202610282130_00000081/section/103"
+  },
+  {
+   "section": "생활",
+   "count": 7,
+   "title": "\"강원을 특별하게, 도민을 신명나게\"…제31회 강원민속예술축제 개막",
+   "press": "강원도민일보",
+   "lede": "강원 사람들의 세월이 담긴 노래와 놀이가 춘천에서 다시 펼쳐졌다. 강원도와 KBS춘천방송총국은 28일 춘천 송암스포츠타운에서 '강원을 특별하게, 도민을 신명나게'를 주제로 제31회 강원민속예술축제를 개최했다. 춘천시",
+   "url": "https://n.news.naver.com/mnews/article/654/0000207948",
+   "cluster": "https://news.naver.com/cluster/c_202610271800_00000702/section/103"
+  },
+  {
+   "section": "IT",
+   "count": 6,
+   "title": "보고 듣고 반응하는 가상세계…이루어질 ‘지니’",
+   "press": "경향신문",
+   "lede": "구글 딥마인드 새 ‘지니 4’ 공개 엔비디아, 로봇 가상훈련 강화 크래프톤 등 국내서도 개발 열중 글 몇줄만 입력하면 눈 덮인 산길이 눈앞에 펼쳐진다. 그 길을 달리다 날씨를 바꿀 수도 있고, 마주친 사람과 대화를",
+   "url": "https://n.news.naver.com/mnews/article/032/0003479257",
+   "cluster": "https://news.naver.com/cluster/c_202610281020_00000325/section/105"
+  },
+  {
+   "section": "세계",
+   "count": 5,
+   "title": "EU, 캐나다 '준회원국' 지위 두고 분열…독일 등 4개국 제동",
+   "press": "뉴시스",
+   "lede": "유럽연합(EU) 회원국들이 27일(현지시간) 캐나다에 '준회원국(associate membership)' 지위를 부여할지를 두고 분열했다. 폴리티코 유럽과 유로뉴스에 따르면 독일과 프랑스 등 4개 회원국은 오는 29",
+   "url": "https://n.news.naver.com/mnews/article/003/0014285189",
+   "cluster": "https://news.naver.com/cluster/c_202610280900_00001049/section/104"
+  },
+  {
+   "section": "생활",
+   "count": 4,
+   "title": "애증의 바그너… 한계 느낄 때마다 음악이 다시 일으켜요",
+   "press": "파이낸셜뉴스",
+   "lede": "연습 시작할 때는 건강했는데 몇 주 지나면서 점점 피폐해졌죠. 그런데 무대서 오케스트라 음악을 들으면 '그래, 이것 때문에 하는 거지'라는 생각이 들어요.\" 바그너 전문 성악가로 잘 알려진 베이스바리톤 사무엘 윤은",
+   "url": "https://n.news.naver.com/mnews/article/014/0005596055",
+   "cluster": "https://news.naver.com/cluster/c_202610271140_00000949/section/103"
+  }
+ ],
+ "popular": [
+  {
+   "title": "올림픽공원 투표지 검증 끝나자…국힘 측 이송 막고 ‘밤샘 농성’ 돌입",
+   "url": "https://n.news.naver.com/article/009/0005755634",
+   "presses": [
+    "매일경제 1위",
+    "서울경제 5위"
+   ]
+  },
+  {
+   "title": "애플, 첫 터치스크린 맥북 공개…하드웨어 전략 변화 신호",
+   "url": "https://n.news.naver.com/article/293/0000092324",
+   "presses": [
+    "블로터 1위",
+    "SBS Biz 2위"
+   ]
+  },
+  {
+   "title": "LG전자, TV 적자 3000억 털었다…다음 승부처는 'AI·로봇'",
+   "url": "https://n.news.naver.com/article/648/0000052043",
+   "presses": [
+    "비즈워치 1위",
+    "조선비즈 4위"
+   ]
+  },
+  {
+   "title": "美 증시 3대 지수 상승…AI 인프라주 버티브 16.5%·오라클 10.6% 급등",
+   "url": "https://n.news.naver.com/article/138/0002246410",
+   "presses": [
+    "디지털데일리 1위",
+    "이데일리 4위"
+   ]
+  },
+  {
+   "title": "헤이지니 \"연봉 25% 인상\" 해명에...전 직원 원천징수영수증 공개",
+   "url": "https://n.news.naver.com/article/008/0005433280",
+   "presses": [
+    "머니투데이 3위",
+    "한국경제 4위"
+   ]
+  },
+  {
+   "title": "\"나이키·아디다스 다 지겨워\"…'이 신발' 뜨자마자 8조 터졌다",
+   "url": "https://n.news.naver.com/article/015/0005347820",
+   "presses": [
+    "한국경제 1위"
+   ]
+  },
+  {
+   "title": "\"이재용 재산의 3배라니\"…43세에 134조 거머쥔 중국 최고 부자의 정체",
+   "url": "https://n.news.naver.com/article/277/0005834857",
+   "presses": [
+    "아시아경제 1위"
+   ]
+  },
+  {
+   "title": "\"아기 맛있는 거 사줘\"...극악의 1호선 출근길, 임산부 울린 할머니",
+   "url": "https://n.news.naver.com/article/008/0005433275",
+   "presses": [
+    "머니투데이 1위"
+   ]
+  },
+  {
+   "title": "\"조상 땅 있다길래 구청 갔더니\"…65세 남성, 5만7000평 찾았다",
+   "url": "https://n.news.naver.com/article/014/0005596134",
+   "presses": [
+    "파이낸셜뉴스 1위"
+   ]
+  },
+  {
+   "title": "“드디어 때가 왔다” 10% 급등으로도 부족…‘300만닉스’ 진짜 가나 [투자360]",
+   "url": "https://n.news.naver.com/article/016/0002715722",
+   "presses": [
+    "헤럴드경제 1위"
+   ]
+  },
+  {
+   "title": "“15만원이 5만원 됐다”…주가 66% 폭락한 이 종목, 바닥일까[종목e슈]",
+   "url": "https://n.news.naver.com/article/018/0006398352",
+   "presses": [
+    "이데일리 1위"
+   ]
+  },
+  {
+   "title": "전세 갱신했더니 월세 생겼다… 매달 38만원 더 낸다",
+   "url": "https://n.news.naver.com/article/366/0001201066",
+   "presses": [
+    "조선비즈 1위"
+   ]
+  }
+ ]
+}
