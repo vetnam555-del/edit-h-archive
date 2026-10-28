@@ -1,0 +1,658 @@
+{
+ "collected_at": "2026-10-28T21:30+09:00",
+ "issues": {
+  "2026-10-28": {
+   "title": "놓쳤다면, 다시 볼 만한 5가지",
+   "format": 2,
+   "pick_tag": "경기 버스 파업",
+   "title_style": "숫자형",
+   "cover": "사진",
+   "weekday": "수",
+   "poll": false,
+   "source_mode": "rewind",
+   "audience": "전체",
+   "series": "없음",
+   "reel_style": null,
+   "reel_seconds": null,
+   "reel_slot": null,
+   "reel_feed": null,
+   "reel_hook": null
+  },
+  "2026-10-27": {
+   "title": "놓쳤다면, 다시 볼 만한 5가지",
+   "format": 2,
+   "pick_tag": "쿠팡 감독",
+   "title_style": "숫자형",
+   "cover": "사진",
+   "weekday": "화",
+   "poll": false,
+   "source_mode": "rewind",
+   "audience": "전체",
+   "series": "없음",
+   "reel_style": null,
+   "reel_seconds": null,
+   "reel_slot": null,
+   "reel_feed": null,
+   "reel_hook": null
+  },
+  "2026-10-26": {
+   "title": "놓쳤다면, 다시 볼 만한 5가지",
+   "format": 2,
+   "pick_tag": "국가인구전략",
+   "title_style": "숫자형",
+   "cover": "사진",
+   "weekday": "월",
+   "poll": false,
+   "source_mode": "rewind",
+   "audience": "전체",
+   "series": "없음",
+   "reel_style": null,
+   "reel_seconds": null,
+   "reel_slot": null,
+   "reel_feed": null,
+   "reel_hook": null
+  },
+  "2026-10-25": {
+   "title": "대한항공·아시아나, 예약번호까지 털렸다고?",
+   "format": 2,
+   "pick_tag": "항공사 정보 유출",
+   "title_style": "질문형",
+   "cover": "핵심어",
+   "weekday": "일",
+   "poll": false,
+   "source_mode": "fallback",
+   "audience": "2030직장인",
+   "series": "없음",
+   "reel_style": "세로",
+   "reel_seconds": 7.9,
+   "reel_slot": "저녁",
+   "reel_feed": false,
+   "reel_hook": true,
+   "src": {
+    "main": 5,
+    "primary": 0,
+    "pick_primary": false,
+    "outlets": 14,
+    "wire": 0,
+    "solo": 0
+   },
+   "big": [
+    6,
+    10,
+    false
+   ]
+  },
+  "2026-10-24": {
+   "title": "경기 버스 4130대, 30일 첫차부터 멈춘다고?",
+   "format": 2,
+   "pick_tag": "경기 버스 파업",
+   "title_style": "질문형",
+   "cover": "핵심어",
+   "weekday": "토",
+   "poll": false,
+   "source_mode": "fallback",
+   "audience": "2030직장인",
+   "series": "없음",
+   "reel_style": "세로",
+   "reel_seconds": 7.9,
+   "reel_slot": "저녁",
+   "reel_feed": false,
+   "reel_hook": true,
+   "src": {
+    "main": 5,
+    "primary": 0,
+    "pick_primary": false,
+    "outlets": 12,
+    "wire": 7,
+    "solo": 0
+   },
+   "big": [
+    3,
+    21,
+    false
+   ]
+  },
+  "2026-10-23": {
+   "title": "쿠팡 105곳 감독, 법 위반 206건이라고?",
+   "format": 2,
+   "pick_tag": "쿠팡 감독",
+   "title_style": "질문형",
+   "cover": "핵심어",
+   "weekday": "금",
+   "poll": false,
+   "source_mode": "anjang",
+   "audience": "2030직장인",
+   "series": "없음",
+   "reel_style": "세로",
+   "reel_seconds": 7.9,
+   "reel_slot": "저녁",
+   "reel_feed": false,
+   "reel_hook": true,
+   "src": {
+    "main": 5,
+    "primary": 2,
+    "pick_primary": true,
+    "outlets": 15,
+    "wire": 0,
+    "solo": 0
+   }
+  },
+  "2026-10-22": {
+   "title": "부모님 연말정산, 26세 자녀까지 공제라고?",
+   "format": 2,
+   "pick_tag": "자녀공제",
+   "title_style": "질문형",
+   "cover": "사진",
+   "weekday": "목",
+   "poll": false,
+   "source_mode": "anjang",
+   "audience": "2030직장인",
+   "series": "없음",
+   "reel_style": "세로",
+   "reel_seconds": 7.9,
+   "reel_slot": "저녁",
+   "reel_feed": false,
+   "reel_hook": true,
+   "src": {
+    "main": 5,
+    "primary": 0,
+    "pick_primary": false,
+    "outlets": 10,
+    "wire": 20,
+    "solo": 0
+   }
+  },
+  "2026-10-21": {
+   "title": "놓쳤다면, 다시 볼 만한 5가지",
+   "format": 2,
+   "pick_tag": "스타벅스 프리퀀시",
+   "title_style": "숫자형",
+   "cover": "사진",
+   "weekday": "수",
+   "poll": false,
+   "source_mode": "rewind",
+   "audience": "전체",
+   "series": "없음",
+   "reel_style": null,
+   "reel_seconds": null,
+   "reel_slot": null,
+   "reel_feed": null,
+   "reel_hook": null
+  },
+  "2026-10-20": {
+   "title": "할리스 회원정보 276만 건, 비밀번호까지 털렸다고?",
+   "format": 2,
+   "pick_tag": "개인정보 유출",
+   "title_style": "질문형",
+   "cover": "사진",
+   "weekday": "화",
+   "poll": false,
+   "source_mode": "anjang",
+   "audience": "2030직장인",
+   "series": "없음",
+   "reel_style": "세로",
+   "reel_seconds": 7.9,
+   "reel_slot": "저녁",
+   "reel_feed": false,
+   "reel_hook": true,
+   "src": {
+    "main": 5,
+    "primary": 0,
+    "pick_primary": false,
+    "outlets": 16,
+    "wire": 6,
+    "solo": 0
+   }
+  },
+  "2026-10-19": {
+   "title": "4% 예금 1000만원, 1년 이자 40만원이라고?",
+   "format": 2,
+   "pick_tag": "예금 금리",
+   "title_style": "질문형",
+   "cover": "핵심어",
+   "weekday": "월",
+   "poll": false,
+   "source_mode": "mixed",
+   "audience": "2030직장인",
+   "series": "없음",
+   "reel_style": "세로",
+   "reel_seconds": 7.9,
+   "reel_slot": "저녁",
+   "reel_feed": false,
+   "reel_hook": true,
+   "src": {
+    "main": 5,
+    "primary": 0,
+    "pick_primary": false,
+    "outlets": 12,
+    "wire": 19,
+    "solo": 1
+   }
+  },
+  "2026-10-18": {
+   "title": "2%대에 빌린 3억, 월 29만원 더 낸다고?",
+   "format": 2,
+   "pick_tag": "주담대 금리",
+   "title_style": "질문형",
+   "cover": "사진",
+   "weekday": "일",
+   "poll": false,
+   "source_mode": "fallback",
+   "audience": "2030직장인",
+   "series": "없음",
+   "reel_style": "세로",
+   "reel_seconds": 7.9,
+   "reel_slot": "저녁",
+   "reel_feed": false,
+   "reel_hook": true,
+   "src": {
+    "main": 5,
+    "primary": 0,
+    "pick_primary": false,
+    "outlets": 12,
+    "wire": 24,
+    "solo": 0
+   }
+  },
+  "2026-10-17": {
+   "title": "코스피 18.8% 빠질 때, 개미는 7조 샀다고?",
+   "format": 2,
+   "pick_tag": "코스피 급락",
+   "title_style": "질문형",
+   "cover": "사진",
+   "weekday": "토",
+   "poll": false,
+   "source_mode": "fallback",
+   "audience": "2030직장인",
+   "series": "없음",
+   "reel_style": "세로",
+   "reel_seconds": 7.9,
+   "reel_slot": "저녁",
+   "reel_feed": false,
+   "reel_hook": true,
+   "src": {
+    "main": 5,
+    "primary": 0,
+    "pick_primary": false,
+    "outlets": 13,
+    "wire": 20,
+    "solo": 0
+   }
+  },
+  "2026-10-16": {
+   "title": "커피 17잔이면, 50유로 스피커라고?",
+   "format": 2,
+   "pick_tag": "스타벅스 프리퀀시",
+   "title_style": "질문형",
+   "cover": "사진",
+   "weekday": "금",
+   "poll": false,
+   "source_mode": "anjang",
+   "audience": "2030직장인",
+   "series": "없음",
+   "reel_style": "세로",
+   "reel_seconds": 7.9,
+   "reel_slot": "저녁",
+   "reel_feed": true,
+   "reel_hook": true,
+   "src": {
+    "main": 5,
+    "primary": 0,
+    "pick_primary": false,
+    "outlets": 11,
+    "wire": 25,
+    "solo": 0
+   }
+  },
+  "2026-10-15": {
+   "title": "첫째 낳으면 1000만원, 결혼 페널티도 없앤다고?",
+   "format": 2,
+   "pick_tag": "국가인구전략",
+   "title_style": "질문형",
+   "cover": "사진",
+   "weekday": "목",
+   "poll": false,
+   "source_mode": "fallback",
+   "audience": "2030직장인",
+   "series": "없음",
+   "reel_style": "세로",
+   "reel_seconds": 7.9,
+   "reel_slot": "저녁",
+   "reel_feed": true,
+   "reel_hook": true,
+   "src": {
+    "main": 5,
+    "primary": 0,
+    "pick_primary": false,
+    "outlets": 11,
+    "wire": 0,
+    "solo": 0
+   }
+  }
+ },
+ "instagram": {
+  "followers": 157,
+  "media": 110,
+  "insights": true,
+  "posts": {
+   "2026-10-15": {
+    "likes": 2,
+    "comments": 0,
+    "reach": 17,
+    "saved": 0,
+    "shares": 0,
+    "views": 45,
+    "profile_visits": 0,
+    "follows": 0,
+    "reel": {
+     "likes": 1,
+     "comments": 0,
+     "reach": 30,
+     "saved": 0,
+     "shares": 0,
+     "views": 37,
+     "seconds": 7.9,
+     "avg_watch_s": 2.4
+    }
+   },
+   "2026-10-16": {
+    "likes": 6,
+    "comments": 0,
+    "reach": 25,
+    "saved": 0,
+    "shares": 0,
+    "views": 69,
+    "profile_visits": 0,
+    "follows": 0,
+    "reel": {
+     "likes": 0,
+     "comments": 0,
+     "reach": 94,
+     "saved": 0,
+     "shares": 0,
+     "views": 106,
+     "seconds": 7.9,
+     "avg_watch_s": 1.1
+    }
+   },
+   "2026-10-17": {
+    "likes": 1,
+    "comments": 0,
+    "reach": 15,
+    "saved": 0,
+    "shares": 0,
+    "views": 51,
+    "profile_visits": 0,
+    "follows": 0,
+    "reel": {
+     "likes": 0,
+     "comments": 0,
+     "reach": 148,
+     "saved": 0,
+     "shares": 0,
+     "views": 167,
+     "seconds": 7.9,
+     "avg_watch_s": 2.3
+    }
+   },
+   "2026-10-18": {
+    "likes": 2,
+    "comments": 0,
+    "reach": 17,
+    "saved": 0,
+    "shares": 0,
+    "views": 57,
+    "profile_visits": 0,
+    "follows": 0,
+    "reel": {
+     "likes": 0,
+     "comments": 0,
+     "reach": 125,
+     "saved": 0,
+     "shares": 0,
+     "views": 137,
+     "seconds": 7.9,
+     "avg_watch_s": 1.7
+    }
+   },
+   "2026-10-19": {
+    "likes": 0,
+    "comments": 0,
+    "reach": 7,
+    "saved": 0,
+    "shares": 0,
+    "views": 20,
+    "profile_visits": 0,
+    "follows": 0,
+    "reel": {
+     "likes": 0,
+     "comments": 0,
+     "reach": 81,
+     "saved": 0,
+     "shares": 0,
+     "views": 85,
+     "seconds": 7.9,
+     "avg_watch_s": 1.1
+    }
+   },
+   "2026-10-20": {
+    "likes": 0,
+    "comments": 0,
+    "reach": 13,
+    "saved": 0,
+    "shares": 0,
+    "views": 38,
+    "profile_visits": 1,
+    "follows": 0,
+    "reel": {
+     "likes": 1,
+     "comments": 0,
+     "reach": 109,
+     "saved": 0,
+     "shares": 0,
+     "views": 126,
+     "seconds": 7.9,
+     "avg_watch_s": 1.5
+    }
+   },
+   "2026-10-21": {
+    "likes": 1,
+    "comments": 0,
+    "reach": 11,
+    "saved": 0,
+    "shares": 0,
+    "views": 31,
+    "profile_visits": 1,
+    "follows": 0
+   },
+   "2026-10-22": {
+    "likes": 1,
+    "comments": 0,
+    "reach": 14,
+    "saved": 0,
+    "shares": 0,
+    "views": 37,
+    "profile_visits": 0,
+    "follows": 0,
+    "reel": {
+     "likes": 0,
+     "comments": 0,
+     "reach": 104,
+     "saved": 0,
+     "shares": 0,
+     "views": 109,
+     "seconds": 7.9,
+     "avg_watch_s": 1.8
+    },
+    "story": {
+     "reach": 36,
+     "views": 51,
+     "replies": 0
+    }
+   },
+   "2026-10-23": {
+    "likes": 2,
+    "comments": 1,
+    "reach": 12,
+    "saved": 0,
+    "shares": 0,
+    "views": 26,
+    "profile_visits": 0,
+    "follows": 0,
+    "reel": {
+     "likes": 0,
+     "comments": 0,
+     "reach": 110,
+     "saved": 0,
+     "shares": 0,
+     "views": 121,
+     "seconds": 7.9,
+     "avg_watch_s": 2.1
+    },
+    "story": {
+     "reach": 34,
+     "views": 52,
+     "replies": 0
+    }
+   },
+   "2026-10-24": {
+    "likes": 3,
+    "comments": 0,
+    "reach": 13,
+    "saved": 0,
+    "shares": 0,
+    "views": 41,
+    "profile_visits": 0,
+    "follows": 0,
+    "reel": {
+     "likes": 0,
+     "comments": 0,
+     "reach": 108,
+     "saved": 0,
+     "shares": 0,
+     "views": 114,
+     "seconds": 7.9,
+     "avg_watch_s": 1.8
+    },
+    "story": {
+     "reach": 25,
+     "views": 28,
+     "replies": 0
+    }
+   },
+   "2026-10-25": {
+    "likes": 2,
+    "comments": 0,
+    "reach": 8,
+    "saved": 0,
+    "shares": 0,
+    "views": 17,
+    "profile_visits": 0,
+    "follows": 0,
+    "reel": {
+     "likes": 0,
+     "comments": 0,
+     "reach": 108,
+     "saved": 0,
+     "shares": 0,
+     "views": 112,
+     "seconds": 7.9,
+     "avg_watch_s": 1.3
+    },
+    "story": {
+     "reach": 29,
+     "views": 34,
+     "replies": 0
+    }
+   },
+   "2026-10-26": {
+    "likes": 2,
+    "comments": 0,
+    "reach": 8,
+    "saved": 0,
+    "shares": 0,
+    "views": 18,
+    "profile_visits": 0,
+    "follows": 0,
+    "story": {
+     "reach": 24,
+     "views": 34,
+     "replies": 0
+    }
+   },
+   "2026-10-27": {
+    "likes": 0,
+    "comments": 0,
+    "reach": 5,
+    "saved": 0,
+    "shares": 0,
+    "views": 14,
+    "profile_visits": 0,
+    "follows": 0,
+    "story": {
+     "reach": 22,
+     "views": 31,
+     "replies": 0
+    }
+   },
+   "2026-10-28": {
+    "likes": 0,
+    "comments": 0,
+    "reach": 10,
+    "saved": 0,
+    "shares": 0,
+    "views": 28,
+    "profile_visits": 0,
+    "follows": 0,
+    "story": {
+     "reach": 29,
+     "views": 34,
+     "replies": 0
+    }
+   }
+  },
+  "account": {
+   "days": 7,
+   "reach": {
+    "NON_FOLLOWER": 414,
+    "FOLLOWER": 74
+   },
+   "follows_and_unfollows": {
+    "FOLLOWER": 6,
+    "NON_FOLLOWER": 0
+   },
+   "accounts_engaged": 8
+  }
+ },
+ "mail": {
+  "replies": {
+   "2026-10-15": 0,
+   "2026-10-16": 0,
+   "2026-10-17": 0,
+   "2026-10-18": 0,
+   "2026-10-19": 0,
+   "2026-10-20": 0,
+   "2026-10-21": 0,
+   "2026-10-22": 0,
+   "2026-10-23": 0,
+   "2026-10-24": 0,
+   "2026-10-25": 0,
+   "2026-10-26": 0,
+   "2026-10-27": 0,
+   "2026-10-28": 0
+  },
+  "signups_14d": 0,
+  "unsubs_14d": 0,
+  "signup_refs_14d": {}
+ },
+ "subscribers": {
+  "listed": 12,
+  "sending": 11,
+  "excluded": 1
+ },
+ "polls": {
+  "2026-09-28": 0,
+  "2026-10-05": 0,
+  "2026-10-12": 0
+ }
+}
