@@ -332,14 +332,14 @@ def story_image(folder, key, site_url):
 
 def story_images(folder, key, site_url):
     """스토리로 올릴 이미지 공개 주소들(올릴 순서). 2026-10-29 운영자 '훅 화면 한 장뿐이라 아무 내용이 없다':
-    build_issue 가 만든 story/ 화면(H PICK·N가지 한눈에 카드 + '전체는 피드에', 훅이 없는 호는 표지 카드부터)을 훅 화면 뒤에 잇는다.
+    build_issue 가 만든 story/ 화면(H PICK 브리핑·오늘의 소식·관련 기사, 못 만들면 카드 화면 — 훅이 없는 호는 훅·표지부터)을 훅 화면 뒤에 잇는다.
     API 는 게시물·링크 스티커를 못 붙여 눌러서 피드로 보낼 수 없으니, 스토리만 넘겨도 오늘 내용이 보이게 한다.
     story/ 가 없는 호(그 전 호·화면 만들기 실패)는 예전처럼 한 장."""
     frames = sorted((folder / "story").glob("s*.jpg"))
     if not frames:
         one = story_image(folder, key, site_url)
         return [one] if one else []
-    hook = (folder / "reel_frames" / "r1_hook.jpg").exists() and not frames[0].stem.endswith("_cover")
+    hook = (folder / "reel_frames" / "r1_hook.jpg").exists() and not frames[0].stem.endswith(("_cover", "_hook"))
     return ([f"{site_url}/instagram/{key}/reel_frames/r1_hook.jpg"] if hook else []) + \
         [f"{site_url}/instagram/{key}/story/{f.name}" for f in frames]
 

@@ -161,14 +161,26 @@ def account_week(g, now=None):
 
 
 def _story_row(g, day, log):
-    """E9 스토리 도달·조회·답장. 24시간이 지나 인사이트가 닫혔으면 지난 스냅숏에 남긴 값을 그대로 쓴다."""
+    """E9 스토리 도달·조회·답장(첫 장). 여러 장이면(2026-10-30~) 장마다 도달도 frames 에 — 끝 장까지 남는 비율을 본다.
+    24시간이 지나 인사이트가 닫혔으면 지난 스냅숏에 남긴 값을 그대로 쓴다."""
     from post_instagram import IGError
-    sid = (log.get("story") or {}).get("id")
+    story = log.get("story") or {}
+    sid = story.get("id")
     if not sid:
         return None
     try:
         got = _values(g.call("GET", f"{sid}/insights", metric=STORY_METRICS).get("data"))
         if got:
+            ids = story.get("ids") or []
+            if len(ids) > 1:
+                frames = []
+                for i in ids:
+                    try:
+                        frames.append(got.get("reach") if i == sid else
+                                      _values(g.call("GET", f"{i}/insights", metric="reach").get("data")).get("reach"))
+                    except IGError:
+                        frames.append(None)
+                got["frames"] = frames
             return got
     except IGError:
         pass
@@ -409,9 +421,12 @@ def _series_compare(snap):
 
 
 def _story_cell(p):
-    """도달 칸 뒤 '(스토리 N)' — E9 아침 스토리의 도달."""
+    """도달 칸 뒤 '(스토리 N)' — E9 아침 스토리의 도달. 여러 장이면 '(스토리 첫 장→끝 장)'(2026-10-30~)."""
     st = p.get("story") or {}
-    return f" (스토리 {st['reach']})" if st.get("reach") is not None else ""
+    if st.get("reach") is None:
+        return ""
+    last = (st.get("frames") or [None])[-1]
+    return f" (스토리 {st['reach']}→{last})" if len(st.get("frames") or []) > 1 and last is not None else f" (스토리 {st['reach']})"
 
 
 def _account_lines(ig, posts):
