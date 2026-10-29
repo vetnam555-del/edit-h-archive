@@ -1176,6 +1176,10 @@ def t_story():
             (folder / "story" / "s1_cover.jpg").write_bytes(b"")
             expect([u.rsplit("/", 1)[-1] for u in post_instagram.story_images(folder, "k", "https://x")] == ["s1_cover.jpg"],
                    "표지 화면으로 시작하는 스토리에 훅 화면을 또 붙인다")
+            (folder / "story" / "s1_cover.jpg").unlink()
+            (folder / "story" / "s1_hook.jpg").write_bytes(b"")
+            expect([u.rsplit("/", 1)[-1] for u in post_instagram.story_images(folder, "k", "https://x")] == ["s1_hook.jpg"],
+                   "훅 화면으로 시작하는 브리핑에 세로 릴스 훅을 또 붙인다")
             # 24시간이 지나 인사이트가 닫히면 지난 스냅숏의 스토리 값을 그대로 쓴다
             daily = Path(tmp) / "m" / "daily"
             daily.mkdir(parents=True)
@@ -1190,10 +1194,27 @@ def t_story():
     expect(story_frames.choose(cards_, hook=True) == [cards_[2], cards_[1]], "훅 다음 카드가 H PICK → 한눈에 순서가 아니다")
     expect(story_frames.choose(cards_, hook=False)[0] == cards_[0], "훅이 없는 호가 표지부터 시작하지 않는다")
     expect(story_frames.choose([cards_[0], cards_[5]], hook=True) == [], "고를 카드가 없는데 화면을 만든다")
-    page, files = story_frames.build(Path("/nonexistent/ig"), cards_, True, "")
+    page, files = story_frames.build_cards(Path("/nonexistent/ig"), cards_, True, "")
     expect(files == ["s1_pick.png", "s2_summary.png"] and page.count('class="card story"') == 2
-           and page.count('class="cta"') == 1 and f"카드 {len(cards_)}장" in page, "스토리 화면 HTML(장 수·마지막 장 안내)이 틀린다")
-    return "날짜·훅+카드 화면·순서·이어 올리기·24시간 뒤 값"
+           and page.count('class="cta"') == 1 and f"카드 {len(cards_)}장" in page, "카드 스토리 화면 HTML(장 수·마지막 장 안내)이 틀린다")
+    # 브리핑(2026-10-29 ②~): H PICK 요점 → 소식 2개씩, 장마다 관련 기사, 마지막 장에만 뉴스레터 안내. 훅이 없으면 훅 화면부터
+    from edith import content
+    d = content.load("2026-10-29")
+    page, files = story_frames.build_briefing(d, True, "")
+    expect(files == ["s1_pick.png", "s2_news1.png", "s3_news2.png"], f"브리핑 장 구성이 틀린다: {files}")
+    expect(page.count("관련 기사·원문 · ") == 5 and page.count("원문 링크·한 줄 뉴스는 뉴스레터에") == 1
+           and all(x in page for x in ("배당소득세 15.4%", "세후 금액부터 계산해 보세요", "오늘의 소식", "/ 05")),
+           "브리핑에 요점·할 일·관련 기사·마지막 장 안내가 빠졌다")
+    expect(story_frames.build_briefing(d, False, "")[1][0] == "s1_hook.png", "훅이 없는 호의 브리핑이 훅 화면으로 시작하지 않는다")
+    expect(story_frames.build_briefing({**d, "format": 1}, True, "") == ("", []), "형식 1 호에 브리핑을 만든다(카드 화면으로 가야 한다)")
+    # 여러 장 스토리의 장별 도달 → 성과표 '(스토리 첫 장→끝 장)'
+    class Reach:
+        def call(self, method, path, **params):
+            return {"data": [{"name": "reach", "values": [{"value": {"a": 30, "b": 24, "c": 19}[path.split("/")[0]]}]}]}
+    got = collect_metrics._story_row(Reach(), "2026-10-30", {"story": {"id": "a", "ids": ["a", "b", "c"]}})
+    expect(got.get("frames") == [30, 24, 19] and collect_metrics._story_cell({"story": got}) == " (스토리 30→19)",
+           f"스토리 장별 도달이 안 잡힌다: {got}")
+    return "날짜·훅+브리핑·카드 화면·순서·이어 올리기·장별 도달·24시간 뒤 값"
 
 
 def t_evening():

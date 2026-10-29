@@ -80,10 +80,10 @@ def render_reel_frames(d, out_dir):
     return [f.replace(".png", ".jpg") for f in files]
 
 
-def render_story_frames(out_dir, hook):
-    """아침 스토리 화면(1080×1920 JPEG) → instagram/{날짜}/story/ — 캐러셀 카드(H PICK·N가지 한눈에, 훅이 없으면 표지부터)를
-    세로 화면에 얹고 마지막 장에 '전체는 피드에'(edith/story_frames.py, 2026-10-29 운영자). 실패해도 발행은 막지 않는다
-    (post_instagram 이 예전처럼 훅 화면 한 장만 올린다)."""
+def render_story_frames(d, out_dir, hook):
+    """아침 스토리 화면(1080×1920 JPEG) → instagram/{날짜}/story/ (edith/story_frames.py, 2026-10-29 운영자).
+    먼저 스토리 전용 브리핑(H PICK 요점·오늘의 소식 2개씩·관련 기사)을, 못 만들거나 글자가 넘치면 캐러셀 카드를 얹은 화면을 만든다.
+    둘 다 실패해도 발행은 막지 않는다(post_instagram 이 예전처럼 훅 화면 한 장만 올린다)."""
     from edith.fonts import font_css
 
     story_dir = out_dir / "story"
@@ -91,23 +91,29 @@ def render_story_frames(out_dir, hook):
         for old in story_dir.glob("*.jpg"):
             old.unlink()
     card_files = sorted(f.name for f in (out_dir / "ig").glob("*.jpg"))
-    page, files = story_frames.build(out_dir / "ig", card_files, hook, font_css())
-    if not files:
-        return []
-    story_dir.mkdir(parents=True, exist_ok=True)
-    with tempfile.TemporaryDirectory() as tmp:
-        html_path = Path(tmp) / "story.html"
-        html_path.write_text(page, encoding="utf-8")
-        proc = subprocess.run(
-            ["node", str(AUTOMATION / "render_cards.cjs"), str(html_path), tmp, f"--jpeg-dir={story_dir}", *files],
-            capture_output=True, text=True,
-        )
-    if proc.returncode != 0:
-        print(f"  ⚠ 스토리 화면을 만들지 못했습니다 — 스토리는 훅 화면 한 장만 올라갑니다\n{proc.stderr[-600:]}")
+    css = font_css()
+    for kind, (page, files) in (("브리핑", story_frames.build_briefing(d, hook, css)),
+                                ("카드", story_frames.build_cards(out_dir / "ig", card_files, hook, css))):
+        if not files:
+            continue
+        story_dir.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory() as tmp:
+            html_path = Path(tmp) / "story.html"
+            html_path.write_text(page, encoding="utf-8")
+            proc = subprocess.run(
+                ["node", str(AUTOMATION / "render_cards.cjs"), str(html_path), tmp, f"--jpeg-dir={story_dir}", *files],
+                capture_output=True, text=True,
+            )
+        bad = []
+        if proc.returncode == 0:
+            bad = [c["file"] for c in json.loads(proc.stdout.strip().splitlines()[-1])["cards"] if c.get("overflow")]
+        if proc.returncode == 0 and not bad:
+            return kind, [f.replace(".png", ".jpg") for f in files]
         for old in story_dir.glob("*.jpg"):
             old.unlink()
-        return []
-    return [f.replace(".png", ".jpg") for f in files]
+        print(f"  ⚠ 스토리 {kind} 화면을 만들지 못했습니다"
+              + (f"(글자가 넘침: {', '.join(bad)} — 제목·body·takeaway 를 줄이면 브리핑으로 나갑니다)" if bad else f"\n{proc.stderr[-600:]}"))
+    return None, []
 
 
 def print_style(d):
@@ -148,9 +154,9 @@ def main():
             frames = render_reel_frames(d, out_dir)
             if frames:
                 print(f"  세로 릴스  instagram/{args.date}/reel_frames/ ({len(frames)}장)")
-        story = render_story_frames(out_dir, hook=bool(frames))
+        kind, story = render_story_frames(d, out_dir, hook=bool(frames))
         if story:
-            print(f"  아침 스토리  instagram/{args.date}/story/ ({len(story)}장{' + 훅 화면' if frames else ''})")
+            print(f"  아침 스토리  instagram/{args.date}/story/ ({kind} {len(story)}장{' + 훅 화면' if frames else ''})")
         caption = site.instagram_caption(d, site_url)
         (out_dir / "caption.txt").write_text(caption + "\n", encoding="utf-8")
         comment = site.first_comment(d)
