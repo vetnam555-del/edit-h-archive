@@ -1103,9 +1103,11 @@ def t_reel_hook():
 
 
 def t_story():
-    """E9 아침 스토리(2026-10-10~): 날짜·데일리만, 세로 훅 화면(없으면 표지), STORIES 로 올림, 24시간 뒤엔 지난 스냅숏 값."""
+    """E9 아침 스토리(2026-10-10~): 날짜·데일리만, 세로 훅 화면(없으면 표지), STORIES 로 올림, 24시간 뒤엔 지난 스냅숏 값.
+    2026-10-29~: 훅 뒤에 카드 화면(story/)을 잇고, 중간에 실패하면 다음 실행이 이어서 올린다."""
     import collect_metrics
     import post_instagram
+    from edith import story_frames
     cfg = {"story_from": "2026-10-10"}
     expect([post_instagram.story_on(cfg, k) for k in ("2026-10-09", "2026-10-10", "2026-10-16-weekly")] == [False, True, False],
            "스토리 시작 날짜·주간 특집 제외가 틀린다")
@@ -1134,9 +1136,46 @@ def t_story():
             (folder / "reel_frames").mkdir()
             (folder / "reel_frames" / "r1_hook.jpg").write_bytes(b"")
             expect(post_instagram.story_image(folder, "k", "https://x").endswith("/reel_frames/r1_hook.jpg"), "스토리가 세로 훅 화면을 안 쓴다")
-            expect(post_instagram.post_story(FakeGraph(), "u", "k", folder, "https://x", False) == "s1", "스토리를 게시하지 않는다")
+            expect(post_instagram.post_story(FakeGraph(), "u", "k", folder, "https://x", False) == ["s1"], "스토리를 게시하지 않는다")
             media = [p for path, p in calls if path == "u/media"]
             expect(media and media[0].get("media_type") == "STORIES" and media[0]["image_url"].endswith("r1_hook.jpg"), "STORIES 컨테이너가 아니다")
+            # 카드 화면(story/)이 있으면 훅 뒤에 잇는다 — 훅이 없는 호(예비 호)는 표지 카드 화면부터
+            (folder / "story").mkdir()
+            for name in ("s1_pick.jpg", "s2_summary.jpg"):
+                (folder / "story" / name).write_bytes(b"")
+            urls = post_instagram.story_images(folder, "k", "https://x")
+            expect([u.rsplit("/", 2)[-2] + "/" + u.rsplit("/", 1)[-1] for u in urls]
+                   == ["reel_frames/r1_hook.jpg", "story/s1_pick.jpg", "story/s2_summary.jpg"], f"스토리 순서가 틀린다: {urls}")
+            calls.clear()
+            expect(post_instagram.post_story(FakeGraph(), "u", "k", folder, "https://x", False) == ["s1"] * 3, "스토리 3장을 다 올리지 않는다")
+            expect([p["image_url"].rsplit("/", 1)[-1] for path, p in calls if path == "u/media"]
+                   == ["r1_hook.jpg", "s1_pick.jpg", "s2_summary.jpg"], "스토리를 순서대로 올리지 않는다")
+
+            class Flaky(FakeGraph):   # 두 번째 장 게시에서 실패 → 첫 장 id 를 남기고, 다음 실행은 두 번째 장부터
+                n = 0
+
+                def call(self, method, path, **params):
+                    if path == "u/media_publish":
+                        Flaky.n += 1
+                        if Flaky.n == 2:
+                            raise post_instagram.IGError("500 (code 2): temporary")
+                    return super().call(method, path, **params)
+            try:
+                post_instagram.post_story(Flaky(), "u", "k", folder, "https://x", False)
+                expect(False, "스토리 게시 실패가 올라오지 않는다")
+            except post_instagram.IGError as e:
+                expect(getattr(e, "posted", None) == ["s1"], f"실패 전까지 올린 스토리를 남기지 않는다: {getattr(e, 'posted', None)}")
+            calls.clear()
+            expect(post_instagram.post_story(FakeGraph(), "u", "k", folder, "https://x", False, done=["s1"]) == ["s1"] * 3,
+                   "이어 올리기가 id 목록을 잇지 않는다")
+            expect([p["image_url"].rsplit("/", 1)[-1] for path, p in calls if path == "u/media"] == ["s1_pick.jpg", "s2_summary.jpg"],
+                   "이어 올리기가 이미 올린 장을 다시 올린다")
+            expect(post_instagram.post_story(FakeGraph(), "u", "k", folder, "https://x", True) == [], "dry-run 이 게시 기록을 남긴다")
+            for f in (folder / "story").glob("*.jpg"):
+                f.unlink()
+            (folder / "story" / "s1_cover.jpg").write_bytes(b"")
+            expect([u.rsplit("/", 1)[-1] for u in post_instagram.story_images(folder, "k", "https://x")] == ["s1_cover.jpg"],
+                   "표지 화면으로 시작하는 스토리에 훅 화면을 또 붙인다")
             # 24시간이 지나 인사이트가 닫히면 지난 스냅숏의 스토리 값을 그대로 쓴다
             daily = Path(tmp) / "m" / "daily"
             daily.mkdir(parents=True)
@@ -1147,7 +1186,14 @@ def t_story():
     finally:
         post_instagram.wait_public, collect_metrics.METRICS = saved_wait, saved_metrics
     expect(collect_metrics._story_cell({"story": {"reach": 31}}) == " (스토리 31)", "성과표에 스토리 도달이 안 붙는다")
-    return "날짜·이미지·게시·24시간 뒤 값"
+    cards_ = [f"{i:02d}_edit_h_2026-10-30_{r}.jpg" for i, r in enumerate(("cover", "summary", "pick", "deep", "issue2", "cta"), 1)]
+    expect(story_frames.choose(cards_, hook=True) == [cards_[2], cards_[1]], "훅 다음 카드가 H PICK → 한눈에 순서가 아니다")
+    expect(story_frames.choose(cards_, hook=False)[0] == cards_[0], "훅이 없는 호가 표지부터 시작하지 않는다")
+    expect(story_frames.choose([cards_[0], cards_[5]], hook=True) == [], "고를 카드가 없는데 화면을 만든다")
+    page, files = story_frames.build(Path("/nonexistent/ig"), cards_, True, "")
+    expect(files == ["s1_pick.png", "s2_summary.png"] and page.count('class="card story"') == 2
+           and page.count('class="cta"') == 1 and f"카드 {len(cards_)}장" in page, "스토리 화면 HTML(장 수·마지막 장 안내)이 틀린다")
+    return "날짜·훅+카드 화면·순서·이어 올리기·24시간 뒤 값"
 
 
 def t_evening():

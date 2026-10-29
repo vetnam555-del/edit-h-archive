@@ -330,19 +330,43 @@ def story_image(folder, key, site_url):
     return f"{site_url}/instagram/{key}/ig/{jpgs[0].name}" if jpgs else None
 
 
-def post_story(g, uid, key, folder, site_url, dry):
-    """E9(2026-10-10~): 캐러셀을 올린 뒤 같은 날 훅 화면을 스토리로 — 스토리는 팔로워 홈 맨 위에 뜬다.
-    2026-10-09 진단: 팔로워 133명 중 이번 주 우리 게시물을 본 사람 36명. 스토리를 보고 프로필·피드로 오게."""
-    url = story_image(folder, key, site_url)
-    if not url:
-        return None
-    wait_public([url])
-    cid = g.call("POST", f"{uid}/media", media_type="STORIES", image_url=url)["id"]
-    g.wait_ready(cid, "스토리")
-    if dry:
-        print("  (dry-run) 스토리 컨테이너 준비 완료 — 게시하지 않음")
-        return None
-    return publish(g, uid, cid, "스토리")
+def story_images(folder, key, site_url):
+    """스토리로 올릴 이미지 공개 주소들(올릴 순서). 2026-10-29 운영자 '훅 화면 한 장뿐이라 아무 내용이 없다':
+    build_issue 가 만든 story/ 화면(H PICK·N가지 한눈에 카드 + '전체는 피드에', 훅이 없는 호는 표지 카드부터)을 훅 화면 뒤에 잇는다.
+    API 는 게시물·링크 스티커를 못 붙여 눌러서 피드로 보낼 수 없으니, 스토리만 넘겨도 오늘 내용이 보이게 한다.
+    story/ 가 없는 호(그 전 호·화면 만들기 실패)는 예전처럼 한 장."""
+    frames = sorted((folder / "story").glob("s*.jpg"))
+    if not frames:
+        one = story_image(folder, key, site_url)
+        return [one] if one else []
+    hook = (folder / "reel_frames" / "r1_hook.jpg").exists() and not frames[0].stem.endswith("_cover")
+    return ([f"{site_url}/instagram/{key}/reel_frames/r1_hook.jpg"] if hook else []) + \
+        [f"{site_url}/instagram/{key}/story/{f.name}" for f in frames]
+
+
+def post_story(g, uid, key, folder, site_url, dry, done=()):
+    """E9(2026-10-10~): 캐러셀을 올린 뒤 같은 날 스토리를 — 스토리는 팔로워 홈 맨 위에 뜬다.
+    2026-10-09 진단: 팔로워 133명 중 이번 주 우리 게시물을 본 사람 36명. 스토리를 보고 프로필·피드로 오게.
+    올린 스토리 id 목록을 돌려준다. done(이미 올린 장)은 건너뛰고, 중간에 실패하면 그때까지 올린 id 를 IGError.posted 에 담는다
+    — 다음 실행이 같은 장을 두 번 올리지 않고 이어서 올린다."""
+    urls = story_images(folder, key, site_url)
+    ids = list(done)
+    if not urls or len(ids) >= len(urls):
+        return ids
+    wait_public(urls[len(ids):])
+    for i, url in enumerate(urls[len(ids):], len(ids) + 1):
+        label = f"스토리 {i}/{len(urls)}"
+        try:
+            cid = g.call("POST", f"{uid}/media", media_type="STORIES", image_url=url)["id"]
+            g.wait_ready(cid, label)
+            if dry:
+                print(f"  (dry-run) {label} 컨테이너 준비 완료 — 게시하지 않음")
+                continue
+            ids.append(publish(g, uid, cid, label))
+        except IGError as e:
+            e.posted = ids
+            raise
+    return [] if dry else ids
 
 
 def reel_to_feed(cfg, key):
@@ -437,7 +461,7 @@ def maintain_token(token):
 
 
 def prune(days):
-    """게시가 끝난 지 오래된 호의 게시용 JPEG(ig/)·릴스 영상(reel.mp4)·세로 릴스 프레임(reel_frames/)은 지운다 — Pages 용량(1GB) 관리.
+    """게시가 끝난 지 오래된 호의 게시용 JPEG(ig/)·릴스 영상(reel.mp4)·세로 릴스 프레임(reel_frames/)·스토리 화면(story/)은 지운다 — Pages 용량(1GB) 관리.
     카드 PNG·갤러리는 그대로 둔다."""
     cutoff = now_kst().date() - dt.timedelta(days=days)
     for d in INSTAGRAM_DIR.glob("*/ig"):
@@ -446,8 +470,8 @@ def prune(days):
             for f in d.glob("*.jpg"):
                 f.unlink()
             d.rmdir()
-    for f in [*INSTAGRAM_DIR.glob("*/reel.mp4"), *INSTAGRAM_DIR.glob("*/reel_frames/*.jpg")]:
-        folder = f.parent.parent if f.parent.name == "reel_frames" else f.parent
+    for f in [*INSTAGRAM_DIR.glob("*/reel.mp4"), *INSTAGRAM_DIR.glob("*/reel_frames/*.jpg"), *INSTAGRAM_DIR.glob("*/story/*.jpg")]:
+        folder = f.parent.parent if f.parent.name in ("reel_frames", "story") else f.parent
         m = re.match(r"(\d{4}-\d{2}-\d{2})", folder.name)
         if m and dt.date.fromisoformat(m.group(1)) < cutoff and (LOG_DIR / f"{folder.name}.json").exists():
             f.unlink()
@@ -557,13 +581,16 @@ def main():
     if want_story and story_on(cfg, key, account_type):
         try:
             print("스토리 게시 중…")
-            sid = post_story(g, uid, key, folder, site_url, args.dry_run)
-            if sid:
-                log["story"] = {"id": sid, "at": now_kst().isoformat(timespec="seconds")}
+            ids = post_story(g, uid, key, folder, site_url, args.dry_run, done=log.get("story_partial") or [])
+            if ids:   # id 는 첫 장(도달·조회는 첫 장이 가장 크다 — 성과표 '(스토리 N)')
+                log["story"] = {"id": ids[0], "ids": ids, "at": now_kst().isoformat(timespec="seconds")}
                 log.pop("story_error", None)
+                log.pop("story_partial", None)
                 save_log(key, log)
-                print("  ✓ 스토리")
+                print(f"  ✓ 스토리 {len(ids)}장")
         except IGError as e:
+            if getattr(e, "posted", None):
+                log["story_partial"] = e.posted
             log["story_error"] = str(e)[:200]
             save_log(key, log)
             print(f"  ⚠ 스토리 실패(게시는 계속): {e}")
