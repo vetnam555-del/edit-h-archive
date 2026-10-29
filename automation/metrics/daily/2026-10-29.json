@@ -1,6 +1,36 @@
 {
- "collected_at": "2026-10-29T07:05+09:00",
+ "collected_at": "2026-10-29T21:30+09:00",
  "issues": {
+  "2026-10-29": {
+   "title": "하이닉스 주당 2만원 배당, 기준일은 11월 30일?",
+   "format": 2,
+   "pick_tag": "SK하이닉스 배당",
+   "title_style": "질문형",
+   "cover": "사진",
+   "weekday": "목",
+   "poll": false,
+   "source_mode": "fallback",
+   "audience": "2030직장인",
+   "series": "없음",
+   "reel_style": "세로",
+   "reel_seconds": 7.9,
+   "reel_slot": "저녁",
+   "reel_feed": false,
+   "reel_hook": true,
+   "src": {
+    "main": 5,
+    "primary": 2,
+    "pick_primary": true,
+    "outlets": 16,
+    "wire": 15,
+    "solo": 0
+   },
+   "big": [
+    7,
+    19,
+    false
+   ]
+  },
   "2026-10-28": {
    "title": "놓쳤다면, 다시 볼 만한 5가지",
    "format": 2,
@@ -306,8 +336,8 @@
   }
  },
  "instagram": {
-  "followers": 157,
-  "media": 110,
+  "followers": 158,
+  "media": 111,
   "insights": true,
   "posts": {
    "2026-10-16": {
@@ -538,10 +568,10 @@
    "2026-10-27": {
     "likes": 0,
     "comments": 0,
-    "reach": 5,
+    "reach": 6,
     "saved": 0,
     "shares": 0,
-    "views": 14,
+    "views": 17,
     "profile_visits": 0,
     "follows": 0,
     "story": {
@@ -556,7 +586,7 @@
     "reach": 12,
     "saved": 0,
     "shares": 0,
-    "views": 34,
+    "views": 39,
     "profile_visits": 0,
     "follows": 0,
     "story": {
@@ -564,19 +594,44 @@
      "views": 40,
      "replies": 0
     }
+   },
+   "2026-10-29": {
+    "likes": 0,
+    "comments": 0,
+    "reach": 7,
+    "saved": 0,
+    "shares": 0,
+    "views": 17,
+    "profile_visits": 0,
+    "follows": 0,
+    "reel": {
+     "likes": 0,
+     "comments": 0,
+     "reach": 2,
+     "saved": 0,
+     "shares": 0,
+     "views": 14,
+     "seconds": 7.9,
+     "avg_watch_s": 0.6
+    },
+    "story": {
+     "reach": 23,
+     "views": 36,
+     "replies": 0
+    }
    }
   },
   "account": {
    "days": 7,
    "reach": {
-    "NON_FOLLOWER": 414,
-    "FOLLOWER": 75
+    "NON_FOLLOWER": 306,
+    "FOLLOWER": 68
    },
    "follows_and_unfollows": {
-    "FOLLOWER": 6,
+    "FOLLOWER": 4,
     "NON_FOLLOWER": 1
    },
-   "accounts_engaged": 8
+   "accounts_engaged": 6
   }
  },
  "mail": {
@@ -593,7 +648,8 @@
    "2026-10-25": 0,
    "2026-10-26": 0,
    "2026-10-27": 0,
-   "2026-10-28": 0
+   "2026-10-28": 0,
+   "2026-10-29": 0
   },
   "signups_14d": 0,
   "unsubs_14d": 0,
