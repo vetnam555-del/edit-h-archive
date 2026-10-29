@@ -6,7 +6,14 @@
   <atom:link href="https://vetnam555-del.github.io/edit-h-archive/feed.xml" rel="self" type="application/rss+xml"/>
   <description>매일 아침 8시 30분, 확인된 숫자로 읽는 트렌드 뉴스레터</description>
   <language>ko</language>
-  <lastBuildDate>Thu, 29 Oct 2026 08:30:00 +0900</lastBuildDate>
+  <lastBuildDate>Fri, 30 Oct 2026 08:30:00 +0900</lastBuildDate>
+  <item>
+    <title>VOL.129 서울 5km 안 새 집터, 7.67만 호는 어디라고?</title>
+    <link>https://vetnam555-del.github.io/edit-h-archive/2026-10-30.html</link>
+    <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-10-30.html</guid>
+    <pubDate>Fri, 30 Oct 2026 08:30:00 +0900</pubDate>
+    <description>수도권 새 집터 7.67만 호·기프티콘 유출·홈플러스 월급·사진으로 옷 찾기·담배 성분 공개 — 오늘의 5가지</description>
+  </item>
   <item>
     <title>VOL.128 하이닉스 주당 2만원 배당, 기준일은 11월 30일?</title>
     <link>https://vetnam555-del.github.io/edit-h-archive/2026-10-29.html</link>
@@ -209,13 +216,6 @@
     <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-10-01.html</guid>
     <pubDate>Thu, 01 Oct 2026 08:00:00 +0900</pubDate>
     <description>1365 유출 신고의 11배·대미투자 1호 223억달러·DSR 예외 70.5%·AI 비서 월 500달러·교통카드도 배달 — 오늘의 5가지</description>
-  </item>
-  <item>
-    <title>VOL.099 놓쳤다면, 다시 볼 만한 5가지</title>
-    <link>https://vetnam555-del.github.io/edit-h-archive/2026-09-30.html</link>
-    <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-09-30.html</guid>
-    <pubDate>Wed, 30 Sep 2026 08:00:00 +0900</pubDate>
-    <description>지난 호 다시 보기 — 추석 끝나자, 10월부터 줄줄이 오른다고? · 짝퉁 판매글, 인스타에서 가장 많이 잡혔다 · AI로 만들었으면, 밝혀 달라 · 공구 시장 4년 새 18배, 세금은 깜깜 · 명문대 졸업생 B학점 이상, 100%에 육박</description>
   </item>
 </channel>
 </rss>
