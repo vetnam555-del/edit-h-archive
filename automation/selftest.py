@@ -1110,8 +1110,8 @@ def t_card_ratio():
     real = common.load_config
     cfg = real()
     ig = cfg.get("instagram") or {}
-    expect(ig.get("card_ratio_from") is None or str(ig["card_ratio_from"]) >= "2026-10-31",
-           "card_ratio_from 이 지난 날짜다(지난 호 카드 크기가 바뀐다)")
+    expect(ig.get("card_ratio_from") is None or str(ig["card_ratio_from"]) >= "2026-11-07",
+           "card_ratio_from 이 11/07 전이다 — 지난 호 카드 크기가 바뀌거나 팔로우 카드(E11, 10/31~11/06) 표본과 겹친다(Codex 검토)")
     fake = lambda: {**cfg, "instagram": {**ig, "card_ratio_from": "2026-11-01", "follow_card_from": "2026-10-31"}}  # noqa: E731
     common.load_config = cards.load_config = fake
     try:
