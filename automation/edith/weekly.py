@@ -11,7 +11,7 @@ import json
 import re
 
 from . import content
-from .common import CONTENT_DIR, ROOT, cover_photo_problem, load_config, parse_date, plain, send_time_ko, weekday_ko
+from .common import CONTENT_DIR, ROOT, card_height, cover_photo_problem, load_config, parse_date, plain, send_time_ko, weekday_ko
 from .site import _LETTER, _pick, _tags, _when, dm_line
 
 WEEKLY_DIR = CONTENT_DIR / "weekly"
@@ -97,7 +97,7 @@ def load(date_str):
     if spec.get("photo"):
         if not (ROOT / spec["photo"]).exists() or not spec.get("credit"):
             raise WeeklyError("photo 를 쓰면 파일이 있어야 하고 credit(출처·라이선스)도 적어야 합니다")
-        if why := cover_photo_problem(spec["photo"]):
+        if why := cover_photo_problem(spec["photo"], card_height(date_str)):
             raise WeeklyError(why)
 
     # 카드 함수가 쓰는 모양으로 맞춘다. 주간 특집에서는 H PICK 반전을 쓰지 않는다('오늘의 핵심' 문구가 맞지 않음).

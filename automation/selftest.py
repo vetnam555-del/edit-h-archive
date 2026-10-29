@@ -1102,6 +1102,63 @@ def t_reel_hook():
     return f"첫 장 {timing['first']}초 · {total:.1f}초"
 
 
+def t_card_ratio():
+    """3:4 카드(2026-10-30 템플릿 ver.3 검토): 날짜로 1350/1440 을 나누고, 표지 사진·카드 CSS·스토리 카드 화면·갤러리가 그 크기를 따른다.
+    API 가 3:4 를 받는지 확인하는 probe-ratio 는 게시(media_publish)를 부르지 않는다. 팔로우 카드는 follow_card_from 부터."""
+    import post_instagram
+    from edith import cards, common, content, site, story_frames
+    real = common.load_config
+    cfg = real()
+    ig = cfg.get("instagram") or {}
+    expect(ig.get("card_ratio_from") is None or str(ig["card_ratio_from"]) >= "2026-11-07",
+           "card_ratio_from 이 11/07 전이다 — 지난 호 카드 크기가 바뀌거나 팔로우 카드(E11, 10/31~11/06) 표본과 겹친다(Codex 검토)")
+    fake = lambda: {**cfg, "instagram": {**ig, "card_ratio_from": "2026-11-01", "follow_card_from": "2026-10-31"}}  # noqa: E731
+    common.load_config = cards.load_config = fake
+    try:
+        expect([common.card_height(x) for x in ("2026-10-31", "2026-11-01", "2026-11-06-weekly")] == [1350, 1440, 1440],
+               "카드 높이 날짜 나눔이 틀린다")
+        expect(cards.height_css("2026-10-31") == "" and cards.height_css("2026-11-01") == ".card{height:1440px;}", "카드 CSS 높이가 틀린다")
+        d = content.load("2026-10-29")
+        d_new = {**d, "date": "2026-11-01"}
+        page, _ = cards.build(d_new, "")
+        expect(".card{height:1440px;}" in page and "팔로우하고 내일 아침에 받기" in page and "2030 직장인의 돈·일·소비 뉴스" in page,
+               "3:4 날 카드에 1440 높이·팔로우 카드가 없다")
+        page_old, _ = cards.build(d, "")
+        expect(".card{height:1440px;}" not in page_old and "팔로우하고 내일 아침에 받기" not in page_old, "지난 호 카드가 바뀐다")
+        expect(cards.follow_on({"date": "2026-10-31"}) and not cards.follow_on({"date": "2026-10-31", "poll": {"q": 1}}),
+               "팔로우 카드 날짜·투표 날 예외가 틀린다")
+        html_page = site.gallery_page(d_new, "https://x", ["01.png"], "caption")
+        expect("1080×1440" in html_page, "갤러리가 3:4 크기를 안 적는다")
+        page, files = story_frames.build_cards(Path("/x/ig"), ["01_a_cover.jpg", "02_a_pick.jpg", "04_a_summary.jpg"], True, "", 1440)
+        expect("height:1333px" in page and "top:1593px" in page, "스토리 카드 화면이 3:4 카드 크기를 안 따른다")
+    finally:
+        common.load_config = cards.load_config = real
+    expect(common.cover_photo_problem("assets/probe/ratio-3x4.jpg", 1440) is None
+           and common.cover_photo_problem("assets/probe/ratio-3x4.jpg", 1600) is not None, "표지 사진 크기 검사가 카드 높이를 안 따른다")
+    calls = []
+
+    class FakeGraph:
+        def call(self, method, path, **params):
+            calls.append((path, params))
+            return {"id": f"c{len(calls)}"}
+
+        def wait_ready(self, *a, **k):
+            pass
+
+    saved = post_instagram.wait_public
+    post_instagram.wait_public = lambda urls, **k: None
+    try:
+        with contextlib.redirect_stdout(io.StringIO()):
+            ok = post_instagram.probe_ratio(FakeGraph(), "u", "https://x")
+    finally:
+        post_instagram.wait_public = saved
+    expect(ok and not any(path.endswith("media_publish") for path, _ in calls), "3:4 확인이 게시를 부른다")
+    expect([p.get("is_carousel_item") for path, p in calls[:2]] == ["true", "true"] and calls[2][1].get("media_type") == "CAROUSEL"
+           and calls[0][1]["image_url"].endswith(post_instagram.PROBE_IMAGE), "3:4 확인이 캐러셀 장 2개 + 캐러셀 컨테이너를 만들지 않는다")
+    expect(common.image_size(ROOT / post_instagram.PROBE_IMAGE) == (1080, 1440), "시험 그림이 1080×1440 이 아니다")
+    return "1350/1440 날짜 나눔·카드·표지 사진·스토리·갤러리·팔로우 카드·게시 없는 3:4 확인"
+
+
 def t_story():
     """E9 아침 스토리(2026-10-10~): 날짜·데일리만, 세로 훅 화면(없으면 표지), STORIES 로 올림, 24시간 뒤엔 지난 스냅숏 값.
     2026-10-29~: 훅 뒤에 카드 화면(story/)을 잇고, 중간에 실패하면 다음 실행이 이어서 올린다."""
@@ -1314,6 +1371,7 @@ def main():
     check("구독 즉시 첫 메일(sync_subscribers)", t_first_issue)
     check("릴스 첫 장 훅(E8)", t_reel_hook)
     check("아침 스토리(E9)", t_story)
+    check("3:4 카드·팔로우 카드(템플릿 ver.3)", t_card_ratio)
     if not args.quick:
         rebuild(daily_issues(args.issues), args.strict)
     if NOTES:

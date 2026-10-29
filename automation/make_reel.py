@@ -22,7 +22,7 @@ import tempfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from edith.common import INSTAGRAM_DIR, ROOT, load_config  # noqa: E402
+from edith.common import INSTAGRAM_DIR, ROOT, image_size, load_config  # noqa: E402
 
 MUSIC_DIR = ROOT / "assets" / "music"
 W, H, FPS = 1080, 1920, 30
@@ -32,7 +32,13 @@ REEL_PARTS = ("cover", "pick", "issue", "cta")   # 데일리 릴스에 넣을 �
 # 세로 전용 프레임(build_issue.py → instagram/{날짜}/reel_frames/r1_hook.jpg …, edith/reel_frames.py)이 있으면 그걸 쓴다
 # (2026-10-03~, 성장 검토: 질문 훅 → 숫자 → 결론 → 에디터 H, 약 10초). 없으면 위 카드 방식.
 VERTICAL_TIMING = {"first": 2.4, "card": 3.0, "last": 2.6, "fade": 0.3, "lift": 0, "zoom": 0.025, "transition": "slideleft"}
-CARD_H = 1350          # 카드 1080×1350 을 가로 1080 에 맞춰 올린다
+CARD_H = 1350          # 카드 1080×1350 을 가로 1080 에 맞춰 올린다(3:4 카드면 실제 크기 — card_h_of)
+
+
+def card_h_of(path):
+    """카드를 가로 1080 에 맞췄을 때의 세로 — 3:4 카드(2026-10-30~ card_ratio_from)는 1440. 못 읽으면 CARD_H."""
+    size = image_size(path)
+    return round(size[1] * 1080 / size[0]) if size else CARD_H
 CREDIT_H = 60          # 음악 출처 띠 높이(카드 바로 위, 흐린 배경 위)
 FONTS = ["/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", "/usr/share/fonts/dejavu/DejaVuSans.ttf",
          "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf"]
@@ -122,7 +128,7 @@ def build(cards, out, track, ffmpeg="ffmpeg", timing=None, credit=None, full=Fal
         parts.append(f"[{prev}][v{i}]xfade=transition={t.get('transition') or 'fade'}:duration={fade}:offset={offset:.3f}[x{i}]")
         prev = f"x{i}"
     if credit:   # 카드 위쪽 흐린 배경에 음악 출처를 영상 내내 작게(세로 프레임은 맨 위 워드마크 위)
-        y = 104 if full else (H - CARD_H) // 2 - t["lift"] - CREDIT_H - 8
+        y = 104 if full else (H - card_h_of(cards[0])) // 2 - t["lift"] - CREDIT_H - 8
         parts.append(f"[{prev}][{n + 1}:v]overlay=0:{y}:format=auto,format=yuv420p[vout]")
         prev = "vout"
     start = float(track.get("start", 0))

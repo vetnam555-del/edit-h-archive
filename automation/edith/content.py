@@ -6,7 +6,7 @@
 import json
 import re
 
-from .common import AUTOMATION, CONTENT_DIR, MANIFEST, ROOT, cover_photo_problem, load_config, parse_date, plain, source_label, weekday_ko
+from .common import AUTOMATION, CONTENT_DIR, MANIFEST, ROOT, card_height, cover_photo_problem, load_config, parse_date, plain, source_label, weekday_ko
 
 POLLS_DIR = AUTOMATION / "polls"
 
@@ -336,7 +336,7 @@ def prepare(data, date_str):
         raise ContentError(f"{where}: cards.cover.photo 파일이 없습니다 ({cards['cover']['photo']})")
     if cards["cover"].get("photo") and not cards["cover"].get("credit"):
         raise ContentError(f"{where}: 표지 사진을 쓰면 cards.cover.credit(출처·라이선스)이 필요합니다")
-    if cards["cover"].get("photo") and (why := cover_photo_problem(cards["cover"]["photo"])):
+    if cards["cover"].get("photo") and (why := cover_photo_problem(cards["cover"]["photo"], card_height(date_str))):
         raise ContentError(f"{where}: {why}")
     cta = cards.setdefault("cta", {})
     cta.setdefault("kick", "오늘의 저장각")

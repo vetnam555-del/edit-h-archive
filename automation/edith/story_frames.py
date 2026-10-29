@@ -23,7 +23,6 @@ from .cards import ACC, ACC_FILL, ACC_INK, ACC_ON_DARK, CSS, INK, MUTED, PAPER, 
 
 W, H = 1080, 1920
 CARD_W = 1000
-CARD_H = CARD_W * 1350 // 1080   # 1250
 ROLES = ("pick", "summary")       # 카드 화면: 훅 다음에 보여 줄 카드(있는 것만, 이 순서로)
 PER_FRAME = 2                     # 브리핑: 한 장에 소식 두 개
 SAFE_TOP, SAFE_BOTTOM = 250, 300
@@ -31,11 +30,11 @@ SAFE_TOP, SAFE_BOTTOM = 250, 300
 FRAME_CSS = """
 .story{height:1920px;background:%(ink)s;}
 .story .body{padding:%(top)dpx 90px %(bottom)dpx;}
-.story .shot{position:absolute;left:%(left)dpx;width:%(w)dpx;height:%(h)dpx;border-radius:28px;overflow:hidden;
+.story .shot{position:absolute;left:%(left)dpx;width:%(w)dpx;border-radius:28px;overflow:hidden;
   border:2px solid rgba(255,255,255,.16);}
 .story .shot img{display:block;width:100%%;height:100%%;}
-.story .cta{position:absolute;left:60px;right:60px;top:1530px;text-align:center;color:#FFFFFF;}
-""" % {"ink": INK, "top": SAFE_TOP, "bottom": SAFE_BOTTOM, "left": (W - CARD_W) // 2, "w": CARD_W, "h": CARD_H}
+.story .cta{position:absolute;left:60px;right:60px;text-align:center;color:#FFFFFF;}
+""" % {"ink": INK, "top": SAFE_TOP, "bottom": SAFE_BOTTOM, "left": (W - CARD_W) // 2, "w": CARD_W}
 
 
 def _page(frames, font_css, extra_css=""):
@@ -135,22 +134,23 @@ def choose(card_files, hook):
     return list(dict.fromkeys(f for f in picked if f))
 
 
-def _card_frame(src, n_cards, last):
-    top = 250 if last else (H - CARD_H) // 2
-    cta = (f'<div class="cta"><div style="font-weight:800;font-size:46px;line-height:1.3;letter-spacing:-1px;">'
+def _card_frame(src, n_cards, last, card_h=1350):
+    shot_h = CARD_W * card_h // 1080      # 4:5 카드 1250, 3:4 카드 1333
+    top = 230 if last else (H - shot_h) // 2
+    cta = (f'<div class="cta" style="top:{top + shot_h + 30}px;"><div style="font-weight:800;font-size:46px;line-height:1.3;letter-spacing:-1px;">'
            f'카드 {n_cards}장 전체와 출처는 피드에</div>'
            f'<div style="margin-top:16px;font-weight:500;font-size:34px;line-height:1.4;opacity:.85;">'
            f'왼쪽 위 프로필을 눌러 오늘 게시물을 보세요</div></div>') if last else ""
     src = html.escape(src, quote=True)
     return (f'<section class="card story">'
-            f'<div class="shot" style="top:{top}px;"><img src="{src}" alt=""></div>{cta}</section>')
+            f'<div class="shot" style="top:{top}px;height:{shot_h}px;"><img src="{src}" alt=""></div>{cta}</section>')
 
 
-def build_cards(card_dir, card_files, hook, font_css):
+def build_cards(card_dir, card_files, hook, font_css, card_h=1350):
     """(html, 파일명 목록). card_dir 의 게시용 JPEG(ig/) 중 고른 카드를 세로 화면으로. 고를 카드가 없으면 ("", [])."""
     chosen = choose(card_files, hook)
     if not chosen:
         return "", []
-    frames = [_card_frame(Path(card_dir).resolve().joinpath(f).as_uri(), len(card_files), i == len(chosen) - 1)
+    frames = [_card_frame(Path(card_dir).resolve().joinpath(f).as_uri(), len(card_files), i == len(chosen) - 1, card_h)
               for i, f in enumerate(chosen)]
     return _page(frames, font_css), [f"s{i}_{role(f)}.png" for i, f in enumerate(chosen, 1)]
