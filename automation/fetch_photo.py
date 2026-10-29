@@ -39,15 +39,18 @@ API = "https://commons.wikimedia.org/w/api.php"
 UA = "EDIT-H-newsletter/1.0 (https://vetnam555-del.github.io/edit-h-archive/)"
 OK_LICENSE = re.compile(r"^(cc0|pd|public domain|cc-by-\d|cc by \d)", re.I)
 SA_LICENSE = re.compile(r"^(cc-by-sa-\d|cc by-sa \d)", re.I)
-CARD_W, CARD_H, MAX_UPSCALE = 1080, 1350, 1.1  # content.py 의 표지 사진 검사와 같은 기준
+CARD_W, MAX_UPSCALE = 1080, 1.1  # content.py 의 표지 사진 검사와 같은 기준(세로는 그날 카드 크기 — common.card_height)
 THUMB_WIDTHS = (1280, 1920)  # 위키미디어 표준 썸네일 폭
 
 
-def fetch_width(w, h):
+def fetch_width(w, h, card_h=None):
     """표지를 채우는 데 충분한 가장 작은 표준 썸네일 폭. 없으면 None.
     원본 파일은 위키미디어가 봇 요청을 제한(429)하므로 원본보다 작은 표준 썸네일만 쓴다."""
+    if not card_h:
+        from edith.common import card_height
+        card_h = card_height()
     for tw in [x for x in THUMB_WIDTHS if x < w]:
-        if max(CARD_W / tw, CARD_H / (h * tw / w)) <= MAX_UPSCALE:
+        if max(CARD_W / tw, card_h / (h * tw / w)) <= MAX_UPSCALE:
             return tw
     return None
 

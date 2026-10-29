@@ -39,16 +39,28 @@ def image_size(path):
     return None
 
 
-def cover_photo_problem(rel_path):
-    """표지 사진이 1080×1350 을 꽉 채울 때 10% 넘게 늘어나면(흐려지면) 이유를 돌려준다. 문제 없으면 None."""
+CARD_W, CARD_H_45, CARD_H_34 = 1080, 1350, 1440
+
+
+def card_height(date=None):
+    """카드 세로 길이 — 4:5(1350), config.instagram.card_ratio_from 날짜부터 3:4(1440).
+    2026-10-30 운영자 '슬라이드투티켓 템플릿 ver.3 참고'(automation/reviews/2026-10-30-template-v3.md): 인스타 프로필 격자가
+    2025-01 부터 3:4 라 4:5 카드는 격자에서 좌우가 잘리고, 3:4 게시는 2025-05 부터 된다. 날짜로 나눠 지난 호는 그때 크기로 다시 만든다."""
+    start = (load_config().get("instagram") or {}).get("card_ratio_from")
+    day = str(date or now_kst().date())[:10]
+    return CARD_H_34 if start and day >= start else CARD_H_45
+
+
+def cover_photo_problem(rel_path, height=CARD_H_45):
+    """표지 사진이 1080×height(카드 크기)를 꽉 채울 때 10% 넘게 늘어나면(흐려지면) 이유를 돌려준다. 문제 없으면 None."""
     size = image_size(ROOT / rel_path)
     if not size:
         return f"{rel_path}: JPEG·PNG 가 아니거나 크기를 읽을 수 없습니다"
     w, h = size
-    scale = max(1080 / w, 1350 / h)
+    scale = max(CARD_W / w, height / h)
     if scale > 1.1:
-        return (f"{rel_path}: {w}×{h} 라서 표지(1080×1350)를 채우려면 {scale:.2f}배로 늘려야 해 흐려집니다 — "
-                f"세로 1350px·가로 1080px 이상인 사진을 쓰세요(fetch_photo.py 는 이 기준으로 고릅니다)")
+        return (f"{rel_path}: {w}×{h} 라서 표지(1080×{height})를 채우려면 {scale:.2f}배로 늘려야 해 흐려집니다 — "
+                f"세로 {height}px·가로 1080px 이상인 사진을 쓰세요(fetch_photo.py 는 이 기준으로 고릅니다)")
     return None
 
 

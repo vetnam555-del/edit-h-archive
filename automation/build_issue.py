@@ -18,7 +18,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from edith import cards, content, newsletter, reel_frames, site, story_frames, style  # noqa: E402
-from edith.common import AUTOMATION, INSTAGRAM_DIR, ROOT, load_config, send_time_on  # noqa: E402
+from edith.common import AUTOMATION, INSTAGRAM_DIR, ROOT, card_height, load_config, send_time_on  # noqa: E402
 
 
 def render_cards(d, out_dir):
@@ -93,7 +93,7 @@ def render_story_frames(d, out_dir, hook):
     card_files = sorted(f.name for f in (out_dir / "ig").glob("*.jpg"))
     css = font_css()
     for kind, (page, files) in (("브리핑", story_frames.build_briefing(d, hook, css)),
-                                ("카드", story_frames.build_cards(out_dir / "ig", card_files, hook, css))):
+                                ("카드", story_frames.build_cards(out_dir / "ig", card_files, hook, css, card_height(d["date"])))):
         if not files:
             continue
         story_dir.mkdir(parents=True, exist_ok=True)

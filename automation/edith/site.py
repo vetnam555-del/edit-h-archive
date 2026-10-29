@@ -2,7 +2,7 @@
 import json
 import re
 
-from .common import load_config, INDEX, MANIFEST, ROOT, esc, plain, send_time_ko
+from .common import card_height, load_config, INDEX, MANIFEST, ROOT, esc, plain, send_time_ko
 from .gift import active_gift
 
 
@@ -145,7 +145,7 @@ def gallery_page(d, site, card_files, caption, comment=""):
 <main>
   <div class="kicker">EDIT H · CARD NEWS · VOL.{d['vol']}</div>
   <h1>{esc(title)}</h1>
-  <div class="meta">{d['date']} ({d['weekday']}) · {len(card_files)}장 · 1080×1350</div>
+  <div class="meta">{d['date']} ({d['weekday']}) · {len(card_files)}장 · 1080×{card_height(d['date'])}</div>
   <div class="links"><a href="../../{d['date']}.html">뉴스레터 전문 읽기 →</a></div>
   {imgs}
   <section class="caption">

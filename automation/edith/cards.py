@@ -1,4 +1,4 @@
-"""카드뉴스(1080×1350, 4:5) — VOL.092 '매거진 엔진'(로컬 templates/magazine/cards.js) 이식 + 2026-09-24 개선안(B).
+"""카드뉴스(1080×1350, 4:5 — config.instagram.card_ratio_from 부터 1080×1440, 3:4) — VOL.092 '매거진 엔진'(로컬 templates/magazine/cards.js) 이식 + 2026-09-24 개선안(B).
 
 Design M 카드뉴스 키트 '매거진 세트'(표지 24 → 본문 9 → 마무리 9) 규격을 재현한 것으로, 키트 원본
 파일·이미지는 쓰지 않고 실측한 치수·색만 옮겼다. 키트의 핑크는 EDIT H 브랜드 버밀리언 계열로 바꿨다.
@@ -24,7 +24,7 @@ import base64
 import mimetypes
 import re
 
-from .common import ROOT, esc as _esc
+from .common import ROOT, card_height, esc as _esc, load_config, send_time_ko
 
 W, H = 1080, 1350
 TEXT, SUB, MUTED = "#282F38", "#555558", "#939393"
@@ -193,6 +193,7 @@ def cover(d, kicker=None, foot=None):
                 f'padding:0 .06em;font-weight:800;font-size:{fs(size)};line-height:1;letter-spacing:-{round(size / 30)}px;color:{TEXT};'
                 f'background:linear-gradient(180deg,transparent 62%,{ACC_FILL} 62%);">{esc(kw)}</span></div>')
     shadow = "text-shadow:0 1px 4px rgba(0,0,0,.55);" if photo else ""
+    extra = card_height(d["date"]) - H   # 3:4 카드(1440)면 늘어난 90px 을 핵심어·스티커 자리에 나눠 준다(아래가 비지 않게)
     foot_color = "#FFFFFF" if photo else MUTED
     head_color, kick_color = ("#FFFFFF", "rgba(255,255,255,.92)") if photo else (TEXT, "#5A5A5E")
     credit = (f'<div style="position:absolute;right:40px;bottom:24px;font-size:19px;color:rgba(255,255,255,.85);{shadow}">'
@@ -202,7 +203,7 @@ def cover(d, kicker=None, foot=None):
   <div style="font-weight:900;font-size:34px;line-height:1;letter-spacing:-1px;color:{head_color};{shadow}">EDIT H<span style="color:{ACC};">.</span></div>
   <div style="margin-top:22px;font-weight:700;font-size:28px;color:{kick_color};{shadow}">{esc(kicker)}</div>
   <div style="flex:none;margin-top:26px;display:flex;flex-direction:column;align-items:center;gap:14px;">{_strip(l1, "#FFFFFF")}{_strip(l2, ACC_FILL)}</div>
-  <div style="flex:none;position:relative;margin-top:70px;width:100%;height:560px;">{hero}{sticker_html}</div>
+  <div style="flex:none;position:relative;margin-top:{70 + extra // 2}px;width:100%;height:{560 + extra // 2}px;">{hero}{sticker_html}</div>
 </div>
 <div style="position:absolute;left:0;right:0;bottom:60px;text-align:center;font-weight:700;font-size:26px;color:{foot_color};{shadow}">{esc(foot)}</div>{credit}""", mark=False)
 
@@ -432,6 +433,43 @@ def cta(d):
 </div>""")
 
 
+def follow_on(d):
+    """마지막 장을 '팔로우 카드'로 내는 날인가 — config.instagram.follow_card_from 부터(투표 날은 예전 마무리)."""
+    start = (load_config().get("instagram") or {}).get("follow_card_from")
+    return bool(start and str(d["date"])[:10] >= start and not d.get("poll"))
+
+
+def cta_follow(d):
+    """마무리 — 팔로우 카드(2026-10-30 운영자 '슬라이드투티켓 템플릿 ver.3' 엔딩: 이미지·계정명 중심, '어떤 계정인지·앞으로 무엇을
+    만날지' 한 문장, 팔로우 버튼). 예전 마무리는 '팔로우 + 저장해두기>'가 옅은 글자 링크라 캐러셀을 보고 팔로우 0·프로필 방문 2
+    (10/29 성과표, 최근 14일 13개 게시물 합)였다 — 인스타 화면과 같은 검은 버튼으로 할 일을 하나로 또렷하게. 저장 질문(오늘의 저장각)은 위에 그대로."""
+    c = d["cards"]["cta"]
+    when = send_time_ko(d.get("send_time_kst") or "08:30").replace("오전 ", "")
+    n = len(d["card_issues"])
+    stats = [(f"{len(d['all_items'])}개", "이슈 전문"), (f"{n}장", "핵심 카드"), (f"{int(d['vol'])}호", "누적 발행")]
+    stat_html = "".join(
+        f'<div><div style="font-weight:700;font-size:{fs(32)};line-height:1;color:#1B1B1E;">{v}</div>'
+        f'<div style="font-weight:400;font-size:{fs(22)};line-height:1;color:#6B6E75;margin-top:10px;">{lbl}</div></div>'
+        for v, lbl in stats)
+    tail = f"이슈 {len(d['all_items'])}개 전문＋출처는 매일 아침 뉴스레터로\n→ **프로필 링크**에서 받아보세요"
+    return _frame(f"""
+<div class="body" style="padding:60px 78px;justify-content:center;">
+  <div style="text-align:center;font-weight:700;font-size:28px;line-height:1;color:#5A5A5E;">{esc(c["kick"])}</div>
+  <div class="bal" style="margin-top:30px;text-align:center;font-weight:700;font-size:{fs(50)};line-height:1.4;letter-spacing:-1px;color:{TEXT};">{mk(c["headline"])}</div>
+  <div class="bal" style="margin-top:18px;text-align:center;font-weight:400;font-size:{fs(30)};line-height:1.5;color:{SUB};">{mk(c["sub"])}</div>
+  <div style="flex:none;margin-top:46px;background:#FFFFFF;border:1.5px solid #EAEAEA;border-radius:36px;box-shadow:0 6px 16px rgba(0,0,0,.10);
+    padding:44px 48px 40px;display:flex;flex-direction:column;align-items:center;text-align:center;">
+    {avatar(132)}
+    <div style="margin-top:22px;font-weight:800;font-size:{fs(40)};line-height:1;color:{TEXT};">edit.h.kr</div>
+    <div class="bal" style="margin-top:16px;font-weight:500;font-size:{fs(30)};line-height:1.45;color:{SUB};">매일 아침 {when}, 2030 직장인의 돈·일·소비 뉴스 {n}가지</div>
+    <div style="flex:none;width:100%;display:grid;grid-template-columns:repeat(3,1fr);margin-top:28px;">{stat_html}</div>
+    <div style="flex:none;margin-top:32px;width:100%;background:#000000;color:#FFFFFF;border-radius:999px;padding:26px 0;
+      font-weight:800;font-size:{fs(36)};line-height:1;">팔로우하고 내일 아침에 받기</div>
+  </div>
+  <div class="bal" style="margin-top:40px;text-align:center;font-weight:400;font-size:27px;line-height:1.6;color:{SUB};">{mk(tail)}</div>
+</div>""")
+
+
 CARD_NAMES = ["cover", "summary", "issue1", "issue2", "issue3", "issue4", "issue5", "issue6", "observation", "cta"]
 CARD_NAMES_2 = ["cover", "summary", "pick", "deep", "issue2", "issue3", "issue4", "issue5", "note", "cta"]
 # 2026-10-06~ (성장 검토 실험 2): 두 번째 장에 가장 센 숫자(H PICK) — 2장까지 넘긴 사람은 대개 끝까지 본다.
@@ -440,12 +478,18 @@ PICK_FIRST_FROM = "2026-10-06"
 CARD_NAMES_2B = ["cover", "pick", "deep", "summary", "issue2", "issue3", "issue4", "issue5", "note", "cta"]
 
 
+def height_css(date):
+    """카드 세로 길이 CSS — 3:4 날(card_ratio_from~)이면 .card 를 1440px 로. 4:5 날은 빈 문자열(CSS 의 1350 그대로)."""
+    h = card_height(date)
+    return f".card{{height:{h}px;}}" if h != H else ""
+
+
 def build(d, font_css):
     """(html 문자열, 파일명 목록)을 돌려준다. 카드 순서 = 파일명 순서."""
     issues = d["card_issues"]
     if d.get("format") == 2 and d["date"] >= PICK_FIRST_FROM and not d.get("rewind"):
         cards = ([cover(d), issue_card(issues[0], 1), deep_card(d), summary(d)]
-                 + [issue_card(it, i) for i, it in enumerate(issues[1:], 2)] + [note_card(d), cta(d)])
+                 + [issue_card(it, i) for i, it in enumerate(issues[1:], 2)] + [note_card(d), cta_follow(d) if follow_on(d) else cta(d)])
         names = CARD_NAMES_2B
     elif d.get("format") == 2:
         cards = ([cover(d), summary(d), issue_card(issues[0], 1), deep_card(d)]
@@ -458,7 +502,8 @@ def build(d, font_css):
     files = [f"{i:02d}_edit_h_{d['date']}_{name}.png" for i, name in enumerate(names, 1)]
     page = f"""<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8">
 <style>{font_css}
-{CSS}</style></head><body>
+{CSS}
+{height_css(d["date"])}</style></head><body>
 {''.join(sections)}
 </body></html>"""
     return page, files

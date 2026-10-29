@@ -286,6 +286,37 @@ def probe_trial(g, uid, site_url):
     (LOG_DIR / "trial_probe.json").write_text(json.dumps(result, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
 
 
+PROBE_IMAGE = "assets/probe/ratio-3x4.jpg"   # 1080×1440 시험 그림(내용 없음)
+
+
+def probe_ratio(g, uid, site_url, image_url=None):
+    """3:4(1080×1440) 카드를 API 가 받는지 확인(2026-10-30 — 운영자가 준 '슬라이드투티켓 템플릿 ver.3'이 3:4. 인스타 앱은 2025-05 부터
+    3:4 게시를 받고 프로필 격자도 2025-01 부터 3:4 인데, 게시 API 문서에는 4:5~1.91:1 만 적혀 있다).
+    시험 그림으로 캐러셀 장 2개와 캐러셀 컨테이너만 만들고 처리 상태를 본다. media_publish 를 부르지 않으므로 아무것도 게시되지 않는다
+    (게시하지 않은 컨테이너는 24시간 뒤 사라진다). 결과는 출력과 GitHub 실행 요약(GITHUB_STEP_SUMMARY)에만 — 저장소엔 쓰지 않는다.
+    받으면 config.instagram.card_ratio_from 에 날짜를 넣어 그날부터 3:4 카드를 만든다. True/False 를 돌려준다."""
+    url = image_url or f"{site_url}/{PROBE_IMAGE}"
+    note = ""
+    try:
+        wait_public([url], timeout=300)
+        kids = [g.call("POST", f"{uid}/media", image_url=url, is_carousel_item="true")["id"] for _ in range(2)]
+        for n, kid in enumerate(kids, 1):
+            g.wait_ready(kid, f"3:4 시험 {n}번째 장")
+        parent = g.call("POST", f"{uid}/media", media_type="CAROUSEL", children=",".join(kids),
+                        caption="ratio probe (not published)")["id"]
+        g.wait_ready(parent, "3:4 시험 캐러셀")
+        ok = True
+        print("✓ 3:4(1080×1440) 캐러셀 컨테이너가 만들어졌습니다 — API 로 3:4 카드를 올릴 수 있어요(이번 확인은 게시하지 않았습니다)")
+    except IGError as e:
+        ok, note = False, str(e)[:300]
+        print(f"✗ 3:4 캐러셀을 받지 않습니다 — 카드는 4:5 그대로: {e}")
+    summary = os.environ.get("GITHUB_STEP_SUMMARY")
+    if summary:
+        with open(summary, "a", encoding="utf-8") as f:
+            f.write(f"### 3:4 비율 확인 — {'받음' if ok else '거절'}\n\n시험 그림: {url}\n\n" + (f"오류: `{note}`\n" if note else ""))
+    return ok
+
+
 def post_reel(g, uid, key, folder, cfg, dry, ffmpeg, site_url):
     out, track = build_reel(key, folder, ffmpeg)
     if not out:
@@ -488,6 +519,8 @@ def main():
     ap.add_argument("--event", default="manual", help="schedule | push | workflow_dispatch | manual")
     ap.add_argument("--probe-trial", action="store_true",
                     help="트라이얼 릴스(trial_params)를 API 가 받는지 확인만 — 게시하지 않는 컨테이너 하나를 만들고 끝낸다")
+    ap.add_argument("--probe-ratio", action="store_true",
+                    help="3:4(1080×1440) 캐러셀을 API 가 받는지 확인만 — 게시하지 않는 컨테이너를 만들고 끝낸다(PROBE_IMAGE_URL 로 그림 주소를 바꿀 수 있다)")
     args = ap.parse_args()
     if args.key and args.key.endswith("-weekly"):
         args.kind = "weekly"   # 수동 실행·저녁 일정 사슬이 key 로 주간 특집을 지정해도 주간 규칙(weekly_reel 등)을 따른다
@@ -522,6 +555,10 @@ def main():
         return
     if args.probe_trial:
         probe_trial(g, uid, cfg_all["site_url"].rstrip("/"))
+        return
+    if args.probe_ratio:
+        if not probe_ratio(g, uid, cfg_all["site_url"].rstrip("/"), os.environ.get("PROBE_IMAGE_URL")):
+            sys.exit(2)
         return
     if not cfg.get("auto_post", True) and not args.key:
         print("config.instagram.auto_post 가 꺼져 있어 예약 게시를 건너뜁니다")

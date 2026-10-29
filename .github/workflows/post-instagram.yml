@@ -24,9 +24,9 @@ on:
         description: "게시할 호 — YYYY-MM-DD 또는 YYYY-MM-DD-weekly (비우면 오늘 데일리)"
         required: false
       mode:
-        description: "check = 토큰 확인만 · dry-run = 게시 없이 이미지·영상·컨테이너까지 확인 · post = 실제 게시 · probe-trial = 트라이얼 릴스 API 지원 확인(게시 안 함)"
+        description: "check = 토큰 확인만 · dry-run = 게시 없이 이미지·영상·컨테이너까지 확인 · post = 실제 게시 · probe-trial = 트라이얼 릴스 API 지원 확인 · probe-ratio = 3:4(1080×1440) 카드 API 지원 확인(둘 다 게시 안 함)"
         type: choice
-        options: [check, dry-run, post, probe-trial]
+        options: [check, dry-run, post, probe-trial, probe-ratio]
         default: check
       only:
         description: "하나만 게시(선택)"
@@ -98,6 +98,7 @@ jobs:
           [ "$IN_MODE" = "check" ] && args="$args --check"
           [ "$IN_MODE" = "dry-run" ] && args="$args --dry-run"
           [ "$IN_MODE" = "probe-trial" ] && args="$args --probe-trial"
+          [ "$IN_MODE" = "probe-ratio" ] && args="$args --probe-ratio"
           if [ -n "$IN_ONLY" ] && [ "$IN_ONLY" != "both" ]; then args="$args --only $IN_ONLY"
           elif [ -n "$PLAN_ONLY" ]; then args="$args --only $PLAN_ONLY"; fi   # 저녁 게시: 아침=carousel · 저녁=reel
           python3 automation/post_instagram.py $args

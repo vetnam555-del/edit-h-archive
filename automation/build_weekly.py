@@ -50,7 +50,7 @@ def main():
     jpeg_dir.mkdir(parents=True, exist_ok=True)
     for old in [*out.glob("*.png"), *jpeg_dir.glob("*.jpg")]:
         old.unlink()
-    page = f'<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><style>{font_css()}\n{cards.CSS}</style></head><body>{"".join(sections)}</body></html>'
+    page = f'<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><style>{font_css()}\n{cards.CSS}\n{cards.height_css(w["date"])}</style></head><body>{"".join(sections)}</body></html>'
     with tempfile.TemporaryDirectory() as tmp:
         hp = Path(tmp) / "weekly.html"
         hp.write_text(page, encoding="utf-8")
