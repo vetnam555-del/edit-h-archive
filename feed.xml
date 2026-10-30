@@ -6,7 +6,14 @@
   <atom:link href="https://vetnam555-del.github.io/edit-h-archive/feed.xml" rel="self" type="application/rss+xml"/>
   <description>매일 아침 8시 30분, 확인된 숫자로 읽는 트렌드 뉴스레터</description>
   <language>ko</language>
-  <lastBuildDate>Fri, 30 Oct 2026 08:30:00 +0900</lastBuildDate>
+  <lastBuildDate>Sat, 31 Oct 2026 08:30:00 +0900</lastBuildDate>
+  <item>
+    <title>VOL.130 코스피 3.48% 급락, 사이드카 또 울렸다고?</title>
+    <link>https://vetnam555-del.github.io/edit-h-archive/2026-10-31.html</link>
+    <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-10-31.html</guid>
+    <pubDate>Sat, 31 Oct 2026 08:30:00 +0900</pubDate>
+    <description>코스피 3.48% 급락·장기요양보험료 월 1100원 인상·조상 땅 5만7000평·네이버 멤버십 축제·바이낸스 해킹 — 오늘의 5가지</description>
+  </item>
   <item>
     <title>VOL.129 서울 5km 안 새 집터, 7.67만 호는 어디라고?</title>
     <link>https://vetnam555-del.github.io/edit-h-archive/2026-10-30.html</link>
@@ -209,13 +216,6 @@
     <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-10-02.html</guid>
     <pubDate>Fri, 02 Oct 2026 08:00:00 +0900</pubDate>
     <description>원천징수 3.3%→2.2%·신한은행 2만5천명 유출·솔드아웃 연말 종료·강원 연휴 축제·카톡 광고 73.7% — 오늘의 5가지</description>
-  </item>
-  <item>
-    <title>VOL.100 정부 사이트 해킹, 피해는 신고의 11배라고?</title>
-    <link>https://vetnam555-del.github.io/edit-h-archive/2026-10-01.html</link>
-    <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-10-01.html</guid>
-    <pubDate>Thu, 01 Oct 2026 08:00:00 +0900</pubDate>
-    <description>1365 유출 신고의 11배·대미투자 1호 223억달러·DSR 예외 70.5%·AI 비서 월 500달러·교통카드도 배달 — 오늘의 5가지</description>
   </item>
 </channel>
 </rss>
