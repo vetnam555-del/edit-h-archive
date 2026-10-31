@@ -1553,6 +1553,66 @@ def t_competitors_ig():
     return f"{len(accounts)}개 계정 · API {version}"
 
 
+def t_competitors_web():
+    """경쟁 매체 웹 추적기(2026-11-01 운영자 '모든 걸 알아서'·'지금 바로 웹 추적기'): 네트워크 없이 — RSS·Atom·글 목록·사이트맵을 읽고,
+    robots 가 막은 매체는 그 매체만 건너뛰며, 우리와 겹친 말·여러 매체가 다룬 말을 고르고, 말끝(같지·영원할)·불용어·숫자를 뺀다."""
+    import urllib.robotparser
+    import competitors_web as cw
+    sources = cw.settings()
+    expect(len(sources) >= 3 and len({s["name"] for s in sources}) == len(sources), f"웹 추적 대상: {[s['name'] for s in sources]}")
+    rss = ('<?xml version="1.0"?><rss version="2.0"><channel>'
+           '<item><title>SK하이닉스 100조 주주환원</title><link>https://a.example/1</link><pubDate>Thu, 30 Oct 2026 09:00:00 +0900</pubDate></item>'
+           '<item><title>오래된 글</title><link>https://a.example/0</link><pubDate>Mon, 01 Sep 2026 09:00:00 +0900</pubDate></item></channel></rss>')
+    items = cw.parse_rss(rss)
+    expect(items[0] == {"title": "SK하이닉스 100조 주주환원", "link": "https://a.example/1", "date": "2026-10-30"}, f"RSS: {items}")
+    atom = ('<feed xmlns="http://www.w3.org/2005/Atom"><entry><title>코스피 급락</title><link href="https://b.example/x"/>'
+            '<updated>2026-10-31T01:00:00Z</updated></entry></feed>')
+    expect(cw.parse_rss(atom) == [{"title": "코스피 급락", "link": "https://b.example/x", "date": "2026-10-31"}], "Atom")
+    page = ('<a href="/2017" class="x"><b>요즘 뜨는 밈</b> 야르 vs 쌰갈</a><a href="/about">소개 페이지</a>'
+            '<a href="https://maily.so/t/posts/abcdef1"><h3>[#646] 나이별 반응</h3><p>26.10.30 (금) 용례</p></a>')
+    links = cw.parse_links(page, r"^/\d{3,5}$|/posts/[a-z0-9]{6,}$", "https://www.careet.net/")
+    expect([x["link"] for x in links] == ["https://www.careet.net/2017", "https://maily.so/t/posts/abcdef1"]
+           and links[0]["date"] is None and links[1]["date"] == "2026-10-30", f"글 목록: {links}")
+    sm = ("<urlset><url><loc>https://n.example/@newneek/article/2</loc><lastmod>2026-10-30T01:00:00Z</lastmod></url>"
+          "<url><loc>https://n.example/@other/article/3</loc><lastmod>2026-10-31T01:00:00Z</lastmod></url>"
+          "<url><loc>https://n.example/@newneek/article/1</loc><lastmod>2026-10-01T01:00:00Z</lastmod></url></urlset>")
+    expect(cw.parse_sitemap(sm, r"@newneek/article/\d+$", 1) == [("https://n.example/@newneek/article/2", "2026-10-30")], "사이트맵")
+    kw = cw.keywords("나 왜 유행 밈 소개가 영원할 거 같지? SK하이닉스가 꺼낸 100조 원의 주주환원 카드")
+    expect({"유행", "sk하이닉스", "주주환원", "카드", "소개"} <= kw and not ({"영원할", "같지", "100조"} & kw), f"말 고르기: {kw}")
+    results = [{"name": "A", "ok": True, "items": [{"title": "금리 인하 SK하이닉스", "link": "1", "date": "2026-10-30", "recent": True}]},
+               {"name": "B", "ok": True, "items": [{"title": "금리 동결 영향", "link": "2", "date": None, "recent": True},
+                                                   {"title": "지난 금리 이야기", "link": "3", "date": None, "recent": False}]},
+               {"name": "C", "ok": False, "items": [], "error": "x"}]
+    gaps = cw.compare(results, {"sk하이닉스", "코스피"})
+    expect(gaps == [("금리", ["A", "B"])] and results[0]["items"][0]["overlap"] == ["sk하이닉스"], f"겹친 말·놓친 말: {gaps}")
+
+    def fake(url):
+        if "blocked" in url:
+            raise RuntimeError("사이트가 자동 접속을 막음(robots.txt 403): " + url)
+        return rss
+    now = cw.parse_when("2026-11-01T12:00:00+09:00")
+    res = cw.collect([{"name": "막힘", "kind": "rss", "url": "https://blocked.example/feed"},
+                      {"name": "열림", "kind": "rss", "url": "https://open.example/feed"},
+                      {"name": "목록", "kind": "links", "url": "https://www.careet.net/", "match": r"^/\d{3,5}$"}],
+                     lambda u: page if "careet" in u else fake(u), now, {"목록": {"https://www.careet.net/2017"}})
+    expect(not res[0]["ok"] and [i["recent"] for i in res[1]["items"]] == [True, False]
+           and [i["recent"] for i in res[2]["items"]] == [False], f"robots 막힘·7일 창·날짜 없는 목록의 새 글: {res}")
+    rp = urllib.robotparser.RobotFileParser()
+    rp.parse(["User-agent: *", "Disallow: /"])
+    f = cw.Fetcher(delay=0)
+    f.robots["https://x.example"] = rp
+    try:
+        f.get("https://x.example/a")
+        expect(False, "robots.txt 가 막은 주소를 열었다")
+    except RuntimeError as e:
+        expect("robots" in str(e), f"robots 거부 문구: {e}")
+    with contextlib.redirect_stdout(io.StringIO()):
+        expect(cw.main(["--dry-run"], fetch=lambda u: rss) == 0, "시험 실행이 0 으로 끝나지 않았다")
+    wf = (ROOT / ".github" / "workflows" / "competitors-web.yml").read_text(encoding="utf-8")
+    expect("competitors_web.py" in wf and "secrets." not in wf, "웹 추적 워크플로가 없거나 비밀값을 쓴다")
+    return f"{len(sources)}곳 · robots 지킴"
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--quick", action="store_true", help="다시 빌드 생략")
@@ -1596,6 +1656,7 @@ def main():
     check("데일리 저장각(체크리스트·차트)", t_save_cards)
     check("마스코트(안경 동그라미 H)", t_mascot)
     check("경쟁 매체 인스타(비즈니스 탐색)", t_competitors_ig)
+    check("경쟁 매체 웹(토큰 없이·robots 지킴)", t_competitors_web)
     if not args.quick:
         rebuild(daily_issues(args.issues), args.strict)
     if NOTES:

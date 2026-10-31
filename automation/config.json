@@ -121,5 +121,27 @@
       {"handle": "ad_zupzup", "name": "광고줍줍", "group": "카피·크리에이티브"},
       {"handle": "copy_pedia", "name": "카피피디아", "group": "카피·크리에이티브"}
     ]
+  },
+  "competitors_web": {
+    "_note": "경쟁 매체 웹 추적기(automation/competitors_web.py, 주 1회 competitors-web.yml) — 토큰 없이 공개 RSS·글 목록을 robots.txt 를 지켜 읽는다. 2026-11-01 운영자 '모든 걸 알아서'·'지금 바로 웹 추적기'. 비스킷(403)·영감농장(403)은 사이트가 자동 접속을 막아 뺐다. 인스타만 있는 계정(스낵아이디어·광고줍줍·카피피디아)은 competitors_ig 쪽.",
+    "sources": [
+      {"name": "어피티", "group": "경제·뉴스 브리핑", "kind": "rss", "url": "https://uppity.co.kr/feed/"},
+      {"name": "뉴닉", "group": "경제·뉴스 브리핑", "kind": "sitemap", "url": "https://newneek.co/sitemap/article-sitemap.xml", "match": "^https://newneek\\.co/@newneek/article/\\d+$", "limit": 12},
+      {
+        "name": "캐릿",
+        "group": "트렌드 미디어",
+        "kind": "links",
+        "url": "https://www.careet.net/",
+        "match": "^/\\d{3,5}$"
+      },
+      {"name": "고구마팜", "group": "트렌드 미디어", "kind": "rss", "url": "https://gogumafarm.kr/feed/"},
+      {
+        "name": "트렌드어워드",
+        "group": "트렌드 미디어",
+        "kind": "links",
+        "url": "https://maily.so/trendaword/posts",
+        "match": "/trendaword/posts/[a-z0-9]{6,}$"
+      }
+    ]
   }
 }

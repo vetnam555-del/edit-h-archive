@@ -1,0 +1,51 @@
+# 경쟁 매체 웹 추적기 — 토큰 없이 공개 RSS·글 목록을 robots.txt 를 지켜 읽고, 이번 주 다룬 주제를 우리 호와 견준다
+# (automation/competitors_web.py). 2026-11-01 운영자 '모든 걸 알아서'·'지금 바로 웹 추적기'.
+# 일요일 21:00 주간 루틴이 automation/competitors/web/summary.md 를 읽는다. 예약 실행은 몇 시간씩 늦으므로 낮에 걸어 두고,
+# 주간 루틴은 필요하면 workflow_dispatch 로 바로 돌린다. 비밀값을 쓰지 않는다.
+name: EDIT H competitors (web)
+
+on:
+  schedule:
+    - cron: "10 3 * * 0"    # UTC 03:10 일요일 = KST 12:10
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "오늘 이미 모았어도 다시 모음"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: competitors-web
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Collect
+        env:
+          IN_FORCE: ${{ inputs.force }}
+        run: |
+          if [ "$IN_FORCE" = "true" ]; then python3 automation/competitors_web.py --force
+          else python3 automation/competitors_web.py; fi
+
+      - name: Record
+        run: |
+          if [ -n "$(git status --porcelain automation/competitors)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add automation/competitors
+            git commit -m "Collect competitor web topics ($(TZ=Asia/Seoul date +%F))"
+            for i in 1 2 3 4; do
+              git pull --rebase origin main && git push origin HEAD:main && break
+              sleep $((i * 5))
+            done
+          fi
