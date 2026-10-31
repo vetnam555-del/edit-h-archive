@@ -25,7 +25,7 @@ ROOT = Path(__file__).resolve().parents[3]
 # 큰 금액은 한 덩어리로('3천억원'·'5천만원'·'2만5천명'도 — 11/01 Codex) — "1조6000억원"을 "1조"·"6000억"으로 쪼개 따로 찾으면 content 가 "1조5000억원과 6000억원"일 때도 통과한다(11/01 Codex)
 # 등락 부호도 숫자의 일부 — "+7.08%"가 content 의 "-7.08%"로 통과하면 안 된다(11/01 Codex). 낱말 사이 '-'(2026-11-01)는 부호가 아니다
 NUM = re.compile(r"(?:(?<![\w.])[+\-−▲▼]\s?)?\d[\d,]*(?:\.\d+)?(?:\s*[조억만천]+\s*\d[\d,]*(?:\.\d+)?)*\s*[조억만천]*\s*"
-                 r"(?:%|원|명|건|분|초|시|일|개|배|p|bp|달러|위|호|거래일|년|월|평|장)?")
+                 r"(?:%|원|명|건|분|초|시간|시|일|개|배|p|bp|달러|위|호|거래일|년|월|평|장|종목|가지|군데|곳|번|살|달|채|대|마리|권|잔|병)?")
 SIGN = str.maketrans({"−": "-", "▲": "+", "▼": "-"})
 # content 는 부호 대신 말로 쓰기도 한다 — "3.02% 내린", "3.0% 늘어", "7% 넘게 내렸어요"
 DOWN = "내리|내린|내려|내렸|하락|떨어|빠진|빠졌|빠지|감소|줄어|줄었|급락|밀려|밀린|밀렸"
@@ -67,6 +67,8 @@ def corpus_numbers(corpus):
 
 
 BRAND_TOKENS = {"8시", "30분", "2030"}   # 끝 화면 고정 문구(발송 시각 8시 30분·'2030의 아침') — content 숫자가 아니어도 된다
+# 어디에 나와도 content 숫자가 아닌 고정 문구 — 확인 기준('기사 2곳 이상에서 확인했어요')
+BRAND_PHRASES = re.compile(r"(?:기사|출처|매체|언론)\s*2\s*곳\s*이상")
 
 
 def check_numbers(texts, corpus, allow=()):
@@ -76,6 +78,7 @@ def check_numbers(texts, corpus, allow=()):
     cvals = content_values(corpus)
     bad = []
     for label, text in texts:
+        text = BRAND_PHRASES.sub(" ", text)
         for t in numbers(text):
             if t in allow:
                 continue
@@ -84,6 +87,10 @@ def check_numbers(texts, corpus, allow=()):
             v = korean_number(body[: len(body) - len(unit)] if unit else body)
             if v is None or not any(_num_match((round(v, 6), unit, sign), c, strict=True) for c in cvals):
                 bad.append(f"{label}: '{t}'")
+        # 화면의 고유어 수사 + 세는 말('반도체 세 종목') — '한 번·한 달' 같은 관용구(1)는 뺀다(11/01 Codex)
+        for _, n in native_numbers(text):
+            if n[0] != 1 and not any(_num_match(n, c, strict=True) for c in cvals):
+                bad.append(f"{label}: '{_say(n)}'")
     return bad
 
 
@@ -214,10 +221,12 @@ def spoken_numbers(text):
 
 
 def _num_match(a, b, strict=False):
-    """값·단위·부호 — 단위나 부호는 둘 다 있을 때만 같아야 한다. strict 면 a 에 부호가 있을 때 b 도 같은 부호여야 한다(화면 숫자 검사)."""
+    """값·단위·부호 — 단위나 부호는 둘 다 있을 때만 같아야 한다. strict(content 와 대조할 때)면 a 에 부호·단위가 있을 때 b 도 같아야 한다."""
     va, ua, sa = (tuple(a) + ("",))[:3]
     vb, ub, sb = (tuple(b) + ("",))[:3]
     if (ua and ub and ua != ub) or (sa and sb and sa != sb) or (strict and sa and sa != sb):
+        return False
+    if strict and ua and ua != ub:   # 화면·대사에 단위(%·원·종목 …)가 있으면 content 도 같은 단위 — 날짜의 맨숫자 31 로 '31%'가 통과하면 안 된다(11/01 Codex)
         return False
     if abs(va - vb) <= 1e-6 * max(1.0, abs(vb)):
         return True
@@ -304,7 +313,9 @@ def main():
     for vline in ep.get("voices", []):
         for sn in spoken_numbers(vline.get("text", "")):
             script_nums.append(sn)
-            if sn[:2] not in BRAND_SPOKEN and not any(_num_match(sn, c) for c in cvals):
+            if sn[1] in COUNTERS.split("|") and sn[0] == 1:   # '한 번·한 달' 같은 관용구는 content 와 대조하지 않는다(받아쓰기 대조는 한다)
+                continue
+            if sn[:2] not in BRAND_SPOKEN and not any(_num_match(sn, c, strict=True) for c in cvals):
                 fails.append(f"content 에 없는 숫자 — 대사 '{vline.get('text', '')[:20]}…': {_say(sn)}")
     if any("AI로 만든 영상" in plain(c["html"]) for c in ep.get("captions", [])):
         fails.append("화면 글자에 'AI로 만든 영상' 표시가 있다(운영자 11/01: 빼기)")

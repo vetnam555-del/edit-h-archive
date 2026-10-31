@@ -1742,6 +1742,12 @@ def t_ai_reel():
     expect([x[:2] for x in two] == [(2.0, "종목")] and qa.check_spoken(two, "내 계좌가 반도체 세 종목에 얼마나")[1]
            and not qa.check_spoken(two, "내 계좌가 반도체 두 종목에 얼마나")[1], f"고유어 수사 검사가 틀린다: {two}")
     expect(any(qa._num_match(two[0], c) for c in qa.content_values("반도체 두 종목에 얼마나 몰려 있는지")), "content 의 '두 종목'을 못 읽는다")
+    # 단위가 있으면 content 도 같은 단위 — 날짜(2026-10-31)의 31 로 '31%'가 통과하면 안 된다, 화면의 '세 종목'·'3종목'도 대조(11/01 Codex)
+    dated = '{"date": "2026-10-31", "t": "코스피 3.48% 내린 5730.74, 반도체 두 종목"}'
+    expect(qa.check_numbers([("t", "코스피 31% 하락")], dated) and qa.check_numbers([("t", "반도체 세 종목")], dated)
+           and qa.check_numbers([("t", "반도체 3종목")], dated), "단위 없는 날짜 숫자나 다른 수량으로 화면 숫자가 통과했다")
+    expect(not qa.check_numbers([("t", "코스피 3.48% · 5730 · 반도체 두 종목 · 한 번 더 · 2종목 · 숫자는 기사 2곳 이상에서 확인했어요")], dated),
+           "content 와 같은 화면 숫자(또는 고정 확인 문구)를 막았다")
     # 천 단위 금액 — '3천억원'은 '4천억원'으로 통과 못 하고 '3000억원'과는 같은 값(11/01 Codex)
     expect(qa.check_numbers([("t", "3천억원")], "4천억원") and not qa.check_numbers([("t", "3천억원 · 5천만원 · 2만5천명")], "3000억원, 5000만원, 2만5000명"),
            "천 단위 금액 검사가 틀린다")
