@@ -484,7 +484,9 @@ def summary_md(snap):
     lines += _account_lines(ig, posts)
     refs = mb.get("signup_refs_14d") or {}
     if refs:
-        names = {"share": "추천 메일", "letter": "뉴스레터 속 버튼", "web": "웹 아카이브", "ig": "인스타", "threads": "스레드", "direct": "직접·알 수 없음"}
+        names = {"share": "추천 메일", "letter": "뉴스레터 속 버튼", "web": "웹 아카이브", "ig": "인스타", "threads": "스레드", "direct": "직접·알 수 없음",
+                 # 2026-11-01~ 첫 화면(index.html)에서 바로 구독 — 들어온 길 + '-home'
+                 "web-home": "웹 첫 화면", "ig-home": "인스타→첫 화면", "share-home": "추천 메일→첫 화면", "letter-home": "뉴스레터→첫 화면"}
         lines.append("- 구독 경로(최근 %d일): " % DAYS + " · ".join(
             f"{names.get(k, k)} {v}" for k, v in sorted(refs.items(), key=lambda kv: -kv[1])))
     lines.append("")
