@@ -5,6 +5,8 @@
 인스타 화면은 로그인하지 않은 자동 접속에 거의 보이지 않고, 약관이 허락 없는 자동 수집을 막는다 — 그래서 페이지를 긁지 않고 공식 API 만 쓴다.
 비즈니스 탐색은 '페이스북 로그인 방식'(graph.facebook.com)에만 있다. 게시에 쓰는 IG_ACCESS_TOKEN(인스타그램 로그인 방식,
 graph.instagram.com)으로는 안 된다 — 운영자가 따로 만든 IG_FB_TOKEN·IG_FB_USER_ID(GitHub Secrets)가 필요하다(OWNER_TODO 맨 위).
+메타 규칙상 한 앱은 두 로그인 방식 중 하나만 쓰므로, 게시용 앱과 다른 새 앱으로 토큰을 만든다.
+필요한 권한(메타 business_discovery 문서): instagram_basic·instagram_manage_insights·pages_read_engagement(+ 페이지 역할이 비즈니스 포트폴리오면 ads_read), ID 를 찾는 데 pages_show_list.
 토큰이 없으면 아무것도 하지 않고 0 으로 끝난다(워크플로가 실패로 보이지 않게).
 
 대상: config competitors_ig.accounts — 공식 사이트·뉴스레터에서 확인한 계정. 프로 계정(비즈니스·크리에이터)만 보인다.
@@ -70,7 +72,8 @@ def describe_error(err, status=None):
     if code in (4, 17, 32, 613):
         return f"호출 한도({code}) — 다음 수집 때 다시"
     if code in (10, 200):
-        return f"권한 부족({code}) — instagram_basic·pages_show_list·pages_read_engagement 권한을 확인한다"
+        return (f"권한 부족({code}) — instagram_basic·instagram_manage_insights·pages_read_engagement 권한을 확인한다"
+                "(페이지 역할을 비즈니스 포트폴리오로 받았으면 ads_read 도)")
     message = re.sub(r"\s+", " ", str(err.get("message") or ""))[:140]
     return f"API 오류 {code or status}: {message}".rstrip(": ")
 

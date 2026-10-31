@@ -6,20 +6,30 @@
 
 ## 지금 바로 (10분)
 
-- [ ] **경쟁 매체 인스타 토큰(15분, 무료) — 2026-11-01 '경쟁사도 못 보면 개선하는 데 영향이 있잖아'** — 준비는 끝났고 **두 값만 넣으면 매주 일요일 자동으로 모은다**
+- [ ] **경쟁 매체 인스타 토큰(20분, 무료) — 2026-11-01 '경쟁사도 못 보면 개선하는 데 영향이 있잖아'** — 준비는 끝났고 **두 값만 넣으면 매주 일요일 자동으로 모은다**
   (`automation/competitors_ig.py` → `automation/competitors/ig/summary.md`, 일요일 21:00 주간 루틴이 읽는다).
   뉴닉·어피티·캐릿·비스킷·고구마팜·트렌드어워드·비크닉·스낵아이디어·광고줍줍 + 우리 계정의 팔로워·최근 14일 게시 수·게시물당 좋아요·댓글·참여율·
   릴스/캐러셀 비율·주로 올리는 시각·프로필 사진. 인스타 화면은 자동 접속에 거의 안 보이고 약관이 자동 수집을 막아 **메타 공식 '비즈니스 탐색' API** 를 쓴다.
-  이 기능은 **페이스북 로그인 방식** 토큰에만 있어, 지금 게시에 쓰는 토큰(IG_ACCESS_TOKEN)과 **다른 토큰**이 필요하다.
-  1. **인스타 계정을 페이스북 페이지에 연결** — 인스타 앱 → 프로필 편집 → '페이지' → 연결(페이지가 없으면 새로 만들기, 무료).
-  2. **토큰 받기** — https://developers.facebook.com/tools/explorer (그래프 API 탐색기) → 오른쪽 'Meta 앱'에서 인스타 게시에 쓰는 앱(없으면 '비즈니스' 유형 새 앱) →
-     권한(Permissions)에 `instagram_basic` `pages_show_list` `pages_read_engagement` `business_management` 추가 → **Generate Access Token** → 페이스북 로그인·페이지 선택·허용.
-     권한 목록에 `instagram_basic` 이 없으면 앱 대시보드 → 사용 사례(Use cases)에서 'Instagram API — 페이스북 로그인으로 설정'을 더한 뒤 다시.
-  3. **우리 인스타 비즈니스 계정 ID** — 같은 화면 주소 칸에 `me/accounts?fields=instagram_business_account{id,username}` → Submit → `edit.h.kr` 옆 `id`(숫자).
-  4. **60일 토큰으로 늘리기** — https://developers.facebook.com/tools/debug/accesstoken 에 2 의 토큰 → Debug → 맨 아래 **Extend Access Token** → 새로 나온 토큰.
-  5. **GitHub Secrets** 에 두 개: `IG_FB_TOKEN`(4 의 토큰), `IG_FB_USER_ID`(3 의 숫자). **채팅에 붙여 넣지 말 것.**
-  6. 시험: Actions → 'EDIT H competitors (Instagram)' → Run workflow. 끝나고 "했어"라고 알려 주시면 바로 분석한다.
-  · 60일마다 2·4·5 를 다시 한다 — 만료되면 요약표 '못 가져온 계정'에 '토큰 만료'가 뜨고 주간 루틴이 알려 드린다. 막히는 화면은 캡처해 보내 주시면 같이 한다.
+  이 기능은 **페이스북 로그인 방식**에만 있고, 메타 규칙상 **한 앱은 인스타그램 로그인·페이스북 로그인 중 하나만** 쓴다(앱 검수 안내 문서)
+  → 게시용 앱(IG_ACCESS_TOKEN)은 그대로 두고 **새 앱을 하나 더** 만든다. 내 계정만 보는 용도라 앱 검수·라이브 전환은 필요 없다(표준 액세스).
+  1. **인스타 계정을 페이스북 '페이지'에 연결** — 인스타 앱 → 프로필 편집 → '페이지'(공개 비즈니스 정보 아래) → 연결 → 페이스북 로그인 → 페이지 고르기
+     (없으면 '페이지 만들기', 무료). 계정 센터에서 페이스북 계정을 잇는 것과는 다르다 — **페이지** 연결이어야 한다.
+  2. **새 앱 만들기** — https://developers.facebook.com/apps → **앱 만들기(Create app)** → 이름 `EDIT H Research` → 사용 사례 **기타(Other)** →
+     앱 유형 **비즈니스(Business)** → 만들기. 사용 사례 목록에 인스타그램 항목이 보이면 그 안에서 **'Facebook 로그인으로 API 설정'** 쪽을 고른다.
+  3. **토큰 받기** — https://developers.facebook.com/tools/explorer (그래프 API 탐색기) → 오른쪽 **Meta App** 에서 2 의 앱 → **User or Page** 는 'User Token' →
+     **Permissions** 에 `instagram_basic` `instagram_manage_insights` `pages_show_list` `pages_read_engagement` 추가(목록에 있으면 `business_management` `ads_read` 도 —
+     페이지 역할을 비즈니스 포트폴리오로 받았으면 `ads_read` 가 필요하다) → **Generate Access Token** → 페이스북 로그인 →
+     페이지와 인스타 계정(`edit.h.kr`)을 고르는 화면에서 **둘 다 선택** → 저장. 권한이 목록에 없거나 오류가 나면 앱 대시보드 → 제품 추가에서
+     'Facebook 로그인 for Business'(있으면 'Instagram' 도)를 **설정(Set up)** 한 뒤 다시.
+  4. **우리 인스타 비즈니스 계정 ID** — 같은 화면 위쪽 칸(GET)에 `me/accounts?fields=name,instagram_business_account{id,username}` → **Submit** →
+     `"username": "edit.h.kr"` 와 같이 묶인 `"id"`(숫자). 바깥쪽 `id` 는 페이지 ID 라 다르다 — **`instagram_business_account` 안의 id** 다.
+  5. **60일 토큰으로 늘리기** — https://developers.facebook.com/tools/debug/accesstoken → 3 의 토큰(Access Token 칸에서 복사) 붙여넣기 → **Debug** →
+     맨 아래 **Extend Access Token** → 새로 나온 토큰을 복사(만료가 약 60일인지 본다).
+  6. **GitHub Secrets** — 저장소 → Settings → Secrets and variables → Actions → **New repository secret** 두 번:
+     `IG_FB_TOKEN`(5 의 토큰), `IG_FB_USER_ID`(4 의 숫자). **채팅에 붙여 넣지 말 것.**
+  7. **시험** — Actions → 'EDIT H competitors (Instagram)' → Run workflow(force 체크) → 초록이면 "했어"라고 알려 주신다. 결과는 `automation/competitors/ig/summary.md`.
+  · 60일마다 3·5 를 다시 해 `IG_FB_TOKEN` 만 바꾼다 — 만료되면 요약표 '못 가져온 계정'에 '토큰 만료'가 뜨고 주간 루틴이 알려 드린다.
+  · 막히는 화면은 캡처해 보내 주시면 같이 한다(토큰 글자가 보이는 부분은 가리고).
 
 - ✅ **클라우드 환경 네트워크 '전체(Full)' 허용(2026-11-01 완료)** — 경쟁 매체 사이트(뉴닉·어피티·캐릿·브런치 등)를 직접 읽는다. 아래 허용 도메인 목록·
   '해외 원문 도메인' 항목은 이걸로 함께 풀렸다(아이보스는 사이트 자체가 자동 접속을 막는다 — 우리 설정 문제 아님).
