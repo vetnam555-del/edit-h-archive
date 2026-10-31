@@ -1,0 +1,169 @@
+{
+ "date": "2026-11-01",
+ "story": "BYD 1~9월 국내 신규 등록 2만137대 · 중국차 수입 점유율 7.22% vs 일본 7.21% — content/2026-11-01.json big_issue",
+ "seedance": {
+  "model": "seedance_2_5",
+  "mode": "omni_reference",
+  "resolution": "720p",
+  "job": "c6932bc4-5f8b-410f-8782-0642fefdc10c",
+  "prompt": "장난감 경주 비유 — H 놀람 → 빨간 전기차 추월 → 결승선 사진 판정(로봇 심판) → H 가 두 차 비교. 로고·국기·실제 차종 없음",
+  "takes": "1판 40926a10(관중석에 흐릿한 관객 → 안 씀) · 2판 3576f4be(관객 없음, 빨간 차가 실제 브랜드 전기차를 닮음 → 안 씀) · 3판 c6932bc4(빈 관중석·통통한 장난감 차 → 씀). 각 720p 105크레딧"
+ },
+ "trim": [
+  0.4,
+  15.04
+ ],
+ "end_seconds": 2.5,
+ "captions": [
+  {
+   "start": 0.0,
+   "end": 2.6,
+   "size": 92,
+   "html": "<div class=\"kick\">10월 31일 수입차 집계</div><div class=\"main\">헉… 중국차가<br>일본차를<br><span class=\"hl\">제쳤다고?!</span></div>"
+  },
+  {
+   "start": 2.6,
+   "end": 6.25,
+   "size": 84,
+   "html": "<div class=\"main\">BYD 올해 1~9월<br><span class=\"hl\">2만137대</span><br>신규 등록</div><div class=\"sub\">9월엔 수입차 4위까지</div>"
+  },
+  {
+   "start": 6.25,
+   "end": 10.25,
+   "size": 82,
+   "html": "<div class=\"kick\">수입차 점유율</div><div class=\"main\">중국 <span class=\"hl\">7.22%</span><br>일본 7.21%</div><div class=\"sub\">중국 브랜드 합계 · 간발의 차</div>"
+  },
+  {
+   "start": 10.25,
+   "end": 14.64,
+   "size": 78,
+   "html": "<div class=\"kick\">그래서 나는?</div><div class=\"main\">전기차 고를 땐<br>같은 가격대<br><span class=\"hl\">중국차도 후보</span>로</div><div class=\"sub\">돌핀 2450만원부터 · 정비 거점까지 비교</div>"
+  }
+ ],
+ "end_card": {
+  "line": "내일 아침 8시 30분에 또 만나요!",
+  "note": "숫자는 기사 2곳 이상에서 확인했어요<br>(10월 31일 한국수입자동차협회 집계 보도 기준)"
+ },
+ "voices": [
+  {
+   "file": "stems/v1_h_shock.mp3",
+   "start": 0.05,
+   "tempo": 1.25,
+   "text": "헉… 중국차가 일본차를 제쳤다고?!",
+   "voice": "qwen_audio_tts · Hana"
+  },
+  {
+   "file": "stems/v2_h_byd.mp3",
+   "start": 2.6,
+   "tempo": 1.3,
+   "text": "비와이디가 올해 구월까지 이만 백삼십칠 대나 등록됐대!",
+   "voice": "qwen_audio_tts · Hana"
+  },
+  {
+   "file": "stems/v3_announcer.mp3",
+   "start": 6.3,
+   "tempo": 1.3,
+   "text": "점유율, 칠 점 이이 퍼센트 대 칠 점 이일 퍼센트! 간발의 차입니다!",
+   "voice": "elevenlabs_v4 · Knox"
+  },
+  {
+   "file": "stems/v4_h_compare.mp3",
+   "start": 10.3,
+   "tempo": 1.22,
+   "text": "전기차 고를 땐, 같은 가격대 중국차도 후보에 넣어 보자!",
+   "voice": "qwen_audio_tts · Hana"
+  },
+  {
+   "file": "../2026-10-31/stems/v5_h_bye.mp3",
+   "start": 14.8,
+   "tempo": 1.15,
+   "text": "내일 아침 여덟 시 반에 또 만나요!",
+   "voice": "qwen_audio_tts · Hana (10/31 녹음 재사용)"
+  }
+ ],
+ "music": [
+  {
+   "file": "../2026-10-31/stems/m1_chase.m4a",
+   "start": 0.0,
+   "dur": 5.9,
+   "fade_out": 0.3
+  },
+  {
+   "file": "../2026-10-31/stems/m1_chase.m4a",
+   "start": 5.7,
+   "offset": 1.85,
+   "dur": 4.05,
+   "lufs": -21,
+   "fade_in": 0.25,
+   "fade_out": 0.4
+  },
+  {
+   "file": "../2026-10-31/stems/m2_morning.m4a",
+   "start": 9.6,
+   "dur": 7.54,
+   "fade_in": 0.35,
+   "fade_out": 0.7
+  }
+ ],
+ "sfx": [
+  [
+   0,
+   6.2,
+   0.5
+  ],
+  [
+   6.2,
+   10.2,
+   0.3
+  ],
+  [
+   10.2,
+   999,
+   0.25
+  ]
+ ],
+ "comic": {
+  "series": "BYD 편",
+  "title": "BYD <span class='hl'>2만137대</span>,<br>중국차가 일본차 제쳤다고?",
+  "panels": [
+   {
+    "t": 2.0,
+    "pos": "50% 40%",
+    "who": "H",
+    "bubble": "헉… 중국차가<br>일본차를 <span class='hl'>제쳤다고?!</span>",
+    "box": "BYD, 올해 1~9월 국내 신규 등록 <b>2만137대</b>."
+   },
+   {
+    "t": 5.0,
+    "pos": "50% 50%",
+    "ph": 760,
+    "who": "H",
+    "bubble": "9월엔 수입차<br><span class='hl'>4위</span>까지 올랐대!",
+    "box": "테슬라·BMW·메르세데스-벤츠 다음 자리예요.",
+    "tail": "right:140px;"
+   },
+   {
+    "t": 9.0,
+    "pos": "50% 45%",
+    "ph": 720,
+    "who": "심판 로봇",
+    "bubble": "<span class='hl'>7.22%</span> 대 7.21%,<br>간발의 차!",
+    "box": "<span class='tag'>사진 판정</span><br>중국 브랜드를 다 합친 수입차 점유율이 일본을 근소하게 앞섰어요.",
+    "tail": "left:200px;"
+   },
+   {
+    "t": 13.5,
+    "pos": "50% 38%",
+    "ph": 700,
+    "who": "H · 그래서 나는?",
+    "bubble": "같은 가격대<br><span class='hl'>중국차도</span> 후보로!",
+    "box": "돌핀 <b>2450만원</b>부터, 씨라이언7 <b>4490만원</b>부터. 실구매가·정비 거점까지 비교해 보세요."
+   }
+  ],
+  "sources": "서울경제·TV조선·SBS Biz 10.31 (한국수입자동차협회 집계 보도)",
+  "end": {
+   "title": "H 극장은 매일 아침",
+   "sub": "경제부터 트렌드까지, 오늘 소식 하나를<br>4컷으로 풀어 드려요"
+  }
+ }
+}

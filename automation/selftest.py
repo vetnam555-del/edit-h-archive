@@ -1737,6 +1737,11 @@ def t_ai_reel():
     expect([x[:2] for x in script] == [(1.6e12, "원"), (5.0, "분"), (3.48, "%")], f"한글 숫자 읽기가 틀린다: {script}")
     expect(all(x[:2] in qa.BRAND_SPOKEN for x in qa.spoken_numbers("사이드카가 하루 만에 울렸대, 삼성 이 회사, 내일 아침 여덟 시 반, 네, 한국 대해")),
            f"숫자가 아닌 말을 숫자로 읽었다: {qa.spoken_numbers('사이드카가 하루 만에 울렸대, 삼성 이 회사, 내일 아침 여덟 시 반, 네, 한국 대해')}")
+    # 세는 말 단위('대'·'종목' …) — '이만 백삼십칠 대' = content '2만137대', 받아쓰기 '2만 137대'(11/01 BYD 편)
+    cars = qa.spoken_numbers("비와이디가 올해 구월까지 이만 백삼십칠 대나 팔렸대!")
+    expect([x[:2] for x in cars] == [(9.0, "월"), (20137.0, "대")] and not qa.check_spoken(cars, "BYD가 올해 9월까지 2만 137대나 팔렸대")[1]
+           and all(any(qa._num_match(x, c, strict=True) for c in qa.content_values("올해 1~9월 국내에서 2만137대 신규 등록")) for x in cars),
+           f"차 대수(대) 읽기가 틀린다: {cars}")
     # 고유어 수사 — '두 종목'을 '세 종목'으로 말하면 막는다, '두 종목'은 content 와 대조(11/01 Codex)
     two = qa.spoken_numbers("내 계좌가 반도체 두 종목에 얼마나 몰렸는지")
     expect([x[:2] for x in two] == [(2.0, "종목")] and qa.check_spoken(two, "내 계좌가 반도체 세 종목에 얼마나")[1]
