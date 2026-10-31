@@ -128,10 +128,10 @@ def write_feeds(manifest, site):
     FEED.write_text(
         '<?xml version="1.0" encoding="UTF-8"?>\n'
         '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">\n<channel>\n'
-        "  <title>EDIT H — 매일 아침, 트렌드 한 입</title>\n"
+        "  <title>EDIT H — 오늘 뉴스, 직장인 버전으로</title>\n"
         f"  <link>{site}/</link>\n"
         f'  <atom:link href="{site}/feed.xml" rel="self" type="application/rss+xml"/>\n'
-        "  <description>매일 아침 8시 30분, 확인된 숫자로 읽는 트렌드 뉴스레터</description>\n"
+        "  <description>매일 아침 8시 30분, 월급·대출·회사 생활에 실제로 달라지는 소식만 확인된 숫자로</description>\n"
         "  <language>ko</language>\n"
         f"  <lastBuildDate>{now}</lastBuildDate>\n"
         + "\n".join(items) + "\n</channel>\n</rss>\n", encoding="utf-8")
