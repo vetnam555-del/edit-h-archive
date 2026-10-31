@@ -212,9 +212,9 @@ AVATAR_MARK = ('<table role="presentation" aria-hidden="true" width="58" height=
 
 # 2026-11-01 운영자 '내 돈·일·소비 같은 문구가 촌스럽다 … 프로필 이미지도 최신본으로'(automation/reviews/2026-11-01-copy.md).
 # 이날 호부터 ① 프로필·노트 마크를 마스코트 얼굴(안경 + 미소, assets/mascot/profile.png)로 ② 바닥·추천 메일 문구를 새 한 줄
-# '오늘 뉴스, 직장인 버전으로'로. 지난 호를 다시 빌드하면 예전 그대로 나온다(기록). 메일엔 여전히 그림 파일을 쓰지 않고 도형으로 그린다.
+# '2030의 아침을 편집합니다'로(같은 날 운영자 '직장인보다 2030 마케팅·트렌드·경제 폭넓게'로 고침). 지난 호를 다시 빌드하면 예전 그대로 나온다(기록). 메일엔 여전히 그림 파일을 쓰지 않고 도형으로 그린다.
 BRAND_V2_FROM = "2026-11-01"
-BRAND_LINE = "오늘 뉴스, 직장인 버전으로"
+BRAND_LINE = "2030의 아침을 편집합니다"   # 11/01 운영자: 직장인보다 2030 마케팅·트렌드·경제 폭넓게
 
 
 def _v2(d):
@@ -421,7 +421,7 @@ def _share_mailto(d, site):
     when = send_time_ko(load_config()['send_time_kst']).replace('오전', '아침')
     if _v2(d):
         subject = f"{BRAND_LINE} — EDIT H 추천해요"
-        pitch = f"매일 {when}, 직장인에게 실제로 달라지는 소식 {n}가지를 골라 보내줘요."
+        pitch = f"매일 {when}, 경제부터 트렌드까지 2030이 알아야 할 소식 {n}가지를 골라 보내줘요."
     else:
         subject = "매일 아침 트렌드 한 입, EDIT H 추천해요"
         pitch = f"매일 {when}에 트렌드 {n}가지를 정리해서 보내줘요."

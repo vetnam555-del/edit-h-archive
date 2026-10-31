@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EDIT H 구독하기 — 오늘 뉴스, 직장인 버전으로</title>
-<meta name="description" content="오늘 뉴스, 직장인 버전으로. 월급, 대출, 회사 생활에 실제로 달라지는 것만 골라 매일 아침 8시 30분에 보내는 무료 뉴스레터 EDIT H 구독 신청.">
+<title>EDIT H 구독하기 — 경제부터 트렌드까지, 2030이 알아야 할 것만</title>
+<meta name="description" content="경제부터 트렌드까지, 2030이 알아야 할 것만. 매일 아침 8시 30분에 보내는 무료 뉴스레터 EDIT H 구독 신청.">
 <link rel="canonical" href="https://vetnam555-del.github.io/edit-h-archive/subscribe.html">
 <meta name="theme-color" content="#FFFFFF">
-<meta property="og:title" content="EDIT H — 오늘 뉴스, 직장인 버전으로">
-<meta property="og:description" content="월급, 대출, 회사 생활에 실제로 달라지는 것만 골라 매일 아침 8시 30분에. 무료·광고 없음.">
+<meta property="og:title" content="EDIT H — 경제부터 트렌드까지, 2030이 알아야 할 것만">
+<meta property="og:description" content="2030의 아침을 편집합니다. 매일 아침 8시 30분, 무료·광고 없음.">
 <meta property="og:type" content="website">
 <meta property="og:image" content="https://vetnam555-del.github.io/edit-h-archive/og_image.png">
 <meta property="og:image:width" content="1200">
@@ -163,12 +163,16 @@
   .noresult { margin: 18px 0 0; padding: 18px; background: var(--band); border-radius: 14px; color: var(--sub); text-align: center; }
 
   /* 마지막 권유 */
-  .closing { margin-top: 80px; background: var(--brand); color: var(--ink); }
-  .closing .wrap { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 24px; padding-top: 52px; padding-bottom: 52px; }
-  .closing h2 { margin: 0 0 6px; font-size: clamp(26px, 6vw, 38px); line-height: 1.2; letter-spacing: -0.045em; font-weight: 800; }
-  .closing p { margin: 0; font-size: 15px; font-weight: 500; }
+  /* 11/01 운영자 "하단이 전부 주황색이라 눈에 안 띈다"(주황 바탕에 주황 마스코트·검은 글씨) → 검은 띠 위에 주황 마스코트·주황 버튼 */
+  .closing { margin-top: 80px; background: var(--ink); color: #fff; }
+  .closing .wrap { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 24px; padding-top: 56px; padding-bottom: 56px; }
+  .closing h2 { margin: 0 0 8px; font-size: clamp(26px, 6vw, 38px); line-height: 1.2; letter-spacing: -0.045em; font-weight: 800; }
+  .closing h2 .hl { color: var(--brand); }
+  .closing p { margin: 0; font-size: 15px; font-weight: 500; color: #BDB6AA; }
   .closing .act { display: flex; align-items: center; gap: 18px; }
-  .closing img { width: 104px; height: 104px; }
+  .closing img { width: 112px; height: 112px; padding: 8px; border-radius: 50%; background: var(--band); }  /* 검은 띠에서 마스코트 다리·컵이 묻히지 않게 */
+  .closing .btn { color: var(--ink); background: var(--brand); }
+  .closing .btn:hover { background: #FF7356; }
   .btn { display: inline-block; text-decoration: none; font-weight: 700; font-size: 16px; color: #fff; background: var(--ink); padding: 15px 26px; border-radius: 12px; }
   .btn:hover { background: #333; }
   .footer { padding: 32px 0 104px; font-size: 13px; color: var(--mute); }
@@ -213,8 +217,8 @@
   <div class="wrap">
     <div class="hero-copy">
       <p class="kicker"><span class="dot" aria-hidden="true"></span>매일 아침 8:30 · 무료 뉴스레터</p>
-      <h1 id="hero-title">오늘 뉴스,<br><span class="hl">직장인 버전</span>으로</h1>
-      <p class="lead">쏟아지는 뉴스 중 월급, 대출, 회사 생활에 실제로 달라지는 것만 골라, 소식마다 '그래서 나는 뭘 하면 되는지'까지 5분 분량으로 정리해요. 숫자는 서로 다른 두 곳에서 확인합니다.</p>
+      <h1 id="hero-title">경제부터 트렌드까지,<br><span class="hl">2030</span>이 알아야 할 것만</h1>
+      <p class="lead">경제와 재테크, 소비 트렌드, 마케팅과 브랜드, 테크까지. 쏟아지는 소식 중 오늘 알아야 할 것만 골라 '그래서 나는?'까지 5분 분량으로 정리해요. 숫자는 서로 다른 두 곳에서 확인합니다.</p>
 
       <form id="subscribeForm" action="https://formspree.io/f/xwvznwyw" method="POST" class="sub-form">
         <div class="field">
