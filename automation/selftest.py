@@ -1654,7 +1654,39 @@ def t_ai_reel():
         parent = g.calls[-1]
         expect(mid == "m1" and info.get("ai_label") is True and parent.get("is_ai_generated") == "true"
                and pi.AI_NOTE_KEY in parent.get("caption", "") and parent.get("media_type") == "CAROUSEL", "만화 캐러셀에 AI 라벨·AI 한 줄이 없다")
-    return "reel_ai.mp4 → 형식 ai · 캡션 따로 · 스토리 영상 · AI 정보 라벨 · H 극장 만화 캐러셀"
+
+    # 게시 전 숫자 검수 — 큰 금액은 한 덩어리로 대조한다(11/01 Codex: '1조6000억원'이 '1조5000억원과 6000억원'에서 통과하면 안 된다)
+    sys.path.insert(0, str(ROOT / "automation" / "pilots" / "ai_reel"))
+    import qa
+    expect(qa.check_numbers([("t", "1조6000억원")], "1조5000억원과 6000억원"), "쪼갠 금액 조각으로 '1조6000억원'이 통과했다")
+    expect(qa.check_numbers([("t", "1조7000억원")], "1조6000억원") and qa.check_numbers([("t", "12거래일")], "11거래일, 12.64"),
+           "content 에 없는 숫자가 통과했다")
+    expect(not qa.check_numbers([("t", "1조6000억원 넘게 · 3.48% · 장중 5599 · 3만 명")], "1조 6000억원 순매도 3.48% 5599.42 3만 명"),
+           "content 에 있는 숫자를 막았다")
+
+    # 만화·AI 릴스 성과는 각자 게시 시각에서 24시간 뒤 스냅숏으로 잰다(캐러셀 시각으로 고르면 늦게 올린 만화가 빠진다 — 11/01 Codex)
+    import collect_metrics as cm
+    with tempfile.TemporaryDirectory() as tmp:
+        auto = Path(tmp)
+        (auto / "ig_posted").mkdir()
+        (auto / "metrics" / "daily").mkdir(parents=True)
+        (auto / "ig_posted" / "2026-11-01.json").write_text(json.dumps(
+            {"carousel": {"at": "2026-11-01T08:30:00+09:00"}, "comic": {"at": "2026-11-02T10:00:00+09:00"}}), encoding="utf-8")
+        snaps = [("2026-11-02T21:00:00+09:00", 1), ("2026-11-03T21:00:00+09:00", 2)]
+        for at, n in snaps:
+            (auto / "metrics" / "daily" / f"{at[:10]}.json").write_text(json.dumps(
+                {"collected_at": at, "instagram": {"posts": {"2026-11-01": {"reach": 100 * n, "comic": {"reach": 10 * n}}}}}), encoding="utf-8")
+        saved = cm.AUTOMATION, cm.METRICS
+        cm.AUTOMATION, cm.METRICS = auto, auto / "metrics"
+        try:
+            main_row = cm._at_age("2026-11-01", {})
+            comic_row = cm._at_age("2026-11-01", {}, kind="comic")
+            none_row = cm._at_age("2026-11-01", {}, kind="reel_ai")
+        finally:
+            cm.AUTOMATION, cm.METRICS = saved
+        expect(main_row.get("reach") == 100 and comic_row == {"reach": 20} and none_row == {},
+               f"만화 24시간 스냅숏을 캐러셀 시각으로 골랐다({main_row}, {comic_row}, {none_row})")
+    return "reel_ai.mp4 → 형식 ai · 캡션 따로 · 스토리 영상 · AI 정보 라벨 · H 극장 만화 캐러셀 · 숫자 검수 · 각자 24시간 성과"
 
 
 def t_competitors_ig():

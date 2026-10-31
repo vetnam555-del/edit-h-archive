@@ -136,7 +136,7 @@ def compose(ep, base, src, out, work):
         f.append(chain + f",adelay={int(v['start'] * 1000)}:all=1[vo{k}]")
         vl.append(f"[vo{k}]")
     if vl:
-        f.append(f"{''.join(vl)}amix=inputs={len(vl)}:normalize=0,apad=whole_dur={total},atrim=0:{total},asplit=2[voice][key]")
+        f.append(f"{''.join(vl)}amix=inputs={len(vl)}:normalize=0,apad=whole_dur={total},atrim=0:{total}" + (",asplit=2[voice][key]" if music else "[voice]"))
     ml = []
     for k, m in enumerate(music):
         fade = (f",afade=t=in:st=0:d={m['fade_in']}" if m.get("fade_in") else "") + \
