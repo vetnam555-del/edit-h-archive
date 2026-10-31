@@ -60,6 +60,76 @@
    "name": "ai-fuel-nozzle",
    "url": "https://d8j0ntlcm91z4.cloudfront.net/user_39AFcjW15BXPoPKJdhkblpn98Bg/hf_20261031_165316_70976aa8-b395-4ef8-8b64-1a76a73ba71a.png",
    "job": "70976aa8-b395-4ef8-8b64-1a76a73ba71a"
+  },
+  {
+   "name": "mascot-sheet",
+   "url": "https://d8j0ntlcm91z4.cloudfront.net/user_39AFcjW15BXPoPKJdhkblpn98Bg/hf_20261031_170818_3635129c-7db7-455b-9a81-21bf70bdb804.png",
+   "job": "3635129c-7db7-455b-9a81-21bf70bdb804",
+   "dir": "assets/mascot",
+   "format": "jpg"
+  },
+  {
+   "name": "h-hello",
+   "url": "https://d8j0ntlcm91z4.cloudfront.net/user_39AFcjW15BXPoPKJdhkblpn98Bg/hf_20261031_171048_45645811-bd45-41b3-ba9e-7d3639460110.png",
+   "job": "45645811-bd45-41b3-ba9e-7d3639460110",
+   "dir": "assets/mascot",
+   "format": "png"
+  },
+  {
+   "name": "h-point",
+   "url": "https://d8j0ntlcm91z4.cloudfront.net/user_39AFcjW15BXPoPKJdhkblpn98Bg/hf_20261031_170820_621adbd5-59df-41cb-95ff-a4f778d9ce24.png",
+   "job": "621adbd5-59df-41cb-95ff-a4f778d9ce24",
+   "dir": "assets/mascot",
+   "format": "png"
+  },
+  {
+   "name": "h-newspaper",
+   "url": "https://d8j0ntlcm91z4.cloudfront.net/user_39AFcjW15BXPoPKJdhkblpn98Bg/hf_20261031_170818_265a1923-702c-496d-87a5-490006743312.png",
+   "job": "265a1923-702c-496d-87a5-490006743312",
+   "dir": "assets/mascot",
+   "format": "png"
+  },
+  {
+   "name": "h-surprised",
+   "url": "https://d8j0ntlcm91z4.cloudfront.net/user_39AFcjW15BXPoPKJdhkblpn98Bg/hf_20261031_170819_fd3f1d29-ca59-4b38-abcf-042b1f4b1b22.png",
+   "job": "fd3f1d29-ca59-4b38-abcf-042b1f4b1b22",
+   "dir": "assets/mascot",
+   "format": "png"
+  },
+  {
+   "name": "h-thinking",
+   "url": "https://d8j0ntlcm91z4.cloudfront.net/user_39AFcjW15BXPoPKJdhkblpn98Bg/hf_20261031_170819_38f2fcad-d861-434b-b35a-0cc93d8b6102.png",
+   "job": "38f2fcad-d861-434b-b35a-0cc93d8b6102",
+   "dir": "assets/mascot",
+   "format": "png"
+  },
+  {
+   "name": "h-celebrate",
+   "url": "https://d8j0ntlcm91z4.cloudfront.net/user_39AFcjW15BXPoPKJdhkblpn98Bg/hf_20261031_170820_f90dbfde-8bd0-4cc5-baad-f345a3cf59d4.png",
+   "job": "f90dbfde-8bd0-4cc5-baad-f345a3cf59d4",
+   "dir": "assets/mascot",
+   "format": "png"
+  },
+  {
+   "name": "h-checklist",
+   "url": "https://d8j0ntlcm91z4.cloudfront.net/user_39AFcjW15BXPoPKJdhkblpn98Bg/hf_20261031_170818_793cb3c3-43a9-4e91-abac-89a8d5d5066a.png",
+   "job": "793cb3c3-43a9-4e91-abac-89a8d5d5066a",
+   "dir": "assets/mascot",
+   "format": "png"
+  },
+  {
+   "name": "h-calendar",
+   "url": "https://d8j0ntlcm91z4.cloudfront.net/user_39AFcjW15BXPoPKJdhkblpn98Bg/hf_20261031_170820_1046e3fc-d39f-47f3-bef1-8e7796c10949.png",
+   "job": "1046e3fc-d39f-47f3-bef1-8e7796c10949",
+   "dir": "assets/mascot",
+   "format": "png"
+  },
+  {
+   "name": "h-coffee",
+   "url": "https://d8j0ntlcm91z4.cloudfront.net/user_39AFcjW15BXPoPKJdhkblpn98Bg/hf_20261031_170819_90e53731-dd76-4952-a568-778fd0eca2a8.png",
+   "job": "90e53731-dd76-4952-a568-778fd0eca2a8",
+   "dir": "assets/mascot",
+   "format": "png"
   }
  ]
 }
