@@ -778,6 +778,17 @@ def t_photo_library():
     every = fetch_photo.library("2999-01-01")
     missing = lib - {c["photo"] for c in every}
     expect(not missing, f"대체 사진 목록에 있지만 파일이나 출처(발행한 호의 credit)가 없다: {', '.join(sorted(missing))}")
+    # AI 생성 사진(2026-11-01~ 힉스필드 — 10/31 회고 '대체 사진이 바닥'): 표지 출처 칸에 'AI 생성'을 밝히고, 3:4 표지도 흐리지 않게 채우고,
+    # 주제어 점수가 같으면 실사 사진이 먼저다
+    from edith.common import CARD_H_34, cover_photo_problem
+    ai = [c for c in every if c["ai"]]
+    expect(ai and all("AI 생성" in c["credit"] for c in ai), "AI 생성 사진의 출처 칸에 'AI 생성' 표기가 없다")
+    blurry = [why for c in ai if (why := cover_photo_problem(c["photo"], CARD_H_34))]
+    expect(not blurry, f"AI 생성 사진이 3:4 표지를 채우기에 작다: {blurry[:1]}")
+    for words in ("", "저축 동전", "출근 직장인", "카드 결제"):
+        cands = fetch_photo.library("2999-01-01", words)
+        late = [(a["photo"], b["photo"]) for a, b in zip(cands, cands[1:]) if a["score"] == b["score"] and a["ai"] and not b["ai"]]
+        expect(not late, f"'{words}': 점수가 같은데 AI 사진이 실사보다 먼저다 — {late[:1]}")
     # 주제어가 하나도 안 맞으면 중립 사진(도시·출근길)이 맨 위 — 핵심어 표지 대신 쓰는 마지막 대안(2026-10-25)
     blank = fetch_photo.library("2999-01-01", "주말 날씨 추위")
     expect(blank and blank[0]["neutral"] and not blank[0]["score"], f"맞는 주제어가 없을 때 중립 사진이 먼저가 아니다: {blank[:1]}")
