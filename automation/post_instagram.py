@@ -170,10 +170,13 @@ def reel_caption(folder, track=None):
     """릴스 캡션 = build_issue.py 가 만든 reel_caption.txt(훅·요약 한 문장·피드 안내·해시태그).
     음악 출처는 캡션에 쓰지 않는다(2026-09-25 요청) — 영상 위쪽에 들어가고(make_reel.py), 못 넣으면 댓글로(music_credit).
     파일이 없으면(주간 특집·예전 호) caption.txt 의 첫 줄과 해시태그로 같은 모양을 만든다."""
-    path = folder / ("reel_ai_caption.txt" if (track or {}).get("style") == "ai" and (folder / "reel_ai_caption.txt").exists()
-                     else "reel_caption.txt")
+    ai = (track or {}).get("style") == "ai"
+    path = folder / ("reel_ai_caption.txt" if ai and (folder / "reel_ai_caption.txt").exists() else "reel_caption.txt")
     if path.exists():
-        return path.read_text(encoding="utf-8").strip()
+        text = path.read_text(encoding="utf-8").strip()
+        if ai and AI_NOTE_KEY not in text:   # AI 전용 캡션이 없어도 AI 제작을 밝힌다(라벨이 거절돼도 표시가 남게 — Codex 리뷰)
+            text += "\n\n" + AI_NOTE
+        return text
     from edith.site import _GENERIC_TAGS
     cap = (folder / "caption.txt").read_text(encoding="utf-8").strip().splitlines()
     line = next((x for x in reversed(cap) if x.startswith("#")), "")
@@ -191,6 +194,8 @@ def music_credit(track):
 
 
 AI_REEL = "reel_ai.mp4"   # 2026-11-01 운영자: 힉스필드로 만든 AI 영상 릴스(대사·음악 포함) — 있으면 그날 릴스를 이것으로 올린다
+AI_NOTE_KEY = "AI로 만들"   # AI 릴스 캡션에 꼭 들어갈 말(없으면 AI_NOTE 를 붙인다)
+AI_NOTE = "이 영상과 목소리는 AI로 만들었어요."
 
 
 def ai_track(video, ffmpeg):
@@ -545,7 +550,7 @@ def maintain_token(token):
 
 
 def prune(days):
-    """게시가 끝난 지 오래된 호의 게시용 JPEG(ig/)·릴스 영상(reel.mp4)·세로 릴스 프레임(reel_frames/)·스토리 화면(story/)은 지운다 — Pages 용량(1GB) 관리.
+    """게시가 끝난 지 오래된 호의 게시용 JPEG(ig/)·릴스 영상(reel.mp4·reel_ai.mp4)·세로 릴스 프레임(reel_frames/)·스토리 화면(story/)은 지운다 — Pages 용량(1GB) 관리.
     카드 PNG·갤러리는 그대로 둔다."""
     cutoff = now_kst().date() - dt.timedelta(days=days)
     for d in INSTAGRAM_DIR.glob("*/ig"):
@@ -554,7 +559,8 @@ def prune(days):
             for f in d.glob("*.jpg"):
                 f.unlink()
             d.rmdir()
-    for f in [*INSTAGRAM_DIR.glob("*/reel.mp4"), *INSTAGRAM_DIR.glob("*/reel_frames/*.jpg"), *INSTAGRAM_DIR.glob("*/story/*.jpg")]:
+    for f in [*INSTAGRAM_DIR.glob("*/reel.mp4"), *INSTAGRAM_DIR.glob(f"*/{AI_REEL}"),   # AI 영상 릴스도 같은 보관 기간(Codex 리뷰)
+              *INSTAGRAM_DIR.glob("*/reel_frames/*.jpg"), *INSTAGRAM_DIR.glob("*/story/*.jpg")]:
         folder = f.parent.parent if f.parent.name in ("reel_frames", "story") else f.parent
         m = re.match(r"(\d{4}-\d{2}-\d{2})", folder.name)
         if m and dt.date.fromisoformat(m.group(1)) < cutoff and (LOG_DIR / f"{folder.name}.json").exists():

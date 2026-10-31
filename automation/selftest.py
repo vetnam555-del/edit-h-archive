@@ -1601,8 +1601,10 @@ def t_ai_reel():
         out, track = pi.build_reel("2026-11-01", folder, "ffmpeg")
         expect(out == folder / pi.AI_REEL and track["style"] == "ai" and track["credit_in_video"], "reel_ai.mp4 를 쓰지 않는다")
         expect(track["license"].upper() == "CC0", "AI 영상에 음악 출처 댓글이 붙는다")
-        expect(pi.reel_caption(folder, track) == "AI 릴스 캡션" and pi.reel_caption(folder, {"style": "vertical"}) == "보통 릴스 캡션",
-               "AI 릴스 캡션 파일을 고르지 못한다")
+        expect(pi.reel_caption(folder, track).startswith("AI 릴스 캡션") and pi.AI_NOTE_KEY in pi.reel_caption(folder, track)
+               and pi.reel_caption(folder, {"style": "vertical"}) == "보통 릴스 캡션", "AI 릴스 캡션 파일을 고르지 못한다")
+        (folder / "reel_ai_caption.txt").unlink()   # AI 전용 캡션이 없어도 AI 제작 표시는 남는다
+        expect(pi.AI_NOTE_KEY in pi.reel_caption(folder, track), "AI 전용 캡션이 없을 때 AI 표시가 빠진다")
     src = inspect.getsource(pi.main)
     expect("reel_ai" in src and "story_ai" in src and "post_story_video" in src, "AI 영상 릴스·스토리 게시 단계가 없다")
 
@@ -1630,6 +1632,7 @@ def t_ai_reel():
     except pi.IGError:
         expect(len(g.calls) == 1, "라벨을 거절당한 뒤 라벨 없는 스토리 컨테이너를 만든다")
     expect("want_reel" in src.split("AI_REEL")[1][:400], "AI 릴스가 릴스 게시 설정(reel=false)을 무시한다")
+    expect("AI_REEL" in inspect.getsource(pi.prune), "오래된 AI 릴스 영상을 정리하지 않는다")
     return "reel_ai.mp4 → 형식 ai · 캡션 따로 · 스토리 영상 · AI 정보 라벨(안 받으면 라벨 없이)"
 
 
