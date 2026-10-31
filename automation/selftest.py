@@ -1720,6 +1720,10 @@ def t_ai_reel():
            and qa.check_numbers([("t", "-3.0%")], signed), "등락 부호가 뒤집힌 숫자가 통과했다")
     expect(not qa.check_numbers([("t", "SK하이닉스 -7.08% · 삼성전자 -3.02% · 생산 +3.0% · 2026-11-01")], signed),
            "content 와 같은 방향의 등락 숫자를 막았다")
+    # 끝 화면 문구 — 고정 문구(8시 30분·2030)는 통과, 그 밖의 숫자는 content 와 대조(11/01 Codex)
+    expect(not qa.check_numbers([("끝", "내일 아침 8시 30분에 또 만나요! 2030의 아침을 편집합니다")], "3.48%", allow=qa.BRAND_TOKENS)
+           and qa.check_numbers([("끝", "코스피 99.99% 하락")], "3.48%", allow=qa.BRAND_TOKENS), "끝 화면 숫자 검수가 틀린다")
+    expect('"끝 화면 {k}"' in inspect.getsource(qa.main) or "끝 화면" in inspect.getsource(qa.main), "qa.main 이 끝 화면 문구를 보지 않는다")
     # 목소리 숫자 — 대사 원고(한글 읽기)는 content 와, 들린 숫자는 대사와 같은 값이어야 한다(11/01 Codex: 자막이 맞아도 '일조 칠천억'을 말하면 막는다)
     script = qa.spoken_numbers("외국인이 하루 만에 일조 육천억 원 넘게 팔았대! 프로그램 매도 오 분간 멈춥니다. 삼 점 사팔 퍼센트")
     expect(script == [(1.6e12, "원"), (5.0, "분"), (3.48, "%")], f"한글 숫자 읽기가 틀린다: {script}")

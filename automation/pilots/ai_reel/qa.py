@@ -8,7 +8,7 @@
     대사 원고의 숫자(한글 읽기)는 content 와, 들린 숫자는 대사 숫자와 같은 값이어야 한다(11/01 Codex — 목소리가 틀린 금액을 말하면 막는다).
  3. 소리 — 통합 음량 -14±1.5 LUFS, 음성 트랙이 있다, 중간에 끊기는 곳이 없다(11/01 운영자 "소리가 중간중간 끊긴다").
  4. 영상 — 1080×1920, 길이 8~30초.
- 5. 캡션 — reel_ai_caption.txt·comic_caption.txt 에 'AI로 만들' 한 줄, 해시태그 5개 이하, 같은 숫자 대조.
+ 5. 캡션 — reel_ai_caption.txt·comic_caption.txt 에 'AI로 만들' 한 줄, 해시태그 5개 이하, 같은 숫자 대조(끝 화면·만화 끝 장 문구도).
  6. 만화 — comic/ JPEG 3~10장, 1080×1350.
  7. 금지 — 화면 글자에 'AI로 만든 영상' 표시 없음(운영자 11/01), 실존 인물·회사 로고는 사람이 프레임 캡처로 한 번 더 본다(자동 아님).
 """
@@ -66,7 +66,10 @@ def corpus_numbers(corpus):
     return have
 
 
-def check_numbers(texts, corpus):
+BRAND_TOKENS = {"8시", "30분", "2030"}   # 끝 화면 고정 문구(발송 시각 8시 30분·'2030의 아침') — content 숫자가 아니어도 된다
+
+
+def check_numbers(texts, corpus, allow=()):
     """숫자는 낱말 단위로 content 의 숫자와 맞춘다(content 전체 글자를 이어 붙여 찾으면 '5599.42, 3만 명'이 '5599.423만명'이 되어
     앞뒤 숫자가 섞인다 — 11/01). 단위가 있으면 content 에 같은 덩어리가 있어야 한다('1조7000억원'·'1조'는 '1조6000억원'으로 통과 못 함,
     '6000억'은 '6000억원'으로 통과). 단위 없는 맨숫자는 같은 수이거나 그 수의 소수(5599 ↔ 5599.42)면 통과, % 수와는 맞추지 않는다.
@@ -76,6 +79,8 @@ def check_numbers(texts, corpus):
     bad = []
     for label, text in texts:
         for t in numbers(text):
+            if t in allow:
+                continue
             sign, body = (t[0], t[1:]) if t[0] in "+-" else ("", t)
             if re.fullmatch(r"[\d.]+", body):
                 ok = any((m := re.match(r"[\d.]+", c)) and (m.group(0) == body or m.group(0).startswith(body + "."))
@@ -248,6 +253,10 @@ def main():
             if len(tags) > 5:
                 fails.append(f"{name}: 해시태그 {len(tags)}개(5개 이하)")
     bad = check_numbers(texts, corpus)
+    # 끝 화면(영상)·만화 끝 장도 화면에 나간다(11/01 Codex) — 고정 문구 숫자(8시 30분·2030)만 예외
+    ends = [(f"끝 화면 {k}", plain(str((ep.get("end_card") or {}).get(k) or ""))) for k in ("line", "sub", "note")]
+    ends += [(f"만화 끝 장 {k}", plain(str(((ep.get("comic") or {}).get("end") or {}).get(k) or ""))) for k in ("title", "sub")]
+    bad += check_numbers([x for x in ends if x[1]], corpus, allow=BRAND_TOKENS)
     fails += [f"content 에 없는 숫자 — {b}" for b in bad]
     # 대사 원고의 숫자(한글 읽기)도 content 와 같은 값이어야 한다
     cvals = content_values(corpus)
