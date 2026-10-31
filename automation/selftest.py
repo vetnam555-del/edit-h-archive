@@ -758,6 +758,8 @@ def t_gift():
             expect((ROOT / f"{it['issue']}.html").exists(), f"선물 항목 '{it['do']}' 의 호 {it['issue']} 가 없다")
     sub = (ROOT / "subscribe.html").read_text(encoding="utf-8")
     expect(f'data-from="{g["from"]}" data-until="{g["until"]}"' in sub, "subscribe.html 선물 상자 날짜가 config.gift 와 다르다")
+    home = (ROOT / "index.html").read_text(encoding="utf-8")
+    expect(f'data-from="{g["from"]}" data-until="{g["until"]}"' in home, "index.html(첫 화면 구독) 선물 상자 날짜가 config.gift 와 다르다")
     gift = active_gift(g["from"])
     expect(gift and gift["url"].endswith(f"/gift/{g['slug']}.html"), "기간 첫날에 선물이 켜져야 한다")
     import sync_subscribers
@@ -1498,6 +1500,57 @@ def t_indexnow():
     return f"{len(urls)}개 주소 · 키 파일 {kf.name[:8]}…"
 
 
+def t_home():
+    """첫 화면 구독(2026-11-01 운영자 '첫 화면에서 바로 구독 신청 — 구독 수를 높이게'): index.html 구독 칸이 subscribe.html 과 같은
+    Formspree 주소·칸(email·동의·ref)을 쓰고, 생성 표시(LATEST·ISSUES·호 수)가 있으며, regenerate_index 가 달 머리·예비 호 표시·
+    최근 호(예비 호 제외)·호 수(가장 큰 VOL)를 바르게 쓰고 두 번 돌려도 같다. 공유 미리보기·아이콘이 제 크기다."""
+    import struct
+    from edith import site as site_mod
+    home = (ROOT / "index.html").read_text(encoding="utf-8")
+    sub = (ROOT / "subscribe.html").read_text(encoding="utf-8")
+    action = re.search(r'<form id="subscribeForm" action="([^"]+)"', sub).group(1)
+    expect(f'id="subscribeForm" action="{action}" method="POST"' in home, "첫 화면 구독 칸이 구독 페이지와 다른 주소로 보낸다")
+    for need in ('name="email"', 'name="consent_marketing" value="yes" required', 'name="ref" id="ref"', 'name="subscribed_at"',
+                 "<!-- LATEST:START -->", "<!-- LATEST:END -->", "<!-- ISSUES:START -->", "<!-- ISSUES:END -->", "<span data-issue-count>",
+                 'id="privacy"', 'href="#privacy"', "og_image.png", "assets/mascot/avatar-96.png"):
+        expect(need in home, f"첫 화면에 {need} 가 없다")
+    expect("-home" in home and "utm_source" in home, "첫 화면 구독 경로(ref …-home, utm_source=ig)를 남기지 않는다")
+    manifest = {"issues": [
+        {"vol": "098", "date": "2026-09-29", "weekday": "화", "emoji": "📈", "title": "구월 호", "subtitle": "s", "filename": "2026-09-29.html", "key_keywords": ["금리"]},
+        {"vol": "099", "date": "2026-10-01", "weekday": "목", "emoji": "🧭", "title": "시월 호", "subtitle": "s", "filename": "2026-10-01.html", "key_keywords": ["연말정산", "청약"]},
+        {"vol": "100", "date": "2026-10-02", "weekday": "금", "emoji": "🔁", "title": "다시 보기 호", "subtitle": "s", "filename": "2026-10-02.html", "source_mode": "rewind"}]}
+    with tempfile.TemporaryDirectory() as tmp:
+        saved = site_mod.INDEX
+        site_mod.INDEX = Path(tmp, "index.html")
+        try:
+            site_mod.INDEX.write_text(home, encoding="utf-8")
+            site_mod.regenerate_index(manifest)
+            once = site_mod.INDEX.read_text(encoding="utf-8")
+            site_mod.regenerate_index(manifest)
+            twice = site_mod.INDEX.read_text(encoding="utf-8")
+        finally:
+            site_mod.INDEX = saved
+    expect(once == twice, "regenerate_index 를 두 번 돌리면 첫 화면이 달라진다")
+    issues = once[once.index("<!-- ISSUES:START -->"):once.index("<!-- ISSUES:END -->")]
+    latest = once[once.index("<!-- LATEST:START -->"):once.index("<!-- LATEST:END -->")]
+    expect(issues.index("2026년 10월") < issues.index("다시 보기 호") < issues.index("2026년 9월") and issues.count('class="item"') == 3,
+           "지난 호 목록이 최신순·달 머리로 나뉘지 않았다")
+    expect('<span class="badge">다시 보기</span>' in issues and "시월 호" in latest and "다시 보기 호" not in latest
+           and "<span>연말정산</span>" in latest, "최근 호 카드가 예비 호를 고르거나 키워드가 없다")
+    expect("<span data-issue-count>100</span>" in once, "호 수가 가장 큰 VOL 이 아니다")
+    expect(home == open(ROOT / "index.html", encoding="utf-8").read(), "시험이 진짜 index.html 을 바꿨다")
+
+    def png_size(path):
+        with open(path, "rb") as f:
+            head = f.read(24)
+        return struct.unpack(">II", head[16:24])
+    for name, size in (("og_image.png", (1200, 630)), ("favicon.png", (64, 64)), ("apple-touch-icon.png", (180, 180)),
+                       ("assets/mascot/avatar-96.png", (96, 96))):
+        expect((ROOT / name).exists() and png_size(ROOT / name) == size, f"{name} 이 없거나 {size} 가 아니다(build_site_assets.py)")
+    expect((ROOT / "og_image.png").stat().st_size > 40_000, "og_image.png 가 너무 작다 — 한글이 □ 로 깨졌던 옛 그림일 수 있다")
+    return f"구독 칸 → {action.rsplit('/', 1)[-1]} · 생성 표시 3곳"
+
+
 def t_competitors_ig():
     """경쟁 매체 인스타(2026-11-01 운영자 '경쟁사도 못 보면 개선에 영향'): 공식 비즈니스 탐색 API 만 쓰고, 토큰이 없으면 네트워크 없이
     0 으로 끝나며, 응답에서 최근 14일 통계(게시 수·평균·참여율·형식·시각·대표 게시물)를 바르게 계산하고, 실패 계정은 따로 적는다."""
@@ -1655,6 +1708,7 @@ def main():
     check("주간 특집 저장각(E13)", t_weekly_save)
     check("데일리 저장각(체크리스트·차트)", t_save_cards)
     check("마스코트(안경 동그라미 H)", t_mascot)
+    check("첫 화면 구독·사이트 그림(index.html)", t_home)
     check("경쟁 매체 인스타(비즈니스 탐색)", t_competitors_ig)
     check("경쟁 매체 웹(토큰 없이·robots 지킴)", t_competitors_web)
     if not args.quick:

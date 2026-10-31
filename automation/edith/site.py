@@ -35,25 +35,64 @@ def update_manifest(d, site, n_cards, publish_time):
     return manifest
 
 
+REWIND = "rewind"   # 예비 호(지난 이야기 다시 보기) — manifest source_mode
+
+
 def _index_item(i):
+    badge = '<span class="badge">다시 보기</span>' if i.get("source_mode") == REWIND else ""
     return (
         f'  <a href="{i["filename"]}" class="item">\n'
-        f'    <div class="meta"><span class="vol">VOL.{i["vol"]}</span><span>{i["date"]} ({i["weekday"]})</span></div>\n'
+        f'    <div class="meta"><span class="vol">VOL.{i["vol"]}</span><span>{i["date"]} ({i["weekday"]})</span>{badge}</div>\n'
         f'    <div class="title"><span class="ico">{i.get("emoji", "🧭")}</span> {esc(i["title"])}</div>\n'
         f'    <div class="subtitle">{esc(i["subtitle"])}</div>\n'
         f"  </a>\n"
     )
 
 
+def _index_items(issues):
+    """최신 호부터, 달이 바뀌면 '2026년 10월' 머리를 넣는다(지난 호가 130호를 넘어 길어져서)."""
+    out, month = [], None
+    for i in issues:
+        ym = i["date"][:7]
+        if ym != month:
+            month = ym
+            out.append(f'  <h3 class="month">{int(ym[:4])}년 {int(ym[5:])}월</h3>\n')
+        out.append(_index_item(i))
+    return "\n".join(out)
+
+
+def _latest_card(i):
+    """첫 화면 '구독 전에, 최근 호 먼저 보기' — 예비 호가 아닌 가장 최근 호."""
+    chips = "".join(f"<span>{esc(k)}</span>" for k in (i.get("key_keywords") or [])[:5])
+    return (
+        f'    <a class="latest" href="{i["filename"]}">\n'
+        f'      <div class="latest-top"><span class="pill">최근 호</span><span>VOL.{i["vol"]} · {i["date"]} ({i["weekday"]})</span></div>\n'
+        f'      <div class="latest-title">{i.get("emoji", "🧭")} {esc(i["title"])}</div>\n'
+        f'      <div class="latest-sub">{esc(i["subtitle"])}</div>\n'
+        + (f'      <div class="chips">{chips}</div>\n' if chips else "")
+        + '      <div class="latest-go">이 호 읽어 보기 →</div>\n'
+        f"    </a>\n"
+    )
+
+
+def _replace_between(html, start, end, body):
+    s = html.index(start) + len(start)
+    e = html.index(end, s)
+    return html[:s] + "\n" + body + html[e:]
+
+
 def regenerate_index(manifest):
-    """'지난 뉴스레터' 목록만 manifest 로 다시 쓴다. 나머지(헤더·CTA·푸터)는 그대로 둔다."""
+    """첫 화면(index.html)의 생성 부분만 manifest 로 다시 쓴다 — 지난 호 목록(ISSUES)·최근 호 카드(LATEST)·호 수(data-issue-count).
+    나머지(머리·구독 칸·소개·바닥)는 손으로 고친 그대로 둔다(2026-11-01 첫 화면 구독 개편)."""
     html = INDEX.read_text(encoding="utf-8")
-    start_marker = "<h2>📰 지난 뉴스레터</h2>\n"
-    end_marker = '\n  <div class="footer">'
-    s = html.index(start_marker) + len(start_marker)
-    e = html.index(end_marker, s)
-    items = "\n".join(_index_item(i) for i in reversed(manifest["issues"]))
-    INDEX.write_text(html[:s] + "  \n" + items + "\n" + html[e:], encoding="utf-8")
+    issues = list(reversed(manifest["issues"]))
+    html = _replace_between(html, "<!-- ISSUES:START -->", "<!-- ISSUES:END -->", _index_items(issues))
+    latest = next((i for i in issues if i.get("source_mode") != REWIND), issues[0] if issues else None)
+    if latest:
+        html = _replace_between(html, "<!-- LATEST:START -->", "<!-- LATEST:END -->", _latest_card(latest))
+    count = max((int(i["vol"]) for i in issues if str(i.get("vol", "")).isdigit()), default=len(issues))
+    html = re.sub(r"(<span data-issue-count>)\d+(</span>)", lambda m: f"{m.group(1)}{count}{m.group(2)}", html)
+    INDEX.write_text(html, encoding="utf-8")
 
 
 FEED = ROOT / "feed.xml"

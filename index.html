@@ -3,85 +3,277 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EDIT H — Archive</title>
-<meta name="description" content="EDIT H — 매일 아침 8시 30분, 확인된 숫자로 읽는 트렌드 뉴스레터. 지난 호를 모두 볼 수 있어요.">
-<meta property="og:title" content="EDIT H — 매일 아침, 트렌드 한 입">
-<meta property="og:description" content="매일 아침 8시 30분, 확인된 숫자로 읽는 트렌드 뉴스레터">
+<title>EDIT H — 매일 아침 8시 30분, 내 돈·일·소비에 바로 쓰는 뉴스</title>
+<meta name="description" content="2030 직장인 데일리 뉴스레터 EDIT H. 월급·세금·대출·구독·회사 제도처럼 지갑과 일정에 바로 닿는 소식을 확인된 숫자로 매일 아침 8시 30분에. 무료·광고 없음. 지난 호를 모두 볼 수 있어요.">
+<meta name="theme-color" content="#0D0C0A">
+<meta property="og:title" content="EDIT H — 내 돈·일·소비에 바로 쓰는 뉴스, 매일 아침 8시 30분">
+<meta property="og:description" content="2030 직장인 데일리 브리프. 확인된 숫자로 5분 안에. 무료·광고 없음.">
 <meta property="og:image" content="https://vetnam555-del.github.io/edit-h-archive/og_image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="EDIT H">
 <meta property="og:url" content="https://vetnam555-del.github.io/edit-h-archive/">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://vetnam555-del.github.io/edit-h-archive/og_image.png">
 <link rel="canonical" href="https://vetnam555-del.github.io/edit-h-archive/">
 <link rel="alternate" type="application/rss+xml" title="EDIT H" href="feed.xml">
-<!-- 파비콘: 16px 에서도 읽히게 단순화한 마크(디테일 생략, 렌즈 두 개 실루엣만) -->
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%23FF5233'/%3E%3Ccircle cx='31' cy='50' r='15' fill='%23F5F1E8' stroke='%230D0C0A' stroke-width='7'/%3E%3Ccircle cx='69' cy='50' r='15' fill='%23F5F1E8' stroke='%230D0C0A' stroke-width='7'/%3E%3Cpath d='M43 47 Q50 43 57 47' stroke='%230D0C0A' stroke-width='5' fill='none' stroke-linecap='round'/%3E%3Ccircle cx='31' cy='50' r='5.5' fill='%230D0C0A'/%3E%3Ccircle cx='69' cy='50' r='5.5' fill='%230D0C0A'/%3E%3C/svg%3E">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<!-- 2026-11-01 운영자 "첫 화면에서 바로 구독 신청해서 구독 수를 높이게 구조 변경 + 디자인 전체 개선".
+     첫 화면 = 구독(이메일 한 칸 + 동의 + 버튼, subscribe.html 과 같은 Formspree 주소·칸). 지난 호 목록·최근 호 카드·호 수는
+     빌드가 manifest 로 다시 쓴다(automation/edith/site.py regenerate_index — 아래 LATEST·ISSUES 표시와 data-issue-count). -->
 <style>
+  :root {
+    --paper: #FAFAF7; --card: #FFFFFF; --ink: #111111; --dark: #0D0C0A; --muted: #5F5A52; --line: #E8E4DA;
+    --brand: #FF5233; --brand-ink: #B91C1C; --cream: #F5F1E8; --focus: #2563EB;
+  }
   * { box-sizing: border-box; }
-  body { font-family: 'Apple SD Gothic Neo','Pretendard','Malgun Gothic',-apple-system,sans-serif; background: #FAFAF7; margin: 0; padding: 32px 16px; color: #1A1A1A; line-height: 1.7; }
-  .container { max-width: 720px; margin: 0 auto; background: #FFF; padding: 48px 40px; }
-  .head { display: flex; align-items: center; gap: 18px; }
-  /* 로고 마크(안경) — 옆에 워드마크가 있으므로 글자 없는 '마크 전용'을 쓴다 */
-  .logomark { width: 64px; height: 64px; border-radius: 50%; background: #FF5233; flex: none;
-    display: flex; align-items: center; justify-content: center; overflow: hidden; }
-  .logomark svg { width: 64px; height: 64px; display: block; }
-  .brand { font-size: 11px; letter-spacing: 5px; color: #888; font-weight: 700; }
-  .logo { font-size: 42px; font-weight: 900; letter-spacing: -2px; margin: 4px 0 0; }
-  /* 브랜드 원색 #FF5233 은 흰 바탕 위 작은 글자로는 대비가 3.2:1 이라 부족하다 → 글자는 진한 적색을 쓴다 */
-  .logo .h { color: #B91C1C; }
-  .tagline { font-size: 13px; color: #555; letter-spacing: 1px; margin-top: 10px; }
-  .subscribe-cta { background: #000; color: #FFF; padding: 24px 28px; margin: 28px 0; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
-  .subscribe-cta .text { flex: 1; min-width: 200px; }
-  .subscribe-cta .label { font-size: 11px; letter-spacing: 4px; color: #E45336; font-weight: 800; margin-bottom: 6px; }
-  .subscribe-cta h3 { font-size: 18px; font-weight: 900; margin: 0 0 4px; letter-spacing: -0.3px; }
-  .subscribe-cta p { font-size: 13px; color: #BBB; line-height: 1.6; margin: 0; }
-  .subscribe-cta a.btn { display: inline-block; background: #B91C1C; color: #FFF; padding: 12px 20px; text-decoration: none; font-size: 13px; font-weight: 800; letter-spacing: 1.5px; white-space: nowrap; }
-  .subscribe-cta a.btn:focus-visible, .item:focus-visible { outline: 3px solid #2563EB; outline-offset: 3px; }
-  h2 { font-size: 16px; font-weight: 800; margin: 40px 0 14px; padding-bottom: 8px; border-bottom: 2px solid #000; letter-spacing: -0.3px; }
-  .item { display: block; padding: 18px 0; border-bottom: 1px solid #EEE; text-decoration: none; color: inherit; transition: background 0.15s; }
-  .item:hover { background: #FAFAF7; padding-left: 8px; padding-right: 8px; }
-  .meta { display: flex; gap: 12px; font-size: 12px; color: #666; margin-bottom: 4px; }
-  .meta .vol { color: #B91C1C; font-weight: 800; letter-spacing: 1px; }
-  .title { font-size: 17px; font-weight: 800; color: #000; line-height: 1.45; }
-  .subtitle { font-size: 13.5px; color: #555; margin-top: 4px; line-height: 1.6; }
+  html { -webkit-text-size-adjust: 100%; scroll-padding-top: 72px; }
+  body { margin: 0; background: var(--paper); color: var(--ink); line-height: 1.65;
+    font-family: 'Pretendard Variable','Pretendard','Apple SD Gothic Neo','Malgun Gothic',-apple-system,sans-serif;
+    word-break: keep-all; overflow-wrap: anywhere; }
+  a { color: inherit; }
+  :focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .skip { position: absolute; left: -999px; top: 8px; background: var(--ink); color: #fff; padding: 8px 12px; z-index: 50; }
+  .skip:focus { left: 8px; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 0 20px; }
+
+  /* 머리 */
+  .top { position: sticky; top: 0; z-index: 20; background: rgba(250,250,247,.92); backdrop-filter: saturate(1.4) blur(8px);
+    -webkit-backdrop-filter: saturate(1.4) blur(8px); border-bottom: 1px solid var(--line); }
+  .top-in { max-width: 1080px; margin: 0 auto; padding: 10px 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .brandmark { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+  .brandmark img { width: 40px; height: 40px; border-radius: 50%; display: block; }
+  .wordmark { font-size: 22px; font-weight: 900; letter-spacing: -1px; }
+  .wordmark .h, .h { color: var(--brand-ink); }
+  .top-nav { display: flex; align-items: center; gap: 16px; font-size: 14px; font-weight: 600; }
+  .top-nav a { text-decoration: none; color: var(--muted); }
+  .top-nav a:hover { color: var(--ink); }
+  .top-nav .top-cta { color: #fff; background: var(--ink); padding: 8px 14px; border-radius: 999px; }
+  .top-nav .top-cta:hover { background: var(--brand-ink); color: #fff; }
+
+  /* 첫 화면 — 구독 */
+  .hero { background: var(--dark); color: var(--cream); position: relative; overflow: hidden; }
+  .hero::before { content: ""; position: absolute; right: -120px; top: -80px; width: 560px; height: 560px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,82,51,.22), rgba(255,82,51,0) 68%); pointer-events: none; }
+  .hero-in { max-width: 1080px; margin: 0 auto; padding: 44px 20px 40px; display: grid; grid-template-columns: 1fr; gap: 8px; position: relative; }
+  .eyebrow { margin: 0; font-size: 13px; font-weight: 700; letter-spacing: 1.5px; color: var(--brand); }
+  .hero h1 { margin: 12px 0 14px; font-size: clamp(32px, 8.4vw, 54px); line-height: 1.18; font-weight: 850; letter-spacing: -1.6px; color: #FFF; }
+  .lead { margin: 0 0 22px; font-size: 16px; color: #CFC8BC; max-width: 34em; }
+  .sub-form { max-width: 520px; }
+  .field { display: flex; gap: 8px; flex-wrap: wrap; }
+  .field input[type=email] { flex: 1 1 220px; min-width: 0; height: 54px; padding: 0 16px; font: inherit; font-size: 16px; color: var(--ink);
+    background: #FFF; border: 2px solid #FFF; border-radius: 10px; outline: none; }
+  .field input[type=email]:focus { border-color: var(--brand); }
+  .field button { flex: 1 0 160px; height: 54px; padding: 0 20px; font: inherit; font-size: 16px; font-weight: 800; letter-spacing: .2px;
+    color: #FFF; background: var(--brand-ink); border: 0; border-radius: 10px; cursor: pointer; transition: background .15s, transform .15s; }
+  .field button:hover { background: #991B1B; }
+  .field button:disabled { background: #6B6359; cursor: progress; }
+  .consent { display: flex; gap: 10px; align-items: flex-start; margin-top: 12px; font-size: 13.5px; color: #CFC8BC; line-height: 1.55; cursor: pointer; }
+  .consent input { width: 18px; height: 18px; margin: 2px 0 0; accent-color: var(--brand); flex: none; }
+  .consent a { color: #FFF; font-weight: 700; }
+  .assure { list-style: none; margin: 16px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; color: #A8A094; }
+  .assure li::before { content: "✓ "; color: var(--brand); font-weight: 800; }
+  .gift { margin-top: 18px; max-width: 520px; padding: 12px 14px; font-size: 14px; line-height: 1.6; color: var(--cream);
+    background: rgba(255,82,51,.12); border: 1px solid rgba(255,82,51,.45); border-radius: 10px; }
+  .gift b { color: #FFF; }
+  .success { max-width: 520px; padding: 16px 18px; font-size: 15px; line-height: 1.65; color: #0F3D24; background: #DCFCE7; border-radius: 10px; }
+  .error { margin: 12px 0 0; padding: 12px 14px; font-size: 13.5px; color: #7F1D1D; background: #FEE2E2; border-radius: 10px; }
+  .error a { color: #7F1D1D; font-weight: 700; }
+  /* 마스코트(캐릭터 — 사람인 척하지 않는다, assets/mascot/README.md). 어두운 바탕에서 검은 팔다리가 묻히지 않게 크림색 원 위에 */
+  .hero-art { display: none; position: relative; }
+  .hero-art .disc { width: 340px; height: 340px; margin: 0 auto; border-radius: 50%; background: var(--cream);
+    display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 10px rgba(255,82,51,.18); }
+  .hero-art img { width: 290px; height: 290px; display: block; }
+  .bubble { position: absolute; left: 50%; top: -6px; transform: translateX(-118%); background: #FFF; color: var(--ink);
+    font-size: 14px; font-weight: 700; padding: 10px 14px; border-radius: 14px 14px 4px 14px; white-space: nowrap; z-index: 1; }
+  .hero-mini { position: absolute; right: 16px; top: 82px; width: 74px; height: 74px; padding: 5px; border-radius: 50%; background: var(--cream); }
+  @media (min-width: 900px) {
+    .hero-in { grid-template-columns: 1.25fr .75fr; align-items: center; padding: 64px 20px 60px; gap: 32px; }
+    .hero-art { display: block; }
+    .hero-mini { display: none; }
+  }
+  @media (max-width: 899px) { .hero h1 { padding-right: 84px; } }
+
+  /* 한눈에 */
+  .proof { background: var(--card); border-bottom: 1px solid var(--line); }
+  .proof-in { max-width: 1080px; margin: 0 auto; padding: 18px 20px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; text-align: center; }
+  .proof b { display: block; font-size: 24px; font-weight: 850; letter-spacing: -.5px; color: var(--brand-ink); }
+  .proof small { display: block; font-size: 12.5px; color: var(--muted); line-height: 1.45; }
+
+  section.block { padding: 40px 0 8px; }
+  .sec { font-size: 20px; font-weight: 800; letter-spacing: -.5px; margin: 0 0 14px; }
+  .sec-note { margin: -8px 0 16px; font-size: 14px; color: var(--muted); }
+
+  /* 최근 호 */
+  .latest { display: block; text-decoration: none; background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+    padding: 22px 22px 18px; box-shadow: 0 1px 0 rgba(0,0,0,.02), 0 8px 24px -16px rgba(0,0,0,.18); transition: transform .15s, box-shadow .15s; }
+  .latest:hover { transform: translateY(-2px); box-shadow: 0 1px 0 rgba(0,0,0,.02), 0 14px 30px -16px rgba(0,0,0,.26); }
+  .latest-top { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 12.5px; color: var(--muted); }
+  .pill { font-size: 11.5px; font-weight: 800; letter-spacing: .5px; color: #FFF; background: var(--brand-ink); padding: 3px 9px; border-radius: 999px; }
+  .latest-title { margin-top: 10px; font-size: 22px; line-height: 1.35; font-weight: 850; letter-spacing: -.6px; }
+  .latest-sub { margin-top: 6px; font-size: 14.5px; color: var(--muted); }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+  .chips span { font-size: 12.5px; font-weight: 600; color: var(--ink); background: var(--cream); padding: 4px 10px; border-radius: 999px; }
+  .latest-go { margin-top: 14px; font-size: 14px; font-weight: 800; color: var(--brand-ink); }
+
+  /* 메일에 들어 있는 것 */
+  .grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+  @media (min-width: 640px) { .grid { grid-template-columns: 1fr 1fr; } }
+  .feat { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; }
+  .feat b { display: block; font-size: 16px; margin: 4px 0 2px; }
+  .feat p { margin: 0; font-size: 14px; color: var(--muted); }
+  .feat .fi { font-size: 22px; }
+  .feat a { color: var(--brand-ink); font-weight: 700; }
+
+  /* 지난 호 */
+  .archive-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 4px; }
+  .archive-head .sec { margin: 0; }
+  #q { flex: 1 1 220px; max-width: 320px; height: 42px; padding: 0 14px; font: inherit; font-size: 15px; border: 1px solid var(--line);
+    border-radius: 10px; background: var(--card); }
+  #q:focus { border-color: var(--brand-ink); outline: none; }
+  .month { margin: 26px 0 2px; font-size: 13px; font-weight: 800; letter-spacing: 1px; color: var(--muted); }
+  .item { display: block; padding: 16px 4px; border-bottom: 1px solid var(--line); text-decoration: none; color: inherit; transition: background .15s, padding .15s; }
+  .item:hover { background: var(--card); padding-left: 10px; padding-right: 10px; }
+  .meta { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; font-size: 12.5px; color: var(--muted); margin-bottom: 2px; }
+  .meta .vol { color: var(--brand-ink); font-weight: 800; letter-spacing: .5px; }
+  .badge { font-size: 11px; font-weight: 700; color: var(--muted); border: 1px solid var(--line); padding: 1px 7px; border-radius: 999px; }
+  .title { font-size: 17px; font-weight: 800; line-height: 1.45; letter-spacing: -.3px; }
+  .subtitle { font-size: 14px; color: var(--muted); margin-top: 3px; line-height: 1.6;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
   .ico { font-size: 17px; }
-  .empty { padding: 24px; background: #F5F5EE; font-size: 14px; color: #666; text-align: center; }
-  .footer { margin-top: 48px; padding-top: 24px; border-top: 1px solid #DDD; font-size: 11px; color: #777; text-align: center; line-height: 1.7; }
-  .footer .red { color: #B91C1C; font-weight: 800; letter-spacing: 1px; }
-  .footer a { color: #B91C1C; text-decoration: underline; font-weight: 600; }
-  @media (max-width: 520px) { body { padding: 0; } .container { padding: 32px 20px; } .logo { font-size: 36px; } }
+  .noresult { padding: 18px; background: var(--card); border-radius: 12px; color: var(--muted); text-align: center; }
+
+  /* 마지막 권유·바닥 */
+  .cta-bottom { margin: 48px 0 0; background: var(--dark); color: var(--cream); text-align: center; padding: 44px 20px; }
+  .cta-bottom h2 { margin: 0 0 6px; font-size: 24px; letter-spacing: -.6px; color: #FFF; }
+  .cta-bottom p { margin: 0 0 18px; color: #A8A094; font-size: 14px; }
+  .btn { display: inline-block; text-decoration: none; font-weight: 800; color: #FFF; background: var(--brand-ink); padding: 14px 26px; border-radius: 10px; }
+  .btn:hover { background: #991B1B; }
+  .footer { padding: 28px 0 96px; font-size: 13px; color: var(--muted); text-align: center; }
+  .footer .foot-brand { font-weight: 800; color: var(--ink); }
+  .foot-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 16px; margin: 10px 0; }
+  .foot-links a { color: var(--muted); }
+  .footer details { max-width: 560px; margin: 8px auto 0; text-align: left; background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; }
+  .footer summary { cursor: pointer; font-weight: 700; color: var(--ink); }
+  .footer details p { margin: 8px 0 0; line-height: 1.7; }
+
+  /* 휴대폰 아래 고정 띠 — 첫 화면 구독 칸이 화면 밖으로 나가면 */
+  .sticky { position: fixed; left: 12px; right: 12px; bottom: 12px; z-index: 30; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    background: var(--dark); color: var(--cream); padding: 10px 10px 10px 16px; border-radius: 14px; box-shadow: 0 10px 30px -10px rgba(0,0,0,.45);
+    font-size: 14px; font-weight: 600; max-width: 560px; margin: 0 auto; }
+  .sticky a { flex: none; text-decoration: none; font-weight: 800; color: #FFF; background: var(--brand-ink); padding: 10px 16px; border-radius: 10px; }
+  [hidden] { display: none !important; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }
 </style>
 </head>
 <body>
-<main class="container">
-  <div class="head">
-    <div class="logomark" aria-hidden="true">
-      <svg viewBox="0 0 1080 1080" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="328" cy="531" r="150" fill="#F5F1E8"/><circle cx="752" cy="531" r="150" fill="#F5F1E8"/>
-        <path fill-rule="evenodd" fill="#0D0C0A" d="M 132 540 a 196 196 0 1 0 392 0 a 196 196 0 1 0 -392 0 Z M 178 531 a 150 150 0 1 0 300 0 a 150 150 0 1 0 -300 0 Z"/>
-        <path fill-rule="evenodd" fill="#0D0C0A" d="M 556 540 a 196 196 0 1 0 392 0 a 196 196 0 1 0 -392 0 Z M 602 531 a 150 150 0 1 0 300 0 a 150 150 0 1 0 -300 0 Z"/>
-        <path d="M 514 526 Q 540 506 566 526" fill="none" stroke="#0D0C0A" stroke-width="48" stroke-linecap="round"/>
-        <circle cx="328" cy="531" r="58" fill="#0D0C0A"/><circle cx="752" cy="531" r="58" fill="#0D0C0A"/>
-      </svg>
+<a class="skip" href="#subscribe">구독 신청 칸으로 건너뛰기</a>
+
+<header class="top">
+  <div class="top-in">
+    <a class="brandmark" href="./" aria-label="EDIT H 첫 화면">
+      <img src="assets/mascot/avatar-96.png" width="40" height="40" alt="">
+      <span class="wordmark">EDIT<span class="h"> H</span></span>
+    </a>
+    <nav class="top-nav" aria-label="바로 가기">
+      <a href="#archive">지난 호</a>
+      <a href="https://www.instagram.com/edit.h.kr/" target="_blank" rel="noopener">인스타그램</a>
+      <a class="top-cta" href="#subscribe" data-jump>무료 구독</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+<section class="hero" id="subscribe" aria-labelledby="hero-title">
+  <div class="hero-in">
+    <div class="hero-copy">
+      <img class="hero-mini" src="assets/mascot/h-hello.png" width="74" height="74" alt="" aria-hidden="true">
+      <p class="eyebrow">2030 직장인 데일리 브리프 · 매일 아침 8:30</p>
+      <h1 id="hero-title">내 돈·일·소비에<br>바로 쓰는 뉴스,<br>매일 아침 메일로</h1>
+      <p class="lead">월급·세금·대출·구독·회사 제도처럼 지갑과 일정에 바로 닿는 소식만 골라, 서로 다른 출처 2곳에서 확인한 숫자로 5분 안에 읽히게 정리해요.</p>
+
+      <form class="sub-form" id="subscribeForm" action="https://formspree.io/f/xwvznwyw" method="POST">
+        <div class="field">
+          <label for="email" class="sr-only">이메일 주소</label>
+          <input type="email" id="email" name="email" placeholder="이메일 주소" autocomplete="email" inputmode="email" required>
+          <button type="submit" id="submitBtn">무료로 받아보기</button>
+        </div>
+        <input type="hidden" name="_subject" value="[EDIT H] 신규 구독 신청">
+        <input type="hidden" name="_format" value="plain">
+        <input type="hidden" name="subscribed_at" id="subscribed_at">
+        <input type="hidden" name="ref" id="ref" value="web-home">
+        <label class="consent">
+          <input type="checkbox" name="consent_marketing" value="yes" required>
+          <span>(필수) EDIT H 뉴스레터 수신에 동의합니다. <a href="#privacy" data-privacy>개인정보 처리방침</a></span>
+        </label>
+        <p class="error" id="errorMsg" role="alert" hidden>⚠ 신청 처리 중 오류가 났어요. 잠시 뒤 다시 시도하거나 <a href="subscribe.html?ref=web">구독 페이지</a>에서 신청해 주세요.</p>
+      </form>
+      <div class="success" id="successMsg" role="status" hidden>
+        ✅ <b>구독 신청이 접수됐어요.</b><br>
+        환영 메일과 가장 최근 호를 곧 보내드려요. 그다음부터 매일 아침 8시 30분에 찾아갈게요. 메일이 안 보이면 스팸함(프로모션 탭)을 확인해 주세요.
+      </div>
+      <ul class="assure"><li>주말 포함 매일</li><li>완전 무료</li><li>광고 없음</li><li>언제든 1-click 해지</li></ul>
+      <!-- 구독 선물(E5) — subscribe.html 과 같은 날짜(config.gift from~until, selftest 가 둘 다 검사). 기간 밖이면 스크립트가 숨긴다 -->
+      <div class="gift" id="gift" data-from="2026-10-05" data-until="2026-12-31">🎁 지금 구독하면 환영 메일로 <b>2026 4분기 돈·일 체크리스트</b>(18가지)를 보내드려요 — 10~12월에 날짜를 놓치면 손해인 것만.</div>
     </div>
-    <div>
-      <div class="brand">DAILY TREND BRIEF</div>
-      <div class="logo">EDIT<span class="h"> H</span></div>
+    <div class="hero-art" aria-hidden="true">
+      <div class="bubble">출근길 5분이면 충분해요</div>
+      <div class="disc"><img src="assets/mascot/h-hello.png" width="290" height="290" alt=""></div>
     </div>
   </div>
-  <div class="tagline">한 호씩 모아 보는 트렌드 큐레이션 아카이브</div>
+</section>
 
-  <div class="subscribe-cta">
-    <div class="text">
-      <div class="label">SUBSCRIBE</div>
-      <h3>매일 아침 8시 30분, 메일로 받아보세요</h3>
-      <p>세상이 어떻게 바뀌는지 매일 아침 한 입에 보는 데일리 브리프.</p>
-    </div>
-    <a href="subscribe.html?ref=web" class="btn">구독 신청 →</a>
+<section class="proof" aria-label="EDIT H 한눈에">
+  <div class="proof-in">
+    <div><b><span data-issue-count>130</span>호</b><small>매일 발행<br>주말·공휴일 포함</small></div>
+    <div><b>2곳</b><small>숫자는 서로 다른<br>출처에서 확인</small></div>
+    <div><b>5분</b><small>출근길에<br>다 읽는 분량</small></div>
   </div>
+</section>
 
-  <h2>📰 지난 뉴스레터</h2>
-  
+<section class="block" aria-labelledby="latest-title">
+  <div class="wrap">
+    <h2 id="latest-title" class="sec">구독 전에, 최근 호 먼저 보기</h2>
+<!-- LATEST:START -->
+    <a class="latest" href="2026-10-31.html">
+      <div class="latest-top"><span class="pill">최근 호</span><span>VOL.130 · 2026-10-31 (토)</span></div>
+      <div class="latest-title">📉 코스피 3.48% 급락, 사이드카 또 울렸다고?</div>
+      <div class="latest-sub">코스피 3.48% 급락·장기요양보험료 월 1100원 인상·조상 땅 5만7000평·네이버 멤버십 축제·바이낸스 해킹 — 오늘의 5가지</div>
+      <div class="chips"><span>코스피 급락</span><span>장기요양보험료</span><span>조상땅 찾기</span><span>네이버 멤버십</span><span>바이낸스 해킹</span></div>
+      <div class="latest-go">이 호 읽어 보기 →</div>
+    </a>
+<!-- LATEST:END -->
+  </div>
+</section>
+
+<section class="block" aria-labelledby="feat-title">
+  <div class="wrap">
+    <h2 id="feat-title" class="sec">메일 한 통에 들어 있는 것</h2>
+    <div class="grid">
+      <div class="feat"><span class="fi" aria-hidden="true">📨</span><b>깊게 읽는 5가지</b><p>H PICK 심층 하나와 오늘 꼭 알아야 할 소식. '그래서 내 돈·일에 뭐가 달라지나'까지 한 줄로.</p></div>
+      <div class="feat"><span class="fi" aria-hidden="true">✅</span><b>오늘 챙길 것</b><p>마감·신청·시행 날짜처럼 오늘 할 일만 체크리스트로 맨 위에.</p></div>
+      <div class="feat"><span class="fi" aria-hidden="true">⚡</span><b>짧게 읽는 소식</b><p>나머지는 한 줄씩 — 평일 5개, 주말·공휴일 3개 이상.</p></div>
+      <div class="feat"><span class="fi" aria-hidden="true">🗂</span><b>인스타 카드뉴스</b><p>같은 날 카드 10장으로도 — <a href="https://www.instagram.com/edit.h.kr/" target="_blank" rel="noopener">@edit.h.kr</a></p></div>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="archive" aria-labelledby="archive-title">
+  <div class="wrap">
+    <div class="archive-head">
+      <h2 id="archive-title" class="sec">지난 뉴스레터</h2>
+      <label for="q" class="sr-only">지난 호 검색</label>
+      <input type="search" id="q" placeholder="지난 호 검색 (예: 금리, 연말정산)" autocomplete="off">
+    </div>
+    <p class="noresult" id="noresult" hidden>찾는 말이 들어간 호가 없어요. 다른 말로 찾아보세요.</p>
+<!-- ISSUES:START -->
+  <h3 class="month">2026년 10월</h3>
+
   <a href="2026-10-31.html" class="item">
     <div class="meta"><span class="vol">VOL.130</span><span>2026-10-31 (토)</span></div>
     <div class="title"><span class="ico">📉</span> 코스피 3.48% 급락, 사이드카 또 울렸다고?</div>
@@ -101,19 +293,19 @@
   </a>
 
   <a href="2026-10-28.html" class="item">
-    <div class="meta"><span class="vol">VOL.127</span><span>2026-10-28 (수)</span></div>
+    <div class="meta"><span class="vol">VOL.127</span><span>2026-10-28 (수)</span><span class="badge">다시 보기</span></div>
     <div class="title"><span class="ico">🔁</span> 놓쳤다면, 다시 볼 만한 5가지</div>
     <div class="subtitle">지난 호 다시 보기 — 경기 버스 4130대, 30일 첫차부터 멈춘다고? · 서울 지하철 노조, 다음 달 파업 찬반투표 · 직장인 53%, 돌아가면 다른 직무 고른다 · 39세 이하 첫 집, 4억 이하 비아파트면 금리 2.1%p 우대 · 금값, 1월 고점보다 29% 내려 4000달러 아래로</div>
   </a>
 
   <a href="2026-10-27.html" class="item">
-    <div class="meta"><span class="vol">VOL.126</span><span>2026-10-27 (화)</span></div>
+    <div class="meta"><span class="vol">VOL.126</span><span>2026-10-27 (화)</span><span class="badge">다시 보기</span></div>
     <div class="title"><span class="ico">🔁</span> 놓쳤다면, 다시 볼 만한 5가지</div>
     <div class="subtitle">지난 호 다시 보기 — 쿠팡 105곳 감독, 법 위반 206건이라고? · 1000원 호루라기 품절, 호신용품 거래액 158%↑ · 원·달러 1324원, 2년 만에 가장 낮다 · AI가 추천한 종목, 15개 중 8개는 떨어졌다 · 휘발유 23주째 내렸지만, 국제유가는 6개월 만에 최고</div>
   </a>
 
   <a href="2026-10-26.html" class="item">
-    <div class="meta"><span class="vol">VOL.125</span><span>2026-10-26 (월)</span></div>
+    <div class="meta"><span class="vol">VOL.125</span><span>2026-10-26 (월)</span><span class="badge">다시 보기</span></div>
     <div class="title"><span class="ico">🔁</span> 놓쳤다면, 다시 볼 만한 5가지</div>
     <div class="subtitle">지난 호 다시 보기 — 첫째 낳으면 1000만원, 결혼 페널티도 없앤다고? · 편의점에서 패딩 산다, 경량패딩 3만9900원 · 지방세 환급금, 12월부터 카카오페이·은행 앱으로 · 경기 버스, 30일 첫차부터 총파업 예고 · 기준금리 연 3% 동결, 11월 인상 전망은 남았다</div>
   </a>
@@ -143,7 +335,7 @@
   </a>
 
   <a href="2026-10-21.html" class="item">
-    <div class="meta"><span class="vol">VOL.120</span><span>2026-10-21 (수)</span></div>
+    <div class="meta"><span class="vol">VOL.120</span><span>2026-10-21 (수)</span><span class="badge">다시 보기</span></div>
     <div class="title"><span class="ico">🔁</span> 놓쳤다면, 다시 볼 만한 5가지</div>
     <div class="subtitle">지난 호 다시 보기 — 커피 17잔이면, 50유로 스피커라고? · 연봉·대출한도까지 샜다면, 이것부터 막으세요 · &quot;생수 주문해줘&quot; 한마디면, 카톡이 결제까지 · 금값 꺾이자, 은행 골드바 매달 300억 팔린다 · 11월 발권하면 뉴욕 왕복 할증료만 81만원</div>
   </a>
@@ -185,13 +377,13 @@
   </a>
 
   <a href="2026-10-14.html" class="item">
-    <div class="meta"><span class="vol">VOL.113</span><span>2026-10-14 (수)</span></div>
+    <div class="meta"><span class="vol">VOL.113</span><span>2026-10-14 (수)</span><span class="badge">다시 보기</span></div>
     <div class="title"><span class="ico">🔁</span> 놓쳤다면, 다시 볼 만한 5가지</div>
     <div class="subtitle">지난 호 다시 보기 — 호프집, 1년 새 1894곳 사라졌다고? · 12월 31일 기차표, 10월 31일 열린다 · 아침은 5도, 일요일 밤부터는 비 · 배달앱 수수료 15% 상한, 배달비도 넣을까 · 편의점 성장률 1.5%, 14개월 만에 최저</div>
   </a>
 
   <a href="2026-10-13.html" class="item">
-    <div class="meta"><span class="vol">VOL.112</span><span>2026-10-13 (화)</span></div>
+    <div class="meta"><span class="vol">VOL.112</span><span>2026-10-13 (화)</span><span class="badge">다시 보기</span></div>
     <div class="title"><span class="ico">🔁</span> 놓쳤다면, 다시 볼 만한 5가지</div>
     <div class="subtitle">지난 호 다시 보기 — 닭값 37.7% 내렸는데, 치킨은 그대로라고? · 카톡 이용자 4명 중 3명, 원치 않는 광고 받았다 · 알아서 일하는 AI, 월 68만원짜리도 나왔다 · 새 직장 10명 중 6명, 1년 안에 떠난다 · 10월 분양 물량 쏟아지는데, 서울은 수백 가구</div>
   </a>
@@ -209,7 +401,7 @@
   </a>
 
   <a href="2026-10-10.html" class="item">
-    <div class="meta"><span class="vol">VOL.109</span><span>2026-10-10 (토)</span></div>
+    <div class="meta"><span class="vol">VOL.109</span><span>2026-10-10 (토)</span><span class="badge">다시 보기</span></div>
     <div class="title"><span class="ico">🔁</span> 놓쳤다면, 다시 볼 만한 5가지</div>
     <div class="subtitle">지난 호 다시 보기 — 월 50만원 3년이면, 2255만원이라고? · 무신사 한정판 거래 &#x27;솔드아웃&#x27;, 연말에 문 닫는다 · 새 가계대출 10건 중 7건, DSR 규제 밖 · 해킹 7개사로 번지자, 금융당국 &#x27;비상체제&#x27; · 미국 10년물 금리 5.36%, 24년 만에 최고</div>
   </a>
@@ -227,7 +419,7 @@
   </a>
 
   <a href="2026-10-07.html" class="item">
-    <div class="meta"><span class="vol">VOL.106</span><span>2026-10-07 (수)</span></div>
+    <div class="meta"><span class="vol">VOL.106</span><span>2026-10-07 (수)</span><span class="badge">다시 보기</span></div>
     <div class="title"><span class="ico">🔁</span> 놓쳤다면, 다시 볼 만한 5가지</div>
     <div class="subtitle">지난 호 다시 보기 — 전셋값 86주째, 39세도 청년 대출 된다고? · 신한은행 고객 2만5천명, 연소득·대출한도까지 샜다 · 대미투자 1호는 텍사스 발전소, 원전 8기도 · 물가 2.9%로 내려왔지만, 기름값은 14.8% · 한국은행 직원 186명, 위탁업체 통해 정보 샜다</div>
   </a>
@@ -268,8 +460,10 @@
     <div class="subtitle">1365 유출 신고의 11배·대미투자 1호 223억달러·DSR 예외 70.5%·AI 비서 월 500달러·교통카드도 배달 — 오늘의 5가지</div>
   </a>
 
+  <h3 class="month">2026년 9월</h3>
+
   <a href="2026-09-30.html" class="item">
-    <div class="meta"><span class="vol">VOL.099</span><span>2026-09-30 (수)</span></div>
+    <div class="meta"><span class="vol">VOL.099</span><span>2026-09-30 (수)</span><span class="badge">다시 보기</span></div>
     <div class="title"><span class="ico">🔁</span> 놓쳤다면, 다시 볼 만한 5가지</div>
     <div class="subtitle">지난 호 다시 보기 — 추석 끝나자, 10월부터 줄줄이 오른다고? · 짝퉁 판매글, 인스타에서 가장 많이 잡혔다 · AI로 만들었으면, 밝혀 달라 · 공구 시장 4년 새 18배, 세금은 깜깜 · 명문대 졸업생 B학점 이상, 100%에 육박</div>
   </a>
@@ -381,6 +575,8 @@
     <div class="title"><span class="ico">🧭</span> 채팅창 광고, 200일 만에 ‘연 10억달러’가 됐다고?</div>
     <div class="subtitle">챗GPT 광고 연환산 매출 10억달러와 구글 검색 매출 17% 증가, 컬리N마트 월 거래액 10배, GS리테일 개인정보 과징금 128억3600만원까지 읽은 10개 이슈</div>
   </a>
+
+  <h3 class="month">2026년 8월</h3>
 
   <a href="2026-08-31.html" class="item">
     <div class="meta"><span class="vol">VOL.080</span><span>2026-08-31 (월)</span></div>
@@ -501,6 +697,8 @@
     <div class="title"><span class="ico">🧭</span> 같은 스무디인데 — 9배가 차이 난다</div>
     <div class="subtitle">편의점 3천원 vs 백화점 2만8천원 스무디 양극화, 다이소 5천원 고데기, 오픈AI 이용자 10억 명 돌파까지 읽은 10개 이슈</div>
   </a>
+
+  <h3 class="month">2026년 7월</h3>
 
   <a href="2026-07-31.html" class="item">
     <div class="meta"><span class="vol">VOL.060</span><span>2026-07-31 (금)</span></div>
@@ -633,6 +831,8 @@
     <div class="title"><span class="ico">🧭</span> 온라인 장바구니가 커질수록 동네 매장은 더 자주 들립니다</div>
     <div class="subtitle">온라인 지출은 대형마트를 줄이고 편의점, SSM, 음식점으로 주변 소비를 남깁니다.</div>
   </a>
+
+  <h3 class="month">2026년 6월</h3>
 
   <a href="2026-06-30.html" class="item">
     <div class="meta"><span class="vol">VOL.038</span><span>2026-06-30 (화)</span></div>
@@ -808,6 +1008,8 @@
     <div class="subtitle">대화형 시리·네이버 카카오 AI 에이전트·SpaceX IPO·올영 6월 빅세일·코스피 사상최고 등 12개 이슈</div>
   </a>
 
+  <h3 class="month">2026년 5월</h3>
+
   <a href="2026-05-29.html" class="item">
     <div class="meta"><span class="vol">VOL.009</span><span>2026-05-29 (금)</span></div>
     <div class="title"><span class="ico">🔁</span> 25년 만에 광고 1위가 바뀐다 — 메타가 구글을 넘어선다</div>
@@ -861,13 +1063,105 @@
     <div class="title"><span class="ico">🔥</span> 24시간이 지났는데 불은 더 커진다</div>
     <div class="subtitle">스타벅스 탱크데이 사태·우버 네이버 8조 배민 인수·앤트로픽 종량제 등 12개 이슈</div>
   </a>
-
-
-  <div class="footer">
-    <span class="red">EDIT H</span> · 매일 08:30<br>
-    <a href="subscribe.html?ref=web">구독 신청</a> · <a href="unsubscribe.html">수신 거부</a> · <a href="feed.xml">RSS</a><br><br>
-    이 페이지를 북마크하면 모든 호를 한곳에서 볼 수 있습니다.
+<!-- ISSUES:END -->
   </div>
+</section>
+
+<section class="cta-bottom" aria-labelledby="cta-title">
+  <h2 id="cta-title">내일 아침 8시 30분, 메일함에서 만나요</h2>
+  <p>무료 · 광고 없음 · 언제든 1-click 해지</p>
+  <a class="btn" href="#subscribe" data-jump>무료로 구독하기</a>
+</section>
 </main>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="foot-brand">EDIT<span class="h"> H</span> · 매일 아침 8시 30분</div>
+    <nav class="foot-links" aria-label="그 밖의 링크">
+      <a href="subscribe.html?ref=web">구독 페이지</a>
+      <a href="unsubscribe.html">수신 거부</a>
+      <a href="feed.xml">RSS</a>
+      <a href="https://www.instagram.com/edit.h.kr/" target="_blank" rel="noopener">인스타그램</a>
+    </nav>
+    <details id="privacy">
+      <summary>개인정보 처리방침</summary>
+      <p>구독 신청에 입력한 이메일과 이름은 EDIT H 뉴스레터 발송 및 구독 관리 목적으로만 사용합니다.
+        수신 거부 시 발송 목록에서 제거되며, 관련 문의는 kim.seonill@hll.kr로 연락해주세요.</p>
+    </details>
+  </div>
+</footer>
+
+<div class="sticky" id="sticky" hidden>
+  <span>매일 08:30, 무료 뉴스레터</span>
+  <a href="#subscribe" data-jump>구독하기</a>
+</div>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var store = { get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+                set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} } };
+
+  // 구독 경로(ref) — 숫자로만 집계한다(collect_metrics.py). 첫 화면 구독은 '-home' 을 붙여 구독 페이지와 가른다.
+  // ?ref= → utm_source(인스타 프로필 링크는 utm_source=ig) → 이전 페이지 → web
+  var q = new URLSearchParams(location.search);
+  var clean = function (s) { return (s || '').toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 14); };
+  var ref = clean(q.get('ref'));
+  if (!ref) { var u = clean(q.get('utm_source')); ref = (u === 'instagram') ? 'ig' : u; }
+  if (!ref) { ref = /instagram\.com/.test(document.referrer || '') ? 'ig' : 'web'; }
+  $('ref').value = ref + '-home';
+  document.querySelectorAll('a[href^="subscribe.html"]').forEach(function (a) { a.href = 'subscribe.html?ref=' + encodeURIComponent(ref); });
+
+  // 구독 선물 상자 — 기간 밖이면 숨긴다(subscribe.html 과 같은 규칙)
+  var g = $('gift'), now = new Date();
+  if (g && (now < new Date(g.dataset.from + 'T00:00:00+09:00') || now > new Date(g.dataset.until + 'T23:59:59+09:00'))) g.remove();
+
+  // 구독 신청 — subscribe.html 과 같은 Formspree 주소·칸
+  var form = $('subscribeForm'), btn = $('submitBtn'), ok = $('successMsg'), err = $('errorMsg'), sticky = $('sticky');
+  var done = function () { form.hidden = true; ok.hidden = false; sticky.hidden = true; store.set('edith_subscribed', '1'); };
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (!form.reportValidity()) return;
+    $('subscribed_at').value = new Date().toISOString();
+    btn.disabled = true; btn.textContent = '신청하는 중…'; err.hidden = true;
+    fetch(form.action, { method: 'POST', body: new FormData(form), headers: { 'Accept': 'application/json' } })
+      .then(function (r) { if (!r.ok) throw new Error('submit failed'); done(); })
+      .catch(function () { err.hidden = false; btn.disabled = false; btn.textContent = '무료로 받아보기'; });
+  });
+
+  // '무료 구독' 버튼들 — 첫 화면 구독 칸으로 올라가 이메일 칸에 바로 쓰게
+  var smooth = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  document.querySelectorAll('[data-jump]').forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      e.preventDefault();
+      $('subscribe').scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'start' });
+      setTimeout(function () { if (!form.hidden) $('email').focus({ preventScroll: true }); }, smooth ? 450 : 0);
+    });
+  });
+  document.querySelectorAll('[data-privacy]').forEach(function (a) {
+    a.addEventListener('click', function () { $('privacy').open = true; });
+  });
+
+  // 아래 고정 띠 — 구독 칸이 화면 밖일 때만, 이미 신청했으면 안 보인다
+  if ('IntersectionObserver' in window && store.get('edith_subscribed') !== '1') {
+    new IntersectionObserver(function (es) {
+      es.forEach(function (en) { sticky.hidden = en.isIntersecting || !form.offsetParent; });
+    }, { threshold: 0.05 }).observe($('subscribe'));
+  }
+
+  // 지난 호 찾기 — 제목·부제·날짜에 든 말로 거른다
+  var items = [].slice.call(document.querySelectorAll('.item')), months = [].slice.call(document.querySelectorAll('.month'));
+  $('q').addEventListener('input', function () {
+    var s = this.value.trim().toLowerCase(), shown = 0;
+    items.forEach(function (it) { var hit = !s || it.textContent.toLowerCase().indexOf(s) >= 0; it.hidden = !hit; if (hit) shown++; });
+    months.forEach(function (m) {
+      var n = m.nextElementSibling, any = false;
+      while (n && !n.classList.contains('month')) { if (n.classList.contains('item') && !n.hidden) { any = true; break; } n = n.nextElementSibling; }
+      m.hidden = !any;
+    });
+    $('noresult').hidden = shown > 0;
+  });
+})();
+</script>
 </body>
 </html>
