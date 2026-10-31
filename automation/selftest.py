@@ -1150,6 +1150,14 @@ def t_goal_line():
             lines = cm._goal_lines(snap)
         finally:
             cm.METRICS, cm.load_config = saved
+        # 수집이 빠져 2주 전 것만 있으면 비교하지 않는다(2주 증가를 한 주로 셈하지 않게 — 11/01 Codex)
+        cm.METRICS = m
+        cm.load_config = lambda: {"goal": {"subscribers": 10000, "by": "2027-11-08"}}
+        try:
+            gap_lines = cm._goal_lines({**snap, "collected_at": "2026-11-15T21:30:00+09:00"})
+        finally:
+            cm.METRICS, cm.load_config = saved
+    expect("7일 전 자료 없음" in "\n".join(gap_lines) and "+10" not in "\n".join(gap_lines), f"2주 전 자료로 7일 변화를 셈했다: {gap_lines}")
     text = "\n".join(lines)
     expect("뉴스레터 **110**(7일 +10)" in text and "인스타 **200**(7일 +0)" in text, f"목표 줄 숫자가 틀린다: {text}")
     expect("뉴스레터 9.0%" in text and "인스타 닿지 않음" in text and "뉴스레터 2027-" in text, f"필요 성장률·닿는 날이 틀린다: {text}")
@@ -1728,6 +1736,10 @@ def t_ai_reel():
     script = qa.spoken_numbers("외국인이 하루 만에 일조 육천억 원 넘게 팔았대! 프로그램 매도 오 분간 멈춥니다. 삼 점 사팔 퍼센트")
     expect(script == [(1.6e12, "원"), (5.0, "분"), (3.48, "%")], f"한글 숫자 읽기가 틀린다: {script}")
     expect(not qa.spoken_numbers("사이드카가 하루 만에 울렸대, 삼성 이 회사, 내일 아침 여덟 시 반"), "숫자가 아닌 말을 숫자로 읽었다")
+    expect(qa.spoken_numbers("11월 30일") == [(11.0, "월"), (30.0, "일")] and qa.spoken_numbers("삼십 일 동안") == [(30.0, "일")]
+           and qa.spoken_numbers("삼십일 일") == [(31.0, "일")], f"날짜·기간의 '일'을 숫자로 삼켰다: {qa.spoken_numbers('11월 30일')}")
+    _, bad_day = qa.check_spoken(qa.spoken_numbers("삼십 일 동안"), "31일 동안")
+    expect(bad_day, "30일을 31일로 말해도 통과했다")
     cv = qa.content_values("외국인이 1조6000억원 넘게 팔았고 5분간 멈췄다, 3.48% 내린")
     expect(all(any(qa._num_match(x, c) for c in cv) for x in script), "content 와 같은 대사 숫자를 막았다")
     expect(not any(qa._num_match((1.7e12, "원"), c) for c in cv), "content 에 없는 대사 금액이 통과했다")

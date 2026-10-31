@@ -516,12 +516,16 @@ def _goal_lines(snap):
         days_left = (dt.date.fromisoformat(str(by)) - now.date()).days
     except ValueError:
         return []
-    old = None
+    old, gap = None, None
     for q in sorted((METRICS / "daily").glob("*.json")):
         s = json.loads(q.read_text(encoding="utf-8"))
         at = s.get("collected_at")
-        if at and dt.datetime.fromisoformat(at) <= now - dt.timedelta(days=6, hours=12):
-            old = s   # 6.5일 넘게 지난 것 중 가장 최근 = 약 7일 전
+        if not at:
+            continue
+        days = (now - dt.datetime.fromisoformat(at)).total_seconds() / 86400
+        # 약 7일 전(6.5~10일)만 비교한다 — 수집이 빠져 2주 전 것을 쓰면 2주 증가를 한 주로 셈하게 된다(11/01 Codex)
+        if 6.5 <= days <= 10 and (gap is None or abs(days - 7) < abs(gap - 7)):
+            old, gap = s, days
     cur = {"뉴스레터": (snap.get("subscribers") or {}).get("sending"), "인스타": (snap.get("instagram") or {}).get("followers")}
     prev = {"뉴스레터": ((old or {}).get("subscribers") or {}).get("sending"), "인스타": ((old or {}).get("instagram") or {}).get("followers")}
     parts, needs, eta = [], [], []
@@ -530,13 +534,17 @@ def _goal_lines(snap):
             continue
         pv = prev.get(k)
         delta = v - pv if isinstance(pv, int) else None
-        parts.append(f"{k} **{v:,}**" + (f"(7일 {delta:+d})" if delta is not None else ""))
+        parts.append(f"{k} **{v:,}**" + (f"({round(gap)}일 {delta:+d})" if delta is not None else "(7일 전 자료 없음)"))
         if days_left > 0 and v < target:
             needs.append(f"{k} {100 * ((target / v) ** (7 / days_left) - 1):.1f}%")
-        if delta is not None and delta > 0 and isinstance(pv, int) and pv > 0 and v < target:
-            weeks = math.log(target / v) / math.log(v / pv)
-            eta.append(f"{k} {(now.date() + dt.timedelta(weeks=weeks)).isoformat()}")
-        elif v < target:
+        if v >= target:
+            continue
+        if delta is None:
+            eta.append(f"{k} 알 수 없음(7일 전 자료 없음)")
+        elif delta > 0 and pv > 0:
+            days_to = math.log(target / v) / math.log(v / pv) * gap   # 실제 경과 일수로 나눈 성장 속도
+            eta.append(f"{k} {(now.date() + dt.timedelta(days=days_to)).isoformat()}")
+        else:
             eta.append(f"{k} 닿지 않음(늘지 않음)")
     if not parts:
         return []

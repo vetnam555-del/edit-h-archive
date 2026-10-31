@@ -171,6 +171,9 @@ def spoken_numbers(text):
     out = []
     for m in SPOKEN.finditer(text):
         run, unit = m.group(1).strip(), m.group(2) or ""
+        # 날짜·기간의 '일'은 단위다(11/01 Codex): '30일' → 30 일, '삼십 일' → 30 일, '삼십일 일' → 31 일. 붙여 쓴 '삼십일'은 31(단위 없음)
+        if not unit and run.endswith("일") and len(run) > 1 and (re.search(r"\d", run[:-1]) or run[:-1].endswith(" ")):
+            run, unit = run[:-1].strip(), "일"
         if not re.search(r"\d", run) and not unit:
             continue
         if re.fullmatch(r"[점\s]+", run):
@@ -242,6 +245,9 @@ def main():
         texts += [(f"만화 {i} 말풍선", plain(p["bubble"])), (f"만화 {i} 설명", plain(p.get("box", "")))]
     if ep.get("comic"):
         texts.append(("만화 제목", plain(ep["comic"]["title"])))
+    if not (folder / "reel_ai_caption.txt").exists():
+        # 없으면 게시 코드가 reel_caption.txt·caption.txt 로 대신 만든다 — 그건 이 검수가 보지 않으므로 반드시 쓴다(11/01 Codex)
+        fails.append("reel_ai_caption.txt 가 없다 — AI 릴스 캡션은 따로 써서 검수한다(대체 캡션은 검수 밖)")
     for name in ("reel_ai_caption.txt", "comic_caption.txt"):
         p = folder / name
         if p.exists():
