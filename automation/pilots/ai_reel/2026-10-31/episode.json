@@ -1,0 +1,115 @@
+{
+ "date": "2026-10-31",
+ "story": "코스피 3.48% 급락 · 매도 사이드카(10/30) — content/2026-10-31.json big_issue",
+ "seedance": {
+  "model": "seedance_2_5",
+  "mode": "omni_reference",
+  "job_1080": "396a3627-2647-42d4-9cb1-a292e3350663",
+  "prompt_file": "../seedance_prompt.txt"
+ },
+ "trim": [
+  0.4,
+  15.04
+ ],
+ "end_seconds": 2.5,
+ "captions": [
+  {
+   "start": 0.0,
+   "end": 2.64,
+   "size": 92,
+   "html": "<div class=\"kick\">10월 30일 코스피</div><div class=\"main\">헉… 코스피<br><span class=\"hl\">3.48%</span><br>빠졌다고?!</div>"
+  },
+  {
+   "start": 2.64,
+   "end": 5.9,
+   "size": 82,
+   "html": "<div class=\"main\">외국인이 하루 만에<br><span class=\"hl\">1조6000억원</span><br>넘게 팔았대!</div><div class=\"sub\">장중 5599까지 · SK하이닉스 -7.08%</div>"
+  },
+  {
+   "start": 5.9,
+   "end": 9.14,
+   "size": 82,
+   "html": "<div class=\"main\">정지! 프로그램 매도<br><span class=\"hl\">5분</span> 멈춥니다</div><div class=\"sub\">이게 '사이드카' · 오전 10시 4분, 11거래일 만</div>"
+  },
+  {
+   "start": 9.14,
+   "end": 14.64,
+   "size": 78,
+   "html": "<div class=\"kick\">그래서 나는?</div><div class=\"main\">팔기 전에,<br>내 계좌가 <span class=\"hl\">반도체 두 종목</span>에<br>얼마나 몰렸는지부터</div>"
+  }
+ ],
+ "end_card": {
+  "line": "내일 아침 8시 30분에 또 만나요!",
+  "note": "숫자는 기사 2곳 이상에서 확인했어요<br>(10월 30일 한국거래소 마감 기준)"
+ },
+ "voices": [
+  {
+   "file": "stems/v1_h_shock.mp3",
+   "start": 0.05,
+   "tempo": 1.25,
+   "text": "헉… 코스피가 삼 점 사팔 퍼센트 빠졌다고?!",
+   "voice": "qwen_audio_tts · Hana"
+  },
+  {
+   "file": "stems/v2_h_sell.mp3",
+   "start": 2.8,
+   "tempo": 1.15,
+   "text": "외국인이 하루 만에 일조 육천억 원 넘게 팔았대!",
+   "voice": "qwen_audio_tts · Hana"
+  },
+  {
+   "file": "stems/v3_robot_stop.mp3",
+   "start": 5.95,
+   "tempo": 1.18,
+   "robot": true,
+   "text": "정지! 프로그램 매도, 오 분간 멈춥니다!",
+   "voice": "elevenlabs_v4 · Knox"
+  },
+  {
+   "file": "stems/v4_h_check.mp3",
+   "start": 9.35,
+   "tempo": 1.1,
+   "text": "팔기 전에, 내 계좌가 반도체 두 종목에 얼마나 몰렸는지부터 보자.",
+   "voice": "qwen_audio_tts · Hana"
+  },
+  {
+   "file": "stems/v5_h_bye.mp3",
+   "start": 14.8,
+   "tempo": 1.25,
+   "text": "내일 아침 여덟 시 반에 또 만나요!",
+   "voice": "qwen_audio_tts · Hana"
+  }
+ ],
+ "music": [
+  {
+   "file": "stems/m1_chase.m4a",
+   "start": 0.0,
+   "dur": 5.9,
+   "fade_out": 0.25
+  },
+  {
+   "file": "stems/m2_morning.m4a",
+   "start": 9.14,
+   "dur": 8.0,
+   "fade_in": 0.4,
+   "fade_out": 0.7
+  }
+ ],
+ "sfx": [
+  [
+   0,
+   5.9,
+   0.55
+  ],
+  [
+   5.9,
+   9.14,
+   0.22
+  ],
+  [
+   9.14,
+   999,
+   0.25
+  ]
+ ]
+}

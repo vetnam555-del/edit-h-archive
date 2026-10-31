@@ -3,6 +3,11 @@
 시스템이 날마다 무엇을 바꿨는지 한 줄씩 남긴다 — **바꾼 것 — 왜(근거) — 어떻게 판정·확인**. 최신이 위.
 매일 14:10 개선 루틴(`RUNBOOK_IMPROVE.md`)과 일요일 21:00 주간 루틴이 적는다. 편집 회고는 `learnings.md`, 조사·실험은 `references.md`.
 
+### 2026-11-01 새벽 13 (운영자 — '바로 올려줘 그리고 스토리에도 … 오늘자도 영상으로 바로')
+- 10/31 AI 릴스·스토리 게시(06:03, 'AI 정보' 라벨 붙음): https://www.instagram.com/reel/DfLFBnWCdCu/ — E19 시작(references.md).
+- 편집 도구를 하루치 설정 파일로: `automation/pilots/ai_reel/episode.py` + `{날짜}/episode.json`(10/31 것으로 다시 만들어 올린 것과 같음을 확인). 예전 overlays.py·compose_v3.py·compose.sh 는 지웠다.
+- 11/01 호 AI 릴스는 08:15 예약(send_later)으로 만든다 — 그날 릴스로 바로 게시, 19:30 일반 릴스는 건너뜀.
+
 ### 2026-11-01 새벽 12 (운영자 — '영상에서 AI 표시는 빼 줘, 인스타에 올릴 때 표시하니까. 수정한 다음 바로 올려 줘, 스토리에도. 오늘 호도 영상으로')
 - **AI 영상 릴스 게시 기능**(post_instagram.py): `instagram/{키}/reel_ai.mp4`(+ `reel_ai_caption.txt`)가 있으면 그날 릴스를 이 영상으로 올리고(형식 'ai' — 성과표가 따로 비교), 같은 영상을 **스토리 영상**으로도 한 장 올린다(log `story_ai`). 그날 릴스가 이미 올라간 호(10/31)는 한 번 더(log `reel_ai`).
   인스타 'AI 정보' 라벨을 API 로 붙인다(`is_ai_generated`, 2026-06-22 Content Publishing API) — 계정이 안 받으면 라벨 없이 다시 만들고 기록, 캡션 한 줄이 밝힌다.
