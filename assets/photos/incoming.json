@@ -1,0 +1,65 @@
+{
+ "_about": "받아 올 표지 후보 사진 — GitHub 서버가 받아 assets/photos/{name}.jpg 로 바꿔 넣는다(.github/workflows/fetch-photos.yml, automation/fetch_incoming_photos.py). 이 작업 환경은 이미지 서버 접속이 막혀 있어 음악 받기(fetch-music.yml)와 같은 방식. 받은 뒤 개선 루틴이 눈으로 검수하고 library.json 에 올린다(검수 전에는 표지 후보가 아니다).",
+ "items": [
+  {
+   "name": "ai-coin-jar",
+   "url": "https://d8j0ntlcm91z4.cloudfront.net/user_39AFcjW15BXPoPKJdhkblpn98Bg/hf_20261031_165313_5577e0b9-14e9-45f5-b119-eaf64367d685.png",
+   "job": "5577e0b9-14e9-45f5-b119-eaf64367d685"
+  },
+  {
+   "name": "ai-stock-tablet",
+   "url": "https://d8j0ntlcm91z4.cloudfront.net/user_39AFcjW15BXPoPKJdhkblpn98Bg/hf_20261031_165315_5266f3a1-ca0b-46b6-b31d-49738ee1814c.png",
+   "job": "5266f3a1-ca0b-46b6-b31d-49738ee1814c"
+  },
+  {
+   "name": "ai-office-desk",
+   "url": "https://d8j0ntlcm91z4.cloudfront.net/user_39AFcjW15BXPoPKJdhkblpn98Bg/hf_20261031_165316_ce2dcf86-bf9a-437b-bed1-b412d736f1ff.png",
+   "job": "ce2dcf86-bf9a-437b-bed1-b412d736f1ff"
+  },
+  {
+   "name": "ai-calculator-forms",
+   "url": "https://d8j0ntlcm91z4.cloudfront.net/user_39AFcjW15BXPoPKJdhkblpn98Bg/hf_20261031_165313_84c38f72-1d07-4458-81b4-da1d465d93d5.png",
+   "job": "84c38f72-1d07-4458-81b4-da1d465d93d5"
+  },
+  {
+   "name": "ai-apartments",
+   "url": "https://d8j0ntlcm91z4.cloudfront.net/user_39AFcjW15BXPoPKJdhkblpn98Bg/hf_20261031_165313_cc1ed509-0aa2-44c8-a0ce-0805b8a473d4.png",
+   "job": "cc1ed509-0aa2-44c8-a0ce-0805b8a473d4"
+  },
+  {
+   "name": "ai-shopping-bags",
+   "url": "https://d8j0ntlcm91z4.cloudfront.net/user_39AFcjW15BXPoPKJdhkblpn98Bg/hf_20261031_165316_ffa8790f-2f2d-402a-abc6-cbe197453df3.png",
+   "job": "ffa8790f-2f2d-402a-abc6-cbe197453df3"
+  },
+  {
+   "name": "ai-card-phone",
+   "url": "https://d8j0ntlcm91z4.cloudfront.net/user_39AFcjW15BXPoPKJdhkblpn98Bg/hf_20261031_165315_ff2b63af-8e8b-4814-9eca-a5125e26feba.png",
+   "job": "ff2b63af-8e8b-4814-9eca-a5125e26feba"
+  },
+  {
+   "name": "ai-subway-morning",
+   "url": "https://d8j0ntlcm91z4.cloudfront.net/user_39AFcjW15BXPoPKJdhkblpn98Bg/hf_20261031_165314_38317318-ffd3-4f59-811d-b035ff2f6b6e.png",
+   "job": "38317318-ffd3-4f59-811d-b035ff2f6b6e"
+  },
+  {
+   "name": "ai-groceries",
+   "url": "https://d8j0ntlcm91z4.cloudfront.net/user_39AFcjW15BXPoPKJdhkblpn98Bg/hf_20261031_165315_f79f061b-f184-4528-aecd-181b3b851481.png",
+   "job": "f79f061b-f184-4528-aecd-181b3b851481"
+  },
+  {
+   "name": "ai-health-piggy",
+   "url": "https://d8j0ntlcm91z4.cloudfront.net/user_39AFcjW15BXPoPKJdhkblpn98Bg/hf_20261031_165316_e95a3f02-1064-44a3-a893-01abd5be7bb2.png",
+   "job": "e95a3f02-1064-44a3-a893-01abd5be7bb2"
+  },
+  {
+   "name": "ai-park-bench",
+   "url": "https://d8j0ntlcm91z4.cloudfront.net/user_39AFcjW15BXPoPKJdhkblpn98Bg/hf_20261031_165314_5da32dab-ba04-45d0-83f0-414bd79e7892.png",
+   "job": "5da32dab-ba04-45d0-83f0-414bd79e7892"
+  },
+  {
+   "name": "ai-fuel-nozzle",
+   "url": "https://d8j0ntlcm91z4.cloudfront.net/user_39AFcjW15BXPoPKJdhkblpn98Bg/hf_20261031_165316_70976aa8-b395-4ef8-8b64-1a76a73ba71a.png",
+   "job": "70976aa8-b395-4ef8-8b64-1a76a73ba71a"
+  }
+ ]
+}
