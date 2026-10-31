@@ -166,8 +166,22 @@ def korean_number(run):
     return value if (total or section or cur is not None) else None
 
 
+def _sign_near(text, start, end):
+    """숫자 앞 부호 말(마이너스·플러스·-·+·▲·▼) 또는 뒤 방향 말(내린·빠졌·오른·늘어 …) → '-'·'+'·''."""
+    before = re.search(r"(마이너스|플러스|[+\-−▲▼])\s?$", text[max(0, start - 6):start])
+    if before:
+        return "-" if before.group(1) in ("마이너스", "-", "−", "▼") else "+"
+    tail = text[end:end + 12]
+    if re.match(rf"\s*(?:\S{{1,3}}\s+)?(?:{DOWN})", tail):
+        return "-"
+    if re.match(rf"\s*(?:\S{{1,3}}\s+)?(?:{UP})", tail):
+        return "+"
+    return ""
+
+
 def spoken_numbers(text):
-    """대사·받아쓴 글에서 숫자 → [(값, 단위)]. 한글 수사만 있는 덩어리는 단위가 붙을 때만 숫자로 본다('사이드카'·'하루 만에'는 숫자가 아니다)."""
+    """대사·받아쓴 글에서 숫자 → [(값, 단위, 부호)]. 한글 수사만 있는 덩어리는 단위가 붙을 때만 숫자로 본다('사이드카'·'하루 만에'는 숫자가 아니다).
+    부호는 앞의 '마이너스·플러스'나 뒤의 '빠졌다·올랐다' 같은 말에서 — 목소리가 등락을 뒤집어 말하면 막는다(11/01 Codex)."""
     out = []
     for m in SPOKEN.finditer(text):
         run, unit = m.group(1).strip(), m.group(2) or ""
@@ -180,13 +194,15 @@ def spoken_numbers(text):
             continue
         v = korean_number(run)
         if v is not None:
-            out.append((round(v, 6), UNIT_SAME.get(unit, unit)))
+            out.append((round(v, 6), UNIT_SAME.get(unit, unit), _sign_near(text, m.start(), m.end())))
     return out
 
 
 def _num_match(a, b):
-    (va, ua), (vb, ub) = a, b
-    if ua and ub and ua != ub:
+    """값·단위·부호 — 단위나 부호는 둘 다 있을 때만 같아야 한다(한쪽만 있으면 따지지 않는다)."""
+    va, ua, sa = (tuple(a) + ("",))[:3]
+    vb, ub, sb = (tuple(b) + ("",))[:3]
+    if (ua and ub and ua != ub) or (sa and sb and sa != sb):
         return False
     if abs(va - vb) <= 1e-6 * max(1.0, abs(vb)):
         return True
@@ -195,26 +211,29 @@ def _num_match(a, b):
 
 
 def content_values(corpus):
-    """content 의 숫자 → [(값, 단위)] — 단위는 숫자 뒤 마지막 단위(1조6000억원 → 원)."""
+    """content 의 숫자 → [(값, 단위, 부호)] — 단위는 숫자 뒤 마지막 단위(1조6000억원 → 원), 부호는 화면 숫자 검사와 같은 규칙(corpus_numbers)."""
     out = []
-    for t in numbers(corpus, keep_single=True):
-        body = t.lstrip("+-")
+    for body, signs in corpus_numbers(corpus).items():
         unit = re.sub(r"^[\d.,조억만천]+", "", body)
         v = korean_number(body[: len(body) - len(unit)] if unit else body)
         if v is not None:
-            out.append((round(v, 6), unit))
+            out += [(round(v, 6), unit, sg) for sg in signs]
     return out
 
 
+def _say(n):
+    return f"{n[2] if len(n) > 2 else ''}{n[0]:g}{n[1]}"
+
+
 def check_spoken(script_nums, said):
-    """들린 숫자 ↔ 대사 숫자 — 목소리가 다른 금액을 말했거나(들린 숫자가 대사에 없음) 숫자를 빼먹었으면 실패. → (들린 숫자, 실패 목록)"""
+    """들린 숫자 ↔ 대사 숫자 — 목소리가 다른 금액·반대 방향을 말했거나(들린 숫자가 대사에 없음) 숫자를 빼먹었으면 실패. → (들린 숫자, 실패 목록)"""
     heard_nums, bad = spoken_numbers(said), []
     for h in heard_nums:
-        if h not in BRAND_SPOKEN and not any(_num_match(h, x) for x in script_nums):
-            bad.append(f"목소리 숫자 — 들린 '{h[0]:g}{h[1]}' 가 대사에 없다(받아쓰기: {said.strip()[:60]})")
+        if h[:2] not in BRAND_SPOKEN and not any(_num_match(h, x) for x in script_nums):
+            bad.append(f"목소리 숫자 — 들린 '{_say(h)}' 가 대사에 없다(받아쓰기: {said.strip()[:60]})")
     for x in script_nums:
-        if x not in BRAND_SPOKEN and not any(_num_match(h, x) for h in heard_nums):
-            bad.append(f"목소리 숫자 — 대사의 '{x[0]:g}{x[1]}' 가 들리지 않는다(받아쓰기: {said.strip()[:60]})")
+        if x[:2] not in BRAND_SPOKEN and not any(_num_match(h, x) for h in heard_nums):
+            bad.append(f"목소리 숫자 — 대사의 '{_say(x)}' 가 들리지 않는다(받아쓰기: {said.strip()[:60]})")
     return heard_nums, bad
 
 
@@ -270,8 +289,8 @@ def main():
     for vline in ep.get("voices", []):
         for sn in spoken_numbers(vline.get("text", "")):
             script_nums.append(sn)
-            if sn not in BRAND_SPOKEN and not any(_num_match(sn, c) for c in cvals):
-                fails.append(f"content 에 없는 숫자 — 대사 '{vline.get('text', '')[:20]}…': {sn[0]:g}{sn[1]}")
+            if sn[:2] not in BRAND_SPOKEN and not any(_num_match(sn, c) for c in cvals):
+                fails.append(f"content 에 없는 숫자 — 대사 '{vline.get('text', '')[:20]}…': {_say(sn)}")
     if any("AI로 만든 영상" in plain(c["html"]) for c in ep.get("captions", [])):
         fails.append("화면 글자에 'AI로 만든 영상' 표시가 있다(운영자 11/01: 빼기)")
 
@@ -309,7 +328,7 @@ def main():
             heard = hangul(said)
             heard_nums, bad_nums = check_spoken(script_nums, said)
             fails += bad_nums
-            notes.append(f"들린 숫자 {', '.join(f'{v:g}{u}' for v, u in heard_nums) or '없음'}")
+            notes.append(f"들린 숫자 {', '.join(_say(n) for n in heard_nums) or '없음'}")
             for vline in ep["voices"]:
                 want = hangul(re.sub(r"[일이삼사오육칠팔구십백천만억조점퍼센트]+(?=\s|$|[,.!?…])", "", vline.get("text", "")))
                 if len(want) < 4:

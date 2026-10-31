@@ -1734,10 +1734,18 @@ def t_ai_reel():
     expect('"끝 화면 {k}"' in inspect.getsource(qa.main) or "끝 화면" in inspect.getsource(qa.main), "qa.main 이 끝 화면 문구를 보지 않는다")
     # 목소리 숫자 — 대사 원고(한글 읽기)는 content 와, 들린 숫자는 대사와 같은 값이어야 한다(11/01 Codex: 자막이 맞아도 '일조 칠천억'을 말하면 막는다)
     script = qa.spoken_numbers("외국인이 하루 만에 일조 육천억 원 넘게 팔았대! 프로그램 매도 오 분간 멈춥니다. 삼 점 사팔 퍼센트")
-    expect(script == [(1.6e12, "원"), (5.0, "분"), (3.48, "%")], f"한글 숫자 읽기가 틀린다: {script}")
+    expect([x[:2] for x in script] == [(1.6e12, "원"), (5.0, "분"), (3.48, "%")], f"한글 숫자 읽기가 틀린다: {script}")
     expect(not qa.spoken_numbers("사이드카가 하루 만에 울렸대, 삼성 이 회사, 내일 아침 여덟 시 반"), "숫자가 아닌 말을 숫자로 읽었다")
-    expect(qa.spoken_numbers("11월 30일") == [(11.0, "월"), (30.0, "일")] and qa.spoken_numbers("삼십 일 동안") == [(30.0, "일")]
-           and qa.spoken_numbers("삼십일 일") == [(31.0, "일")], f"날짜·기간의 '일'을 숫자로 삼켰다: {qa.spoken_numbers('11월 30일')}")
+    day = lambda t: [x[:2] for x in qa.spoken_numbers(t)]  # noqa: E731
+    expect(day("11월 30일") == [(11.0, "월"), (30.0, "일")] and day("삼십 일 동안") == [(30.0, "일")]
+           and day("삼십일 일") == [(31.0, "일")], f"날짜·기간의 '일'을 숫자로 삼켰다: {day('11월 30일')}")
+    # 등락 방향 — 목소리가 '플러스'로, 또는 '올랐대'로 뒤집어 말하면 막는다(11/01 Codex)
+    _, flip = qa.check_spoken(qa.spoken_numbers("마이너스 칠 점 영팔 퍼센트"), "플러스 칠 점 영팔 퍼센트")
+    expect(flip, "목소리가 등락 부호를 뒤집어 말해도 통과했다")
+    cv7 = qa.content_values("SK하이닉스 -7.08%, 삼성전자는 3.02% 내린")
+    expect(not any(qa._num_match(x, c) for x in qa.spoken_numbers("칠 점 영팔 퍼센트 올랐대") for c in cv7)
+           and all(any(qa._num_match(x, c) for c in cv7) for x in qa.spoken_numbers("칠 점 영팔 퍼센트 빠졌대, 삼 점 영이 퍼센트 내렸어")),
+           "대사의 등락 방향을 content 와 대조하지 않는다")
     _, bad_day = qa.check_spoken(qa.spoken_numbers("삼십 일 동안"), "31일 동안")
     expect(bad_day, "30일을 31일로 말해도 통과했다")
     cv = qa.content_values("외국인이 1조6000억원 넘게 팔았고 5분간 멈췄다, 3.48% 내린")
