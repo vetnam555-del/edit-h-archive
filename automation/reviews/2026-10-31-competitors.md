@@ -31,9 +31,9 @@
 | 캐릿 | 대학내일 | 웹 아티클이 본진<br>트렌드 레터·인스타 카드뉴스로 퍼뜨림<br>유료 멤버십, Z세대 자문단이 직접 고름 | 레터 20만+(2023 공식)<br>인스타 약 5.5만 |
 | 고구마팜 | 더에스엠씨(디지털 마케팅 회사) | 웹 아티클 + 목요일 뉴스레터, 에디터 기수 모집 | 인스타는 작다(검색 표기 약 4천)<br>본진은 웹·메일 |
 | 비스킷 | BAT(브랜드 에이전시) | 하루 한 번 인사이트 카드뉴스<br>매월 마지막 주 실무 세미나(누적 신청 6,000명) | 인스타 약 12.5만 |
-| 비크닉(bicnic) | 중앙일보 | 브랜드 뉴스레터 + 인스타 카드뉴스·숏폼 | 미확인 |
+| 비크닉(bicnic) | 중앙일보 | 브랜드 뉴스레터 + 인스타 카드뉴스·숏폼 | 인스타 약 6.1만(블로그 인용, 시점 2025 초) |
 | 트렌드어워드(Trend A Word) | 1인 '테드' | 주 5회(신조어 화·목, 트렌드 월·수·금), 유튜브 | 메일리 약 2.2만(표기 시점 불명)<br>2024 신조어 테스트 18만 명 참여 |
-| 영감농장·스낵아이디어·광고줍줍·copy_pedia | 개인·현직 마케터 | 국내외 광고·캠페인·카피 사례 카드뉴스, 주 1회 안팎(광고줍줍은 수요일 저녁) | 스낵아이디어 약 1.4만<br>광고줍줍 약 5.7천<br>나머지 미확인 |
+| 영감농장·스낵아이디어·광고줍줍·copy_pedia | 개인·현직 마케터 | 국내외 광고·캠페인·카피 사례 카드뉴스, 주 1회 안팎(광고줍줍은 수요일 저녁) | 스낵아이디어 약 1.4만<br>광고줍줍 약 5.7천<br>카피피디아 약 3.8만(블로그 인용, 2025 초)<br>영감농장 미확인 |
 
 ### 2. 커뮤니티
 
@@ -203,6 +203,10 @@
 
 **인스타 계정** — 공식 사이트·뉴스레터에서 확인: 뉴닉 @newneek.official · 어피티 @uppity.official · 캐릿 @careet.official · 비스킷 @biscit.co.kr ·
 트렌드어워드 @trendaword(레터 하단). 이전 검색으로: 고구마팜 @gogumafarm.kr · 비크닉 @bicnic_letter · 스낵아이디어 @snack__idea · 광고줍줍 @ad_zupzup.
+운영자가 11/01 더 준 목록에서: **영감농장 @inspirationfarm_**(브런치 모비인사이드 2025-12 '레퍼런스 인스타 계정 추천') ·
+**카피피디아 @copy_pedia**(네이버 블로그 '현직 마케터가 구독하는 인스타 계정 9선' — 그 글 시점 팔로워 3.8만, 비크닉 6.1만, 비스킷 5.9만).
+추적기 요약표는 운영자 분류대로 넷으로 나눈다: 경제·뉴스 브리핑(독자가 겹친다) / 트렌드 미디어 / 마케팅·브랜드 인사이트 / 카피·크리에이티브.
+뒤의 셋은 독자가 마케터라 **형식(카드뉴스 구성·저장각·게시 시각) 참고용**으로 본다 — 숫자를 우리 목표로 삼지 않는다.
 - 머니그라피 인스타는 확인하지 못했다. 안장출근길은 인스타 링크가 없다.
 - 아이보스는 사이트가 자동 접속을 막아(403 — 우리 설정 문제 아님) 직접 읽지 못했다.
 
@@ -226,4 +230,5 @@
 - 비크닉: 중앙일보 이노베이션랩 채용 공고(검색 결과) — 인스타 `@bicnic_letter`
 - 11/01 직접 확인: [뉴닉](https://newneek.co/) · [어피티](https://uppity.co.kr/) · [캐릿](https://www.careet.net/) · [고구마팜](https://gogumafarm.kr/) ·
   [비스킷 About](https://biscit.co.kr/about/) · [트렌드어워드 메일리](https://maily.so/trendaword) · [머니그라피 유튜브](https://www.youtube.com/@moneygraphy) ·
-  [브런치 @mobiinside/2905](https://brunch.co.kr/@mobiinside/2905) · [메타 비즈니스 탐색 문서](https://developers.facebook.com/documentation/instagram-platform/instagram-api-with-facebook-login/business-discovery)
+  [브런치 @mobiinside/2905](https://brunch.co.kr/@mobiinside/2905) · [브런치 @mobiinside/6964(영감농장)](https://brunch.co.kr/@mobiinside/6964) ·
+  [네이버 블로그 — 마케터가 구독하는 인스타 9선(카피피디아·비크닉·비스킷)](https://blog.naver.com/meaningful-day/223727992932) · [메타 비즈니스 탐색 문서](https://developers.facebook.com/documentation/instagram-platform/instagram-api-with-facebook-login/business-discovery)
