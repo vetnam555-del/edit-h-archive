@@ -1,0 +1,20 @@
+# 2026-11-01 시험판(10/31 호) — Seedance 2.5, mode=omni_reference, 15초, 9:16, generate_audio=true
+# 참고 그림(image_references): assets/mascot/mascot-sheet.jpg, h-surprised.png, h-coffee.png
+# 480p 시안(draft=true, 45크레딧) → 고른 시안을 draft_job_id 로 1080p 확정(240크레딧). 1080p 확정은 시안과 구도가 같다.
+# 시안 2개 중 1개는 힉스필드 'ip_detected'(지식재산 감지)로 막혔다 — 다른 캐릭터를 닮은 묘사를 피한다.
+
+[SCENE] A 15-second vertical 9:16 cinematic 3D animated micro-drama, feature-film quality, soft matte vinyl-toy materials, warm morning light, palette of cream, coral-orange and ink black. No dialogue.
+
+[ACTIVE REFERENCES] @image1, @image2 and @image3 show the only main character, "H": a perfectly round coral-orange ball body (the body IS the head), two big round black-rimmed glasses with white eyes and black pupils, a small curved black smile, thin black noodle arms and legs with round black feet. No nose, no ears, no hair, no clothes. Keep this exact design and color in every shot, rendered as a smooth 3D vinyl toy.
+
+[ACTION TIMELINE]
+Shot 1 - The alert (0-3s): close-up in a cozy small studio apartment at 8 a.m. H sits on the edge of a bed holding a smartphone; the screen glows red and a red zig-zag line plunging downward is reflected in H's glasses. H's eyes snap wide, tiny sweat drops pop out, it hops back in comedic shock (like @image2). Fast push-in on the glasses.
+Shot 2 - The stampede (3-7s): hard cut to a miniature toy city at street level; the road itself is shaped like a steep falling line graph. Dozens of identical small white boxy robot delivery trucks rush downhill in a panic, wheels smoking, cardboard boxes tumbling off. Low-angle tracking shot, motion blur, red warning lights pulsing on the buildings.
+Shot 3 - Sidecar (7-10s): a cute white police motorcycle with a sidecar, red and blue lights flashing, drifts sideways into frame and stops across the road. A small round robot officer in the sidecar raises a round red stop paddle. All trucks screech to a halt inches away; dust and flying boxes freeze in mid-air for a beat while the camera orbits around the frozen moment.
+Shot 4 - Calm check (10-15s): match cut back to the apartment, calm golden light. H sits at a small wooden desk with a takeaway coffee cup (like @image3), takes a sip, then looks at a paper pie chart on the desk where two big slices are orange, taps them with a finger, nods thoughtfully and gives a small confident smile to camera. Slow push-in.
+
+[CAMERA/EDIT] Hard cuts on the beat, never two identical shot sizes in a row. Keep the subject in the middle of the vertical frame; keep the top 18% and bottom 22% of the frame visually simple (room for captions).
+
+[AUDIO] No speech, no voices, no singing. Phone buzz and a short dramatic orchestral sting (shot 1); rumbling engines, honks, rattling boxes (shot 2); police siren whoop, tire screech, then sudden silence with a single ticking clock (shot 3); calm lo-fi piano, coffee sip, soft room tone (shot 4).
+
+[NEGATIVE] No text, letters, numbers, logos or watermarks anywhere; no real brands; no humans; no extra limbs or extra eyes; never change the character's round shape, glasses or orange color; nothing scary.
