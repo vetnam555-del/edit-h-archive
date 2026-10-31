@@ -25,7 +25,7 @@ ROOT = Path(__file__).resolve().parents[3]
 # 큰 금액은 한 덩어리로('3천억원'·'3백억원'·'5천6백만원'·'2만5천명'도 — 11/01 Codex) — "1조6000억원"을 "1조"·"6000억"으로 쪼개 따로 찾으면 content 가 "1조5000억원과 6000억원"일 때도 통과한다(11/01 Codex)
 # 등락 부호도 숫자의 일부 — "+7.08%"가 content 의 "-7.08%"로 통과하면 안 된다(11/01 Codex). 낱말 사이 '-'(2026-11-01)는 부호가 아니다
 NUM = re.compile(r"(?:(?<![\w.])[+\-−▲▼]\s?)?\d[\d,]*(?:\.\d+)?(?:\s*[조억만천백]+\s*\d[\d,]*(?:\.\d+)?)*[조억만천백]*\s*"
-                 r"(?:%|원|명|건|분|초|시간|시|일|개|배|p|bp|달러|위|호|거래일|년|월|평|장|종목|가지|군데|곳|번|살|달|채|대|마리|권|잔|병)?")
+                 r"(?:%p|%포인트|%|원|명|건|분|초|시간|시|일|개|배|p|bp|달러|위|호|거래일|년|월|평|장|종목|가지|군데|곳|번|살|달|채|대|마리|권|잔|병)?")
 SIGN = str.maketrans({"−": "-", "▲": "+", "▼": "-"})
 # content 는 부호 대신 말로 쓰기도 한다 — "3.02% 내린", "3.0% 늘어", "7% 넘게 내렸어요"
 DOWN = "내리|내린|내려|내렸|하락|떨어|빠진|빠졌|빠지|감소|줄어|줄었|급락|밀려|밀린|밀렸"
@@ -84,10 +84,11 @@ def check_numbers(texts, corpus, allow=()):
             if re.fullmatch(r"[+-]?\d", t) or t in allow:
                 continue
             sign, body = (t[0], t[1:]) if t[0] in "+-" else ("", t)
-            if not sign and body.endswith(("%", "%p", "p")):
+            if not sign and body.endswith(("%", "%p", "%포인트", "p")):
                 sign = _sign_near(text, m.start(), m.end(), words=True)   # '3.48% 상승'·'빠졌다고' — 등락률만 말로 방향을 읽는다(11/01 Codex)
             unit = re.sub(r"^[\d.,조억만천백]+", "", body)
             v = korean_number(body[: len(body) - len(unit)] if unit else body)
+            unit = UNIT_SAME.get(unit, unit)
             if v is None or not any(_num_match((round(v, 6), unit, sign), c, strict=True) for c in cvals):
                 bad.append(f"{label}: '{t}'")
         # 화면의 고유어 수사 + 세는 말('반도체 세 종목') — '한 번·한 달' 같은 관용구(1)는 뺀다(11/01 Codex)
@@ -139,8 +140,9 @@ _SINO = {"영": 0, "공": 0, "일": 1, "이": 2, "삼": 3, "사": 4, "오": 5, "
 _SMALL = {"십": 10, "백": 100, "천": 1000}
 _BIG = {"만": 10 ** 4, "억": 10 ** 8, "조": 10 ** 12}
 _PIECE = r"\d[\d,]*(?:\.\d+)?|[영공일이삼사오육칠팔구십백천만억조점]"
-SPOKEN = re.compile(rf"(?<![가-힣\d.])((?:{_PIECE})(?:\s?(?:{_PIECE}))*)\s?(퍼센트|%|거래일|원|분|명|건|개|배|호|위|년|월|일|시|초)?")
-UNIT_SAME = {"퍼센트": "%"}
+SPOKEN = re.compile(rf"(?<![가-힣\d.])((?:{_PIECE})(?:\s?(?:{_PIECE}))*)\s?(퍼센트\s?포인트|%p|퍼센트|%|거래일|원|분|명|건|개|배|호|위|년|월|일|시|초)?")
+# 퍼센트(%)와 퍼센트포인트(%p)는 다른 단위다 — 금리 '2.1%p 우대'를 '2.1%'로 쓰면 막는다(11/01 Codex)
+UNIT_SAME = {"퍼센트": "%", "퍼센트포인트": "%p", "퍼센트 포인트": "%p", "%포인트": "%p"}
 # 브랜드 고정 말(발송 시각 '여덟 시 반' = 08:30) — content 숫자가 아니어도 된다
 BRAND_SPOKEN = {(8.0, "시"), (8.0, ""), (30.0, "분"), (30.0, "")}
 
@@ -237,7 +239,7 @@ def _num_match(a, b, strict=False):
     if abs(va - vb) <= 1e-6 * max(1.0, abs(vb)):
         return True
     # 단위 없는 맨숫자 5599 ↔ 5599.42 (% 수와는 아니다, '12거래일'처럼 단위가 붙은 수는 정확히 같아야 한다)
-    return not ua and float(va).is_integer() and int(va) == int(vb) and "%" not in (ua, ub) and not float(vb).is_integer()
+    return not ua and float(va).is_integer() and int(va) == int(vb) and not {"%", "%p"} & {ua, ub} and not float(vb).is_integer()
 
 
 def content_values(corpus):
@@ -247,7 +249,7 @@ def content_values(corpus):
         unit = re.sub(r"^[\d.,조억만천백]+", "", body)
         v = korean_number(body[: len(body) - len(unit)] if unit else body)
         if v is not None:
-            out += [(round(v, 6), unit, sg) for sg in signs]
+            out += [(round(v, 6), UNIT_SAME.get(unit, unit), sg) for sg in signs]
     return out + [n for _, n in native_numbers(corpus)]   # '반도체 두 종목' 같은 고유어 수사
 
 
