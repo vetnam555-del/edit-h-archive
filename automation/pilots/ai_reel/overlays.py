@@ -37,11 +37,11 @@ html,body{{margin:0;width:1080px;height:1920px;background:transparent;font-famil
 {body}
 </body></html>"""
 
-CAPS = {
-    "a_hook": dict(top=300, size=96, body='<div class="kick">10월 30일 코스피</div><div class="main"><span class="hl">3.48%</span> 급락,<br>사이드카<br>또 울렸다고?</div>'),
-    "b_sell": dict(top=300, size=84, body='<div class="main">외국인이 하루에<br><span class="hl">1조6000억원</span><br>넘게 팔았어요</div><div class="sub">장중 5599까지 · SK하이닉스 -7.08%</div>'),
-    "c_sidecar": dict(top=300, size=84, body='<div class="main"><span class="hl">사이드카</span> =<br>프로그램 매도<br>5분 멈춤</div><div class="sub">오전 10시 4분 발동 · 11거래일 만</div>'),
-    "d_check": dict(top=300, size=80, body='<div class="kick">그래서 나는?</div><div class="main">팔기 전에,<br>내 계좌가 <span class="hl">반도체 두 종목</span>에<br>얼마나 몰려 있는지부터</div>'),
+CAPS = {  # 3판(대사 판): 화면 글자 = 말하는 대사(소리를 끄고 봐도 같은 내용) + 확인된 숫자 강조
+    "a_hook": dict(top=300, size=92, body='<div class="kick">10월 30일 코스피</div><div class="main">헉… 코스피<br><span class="hl">3.48%</span><br>빠졌다고?!</div>'),
+    "b_sell": dict(top=300, size=82, body='<div class="main">외국인이 하루 만에<br><span class="hl">1조6000억원</span><br>넘게 팔았대!</div><div class="sub">장중 5599까지 · SK하이닉스 -7.08%</div>'),
+    "c_sidecar": dict(top=300, size=82, body='<div class="main">정지! 프로그램 매도<br><span class="hl">5분</span> 멈춥니다</div><div class="sub">이게 \'사이드카\' · 오전 10시 4분, 11거래일 만</div>'),
+    "d_check": dict(top=300, size=78, body='<div class="kick">그래서 나는?</div><div class="main">팔기 전에,<br>내 계좌가 <span class="hl">반도체 두 종목</span>에<br>얼마나 몰렸는지부터</div>'),
 }
 
 END = """<!doctype html><html><head><meta charset="utf-8"><style>
@@ -59,11 +59,11 @@ img{{width:240px;height:240px;border-radius:50%;display:block;margin:0 auto}}
 <div class="wrap">
   <img src="{face}" alt="">
   <div class="name">EDIT H<span class="dot">.</span></div>
-  <div class="line">2030의 아침을 편집합니다</div>
-  <div class="sub">경제부터 트렌드까지, 매일 아침 8시 30분<br>숫자·출처 전문은 프로필 링크 뉴스레터에서</div>
+  <div class="line">내일 아침 8시 30분에 또 만나요!</div>
+  <div class="sub">2030의 아침을 편집합니다 · 경제부터 트렌드까지<br>숫자·출처 전문은 프로필 링크 뉴스레터에서</div>
   <div class="btn">팔로우하고 내일 아침에 받기</div>
 </div>
-<div class="note">AI로 만든 영상이에요. 숫자는 기사 2곳 이상에서 확인했어요<br>(10월 30일 한국거래소 마감 기준)</div>
+<div class="note">AI로 만든 영상·목소리예요. 숫자는 기사 2곳 이상에서 확인했어요<br>(10월 30일 한국거래소 마감 기준)</div>
 </body></html>"""
 
 
