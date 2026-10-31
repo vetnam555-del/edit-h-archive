@@ -1587,6 +1587,55 @@ def t_brand_v2():
     return f"{newsletter.BRAND_V2_FROM} 호부터 · '{newsletter.BRAND_LINE}'"
 
 
+def t_ai_reel():
+    """AI 영상 릴스(2026-11-01 운영자 '바로 올려줘 … 스토리에도'): instagram/{키}/reel_ai.mp4 가 있으면 make_reel 로 만들지 않고
+    그 영상을 형식 'ai' 로 쓰고, 캡션은 reel_ai_caption.txt, 소리는 영상 안에 있어 출처 댓글이 필요 없다(CC0 취급)."""
+    import inspect
+    import tempfile
+    import post_instagram as pi
+    with tempfile.TemporaryDirectory() as tmp:
+        folder = Path(tmp)
+        (folder / "reel_caption.txt").write_text("보통 릴스 캡션", encoding="utf-8")
+        (folder / "reel_ai_caption.txt").write_text("AI 릴스 캡션", encoding="utf-8")
+        (folder / pi.AI_REEL).write_bytes(b"\x00" * 2048)
+        out, track = pi.build_reel("2026-11-01", folder, "ffmpeg")
+        expect(out == folder / pi.AI_REEL and track["style"] == "ai" and track["credit_in_video"], "reel_ai.mp4 를 쓰지 않는다")
+        expect(track["license"].upper() == "CC0", "AI 영상에 음악 출처 댓글이 붙는다")
+        expect(pi.reel_caption(folder, track).startswith("AI 릴스 캡션") and pi.AI_NOTE_KEY in pi.reel_caption(folder, track)
+               and pi.reel_caption(folder, {"style": "vertical"}) == "보통 릴스 캡션", "AI 릴스 캡션 파일을 고르지 못한다")
+        (folder / "reel_ai_caption.txt").unlink()   # AI 전용 캡션이 없어도 AI 제작 표시는 남는다
+        expect(pi.AI_NOTE_KEY in pi.reel_caption(folder, track), "AI 전용 캡션이 없을 때 AI 표시가 빠진다")
+    src = inspect.getsource(pi.main)
+    expect("reel_ai" in src and "story_ai" in src and "post_story_video" in src, "AI 영상 릴스·스토리 게시 단계가 없다")
+
+    class G:  # 라벨 값을 안 받는 계정이면 라벨 없이 다시 만들고 기록한다
+        def __init__(self, accept):
+            self.accept, self.calls = accept, []
+
+        def call(self, method, path, **params):
+            self.calls.append(params)
+            if "is_ai_generated" in params and not self.accept:
+                raise pi.IGError("400 OAuthException (code 100): Invalid parameter is_ai_generated")
+            return {"id": "c1"}
+    info = {}
+    g = G(True)
+    expect(pi.create_with_ai_label(g, "u", {"media_type": "REELS"}, info) == "c1" and info["ai_label"] is True
+           and g.calls[0].get("is_ai_generated") == "true", "AI 라벨을 붙여 만들지 않는다")
+    info = {}
+    g = G(False)
+    expect(pi.create_with_ai_label(g, "u", {"media_type": "REELS"}, info) == "c1" and info["ai_label"] is False
+           and len(g.calls) == 2 and "is_ai_generated" not in g.calls[1], "라벨을 안 받을 때 라벨 없이 다시 만들지 않는다")
+    g = G(False)
+    try:   # 스토리는 캡션이 없어 라벨이 필수 — 못 붙이면 올리지 않는다
+        pi.post_story_video(g, "u", "https://x/v.mp4", False, {})
+        expect(False, "AI 라벨 없는 스토리 영상을 올린다")
+    except pi.IGError:
+        expect(len(g.calls) == 1, "라벨을 거절당한 뒤 라벨 없는 스토리 컨테이너를 만든다")
+    expect("want_reel" in src.split("AI_REEL")[1][:400], "AI 릴스가 릴스 게시 설정(reel=false)을 무시한다")
+    expect("AI_REEL" in inspect.getsource(pi.prune), "오래된 AI 릴스 영상을 정리하지 않는다")
+    return "reel_ai.mp4 → 형식 ai · 캡션 따로 · 스토리 영상 · AI 정보 라벨(안 받으면 라벨 없이)"
+
+
 def t_competitors_ig():
     """경쟁 매체 인스타(2026-11-01 운영자 '경쟁사도 못 보면 개선에 영향'): 공식 비즈니스 탐색 API 만 쓰고, 토큰이 없으면 네트워크 없이
     0 으로 끝나며, 응답에서 최근 14일 통계(게시 수·평균·참여율·형식·시각·대표 게시물)를 바르게 계산하고, 실패 계정은 따로 적는다."""
@@ -1746,6 +1795,7 @@ def main():
     check("마스코트(안경 동그라미 H)", t_mascot)
     check("첫 화면 구독·사이트 그림(index.html)", t_home)
     check("문구·마크 2판(2030 대표 한 줄·마스코트 얼굴)", t_brand_v2)
+    check("AI 영상 릴스·스토리(reel_ai.mp4)", t_ai_reel)
     check("경쟁 매체 인스타(비즈니스 탐색)", t_competitors_ig)
     check("경쟁 매체 웹(토큰 없이·robots 지킴)", t_competitors_web)
     if not args.quick:
