@@ -1,4 +1,6 @@
 {
+  "goal": {"subscribers": 10000, "by": "2027-10-31", "set": "2026-11-01"},
+  "_goal_note": "북극성(2026-11-01 운영자 '매일매일 발전해서 구독자 1만 명'). 목표일은 1년으로 잡았다 — 운영자가 바꿀 수 있다. 성과표 한눈에 첫 줄·개선 루틴 우선순위·주간 리포트가 읽는다.",
   "site_url": "https://vetnam555-del.github.io/edit-h-archive",
   "indexnow_key": "43c46da34314ed8ab3d2f64ec782f3df",
   "_indexnow_note": "새 호 페이지를 네이버·빙 등에 바로 알리는 IndexNow 키(공개 값 — 저장소 맨 위 같은 이름의 .txt 가 증명 파일). automation/indexnow.py · .github/workflows/indexnow.yml (2026-10-31 경쟁 비교: 배포 길 넓히기). 구글은 IndexNow 를 받지 않아 서치 콘솔 등록(운영자)이 따로 필요하다.",

@@ -503,6 +503,49 @@ def _account_lines(ig, posts):
     return out
 
 
+def _goal_lines(snap):
+    """북극성 — 구독자 1만(2026-11-01 운영자 '매일매일 발전해서 구독자 1만 명 달성할 수 있게끔'). config.goal.
+    뉴스레터 발송 대상·인스타 팔로워 지금 숫자, 7일 전 스냅숏과의 차이, 목표일까지 닿으려면 필요한 주간 성장률, 지금 속도로 닿는 날."""
+    import math
+    goal = load_config().get("goal") or {}
+    target, by = goal.get("subscribers"), goal.get("by")
+    if not target or not by:
+        return []
+    try:
+        now = dt.datetime.fromisoformat(str(snap.get("collected_at")))
+        days_left = (dt.date.fromisoformat(str(by)) - now.date()).days
+    except ValueError:
+        return []
+    old = None
+    for q in sorted((METRICS / "daily").glob("*.json")):
+        s = json.loads(q.read_text(encoding="utf-8"))
+        at = s.get("collected_at")
+        if at and dt.datetime.fromisoformat(at) <= now - dt.timedelta(days=6, hours=12):
+            old = s   # 6.5일 넘게 지난 것 중 가장 최근 = 약 7일 전
+    cur = {"뉴스레터": (snap.get("subscribers") or {}).get("sending"), "인스타": (snap.get("instagram") or {}).get("followers")}
+    prev = {"뉴스레터": ((old or {}).get("subscribers") or {}).get("sending"), "인스타": ((old or {}).get("instagram") or {}).get("followers")}
+    parts, needs, eta = [], [], []
+    for k, v in cur.items():
+        if not isinstance(v, int) or v <= 0:
+            continue
+        pv = prev.get(k)
+        delta = v - pv if isinstance(pv, int) else None
+        parts.append(f"{k} **{v:,}**" + (f"(7일 {delta:+d})" if delta is not None else ""))
+        if days_left > 0 and v < target:
+            needs.append(f"{k} {100 * ((target / v) ** (7 / days_left) - 1):.1f}%")
+        if delta is not None and delta > 0 and isinstance(pv, int) and pv > 0 and v < target:
+            weeks = math.log(target / v) / math.log(v / pv)
+            eta.append(f"{k} {(now.date() + dt.timedelta(weeks=weeks)).isoformat()}")
+        elif v < target:
+            eta.append(f"{k} 닿지 않음(늘지 않음)")
+    if not parts:
+        return []
+    out = [f"- **목표 구독자 {target:,}명**({by}까지) — 지금 " + " · ".join(parts)]
+    if needs:
+        out.append("  - 닿으려면 매주 " + " · ".join(needs) + " 늘어야 한다 · 지금 속도로 닿는 날: " + " · ".join(eta))
+    return out
+
+
 def summary_md(snap):
     ig = snap.get("instagram") or {}
     posts = ig.get("posts") or {}
@@ -520,6 +563,7 @@ def summary_md(snap):
               + (" · 도달·저장 인사이트 권한 없음(좋아요·댓글만)" if ig.get("insights") is False else ""),
               f"- 메일 발송 대상 **{sub.get('sending', '–')}**명 (명단 {sub.get('listed', '–')} · 수신 제외 {sub.get('excluded', '–')})"
               f" · 최근 {DAYS}일 구독 신청 {mb.get('signups_14d', '–')} · 수신 거부 {mb.get('unsubs_14d', '–')}"]
+    lines += _goal_lines(snap)
     lines += _account_lines(ig, posts)
     refs = mb.get("signup_refs_14d") or {}
     if refs:

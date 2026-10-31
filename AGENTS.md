@@ -63,7 +63,7 @@
 
 ### 2-3. 14:10 개선 (선택 — 사용량이 넉넉할 때만)
 - `automation/RUNBOOK_IMPROVE.md` 0~5단계 그대로. **하루 PR 하나**, 고치는 건 1~2건, `python3 automation/selftest.py` 가 '✓ 자동 점검 통과' 여야 PR.
-- 우선순위: 어제·오늘 발행 실패 → `automation/learnings.md` '시스템 개선 요청' → 판정일이 된 실험(`automation/references.md` '지금 시험 중') → 3일 넘게 반복되는 빌드 경고 → 표지 사진 목록 채우기.
+- 우선순위: 어제·오늘 발행 실패 → 구독자 길에서 가장 좁은 칸(RUNBOOK_IMPROVE '북극성') → `automation/learnings.md` '시스템 개선 요청' → 판정일이 된 실험(`automation/references.md` '지금 시험 중') → 3일 넘게 반복되는 빌드 경고 → 표지 사진 목록 채우기.
 
 ### 2-4. 22:00 편집 회고
 1. main 최신으로. `python3 automation/request_metrics.py`(성과표가 오늘 21:00 이후 것이 아니면 수집을 요청하고 최대 9분 기다린다 — 코드 0 최신, 2 기존 것으로 진행).
@@ -76,6 +76,7 @@
 ### 2-5. 일요일 21:00 주간 루틴
 이번 주 `automation/CHANGELOG.md`·`automation/learnings.md`·`automation/metrics/summary.md`(출처 품질 칸 포함)·`automation/references.md`·Actions 실행을 훑고,
 숫자가 오르내린 원인 진단 → 판정일이 된 실험 판정 → 레퍼런스 조사(20분) → 효과 큰 변경 1개 PR → 운영자에게 한국어 주간 리포트.
+리포트 첫 줄은 **구독자 1만 목표 줄**(성과표 '한눈에' 그대로 — 2026-11-01 운영자 결정, `automation/reviews/2026-11-01-growth-10k.md`)과 한 주 변화, 가장 좁은 칸.
 
 ## 3. 꼭 지킬 것
 

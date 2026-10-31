@@ -1130,6 +1130,32 @@ def t_reel_hook():
     return f"첫 장 {timing['first']}초 · {total:.1f}초"
 
 
+def t_goal_line():
+    """북극성(2026-11-01 운영자 '구독자 1만 명'): 성과표 한눈에 목표 줄 — 지금 숫자·7일 변화·필요한 주간 성장률·지금 속도로 닿는 날."""
+    import tempfile
+    import collect_metrics as cm
+    from edith import common
+    goal = (common.load_config().get("goal") or {})
+    expect(goal.get("subscribers") == 10000 and goal.get("by"), "config.goal(1만 명·목표일)이 없다")
+    with tempfile.TemporaryDirectory() as tmp:
+        m = Path(tmp)
+        (m / "daily").mkdir()
+        (m / "daily" / "2026-11-01.json").write_text(json.dumps(
+            {"collected_at": "2026-11-01T21:30:00+09:00", "subscribers": {"sending": 100}, "instagram": {"followers": 200}}), encoding="utf-8")
+        snap = {"collected_at": "2026-11-08T21:30:00+09:00", "subscribers": {"sending": 110}, "instagram": {"followers": 200}}
+        saved = cm.METRICS, cm.load_config
+        cm.METRICS = m
+        cm.load_config = lambda: {"goal": {"subscribers": 10000, "by": "2027-11-08"}}
+        try:
+            lines = cm._goal_lines(snap)
+        finally:
+            cm.METRICS, cm.load_config = saved
+    text = "\n".join(lines)
+    expect("뉴스레터 **110**(7일 +10)" in text and "인스타 **200**(7일 +0)" in text, f"목표 줄 숫자가 틀린다: {text}")
+    expect("뉴스레터 9.0%" in text and "인스타 닿지 않음" in text and "뉴스레터 2027-" in text, f"필요 성장률·닿는 날이 틀린다: {text}")
+    return lines[0][:60]
+
+
 def t_mascot_cards():
     """캐러셀이 글자만으로 나가지 않는다(2026-11-01 운영자 '문구만 만들지 마 — 이미지나 캐릭터 이미지로'): MASCOT_CARDS_FROM 부터
     사진 없는 표지는 마스코트 H + 핵심어 말풍선, 이슈 카드마다 H 가 '그래서 뭐가 달라져?'를 묻는다. 사진 표지는 사진 그대로, 지난 호는 그대로."""
@@ -1898,6 +1924,7 @@ def main():
     check("문구·마크 2판(2030 대표 한 줄·마스코트 얼굴)", t_brand_v2)
     check("AI 영상 릴스·스토리(reel_ai.mp4)", t_ai_reel)
     check("캐러셀 이미지(마스코트 H)", t_mascot_cards)
+    check("구독자 1만 목표 줄", t_goal_line)
     check("경쟁 매체 인스타(비즈니스 탐색)", t_competitors_ig)
     check("경쟁 매체 웹(토큰 없이·robots 지킴)", t_competitors_web)
     if not args.quick:
