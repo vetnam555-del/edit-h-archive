@@ -1,0 +1,50 @@
+# EDIT H 검색 알림(IndexNow) — 새 호 페이지가 main 에 올라오면 GitHub Pages 배포를 기다렸다가 네이버·빙 등에 알린다(automation/indexnow.py).
+# 발송·게시와 따로 돈다 — 실패해도 메일·인스타·스레드에는 영향이 없다. 키는 공개 값(저장소 맨 위 {키}.txt, config indexnow_key).
+# 2026-10-31 경쟁 비교 2차: 잘 되는 매체는 웹 검색으로도 독자를 모은다(reviews/2026-10-31-competitors.md).
+name: EDIT H search ping
+
+on:
+  push:
+    branches: [main]
+    paths: ["20*.html"]          # 맨 위의 호 페이지(YYYY-MM-DD.html)만 — 하위 폴더는 * 가 넘지 않는다
+  workflow_dispatch:
+    inputs:
+      date:
+        description: "알릴 호 YYYY-MM-DD (비우면 오늘)"
+        required: false
+      dry_run:
+        description: "보낼 내용만 출력"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: indexnow
+  cancel-in-progress: false
+
+jobs:
+  ping:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Ping IndexNow
+        env:
+          EVENT: ${{ github.event_name }}
+          EVENT_COMMITS: ${{ toJSON(github.event.commits) }}
+          IN_DATE: ${{ inputs.date }}
+          IN_DRY: ${{ inputs.dry_run }}
+        run: |
+          if [ "$EVENT" = "push" ]; then
+            python3 automation/indexnow.py --commits "$EVENT_COMMITS"
+            exit $?
+          fi
+          args=""
+          [ -n "$IN_DATE" ] && args="$args --date $IN_DATE"
+          [ "$IN_DRY" = "true" ] && args="$args --dry-run"
+          python3 automation/indexnow.py $args

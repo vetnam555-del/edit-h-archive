@@ -304,9 +304,43 @@ def observation(d):
 </div>""")
 
 
+def _on(d, key):
+    """config.instagram[key] 날짜부터 켜는 카드 요소인가(2026-10-31 경쟁 비교 후속 — 실험 표본이 겹치지 않게 날짜로 켠다)."""
+    start = (load_config().get("instagram") or {}).get(key)
+    return bool(start) and str(d["date"])[:10] >= str(start)
+
+
+def chart_box(ch):
+    """숫자 비교·추이 막대 차트 — 주장 하나, 출처는 그림 안에(Chartr·Visual Capitalist, 2026-10-31 경쟁 비교 '자기만의 재료').
+    ch: {'title', 'points': [{'label', 'value', 'text'?}] 3~6개, 'unit'?, 'highlight'?(기본 마지막), 'source'}. 값은 0 이상."""
+    pts = ch["points"]
+    top = max(float(p["value"]) for p in pts) or 1
+    hi = ch.get("highlight", len(pts) - 1)
+    unit = ch.get("unit", "")
+    shown = [p.get("text") or f"{float(p['value']):g}{unit}" for p in pts]   # 막대 위 숫자 — text 가 있으면 그대로(예: 1.2조)
+    bars = "".join(
+        f'<div style="flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;">'
+        f'<div style="font-weight:800;font-size:{fs(30)};line-height:1.1;white-space:nowrap;color:{TEXT if i == hi else SUB};">'
+        f'{esc(shown[i])}</div>'
+        f'<div style="margin-top:10px;width:72%;height:{max(round(float(p["value"]) / top * 100), 2)}%;border-radius:12px 12px 0 0;'
+        f'background:{ACC if i == hi else "#D9D9D9"};"></div></div>'
+        for i, p in enumerate(pts))
+    labels = "".join(
+        f'<div style="flex:1;min-width:0;text-align:center;font-weight:{700 if i == hi else 500};font-size:{fs(24)};line-height:1.25;'
+        f'color:{TEXT if i == hi else SUB};">{esc(p["label"])}</div>' for i, p in enumerate(pts))
+    return (f'<div style="flex:none;width:100%;margin-top:40px;background:{BOX};border-radius:24px;padding:28px 28px 22px;">'
+            f'<div style="font-weight:800;font-size:{fs(32)};line-height:1.3;color:{TEXT};">{mk(ch["title"])}</div>'
+            f'<div style="margin-top:18px;height:250px;display:flex;gap:12px;align-items:flex-end;border-bottom:3px solid {TEXT};">{bars}</div>'
+            f'<div style="margin-top:12px;display:flex;gap:12px;">{labels}</div>'
+            f'<div style="margin-top:14px;font-weight:500;font-size:{fs(21)};line-height:1.35;color:{SRC_LIGHT};text-align:right;">'
+            f'자료 · {esc(ch["source"])}</div></div>')
+
+
 def deep_card(d):
-    """형식 2 — H PICK 심층 '왜 중요해?'. 검정 H PICK 카드 바로 뒤에 붙어 한 이슈를 두 장으로 읽게 한다."""
+    """형식 2 — H PICK 심층 '왜 중요해?'. 검정 H PICK 카드 바로 뒤에 붙어 한 이슈를 두 장으로 읽게 한다.
+    차트 날(config.instagram.chart_card_from~, cards.deep.chart 가 있을 때)은 숫자 상자 대신 막대 차트 — 카드 수(10장)는 그대로."""
     b, deep = d["big_issue"], d["cards"]["deep"]
+    chart = deep.get("chart") if _on(d, "chart_card_from") else None
     tiles = "".join(
         f'<div style="flex:1;min-width:0;background:{BOX};border-radius:24px;padding:24px 14px;text-align:center;">'
         f'<div style="font-weight:800;font-size:{fs(54)};line-height:1.1;letter-spacing:-1px;color:{TEXT};white-space:nowrap;">{esc(n["value"])}</div>'
@@ -323,7 +357,7 @@ def deep_card(d):
 <div class="body" style="padding:110px 70px 140px;justify-content:center;">
   <div style="text-align:center;">{bubble("왜 중요해?")}</div>
   <div class="bal" style="text-align:center;font-weight:800;font-size:{fs(74)};line-height:1.3;letter-spacing:-1.5px;color:{TEXT};">{mk(deep["headline"])}</div>
-  <div style="flex:none;display:flex;gap:14px;width:100%;margin-top:46px;">{tiles}</div>
+  {chart_box(chart) if chart else f'<div style="flex:none;display:flex;gap:14px;width:100%;margin-top:46px;">{tiles}</div>'}
   <div style="flex:none;margin-top:40px;border-top:3px solid {TEXT};">{points}</div>
 </div>
 <div style="position:absolute;left:60px;right:60px;bottom:70px;text-align:center;font-size:24px;line-height:1.4;color:{SRC_LIGHT};">H PICK 심층 · 출처 · {esc(src)}</div>""")
@@ -356,8 +390,18 @@ def note_card(d):
         h, sep, tail = text.partition(" — ")
         quote = (f"{mk(h)} — <span style=\"background:linear-gradient(180deg,transparent 58%,{ACC_FILL} 58%);font-weight:800;color:{TEXT};\">{mk(tail)}</span>"
                  if sep else mk(text))
-        body = (f'<div style="margin-top:50px;font-weight:900;font-size:150px;line-height:.7;height:70px;color:{ACC_FILL};">“</div>'
-                f'<div class="bal" style="margin-top:6px;font-weight:600;font-size:{fs(60)};line-height:1.55;letter-spacing:-1.5px;color:{TEXT};">{quote}</div>')
+        # 오늘 챙길 것(config.instagram.todo_card_from~) — 메일 첫 화면의 체크리스트를 카드에도. 저장해 두고 쓰는 장(2026-10-31 경쟁 비교)
+        todo = [x for x in d.get("todo") or [] if str(x).strip()][:3] if _on(d, "todo_card_from") else []
+        checks = "".join(
+            f'<div style="display:flex;gap:18px;align-items:flex-start;margin-top:{0 if i == 0 else 18}px;">'
+            f'<div style="flex:none;margin-top:4px;width:36px;height:36px;border:3px solid {TEXT};border-radius:8px;"></div>'
+            f'<div class="bal" style="font-weight:600;font-size:{fs(36)};line-height:1.4;color:{TEXT};">{mk(x)}</div></div>'
+            for i, x in enumerate(todo))
+        body = (f'<div style="margin-top:{40 if todo else 50}px;font-weight:900;font-size:{120 if todo else 150}px;line-height:.7;height:{56 if todo else 70}px;color:{ACC_FILL};">“</div>'
+                f'<div class="bal" style="margin-top:6px;font-weight:600;font-size:{fs(50 if todo else 60)};line-height:1.5;letter-spacing:-1.5px;color:{TEXT};">{quote}</div>'
+                + (f'<div style="flex:none;margin-top:44px;padding:30px 34px;border-radius:24px;background:{BOX};">'
+                   f'<div style="font-weight:800;font-size:{fs(30)};line-height:1;margin-bottom:24px;color:{ACC_INK};">오늘 챙길 것 · 저장해 두고 체크</div>'
+                   f'{checks}</div>' if todo else ""))
     return _frame(f"""
 <div class="body" style="padding:120px 90px 110px;justify-content:center;">
   {head}
@@ -380,6 +424,30 @@ def list_card(label, title, rows):
     <div style="width:24px;height:24px;background:{ACC};"></div>{esc(label)}</div>
   <div class="bal" style="margin-top:34px;font-weight:800;font-size:{fs(68)};line-height:1.3;letter-spacing:-1.5px;color:{TEXT};">{mk(title, dark=False)}</div>
   <div style="flex:none;margin-top:44px;border-top:3px solid {TEXT};">{items}</div>
+</div>""")
+
+
+def calendar_card(label, title, rows):
+    """달력에 적어 둘 날짜 — 주간 특집 저장각 장(E13, 2026-11-06~). rows: [{'month', 'day', 'weekday', 'what', 'todo', 'from'}].
+    날짜 칸(월·일·요일) + 무슨 날 + 할 일 + '○/○ 호' — 저장해 두었다가 그날 꺼내 보는 참고 자료(2026-10-31 경쟁 비교: 두고 쓰는 자료)."""
+    items = "".join(
+        f'<div style="display:flex;gap:30px;align-items:center;padding:22px 0;border-bottom:2px solid #EAEAEA;">'
+        f'<div style="flex:none;width:124px;padding:14px 0 12px;border-radius:20px;background:{TEXT};color:#FFFFFF;text-align:center;">'
+        f'<div style="font-weight:700;font-size:26px;line-height:1;opacity:.75;">{r["month"]}월</div>'
+        f'<div style="margin-top:6px;font-weight:900;font-size:50px;line-height:1;letter-spacing:-1px;">{r["day"]}</div>'
+        f'<div style="margin-top:8px;font-weight:700;font-size:24px;line-height:1;color:{ACC_ON_DARK};">{esc(r["weekday"])}</div></div>'
+        f'<div style="min-width:0;">'
+        f'<div class="bal" style="font-weight:800;font-size:{fs(40)};line-height:1.28;letter-spacing:-1px;color:{TEXT};">{mk(r["what"])}</div>'
+        f'<div class="bal" style="margin-top:6px;font-weight:600;font-size:{fs(31)};line-height:1.38;color:{ACC_INK};">→ {esc(r["todo"])}</div>'
+        f'<div style="margin-top:4px;font-weight:500;font-size:{fs(24)};line-height:1.3;color:{SRC_LIGHT};">{esc(r["from"])}</div></div></div>'
+        for r in rows)
+    return _frame(f"""
+<div class="body" style="padding:100px 84px 90px;justify-content:center;">
+  <div style="display:flex;align-items:center;gap:16px;font-weight:700;font-size:32px;color:{TEXT};">
+    <div style="width:24px;height:24px;background:{ACC};"></div>{esc(label)}</div>
+  <div class="bal" style="margin-top:26px;font-weight:800;font-size:{fs(60)};line-height:1.3;letter-spacing:-1.5px;color:{TEXT};">{mk(title, dark=False)}</div>
+  <div style="flex:none;margin-top:30px;border-top:3px solid {TEXT};">{items}</div>
+  <div style="margin-top:22px;font-weight:600;font-size:{fs(27)};line-height:1.4;color:{SUB};">저장해 두면 그날 바로 꺼내 볼 수 있어요</div>
 </div>""")
 
 
