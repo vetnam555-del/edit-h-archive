@@ -124,7 +124,7 @@ def _reel_facts(day):
     hour = int(reel["at"][11:13]) if reel.get("at") else None
     slot = None if hour is None else ("아침" if hour < 12 else "낮" if hour < 17 else "저녁")
     seconds = reel.get("seconds") or (32.3 if day < "2026-10-01" else 19.6 if day < "2026-10-03" else None)
-    return {"reel_style": {"vertical": "세로", "cards": "카드"}.get(style, style), "reel_seconds": seconds, "reel_slot": slot,
+    return {"reel_style": {"vertical": "세로", "cards": "카드", "ai": "AI 영상"}.get(style, style), "reel_seconds": seconds, "reel_slot": slot,
             "reel_feed": bool(reel.get("feed")),   # E7 — 피드에도 올렸나(2026-10-13~)
             "reel_hook": bool(reel.get("hook"))}   # E8 — 첫 장 훅(짧게 + 확 다가오기, 2026-10-13~)
 
@@ -253,6 +253,17 @@ def instagram(days, weekly_days=()):
                         row["reel"]["avg_watch_s"] = round(ms["ig_reels_avg_watch_time"] / 1000, 1)
                 except IGError as e:
                     row["reel"]["watch_error"] = str(e)[:120]
+        aid = (log.get("reel_ai") or {}).get("id")
+        if aid:   # 그날 릴스와 따로 올린 AI 영상 릴스(10/31 시험판) — 형식 'AI 영상' 비교에 넣는다(Codex 리뷰)
+            try:
+                row["reel_ai"] = _media_row(g, aid, 0, out)
+                row["reel_ai"]["seconds"] = (log.get("reel_ai") or {}).get("seconds")
+                data = g.call("GET", f"{aid}/insights", metric=REEL_WATCH_METRICS).get("data", [])
+                ms = {d["name"]: _num(d.get("total_value", {}).get("value", (d.get("values") or [{}])[0].get("value"))) for d in data}
+                if ms.get("ig_reels_avg_watch_time") is not None:
+                    row["reel_ai"]["avg_watch_s"] = round(ms["ig_reels_avg_watch_time"] / 1000, 1)
+            except IGError as e:
+                row["reel_ai_error"] = str(e)[:120]
         story = _story_row(g, day, log)
         if story:
             row["story"] = story
@@ -382,6 +393,9 @@ def _reel_compare(scored):
     """릴스 형식(세로·카드)·게시 시각대별 — 게시 24시간 뒤 도달, 평균 시청 시간과 길이 대비 비율(2026-10-02 실험 축)."""
     groups = {}
     for d, f, sc, a in scored:
+        x = a.get("reel_ai") or {}   # 그날 릴스와 따로 올린 AI 영상 릴스
+        if x.get("reach") is not None:
+            groups.setdefault("AI 영상·따로", []).append((x.get("reach"), x.get("avg_watch_s"), x.get("seconds")))
         r = a.get("reel") or {}
         if not f.get("reel_style") or r.get("reach") is None:
             continue

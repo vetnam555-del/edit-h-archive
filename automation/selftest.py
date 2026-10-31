@@ -1621,8 +1621,15 @@ def t_ai_reel():
            and g.calls[0].get("is_ai_generated") == "true", "AI 라벨을 붙여 만들지 않는다")
     info = {}
     g = G(False)
-    expect(pi.create_with_ai_label(g, "u", {"media_type": "STORIES"}, info) == "c1" and info["ai_label"] is False
+    expect(pi.create_with_ai_label(g, "u", {"media_type": "REELS"}, info) == "c1" and info["ai_label"] is False
            and len(g.calls) == 2 and "is_ai_generated" not in g.calls[1], "라벨을 안 받을 때 라벨 없이 다시 만들지 않는다")
+    g = G(False)
+    try:   # 스토리는 캡션이 없어 라벨이 필수 — 못 붙이면 올리지 않는다
+        pi.post_story_video(g, "u", "https://x/v.mp4", False, {})
+        expect(False, "AI 라벨 없는 스토리 영상을 올린다")
+    except pi.IGError:
+        expect(len(g.calls) == 1, "라벨을 거절당한 뒤 라벨 없는 스토리 컨테이너를 만든다")
+    expect("want_reel" in src.split("AI_REEL")[1][:400], "AI 릴스가 릴스 게시 설정(reel=false)을 무시한다")
     return "reel_ai.mp4 → 형식 ai · 캡션 따로 · 스토리 영상 · AI 정보 라벨(안 받으면 라벨 없이)"
 
 

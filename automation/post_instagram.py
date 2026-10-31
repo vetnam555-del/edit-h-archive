@@ -399,7 +399,7 @@ def story_images(folder, key, site_url):
         [f"{site_url}/instagram/{key}/story/{f.name}" for f in frames]
 
 
-def create_with_ai_label(g, uid, params, info):
+def create_with_ai_label(g, uid, params, info, required=False):
     """AI 영상 컨테이너 — 인스타 'AI 정보' 라벨(is_ai_generated, 2026-06-22 Content Publishing API)을 붙여 만든다.
     11/01 운영자: '영상 안 AI 표시는 빼 줘, 인스타에 올릴 때 표시하니까'. 이 계정 API 가 라벨 값을 안 받으면 라벨 없이 다시 만들고
     info['ai_label']=False 로 남긴다(캡션의 'AI로 만들었어요' 한 줄이 그때도 밝힌다)."""
@@ -410,14 +410,17 @@ def create_with_ai_label(g, uid, params, info):
     except IGError as e:
         if "is_ai_generated" not in str(e) and "nvalid parameter" not in str(e) and "(code 100)" not in str(e):
             raise
-        print(f"  ⚠ AI 라벨 값을 받지 않음 — 라벨 없이 다시 만듦: {e}")
         info["ai_label"] = False
+        if required:   # 캡션도 화면 표시도 없는 스토리는 라벨 없이 올리지 않는다(Codex 리뷰)
+            raise IGError(f"AI 라벨을 받지 않아 올리지 않음(AI 표시가 하나도 없게 됨): {e}")
+        print(f"  ⚠ AI 라벨 값을 받지 않음 — 라벨 없이 다시 만듦(캡션 한 줄이 밝힌다): {e}")
         return g.call("POST", f"{uid}/media", **params)["id"]
 
 
-def post_story_video(g, uid, url, dry):
-    """AI 영상 릴스를 스토리로도(2026-11-01 운영자 '스토리에도 올리고') — 영상 스토리 한 장. 게시한 id(dry-run 이면 None)."""
-    cid = create_with_ai_label(g, uid, dict(media_type="STORIES", video_url=url), {})
+def post_story_video(g, uid, url, dry, info=None):
+    """AI 영상 릴스를 스토리로도(2026-11-01 운영자 '스토리에도 올리고') — 영상 스토리 한 장. 게시한 id(dry-run 이면 None).
+    스토리엔 캡션이 없어 AI 정보 라벨이 꼭 붙어야 올린다(못 붙이면 IGError)."""
+    cid = create_with_ai_label(g, uid, dict(media_type="STORIES", video_url=url), info if info is not None else {}, required=True)
     g.wait_ready(cid, "스토리 영상", timeout=900)
     if dry:
         print("  (dry-run) 스토리 영상 컨테이너 준비 완료 — 게시하지 않음")
@@ -738,7 +741,7 @@ def main():
     # AI 영상 릴스(2026-11-01 운영자 '바로 올려줘 … 스토리에도'): 그날 릴스가 이미 다른 영상으로 올라간 호(시험판 10/31)는
     # 한 번 더 올려 log['reel_ai'] 에, 그리고 AI 영상을 스토리 영상으로 한 장(log['story_ai']). 둘 다 한 번만.
     ai = folder / AI_REEL
-    if args.only != "carousel" and ai.exists() and not rewind:
+    if args.only != "carousel" and ai.exists() and want_reel:   # want_reel: 릴스 게시 설정(reel·weekly_reel)·예비 호 규칙을 그대로(Codex 리뷰)
         if log.get("reel") and log["reel"].get("style") != "ai" and not log.get("reel_ai"):
             try:
                 print("AI 영상 릴스 게시 중…(그날 릴스는 이미 있음)")
@@ -761,9 +764,10 @@ def main():
                 print("AI 영상 스토리 게시 중…")
                 url = f"{site_url}/instagram/{key}/{AI_REEL}"
                 wait_public([url], timeout=900, kind="video")
-                sid = post_story_video(g, uid, url, args.dry_run)
+                label = {}
+                sid = post_story_video(g, uid, url, args.dry_run, label)
                 if sid:
-                    log["story_ai"] = {"id": sid, "at": now_kst().isoformat(timespec="seconds")}
+                    log["story_ai"] = {"id": sid, "at": now_kst().isoformat(timespec="seconds"), "ai_label": label.get("ai_label")}
                     log.pop("story_ai_error", None)
                     save_log(key, log)
                     print("  ✓ AI 영상 스토리")
