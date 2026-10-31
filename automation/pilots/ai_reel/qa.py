@@ -22,9 +22,9 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
-# 큰 금액은 한 덩어리로('3천억원'·'5천만원'·'2만5천명'도 — 11/01 Codex) — "1조6000억원"을 "1조"·"6000억"으로 쪼개 따로 찾으면 content 가 "1조5000억원과 6000억원"일 때도 통과한다(11/01 Codex)
+# 큰 금액은 한 덩어리로('3천억원'·'3백억원'·'5천6백만원'·'2만5천명'도 — 11/01 Codex) — "1조6000억원"을 "1조"·"6000억"으로 쪼개 따로 찾으면 content 가 "1조5000억원과 6000억원"일 때도 통과한다(11/01 Codex)
 # 등락 부호도 숫자의 일부 — "+7.08%"가 content 의 "-7.08%"로 통과하면 안 된다(11/01 Codex). 낱말 사이 '-'(2026-11-01)는 부호가 아니다
-NUM = re.compile(r"(?:(?<![\w.])[+\-−▲▼]\s?)?\d[\d,]*(?:\.\d+)?(?:\s*[조억만천]+\s*\d[\d,]*(?:\.\d+)?)*\s*[조억만천]*\s*"
+NUM = re.compile(r"(?:(?<![\w.])[+\-−▲▼]\s?)?\d[\d,]*(?:\.\d+)?(?:\s*[조억만천백]+\s*\d[\d,]*(?:\.\d+)?)*[조억만천백]*\s*"
                  r"(?:%|원|명|건|분|초|시간|시|일|개|배|p|bp|달러|위|호|거래일|년|월|평|장|종목|가지|군데|곳|번|살|달|채|대|마리|권|잔|병)?")
 SIGN = str.maketrans({"−": "-", "▲": "+", "▼": "-"})
 # content 는 부호 대신 말로 쓰기도 한다 — "3.02% 내린", "3.0% 늘어", "7% 넘게 내렸어요"
@@ -79,11 +79,14 @@ def check_numbers(texts, corpus, allow=()):
     bad = []
     for label, text in texts:
         text = BRAND_PHRASES.sub(" ", text)
-        for t in numbers(text):
-            if t in allow:
+        for m in NUM.finditer(text):
+            t = norm_num(m.group(0))
+            if re.fullmatch(r"[+-]?\d", t) or t in allow:
                 continue
             sign, body = (t[0], t[1:]) if t[0] in "+-" else ("", t)
-            unit = re.sub(r"^[\d.,조억만천]+", "", body)
+            if not sign and body.endswith(("%", "%p", "p")):
+                sign = _sign_near(text, m.start(), m.end(), words=True)   # '3.48% 상승'·'빠졌다고' — 등락률만 말로 방향을 읽는다(11/01 Codex)
+            unit = re.sub(r"^[\d.,조억만천백]+", "", body)
             v = korean_number(body[: len(body) - len(unit)] if unit else body)
             if v is None or not any(_num_match((round(v, 6), unit, sign), c, strict=True) for c in cvals):
                 bad.append(f"{label}: '{t}'")
@@ -168,11 +171,13 @@ def korean_number(run):
     return value if (total or section or cur is not None) else None
 
 
-def _sign_near(text, start, end):
-    """숫자 앞 부호 말(마이너스·플러스·-·+·▲·▼) 또는 뒤 방향 말(내린·빠졌·오른·늘어 …) → '-'·'+'·''."""
+def _sign_near(text, start, end, words=True):
+    """숫자 앞 부호 말(마이너스·플러스·-·+·▲·▼) 또는 (words 면) 뒤 방향 말(내린·빠졌·오른·상승·하락 …) → '-'·'+'·''."""
     before = re.search(r"(마이너스|플러스|[+\-−▲▼])\s?$", text[max(0, start - 6):start])
     if before:
         return "-" if before.group(1) in ("마이너스", "-", "−", "▼") else "+"
+    if not words:
+        return ""
     tail = text[end:end + 12]
     if re.match(rf"\s*(?:\S{{1,3}}\s+)?(?:{DOWN})", tail):
         return "-"
@@ -197,7 +202,7 @@ def native_numbers(text):
         if not tens and not ones:
             continue
         v = float(_NATIVE_TENS.get(tens, 0) + _NATIVE_ONES.get(ones, 0))
-        out.append((m.start(), (v, unit, _sign_near(text, m.start(), m.end()))))
+        out.append((m.start(), (v, unit, _sign_near(text, m.start(), m.end(), words=False))))
     return out
 
 
@@ -216,7 +221,8 @@ def spoken_numbers(text):
             continue
         v = korean_number(run)
         if v is not None:
-            out.append((m.start(), (round(v, 6), UNIT_SAME.get(unit, unit), _sign_near(text, m.start(), m.end()))))
+            u = UNIT_SAME.get(unit, unit)   # 방향 말(빠졌다·올랐다)은 등락률(%)에만 — 지수·금액 수준에 붙은 말로 잘못 막지 않게
+            out.append((m.start(), (round(v, 6), u, _sign_near(text, m.start(), m.end(), words=(u == "%")))))
     return [n for _, n in sorted(out + native_numbers(text), key=lambda x: x[0])]
 
 
@@ -238,7 +244,7 @@ def content_values(corpus):
     """content 의 숫자 → [(값, 단위, 부호)] — 단위는 숫자 뒤 마지막 단위(1조6000억원 → 원), 부호는 화면 숫자 검사와 같은 규칙(corpus_numbers)."""
     out = []
     for body, signs in corpus_numbers(corpus).items():
-        unit = re.sub(r"^[\d.,조억만천]+", "", body)
+        unit = re.sub(r"^[\d.,조억만천백]+", "", body)
         v = korean_number(body[: len(body) - len(unit)] if unit else body)
         if v is not None:
             out += [(round(v, 6), unit, sg) for sg in signs]
