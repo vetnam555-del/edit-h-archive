@@ -1130,6 +1130,31 @@ def t_reel_hook():
     return f"첫 장 {timing['first']}초 · {total:.1f}초"
 
 
+def t_mascot_cards():
+    """캐러셀이 글자만으로 나가지 않는다(2026-11-01 운영자 '문구만 만들지 마 — 이미지나 캐릭터 이미지로'): MASCOT_CARDS_FROM 부터
+    사진 없는 표지는 마스코트 H + 핵심어 말풍선, 이슈 카드마다 H 가 '그래서 뭐가 달라져?'를 묻는다. 사진 표지는 사진 그대로, 지난 호는 그대로."""
+    from edith import cards, content
+    sig = 'alt="" style="display:block;width:'
+    d = content.load("2026-10-31")   # 사진 없는 표지(급락)
+    expect(not d["cards"]["cover"].get("photo"), "시험 원고(10/31)에 표지 사진이 생겼다 — 사진 없는 호로 바꾸기")
+    n_issue = len(d["card_issues"])
+    page_old, _ = cards.build(d, "")
+    expect(sig not in page_old, "지난 호(10/31) 카드에 마스코트가 들어간다 — 기록이 바뀐다")
+    page, files = cards.build({**d, "date": cards.MASCOT_CARDS_FROM}, "")
+    cover = page.split('<section class="card"')[1]
+    expect(sig in cover and d["cards"]["cover"]["keyword"] in cover, "사진 없는 표지에 마스코트·핵심어 말풍선이 없다")
+    expect(page.count(sig) == 1 + n_issue, f"이슈 카드마다 H 가 없다({page.count(sig) - 1}/{n_issue})")
+    d2 = content.load("2026-10-30")   # 사진 표지
+    page2, _ = cards.build({**d2, "date": cards.MASCOT_CARDS_FROM}, "")
+    cover2 = page2.split('<section class="card"')[1]
+    expect("background:url(" in cover2 and sig not in cover2, "사진 표지가 마스코트 표지로 바뀌었다(사진이 먼저)")
+    expect(cards.mascot_pose("코스피 3.48% 급락") == "surprised" and cards.mascot_pose("청년 지원금 환급 돌파") == "celebrate"
+           and cards.mascot_pose("내일부터 신청 접수") == "calendar" and cards.mascot_pose("AI 검색") == "thinking", "H 자세 고르기가 틀린다")
+    expect(all((cards.MASCOT_DIR / f"h-{x}.png").exists() for x in ("point", "surprised", "celebrate", "calendar", "thinking", "hello")),
+           "마스코트 자세 그림이 없다")
+    return f"{cards.MASCOT_CARDS_FROM}~ 사진 없는 표지 H·이슈 카드 {n_issue}장 H · 사진 표지·지난 호 그대로"
+
+
 def t_card_ratio():
     """3:4 카드(2026-10-30 템플릿 ver.3 검토): 날짜로 1350/1440 을 나누고, 표지 사진·카드 CSS·스토리 카드 화면·갤러리가 그 크기를 따른다.
     API 가 3:4 를 받는지 확인하는 probe-ratio 는 게시(media_publish)를 부르지 않는다. 팔로우 카드는 follow_card_from 부터."""
@@ -1872,6 +1897,7 @@ def main():
     check("첫 화면 구독·사이트 그림(index.html)", t_home)
     check("문구·마크 2판(2030 대표 한 줄·마스코트 얼굴)", t_brand_v2)
     check("AI 영상 릴스·스토리(reel_ai.mp4)", t_ai_reel)
+    check("캐러셀 이미지(마스코트 H)", t_mascot_cards)
     check("경쟁 매체 인스타(비즈니스 탐색)", t_competitors_ig)
     check("경쟁 매체 웹(토큰 없이·robots 지킴)", t_competitors_web)
     if not args.quick:

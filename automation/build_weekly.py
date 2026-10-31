@@ -48,7 +48,7 @@ def main():
         names, foot = NAMES, f"밀어서 {n}가지 보기 →"
     sections = ([cards.cover(w, kicker=f"{w['week_label']} 주간 특집 | 이번 주 TOP{n}", foot=foot),
                  cards.summary(w, period="이번 주")]
-                + [cards.issue_card(it, i) for i, it in enumerate(w["card_issues"], 1)]
+                + [cards.issue_card(it, i, w["date"]) for i, it in enumerate(w["card_issues"], 1)]
                 + [eighth, cards.cta(w)])
     files = [f"{i:02d}_edit_h_{w['date']}_{name}.png" for i, name in enumerate(names, 1)]
     out = Path(args.out) if args.out else INSTAGRAM_DIR / w["date"]
