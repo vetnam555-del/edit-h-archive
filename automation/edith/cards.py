@@ -507,6 +507,17 @@ def follow_on(d):
     return bool(start and str(d["date"])[:10] >= start and not d.get("poll"))
 
 
+# 팔로우 카드 소개 줄 — 11/01 운영자 "꼭 직장인보다는 2030 마케팅, 트렌드, 경제 등 폭넓게"(automation/reviews/2026-11-01-copy.md).
+# E11(팔로우 카드) 표본 10/31~11/06 은 예전 줄 그대로 두고 그다음 날부터 바꾼다. 지난 호 카드는 다시 만들어도 예전 그대로(기록).
+FOLLOW_LINE_V2_FROM = "2026-11-07"
+
+
+def follow_line(d, when, n):
+    if str(d["date"])[:10] >= FOLLOW_LINE_V2_FROM:
+        return f"매일 아침 {when}, 경제부터 트렌드까지 2030이 알아야 할 소식 {n}가지"
+    return f"매일 아침 {when}, 2030 직장인의 돈·일·소비 뉴스 {n}가지"
+
+
 def cta_follow(d):
     """마무리 — 팔로우 카드(2026-10-30 운영자 '슬라이드투티켓 템플릿 ver.3' 엔딩: 이미지·계정명 중심, '어떤 계정인지·앞으로 무엇을
     만날지' 한 문장, 팔로우 버튼). 예전 마무리는 '팔로우 + 저장해두기>'가 옅은 글자 링크라 캐러셀을 보고 팔로우 0·프로필 방문 2
@@ -529,7 +540,7 @@ def cta_follow(d):
     padding:44px 48px 40px;display:flex;flex-direction:column;align-items:center;text-align:center;">
     {avatar(132)}
     <div style="margin-top:22px;font-weight:800;font-size:{fs(40)};line-height:1;color:{TEXT};">edit.h.kr</div>
-    <div class="bal" style="margin-top:16px;font-weight:500;font-size:{fs(30)};line-height:1.45;color:{SUB};">매일 아침 {when}, 2030 직장인의 돈·일·소비 뉴스 {n}가지</div>
+    <div class="bal" style="margin-top:16px;font-weight:500;font-size:{fs(30)};line-height:1.45;color:{SUB};">{follow_line(d, when, n)}</div>
     <div style="flex:none;width:100%;display:grid;grid-template-columns:repeat(3,1fr);margin-top:28px;">{stat_html}</div>
     <div style="flex:none;margin-top:32px;width:100%;background:#000000;color:#FFFFFF;border-radius:999px;padding:26px 0;
       font-weight:800;font-size:{fs(36)};line-height:1;">팔로우하고 내일 아침에 받기</div>

@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EDIT H — 오늘 뉴스, 직장인 버전으로</title>
-<meta name="description" content="오늘 뉴스, 직장인 버전으로. 쏟아지는 뉴스 중 월급, 대출, 회사 생활에 실제로 달라지는 것만 골라 매일 아침 8시 30분에 보내는 무료 뉴스레터 EDIT H. 지난 호를 모두 볼 수 있어요.">
+<title>EDIT H — 경제부터 트렌드까지, 2030이 알아야 할 것만</title>
+<meta name="description" content="경제부터 트렌드까지, 2030이 알아야 할 것만. 경제·재테크, 소비 트렌드, 마케팅·브랜드, 테크 소식을 골라 매일 아침 8시 30분에 보내는 무료 뉴스레터 EDIT H. 지난 호를 모두 볼 수 있어요.">
 <meta name="theme-color" content="#FFFFFF">
-<meta property="og:title" content="EDIT H — 오늘 뉴스, 직장인 버전으로">
-<meta property="og:description" content="월급, 대출, 회사 생활에 실제로 달라지는 것만 골라 매일 아침 8시 30분에. 무료·광고 없음.">
+<meta property="og:title" content="EDIT H — 경제부터 트렌드까지, 2030이 알아야 할 것만">
+<meta property="og:description" content="2030의 아침을 편집합니다. 매일 아침 8시 30분, 무료·광고 없음.">
 <meta property="og:image" content="https://vetnam555-del.github.io/edit-h-archive/og_image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -23,7 +23,7 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <!-- 2026-11-01 운영자 "첫 화면에서 바로 구독 신청해서 구독 수를 높이게 구조 변경 + 디자인 전체 개선" → 같은 날 "좀 촌스러운 것 같은데"
-     → "내 돈·일·소비 같은 문구도 촌스럽다"(문구 체계: automation/reviews/2026-11-01-copy.md — 대표 한 줄 '오늘 뉴스, 직장인 버전으로').
+     → "내 돈·일·소비 같은 문구도 촌스럽다"(문구 체계: automation/reviews/2026-11-01-copy.md — 대표 한 줄 '2030의 아침을 편집합니다' — 11/01 운영자 '직장인보다 2030 마케팅·트렌드·경제 폭넓게').
      2판: 레퍼런스(Morning Brew·1440·캐릿)처럼 단색 바탕·큰 글자·입력칸 하나로 줄이고, 장식(빛번짐·이모지·말풍선)을 빼고,
      실제로 보낸 최근 호를 휴대폰 모양 안에 그대로 보여 준다(무엇을 받는지 첫 화면에서). 색·칩은 뉴스레터 본문과 같은 말투.
      구독 칸은 subscribe.html 과 같은 Formspree 주소·칸. 지난 호 목록·최근 호 카드·호 수는 빌드가 manifest 로 다시 쓴다
@@ -168,12 +168,16 @@
   .noresult { margin: 18px 0 0; padding: 18px; background: var(--band); border-radius: 14px; color: var(--sub); text-align: center; }
 
   /* 마지막 권유 */
-  .closing { margin-top: 80px; background: var(--brand); color: var(--ink); }
-  .closing .wrap { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 24px; padding-top: 52px; padding-bottom: 52px; }
-  .closing h2 { margin: 0 0 6px; font-size: clamp(26px, 6vw, 38px); line-height: 1.2; letter-spacing: -0.045em; font-weight: 800; }
-  .closing p { margin: 0; font-size: 15px; font-weight: 500; }
+  /* 11/01 운영자 "하단이 전부 주황색이라 눈에 안 띈다"(주황 바탕에 주황 마스코트·검은 글씨) → 검은 띠 위에 주황 마스코트·주황 버튼 */
+  .closing { margin-top: 80px; background: var(--ink); color: #fff; }
+  .closing .wrap { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 24px; padding-top: 56px; padding-bottom: 56px; }
+  .closing h2 { margin: 0 0 8px; font-size: clamp(26px, 6vw, 38px); line-height: 1.2; letter-spacing: -0.045em; font-weight: 800; }
+  .closing h2 .hl { color: var(--brand); }
+  .closing p { margin: 0; font-size: 15px; font-weight: 500; color: #BDB6AA; }
   .closing .act { display: flex; align-items: center; gap: 18px; }
-  .closing img { width: 104px; height: 104px; }
+  .closing img { width: 112px; height: 112px; padding: 8px; border-radius: 50%; background: var(--band); }  /* 검은 띠에서 마스코트 다리·컵이 묻히지 않게 */
+  .closing .btn { color: var(--ink); background: var(--brand); }
+  .closing .btn:hover { background: #FF7356; }
   .btn { display: inline-block; text-decoration: none; font-weight: 700; font-size: 16px; color: #fff; background: var(--ink); padding: 15px 26px; border-radius: 12px; }
   .btn:hover { background: #333; }
   .footer { padding: 32px 0 104px; font-size: 13px; color: var(--mute); }
@@ -218,8 +222,8 @@
   <div class="wrap">
     <div class="hero-copy">
       <p class="kicker"><span class="dot" aria-hidden="true"></span>매일 아침 8:30 · 무료 뉴스레터</p>
-      <h1 id="hero-title">오늘 뉴스,<br><span class="hl">직장인 버전</span>으로</h1>
-      <p class="lead">쏟아지는 뉴스 중 월급, 대출, 회사 생활에 실제로 달라지는 것만 골라, 소식마다 '그래서 나는 뭘 하면 되는지'까지 5분 분량으로 정리해요. 숫자는 서로 다른 두 곳에서 확인합니다.</p>
+      <h1 id="hero-title">경제부터 트렌드까지,<br><span class="hl">2030</span>이 알아야 할 것만</h1>
+      <p class="lead">경제와 재테크, 소비 트렌드, 마케팅과 브랜드, 테크까지. 쏟아지는 소식 중 오늘 알아야 할 것만 골라 '그래서 나는?'까지 5분 분량으로 정리해요. 숫자는 서로 다른 두 곳에서 확인합니다.</p>
 
       <form class="sub-form" id="subscribeForm" action="https://formspree.io/f/xwvznwyw" method="POST">
         <div class="field">
@@ -263,7 +267,7 @@
   <div class="wrap">
     <div class="fact"><b><span data-issue-count>130</span>호</b><small>주말·공휴일 포함<br>매일 발행</small></div>
     <div class="fact"><b>2곳</b><small>숫자는 서로 다른<br>두 곳에서 확인</small></div>
-    <div class="fact"><b>5분</b><small>출근길에<br>다 읽는 분량</small></div>
+    <div class="fact"><b>5분</b><small>아침에<br>다 읽는 분량</small></div>
   </div>
 </section>
 
@@ -303,7 +307,7 @@
       <div class="search">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
         <label for="q" class="sr-only">지난 호 검색</label>
-        <input type="search" id="q" placeholder="지난 호 검색 (예: 금리, 연말정산)" autocomplete="off">
+        <input type="search" id="q" placeholder="지난 호 검색 (예: 금리, 브랜드, AI)" autocomplete="off">
       </div>
     </div>
     <p class="noresult" id="noresult" hidden>찾는 말이 들어간 호가 없어요. 다른 말로 찾아보세요.</p>
@@ -1106,11 +1110,11 @@
 <section class="closing" aria-labelledby="cta-title">
   <div class="wrap">
     <div>
-      <h2 id="cta-title">내일 아침 8시 30분,<br>메일함에서 만나요</h2>
+      <h2 id="cta-title">내일 아침 <span class="hl">8시 30분</span>,<br>메일함에서 만나요</h2>
       <p>무료 · 광고 없음 · 언제든 1-click 해지</p>
     </div>
     <div class="act">
-      <img src="assets/mascot/h-coffee.png" width="104" height="104" alt="" aria-hidden="true">
+      <img src="assets/mascot/h-coffee.png" width="112" height="112" alt="" aria-hidden="true">
       <a class="btn" href="#subscribe" data-jump>무료로 구독하기</a>
     </div>
   </div>
@@ -1193,11 +1197,18 @@
     a.addEventListener('click', function () { $('privacy').open = true; });
   });
 
-  // 아래 고정 띠 — 구독 칸이 화면 밖일 때만, 이미 신청했으면 안 보인다
+  // 아래 고정 띠 — 구독 칸·마지막 권유·바닥이 화면 밖일 때만(겹쳐 가리지 않게), 이미 신청했으면 안 보인다
   if ('IntersectionObserver' in window && store.get('edith_subscribed') !== '1') {
-    new IntersectionObserver(function (es) {
-      es.forEach(function (en) { sticky.hidden = en.isIntersecting || !form.offsetParent; });
-    }, { threshold: 0.05 }).observe(form);
+    var inView = [], spots = [form, document.querySelector('.closing'), document.querySelector('.footer')].filter(Boolean);
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (en) {
+        var i = inView.indexOf(en.target);
+        if (en.isIntersecting && i < 0) inView.push(en.target);
+        if (!en.isIntersecting && i >= 0) inView.splice(i, 1);
+      });
+      sticky.hidden = inView.length > 0 || !form.offsetParent;
+    }, { threshold: 0.05 });
+    spots.forEach(function (el) { io.observe(el); });
   }
 
   // 지난 호 찾기 — 제목·부제·날짜에 든 말로 거른다
