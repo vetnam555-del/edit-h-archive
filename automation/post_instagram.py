@@ -428,7 +428,8 @@ COMIC_DIR = "comic"   # 2026-11-01 운영자 '캐러셀도 재미있는 양식�
 def post_comic(g, uid, key, folder, site_url, dry):
     """'H 극장' 만화 캐러셀(instagram/{키}/comic/*.jpg + comic_caption.txt + comic_alt.json) — (게시 id, 라벨 정보).
     그림이 AI 영상 장면이라 AI 정보 라벨을 붙이고(못 붙이면 캡션의 'AI로 만들었어요' 한 줄), 캡션에 그 줄이 없으면 붙인다."""
-    jpgs = sorted((folder / COMIC_DIR).glob("*.jpg"))
+    # 파일명 숫자 순서 — 사전순이면 10장일 때 c10(끝 장)이 두 번째로 올라간다(11/01 Codex)
+    jpgs = sorted((folder / COMIC_DIR).glob("*.jpg"), key=lambda p: (int(m.group()) if (m := re.search(r"\d+", p.stem)) else 0, p.name))
     if not 2 <= len(jpgs) <= 10:
         raise IGError(f"만화 캐러셀은 JPEG 2~10장이어야 합니다(지금 {len(jpgs)}장)")
     urls = [f"{site_url}/instagram/{key}/{COMIC_DIR}/{p.name}" for p in jpgs]

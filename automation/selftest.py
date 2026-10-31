@@ -1663,6 +1663,29 @@ def t_ai_reel():
            "content 에 없는 숫자가 통과했다")
     expect(not qa.check_numbers([("t", "1조6000억원 넘게 · 3.48% · 장중 5599 · 3만 명")], "1조 6000억원 순매도 3.48% 5599.42 3만 명"),
            "content 에 있는 숫자를 막았다")
+    # 등락 부호 — '+7.08%'는 '-7.08%'로 통과 못 하고, '-3.02%'는 '3.02% 내린'으로 통과한다(11/01 Codex)
+    signed = "2026-11-01 SK하이닉스 -7.08%, 삼성전자는 3.02% 내린 22만5000원, 생산이 3.0% 늘어"
+    expect(qa.check_numbers([("t", "SK하이닉스 +7.08%")], signed) and qa.check_numbers([("t", "+3.02%")], signed)
+           and qa.check_numbers([("t", "-3.0%")], signed), "등락 부호가 뒤집힌 숫자가 통과했다")
+    expect(not qa.check_numbers([("t", "SK하이닉스 -7.08% · 삼성전자 -3.02% · 생산 +3.0% · 2026-11-01")], signed),
+           "content 와 같은 방향의 등락 숫자를 막았다")
+    # 만화 10장 순서 — 사전순이면 c10(끝 장)이 두 번째로 올라간다
+    with tempfile.TemporaryDirectory() as tmp:
+        folder = Path(tmp)
+        (folder / pi.COMIC_DIR).mkdir()
+        for i in range(1, 11):
+            (folder / pi.COMIC_DIR / f"c{i}.jpg").write_bytes(b"x")
+        (folder / "comic_caption.txt").write_text("만화 캡션", encoding="utf-8")
+        g = G(True)
+        saved_wp, saved_pub = pi.wait_public, pi.publish
+        pi.wait_public = lambda urls, **k: None
+        pi.publish = lambda g_, uid, cid, what, tries=6: "m1"
+        try:
+            pi.post_comic(g, "u", "2026-11-01", folder, "https://x", False)
+        finally:
+            pi.wait_public, pi.publish = saved_wp, saved_pub
+        order = [c["image_url"].rsplit("/", 1)[1] for c in g.calls if c.get("is_carousel_item")]
+        expect(order == [f"c{i}.jpg" for i in range(1, 11)], f"만화 순서가 틀렸다: {order}")
 
     # 만화·AI 릴스 성과는 각자 게시 시각에서 24시간 뒤 스냅숏으로 잰다(캐러셀 시각으로 고르면 늦게 올린 만화가 빠진다 — 11/01 Codex)
     import collect_metrics as cm

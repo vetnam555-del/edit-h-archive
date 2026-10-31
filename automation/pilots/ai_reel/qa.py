@@ -22,8 +22,13 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 # 큰 금액은 한 덩어리로 — "1조6000억원"을 "1조"·"6000억"으로 쪼개 따로 찾으면 content 가 "1조5000억원과 6000억원"일 때도 통과한다(11/01 Codex)
-NUM = re.compile(r"\d[\d,]*(?:\.\d+)?(?:\s*(?:조|억|만)\s*\d[\d,]*(?:\.\d+)?)*\s*(?:조|억|만)?\s*"
+# 등락 부호도 숫자의 일부 — "+7.08%"가 content 의 "-7.08%"로 통과하면 안 된다(11/01 Codex). 낱말 사이 '-'(2026-11-01)는 부호가 아니다
+NUM = re.compile(r"(?:(?<![\w.])[+\-−▲▼]\s?)?\d[\d,]*(?:\.\d+)?(?:\s*(?:조|억|만)\s*\d[\d,]*(?:\.\d+)?)*\s*(?:조|억|만)?\s*"
                  r"(?:%|원|명|건|분|초|시|일|개|배|p|bp|달러|위|호|거래일|년|월|평|장)?")
+SIGN = str.maketrans({"−": "-", "▲": "+", "▼": "-"})
+# content 는 부호 대신 말로 쓰기도 한다 — "3.02% 내린", "3.0% 늘어", "7% 넘게 내렸어요"
+DOWN = "내리|내린|내려|내렸|하락|떨어|빠진|빠졌|빠지|감소|줄어|줄었|급락|밀려|밀린|밀렸"
+UP = "오른|올라|올랐|오르|상승|늘어|늘었|증가|급등|뛰었|뛴|뛰어"
 
 
 def plain(s):
@@ -31,32 +36,51 @@ def plain(s):
 
 
 def norm_num(tok):
-    return re.sub(r"[\s,]", "", tok)
+    return re.sub(r"[\s,]", "", tok).translate(SIGN)
 
 
 def numbers(text, keep_single=False):
     out = []
     for m in NUM.finditer(text):
         t = norm_num(m.group(0))
-        if not keep_single and re.fullmatch(r"\d", t):   # 한 자리 맨숫자(컷 번호 등)는 건너뛴다
+        if not keep_single and re.fullmatch(r"[+-]?\d", t):   # 한 자리 맨숫자(컷 번호 등)는 건너뛴다
             continue
         out.append(t)
     return out
 
 
+def corpus_numbers(corpus):
+    """content 의 숫자 → {부호 뺀 숫자: {부호}}. 부호가 없으면 바로 뒤 말(내린·오른 …)로 부호를 정한다, 없으면 ''."""
+    have = {}
+    for m in NUM.finditer(corpus):
+        c = norm_num(m.group(0))
+        sign, body = (c[0], c[1:]) if c[0] in "+-" else ("", c)
+        if not sign:
+            tail = corpus[m.end():m.end() + 12]
+            if re.match(rf"\s*(?:\S{{1,3}}\s+)?(?:{DOWN})", tail):
+                sign = "-"
+            elif re.match(rf"\s*(?:\S{{1,3}}\s+)?(?:{UP})", tail):
+                sign = "+"
+        have.setdefault(body, set()).add(sign)
+    return have
+
+
 def check_numbers(texts, corpus):
     """숫자는 낱말 단위로 content 의 숫자와 맞춘다(content 전체 글자를 이어 붙여 찾으면 '5599.42, 3만 명'이 '5599.423만명'이 되어
     앞뒤 숫자가 섞인다 — 11/01). 단위가 있으면 content 에 같은 덩어리가 있어야 한다('1조7000억원'·'1조'는 '1조6000억원'으로 통과 못 함,
-    '6000억'은 '6000억원'으로 통과). 단위 없는 맨숫자는 같은 수이거나 그 수의 소수(5599 ↔ 5599.42)면 통과, % 수와는 맞추지 않는다."""
-    have = set(numbers(corpus, keep_single=True))
+    '6000억'은 '6000억원'으로 통과). 단위 없는 맨숫자는 같은 수이거나 그 수의 소수(5599 ↔ 5599.42)면 통과, % 수와는 맞추지 않는다.
+    부호: 화면 숫자에 +·-가 있으면 content 의 같은 수도 그 부호여야 한다('-7.08%' 또는 '7.08% 내린'). 부호 없는 화면 숫자는 따지지 않는다."""
+    have = corpus_numbers(corpus)
+    signs_ok = lambda sign, got: not sign or sign in got  # noqa: E731
     bad = []
     for label, text in texts:
         for t in numbers(text):
-            if re.fullmatch(r"[\d.]+", t):
-                ok = any((m := re.match(r"[\d.]+", c)) and (m.group(0) == t or m.group(0).startswith(t + "."))
-                         and not c[m.end():].startswith("%") for c in have)
+            sign, body = (t[0], t[1:]) if t[0] in "+-" else ("", t)
+            if re.fullmatch(r"[\d.]+", body):
+                ok = any((m := re.match(r"[\d.]+", c)) and (m.group(0) == body or m.group(0).startswith(body + "."))
+                         and not c[m.end():].startswith("%") and signs_ok(sign, got) for c, got in have.items())
             else:
-                ok = t in have or t + "원" in have
+                ok = any(k in have and signs_ok(sign, have[k]) for k in (body, body + "원"))
             if not ok:
                 bad.append(f"{label}: '{t}'")
     return bad
