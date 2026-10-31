@@ -1533,6 +1533,10 @@ def t_competitors_ig():
     expect([r["ok"] for r in rows] == [True, False] and "토큰 만료" in rows[1]["error"], f"실패 계정 처리: {rows}")
     md = ci.render(rows, {"edit.h.kr": 90}, "2026-10-25", now)
     expect("| **우리** (@edit.h.kr) | 100 | +10 | 3 |" in md and "못 가져온 계정" in md, "요약표(우리 줄·지난 대비·실패 계정)")
+    groups = [dict(rows[0], group="경제·뉴스 브리핑"), dict(rows[0], handle="careet.official", name="캐릿", self=False, group="트렌드 미디어")]
+    md2 = ci.render(groups, {}, None, now)
+    expect(md2.index("### 경제·뉴스 브리핑") < md2.index("### 트렌드 미디어") and md2.count("| 매체 |") == 2, "무리(group)마다 표가 나뉘지 않는다")
+    expect(len({a["group"] for a in accounts}) >= 2 and all(a["group"] for a in accounts), "config 계정마다 무리(group)가 있어야 한다")
     saved = ci.fetch, dict(os.environ)
     ci.fetch = lambda *a, **k: (_ for _ in ()).throw(AssertionError("토큰 없이 네트워크를 썼다"))
     try:

@@ -44,7 +44,7 @@ UA = "EDIT-H-competitors/1.0 (+https://github.com/vetnam555-del/edit-h-archive)"
 
 
 def settings(cfg=None):
-    """([{handle, name, self}], 계정당 게시물 수, API 버전). 계정 이름 형식이 틀리면 ValueError."""
+    """([{handle, name, self, group}], 계정당 게시물 수, API 버전). 계정 이름 형식이 틀리면 ValueError."""
     cfg = cfg or load_config()
     c = cfg.get("competitors_ig") or {}
     accounts = []
@@ -52,7 +52,8 @@ def settings(cfg=None):
         handle = str(a.get("handle") or "")
         if not HANDLE_RE.match(handle):
             raise ValueError(f"인스타 계정 이름 형식이 아니다: {handle!r}")
-        accounts.append({"handle": handle, "name": str(a.get("name") or handle), "self": bool(a.get("self"))})
+        accounts.append({"handle": handle, "name": str(a.get("name") or handle), "self": bool(a.get("self")),
+                         "group": str(a.get("group") or "")})
     version = (cfg.get("instagram") or {}).get("api_version") or "v23.0"
     return accounts, int(c.get("media_limit") or 25), version
 
@@ -163,7 +164,7 @@ def collect(accounts, get, now):
     """계정마다 get(handle) → 기록. 한 계정이 실패해도 나머지는 모은다."""
     out = []
     for a in accounts:
-        row = {"handle": a["handle"], "name": a["name"], "self": a["self"]}
+        row = {"handle": a["handle"], "name": a["name"], "self": a["self"], "group": a.get("group", "")}
         try:
             row.update(ok=True, **summarize(get(a["handle"]), now))
         except RuntimeError as e:
@@ -185,30 +186,39 @@ def previous_followers(day, folder=OUT):
 def _num(v, unit=""):
     if v is None:
         return "–"
+    if unit == "%":
+        return f"{v:.2f}%"   # 큰 계정의 참여율은 0.0x% 라 소수 둘째 자리까지
     if isinstance(v, float) and not v.is_integer():
         return f"{v:,.1f}{unit}"
     return f"{int(v):,}{unit}"
 
 
+def _row(r, prev):
+    s = r["stats"]
+    before = prev.get(r["handle"])
+    delta = "–" if before is None or r.get("followers") is None else f"{r['followers'] - before:+,}"
+    fmt = " · ".join(f"{k} {v}%" for k, v in s["formats"].items()) or "–"
+    hour = "–" if s["top_hour_kst"] is None else f"{s['top_hour_kst']:02d}시"
+    name = f"**{r['name']}**" if r["self"] else r["name"]
+    return (f"| {name} (@{r['handle']}) | {_num(r.get('followers'))} | {delta} | {s['posts']} | "
+            f"{_num(s['avg_likes'])} | {_num(s['avg_comments'])} | {_num(s['engagement_pct'], '%')} | {fmt} | {hour} |")
+
+
 def render(results, prev, prev_day, now):
-    """요약표(마크다운). 우리 계정이 맨 위, 나머지는 팔로워 많은 순."""
+    """요약표(마크다운). 무리(config group)마다 표 하나 — 무리는 config 순서, 표 안은 우리 계정 먼저·팔로워 많은 순."""
     ok = [r for r in results if r["ok"]]
-    ok.sort(key=lambda r: (not r["self"], -(r.get("followers") or 0)))
     lines = [f"# 경쟁 매체 인스타 — 공식 '비즈니스 탐색' API ({now:%Y-%m-%d %H:%M} KST 자동 생성)", "",
              f"최근 {WINDOW_DAYS}일 게시물 기준. 참여율 = 게시물당 (좋아요+댓글) ÷ 팔로워. 좋아요를 숨긴 계정은 '–'.",
-             f"지난 수집: {prev_day or '없음(첫 수집)'}. 만든 곳: `automation/competitors_ig.py`(주 1회, `.github/workflows/competitors-ig.yml`).", "",
-             f"| 매체 | 팔로워 | 지난 수집 대비 | {WINDOW_DAYS}일 게시 | 게시물당 좋아요 | 댓글 | 참여율 | 형식 | 주로 올리는 시각 |",
-             "|---|---|---|---|---|---|---|---|---|"]
-    for r in ok:
-        s = r["stats"]
-        before = prev.get(r["handle"])
-        delta = "–" if before is None or r.get("followers") is None else f"{r['followers'] - before:+,}"
-        fmt = " · ".join(f"{k} {v}%" for k, v in s["formats"].items()) or "–"
-        hour = "–" if s["top_hour_kst"] is None else f"{s['top_hour_kst']:02d}시"
-        name = f"**{r['name']}**" if r["self"] else r["name"]
-        lines.append(f"| {name} (@{r['handle']}) | {_num(r.get('followers'))} | {delta} | {s['posts']} | "
-                     f"{_num(s['avg_likes'])} | {_num(s['avg_comments'])} | {_num(s['engagement_pct'], '%')} | {fmt} | {hour} |")
-    tops = [r for r in ok if r["stats"]["top_post"] and not r["self"]]
+             f"지난 수집: {prev_day or '없음(첫 수집)'}. 만든 곳: `automation/competitors_ig.py`(주 1회, `.github/workflows/competitors-ig.yml`)."]
+    for group in dict.fromkeys(r.get("group") or "" for r in results):
+        rows = sorted((r for r in ok if (r.get("group") or "") == group), key=lambda r: (not r["self"], -(r.get("followers") or 0)))
+        if not rows:
+            continue
+        lines += [""] + ([f"### {group}", ""] if group else []) + [
+            f"| 매체 | 팔로워 | 지난 수집 대비 | {WINDOW_DAYS}일 게시 | 게시물당 좋아요 | 댓글 | 참여율 | 형식 | 주로 올리는 시각 |",
+            "|---|---|---|---|---|---|---|---|---|"]
+        lines += [_row(r, prev) for r in rows]
+    tops = sorted((r for r in ok if r["stats"]["top_post"] and not r["self"]), key=lambda r: -(r.get("followers") or 0))
     if tops:
         lines += ["", f"## {WINDOW_DAYS}일 동안 반응이 가장 컸던 게시물", ""]
         for r in tops:
