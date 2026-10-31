@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """AI 릴스·H 극장 만화 검수 — 올리기 전에 반드시 돌린다(2026-11-01 운영자 "검수도 잘해주고").
 
-사용: python3 automation/pilots/ai_reel/qa.py <episode.json> [--no-asr]
+사용: python3 automation/pilots/ai_reel/qa.py <episode.json> [--no-asr] [--video 다른 영상.mp4]
 검사(하나라도 ✗ 면 올리지 않는다):
  1. 숫자 대조 — 화면 글자·말풍선·설명·캡션에 나온 숫자가 그날 content/{날짜}.json 에 그대로 있나(확인된 숫자만).
  2. 대사 — 완성본을 음성 인식(faster-whisper small)으로 받아 적어, 대사 줄마다 낱말이 충분히 들리나.
- 3. 소리 — 통합 음량 -14±1.5 LUFS, 음성 트랙이 있다.
+ 3. 소리 — 통합 음량 -14±1.5 LUFS, 음성 트랙이 있다, 중간에 끊기는 곳이 없다(11/01 운영자 "소리가 중간중간 끊긴다").
  4. 영상 — 1080×1920, 길이 8~30초.
  5. 캡션 — reel_ai_caption.txt·comic_caption.txt 에 'AI로 만들' 한 줄, 해시태그 5개 이하, 같은 숫자 대조.
  6. 만화 — comic/ JPEG 3~10장, 1080×1350.
@@ -86,6 +86,43 @@ def check_numbers(texts, corpus):
     return bad
 
 
+def dropouts(video, head=0.3, tail=0.8):
+    """소리 끊김 — 50ms 창 음량(dBFS)이 (가) -32 아래로 150ms 넘게 있거나 (나) 앞뒤 1초 중앙값보다 18dB 넘게 100ms 넘게 꺼지면 끊김.
+    11/01 운영자 "소리가 중간중간 끊기는 것 같다": 10/31 편은 '정적' 구간이 -45~-52dB 로 0.6초, 대사 사이가 -36dB 로 꺼졌다.
+    처음 head 초와 끝 tail 초(페이드)는 뺀다. → [(시작초, 길이초, 가장 낮은 dB)]"""
+    import numpy as np
+    raw = subprocess.run(["ffmpeg", "-v", "error", "-i", str(video), "-vn", "-ac", "1", "-ar", "48000", "-f", "f32le", "-"],
+                         capture_output=True, check=True).stdout
+    x = np.frombuffer(raw, dtype=np.float32)
+    win = 2400   # 50ms
+    n = len(x) // win
+    if n == 0:
+        return []
+    db = 20 * np.log10(np.sqrt((x[:n * win].reshape(n, win).astype(np.float64) ** 2).mean(1) + 1e-12))
+    med = np.array([np.median(db[max(0, i - 10):i + 11]) for i in range(n)])
+    lo, t_max = int(head / 0.05), n - int(tail / 0.05)
+    out = []
+    for mask, need in ((db < -32, 3), (db < med - 18, 2)):   # 150ms·100ms
+        s0 = None
+        for i in range(lo, t_max + 1):
+            on = i < t_max and mask[i]
+            if on and s0 is None:
+                s0 = i
+            if not on and s0 is not None:
+                if i - s0 >= need:
+                    out.append((round(s0 * 0.05, 2), round((i - s0) * 0.05, 2), round(float(db[s0:i].min()), 1)))
+                s0 = None
+    out.sort()
+    merged = []
+    for g in out:   # 두 기준이 같은 곳을 잡으면 하나로
+        if merged and g[0] <= merged[-1][0] + merged[-1][1]:
+            a0, l0, m0 = merged[-1]
+            merged[-1] = (a0, round(max(a0 + l0, g[0] + g[1]) - a0, 2), min(m0, g[2]))
+        else:
+            merged.append(g)
+    return merged
+
+
 def hangul(s):
     return re.sub(r"[^가-힣]", "", s)
 
@@ -94,6 +131,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("episode")
     ap.add_argument("--no-asr", action="store_true")
+    ap.add_argument("--video", help="instagram/{날짜}/reel_ai.mp4 대신 볼 영상(고쳐 본 판)")
     a = ap.parse_args()
     epath = Path(a.episode).resolve()
     ep = json.loads(epath.read_text(encoding="utf-8"))
@@ -128,7 +166,7 @@ def main():
         fails.append("화면 글자에 'AI로 만든 영상' 표시가 있다(운영자 11/01: 빼기)")
 
     # 3·4 영상·소리
-    video = folder / "reel_ai.mp4"
+    video = Path(a.video) if a.video else folder / "reel_ai.mp4"
     if not video.exists():
         fails.append("instagram/{}/reel_ai.mp4 가 없다".format(day))
     else:
@@ -148,6 +186,10 @@ def main():
         if lufs is None or abs(lufs + 14) > 1.5:
             fails.append(f"음량 {lufs} LUFS(-14±1.5)")
         notes.append(f"영상 {dur:.1f}초 · {lufs} LUFS")
+        gaps = dropouts(video)
+        if gaps:
+            fails.append("소리 끊김 " + ", ".join(f"{a:.2f}초부터 {b:.2f}초({m}dB)" for a, b, m in gaps)
+                         + " — 곡 사이를 비우지 말고 낮게 깔기·덕킹 약하게(episode.json music·duck)")
 
         # 2 대사
         if not a.no_asr and ep.get("voices"):

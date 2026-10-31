@@ -13,7 +13,9 @@ episode.json (경로는 이 파일 기준 상대경로):
   captions    [{start, end, top, size, html}]   화면 글자(대사와 같은 말 + 확인된 숫자를 <span class="hl">로)
   end_card    {line, sub, note}    끝 화면 문구
   voices      [{file, start, tempo, robot}]     대사 파일(음성 인식으로 확인한 것)
-  music       [{file, start, dur, fade_in, fade_out}]
+  music       [{file, start, dur, fade_in, fade_out, offset, lufs, lowpass}]   곡 사이에 빈 구간을 두지 않는다 —
+              '정적'은 무음이 아니라 같은 곡을 낮고 먹먹하게(lowpass·lufs -30 안팎) 깐다(11/01 "소리가 끊긴다")
+  duck        {threshold, ratio, attack, release, mix}   대사 밑 음악 줄이기(기본 0.05·3·20·650·0.75)
   sfx         [[시작, 끝, 볼륨], …]  원래 AI 영상 소리(효과음)의 구간별 볼륨
 규칙(분석 문서 '지켜야 할 선'): 숫자·이름은 AI 화면에 그리지 않고 여기 글자로만, 실존 인물·로고·실제 장소 없음, 주인공은 마스코트 H.
 화면 속 'AI로 만든 영상' 표시는 없다(11/01 운영자) — 게시할 때 인스타 'AI 정보' 라벨과 캡션 한 줄로 밝힌다(post_instagram.py).
@@ -141,13 +143,19 @@ def compose(ep, base, src, out, work):
     for k, m in enumerate(music):
         fade = (f",afade=t=in:st=0:d={m['fade_in']}" if m.get("fade_in") else "") + \
                (f",afade=t=out:st={m['dur'] - m['fade_out']:.2f}:d={m['fade_out']}" if m.get("fade_out") else "")
-        f.append(f"[{mi + k}:a]aresample=48000,aformat=channel_layouts=stereo,atrim=0:{m['dur']},asetpts=PTS-STARTPTS,"
+        off = m.get("offset", 0)   # 곡의 어디서부터 쓸지(초) — 같은 곡의 뒷부분을 '정적' 바닥으로 다시 쓸 때
+        lp = f",lowpass=f={m['lowpass']}" if m.get("lowpass") else ""   # 먹먹하게(시간이 멈춘 느낌) — 소리를 끊지 않고 낮춘다
+        f.append(f"[{mi + k}:a]aresample=48000,aformat=channel_layouts=stereo,atrim={off}:{off + m['dur']},asetpts=PTS-STARTPTS{lp},"
                  f"loudnorm=I={m.get('lufs', -20)}:TP=-3{fade},adelay={int(m['start'] * 1000)}:all=1[mu{k}]")
         ml.append(f"[mu{k}]")
     if ml:
         f.append(f"{''.join(ml)}amix=inputs={len(ml)}:normalize=0,apad=whole_dur={total},atrim=0:{total}[music]")
     if vl and ml:
-        f.append("[music][key]sidechaincompress=threshold=0.04:ratio=5:attack=15:release=350:makeup=1[ducked]")
+        # 대사 밑 음악 줄이기 — 11/01 운영자 "소리가 중간중간 끊기는 것 같다": ratio 5·release 350ms 로 세게 줄이면
+        # 낱말 사이 숨에서 음악이 늦게 돌아와 0.1~0.3초씩 15~20dB 꺼졌다 → 덜 깊게(mix)·천천히 돌아오게(release)
+        d = {"threshold": 0.05, "ratio": 3, "attack": 20, "release": 650, "mix": 0.75, **(ep.get("duck") or {})}
+        f.append(f"[music][key]sidechaincompress=threshold={d['threshold']}:ratio={d['ratio']}:attack={d['attack']}:"
+                 f"release={d['release']}:makeup=1:mix={d['mix']}[ducked]")
         f.append("[voice][ducked][sfx]amix=inputs=3:normalize=0,loudnorm=I=-14:TP=-1.5:LRA=11,aresample=48000[a]")
     elif vl:
         f.append("[voice][sfx]amix=inputs=2:normalize=0,loudnorm=I=-14:TP=-1.5:LRA=11,aresample=48000[a]")
