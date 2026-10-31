@@ -16,6 +16,7 @@
 | 08:40 등 | 빠진 일 알림 메일 | `alerts.yml` |
 | 17:30~21:30 | 주간 특집(금)·저녁 릴스·성과 수집 | `evening.yml` |
 | 새 호 푸시 직후 | 네이버·빙에 새 호 페이지 알림(IndexNow, 2026-10-31~) | `indexnow.yml` |
+| 일요일 12:00 | 경쟁 매체 인스타 지표(공식 API, 운영자 토큰을 넣은 뒤부터, 2026-11-01~) | `competitors-ig.yml` |
 
 그래서 **가장 중요한 일은 07:40 '제작'** 이다. 이게 빠지면 예비 호가 나가 새 소식이 없는 날이 된다.
 
@@ -93,6 +94,7 @@
 | `automation/CHANGELOG.md` | 날마다 무엇을 바꿨나(최신이 위) |
 | `automation/OWNER_TODO.md` | 운영자만 할 수 있는 일 |
 | `automation/metrics/summary.md` | 최근 14호 성과표·출처 품질 |
+| `automation/competitors/ig/summary.md` | 경쟁 매체 인스타 지표(주 1회, 토큰을 넣은 뒤부터) |
 | `automation/codex_fallback.py` | Codex 자동 대체의 판단(표시·기다림·회고 빠짐·허용 경로) |
 
 ## 5. 실행 환경이 갖춰야 할 것

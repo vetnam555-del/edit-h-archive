@@ -1,0 +1,53 @@
+# 경쟁 매체 인스타 공개 지표 — 메타 공식 '비즈니스 탐색' API(automation/competitors_ig.py). 2026-11-01 운영자 '경쟁사도 못 보면 개선에 영향'.
+# 일요일 21:00 주간 루틴이 automation/competitors/ig/summary.md 를 읽는다. 예약 실행은 몇 시간씩 늦으므로 낮에 걸어 두고,
+# 주간 루틴은 필요하면 workflow_dispatch 로 바로 돌린다. 토큰(IG_FB_TOKEN·IG_FB_USER_ID — 게시 토큰과 다른 페이스북 로그인 방식)이
+# 없으면 아무것도 하지 않고 성공으로 끝난다(OWNER_TODO 맨 위). 공개 저장소라 로그에 토큰·주소를 찍지 않는다.
+name: EDIT H competitors (Instagram)
+
+on:
+  schedule:
+    - cron: "0 3 * * 0"    # UTC 03:00 일요일 = KST 12:00(늦어도 21:00 주간 루틴 전에 돈다)
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "오늘 이미 모았어도 다시 모음"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: competitors-ig
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Collect
+        env:
+          IG_FB_TOKEN: ${{ secrets.IG_FB_TOKEN }}
+          IG_FB_USER_ID: ${{ secrets.IG_FB_USER_ID }}
+          IN_FORCE: ${{ inputs.force }}
+        run: |
+          if [ "$IN_FORCE" = "true" ]; then python3 automation/competitors_ig.py --force
+          else python3 automation/competitors_ig.py; fi
+
+      - name: Record
+        run: |
+          if [ -n "$(git status --porcelain automation/competitors)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add automation/competitors
+            git commit -m "Collect competitor Instagram metrics ($(TZ=Asia/Seoul date +%F))"
+            for i in 1 2 3 4; do
+              git pull --rebase origin main && git push origin HEAD:main && break
+              sleep $((i * 5))
+            done
+          fi
