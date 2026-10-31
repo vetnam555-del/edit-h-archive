@@ -32,6 +32,7 @@
 | `h-calendar.png` | 동그라미 친 달력 | 다가올 날짜(저장각 주간 특집) |
 | `h-coffee.png` | 커피 들고 걸어감 | 출근길·아침 인사 |
 | `mascot-sheet.jpg` | 9가지 모음(크림 배경) | 새 자세를 만들 때 기준 그림 |
+| `profile.png` | 얼굴만, 주황 꽉 채움(1024×1024) | 인스타 프로필 사진 — 크림 바탕 시안보다 40px 아바타·스토리 고리 안에서 안경이 더 크게 읽혀 골랐다 |
 
 원본(1024px)과 작업 번호는 `assets/photos/incoming.json` 에 남아 있다. 새 자세는 `mascot-sheet.jpg` 와 `h-point.png` 를 힉스필드 기준 그림으로 넣어 만든다.
 
