@@ -22,9 +22,9 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
-# 큰 금액은 한 덩어리로 — "1조6000억원"을 "1조"·"6000억"으로 쪼개 따로 찾으면 content 가 "1조5000억원과 6000억원"일 때도 통과한다(11/01 Codex)
+# 큰 금액은 한 덩어리로('3천억원'·'5천만원'·'2만5천명'도 — 11/01 Codex) — "1조6000억원"을 "1조"·"6000억"으로 쪼개 따로 찾으면 content 가 "1조5000억원과 6000억원"일 때도 통과한다(11/01 Codex)
 # 등락 부호도 숫자의 일부 — "+7.08%"가 content 의 "-7.08%"로 통과하면 안 된다(11/01 Codex). 낱말 사이 '-'(2026-11-01)는 부호가 아니다
-NUM = re.compile(r"(?:(?<![\w.])[+\-−▲▼]\s?)?\d[\d,]*(?:\.\d+)?(?:\s*(?:조|억|만)\s*\d[\d,]*(?:\.\d+)?)*\s*(?:조|억|만)?\s*"
+NUM = re.compile(r"(?:(?<![\w.])[+\-−▲▼]\s?)?\d[\d,]*(?:\.\d+)?(?:\s*[조억만천]+\s*\d[\d,]*(?:\.\d+)?)*\s*[조억만천]*\s*"
                  r"(?:%|원|명|건|분|초|시|일|개|배|p|bp|달러|위|호|거래일|년|월|평|장)?")
 SIGN = str.maketrans({"−": "-", "▲": "+", "▼": "-"})
 # content 는 부호 대신 말로 쓰기도 한다 — "3.02% 내린", "3.0% 늘어", "7% 넘게 내렸어요"
@@ -70,24 +70,19 @@ BRAND_TOKENS = {"8시", "30분", "2030"}   # 끝 화면 고정 문구(발송 시
 
 
 def check_numbers(texts, corpus, allow=()):
-    """숫자는 낱말 단위로 content 의 숫자와 맞춘다(content 전체 글자를 이어 붙여 찾으면 '5599.42, 3만 명'이 '5599.423만명'이 되어
-    앞뒤 숫자가 섞인다 — 11/01). 단위가 있으면 content 에 같은 덩어리가 있어야 한다('1조7000억원'·'1조'는 '1조6000억원'으로 통과 못 함,
-    '6000억'은 '6000억원'으로 통과). 단위 없는 맨숫자는 같은 수이거나 그 수의 소수(5599 ↔ 5599.42)면 통과, % 수와는 맞추지 않는다.
-    부호: 화면 숫자에 +·-가 있으면 content 의 같은 수도 그 부호여야 한다('-7.08%' 또는 '7.08% 내린'). 부호 없는 화면 숫자는 따지지 않는다."""
-    have = corpus_numbers(corpus)
-    signs_ok = lambda sign, got: not sign or sign in got  # noqa: E731
+    """화면 숫자를 값으로 content 와 맞춘다 — '3천억원' = '3000억원', '1조6000억원'은 한 덩어리(조각 '1조'·'6000억'으로는 통과 못 함).
+    단위는 둘 다 있을 때 같아야 하고('12거래일' ≠ '11거래일'), 단위 없는 맨숫자는 같은 수나 그 수의 소수(5599 ↔ 5599.42)면 통과(% 수와는 아니다).
+    부호: 화면 숫자에 +·-가 있으면 content 의 같은 수도 그 방향이어야 한다('-7.08%' 또는 '7.08% 내린'). 부호 없는 화면 숫자는 따지지 않는다."""
+    cvals = content_values(corpus)
     bad = []
     for label, text in texts:
         for t in numbers(text):
             if t in allow:
                 continue
             sign, body = (t[0], t[1:]) if t[0] in "+-" else ("", t)
-            if re.fullmatch(r"[\d.]+", body):
-                ok = any((m := re.match(r"[\d.]+", c)) and (m.group(0) == body or m.group(0).startswith(body + "."))
-                         and not c[m.end():].startswith("%") and signs_ok(sign, got) for c, got in have.items())
-            else:
-                ok = any(k in have and signs_ok(sign, have[k]) for k in (body, body + "원"))
-            if not ok:
+            unit = re.sub(r"^[\d.,조억만천]+", "", body)
+            v = korean_number(body[: len(body) - len(unit)] if unit else body)
+            if v is None or not any(_num_match((round(v, 6), unit, sign), c, strict=True) for c in cvals):
                 bad.append(f"{label}: '{t}'")
     return bad
 
@@ -179,6 +174,26 @@ def _sign_near(text, start, end):
     return ""
 
 
+_NATIVE_TENS = {"열": 10, "스물": 20, "스무": 20, "서른": 30, "마흔": 40}
+_NATIVE_ONES = {"한": 1, "하나": 1, "두": 2, "둘": 2, "세": 3, "셋": 3, "석": 3, "네": 4, "넷": 4, "넉": 4,
+                "다섯": 5, "여섯": 6, "일곱": 7, "여덟": 8, "아홉": 9}
+COUNTERS = "종목|가지|군데|시간|개|명|곳|번|살|달|건|장|채|대|마리|권|잔|병|시|주|해"
+NATIVE = re.compile(rf"(?<![가-힣])(?:({'|'.join(_NATIVE_TENS)})\s?)?({'|'.join(sorted(_NATIVE_ONES, key=len, reverse=True))})?\s?({COUNTERS})"
+                    r"(?=$|[^가-힣]|[에을를이가은는도의로째씩만])")
+
+
+def native_numbers(text):
+    """고유어 수사 + 세는 말 — '두 종목'·'세 곳'·'열두 개'·'여덟 시' → [(위치, (값, 세는 말, 부호))] (11/01 Codex: '두 종목'을 '세 종목'으로 말하면 막는다)."""
+    out = []
+    for m in NATIVE.finditer(text):
+        tens, ones, unit = m.group(1), m.group(2), m.group(3)
+        if not tens and not ones:
+            continue
+        v = float(_NATIVE_TENS.get(tens, 0) + _NATIVE_ONES.get(ones, 0))
+        out.append((m.start(), (v, unit, _sign_near(text, m.start(), m.end()))))
+    return out
+
+
 def spoken_numbers(text):
     """대사·받아쓴 글에서 숫자 → [(값, 단위, 부호)]. 한글 수사만 있는 덩어리는 단위가 붙을 때만 숫자로 본다('사이드카'·'하루 만에'는 숫자가 아니다).
     부호는 앞의 '마이너스·플러스'나 뒤의 '빠졌다·올랐다' 같은 말에서 — 목소리가 등락을 뒤집어 말하면 막는다(11/01 Codex)."""
@@ -194,20 +209,20 @@ def spoken_numbers(text):
             continue
         v = korean_number(run)
         if v is not None:
-            out.append((round(v, 6), UNIT_SAME.get(unit, unit), _sign_near(text, m.start(), m.end())))
-    return out
+            out.append((m.start(), (round(v, 6), UNIT_SAME.get(unit, unit), _sign_near(text, m.start(), m.end()))))
+    return [n for _, n in sorted(out + native_numbers(text), key=lambda x: x[0])]
 
 
-def _num_match(a, b):
-    """값·단위·부호 — 단위나 부호는 둘 다 있을 때만 같아야 한다(한쪽만 있으면 따지지 않는다)."""
+def _num_match(a, b, strict=False):
+    """값·단위·부호 — 단위나 부호는 둘 다 있을 때만 같아야 한다. strict 면 a 에 부호가 있을 때 b 도 같은 부호여야 한다(화면 숫자 검사)."""
     va, ua, sa = (tuple(a) + ("",))[:3]
     vb, ub, sb = (tuple(b) + ("",))[:3]
-    if (ua and ub and ua != ub) or (sa and sb and sa != sb):
+    if (ua and ub and ua != ub) or (sa and sb and sa != sb) or (strict and sa and sa != sb):
         return False
     if abs(va - vb) <= 1e-6 * max(1.0, abs(vb)):
         return True
-    # 맨숫자 5599 ↔ 5599.42 (% 수와는 아니다)
-    return float(va).is_integer() and int(va) == int(vb) and "%" not in (ua, ub) and not float(vb).is_integer()
+    # 단위 없는 맨숫자 5599 ↔ 5599.42 (% 수와는 아니다, '12거래일'처럼 단위가 붙은 수는 정확히 같아야 한다)
+    return not ua and float(va).is_integer() and int(va) == int(vb) and "%" not in (ua, ub) and not float(vb).is_integer()
 
 
 def content_values(corpus):
@@ -218,7 +233,7 @@ def content_values(corpus):
         v = korean_number(body[: len(body) - len(unit)] if unit else body)
         if v is not None:
             out += [(round(v, 6), unit, sg) for sg in signs]
-    return out
+    return out + [n for _, n in native_numbers(corpus)]   # '반도체 두 종목' 같은 고유어 수사
 
 
 def _say(n):

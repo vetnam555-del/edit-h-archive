@@ -1735,7 +1735,16 @@ def t_ai_reel():
     # 목소리 숫자 — 대사 원고(한글 읽기)는 content 와, 들린 숫자는 대사와 같은 값이어야 한다(11/01 Codex: 자막이 맞아도 '일조 칠천억'을 말하면 막는다)
     script = qa.spoken_numbers("외국인이 하루 만에 일조 육천억 원 넘게 팔았대! 프로그램 매도 오 분간 멈춥니다. 삼 점 사팔 퍼센트")
     expect([x[:2] for x in script] == [(1.6e12, "원"), (5.0, "분"), (3.48, "%")], f"한글 숫자 읽기가 틀린다: {script}")
-    expect(not qa.spoken_numbers("사이드카가 하루 만에 울렸대, 삼성 이 회사, 내일 아침 여덟 시 반"), "숫자가 아닌 말을 숫자로 읽었다")
+    expect(all(x[:2] in qa.BRAND_SPOKEN for x in qa.spoken_numbers("사이드카가 하루 만에 울렸대, 삼성 이 회사, 내일 아침 여덟 시 반, 네, 한국 대해")),
+           f"숫자가 아닌 말을 숫자로 읽었다: {qa.spoken_numbers('사이드카가 하루 만에 울렸대, 삼성 이 회사, 내일 아침 여덟 시 반, 네, 한국 대해')}")
+    # 고유어 수사 — '두 종목'을 '세 종목'으로 말하면 막는다, '두 종목'은 content 와 대조(11/01 Codex)
+    two = qa.spoken_numbers("내 계좌가 반도체 두 종목에 얼마나 몰렸는지")
+    expect([x[:2] for x in two] == [(2.0, "종목")] and qa.check_spoken(two, "내 계좌가 반도체 세 종목에 얼마나")[1]
+           and not qa.check_spoken(two, "내 계좌가 반도체 두 종목에 얼마나")[1], f"고유어 수사 검사가 틀린다: {two}")
+    expect(any(qa._num_match(two[0], c) for c in qa.content_values("반도체 두 종목에 얼마나 몰려 있는지")), "content 의 '두 종목'을 못 읽는다")
+    # 천 단위 금액 — '3천억원'은 '4천억원'으로 통과 못 하고 '3000억원'과는 같은 값(11/01 Codex)
+    expect(qa.check_numbers([("t", "3천억원")], "4천억원") and not qa.check_numbers([("t", "3천억원 · 5천만원 · 2만5천명")], "3000억원, 5000만원, 2만5000명"),
+           "천 단위 금액 검사가 틀린다")
     day = lambda t: [x[:2] for x in qa.spoken_numbers(t)]  # noqa: E731
     expect(day("11월 30일") == [(11.0, "월"), (30.0, "일")] and day("삼십 일 동안") == [(30.0, "일")]
            and day("삼십일 일") == [(31.0, "일")], f"날짜·기간의 '일'을 숫자로 삼켰다: {day('11월 30일')}")
