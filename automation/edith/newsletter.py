@@ -210,6 +210,35 @@ AVATAR_MARK = ('<table role="presentation" aria-hidden="true" width="58" height=
                + '<div style="display:inline-block;width:5px;height:3px;background:#0D0C0A;vertical-align:middle;font-size:0;line-height:0;">&nbsp;</div>'
                + _LENS + '</td></tr></table>')
 
+# 2026-11-01 운영자 '내 돈·일·소비 같은 문구가 촌스럽다 … 프로필 이미지도 최신본으로'(automation/reviews/2026-11-01-copy.md).
+# 이날 호부터 ① 프로필·노트 마크를 마스코트 얼굴(안경 + 미소, assets/mascot/profile.png)로 ② 바닥·추천 메일 문구를 새 한 줄
+# '오늘 뉴스, 직장인 버전으로'로. 지난 호를 다시 빌드하면 예전 그대로 나온다(기록). 메일엔 여전히 그림 파일을 쓰지 않고 도형으로 그린다.
+BRAND_V2_FROM = "2026-11-01"
+BRAND_LINE = "오늘 뉴스, 직장인 버전으로"
+
+
+def _v2(d):
+    return str(d.get("date", "")) >= BRAND_V2_FROM
+
+
+def _face_mark(px=58):
+    """마스코트 얼굴 마크 — 주황 원 + 흰 렌즈 안경 + 미소(assets/mascot/profile.png 를 도형으로). 그림 차단에도 그대로 보인다."""
+    k = px / 58
+    lens = (f'<div style="display:inline-block;box-sizing:border-box;width:{round(20 * k)}px;height:{round(20 * k)}px;border-radius:50%;'
+            f'border:{max(2, round(3 * k))}px solid #0D0C0A;background:#FFFFFF;vertical-align:middle;">'
+            f'<div style="width:{max(3, round(7 * k))}px;height:{max(3, round(7 * k))}px;border-radius:50%;background:#0D0C0A;'
+            f'margin:{max(2, round(4 * k))}px auto 0;font-size:0;line-height:0;">&nbsp;</div></div>')
+    bridge = (f'<div style="display:inline-block;width:{max(3, round(4 * k))}px;height:{max(2, round(3 * k))}px;background:#0D0C0A;'
+              'vertical-align:middle;font-size:0;line-height:0;">&nbsp;</div>')
+    smile = (f'<div style="width:{max(6, round(12 * k))}px;height:{max(3, round(5 * k))}px;margin:{max(2, round(4 * k))}px auto 0;'
+             f'border-bottom:{max(2, round(3 * k))}px solid #0D0C0A;border-radius:0 0 {round(12 * k)}px {round(12 * k)}px;'
+             'font-size:0;line-height:0;">&nbsp;</div>')
+    return (f'<table role="presentation" aria-hidden="true" width="{px}" height="{px}" cellpadding="0" cellspacing="0" border="0" '
+            f'style="width:{px}px;height:{px}px;border-radius:50%;background:#FF5233;"><tr>'
+            f'<td align="center" valign="middle" style="font-size:0;line-height:0;padding-top:{round(3 * k)}px;">'
+            f'<div style="white-space:nowrap;">{lens}{bridge}{lens}</div>{smile}</td></tr></table>')
+
+
 # ── 형식 2 ──────────────────────────────────────────────────────────────
 
 def _mini_avatar(px=40):
@@ -253,7 +282,7 @@ def _todo(d):
 
 def _note(d):
     """에디터 H 노트 — 고정 코너. 안경 마크 + 1인칭 편지 + 오늘의 목록(10/16~ 짧게 읽는 소식까지 10가지) + H의 한 줄."""
-    head = (f'<table role="presentation" cellpadding="0" cellspacing="0"><tr><td valign="middle">{_mini_avatar()}</td>'
+    head = (f'<table role="presentation" cellpadding="0" cellspacing="0"><tr><td valign="middle">{_face_mark(40) if _v2(d) else _mini_avatar()}</td>'
             f'<td valign="middle" style="padding-left:10px;">'
             + _div(f"font-size:17px;font-weight:700;line-height:1.3;color:{INK};",
                    '에디터 H 노트 <span style="color:#C4C4C4;font-weight:400;">|</span> '
@@ -389,9 +418,15 @@ def _share_mailto(d, site):
     구독자 개인 링크(수신 거부 등)는 넣지 않는다."""
     from urllib.parse import quote
     n = len(d["all_items"]) + (len(d["briefs"]) if d.get("format") == 2 else 0)
-    subject = "매일 아침 트렌드 한 입, EDIT H 추천해요"
+    when = send_time_ko(load_config()['send_time_kst']).replace('오전', '아침')
+    if _v2(d):
+        subject = f"{BRAND_LINE} — EDIT H 추천해요"
+        pitch = f"매일 {when}, 직장인에게 실제로 달라지는 소식 {n}가지를 골라 보내줘요."
+    else:
+        subject = "매일 아침 트렌드 한 입, EDIT H 추천해요"
+        pitch = f"매일 {when}에 트렌드 {n}가지를 정리해서 보내줘요."
     body = (f"오늘 받아본 뉴스레터인데 괜찮아서 보내요.\n\n[EDIT H] {plain(d['title'])}\n{site}/{d['date']}.html\n\n"
-            f"매일 {send_time_ko(load_config()['send_time_kst']).replace('오전', '아침')}에 트렌드 {n}가지를 정리해서 보내줘요. 무료 구독: {site}/subscribe.html?ref=share\n")
+            f"{pitch} 무료 구독: {site}/subscribe.html?ref=share\n")
     return f"mailto:?subject={quote(subject)}&amp;body={quote(body)}"
 
 
@@ -415,7 +450,7 @@ def _cta(d, site, campaign, n_cards):
                     else f"매일 아침 {n_topics}가지 트렌드 이슈를<br>한 번에 정리해 드려요!"), True)
             + f"""<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:16px;background:#FFFFFF;border:1px solid {RULE};border-radius:18px;box-shadow:0 2px 6px rgba(0,0,0,.08);"><tr><td style="padding:18px 16px;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
-    <td valign="middle" style="width:70px;">{AVATAR_MARK}</td>
+    <td valign="middle" style="width:70px;">{_face_mark(58) if _v2(d) else AVATAR_MARK}</td>
     <td valign="middle" style="padding-left:12px;">{_div(f"font-size:15px;font-weight:500;line-height:1.2;color:{INK};", "edit.h.kr")}
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:8px;"><tr>{stats}</tr></table>
     </td>
@@ -427,11 +462,12 @@ def _cta(d, site, campaign, n_cards):
 {_div(f"font-size:12px;font-weight:400;line-height:1.6;color:{MUTED};margin-top:8px;", "추천하기를 누르면 오늘 호 링크가 담긴 메일이 열려요. 받는 사람만 넣어 보내면 돼요.", True)}</td></tr>""")
 
 
-def _footer(site, campaign):
+def _footer(site, campaign, d=None):
     ig = f"https://instagram.com/edit.h.kr?utm_source=edit_h&amp;utm_medium=email&amp;utm_campaign={campaign}&amp;utm_content=footer_instagram"
+    line = BRAND_LINE if d and _v2(d) else "매일 아침, 트렌드 한 입"
     return (f'<tr><td class="px" style="padding:34px 36px 40px;">'
             + _div(f"font-size:12px;font-weight:400;line-height:1.9;color:{MUTED};",
-                   f'EDIT H · 매일 아침, 트렌드 한 입 · 인스타그램 <a href="{ig}" style="color:{MUTED};">@edit.h.kr</a><br>'
+                   f'EDIT H · {line} · 인스타그램 <a href="{ig}" style="color:{MUTED};">@edit.h.kr</a><br>'
                    f'이 메일이 유용했다면 동료에게 전달해주세요. · <a href="{site}/unsubscribe.html?email=PLACEHOLDER" style="color:{MUTED};">수신거부</a>', True)
             + "</td></tr>")
 
@@ -470,7 +506,7 @@ def render(d, site, n_cards):
             body.append(_section_head(i, sec))
             body.extend(_item(it) for it in sec["items"])
         body += [_briefs(d), _question(d)]
-    body += [_cta(d, site, campaign, n_cards), _footer(site, campaign)]
+    body += [_cta(d, site, campaign, n_cards), _footer(site, campaign, d)]
     # --no-cards 로 만든 호는 표지 PNG 가 없다 — 공유 미리보기는 사이트 대표 이미지로(Codex 리뷰)
     share_img = f"{site}/instagram/{d['date']}/01_edit_h_{d['date']}_cover.png" if n_cards else f"{site}/og_image.png"
     return f"""<!DOCTYPE html>

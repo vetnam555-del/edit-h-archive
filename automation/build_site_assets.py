@@ -35,6 +35,7 @@ h1{{font-size:74px;line-height:1.17;font-weight:850;letter-spacing:-2.5px;margin
 .foot{{position:absolute;left:80px;bottom:58px;display:flex;align-items:baseline;gap:22px}}
 .logo{{font-size:46px;font-weight:900;letter-spacing:-1.5px}}
 .logo .h{{color:#FF5233}}
+.hl{{color:#FF5233}}
 .meta{{font-size:22px;color:#8E887D;font-weight:600}}
 .glow{{position:absolute;right:-10px;bottom:-30px;width:540px;height:540px;border-radius:50%;
   background:radial-gradient(circle,rgba(255,82,51,.20),rgba(255,82,51,0) 68%)}}
@@ -43,8 +44,8 @@ h1{{font-size:74px;line-height:1.17;font-weight:850;letter-spacing:-2.5px;margin
 <div class="bar"></div>
 <div class="wrap">
   <div class="eyebrow">매일 아침 8:30 · 무료 뉴스레터</div>
-  <h1>내 돈·일·소비에<br>바로 쓰는 뉴스</h1>
-  <div class="sub">2030 직장인 데일리 브리프<br>확인된 숫자로, 5분 안에</div>
+  <h1>오늘 뉴스,<br><span class="hl">직장인 버전</span>으로</h1>
+  <div class="sub">월급, 대출, 회사 생활에 실제로 달라지는 것만<br>숫자는 두 번 확인해서, 5분 분량으로</div>
 </div>
 <div class="foot"><div class="logo">EDIT<span class="h"> H</span></div><div class="meta">주말 포함 매일 · 광고 없음</div></div>
 <div class="glow"></div>

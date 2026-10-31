@@ -1551,6 +1551,33 @@ def t_home():
     return f"구독 칸 → {action.rsplit('/', 1)[-1]} · 생성 표시 3곳"
 
 
+def t_brand_v2():
+    """문구·마크 2판(2026-11-01 운영자 '내 돈·일·소비 같은 문구가 촌스럽다', automation/reviews/2026-11-01-copy.md):
+    11/01 호부터 메일 바닥·추천 메일이 '오늘 뉴스, 직장인 버전으로', 프로필 카드·노트 마크가 마스코트 얼굴(미소)이고,
+    그 전 호는 예전 그대로(지난 호 다시 빌드가 발행본과 같아야 한다). 사이트·구독 페이지·RSS 에 옛 문구가 남지 않았다."""
+    import copy as copy_mod
+    import inspect
+    from edith import newsletter
+    from edith import content as content_mod
+    from edith import site as site_mod
+    site = load_config()["site_url"].rstrip("/")
+    d = content_mod.load(daily_issues(1)[0])
+    old = copy_mod.deepcopy(d)
+    old["date"] = "2026-10-31"
+    new = copy_mod.deepcopy(d)
+    new["date"] = newsletter.BRAND_V2_FROM
+    a, b = newsletter.render(old, site, 10), newsletter.render(new, site, 10)
+    expect("트렌드 한 입" in a and newsletter.BRAND_LINE not in a, "11/01 전 호의 바닥 문구가 바뀌었다(지난 호는 기록)")
+    expect(newsletter.BRAND_LINE in b and "트렌드 한 입" not in b, "11/01 호 메일에 옛 문구('트렌드 한 입')가 남았다")
+    expect("border-radius:0 0" in b and "border-radius:0 0" not in a, "11/01 호 프로필·노트 마크가 마스코트 얼굴(미소)이 아니다")
+    for name in ("index.html", "subscribe.html"):
+        page = (ROOT / name).read_text(encoding="utf-8")
+        expect("직장인 버전" in page and "돈·일·소비에" not in page and "트렌드 한 입" not in page and "TREND BRIEF" not in page,
+               f"{name} 에 옛 문구가 남았거나 새 대표 문구가 없다")
+    expect("트렌드 한 입" not in inspect.getsource(site_mod.write_feeds), "RSS 제목이 옛 문구다")
+    return f"{newsletter.BRAND_V2_FROM} 호부터 · '{newsletter.BRAND_LINE}'"
+
+
 def t_competitors_ig():
     """경쟁 매체 인스타(2026-11-01 운영자 '경쟁사도 못 보면 개선에 영향'): 공식 비즈니스 탐색 API 만 쓰고, 토큰이 없으면 네트워크 없이
     0 으로 끝나며, 응답에서 최근 14일 통계(게시 수·평균·참여율·형식·시각·대표 게시물)를 바르게 계산하고, 실패 계정은 따로 적는다."""
@@ -1709,6 +1736,7 @@ def main():
     check("데일리 저장각(체크리스트·차트)", t_save_cards)
     check("마스코트(안경 동그라미 H)", t_mascot)
     check("첫 화면 구독·사이트 그림(index.html)", t_home)
+    check("문구·마크 2판(직장인 버전·마스코트 얼굴)", t_brand_v2)
     check("경쟁 매체 인스타(비즈니스 탐색)", t_competitors_ig)
     check("경쟁 매체 웹(토큰 없이·robots 지킴)", t_competitors_web)
     if not args.quick:
