@@ -62,34 +62,74 @@
    "job": "70976aa8-b395-4ef8-8b64-1a76a73ba71a"
   },
   {
-   "name": "mascot-concept-a1",
-   "url": "https://d8j0ntlcm91z4.cloudfront.net/user_39AFcjW15BXPoPKJdhkblpn98Bg/hf_20261031_170420_e9993171-ae50-47d8-bdfc-6539b2a64a49.png",
-   "job": "e9993171-ae50-47d8-bdfc-6539b2a64a49"
+   "name": "mascot-sheet",
+   "url": "https://d8j0ntlcm91z4.cloudfront.net/user_39AFcjW15BXPoPKJdhkblpn98Bg/hf_20261031_170818_3635129c-7db7-455b-9a81-21bf70bdb804.png",
+   "job": "3635129c-7db7-455b-9a81-21bf70bdb804",
+   "dir": "assets/mascot",
+   "format": "jpg"
   },
   {
-   "name": "mascot-concept-a2",
-   "url": "https://d8j0ntlcm91z4.cloudfront.net/user_39AFcjW15BXPoPKJdhkblpn98Bg/hf_20261031_170420_5116b0f8-561c-4917-afbe-4a4bd62857bc.png",
-   "job": "5116b0f8-561c-4917-afbe-4a4bd62857bc"
+   "name": "h-hello",
+   "url": "https://d8j0ntlcm91z4.cloudfront.net/user_39AFcjW15BXPoPKJdhkblpn98Bg/hf_20261031_170818_0a4d8969-0867-4217-9328-bf01f8eee800.png",
+   "job": "0a4d8969-0867-4217-9328-bf01f8eee800",
+   "dir": "assets/mascot",
+   "format": "png"
   },
   {
-   "name": "mascot-concept-b1",
-   "url": "https://d8j0ntlcm91z4.cloudfront.net/user_39AFcjW15BXPoPKJdhkblpn98Bg/hf_20261031_170420_bc02de39-79aa-4461-b6b5-68c63d550269.png",
-   "job": "bc02de39-79aa-4461-b6b5-68c63d550269"
+   "name": "h-point",
+   "url": "https://d8j0ntlcm91z4.cloudfront.net/user_39AFcjW15BXPoPKJdhkblpn98Bg/hf_20261031_170820_621adbd5-59df-41cb-95ff-a4f778d9ce24.png",
+   "job": "621adbd5-59df-41cb-95ff-a4f778d9ce24",
+   "dir": "assets/mascot",
+   "format": "png"
   },
   {
-   "name": "mascot-concept-b2",
-   "url": "https://d8j0ntlcm91z4.cloudfront.net/user_39AFcjW15BXPoPKJdhkblpn98Bg/hf_20261031_170421_8d828cdb-0a48-4b23-ab13-fea126c45454.png",
-   "job": "8d828cdb-0a48-4b23-ab13-fea126c45454"
+   "name": "h-newspaper",
+   "url": "https://d8j0ntlcm91z4.cloudfront.net/user_39AFcjW15BXPoPKJdhkblpn98Bg/hf_20261031_170818_265a1923-702c-496d-87a5-490006743312.png",
+   "job": "265a1923-702c-496d-87a5-490006743312",
+   "dir": "assets/mascot",
+   "format": "png"
   },
   {
-   "name": "mascot-concept-c1",
-   "url": "https://d8j0ntlcm91z4.cloudfront.net/user_39AFcjW15BXPoPKJdhkblpn98Bg/hf_20261031_170420_1b79579c-e66d-4669-be3b-d5c25ea6f4b4.png",
-   "job": "1b79579c-e66d-4669-be3b-d5c25ea6f4b4"
+   "name": "h-surprised",
+   "url": "https://d8j0ntlcm91z4.cloudfront.net/user_39AFcjW15BXPoPKJdhkblpn98Bg/hf_20261031_170819_fd3f1d29-ca59-4b38-abcf-042b1f4b1b22.png",
+   "job": "fd3f1d29-ca59-4b38-abcf-042b1f4b1b22",
+   "dir": "assets/mascot",
+   "format": "png"
   },
   {
-   "name": "mascot-concept-c2",
-   "url": "https://d8j0ntlcm91z4.cloudfront.net/user_39AFcjW15BXPoPKJdhkblpn98Bg/hf_20261031_170421_e62f5315-f00e-43cc-ae11-c9cede255797.png",
-   "job": "e62f5315-f00e-43cc-ae11-c9cede255797"
+   "name": "h-thinking",
+   "url": "https://d8j0ntlcm91z4.cloudfront.net/user_39AFcjW15BXPoPKJdhkblpn98Bg/hf_20261031_170819_38f2fcad-d861-434b-b35a-0cc93d8b6102.png",
+   "job": "38f2fcad-d861-434b-b35a-0cc93d8b6102",
+   "dir": "assets/mascot",
+   "format": "png"
+  },
+  {
+   "name": "h-celebrate",
+   "url": "https://d8j0ntlcm91z4.cloudfront.net/user_39AFcjW15BXPoPKJdhkblpn98Bg/hf_20261031_170820_f90dbfde-8bd0-4cc5-baad-f345a3cf59d4.png",
+   "job": "f90dbfde-8bd0-4cc5-baad-f345a3cf59d4",
+   "dir": "assets/mascot",
+   "format": "png"
+  },
+  {
+   "name": "h-checklist",
+   "url": "https://d8j0ntlcm91z4.cloudfront.net/user_39AFcjW15BXPoPKJdhkblpn98Bg/hf_20261031_170818_793cb3c3-43a9-4e91-abac-89a8d5d5066a.png",
+   "job": "793cb3c3-43a9-4e91-abac-89a8d5d5066a",
+   "dir": "assets/mascot",
+   "format": "png"
+  },
+  {
+   "name": "h-calendar",
+   "url": "https://d8j0ntlcm91z4.cloudfront.net/user_39AFcjW15BXPoPKJdhkblpn98Bg/hf_20261031_170820_1046e3fc-d39f-47f3-bef1-8e7796c10949.png",
+   "job": "1046e3fc-d39f-47f3-bef1-8e7796c10949",
+   "dir": "assets/mascot",
+   "format": "png"
+  },
+  {
+   "name": "h-coffee",
+   "url": "https://d8j0ntlcm91z4.cloudfront.net/user_39AFcjW15BXPoPKJdhkblpn98Bg/hf_20261031_170819_90e53731-dd76-4952-a568-778fd0eca2a8.png",
+   "job": "90e53731-dd76-4952-a568-778fd0eca2a8",
+   "dir": "assets/mascot",
+   "format": "png"
   }
  ]
 }

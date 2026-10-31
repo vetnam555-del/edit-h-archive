@@ -7,6 +7,7 @@ Claude 작업 환경은 이미지 서버(클라우드프런트) 접속이 막혀
 
 받기만 한다 — 표지 후보가 되는 건 개선 루틴이 눈으로 검수해 assets/photos/library.json 에 올린 뒤다(검수 전 사진은 쓰이지 않는다).
 허용한 주소(ALLOWED_HOSTS)·이미지 형식·크기만 받고, 이미 받은 이름은 건너뛴다. 가로 1280px JPEG 로 줄인다(대체 사진들과 같은 크기).
+마스코트(2026-11-01 운영자 '마스코트 캐릭터 만들어 줘')는 "dir": "assets/mascot", "format": "png" 로 — 투명 배경을 살린 PNG(가로 1024 이하).
 
   python3 automation/fetch_incoming_photos.py            # 받기
   python3 automation/fetch_incoming_photos.py --dry-run  # 받을 목록만
@@ -29,8 +30,20 @@ WIDTH = 1280
 UA = "EDIT-H-photo-fetch/1.0 (+https://github.com/vetnam555-del/edit-h-archive)"
 
 
+DIRS = {"assets/photos", "assets/mascot"}     # 받아 넣을 수 있는 폴더
+FORMATS = {"jpg", "png"}                      # png = 투명 배경 유지(마스코트)
+
+
+def target(it):
+    """항목이 들어갈 파일 경로. 폴더·형식이 규칙에 맞지 않으면 ValueError."""
+    folder, fmt = str(it.get("dir") or "assets/photos"), str(it.get("format") or "jpg")
+    if folder not in DIRS or fmt not in FORMATS:
+        raise ValueError(f"허용하지 않은 폴더·형식: {folder} · {fmt}")
+    return ROOT / folder / f"{it['name']}.{fmt}"
+
+
 def todo(manifest=None):
-    """[(name, url)] — 아직 받지 않은 항목. 주소·이름이 규칙에 맞지 않으면 ValueError."""
+    """[(name, url, 받을 경로)] — 아직 받지 않은 항목. 주소·이름·폴더가 규칙에 맞지 않으면 ValueError."""
     data = json.loads((manifest or MANIFEST).read_text(encoding="utf-8"))
     out = []
     for it in data.get("items") or []:
@@ -40,8 +53,9 @@ def todo(manifest=None):
         u = urllib.parse.urlsplit(url)
         if u.scheme != "https" or u.hostname not in ALLOWED_HOSTS:
             raise ValueError(f"허용하지 않은 주소: {url}")
-        if not (PHOTOS / f"{name}.jpg").exists():
-            out.append((name, url))
+        path = target(it)
+        if not path.exists():
+            out.append((name, url, path))
     return out
 
 
@@ -54,15 +68,22 @@ def fetch(url):
     return data
 
 
-def to_jpeg(data, out_path):
+def convert(data, out_path):
+    """.jpg 는 가로 WIDTH JPEG, .png 는 투명 배경을 살려 가로 1024 이하 PNG 로."""
     from PIL import Image   # GitHub 서버에서만 설치한다(워크플로)
     im = Image.open(io.BytesIO(data))
     if im.format not in ("PNG", "JPEG", "WEBP"):
         raise ValueError(f"이미지 형식이 아니다: {im.format}")
-    im = im.convert("RGB")
-    if im.width > WIDTH:
-        im = im.resize((WIDTH, round(im.height * WIDTH / im.width)), Image.LANCZOS)
-    im.save(out_path, "JPEG", quality=86, optimize=True, progressive=True)
+    png = out_path.suffix == ".png"
+    im = im.convert("RGBA" if png else "RGB")
+    limit = 1024 if png else WIDTH
+    if im.width > limit:
+        im = im.resize((limit, round(im.height * limit / im.width)), Image.LANCZOS)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    if png:
+        im.save(out_path, "PNG", optimize=True)
+    else:
+        im.save(out_path, "JPEG", quality=86, optimize=True, progressive=True)
     return im.size
 
 
@@ -75,13 +96,13 @@ def main():
         print("받을 사진 없음(모두 받았다)")
         return 0
     failed = 0
-    for name, url in items:
+    for name, url, path in items:
         if args.dry_run:
-            print(f"  받을 것: {name} ← {urllib.parse.urlsplit(url).hostname}")
+            print(f"  받을 것: {path.relative_to(ROOT)} ← {urllib.parse.urlsplit(url).hostname}")
             continue
         try:
-            size = to_jpeg(fetch(url), PHOTOS / f"{name}.jpg")
-            print(f"  ✓ {name}.jpg {size[0]}×{size[1]}")
+            size = convert(fetch(url), path)
+            print(f"  ✓ {path.relative_to(ROOT)} {size[0]}×{size[1]}")
         except Exception as e:  # noqa: BLE001 — 한 장이 실패해도 나머지는 받는다
             failed += 1
             print(f"  ✗ {name}: {type(e).__name__}: {str(e)[:120]}")
