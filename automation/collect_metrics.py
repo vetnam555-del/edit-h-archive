@@ -264,6 +264,12 @@ def instagram(days, weekly_days=()):
                     row["reel_ai"]["avg_watch_s"] = round(ms["ig_reels_avg_watch_time"] / 1000, 1)
             except IGError as e:
                 row["reel_ai_error"] = str(e)[:120]
+        mid = (log.get("comic") or {}).get("id")
+        if mid:   # 'H 극장' 만화 캐러셀(2026-11-01~) — 08:30 캐러셀과 따로 잰다
+            try:
+                row["comic"] = _media_row(g, mid, 0, out)
+            except IGError as e:
+                row["comic_error"] = str(e)[:120]
         story = _story_row(g, day, log)
         if story:
             row["story"] = story
@@ -375,25 +381,44 @@ def _reel_cell(p):
     return cell + (f" (반응 {extra})" if extra else "")
 
 
-def _at_age(day, snap, hours=24):
+def _at_age(day, snap, hours=24, kind="carousel"):
     """그 호 캐러셀의 '게시 hours 시간 뒤 첫 스냅숏' 숫자({reach, views, …}). 아직 그만큼 안 지났으면 {}.
-    스냅숏은 하루 1~2번이라 실제 나이는 24~48시간 사이 — 누적 숫자를 그대로 비교하는 것보다 공정하다."""
+    스냅숏은 하루 1~2번이라 실제 나이는 24~48시간 사이 — 누적 숫자를 그대로 비교하는 것보다 공정하다.
+    kind='comic'·'reel_ai' 면 따로 올린 그 게시물의 게시 시각(ig_posted 의 at)으로 재고 그 칸만 돌려준다 —
+    캐러셀 시각으로 고르면 늦게 올린 만화가 24시간이 안 된 채 비교되거나 영영 빠진다(2026-11-01 Codex)."""
     log = AUTOMATION / "ig_posted" / f"{day}.json"
-    at = ((json.loads(log.read_text(encoding="utf-8")).get("carousel") or {}).get("at") if log.exists() else None) or f"{day}T08:00:00+09:00"
+    entry = (json.loads(log.read_text(encoding="utf-8")).get(kind) or {}) if log.exists() else {}
+    at = entry.get("at") or (f"{day}T08:00:00+09:00" if kind == "carousel" else None)
+    if not at:
+        return {}
     due = dt.datetime.fromisoformat(at) + dt.timedelta(hours=hours)
     snaps = [json.loads(q.read_text(encoding="utf-8")) for q in sorted((METRICS / "daily").glob("*.json"))] + [snap]
     for s in sorted(snaps, key=lambda s: s.get("collected_at") or ""):
         row = ((s.get("instagram") or {}).get("posts") or {}).get(day)
+        if kind != "carousel":
+            row = (row or {}).get(kind)
         if row and s.get("collected_at") and dt.datetime.fromisoformat(s["collected_at"]) >= due:
             return row
     return {}
 
 
-def _reel_compare(scored):
+def _comic_compare(scored, snap):
+    """'H 극장' 만화 캐러셀(2026-11-01~) vs 같은 날 08:30 캐러셀 — 각자 게시 24시간 뒤 도달·저장·공유(호 수)."""
+    pairs = [(c, a) for d, _, _, a in scored if a.get("reach") is not None
+             for c in [_at_age(d, snap, kind="comic")] if c.get("reach") is not None]
+    if not pairs:
+        return []
+    avg = lambda rows, k: sum((r.get(k) or 0) for r in rows) / len(rows)  # noqa: E731
+    comic, main = [c for c, _ in pairs], [a for _, a in pairs]
+    return [f"- H 극장 만화: 도달 {avg(comic, 'reach'):.0f}·저장 {avg(comic, 'saved'):.1f}·공유 {avg(comic, 'shares'):.1f}"
+            f" vs 같은 날 캐러셀 도달 {avg(main, 'reach'):.0f}·저장 {avg(main, 'saved'):.1f}·공유 {avg(main, 'shares'):.1f}({len(pairs)}호)"]
+
+
+def _reel_compare(scored, snap):
     """릴스 형식(세로·카드)·게시 시각대별 — 게시 24시간 뒤 도달, 평균 시청 시간과 길이 대비 비율(2026-10-02 실험 축)."""
     groups = {}
     for d, f, sc, a in scored:
-        x = a.get("reel_ai") or {}   # 그날 릴스와 따로 올린 AI 영상 릴스
+        x = _at_age(d, snap, kind="reel_ai")   # 그날 릴스와 따로 올린 AI 영상 릴스 — 그 게시 시각에서 24시간
         if x.get("reach") is not None:
             groups.setdefault("AI 영상·따로", []).append((x.get("reach"), x.get("avg_watch_s"), x.get("seconds")))
         r = a.get("reel") or {}
@@ -542,7 +567,8 @@ def summary_md(snap):
                   f"- 요일: {avg_by('weekday')}",
                   *([f"- 독자 축: {avg_by('audience')}"] if len({f.get('audience') for _, f, _, _ in scored}) > 1 else []),
                   *_series_compare(snap),
-                  *_reel_compare(scored),
+                  *_reel_compare(scored, snap),
+                  *_comic_compare(scored, snap),
                   f"- 가장 좋았던 호: {best[0]} 「{best[1]['title']}」 {best[2]}점·도달 {best[3].get('reach', '–')}"
                   f" · 가장 약했던 호: {worst[0]} 「{worst[1]['title']}」 {worst[2]}점·도달 {worst[3].get('reach', '–')}",
                   "", "※ 호 수가 적을 때의 차이는 우연일 수 있다. 원칙은 같은 방향의 근거가 3호 이상 쌓였을 때만 바꾼다."]

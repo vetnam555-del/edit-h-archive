@@ -1633,7 +1633,83 @@ def t_ai_reel():
         expect(len(g.calls) == 1, "라벨을 거절당한 뒤 라벨 없는 스토리 컨테이너를 만든다")
     expect("want_reel" in src.split("AI_REEL")[1][:400], "AI 릴스가 릴스 게시 설정(reel=false)을 무시한다")
     expect("AI_REEL" in inspect.getsource(pi.prune), "오래된 AI 릴스 영상을 정리하지 않는다")
-    return "reel_ai.mp4 → 형식 ai · 캡션 따로 · 스토리 영상 · AI 정보 라벨(안 받으면 라벨 없이)"
+    # 'H 극장' 만화 캐러셀: 08:30 캐러셀 실행(only=carousel)에선 안 올리고, 라벨·AI 한 줄·정리 대상
+    expect("post_comic" in src and "COMIC_DIR" in inspect.getsource(pi.prune), "만화 캐러셀 게시·정리 단계가 없다")
+    expect('args.only != "carousel"' in src.split("H 극장 만화")[0][-600:], "만화 캐러셀이 08:30 캐러셀 실행에서 올라갈 수 있다")
+    with tempfile.TemporaryDirectory() as tmp:
+        folder = Path(tmp)
+        (folder / pi.COMIC_DIR).mkdir()
+        for i in (1, 2, 3):
+            (folder / pi.COMIC_DIR / f"c{i}.jpg").write_bytes(b"x")
+        (folder / "comic_caption.txt").write_text("만화 캡션", encoding="utf-8")
+        g = G(True)
+        saved_wp, saved_wr, saved_pub = pi.wait_public, getattr(G, "wait_ready", None), pi.publish
+        pi.wait_public = lambda urls, **k: None
+        G.wait_ready = lambda self, cid, what, timeout=600: None
+        pi.publish = lambda g_, uid, cid, what, tries=6: "m1"
+        try:
+            mid, info = pi.post_comic(g, "u", "2026-11-01", folder, "https://x", False)
+        finally:
+            pi.wait_public, pi.publish = saved_wp, saved_pub
+        parent = g.calls[-1]
+        expect(mid == "m1" and info.get("ai_label") is True and parent.get("is_ai_generated") == "true"
+               and pi.AI_NOTE_KEY in parent.get("caption", "") and parent.get("media_type") == "CAROUSEL", "만화 캐러셀에 AI 라벨·AI 한 줄이 없다")
+
+    # 게시 전 숫자 검수 — 큰 금액은 한 덩어리로 대조한다(11/01 Codex: '1조6000억원'이 '1조5000억원과 6000억원'에서 통과하면 안 된다)
+    sys.path.insert(0, str(ROOT / "automation" / "pilots" / "ai_reel"))
+    import qa
+    expect(qa.check_numbers([("t", "1조6000억원")], "1조5000억원과 6000억원"), "쪼갠 금액 조각으로 '1조6000억원'이 통과했다")
+    expect(qa.check_numbers([("t", "1조7000억원")], "1조6000억원") and qa.check_numbers([("t", "12거래일")], "11거래일, 12.64"),
+           "content 에 없는 숫자가 통과했다")
+    expect(not qa.check_numbers([("t", "1조6000억원 넘게 · 3.48% · 장중 5599 · 3만 명")], "1조 6000억원 순매도 3.48% 5599.42 3만 명"),
+           "content 에 있는 숫자를 막았다")
+    # 등락 부호 — '+7.08%'는 '-7.08%'로 통과 못 하고, '-3.02%'는 '3.02% 내린'으로 통과한다(11/01 Codex)
+    signed = "2026-11-01 SK하이닉스 -7.08%, 삼성전자는 3.02% 내린 22만5000원, 생산이 3.0% 늘어"
+    expect(qa.check_numbers([("t", "SK하이닉스 +7.08%")], signed) and qa.check_numbers([("t", "+3.02%")], signed)
+           and qa.check_numbers([("t", "-3.0%")], signed), "등락 부호가 뒤집힌 숫자가 통과했다")
+    expect(not qa.check_numbers([("t", "SK하이닉스 -7.08% · 삼성전자 -3.02% · 생산 +3.0% · 2026-11-01")], signed),
+           "content 와 같은 방향의 등락 숫자를 막았다")
+    # 만화 10장 순서 — 사전순이면 c10(끝 장)이 두 번째로 올라간다
+    with tempfile.TemporaryDirectory() as tmp:
+        folder = Path(tmp)
+        (folder / pi.COMIC_DIR).mkdir()
+        for i in range(1, 11):
+            (folder / pi.COMIC_DIR / f"c{i}.jpg").write_bytes(b"x")
+        (folder / "comic_caption.txt").write_text("만화 캡션", encoding="utf-8")
+        g = G(True)
+        saved_wp, saved_pub = pi.wait_public, pi.publish
+        pi.wait_public = lambda urls, **k: None
+        pi.publish = lambda g_, uid, cid, what, tries=6: "m1"
+        try:
+            pi.post_comic(g, "u", "2026-11-01", folder, "https://x", False)
+        finally:
+            pi.wait_public, pi.publish = saved_wp, saved_pub
+        order = [c["image_url"].rsplit("/", 1)[1] for c in g.calls if c.get("is_carousel_item")]
+        expect(order == [f"c{i}.jpg" for i in range(1, 11)], f"만화 순서가 틀렸다: {order}")
+
+    # 만화·AI 릴스 성과는 각자 게시 시각에서 24시간 뒤 스냅숏으로 잰다(캐러셀 시각으로 고르면 늦게 올린 만화가 빠진다 — 11/01 Codex)
+    import collect_metrics as cm
+    with tempfile.TemporaryDirectory() as tmp:
+        auto = Path(tmp)
+        (auto / "ig_posted").mkdir()
+        (auto / "metrics" / "daily").mkdir(parents=True)
+        (auto / "ig_posted" / "2026-11-01.json").write_text(json.dumps(
+            {"carousel": {"at": "2026-11-01T08:30:00+09:00"}, "comic": {"at": "2026-11-02T10:00:00+09:00"}}), encoding="utf-8")
+        snaps = [("2026-11-02T21:00:00+09:00", 1), ("2026-11-03T21:00:00+09:00", 2)]
+        for at, n in snaps:
+            (auto / "metrics" / "daily" / f"{at[:10]}.json").write_text(json.dumps(
+                {"collected_at": at, "instagram": {"posts": {"2026-11-01": {"reach": 100 * n, "comic": {"reach": 10 * n}}}}}), encoding="utf-8")
+        saved = cm.AUTOMATION, cm.METRICS
+        cm.AUTOMATION, cm.METRICS = auto, auto / "metrics"
+        try:
+            main_row = cm._at_age("2026-11-01", {})
+            comic_row = cm._at_age("2026-11-01", {}, kind="comic")
+            none_row = cm._at_age("2026-11-01", {}, kind="reel_ai")
+        finally:
+            cm.AUTOMATION, cm.METRICS = saved
+        expect(main_row.get("reach") == 100 and comic_row == {"reach": 20} and none_row == {},
+               f"만화 24시간 스냅숏을 캐러셀 시각으로 골랐다({main_row}, {comic_row}, {none_row})")
+    return "reel_ai.mp4 → 형식 ai · 캡션 따로 · 스토리 영상 · AI 정보 라벨 · H 극장 만화 캐러셀 · 숫자 검수 · 각자 24시간 성과"
 
 
 def t_competitors_ig():
