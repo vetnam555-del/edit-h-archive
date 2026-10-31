@@ -1515,6 +1515,10 @@ def t_home():
                  'id="privacy"', 'href="#privacy"', "og_image.png", "assets/mascot/avatar-96.png"):
         expect(need in home, f"첫 화면에 {need} 가 없다")
     expect("-home" in home and "utm_source" in home, "첫 화면 구독 경로(ref …-home, utm_source=ig)를 남기지 않는다")
+    # 2026-11-01 운영자: 문의 주소는 makefair@naver.com (예전 주소가 공개 페이지에 남지 않게)
+    for name in ("index.html", "subscribe.html", "unsubscribe.html"):
+        page = (ROOT / name).read_text(encoding="utf-8")
+        expect("makefair@naver.com" in page and "hll.kr" not in page, f"{name} 의 문의 주소가 makefair@naver.com 이 아니다")
     manifest = {"issues": [
         {"vol": "098", "date": "2026-09-29", "weekday": "화", "emoji": "📈", "title": "구월 호", "subtitle": "s", "filename": "2026-09-29.html", "key_keywords": ["금리"]},
         {"vol": "099", "date": "2026-10-01", "weekday": "목", "emoji": "🧭", "title": "시월 호", "subtitle": "s", "filename": "2026-10-01.html", "key_keywords": ["연말정산", "청약"]},
