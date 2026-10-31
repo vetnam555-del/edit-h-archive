@@ -1498,6 +1498,57 @@ def t_indexnow():
     return f"{len(urls)}개 주소 · 키 파일 {kf.name[:8]}…"
 
 
+def t_competitors_ig():
+    """경쟁 매체 인스타(2026-11-01 운영자 '경쟁사도 못 보면 개선에 영향'): 공식 비즈니스 탐색 API 만 쓰고, 토큰이 없으면 네트워크 없이
+    0 으로 끝나며, 응답에서 최근 14일 통계(게시 수·평균·참여율·형식·시각·대표 게시물)를 바르게 계산하고, 실패 계정은 따로 적는다."""
+    import competitors_ig as ci
+    accounts, limit, version = ci.settings()
+    handles = [a["handle"] for a in accounts]
+    expect(len(handles) == len(set(handles)) and sum(a["self"] for a in accounts) == 1, f"대상 계정이 겹치거나 우리 계정이 하나가 아니다: {handles}")
+    expect(ci.fields_for("newneek.official", 25) == "business_discovery.username(newneek.official){username,name,profile_picture_url,"
+           "followers_count,follows_count,media_count,media.limit(25){" + ci.MEDIA_FIELDS + "}}", "비즈니스 탐색 필드 식이 틀렸다")
+    expect(ci.GRAPH == "https://graph.facebook.com", "비즈니스 탐색은 페이스북 로그인 방식(graph.facebook.com)에만 있다")
+    now = ci.parse_time("2026-11-01T03:00:00+0000")
+    media = {"data": [
+        {"timestamp": "2026-10-31T23:30:00+0000", "like_count": 120, "comments_count": 8, "media_type": "CAROUSEL_ALBUM",
+         "media_product_type": "FEED", "permalink": "https://www.instagram.com/p/A/", "caption": "\n첫 줄 제목\n둘째 줄"},
+        {"timestamp": "2026-10-30T09:10:00+0000", "like_count": 300, "comments_count": 20, "media_type": "VIDEO",
+         "media_product_type": "REELS", "permalink": "https://www.instagram.com/reel/B/", "caption": "릴스"},
+        {"timestamp": "2026-10-29T23:40:00+0000", "comments_count": 2, "media_type": "IMAGE", "media_product_type": "FEED"},
+        {"timestamp": "2026-10-01T00:00:00+0000", "like_count": 999, "comments_count": 99, "media_type": "IMAGE"}]}
+    rec = ci.summarize({"username": "x", "followers_count": 10000, "media_count": 500, "media": media}, now)
+    s = rec["stats"]
+    expect(s["posts"] == 3 and s["avg_likes"] == 210.0 and s["avg_comments"] == 10.0, f"14일 통계: {s}")
+    expect(s["engagement_pct"] == 2.2, f"참여율(게시물당 (좋아요+댓글)÷팔로워): {s['engagement_pct']}")
+    expect(s["formats"] == {"캐러셀": 33, "릴스": 33, "사진": 33} and s["top_hour_kst"] == 8, f"형식·시각(KST): {s['formats']} {s['top_hour_kst']}")
+    expect(s["top_post"]["permalink"].endswith("/reel/B/") and rec["posts"][0]["caption"] == "첫 줄 제목", f"대표 게시물·캡션: {s['top_post']}")
+    expect(all("_t" not in p for p in rec["posts"]), "저장 기록에 내부 시각 값이 남았다")
+
+    def fake(handle):
+        if handle == "uppity.official":
+            raise RuntimeError(ci.describe_error({"code": 190, "message": "expired"}))
+        return {"username": handle, "followers_count": 100, "media": media}
+    rows = ci.collect([{"handle": "edit.h.kr", "name": "우리", "self": True}, {"handle": "uppity.official", "name": "어피티", "self": False}],
+                      fake, now)
+    expect([r["ok"] for r in rows] == [True, False] and "토큰 만료" in rows[1]["error"], f"실패 계정 처리: {rows}")
+    md = ci.render(rows, {"edit.h.kr": 90}, "2026-10-25", now)
+    expect("| **우리** (@edit.h.kr) | 100 | +10 | 3 |" in md and "못 가져온 계정" in md, "요약표(우리 줄·지난 대비·실패 계정)")
+    saved = ci.fetch, dict(os.environ)
+    ci.fetch = lambda *a, **k: (_ for _ in ()).throw(AssertionError("토큰 없이 네트워크를 썼다"))
+    try:
+        os.environ.pop("IG_FB_TOKEN", None)
+        os.environ.pop("IG_FB_USER_ID", None)
+        with contextlib.redirect_stdout(io.StringIO()):
+            expect(ci.main([]) == 0, "토큰이 없을 때 0 으로 끝나지 않았다")
+    finally:
+        ci.fetch = saved[0]
+        os.environ.clear()
+        os.environ.update(saved[1])
+    wf = (ROOT / ".github" / "workflows" / "competitors-ig.yml").read_text(encoding="utf-8")
+    expect("secrets.IG_FB_TOKEN" in wf and "secrets.IG_ACCESS_TOKEN" not in wf, "경쟁 매체 워크플로가 게시 토큰을 쓴다")
+    return f"{len(accounts)}개 계정 · API {version}"
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--quick", action="store_true", help="다시 빌드 생략")
@@ -1540,6 +1591,7 @@ def main():
     check("주간 특집 저장각(E13)", t_weekly_save)
     check("데일리 저장각(체크리스트·차트)", t_save_cards)
     check("마스코트(안경 동그라미 H)", t_mascot)
+    check("경쟁 매체 인스타(비즈니스 탐색)", t_competitors_ig)
     if not args.quick:
         rebuild(daily_issues(args.issues), args.strict)
     if NOTES:

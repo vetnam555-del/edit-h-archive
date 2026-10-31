@@ -130,6 +130,13 @@
    "job": "90e53731-dd76-4952-a568-778fd0eca2a8",
    "dir": "assets/mascot",
    "format": "png"
+  },
+  {
+   "name": "profile",
+   "url": "https://d8j0ntlcm91z4.cloudfront.net/user_39AFcjW15BXPoPKJdhkblpn98Bg/hf_20261031_172417_854397ff-9d25-407c-94d7-204e14ec4f46.png",
+   "job": "854397ff-9d25-407c-94d7-204e14ec4f46",
+   "dir": "assets/mascot",
+   "format": "png"
   }
  ]
 }
