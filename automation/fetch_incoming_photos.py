@@ -23,7 +23,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 MANIFEST = ROOT / "assets" / "photos" / "incoming.json"
-PHOTOS = ROOT / "assets" / "photos"
 ALLOWED_HOSTS = {"d8j0ntlcm91z4.cloudfront.net"}   # 힉스필드 생성 이미지 저장소
 MAX_BYTES = 25 * 1024 * 1024
 WIDTH = 1280

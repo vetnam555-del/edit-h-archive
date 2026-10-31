@@ -1451,6 +1451,21 @@ def t_save_cards():
     return f"체크리스트 {ig.get('todo_card_from')}~ · 차트 {ig.get('chart_card_from')}~ · 막는 차트 {len(bad)}가지"
 
 
+def t_mascot():
+    """마스코트(2026-11-01 운영자 '마스코트 캐릭터 만들어 줘'): 자세 9장이 512×512 투명 PNG 로 있고, 설정 문서가 파일마다 쓰임을 적었다."""
+    from edith.common import image_size
+    folder = ROOT / "assets" / "mascot"
+    poses = ["hello", "point", "newspaper", "surprised", "thinking", "celebrate", "checklist", "calendar", "coffee"]
+    readme = (folder / "README.md").read_text(encoding="utf-8")
+    for p in poses:
+        f = folder / f"h-{p}.png"
+        expect(f.exists(), f"마스코트 {f.name} 가 없다")
+        expect(image_size(f) == (512, 512), f"마스코트 {f.name} 가 512×512 가 아니다: {image_size(f)}")
+        expect(f.read_bytes()[25] == 6, f"마스코트 {f.name} 가 투명 배경(RGBA) PNG 가 아니다")   # IHDR 색 형식 6 = RGBA
+        expect(f"`h-{p}.png`" in readme, f"마스코트 설정 문서에 {f.name} 쓰임이 없다")
+    return f"자세 {len(poses)}장"
+
+
 def t_indexnow():
     """검색 알림(IndexNow, 2026-10-31 경쟁 비교 — 배포 길 넓히기): 키 파일이 키와 같고, 푸시에서 맨 위 호 페이지만 골라,
     모든 주소가 키 파일 폴더 아래에 있고(IndexNow 규칙 — 하위 경로 사이트), 시험 실행은 네트워크를 쓰지 않는다."""
@@ -1524,6 +1539,7 @@ def main():
     check("검색 알림(IndexNow)", t_indexnow)
     check("주간 특집 저장각(E13)", t_weekly_save)
     check("데일리 저장각(체크리스트·차트)", t_save_cards)
+    check("마스코트(안경 동그라미 H)", t_mascot)
     if not args.quick:
         rebuild(daily_issues(args.issues), args.strict)
     if NOTES:
