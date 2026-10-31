@@ -216,6 +216,9 @@
   운영자가 페이스북 로그인 토큰 두 값을 넣으면(OWNER_TODO 맨 위, 15분·무료) 경쟁 계정의 팔로워·게시물별 좋아요·댓글·형식·시각이
   `automation/competitors/ig/summary.md` 에 모이고, 일요일 주간 루틴이 읽는다.
 - **브런치 글**: 11/01 읽었다(위 '11/01 직접 확인').
+- **경쟁 매체가 이번 주 무엇을 다뤘나** — 11/01 토큰 없이 도는 웹 추적기를 만들었다(`automation/competitors_web.py`, 매주 일요일).
+  어피티·뉴닉·캐릿·고구마팜·트렌드어워드의 공개 RSS·글 목록을 robots.txt 를 지켜 읽고, 우리와 겹친 글·우리가 놓친 말을
+  `automation/competitors/web/summary.md` 에 남긴다.
 
 ## 출처
 
