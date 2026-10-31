@@ -27,9 +27,10 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from edith.common import AUTOMATION, CONTENT_DIR, load_config, now_kst, weekday_ko  # noqa: E402
+from edith.common import AUTOMATION, CONTENT_DIR, INSTAGRAM_DIR, load_config, now_kst, weekday_ko  # noqa: E402
 
 METRICS = AUTOMATION / "metrics"
+WEEKLY_DAYS = 28   # 주간 특집 표 — 금요일 4편(E13 판정: 저장각 4편 vs 그 전 특집)
 DAYS = 14
 FRESH_HOUR = "21"   # 이 시각(KST) 이후 스냅숏이 오늘 성과표(22:00 회고가 읽는다)
 INSIGHT_METRICS = "reach,saved,shares,views"
@@ -212,8 +213,9 @@ def _media_row(g, media_id, own_comments, out):
     return row
 
 
-def instagram(days):
-    """{'followers': n, 'insights': bool, 'posts': {날짜: {...}}} 또는 None(토큰 없음)."""
+def instagram(days, weekly_days=()):
+    """{'followers': n, 'insights': bool, 'posts': {날짜: {...}}, 'weekly': {금요일: {...}}} 또는 None(토큰 없음).
+    weekly_days — 금요일 주간 특집을 찾아볼 날짜들(main 이 최근 WEEKLY_DAYS 일을 준다)."""
     token = os.environ.get("IG_ACCESS_TOKEN", "").strip()
     if not token:
         print("  인스타: IG_ACCESS_TOKEN 이 없어 건너뜀")
@@ -255,6 +257,16 @@ def instagram(days):
         if story:
             row["story"] = story
         out["posts"][day] = row
+    for day in weekly_days:   # 금요일 주간 특집(18:00) — E13 저장각 판정(도달당 저장·공유, 2026-11-06~). 그 전 특집과 견주려고 4주를 본다
+        wlog_path = AUTOMATION / "ig_posted" / f"{day}-weekly.json"
+        if not wlog_path.exists():
+            continue
+        wcar = json.loads(wlog_path.read_text(encoding="utf-8")).get("carousel") or {}
+        if wcar.get("id"):
+            try:
+                out.setdefault("weekly", {})[day] = _media_row(g, wcar["id"], 1 if wcar.get("first_comment") else 0, out)
+            except Exception as e:  # noqa: BLE001 — 주간 특집 값이 이상해도 데일리 성과·계정 지표는 남긴다
+                out.setdefault("weekly", {})[day] = {"error": (str(e) if isinstance(e, IGError) else type(e).__name__)[:120]}
     try:   # 게시물 인사이트와 따로 — 게시가 쉬었거나 게시물 지표가 막혀도 계정 지표는 모은다(Codex 리뷰)
         out["account"] = account_week(g)
     except Exception as e:  # noqa: BLE001 — 계정 지표가 이상해도 게시물 성과는 남긴다
@@ -520,10 +532,27 @@ def summary_md(snap):
                   "", "※ 호 수가 적을 때의 차이는 우연일 수 있다. 원칙은 같은 방향의 근거가 3호 이상 쌓였을 때만 바꾼다."]
     else:
         lines += ["", "(비교는 인스타 성과가 3호 이상 쌓이면 나온다)"]
+    lines += weekly_lines(snap)
     polls = snap.get("polls") or {}
     if polls:
         lines += ["", "## 투표 참여", ""] + [f"- {k}: {v}명" for k, v in sorted(polls.items())]
     return "\n".join(lines) + "\n"
+
+
+def weekly_lines(snap):
+    """금요일 주간 특집 표 — 형식(저장각 날짜 장 / 한 줄로)·도달·저장·공유·도달당 (저장+공유). E13 판정 잣대(2026-11-06~)."""
+    weekly = (snap.get("instagram") or {}).get("weekly") or {}
+    if not weekly:
+        return []
+    out = ["", "## 주간 특집 (금 18:00 · E13 저장각 판정 — 도달당 저장·공유, 판정은 다음 날 21:30 수집 값)", "",
+           "| 날짜 | 08 장 | 도달 | 저장 | 공유 | 좋아요 | (저장+공유)/도달 |", "|---|---|---|---|---|---|---|"]
+    for day, w in sorted(weekly.items(), reverse=True):
+        kind = "날짜(저장각)" if any((INSTAGRAM_DIR / f"{day}-weekly").glob("*_dates.png")) else "한 줄로"
+        reach, keep = w.get("reach"), (w.get("saved") or 0) + (w.get("shares") or 0)
+        rate = f"{keep / reach:.0%}" if reach else "–"
+        out.append(f"| {day} | {kind} | {reach if reach is not None else '–'} | {w.get('saved', '–')} | {w.get('shares', '–')} | "
+                   f"{w.get('likes', '–')} | {rate} |")
+    return out
 
 
 def latest_fresh(now=None):
@@ -557,7 +586,8 @@ def main():
     days = [(today - dt.timedelta(days=i)).isoformat() for i in range(DAYS)]
     issues = {d: f for d in days if (f := issue_facts(d))}
     snap = {"collected_at": now_kst().isoformat(timespec="minutes"), "issues": issues}
-    for name, fn in (("instagram", lambda: instagram(sorted(issues))),
+    weekly_days = [(today - dt.timedelta(days=i)).isoformat() for i in range(WEEKLY_DAYS)]
+    for name, fn in (("instagram", lambda: instagram(sorted(issues), weekly_days)),
                      ("mail", lambda: mailbox(sorted(issues), {d: f["title"] for d, f in issues.items()})),
                      ("subscribers", subscribers)):
         try:

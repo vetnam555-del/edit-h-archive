@@ -165,6 +165,34 @@ def _card_issues(data, where):
     return out
 
 
+CHART_POINTS, CHART_TITLE, CHART_LABEL, CHART_TEXT = (3, 6), 22, 6, 7
+
+
+def _chart(ch, where):
+    """H PICK 심층 카드의 막대 차트(선택, config.instagram.chart_card_from~ — 2026-10-31 경쟁 비교 '자기만의 재료').
+    같은 잣대의 확인된 숫자 3~6개(숫자 원칙 그대로 — 서로 다른 출처 2곳), 출처는 그림 안에. 값은 막대 길이라 0 이상."""
+    if not isinstance(ch, dict):
+        raise ContentError(f"{where}: 차트는 객체여야 합니다")
+    pts = ch.get("points")
+    if not isinstance(pts, list) or not CHART_POINTS[0] <= len(pts) <= CHART_POINTS[1]:
+        raise ContentError(f"{where}: points 는 {CHART_POINTS[0]}~{CHART_POINTS[1]}개({{label, value}})여야 합니다")
+    for i, pt in enumerate(pts, 1):
+        v = pt.get("value") if isinstance(pt, dict) else None
+        if isinstance(v, bool) or not isinstance(v, (int, float)) or v < 0:
+            raise ContentError(f"{where}.points[{i}]: value 는 0 이상의 숫자여야 합니다(막대 길이 — 감소는 '낙폭'처럼 크기로)")
+        if not 1 <= len(str(pt.get("label") or "").strip()) <= CHART_LABEL:
+            raise ContentError(f"{where}.points[{i}]: label 은 1~{CHART_LABEL}자")
+        if pt.get("text") is not None and not 1 <= len(str(pt["text"])) <= CHART_TEXT:
+            raise ContentError(f"{where}.points[{i}]: text(막대 위 숫자)는 1~{CHART_TEXT}자")
+    if not 1 <= len(plain(str(ch.get("title") or ""))) <= CHART_TITLE:
+        raise ContentError(f"{where}: title 은 1~{CHART_TITLE}자(주장 하나)")
+    if not str(ch.get("source") or "").strip():
+        raise ContentError(f"{where}: source(자료 출처)가 필요합니다")
+    hi = ch.get("highlight")
+    if hi is not None and (isinstance(hi, bool) or not isinstance(hi, int) or not 0 <= hi < len(pts)):
+        raise ContentError(f"{where}: highlight 는 0~{len(pts) - 1} 사이의 칸 번호입니다")
+
+
 def _poll(data, where):
     """투표(형식 2, 주 첫 호) 와 투표 결과(주 마지막 호) 검증. 결과 숫자는 사람이 적지 않고
     automation/polls/{id}.json(tally_poll.py 가 메일·인스타 댓글로 집계)에서 읽는다."""
@@ -324,6 +352,8 @@ def prepare(data, date_str):
         pts = _need(deep, "points", f"{where} cards.deep")
         if not 2 <= len(pts) <= 3:
             raise ContentError(f"{where} cards.deep: points 는 2~3개여야 합니다('왜 중요해?' 요점)")
+        if deep.get("chart") is not None:
+            _chart(deep["chart"], f"{where} cards.deep.chart")
     _poll(data, where)
     cards.setdefault("cover", {})
     cards["cover"].setdefault("title", data["hero_title"])

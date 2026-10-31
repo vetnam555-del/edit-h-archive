@@ -250,6 +250,24 @@ def _solid(story):
 
 
 PICK_GAP_DAYS = 3   # 예비 호 H PICK 은 이 날수 안(사흘 전까지)에 H PICK 으로 실린 이야기를 피한다
+REPEAT_DAYS = 5     # 2026-10-28 회고: '경기 버스 파업'이 10/24 H PICK → 10/26 예비 호 메인 → 10/28 예비 호 H PICK(5일 새 세 번)
+
+
+def _recent_tags(date, on=None):
+    """on(내는 날) 전 REPEAT_DAYS 일 안에 예비 호의 H PICK·메인이나 원래 호의 H PICK 으로 실린 태그 — 만드는 date 호 자신은 빼고.
+    제목이 달라도 같은 이야기(같은 태그)를 예비 호가 되풀이하지 않게 한다. 예비 호는 실제로 낸 날로 센다."""
+    on_day = parse_date(on or date)
+    tags = set()
+    for p in sorted(CONTENT_DIR.glob("20*.json")):
+        if p.stem == date:
+            continue
+        c = json.loads(p.read_text(encoding="utf-8"))
+        shown = parse_date((c.get("published_at_kst") or p.stem)[:10])
+        if not 0 < (on_day - shown).days <= REPEAT_DAYS:
+            continue
+        stories = [c.get("big_issue") or {}] + (list(c.get("items") or []) if c.get("rewind") else [])
+        tags.update(x["tag"] for x in stories if x.get("tag"))
+    return tags
 
 
 def pick(date, on=None):
@@ -262,6 +280,7 @@ def pick(date, on=None):
     cands = pool(date)
     used = _used(date)
     on = on or date
+    recent = _recent_tags(date, on)
 
     def gone(x):
         """결론(할 일)에 박힌 날짜가 이미 지났다 — 그런 이야기는 맨 뒤로(2026-10-10 회고)."""
@@ -274,7 +293,8 @@ def pick(date, on=None):
         story, spec, day, is_pick, c = x
         stale = _stale(story.get("title"), story.get("body"), story.get("takeaway"), spec.get("headline"), spec.get("body"),
                        " ".join(story.get("paragraphs") or []))
-        fresh = plain_title(c["title"] if is_pick else story["title"]) not in used
+        fresh = (plain_title(c["title"] if is_pick else story["title"]) not in used
+                 and story.get("tag") not in recent)   # 같은 이야기(태그)를 며칠 새 다시 싣지 않게(2026-10-28 회고)
         return (not gone(x), fresh, _solid(story), not stale, day != yesterday, scores.get(day, 0), day)
 
     # H PICK 은 출처 2건 이상을 먼저(지난 예비 호에 실렸어도) — 출처 기준이 '안 겹치기'보다 앞선다. 다만 결론 날짜가 지난 것은 그보다 뒤
@@ -295,6 +315,10 @@ def pick(date, on=None):
     else:   # 모두 사흘 안이면 출처 2건 이상을 먼저, 그 안에서 가장 오래전에 실린 H PICK 부터(어제 것을 또 쓰지 않게, Codex 리뷰)
         picks = sorted(picks, key=lambda x: (gone(x), not _solid(x[0]), last[id(x)]))
         print(f"  ⚠ 예비 호: {PICK_GAP_DAYS}일보다 오래된 H PICK 이 없어 가장 오래전에 실린 H PICK 을 다시 씁니다")
+    # 며칠 새 예비 호(H PICK·메인)나 원래 호 H PICK 으로 실린 이야기(태그)는 다른 후보가 있으면 뒤로(2026-10-28 회고)
+    unrepeated = [x for x in picks if x[0].get("tag") not in recent]
+    if unrepeated:
+        picks = unrepeated
     # 지난 연휴·요일에 묶인 H PICK 은 같은 조건의 다른 후보가 있으면 뒤로 — 사흘 간격(같은 H PICK 반복 막기)이 먼저다(2026-10-14 회고)
     timely = [x for x in picks if not dated(x)]
     if timely:
@@ -386,13 +410,13 @@ def build(date):
         "source_mode": "rewind",
         "published_at_kst": now.isoformat(timespec="seconds"),   # 08:35 뒤 실제로 만든 시각 — 검색엔진 발행 시각(NewsArticle)
         "lead": (f"오늘은 새 소식을 준비하지 못해, 지난 호에서 {what} 이야기 다섯 가지를 다시 골랐어요. "
-                 "출처 옆 날짜가 처음 실린 날이에요. 내일 아침엔 새 소식으로 돌아올게요."),
+                 "출처 옆 날짜가 처음 실린 날이에요. 천천히 넘겨 보세요."),
         "observation": "새 소식이 없는 날엔 다시 볼 이야기를 — 지난 숫자에도 오늘 쓸모가 남아 있어요.",
         "big_issue": big,
         "items": content_items,
         "briefs": [],
         "question": {"text": "지난 이야기 중\n==더 알고 싶은 주제==가 있나요?",
-                     "closing": "내일 아침엔 새 소식으로 찾아갈게요. — 에디터 H 드림"},
+                     "closing": "오늘도 열어 주셔서 고마워요. — 에디터 H 드림"},
         "cards": {
             "cover": cover,
             "issues": card_issues,
@@ -402,7 +426,7 @@ def build(date):
             # 첫 화면('더 보기' 전)에 주제어 — 인스타 검색은 캡션 글을 읽는다(2026-10-09 운영자 자료)
             "caption": ("오늘은 새 소식 대신, 지난 이야기 중 다시 볼 만한 다섯 가지를 골랐어요.\n\n"
                         f"{'·'.join([big['tag']] + [it['tag'] for it in content_items[:2]])} 이야기, 놓쳤다면 넘겨보세요. "
-                        "내일 아침엔 새 소식으로 돌아올게요."),
+                        "카드마다 처음 실린 날짜를 적어 뒀어요."),
             "ask": "이 중에 더 자세히 알고 싶은 이야기가 있어요?",
             "hashtags": [big["tag"]] + [it["tag"] for it in content_items[:3]],
         },

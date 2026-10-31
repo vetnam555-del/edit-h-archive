@@ -628,6 +628,16 @@ def t_rewind():
                    "지난 날짜 예비 호가 그 날짜 뒤에 실린 H PICK 을 안 센다")
         finally:
             build_rewind.CONTENT_DIR = saved
+    # 같은 이야기(태그) 되풀이 — '경기 버스 파업'이 10/24 H PICK → 10/26 예비 호 메인 → 10/28 예비 호 H PICK(2026-10-28 회고)
+    recent = build_rewind._recent_tags("2026-10-28")
+    expect("경기 버스 파업" in recent, f"최근 예비 호·H PICK 에 실린 태그를 못 센다: {sorted(recent)}")
+    with contextlib.redirect_stdout(io.StringIO()):
+        top28, items28, _ = build_rewind.pick("2026-10-28")
+    again28 = [x[0]["tag"] for x in [top28, *items28] if x[0]["tag"] in recent]
+    expect(not again28, f"10/28 예비 호가 5일 안에 실린 이야기를 또 고른다: {again28}")
+    import inspect
+    expect("내일 아침엔" not in inspect.getsource(build_rewind.build),
+           "예비 호가 '내일 아침엔 새 소식으로'를 약속한다 — 사흘 연속 나가 이틀은 못 지켰다(10/28 회고, 원칙 5)")
     for past in ("2026-09-30", "2026-10-07"):   # 실제 예비 호 날 — 이틀 전 H PICK 을 다시 실었던 날(10/8 회고)
         gap = (parse_date(past) - parse_date(build_rewind.pick(past)[0][2])).days
         expect(gap > build_rewind.PICK_GAP_DAYS, f"{past} 예비 호 H PICK 이 {gap}일 전 호의 H PICK 이다")
@@ -713,6 +723,11 @@ def t_metrics():
     expect(snaps, "성과표 스냅숏이 없다")
     md = collect_metrics.summary_md(json.loads(snaps[-1].read_text(encoding="utf-8")))
     expect(md.startswith("# EDIT H 성과표"), "성과표 머리말")
+    # 2026-10-25·10-29 회고 '출처 품질 표에 같은 날짜가 두 줄씩' — 커밋된 성과표 25판에서 재현 안 됨(호별 성과 표와 한 번씩 나온다). 생기면 잡는다
+    for p in snaps[-5:]:
+        sec = collect_metrics.summary_md(json.loads(p.read_text(encoding="utf-8"))).split("## 출처 품질")[-1].split("\n- 최근")[0]
+        days = re.findall(r"^\| (20\d\d-\d\d-\d\d) \|", sec, re.M)
+        expect(len(days) == len(set(days)), f"{p.stem} 성과표 출처 품질 표에 같은 날짜가 두 줄: {sorted(d for d in days if days.count(d) > 1)}")
     return f"{snaps[-1].stem} 스냅숏으로 {len(md.splitlines())}줄"
 
 
@@ -1334,6 +1349,129 @@ def rebuild(days, strict):
                 print(f"  ✓ {name} — 뉴스레터·캡션이 발행본과 같음" + (f" (빌드 경고 {len(warn)}줄)" if warn else ""))
 
 
+def t_weekly_save():
+    """금요일 주간 특집 저장각(E13, 2026-11-06~ — 2026-10-31 경쟁 비교 '두고 쓰는 자료'): 날짜는 이미 낸 호 원고에 글자로 있는 것만,
+    지난·먼 날짜·아직 안 낸 호·글자 수·개수는 막고, 시작일 전 특집과 날짜 2개 미만은 예전 '한 줄로' 장, 캡션 날짜 줄, 성과표 '주간 특집' 표."""
+    from edith import cards, weekly
+    import collect_metrics
+    fri = parse_date("2026-10-30")
+    good = [{"date": "2026-11-30", "what": "SK하이닉스 배당 기준일", "todo": "주당 2만원 — 전날까지 보유", "from": "2026-10-29"},
+            {"date": "2026-11-20", "what": "열하루 뒤 일정", "todo": "달력에 적기", "from": "2026-10-28"}]
+    rows = weekly.dates_rows({"dates": good}, fri)
+    expect([r["day"] for r in rows] == [20, 30] and rows[0]["from"] == "10/28 호에서 확인" and rows[1]["weekday"] == "월",
+           f"저장각 날짜 행(날짜 순·출처 호·요일): {rows}")
+    expect(weekly.dates_rows({"dates": good[:1]}, fri) == [], "날짜가 1개면 '한 줄로' 장으로 돌아가야 한다")
+    bad = {"원고에 없는 날짜": {**good[0], "date": "2026-11-17"}, "지난 날짜": {**good[0], "date": "2026-10-29"},
+           "60일 넘는 날짜": {**good[0], "date": "2027-01-15"}, "아직 안 낸 호": {**good[0], "from": "2026-11-02"},
+           "긴 what": {**good[0], "what": "가" * 23}, "빈 todo": {**good[0], "todo": ""}}
+    for why, entry in bad.items():
+        try:
+            weekly.dates_rows({"dates": [entry, good[1]]}, fri)
+            raise AssertionError(f"저장각 날짜 검사가 '{why}'를 통과시켰다")
+        except weekly.WeeklyError:
+            pass
+    try:
+        weekly.dates_rows({"dates": good * 3}, fri)
+        raise AssertionError("저장각 날짜 6개를 통과시켰다(카드는 4개까지 — 5개면 넘친다)")
+    except weekly.WeeklyError:
+        pass
+    expect(not weekly.save_card_on("2026-10-30") and weekly.save_card_on("2026-11-06"),
+           "save_card_from 이 2026-11-06 이 아니다 — 지난 특집을 다시 빌드하면 08 장이 바뀐다")
+    page = cards.calendar_card("10월 5주차 저장각", "달력에 적어 둘\n==다가올 날짜==", rows)
+    expect("11월" in page and ">20<" in page and ">30<" in page and "10/29 호에서 확인" in page, "날짜 카드에 월·일·출처 호가 없다")
+    with tempfile.TemporaryDirectory() as tmp:
+        spec = json.loads((CONTENT_DIR / "weekly" / "2026-10-30.json").read_text(encoding="utf-8"))
+        Path(tmp, "2026-10-30.json").write_text(json.dumps({**spec, "dates": good}, ensure_ascii=False), encoding="utf-8")
+        saved = weekly.WEEKLY_DIR, weekly.load_config
+        real = weekly.load_config
+        try:
+            weekly.WEEKLY_DIR = Path(tmp)
+            weekly.load_config = lambda: {**real(), "weekly_special": {**real()["weekly_special"], "save_card_from": "2026-10-30"}}
+            w = weekly.load("2026-10-30")
+            cap = weekly.caption(w)
+        finally:
+            weekly.WEEKLY_DIR, weekly.load_config = saved
+    expect(len(w["dates"]) == 2 and "달력에 적어 둘 날짜\n· 11/20(금) 열하루 뒤 일정\n· 11/30(월) SK하이닉스 배당 기준일" in cap
+           and "날짜 장은 저장해 두면" in w["cards"]["cta"]["sub"], "저장각 특집의 캡션 날짜 줄·마무리 문구")
+    snap = {"collected_at": "2026-11-07T21:30+09:00", "issues": {}, "instagram": {"weekly": {"2026-11-06": {"reach": 40, "saved": 3, "shares": 1}}}}
+    table = "\n".join(collect_metrics.weekly_lines(snap))
+    expect("## 주간 특집" in table and "| 2026-11-06 |" in table and "| 10% |" in table, f"성과표 주간 특집 표:\n{table}")
+    return f"날짜 {len(rows)}개 · 막는 경우 {len(bad) + 1}가지"
+
+
+def t_save_cards():
+    """데일리 저장각(2026-11-14~ — 2026-10-31 경쟁 비교 후속): 노트 카드의 '오늘 챙길 것' 체크리스트, H PICK 심층 카드의 막대 차트.
+    시작일 전 호·투표 결과 날은 그대로, 차트 원고 검사(점 3~6개·0 이상·출처), 시작일이 E12 표본(11/07~11/13) 뒤인지."""
+    from edith import cards
+    from edith import content as content_mod
+    ig = load_config()["instagram"]
+    for key in ("todo_card_from", "chart_card_from"):
+        expect(ig.get(key) is None or str(ig[key]) >= "2026-11-14",
+               f"{key} 가 11/14 전이다 — E11 팔로우 카드(10/31~11/06)·E12 3:4(11/07~11/13) 표본과 겹친다")
+    day = daily_issues(1)[0]
+    d = content_mod.load(day)
+    d["todo"] = ["11월 3일 일정 달력에 적기", "내 계좌 비중 확인하기"]
+    d["cards"]["deep"]["chart"] = {"title": "하루 낙폭, ==큰 날==", "unit": "%", "source": "가·나",
+                                   "points": [{"label": "4/7", "value": 5.57}, {"label": "8/5", "value": 8.77}, {"label": "10/30", "value": 3.48}]}
+    real = cards.load_config
+    try:
+        cards.load_config = lambda: {**real(), "instagram": {**real()["instagram"], "todo_card_from": "2999-01-01", "chart_card_from": "2999-01-01"}}
+        before_note, before_deep = cards.note_card(d), cards.deep_card(d)
+        cards.load_config = lambda: {**real(), "instagram": {**real()["instagram"], "todo_card_from": day, "chart_card_from": day}}
+        note, deep = cards.note_card(d), cards.deep_card(d)
+        poll_note = cards.note_card({**d, "poll_result": {"tally": {"votes": {"A": 1, "B": 0}, "pct": {"A": 100, "B": 0}, "total": 1,
+                                                                     "options": ["가", "나"], "question": "질문"}}})
+    finally:
+        cards.load_config = real
+    expect("오늘 챙길 것" not in before_note and "자료 ·" not in before_deep, "시작일 전 호에 체크리스트·차트가 들어갔다(지난 호가 바뀐다)")
+    expect("오늘 챙길 것" in note and "일정 달력에 적기" in note and "내 계좌 비중 확인하기" in note, "노트 카드에 오늘 챙길 것이 없다")
+    expect("오늘 챙길 것" not in poll_note, "투표 결과 날 노트 카드에 체크리스트가 들어갔다")
+    expect("자료 · 가" in deep and "8.77%" in deep and "10/30" in deep, "심층 카드에 차트(숫자·칸 이름·자료 출처)가 없다")
+    bad = {"점 2개": {"points": [{"label": "a", "value": 1}] * 2}, "음수": {"points": [{"label": "a", "value": -1}] * 3},
+           "출처 없음": {"source": ""}, "긴 칸 이름": {"points": [{"label": "가나다라마바사", "value": 1}] * 3},
+           "칸 번호 밖": {"highlight": 3}}
+    for why, patch in bad.items():
+        try:
+            content_mod._chart({**d["cards"]["deep"]["chart"], **patch}, "시험")
+            raise AssertionError(f"차트 검사가 '{why}'를 통과시켰다")
+        except content_mod.ContentError:
+            pass
+    content_mod._chart(d["cards"]["deep"]["chart"], "시험")
+    return f"체크리스트 {ig.get('todo_card_from')}~ · 차트 {ig.get('chart_card_from')}~ · 막는 차트 {len(bad)}가지"
+
+
+def t_indexnow():
+    """검색 알림(IndexNow, 2026-10-31 경쟁 비교 — 배포 길 넓히기): 키 파일이 키와 같고, 푸시에서 맨 위 호 페이지만 골라,
+    모든 주소가 키 파일 폴더 아래에 있고(IndexNow 규칙 — 하위 경로 사이트), 시험 실행은 네트워크를 쓰지 않는다."""
+    import indexnow
+    site, key, key_url = indexnow.settings()
+    kf = ROOT / f"{key}.txt"
+    expect(kf.exists() and kf.read_text(encoding="utf-8").strip() == key, f"키 파일 {kf.name} 이 없거나 내용이 키와 다르다")
+    commits = json.dumps([{"added": ["2026-11-01.html", "instagram/2026-11-01/index.html", "content/2026-11-01.json"],
+                           "modified": ["index.html", "2026-10-31.html"], "removed": ["2026-10-01.html"]},
+                          {"added": [], "modified": ["2026-11-01.html"]}])
+    dates = indexnow.dates_from_commits(commits)
+    expect(dates == ["2026-11-01", "2026-10-31"], f"푸시에서 고른 호: {dates}")
+    expect(indexnow.dates_from_commits("null") == [] and indexnow.dates_from_commits("") == [], "commits 가 없을 때 빈 목록이 아니다")
+    urls = indexnow.urls_for(dates, site)
+    expect(urls == [f"{site}/2026-11-01.html", f"{site}/2026-10-31.html", f"{site}/"], f"알릴 주소: {urls}")
+    folder = key_url.rsplit("/", 1)[0] + "/"
+    expect(all(u.startswith(folder) for u in urls), "키 파일 폴더 밖 주소를 알린다(IndexNow 가 거절한다)")
+    body = indexnow.payload(urls, site, key, key_url)
+    expect(body["host"] == "vetnam555-del.github.io" and body["keyLocation"] == key_url and body["key"] == key, f"보낼 내용: {body}")
+    saved = indexnow.submit, indexnow.wait_live, sys.argv
+    indexnow.submit = indexnow.wait_live = lambda *a, **k: (_ for _ in ()).throw(AssertionError("시험 실행이 네트워크를 썼다"))
+    try:
+        sys.argv = ["indexnow.py", "--date", "2026-10-31", "--dry-run"]
+        with contextlib.redirect_stdout(io.StringIO()):
+            expect(indexnow.main() == 0, "시험 실행이 0 으로 끝나지 않았다")
+    finally:
+        indexnow.submit, indexnow.wait_live, sys.argv = saved
+    wf = (ROOT / ".github" / "workflows" / "indexnow.yml").read_text(encoding="utf-8")
+    expect('paths: ["20*.html"]' in wf and "indexnow.py --commits" in wf, "검색 알림 워크플로가 호 페이지 푸시에 걸려 있지 않다")
+    return f"{len(urls)}개 주소 · 키 파일 {kf.name[:8]}…"
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--quick", action="store_true", help="다시 빌드 생략")
@@ -1372,6 +1510,9 @@ def main():
     check("릴스 첫 장 훅(E8)", t_reel_hook)
     check("아침 스토리(E9)", t_story)
     check("3:4 카드·팔로우 카드(템플릿 ver.3)", t_card_ratio)
+    check("검색 알림(IndexNow)", t_indexnow)
+    check("주간 특집 저장각(E13)", t_weekly_save)
+    check("데일리 저장각(체크리스트·차트)", t_save_cards)
     if not args.quick:
         rebuild(daily_issues(args.issues), args.strict)
     if NOTES:

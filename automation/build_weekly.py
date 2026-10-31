@@ -35,16 +35,22 @@ def main():
         raise SystemExit(f"✗ 주간 특집 검증 실패\n{e}")
     picked = ", ".join(f"{it['day_label']} {it['tag']}" for it in w["card_issues"])
     if args.check:
-        print(f"✓ 주간 특집 검증 통과 — {picked}")
+        print(f"✓ 주간 특집 검증 통과 — {picked}" + (f" · 저장각 날짜 {len(w['dates'])}개" if w["dates"] else ""))
         return
 
     ol = w["spec"]["oneliner"]
-    sections = ([cards.cover(w, kicker=f"{w['week_label']} 주간 특집 | 이번 주 TOP{len(w['card_issues'])}",
-                             foot=f"밀어서 {len(w['card_issues'])}가지 보기 →"),
+    n = len(w["card_issues"])
+    if w["dates"]:   # 저장각(E13, weekly_special.save_card_from~) — 08 을 '달력에 적어 둘 날짜'로
+        eighth = cards.calendar_card(f"{w['week_label']} 저장각", w["dates_title"], w["dates"])
+        names, foot = NAMES[:-2] + ["dates", "cta"], f"밀어서 {n}가지 + 챙길 날짜 보기 →"
+    else:
+        eighth = cards.list_card("이번 주를 한 줄로", ol["title"], ol["lines"])
+        names, foot = NAMES, f"밀어서 {n}가지 보기 →"
+    sections = ([cards.cover(w, kicker=f"{w['week_label']} 주간 특집 | 이번 주 TOP{n}", foot=foot),
                  cards.summary(w, period="이번 주")]
                 + [cards.issue_card(it, i) for i, it in enumerate(w["card_issues"], 1)]
-                + [cards.list_card("이번 주를 한 줄로", ol["title"], ol["lines"]), cards.cta(w)])
-    files = [f"{i:02d}_edit_h_{w['date']}_{n}.png" for i, n in enumerate(NAMES, 1)]
+                + [eighth, cards.cta(w)])
+    files = [f"{i:02d}_edit_h_{w['date']}_{name}.png" for i, name in enumerate(names, 1)]
     out = Path(args.out) if args.out else INSTAGRAM_DIR / w["date"]
     jpeg_dir = out / "ig"  # 인스타그램 자동 게시용 JPEG
     jpeg_dir.mkdir(parents=True, exist_ok=True)
