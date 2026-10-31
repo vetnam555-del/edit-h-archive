@@ -1633,7 +1633,28 @@ def t_ai_reel():
         expect(len(g.calls) == 1, "라벨을 거절당한 뒤 라벨 없는 스토리 컨테이너를 만든다")
     expect("want_reel" in src.split("AI_REEL")[1][:400], "AI 릴스가 릴스 게시 설정(reel=false)을 무시한다")
     expect("AI_REEL" in inspect.getsource(pi.prune), "오래된 AI 릴스 영상을 정리하지 않는다")
-    return "reel_ai.mp4 → 형식 ai · 캡션 따로 · 스토리 영상 · AI 정보 라벨(안 받으면 라벨 없이)"
+    # 'H 극장' 만화 캐러셀: 08:30 캐러셀 실행(only=carousel)에선 안 올리고, 라벨·AI 한 줄·정리 대상
+    expect("post_comic" in src and "COMIC_DIR" in inspect.getsource(pi.prune), "만화 캐러셀 게시·정리 단계가 없다")
+    expect('args.only != "carousel"' in src.split("H 극장 만화")[0][-600:], "만화 캐러셀이 08:30 캐러셀 실행에서 올라갈 수 있다")
+    with tempfile.TemporaryDirectory() as tmp:
+        folder = Path(tmp)
+        (folder / pi.COMIC_DIR).mkdir()
+        for i in (1, 2, 3):
+            (folder / pi.COMIC_DIR / f"c{i}.jpg").write_bytes(b"x")
+        (folder / "comic_caption.txt").write_text("만화 캡션", encoding="utf-8")
+        g = G(True)
+        saved_wp, saved_wr, saved_pub = pi.wait_public, getattr(G, "wait_ready", None), pi.publish
+        pi.wait_public = lambda urls, **k: None
+        G.wait_ready = lambda self, cid, what, timeout=600: None
+        pi.publish = lambda g_, uid, cid, what, tries=6: "m1"
+        try:
+            mid, info = pi.post_comic(g, "u", "2026-11-01", folder, "https://x", False)
+        finally:
+            pi.wait_public, pi.publish = saved_wp, saved_pub
+        parent = g.calls[-1]
+        expect(mid == "m1" and info.get("ai_label") is True and parent.get("is_ai_generated") == "true"
+               and pi.AI_NOTE_KEY in parent.get("caption", "") and parent.get("media_type") == "CAROUSEL", "만화 캐러셀에 AI 라벨·AI 한 줄이 없다")
+    return "reel_ai.mp4 → 형식 ai · 캡션 따로 · 스토리 영상 · AI 정보 라벨 · H 극장 만화 캐러셀"
 
 
 def t_competitors_ig():

@@ -422,6 +422,47 @@ def create_with_ai_label(g, uid, params, info, required=False):
         return g.call("POST", f"{uid}/media", **params)["id"]
 
 
+COMIC_DIR = "comic"   # 2026-11-01 운영자 '캐러셀도 재미있는 양식으로' → 'H 극장' 4컷 만화(AI 릴스 장면 + 말풍선), 08:30 캐러셀과 따로
+
+
+def post_comic(g, uid, key, folder, site_url, dry):
+    """'H 극장' 만화 캐러셀(instagram/{키}/comic/*.jpg + comic_caption.txt + comic_alt.json) — (게시 id, 라벨 정보).
+    그림이 AI 영상 장면이라 AI 정보 라벨을 붙이고(못 붙이면 캡션의 'AI로 만들었어요' 한 줄), 캡션에 그 줄이 없으면 붙인다."""
+    jpgs = sorted((folder / COMIC_DIR).glob("*.jpg"))
+    if not 2 <= len(jpgs) <= 10:
+        raise IGError(f"만화 캐러셀은 JPEG 2~10장이어야 합니다(지금 {len(jpgs)}장)")
+    urls = [f"{site_url}/instagram/{key}/{COMIC_DIR}/{p.name}" for p in jpgs]
+    wait_public(urls)
+    alt_path = folder / "comic_alt.json"
+    alts = json.loads(alt_path.read_text(encoding="utf-8")) if alt_path.exists() else {}
+    children = []
+    for p, u in zip(jpgs, urls):
+        params = {"image_url": u, "is_carousel_item": "true"}
+        if alts.get(p.name):
+            params["alt_text"] = alts[p.name]
+        try:
+            children.append(g.call("POST", f"{uid}/media", **params)["id"])
+        except IGError:
+            if "alt_text" not in params:
+                raise
+            alts = {}
+            params.pop("alt_text")
+            children.append(g.call("POST", f"{uid}/media", **params)["id"])
+    for n, child in enumerate(children, 1):
+        g.wait_ready(child, f"만화 {n}번째 장")
+    cap_path = folder / "comic_caption.txt"
+    caption = cap_path.read_text(encoding="utf-8").strip() if cap_path.exists() else ""
+    if AI_NOTE_KEY not in caption:
+        caption = (caption + "\n\n" + AI_NOTE).strip()
+    info = {}
+    parent = create_with_ai_label(g, uid, dict(media_type="CAROUSEL", children=",".join(children), caption=caption), info)
+    g.wait_ready(parent, "만화 캐러셀")
+    if dry:
+        print(f"  (dry-run) 만화 캐러셀 컨테이너 준비 완료 — {len(children)}장, 게시하지 않음")
+        return None, info
+    return publish(g, uid, parent, "만화 캐러셀"), info
+
+
 def post_story_video(g, uid, url, dry, info=None):
     """AI 영상 릴스를 스토리로도(2026-11-01 운영자 '스토리에도 올리고') — 영상 스토리 한 장. 게시한 id(dry-run 이면 None).
     스토리엔 캡션이 없어 AI 정보 라벨이 꼭 붙어야 올린다(못 붙이면 IGError)."""
@@ -560,8 +601,9 @@ def prune(days):
                 f.unlink()
             d.rmdir()
     for f in [*INSTAGRAM_DIR.glob("*/reel.mp4"), *INSTAGRAM_DIR.glob(f"*/{AI_REEL}"),   # AI 영상 릴스도 같은 보관 기간(Codex 리뷰)
-              *INSTAGRAM_DIR.glob("*/reel_frames/*.jpg"), *INSTAGRAM_DIR.glob("*/story/*.jpg")]:
-        folder = f.parent.parent if f.parent.name in ("reel_frames", "story") else f.parent
+              *INSTAGRAM_DIR.glob("*/reel_frames/*.jpg"), *INSTAGRAM_DIR.glob("*/story/*.jpg"),
+              *INSTAGRAM_DIR.glob(f"*/{COMIC_DIR}/*.jpg")]:
+        folder = f.parent.parent if f.parent.name in ("reel_frames", "story", COMIC_DIR) else f.parent
         m = re.match(r"(\d{4}-\d{2}-\d{2})", folder.name)
         if m and dt.date.fromisoformat(m.group(1)) < cutoff and (LOG_DIR / f"{folder.name}.json").exists():
             f.unlink()
@@ -781,6 +823,24 @@ def main():
                 log["story_ai_error"] = str(e)[:200]
                 save_log(key, log)
                 print(f"  ⚠ AI 영상 스토리 실패(게시는 계속): {e}")
+
+    # 'H 극장' 만화 캐러셀 — 08:30 캐러셀 실행(only=carousel)이 아니라 AI 릴스와 함께(수동·저녁 실행) 한 번만
+    if (args.only != "carousel" and not rewind and cfg.get("comic", True) and any((folder / COMIC_DIR).glob("*.jpg"))
+            and not log.get("comic")):
+        try:
+            print("H 극장 만화 캐러셀 게시 중…")
+            media_id, info = post_comic(g, uid, key, folder, site_url, args.dry_run)
+            if media_id:
+                log["comic"] = {"id": media_id, "at": now_kst().isoformat(timespec="seconds"), "ai_label": info.get("ai_label")}
+                save_log(key, log)
+                try:
+                    log["comic"]["permalink"] = g.call("GET", media_id, fields="permalink").get("permalink")
+                    save_log(key, log)
+                except IGError:
+                    pass
+                print(f"  ✓ 만화 캐러셀 게시 {log['comic'].get('permalink') or media_id}")
+        except IGError as e:
+            failures.append(f"만화 캐러셀: {e}")
 
     if not args.dry_run:
         prune(int(cfg.get("keep_jpeg_days", 14)))

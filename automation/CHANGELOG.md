@@ -3,6 +3,10 @@
 시스템이 날마다 무엇을 바꿨는지 한 줄씩 남긴다 — **바꾼 것 — 왜(근거) — 어떻게 판정·확인**. 최신이 위.
 매일 14:10 개선 루틴(`RUNBOOK_IMPROVE.md`)과 일요일 21:00 주간 루틴이 적는다. 편집 회고는 `learnings.md`, 조사·실험은 `references.md`.
 
+### 2026-11-01 새벽 14 (운영자 — '캐러셀도 더 재미있는 양식으로' → 시안 승인 '좋네 오늘부터 잘 부탁해, 검수도 잘')
+- **H 극장 만화 캐러셀**: AI 릴스 장면 4컷 + 말풍선 + 끝 장(`automation/pilots/ai_reel/comic.py`). 08:30 캐러셀(E11·E12)은 그대로, AI 릴스와 함께 따로 올린다(post_instagram.py `post_comic`, AI 정보 라벨, log `comic`, 08:30 실행에선 안 올림). 성과표 'H 극장 만화' 줄.
+- **검수 도구** `automation/pilots/ai_reel/qa.py`: 숫자 대조(단위까지)·대사 음성 인식·음량·크기·캡션 AI 한 줄·만화 장수 — 실패면 올리지 않는다. 음수 시험으로 틀린 숫자 2개를 잡는지 확인(처음엔 '1'만 맞으면 통과시켜 고침).
+
 ### 2026-11-01 새벽 13 (운영자 — '바로 올려줘 그리고 스토리에도 … 오늘자도 영상으로 바로')
 - 10/31 AI 릴스·스토리 게시(06:03, 'AI 정보' 라벨 붙음): https://www.instagram.com/reel/DfLFBnWCdCu/ — E19 시작(references.md).
 - 편집 도구를 하루치 설정 파일로: `automation/pilots/ai_reel/episode.py` + `{날짜}/episode.json`(10/31 것으로 다시 만들어 올린 것과 같음을 확인). 예전 overlays.py·compose_v3.py·compose.sh 는 지웠다.

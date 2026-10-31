@@ -264,6 +264,12 @@ def instagram(days, weekly_days=()):
                     row["reel_ai"]["avg_watch_s"] = round(ms["ig_reels_avg_watch_time"] / 1000, 1)
             except IGError as e:
                 row["reel_ai_error"] = str(e)[:120]
+        mid = (log.get("comic") or {}).get("id")
+        if mid:   # 'H 극장' 만화 캐러셀(2026-11-01~) — 08:30 캐러셀과 따로 잰다
+            try:
+                row["comic"] = _media_row(g, mid, 0, out)
+            except IGError as e:
+                row["comic_error"] = str(e)[:120]
         story = _story_row(g, day, log)
         if story:
             row["story"] = story
@@ -387,6 +393,17 @@ def _at_age(day, snap, hours=24):
         if row and s.get("collected_at") and dt.datetime.fromisoformat(s["collected_at"]) >= due:
             return row
     return {}
+
+
+def _comic_compare(scored):
+    """'H 극장' 만화 캐러셀(2026-11-01~) vs 같은 날 08:30 캐러셀 — 게시 24시간 뒤 도달·저장·공유(호 수)."""
+    pairs = [(a.get("comic") or {}, a) for _, _, _, a in scored if (a.get("comic") or {}).get("reach") is not None]
+    if not pairs:
+        return []
+    avg = lambda rows, k: sum((r.get(k) or 0) for r in rows) / len(rows)  # noqa: E731
+    comic, main = [c for c, _ in pairs], [a for _, a in pairs]
+    return [f"- H 극장 만화: 도달 {avg(comic, 'reach'):.0f}·저장 {avg(comic, 'saved'):.1f}·공유 {avg(comic, 'shares'):.1f}"
+            f" vs 같은 날 캐러셀 도달 {avg(main, 'reach'):.0f}·저장 {avg(main, 'saved'):.1f}·공유 {avg(main, 'shares'):.1f}({len(pairs)}호)"]
 
 
 def _reel_compare(scored):
@@ -543,6 +560,7 @@ def summary_md(snap):
                   *([f"- 독자 축: {avg_by('audience')}"] if len({f.get('audience') for _, f, _, _ in scored}) > 1 else []),
                   *_series_compare(snap),
                   *_reel_compare(scored),
+                  *_comic_compare(scored),
                   f"- 가장 좋았던 호: {best[0]} 「{best[1]['title']}」 {best[2]}점·도달 {best[3].get('reach', '–')}"
                   f" · 가장 약했던 호: {worst[0]} 「{worst[1]['title']}」 {worst[2]}점·도달 {worst[3].get('reach', '–')}",
                   "", "※ 호 수가 적을 때의 차이는 우연일 수 있다. 원칙은 같은 방향의 근거가 3호 이상 쌓였을 때만 바꾼다."]
