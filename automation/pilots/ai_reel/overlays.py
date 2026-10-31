@@ -1,4 +1,5 @@
 """AI 릴스 시험판(2026-11-01, 10/31 호) — 영상 위에 얹을 글자(투명 PNG)와 끝 화면.
+11/01 운영자: '영상에서 AI로 만들었다는 내용은 빼 줘 — 인스타에 올릴 때 표시하니까' → 화면 표시는 빼고 캡션 한 줄로 밝힌다.
 
 AI 영상에는 글자·숫자를 그리게 하지 않고(틀리게 그린다), 확인된 숫자는 여기서 우리 글꼴로 얹는다.
 숫자는 content/2026-10-31.json(출처 3곳)에서 그대로 옮겼다. 사용: python3 automation/pilots/ai_reel/overlays.py <출력 폴더>
@@ -33,7 +34,7 @@ html,body{{margin:0;width:1080px;height:1920px;background:transparent;font-famil
 .sub{{margin-top:20px;font-weight:650;font-size:38px;line-height:1.4;color:#fff;text-shadow:0 3px 14px rgba(0,0,0,.8),0 0 3px rgba(0,0,0,.9)}}
 </style></head><body>
 <div class="shade"></div>
-<div class="top"><span class="mark"><span>EDIT H<span class="dot">.</span></span><span class="ai">AI로 만든 영상</span></span></div>
+<div class="top"><span class="mark"><span>EDIT H<span class="dot">.</span></span></span></div>
 {body}
 </body></html>"""
 
@@ -63,7 +64,7 @@ img{{width:240px;height:240px;border-radius:50%;display:block;margin:0 auto}}
   <div class="sub">2030의 아침을 편집합니다 · 경제부터 트렌드까지<br>숫자·출처 전문은 프로필 링크 뉴스레터에서</div>
   <div class="btn">팔로우하고 내일 아침에 받기</div>
 </div>
-<div class="note">AI로 만든 영상·목소리예요. 숫자는 기사 2곳 이상에서 확인했어요<br>(10월 30일 한국거래소 마감 기준)</div>
+<div class="note">숫자는 기사 2곳 이상에서 확인했어요<br>(10월 30일 한국거래소 마감 기준)</div>
 </body></html>"""
 
 

@@ -170,7 +170,8 @@ def reel_caption(folder, track=None):
     """릴스 캡션 = build_issue.py 가 만든 reel_caption.txt(훅·요약 한 문장·피드 안내·해시태그).
     음악 출처는 캡션에 쓰지 않는다(2026-09-25 요청) — 영상 위쪽에 들어가고(make_reel.py), 못 넣으면 댓글로(music_credit).
     파일이 없으면(주간 특집·예전 호) caption.txt 의 첫 줄과 해시태그로 같은 모양을 만든다."""
-    path = folder / "reel_caption.txt"
+    path = folder / ("reel_ai_caption.txt" if (track or {}).get("style") == "ai" and (folder / "reel_ai_caption.txt").exists()
+                     else "reel_caption.txt")
     if path.exists():
         return path.read_text(encoding="utf-8").strip()
     from edith.site import _GENERIC_TAGS
@@ -189,8 +190,30 @@ def music_credit(track):
     return line
 
 
+AI_REEL = "reel_ai.mp4"   # 2026-11-01 운영자: 힉스필드로 만든 AI 영상 릴스(대사·음악 포함) — 있으면 그날 릴스를 이것으로 올린다
+
+
+def ai_track(video, ffmpeg):
+    """AI 영상 릴스의 게시 기록용 정보(성과표가 형식 'ai' 로 따로 비교한다). 소리는 영상 안에 있어 출처 댓글이 필요 없다."""
+    seconds = None
+    try:
+        probe = subprocess.run([ffmpeg.replace("ffmpeg", "ffprobe"), "-v", "error", "-show_entries", "format=duration",
+                                "-of", "csv=p=0", str(video)], capture_output=True, text=True, timeout=60)
+        seconds = round(float(probe.stdout.strip()), 1)
+    except (OSError, ValueError, subprocess.TimeoutExpired):
+        pass
+    return {"title": "AI 영상(자체 음악·목소리)", "artist": "EDIT H", "license": "CC0", "credit_in_video": True,
+            "style": "ai", "seconds": seconds, "hook": True}
+
+
 def build_reel(key, folder, ffmpeg):
-    """make_reel.py 로 folder/reel.mp4 를 만든다. (영상 경로, 곡) — 쓸 곡이 없으면 (None, None)."""
+    """make_reel.py 로 folder/reel.mp4 를 만든다. (영상 경로, 곡) — 쓸 곡이 없으면 (None, None).
+    folder/reel_ai.mp4(AI 영상 릴스)가 있으면 만들지 않고 그것을 쓴다."""
+    ai = folder / AI_REEL
+    if ai.exists():
+        track = ai_track(ai, ffmpeg)
+        print(f"  AI 영상 릴스 {ai.stat().st_size // 1024}KB · {track['seconds']}초")
+        return ai, track
     out = folder / "reel.mp4"
     proc = subprocess.run([sys.executable, str(AUTOMATION / "make_reel.py"), key, "--out", str(out), "--ffmpeg", ffmpeg],
                           capture_output=True, text=True)
@@ -330,8 +353,9 @@ def post_reel(g, uid, key, folder, cfg, dry, ffmpeg, site_url):
     print(f"  영상 공개 주소 {url}")
     feed = reel_to_feed(cfg, key)
     track["feed"] = feed
-    cid = g.call("POST", f"{uid}/media", media_type="REELS", video_url=url, caption=reel_caption(folder, track),
-                 share_to_feed="true" if feed else "false", thumb_offset="800")["id"]
+    params = dict(media_type="REELS", video_url=url, caption=reel_caption(folder, track),
+                  share_to_feed="true" if feed else "false", thumb_offset="800")
+    cid = create_with_ai_label(g, uid, params, track) if track.get("style") == "ai" else g.call("POST", f"{uid}/media", **params)["id"]
     g.wait_ready(cid, "릴스", timeout=900)
     media_id = publish(g, uid, cid, "릴스")
     if track.get("license", "").upper() != "CC0" and not track.get("credit_in_video"):
@@ -373,6 +397,32 @@ def story_images(folder, key, site_url):
     hook = (folder / "reel_frames" / "r1_hook.jpg").exists() and not frames[0].stem.endswith(("_cover", "_hook"))
     return ([f"{site_url}/instagram/{key}/reel_frames/r1_hook.jpg"] if hook else []) + \
         [f"{site_url}/instagram/{key}/story/{f.name}" for f in frames]
+
+
+def create_with_ai_label(g, uid, params, info):
+    """AI 영상 컨테이너 — 인스타 'AI 정보' 라벨(is_ai_generated, 2026-06-22 Content Publishing API)을 붙여 만든다.
+    11/01 운영자: '영상 안 AI 표시는 빼 줘, 인스타에 올릴 때 표시하니까'. 이 계정 API 가 라벨 값을 안 받으면 라벨 없이 다시 만들고
+    info['ai_label']=False 로 남긴다(캡션의 'AI로 만들었어요' 한 줄이 그때도 밝힌다)."""
+    try:
+        cid = g.call("POST", f"{uid}/media", is_ai_generated="true", **params)["id"]
+        info["ai_label"] = True
+        return cid
+    except IGError as e:
+        if "is_ai_generated" not in str(e) and "nvalid parameter" not in str(e) and "(code 100)" not in str(e):
+            raise
+        print(f"  ⚠ AI 라벨 값을 받지 않음 — 라벨 없이 다시 만듦: {e}")
+        info["ai_label"] = False
+        return g.call("POST", f"{uid}/media", **params)["id"]
+
+
+def post_story_video(g, uid, url, dry):
+    """AI 영상 릴스를 스토리로도(2026-11-01 운영자 '스토리에도 올리고') — 영상 스토리 한 장. 게시한 id(dry-run 이면 None)."""
+    cid = create_with_ai_label(g, uid, dict(media_type="STORIES", video_url=url), {})
+    g.wait_ready(cid, "스토리 영상", timeout=900)
+    if dry:
+        print("  (dry-run) 스토리 영상 컨테이너 준비 완료 — 게시하지 않음")
+        return None
+    return publish(g, uid, cid, "스토리 영상")
 
 
 def post_story(g, uid, key, folder, site_url, dry, done=()):
@@ -646,7 +696,7 @@ def main():
             if media_id:
                 log["reel"] = {"id": media_id, "at": now_kst().isoformat(timespec="seconds"), "track": track["title"],
                                "style": track.get("style"), "seconds": track.get("seconds"), "feed": track.get("feed"),
-                               "hook": track.get("hook")}
+                               "hook": track.get("hook"), **({"ai_label": track["ai_label"]} if "ai_label" in track else {})}
                 save_log(key, log)
                 try:
                     log["reel"]["permalink"] = g.call("GET", media_id, fields="permalink").get("permalink")
@@ -684,6 +734,43 @@ def main():
             failures.append(f"릴스 메일: {e}")
         finally:
             (folder / "reel.mp4").unlink(missing_ok=True)
+
+    # AI 영상 릴스(2026-11-01 운영자 '바로 올려줘 … 스토리에도'): 그날 릴스가 이미 다른 영상으로 올라간 호(시험판 10/31)는
+    # 한 번 더 올려 log['reel_ai'] 에, 그리고 AI 영상을 스토리 영상으로 한 장(log['story_ai']). 둘 다 한 번만.
+    ai = folder / AI_REEL
+    if args.only != "carousel" and ai.exists() and not rewind:
+        if log.get("reel") and log["reel"].get("style") != "ai" and not log.get("reel_ai"):
+            try:
+                print("AI 영상 릴스 게시 중…(그날 릴스는 이미 있음)")
+                media_id, track = post_reel(g, uid, key, folder, cfg, args.dry_run, args.ffmpeg, site_url)
+                if media_id:
+                    log["reel_ai"] = {"id": media_id, "at": now_kst().isoformat(timespec="seconds"), "style": "ai",
+                                      "seconds": track.get("seconds"), "ai_label": track.get("ai_label")}
+                    save_log(key, log)
+                    try:
+                        log["reel_ai"]["permalink"] = g.call("GET", media_id, fields="permalink").get("permalink")
+                        save_log(key, log)
+                    except IGError:
+                        pass
+                    print(f"  ✓ AI 영상 릴스 게시 {log['reel_ai'].get('permalink') or media_id}")
+            except IGError as e:
+                failures.append(f"AI 릴스: {e}")
+        ai_posted = (log.get("reel") or {}).get("style") == "ai" or log.get("reel_ai")
+        if ai_posted and not log.get("story_ai") and not args.dry_run:
+            try:
+                print("AI 영상 스토리 게시 중…")
+                url = f"{site_url}/instagram/{key}/{AI_REEL}"
+                wait_public([url], timeout=900, kind="video")
+                sid = post_story_video(g, uid, url, args.dry_run)
+                if sid:
+                    log["story_ai"] = {"id": sid, "at": now_kst().isoformat(timespec="seconds")}
+                    log.pop("story_ai_error", None)
+                    save_log(key, log)
+                    print("  ✓ AI 영상 스토리")
+            except IGError as e:   # 스토리는 실패해도 게시 작업을 실패로 치지 않는다(기록만, 다음 실행이 다시 시도)
+                log["story_ai_error"] = str(e)[:200]
+                save_log(key, log)
+                print(f"  ⚠ AI 영상 스토리 실패(게시는 계속): {e}")
 
     if not args.dry_run:
         prune(int(cfg.get("keep_jpeg_days", 14)))
