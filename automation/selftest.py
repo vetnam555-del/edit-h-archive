@@ -1720,6 +1720,17 @@ def t_ai_reel():
            and qa.check_numbers([("t", "-3.0%")], signed), "등락 부호가 뒤집힌 숫자가 통과했다")
     expect(not qa.check_numbers([("t", "SK하이닉스 -7.08% · 삼성전자 -3.02% · 생산 +3.0% · 2026-11-01")], signed),
            "content 와 같은 방향의 등락 숫자를 막았다")
+    # 목소리 숫자 — 대사 원고(한글 읽기)는 content 와, 들린 숫자는 대사와 같은 값이어야 한다(11/01 Codex: 자막이 맞아도 '일조 칠천억'을 말하면 막는다)
+    script = qa.spoken_numbers("외국인이 하루 만에 일조 육천억 원 넘게 팔았대! 프로그램 매도 오 분간 멈춥니다. 삼 점 사팔 퍼센트")
+    expect(script == [(1.6e12, "원"), (5.0, "분"), (3.48, "%")], f"한글 숫자 읽기가 틀린다: {script}")
+    expect(not qa.spoken_numbers("사이드카가 하루 만에 울렸대, 삼성 이 회사, 내일 아침 여덟 시 반"), "숫자가 아닌 말을 숫자로 읽었다")
+    cv = qa.content_values("외국인이 1조6000억원 넘게 팔았고 5분간 멈췄다, 3.48% 내린")
+    expect(all(any(qa._num_match(x, c) for c in cv) for x in script), "content 와 같은 대사 숫자를 막았다")
+    expect(not any(qa._num_match((1.7e12, "원"), c) for c in cv), "content 에 없는 대사 금액이 통과했다")
+    _, bad = qa.check_spoken(script, "외국인이 하루 만에 1조 7천억 원 넘게 팔았대 프로그램 매도 5분간 멈춥니다 3.48%")
+    expect(any("1.7e+12" in b for b in bad) and any("1.6e+12" in b for b in bad), f"목소리가 틀린 금액을 말해도 통과했다: {bad}")
+    _, ok = qa.check_spoken(script, "외국인이 하루 만에 1조 6천억 원 넘게 팔았대 프로그램 매도 5분간 멈춥니다 3.48% 내일 아침 8시 반에")
+    expect(not ok, f"맞게 말한 숫자를 막았다: {ok}")
     # 만화 10장 순서 — 사전순이면 c10(끝 장)이 두 번째로 올라간다
     with tempfile.TemporaryDirectory() as tmp:
         folder = Path(tmp)

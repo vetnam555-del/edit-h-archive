@@ -5,6 +5,7 @@
 검사(하나라도 ✗ 면 올리지 않는다):
  1. 숫자 대조 — 화면 글자·말풍선·설명·캡션에 나온 숫자가 그날 content/{날짜}.json 에 그대로 있나(확인된 숫자만).
  2. 대사 — 완성본을 음성 인식(faster-whisper small)으로 받아 적어, 대사 줄마다 낱말이 충분히 들리나.
+    대사 원고의 숫자(한글 읽기)는 content 와, 들린 숫자는 대사 숫자와 같은 값이어야 한다(11/01 Codex — 목소리가 틀린 금액을 말하면 막는다).
  3. 소리 — 통합 음량 -14±1.5 LUFS, 음성 트랙이 있다, 중간에 끊기는 곳이 없다(11/01 운영자 "소리가 중간중간 끊긴다").
  4. 영상 — 1080×1920, 길이 8~30초.
  5. 캡션 — reel_ai_caption.txt·comic_caption.txt 에 'AI로 만들' 한 줄, 해시태그 5개 이하, 같은 숫자 대조.
@@ -123,6 +124,92 @@ def dropouts(video, head=0.3, tail=0.8):
     return merged
 
 
+# ── 말로 읽는 숫자(대사) — 11/01 Codex: 자막이 맞아도 목소리가 '일조 칠천억'이라 말하면 막아야 한다 ──
+_SINO = {"영": 0, "공": 0, "일": 1, "이": 2, "삼": 3, "사": 4, "오": 5, "육": 6, "칠": 7, "팔": 8, "구": 9}
+_SMALL = {"십": 10, "백": 100, "천": 1000}
+_BIG = {"만": 10 ** 4, "억": 10 ** 8, "조": 10 ** 12}
+_PIECE = r"\d[\d,]*(?:\.\d+)?|[영공일이삼사오육칠팔구십백천만억조점]"
+SPOKEN = re.compile(rf"(?<![가-힣\d.])((?:{_PIECE})(?:\s?(?:{_PIECE}))*)\s?(퍼센트|%|거래일|원|분|명|건|개|배|호|위|년|월|일|시|초)?")
+UNIT_SAME = {"퍼센트": "%"}
+# 브랜드 고정 말(발송 시각 '여덟 시 반' = 08:30) — content 숫자가 아니어도 된다
+BRAND_SPOKEN = {(8.0, "시"), (8.0, ""), (30.0, "분"), (30.0, "")}
+
+
+def korean_number(run):
+    """'일조 육천억'·'1조 6천억'·'삼 점 사팔'·'십일'·'5599.42' → 숫자. 읽을 수 없으면 None."""
+    total, section, cur, frac = 0.0, 0.0, None, None
+    for tok in re.findall(_PIECE, run):
+        if tok[0].isdigit():
+            cur, frac = float(tok.replace(",", "")), None
+        elif tok == "점":
+            frac = ""
+        elif tok in _SINO:
+            if frac is not None:
+                frac += str(_SINO[tok])
+            else:
+                cur = float(_SINO[tok])
+        elif tok in _SMALL:
+            section += (cur if cur is not None else 1) * _SMALL[tok]
+            cur, frac = None, None
+        elif tok in _BIG:
+            section += cur or 0
+            total += (section or 1) * _BIG[tok]
+            section, cur, frac = 0.0, None, None
+        if frac:
+            cur = float(int(cur or 0)) + float("0." + frac)
+    value = total + section + (cur or 0)
+    return value if (total or section or cur is not None) else None
+
+
+def spoken_numbers(text):
+    """대사·받아쓴 글에서 숫자 → [(값, 단위)]. 한글 수사만 있는 덩어리는 단위가 붙을 때만 숫자로 본다('사이드카'·'하루 만에'는 숫자가 아니다)."""
+    out = []
+    for m in SPOKEN.finditer(text):
+        run, unit = m.group(1).strip(), m.group(2) or ""
+        if not re.search(r"\d", run) and not unit:
+            continue
+        if re.fullmatch(r"[점\s]+", run):
+            continue
+        v = korean_number(run)
+        if v is not None:
+            out.append((round(v, 6), UNIT_SAME.get(unit, unit)))
+    return out
+
+
+def _num_match(a, b):
+    (va, ua), (vb, ub) = a, b
+    if ua and ub and ua != ub:
+        return False
+    if abs(va - vb) <= 1e-6 * max(1.0, abs(vb)):
+        return True
+    # 맨숫자 5599 ↔ 5599.42 (% 수와는 아니다)
+    return float(va).is_integer() and int(va) == int(vb) and "%" not in (ua, ub) and not float(vb).is_integer()
+
+
+def content_values(corpus):
+    """content 의 숫자 → [(값, 단위)] — 단위는 숫자 뒤 마지막 단위(1조6000억원 → 원)."""
+    out = []
+    for t in numbers(corpus, keep_single=True):
+        body = t.lstrip("+-")
+        unit = re.sub(r"^[\d.,조억만천]+", "", body)
+        v = korean_number(body[: len(body) - len(unit)] if unit else body)
+        if v is not None:
+            out.append((round(v, 6), unit))
+    return out
+
+
+def check_spoken(script_nums, said):
+    """들린 숫자 ↔ 대사 숫자 — 목소리가 다른 금액을 말했거나(들린 숫자가 대사에 없음) 숫자를 빼먹었으면 실패. → (들린 숫자, 실패 목록)"""
+    heard_nums, bad = spoken_numbers(said), []
+    for h in heard_nums:
+        if h not in BRAND_SPOKEN and not any(_num_match(h, x) for x in script_nums):
+            bad.append(f"목소리 숫자 — 들린 '{h[0]:g}{h[1]}' 가 대사에 없다(받아쓰기: {said.strip()[:60]})")
+    for x in script_nums:
+        if x not in BRAND_SPOKEN and not any(_num_match(h, x) for h in heard_nums):
+            bad.append(f"목소리 숫자 — 대사의 '{x[0]:g}{x[1]}' 가 들리지 않는다(받아쓰기: {said.strip()[:60]})")
+    return heard_nums, bad
+
+
 def hangul(s):
     return re.sub(r"[^가-힣]", "", s)
 
@@ -162,6 +249,14 @@ def main():
                 fails.append(f"{name}: 해시태그 {len(tags)}개(5개 이하)")
     bad = check_numbers(texts, corpus)
     fails += [f"content 에 없는 숫자 — {b}" for b in bad]
+    # 대사 원고의 숫자(한글 읽기)도 content 와 같은 값이어야 한다
+    cvals = content_values(corpus)
+    script_nums = []
+    for vline in ep.get("voices", []):
+        for sn in spoken_numbers(vline.get("text", "")):
+            script_nums.append(sn)
+            if sn not in BRAND_SPOKEN and not any(_num_match(sn, c) for c in cvals):
+                fails.append(f"content 에 없는 숫자 — 대사 '{vline.get('text', '')[:20]}…': {sn[0]:g}{sn[1]}")
     if any("AI로 만든 영상" in plain(c["html"]) for c in ep.get("captions", [])):
         fails.append("화면 글자에 'AI로 만든 영상' 표시가 있다(운영자 11/01: 빼기)")
 
@@ -195,7 +290,11 @@ def main():
         if not a.no_asr and ep.get("voices"):
             from faster_whisper import WhisperModel
             segs, _ = WhisperModel("small", device="cpu", compute_type="int8").transcribe(str(video), language="ko", beam_size=5)
-            heard = hangul("".join(s.text for s in segs))
+            said = " ".join(s.text for s in segs)
+            heard = hangul(said)
+            heard_nums, bad_nums = check_spoken(script_nums, said)
+            fails += bad_nums
+            notes.append(f"들린 숫자 {', '.join(f'{v:g}{u}' for v, u in heard_nums) or '없음'}")
             for vline in ep["voices"]:
                 want = hangul(re.sub(r"[일이삼사오육칠팔구십백천만억조점퍼센트]+(?=\s|$|[,.!?…])", "", vline.get("text", "")))
                 if len(want) < 4:
