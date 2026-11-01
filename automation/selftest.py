@@ -1706,7 +1706,77 @@ def t_webtoon():
     expect(comic.from_cards(old, day) == [] and "take" not in old["panels"][0], "card 없는 지난 만화 설정이 바뀐다")
     expect("<span class='hl'>" in comic._md("==28%== 폭락") and "<br>" in comic._md("가\n나") and "&lt;" in comic._md("<b>"),
            "카드 글 → 말풍선 HTML 바꾸기가 틀린다")
-    return f"{day} 카드 {len(picked)}장 → 컷·요약 · 지난 만화 설정 그대로"
+    # 웹툰 3판(두 컷 한 장, 2026-11-01 운영자 '이게 최선이야?'): 위 컷 → 내레이션 → 본문 → 말풍선 → 아래 컷 순서로 한 세로 칸(.duo.fit)에,
+    # 숫자 스티커·말풍선 쪽·꼬리 자리는 설정대로(그림을 보고 인물을 덮지 않는 쪽으로 고른다)
+    img = ROOT / "assets" / "mascot" / "h-hello.png"
+    p = {"bubble": "인텔 하루<br><span class='hl'>28.58%</span> 폭락", "body": "본문", "take": "그래서", "number": "28.58%", "tag": "반도체", "src": "가·나"}
+    h = comic.duo_slide({}, 2, dict(p), img, img)
+    order = [h.find(k) for k in ("class='duo fit'", "class='fr'", "class='num'>1<", "class='stk'>28.58%<", "class='narr'",
+                                   "class='body3'", "class='say l'", "class='fr b'", "class='src'")]
+    expect(-1 not in order and order == sorted(order), f"두 컷 장의 칸 순서가 틀리다: {order}")
+    expect("인텔 하루 <span class='hl'>28.58%</span> 폭락" in h, "내레이션 상자에 카드 제목이 한 줄로 들어가지 않는다")
+    h2 = comic.duo_slide({}, 3, {**p, "say_side": "right", "tail": "out", "stk_side": "left"}, img, img)
+    h3 = comic.duo_slide({}, 3, {**p, "stk_side": "none"}, img, img)
+    expect("class='say r out'" in h2 and "class='stk l'" in h2 and "class='stk" not in h3, "말풍선 쪽·꼬리·스티커 자리 설정이 안 먹는다")
+    cov = comic.duo_cover({"title": "제목"}, [{"tag": "반도체", "number": "28.58%"}, {"tag": "BYD", "number": "2만137대"}], img, "50% 50%")
+    expect("class='cov fit'" in cov and "<b>2</b>BYD<i>2만137대</i>" in cov and "넘겨서 2가지 보기" in cov, "두 컷 웹툰 표지 목차가 틀리다")
+    return f"{day} 카드 {len(picked)}장 → 컷·요약 · 지난 만화 설정 그대로 · 두 컷 장 칸 순서"
+
+
+def t_webtoon_render():
+    """웹툰 3판 두 컷 장이 카드 글자 한도(제목 26·본문 80·'그래서' 60·숫자 9)를 꽉 채워도 넘치지 않고(두 컷이 같이 줄어든다),
+    한도를 크게 넘긴 글은 렌더러가 넘침으로 잡아 실패한다(반쯤 잘린 장을 올리지 않게) — 실제로 렌더링(node·Playwright)."""
+    sys.path.insert(0, str(AUTOMATION / "pilots" / "ai_reel"))
+    import comic
+    from edith.content import CARD_LIMITS as L
+    from edith.fonts import font_css
+    img = ROOT / "assets" / "mascot" / "h-hello.png"
+
+    def fill(n, words="반도체 지수 하락 투자자 비중부터 점검 월요일 시장 금리 환율 수입차 점유율"):   # 띄어쓰기 있는 실제 같은 글
+        out = ""
+        while len(out) < n:
+            out += (" " if out else "") + words.split()[len(out) % len(words.split())]
+        return out[:n].rstrip()
+
+    head = fill(L["headline"] - 8) + " ==1,234억원=="   # 표시 글자 수 ≈ 한도
+    worst = {"bubble": comic._md(head), "body": comic._md(fill(L["body"] - 6) + " 12.3%"),
+             "take": comic._md(fill(L["takeaway"])), "number": "9" * L["number"], "tag": "반도체 급락", "src": "가·나·다 10.31"}
+    fonts = font_css()
+    with tempfile.TemporaryDirectory() as tmp:
+        comic.shot(comic.page(fonts, comic.duo_slide({}, 2, worst, img, img)), Path(tmp) / "worst.jpg")
+        expect((Path(tmp) / "worst.jpg").stat().st_size > 20000, "한도를 채운 두 컷 장이 비어 있다")
+        try:
+            comic.shot(comic.page(fonts, comic.duo_slide({}, 2, {**worst, "body": "라" * 600}, img, img)), Path(tmp) / "over.jpg")
+            caught = False
+        except SystemExit as e:
+            caught = "넘쳤" in str(e)
+        expect(caught, "한도를 크게 넘긴 두 컷 장을 넘침으로 잡지 못한다")
+        # 한 묶음 전체(표지·두 컷·요약·끝 장) — card 없는 컷이 끼어도 컷마다 제 카드 글이 들어가고, 그림이 없으면 아무것도 지우기 전에 멈춘다
+        from edith import content as content_mod
+        day = daily_issues(1)[0]
+        issues = content_mod.load(day)["card_issues"]
+        ep = {"date": day, "comic": {"series": "오늘 아침 5가지", "layout": "duo", "title": "제목<br>둘째 줄", "cover": {"img": str(img)},
+                                     "summary": True, "sources": "장마다 표시", "end": {"title": "끝", "sub": "끝"},
+                                     "panels": [{"card": 2, "img_a": str(img), "img_b": str(img)},
+                                                {"bubble": "직접 쓴 제목", "body": "본문", "take": "그래서", "img_a": str(img), "img_b": str(img)},
+                                                {"card": 1, "img_a": str(img), "img_b": str(img), "stk_side": "none"}]}}
+        out = Path(tmp) / "set"
+        n = comic.build(json.loads(json.dumps(ep)), None, out, alt_path=Path(tmp) / "alt.json")
+        alts = json.loads((Path(tmp) / "alt.json").read_text(encoding="utf-8"))
+        expect(n == 6 and sorted(f.name for f in out.glob("c*.jpg")) == [f"c{i}.jpg" for i in range(1, 7)] and sorted(alts) == sorted(f"c{i}.jpg" for i in range(1, 7)),
+               f"두 컷 웹툰 묶음이 표지·컷 3·요약·끝 장 6장이 아니다: {n}")
+        head = lambda k: comic.plain(comic._md(issues[k]["headline"]))  # noqa: E731
+        expect(head(1) in alts["c2.jpg"] and "직접 쓴 제목" in alts["c3.jpg"] and head(0) in alts["c4.jpg"],
+               "card 없는 컷이 끼면 뒤 컷의 카드 글이 어긋난다")
+        bad = json.loads(json.dumps(ep))
+        bad["comic"]["panels"][1]["img_b"] = str(Path(tmp) / "없는 그림.png")
+        try:
+            comic.build(bad, None, out, alt_path=Path(tmp) / "alt.json")
+            stopped = False
+        except SystemExit as e:
+            stopped = "그림이 없어요" in str(e)
+        expect(stopped and len(list(out.glob("c*.jpg"))) == 6, "그림이 없는데 멈추지 않거나 지난 장을 지웠다")
+    return "한도 꽉 채움 통과 · 넘침 잡음 · 묶음 6장(카드 없는 컷 섞임) · 그림 없으면 멈춤"
 
 
 def t_mascot():
@@ -2309,6 +2379,7 @@ def main():
     check("경쟁 매체 웹(토큰 없이·robots 지킴)", t_competitors_web)
     if not args.quick:
         check("딥다이브 카드 글자 한도 렌더링(넘침 없음)", t_dive_render)
+        check("웹툰 두 컷 장 글자 한도 렌더링(넘침 없음·넘침 잡음)", t_webtoon_render)
         rebuild(daily_issues(args.issues), args.strict)
     if NOTES:
         print("\n달라진 글(의도한 변경인지 확인):")
