@@ -38,6 +38,18 @@ CARD_LIMITS = {
     "brief_title": 32,       # 형식 2: 짧게 읽는 소식 제목(한 문장)
     "brief_body": 170,       # 형식 2: 짧게 읽는 소식 본문(2~3문장, 숫자 1개 이상 — 2026-10-16~, 예전 한 줄 뉴스는 1~2문장 100자)
     "todo": 40,              # 오늘 챙길 것 한 줄(동사로 끝나는 할 일, 마감·날짜가 있으면 넣는다)
+    "ask": 16,               # H PICK 02·03 장 말풍선 질문(선택, 2026-11-02~ — 질문 사슬 '얼마나 팔렸나?' → '왜 잘 팔리나?')
+    # 딥다이브 카드(cards.dive, config.instagram.dive_card_from~ 연재 날) — 머니그라피 딥다이브 문법(2026-11-01 운영자)
+    "dive_by": 14,           # 표지 이름표('H가 숫자로 읽어 주는')
+    "dive_label": 8,         # 질문 장 머리표(없으면 Q1·Q2… — 비유 장은 '비유로 보면')
+    "dive_q": 20,            # 질문 장 제목(질문 하나, 두 줄 안)
+    "dive_say": 64,          # H 의 해석 한두 줄(쉬운 말 — '2023년 말의 1/3 수준이에요')
+    "dive_box_title": 14,    # 개념 상자 제목
+    "dive_box_text": 56,     # 개념 상자 풀이
+    "dive_stat_value": 9,    # 큰 숫자 장의 숫자
+    "dive_stat_label": 22,   # 큰 숫자 장의 설명
+    "dive_point": 40,        # 요점 장의 요점(2~3개)
+    "dive_verdict": 64,      # H의 판정(뉴스레터 노트 마지막 문장과 같은 생각)
 }
 CARD_ISSUES = {1: 6, 2: 5}   # 형식별 카드 이슈 수(형식 2 는 5가지 모두 카드로)
 ITEMS = {1: 9, 2: 4}         # 형식별 H PICK(빅이슈) 뒤 아이템 수
@@ -144,6 +156,8 @@ def _card_issues(data, where):
         seen.add(no)
         for key in ("headline", "body", "takeaway"):
             _need(ci, key, w)
+        if ci.get("ask") is not None:
+            _ask(ci["ask"], f"{w}.ask")
         cmp = ci.get("compare")
         if cmp:
             for side in ("from", "to"):
@@ -191,6 +205,124 @@ def _chart(ch, where):
     hi = ch.get("highlight")
     if hi is not None and (isinstance(hi, bool) or not isinstance(hi, int) or not 0 <= hi < len(pts)):
         raise ContentError(f"{where}: highlight 는 0~{len(pts) - 1} 사이의 칸 번호입니다")
+
+
+def _ask(text, where):
+    """질문 사슬 말풍선(선택, 2026-11-02~) — H PICK 02 장(cards.issues 1번)·03 장(cards.deep) 말풍선을 질문으로. 한 줄, 물음표로 끝난다."""
+    t = plain(str(text or "")).strip()
+    if not t or "\n" in str(text) or not t.endswith("?"):
+        raise ContentError(f"{where}: ask 는 물음표로 끝나는 한 줄 질문이어야 합니다(예 '왜 잘 팔릴까?')")
+
+
+# 딥다이브 카드(cards.dive) — 2026-11-01 운영자 '딥다이브 카드 지금 바로 만들어줘'. 머니그라피 인스타 딥다이브 캐러셀 문법
+# (reviews/2026-11-01-moneygraphy.md '인스타 화면' A): 질문 장 3~5개(장마다 그림 하나 + H 의 해석 + 출처) + H의 판정.
+# 표지·H PICK·판정·5가지 한눈에·마무리 5장을 더해 10장(인스타 캐러셀 API 한도) 안.
+DIVE_STEPS = (3, 5)
+DIVE_VISUALS = ("table", "line", "chart", "stat", "points")
+DIVE_POSES = ("hello", "point", "newspaper", "surprised", "thinking", "celebrate", "checklist", "calendar", "coffee")
+TABLE_COLS, TABLE_ROWS, TABLE_HEAD, TABLE_CELL = (2, 4), (2, 4), 8, 10   # 4줄 × 4칸 + 개념 상자 + 해석이 4:5 한 장에 드는 한도(자동 점검이 렌더링으로 본다)
+LINE_POINTS, LINE_LABEL, LINE_TEXT, LINE_UNIT = (2, 7), 6, 9, 4   # 점 2개면 '그때 → 지금' 두 값(사이는 점선 — 재지 않은 구간)
+
+
+def _table(tb, where):
+    """표 하나 — head(열 이름 2~4개, 첫 열은 빈 칸도 된다) + rows(2~4줄, 줄마다 열 수 같게). 칸은 짧게(숫자·기간). highlight = 강조할 줄 번호(선택)."""
+    if not isinstance(tb, dict):
+        raise ContentError(f"{where}: 표는 객체여야 합니다")
+    head, rows = tb.get("head"), tb.get("rows")
+    if not isinstance(head, list) or not TABLE_COLS[0] <= len(head) <= TABLE_COLS[1]:
+        raise ContentError(f"{where}: head 는 열 이름 {TABLE_COLS[0]}~{TABLE_COLS[1]}개 목록이어야 합니다")
+    for j, h in enumerate(head, 1):
+        if not isinstance(h, str) or len(plain(h)) > TABLE_HEAD:
+            raise ContentError(f"{where}.head[{j}]: 열 이름은 {TABLE_HEAD}자 이하 글자(첫 열은 빈 칸 \"\" 도 된다)")
+    if not isinstance(rows, list) or not TABLE_ROWS[0] <= len(rows) <= TABLE_ROWS[1]:
+        raise ContentError(f"{where}: rows 는 {TABLE_ROWS[0]}~{TABLE_ROWS[1]}줄이어야 합니다")
+    for i, row in enumerate(rows, 1):
+        if not isinstance(row, list) or len(row) != len(head):
+            raise ContentError(f"{where}.rows[{i}]: 칸 수가 head({len(head)}개)와 같아야 합니다")
+        for j, cell in enumerate(row, 1):
+            if isinstance(cell, bool) or not isinstance(cell, (str, int, float)) or not 1 <= len(plain(str(cell))) <= TABLE_CELL:
+                raise ContentError(f"{where}.rows[{i}][{j}]: 칸은 1~{TABLE_CELL}자(숫자·기간을 짧게 — 예 2만137대)")
+    hi = tb.get("highlight")
+    if hi is not None and (isinstance(hi, bool) or not isinstance(hi, int) or not 0 <= hi < len(rows)):
+        raise ContentError(f"{where}: highlight 는 0~{len(rows) - 1} 사이의 줄 번호입니다")
+
+
+def _line(ln, where):
+    """선 그래프 — 같은 잣대의 확인된 숫자 2~7개(시간 순서). 꼭대기·마지막 값에 이름표가 자동으로 붙는다(머니그라피 '136,000원 → 39,400원').
+    두 점이면 사이를 점선으로 그린다 — 그 사이 값은 재지 않았으니 지어내지 않는다."""
+    if not isinstance(ln, dict):
+        raise ContentError(f"{where}: 선 그래프는 객체여야 합니다")
+    pts = ln.get("points")
+    if not isinstance(pts, list) or not LINE_POINTS[0] <= len(pts) <= LINE_POINTS[1]:
+        raise ContentError(f"{where}: points 는 {LINE_POINTS[0]}~{LINE_POINTS[1]}개({{label, value}}, 시간 순서)여야 합니다")
+    for i, pt in enumerate(pts, 1):
+        v = pt.get("value") if isinstance(pt, dict) else None
+        if isinstance(v, bool) or not isinstance(v, (int, float)):
+            raise ContentError(f"{where}.points[{i}]: value 는 숫자여야 합니다")
+        if not 1 <= len(str(pt.get("label") or "").strip()) <= LINE_LABEL:
+            raise ContentError(f"{where}.points[{i}]: label 은 1~{LINE_LABEL}자(예 2023·3분기·9월)")
+        if pt.get("text") is not None and not 1 <= len(str(pt["text"])) <= LINE_TEXT:
+            raise ContentError(f"{where}.points[{i}]: text(이름표 숫자)는 1~{LINE_TEXT}자")
+    if ln.get("unit") is not None and len(str(ln["unit"])) > LINE_UNIT:
+        raise ContentError(f"{where}: unit 은 {LINE_UNIT}자 이하")
+    if ln.get("title") is not None and not 1 <= len(plain(str(ln["title"]))) <= CHART_TITLE:
+        raise ContentError(f"{where}: title 은 1~{CHART_TITLE}자")
+
+
+def _dive(data, where):
+    """딥다이브 카드 원고 검사 — 형식 2 정규 연재 날에만, 질문 장 3~5개(장마다 그림 하나·해석·출처) + H의 판정."""
+    dv = (data.get("cards") or {}).get("dive")
+    if dv is None:
+        return
+    w = f"{where} cards.dive"
+    if data["format"] != 2 or data.get("rewind"):
+        raise ContentError(f"{w}: 딥다이브 카드는 형식 2 정규 호에서만 씁니다")
+    if not data.get("series"):
+        raise ContentError(f"{w}: 딥다이브 카드는 연재 날(series — 수요일 「H의 장부」)에만 씁니다. "
+                           "다른 날에 쓰면 E4(연재 편 vs 그 밖의 호) 비교가 섞인다 — E10(단일 주제 캐러셀) 전까지")
+    if not isinstance(dv, dict):
+        raise ContentError(f"{w}: {{\"steps\": [...], \"verdict\": {{...}}}} 꼴이어야 합니다")
+    steps = dv.get("steps")
+    if not isinstance(steps, list) or not DIVE_STEPS[0] <= len(steps) <= DIVE_STEPS[1]:
+        raise ContentError(f"{w}: steps(질문 장)는 {DIVE_STEPS[0]}~{DIVE_STEPS[1]}개 — 표지·H PICK·판정·5가지 한눈에·마무리를 더해 10장 안")
+    for i, st in enumerate(steps, 1):
+        sw = f"{w}.steps[{i}]"
+        if not isinstance(st, dict):
+            raise ContentError(f"{sw}: 객체여야 합니다")
+        _need(st, "q", sw)
+        _need(st, "say", sw)
+        kinds = [k for k in DIVE_VISUALS if st.get(k) not in (None, "", [], {})]
+        if len(kinds) != 1:
+            raise ContentError(f"{sw}: 그림은 하나만 — {'·'.join(DIVE_VISUALS)} 중 하나(지금 {'·'.join(kinds) or '없음'})")
+        kind = kinds[0]
+        if kind == "table":
+            _table(st["table"], f"{sw}.table")
+        elif kind == "line":
+            _line(st["line"], f"{sw}.line")
+        elif kind == "chart":
+            if isinstance(st["chart"], dict) and not st["chart"].get("source"):
+                st["chart"]["source"] = st.get("source")   # 막대 차트 출처 = 장 출처(두 번 쓰지 않게)
+            _chart(st["chart"], f"{sw}.chart")
+        elif kind == "stat":
+            if not isinstance(st["stat"], dict) or not st["stat"].get("value") or not st["stat"].get("label"):
+                raise ContentError(f"{sw}.stat: value·label 이 모두 필요합니다")
+        elif (not isinstance(st["points"], list) or not 2 <= len(st["points"]) <= 3
+              or not all(isinstance(x, str) and x.strip() for x in st["points"])):
+            raise ContentError(f"{sw}.points: 요점은 2~3개 문장 목록이어야 합니다")
+        if not str(st.get("source") or "").strip():
+            raise ContentError(f"{sw}: source(자료 출처)가 필요합니다 — 숫자는 서로 다른 출처 2곳에서 확인한 것만(원칙 2)")
+        box = st.get("box")
+        if box is not None and (not isinstance(box, dict) or not box.get("title") or not box.get("text")):
+            raise ContentError(f"{sw}.box: 개념 상자는 title·text 가 모두 필요합니다")
+        if st.get("pose") is not None and st["pose"] not in DIVE_POSES:
+            raise ContentError(f"{sw}: pose 는 {'·'.join(DIVE_POSES)} 중 하나")
+    verdict = dv.get("verdict")
+    if not isinstance(verdict, dict) or not str(verdict.get("text") or "").strip():
+        raise ContentError(f"{w}: verdict.text(H의 판정 한 줄)가 필요합니다")
+    if verdict.get("pose") is not None and verdict["pose"] not in DIVE_POSES:
+        raise ContentError(f"{w}.verdict: pose 는 {'·'.join(DIVE_POSES)} 중 하나")
+    if dv.get("by") is not None and not str(dv["by"]).strip():
+        raise ContentError(f"{w}: by(표지 이름표)를 비우려면 필드를 빼세요(기본 'H가 숫자로 읽어 주는')")
 
 
 def _poll(data, where):
@@ -354,6 +486,9 @@ def prepare(data, date_str):
             raise ContentError(f"{where} cards.deep: points 는 2~3개여야 합니다('왜 중요해?' 요점)")
         if deep.get("chart") is not None:
             _chart(deep["chart"], f"{where} cards.deep.chart")
+        if deep.get("ask") is not None:
+            _ask(deep["ask"], f"{where} cards.deep.ask")
+        _dive(data, where)
     _poll(data, where)
     cards.setdefault("cover", {})
     cards["cover"].setdefault("title", data["hero_title"])
@@ -387,12 +522,35 @@ def prepare(data, date_str):
         for j, m in enumerate(it.get("metrics") or [], 1):
             _len_check(m["value"], CARD_LIMITS["metric_value"], f"{w}.metrics[{j}].value", problems)
             _len_check(m["label"], CARD_LIMITS["metric_label"], f"{w}.metrics[{j}].label", problems)
+        if it.get("ask"):
+            _len_check(it["ask"], CARD_LIMITS["ask"], f"{w}.ask", problems)
     _len_check(cta["headline"], CARD_LIMITS["cta_headline"], "cards.cta.headline(없으면 question.text)", problems)
     _len_check(data["observation"], CARD_LIMITS["observation"], "observation(관찰 카드)", problems)
     if fmt == 2:
         _len_check(cards["deep"]["headline"], CARD_LIMITS["deep_headline"], "cards.deep.headline", problems)
         for i, pt in enumerate(cards["deep"]["points"], 1):
             _len_check(pt, CARD_LIMITS["deep_point"], f"cards.deep.points[{i}]", problems)
+        if cards["deep"].get("ask"):
+            _len_check(cards["deep"]["ask"], CARD_LIMITS["ask"], "cards.deep.ask", problems)
+        dv = cards.get("dive")
+        if dv:
+            if dv.get("by"):
+                _len_check(dv["by"], CARD_LIMITS["dive_by"], "cards.dive.by", problems)
+            for i, st in enumerate(dv["steps"], 1):
+                w = f"cards.dive.steps[{i}]"
+                _len_check(st["q"], CARD_LIMITS["dive_q"], f"{w}.q", problems)
+                _len_check(st["say"], CARD_LIMITS["dive_say"], f"{w}.say", problems)
+                if st.get("label"):
+                    _len_check(st["label"], CARD_LIMITS["dive_label"], f"{w}.label", problems)
+                if st.get("box"):
+                    _len_check(st["box"]["title"], CARD_LIMITS["dive_box_title"], f"{w}.box.title", problems)
+                    _len_check(st["box"]["text"], CARD_LIMITS["dive_box_text"], f"{w}.box.text", problems)
+                if st.get("stat"):
+                    _len_check(st["stat"]["value"], CARD_LIMITS["dive_stat_value"], f"{w}.stat.value", problems)
+                    _len_check(st["stat"]["label"], CARD_LIMITS["dive_stat_label"], f"{w}.stat.label", problems)
+                for j, pt in enumerate(st.get("points") or [], 1):
+                    _len_check(pt, CARD_LIMITS["dive_point"], f"{w}.points[{j}]", problems)
+            _len_check(dv["verdict"]["text"], CARD_LIMITS["dive_verdict"], "cards.dive.verdict.text", problems)
         for j, n in enumerate(big["numbers"], 1):
             _len_check(n["value"], CARD_LIMITS["metric_value"], f"big_issue.numbers[{j}].value", problems)
             _len_check(n["label"], CARD_LIMITS["metric_label"], f"big_issue.numbers[{j}].label", problems)

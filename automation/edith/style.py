@@ -61,6 +61,13 @@ def _texts(d):
                 (f"카드 {i} 그래서", it.get("takeaway"), "card")]
     deep = cards.get("deep") or {}
     out += [(f"심층 카드 요점 {i}", p, "card") for i, p in enumerate(deep.get("points") or [], 1)]
+    dive = cards.get("dive") if isinstance(cards.get("dive"), dict) else {}
+    for i, st in enumerate(dive.get("steps") or [], 1):   # 딥다이브 질문 장(2026-11-04~ 연재 날)
+        if isinstance(st, dict):
+            out += [(f"딥다이브 {i} 질문", st.get("q"), "card"), (f"딥다이브 {i} 해석", st.get("say"), "card"),
+                    (f"딥다이브 {i} 개념 상자", (st.get("box") or {}).get("text") if isinstance(st.get("box"), dict) else None, "card")]
+            out += [(f"딥다이브 {i} 요점 {j}", p, "card") for j, p in enumerate(st.get("points") or [], 1) if isinstance(p, str)]
+    out.append(("H의 판정", (dive.get("verdict") or {}).get("text") if isinstance(dive.get("verdict"), dict) else None, "card"))
     ig = d.get("instagram") or {}
     out += [("인스타 캡션", ig.get("caption"), "social"), ("인스타 질문", ig.get("ask"), "social")]
     return [(w, plain(str(t)).replace("\n", " ").strip(), k) for w, t, k in out if t]

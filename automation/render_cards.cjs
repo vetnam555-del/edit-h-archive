@@ -34,6 +34,10 @@ function loadPlaywright() {
         const first = body.firstElementChild;
         if (first && first.getBoundingClientRect().top < top + 60) return false;
       }
+      // .fitw: 옆으로 넘치면 안 되는 상자(딥다이브 표 — 칸은 줄을 바꾸지 않는다)
+      for (const box of card.querySelectorAll('.fitw')) {
+        if (box.scrollWidth > box.clientWidth + 1) return false;
+      }
       return card.scrollHeight <= card.clientHeight + 1;
     };
     // .shrink: 줄을 고르게 나눈(balance) 뒤 상자 폭을 가장 긴 줄에 맞춘다 — 말풍선 오른쪽이 비지 않게.
