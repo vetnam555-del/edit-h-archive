@@ -1,0 +1,238 @@
+{
+ "date": "2026-11-02",
+ "story": "오늘 아침 5가지 — 메인 5개(big_issue·items 4개)를 20초 한 편에. 가장 센 장면(공항 면세 환급 — 쇼핑백 탑에 동전이 쏟아짐)을 맨 앞에 — content/2026-11-02.json",
+ "hook": "질문",
+ "items": [
+  "일본 면세",
+  "수출",
+  "자이 유출",
+  "쿠팡 로켓나우",
+  "크리스마스 마케팅"
+ ],
+ "seedance": {
+  "model": "seedance_2_5",
+  "made_by": "크레딧 API(720p 20초, 140 크레딧)",
+  "job": "45432483-c396-4ea8-a938-3ac2d288a8d2",
+  "prompt": "첫 프레임부터 공항에서 쇼핑백 탑을 든 H 에게 키오스크가 동전을 돌려줌 → 항구 크레인이 칩 상자를 싣고 H 가 꼭대기에 매달림 → 아파트 창문에서 카드·열쇠가 날아가자 H 가 창을 닫고 자물쇠를 돌림 → 위에서 본 도시, 로켓 스쿠터가 과일·우유를 H 에게 배달 → 가을 거리 낙엽, 건물에 전구가 켜지고 트리가 솟고 H 가 전구에 감김 → 봉투 더미 위 H 가 손 흔들고 폴짝. 장면 사이 휙 넘김(검은 화면 없음), 사람·글자·로고 없음. 전문: brief_prompt.txt",
+  "cut": "장면 경계(scene 검출): 공항 0~3.33 · 항구 3.33~6.9 · 아파트 6.9~10.04 · 도시 10.04~13.98 · 가을 거리 13.98~17.5(전구 켜짐 15.8) · 책상 끝인사 17.5~20.04. 검은 화면 0. 꽉 찬 화면(원본 아래 띠 선명도 중앙값 0.62). AI 가 그린 엉터리 글자 지움: 공항 안내판 글자(0~3.34초, 카메라가 1.2초까지 오른쪽으로 32px 흘러 그만큼 따라가며 안내판 안 무채색 화소만 판 색으로 — 쇼핑백(갈색)은 그대로), 도시 STOP 표지판 2개(10.15~13.95초 delogo), 가을 거리 문 위 간판·입간판(13.95~17.5초 delogo)",
+  "prompt_file": "brief_prompt.txt"
+ },
+ "trim": [
+  0.0,
+  20.0
+ ],
+ "end_seconds": 2.6,
+ "captions": [
+  {
+   "start": 0.0,
+   "end": 1.3,
+   "top": 300,
+   "size": 90,
+   "html": "<div class=\"kick\">11월 2일 · 오늘 아침 5가지</div><div class=\"main\">일본 면세 <span class=\"hl\">74년</span> 만에<br>이제 공항에서<br>돌려받는다고?</div><div class=\"sub\">여행부터 크리스마스까지, 하나씩 짚어 볼게요</div>"
+  },
+  {
+   "start": 1.3,
+   "end": 3.33,
+   "size": 84,
+   "html": "<div class=\"kick\">1/5 · 여행</div><div class=\"main\">매장에선 세금까지 내고<br><span class=\"hl\">출국 때</span> 돌려받기</div><div class=\"sub\">세전 5000엔 이상부터 대상</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 부산일보·매일신문</div>"
+  },
+  {
+   "start": 3.33,
+   "end": 6.9,
+   "size": 76,
+   "html": "<div class=\"kick\">2/5 · 수출</div><div class=\"main\">10월 수출<br><span class=\"hl\">93.7%</span> 늘었다</div><div class=\"sub\">반도체만 564억 달러</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 정책브리핑·서울신문</div>"
+  },
+  {
+   "start": 6.9,
+   "end": 10.04,
+   "size": 84,
+   "html": "<div class=\"kick\">3/5 · 보안</div><div class=\"main\">자이 아파트<br>예약 시스템 <span class=\"hl\">유출</span></div><div class=\"sub\">28일 외부 접근 확인 · 범위 조사 중</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 뉴스1·한겨레</div>"
+  },
+  {
+   "start": 10.04,
+   "end": 13.98,
+   "size": 84,
+   "html": "<div class=\"kick\">4/5 · 유통</div><div class=\"main\">쿠팡 로켓나우<br><span class=\"hl\">즉시배송</span> 재도전</div><div class=\"sub\">제주 → 용인·성수동으로</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 부산일보·지디넷코리아</div>"
+  },
+  {
+   "start": 13.98,
+   "end": 17.5,
+   "size": 84,
+   "html": "<div class=\"kick\">5/5 · 트렌드</div><div class=\"main\">10월부터 켜진<br><span class=\"hl\">크리스마스</span> 트리</div><div class=\"sub\">롯데 본점 전구 2만 개</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 경향신문·동아일보</div>"
+  }
+ ],
+ "end_card": {
+  "line": "팔로우하면 내일 아침에도 알려 줄게요!",
+  "sub": "2030의 아침을 편집합니다 · 경제부터 트렌드까지",
+  "note": "숫자는 기사 2곳 이상에서 확인했어요<br>(출처는 장면마다·캡션에)"
+ },
+ "voices": [
+  {
+   "file": "stems/i1_japan.mp3",
+   "start": 0.1,
+   "tempo": 1.0,
+   "text": "일본 여행 면세, 이젠 공항에서 돌려받아요.",
+   "voice": "Ian(남성·elevenlabs)"
+  },
+  {
+   "file": "stems/i2_export.mp3",
+   "start": 3.45,
+   "tempo": 1.0,
+   "text": "10월 수출, 구십삼 점 칠 퍼센트 늘었대요.",
+   "voice": "Ian(남성·elevenlabs)",
+   "tts": "시월 수출, 구십삼 점 칠 퍼센트 늘었대요. — 받아쓰기가 '10월'로 적어 원고도 그렇게 둔다(11/01 BYD 와 같음)"
+  },
+  {
+   "file": "stems/i3_xi.mp3",
+   "start": 7.05,
+   "tempo": 1.0,
+   "text": "자이 사는 분, 비밀번호부터 바꾸세요.",
+   "voice": "Ian(남성·elevenlabs)"
+  },
+  {
+   "file": "stems/i4_coupang.mp3",
+   "start": 10.15,
+   "tempo": 1.03,
+   "text": "쿠팡 로켓나우, 성수랑 용인까지 넓혔어요.",
+   "voice": "Ian(남성·elevenlabs)"
+  },
+  {
+   "file": "stems/i5_xmas.mp3",
+   "start": 14.1,
+   "tempo": 1.06,
+   "text": "백화점 트리, 전구 이만 개로 벌써 켜졌어요.",
+   "voice": "Ian(남성·elevenlabs)"
+  },
+  {
+   "file": "stems/i_bye_follow.mp3",
+   "start": 17.65,
+   "tempo": 1.0,
+   "text": "팔로우하면 내일 아침에도 알려 줄게요!",
+   "voice": "Ian(남성·elevenlabs) — signoffs bye_follow 문구를 그날 새로 녹음"
+  }
+ ],
+ "music": [
+  {
+   "file": "../2026-10-31/stems/m1_chase.m4a",
+   "start": 0.0,
+   "offset": 1.7,
+   "dur": 4.2,
+   "fade_out": 0.3
+  },
+  {
+   "file": "../2026-10-31/stems/m1_chase.m4a",
+   "start": 4.0,
+   "offset": 1.75,
+   "dur": 4.15,
+   "fade_in": 0.2,
+   "fade_out": 0.4
+  },
+  {
+   "file": "../2026-10-31/stems/m2_morning.m4a",
+   "start": 7.6,
+   "dur": 7.3,
+   "fade_in": 0.3,
+   "fade_out": 0.4
+  },
+  {
+   "file": "../2026-10-31/stems/m2_morning.m4a",
+   "start": 14.6,
+   "dur": 8.0,
+   "lufs": -18,
+   "fade_in": 0.3,
+   "fade_out": 0.8
+  }
+ ],
+ "sfx": [
+  [
+   0,
+   999,
+   0.4
+  ]
+ ],
+ "music_note": "11/01 과 같은 곡 이음(m1_chase 1.7초부터, 0.25초 넘게 겹침). 끝인사가 17.65~20.3초라 m2_morning 5.75초 강박이 끝인사 숨(20.3초께)에 오게 14.6초에 다시 깐다",
+ "duck": {
+  "mix": 0.6
+ },
+ "source_note": "장면마다 그 소식의 매체 2곳을 작게 띄운다(11/01 Lisa 레퍼런스). 원 기사 대조: 일본 면세 '74년 만·출국 때 환급·세전 5000엔' 부산일보·매일신문, 수출 '93.7%·반도체 564억' 정책브리핑·서울신문, 자이 '28일 외부 접근·범위 조사' 뉴스1·한겨레(한겨레엔 '비밀번호'가 없어 자막에 '비밀번호 유출'은 쓰지 않고, 목소리는 카드 '그래서 나는?' 권고만), 쿠팡 '제주→용인·성수동' 부산일보·지디넷코리아, 크리스마스 '롯데 본점 전구 2만 개' 동아일보(경향신문 원문은 이 환경에서 접속 시간 초과 — 파이낸셜뉴스 기사로 2만 개 한 번 더 확인)",
+ "source_video_prep": "ffmpeg -i <원본> -filter_complex \"[0:v]format=yuv420p,split=2[base][a];[a]crop=530:160:190:255,geq=lum='if((between(Y+255\\,258\\,312)+between(Y+255\\,355\\,410))*(between(X+190\\,200+32*min(T/1.2\\,1)\\,358+32*min(T/1.2\\,1))+lt(T\\,1.1)*gte(X+190\\,693+32*min(T/1.2\\,1)))*lt(abs(cb(X/2\\,Y/2)-128)\\,12)*lt(abs(cr(X/2\\,Y/2)-128)\\,12)\\,min(lum(X\\,Y)\\,30)\\,lum(X\\,Y))':cb='if((between(2*Y+255\\,258\\,312)+between(2*Y+255\\,355\\,410))*(between(2*X+190\\,200+32*min(T/1.2\\,1)\\,358+32*min(T/1.2\\,1))+lt(T\\,1.1)*gte(2*X+190\\,693+32*min(T/1.2\\,1)))*lt(abs(cb(X\\,Y)-128)\\,12)*lt(abs(cr(X\\,Y)-128)\\,12)\\,128\\,cb(X\\,Y))':cr='if((between(2*Y+255\\,258\\,312)+between(2*Y+255\\,355\\,410))*(between(2*X+190\\,200+32*min(T/1.2\\,1)\\,358+32*min(T/1.2\\,1))+lt(T\\,1.1)*gte(2*X+190\\,693+32*min(T/1.2\\,1)))*lt(abs(cb(X\\,Y)-128)\\,12)*lt(abs(cr(X\\,Y)-128)\\,12)\\,128\\,cr(X\\,Y))'[k];[base][k]overlay=190:255:enable='lt(t\\,3.34)'[t3];[t3]delogo=x=66:y=654:w=40:h=28:enable='between(t,10.15,13.95)',delogo=x=292:y=1116:w=46:h=26:enable='between(t,10.15,13.95)',delogo=x=322:y=812:w=78:h=30:enable='between(t,13.95,17.5)',delogo=x=186:y=934:w=52:h=78:enable='between(t,13.95,17.5)',format=yuv420p[out]\" -map [out] -map 0:a -c:v libx264 -crf 14 -c:a copy → episode.py 입력",
+ "comic": {
+  "series": "오늘 아침 5가지",
+  "layout": "duo",
+  "title": "일본 면세 <span class='hl'>74년</span> 만에,<br>오늘 아침 5가지",
+  "cover": {
+   "img": "stills/cover.png",
+   "pos": "50% 40%",
+   "job": "0011e0ab-02ff-47a6-9dc9-8690872ed3ae"
+  },
+  "summary": true,
+  "panels": [
+   {
+    "card": 1,
+    "img_a": "stills/jp_a.png",
+    "pos_a": "50% 40%",
+    "img_b": "stills/jp_b.png",
+    "pos_b": "50% 30%",
+    "say_side": "left",
+    "jobs": [
+     "f2d0f19a-4b22-4c84-8c7b-9507bc6b9f68",
+     "5e8d0e36-cbcd-42d6-909a-4e7bdad176a1"
+    ]
+   },
+   {
+    "card": 2,
+    "img_a": "stills/ex_a.png",
+    "pos_a": "50% 30%",
+    "img_b": "stills/ex_b.png",
+    "pos_b": "50% 35%",
+    "say_side": "right",
+    "jobs": [
+     "0c5d16de-3748-4e45-9eec-8c3f21f0f7cd",
+     "120a6a40-bea2-4c42-bafe-dd0721058840"
+    ]
+   },
+   {
+    "card": 3,
+    "img_a": "stills/xi_a.png",
+    "pos_a": "50% 35%",
+    "img_b": "stills/xi_b.png",
+    "pos_b": "50% 35%",
+    "say_side": "left",
+    "jobs": [
+     "fc2f3178-e9c8-42fb-8790-d5f65a980fc2",
+     "8a7c4f72-5b81-430f-8adf-72ab25e14d0b"
+    ]
+   },
+   {
+    "card": 4,
+    "img_a": "stills/cp_a.png",
+    "pos_a": "50% 35%",
+    "img_b": "stills/cp_b.png",
+    "pos_b": "50% 35%",
+    "say_side": "right",
+    "jobs": [
+     "c0a52e64-8d95-489a-ac19-39df87470199",
+     "a3d70299-d416-462e-b5fd-f9fb3d641eba"
+    ]
+   },
+   {
+    "card": 5,
+    "img_a": "stills/xm_a.png",
+    "pos_a": "50% 40%",
+    "img_b": "stills/xm_b.png",
+    "pos_b": "50% 35%",
+    "say_side": "left",
+    "jobs": [
+     "75ea212b-a3f0-41a2-aed7-a0d65d3f3711",
+     "b84ae962-9a98-4082-8e2b-e66b5e4477d1"
+    ]
+   }
+  ],
+  "sources": "장마다 표시",
+  "end": {
+   "title": "오늘 아침 5가지,<br>매일 8시 30분",
+   "sub": "경제부터 트렌드까지, 오늘 소식 5가지를<br>웹툰으로 풀어 드려요"
+  }
+ },
+ "comic_note": "5가지 웹툰 3판(E20 11/02~11/08 — 같은 날 08:30 카드와 도달·저장+공유 비교, 판정 11/09). 그림 11장 gpt_image_2_5 4:3 1k(장당 0.25 크레딧), 프롬프트·구도 규칙 automation/pilots/ai_reel/webtoon_prompt.md. stills/ 는 저장소에 올리지 않는다(jobs 로 다시 받는다)."
+}
