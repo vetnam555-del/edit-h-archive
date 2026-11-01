@@ -6,7 +6,8 @@ AI 릴스와 함께 따로 올리는 두 번째 캐러셀이다(post_instagram.p
 같은 AI 영상에서 장면을 뽑으므로 크레딧이 더 들지 않는다.
 
 사용: python3 automation/pilots/ai_reel/comic.py <episode.json> <힉스필드 영상.mp4> [--out 폴더]
-     → instagram/{날짜}/comic/c1.jpg … + comic_alt.json(대체 텍스트). --out 은 미리보기용(게시 폴더를 덮어쓰지 않게)
+     → instagram/{날짜}/comic/c1.jpg … + instagram/{날짜}/comic_alt.json(대체 텍스트).
+     --out 은 미리보기용 — 컷과 대체 텍스트를 모두 그 폴더 안에 둔다(게시 파일을 덮어쓰지 않게)
 episode.json 의 "comic": {series, title, panels:[{t, pos, who, bubble, box, src?}], sources, end:{title, sub}}
   t = 원래 AI 영상에서 뽑을 시각(초), pos = 그림 자르는 기준점(CSS object-position), bubble·box 의 숫자는 content 에서만.
   src = 그 컷의 출처(5가지 웹툰처럼 컷마다 소식이 다를 때 — 없으면 sources). 2026-11-01 운영자 '캐러셀을 H 극장처럼 웹툰으로' →
@@ -110,7 +111,9 @@ def from_cards(c, date):
     return [issues[n - 1] for n in order]
 
 
-def build(ep, video, outdir):
+def build(ep, video, outdir, alt_path=None):
+    """컷 JPEG 를 outdir 에, 대체 텍스트를 alt_path(기본 outdir 옆 comic_alt.json — 게시 코드 post_comic 이 읽는 자리)에.
+    미리보기(--out)는 대체 텍스트도 미리보기 폴더 안에 둔다 — 게시용 comic_alt.json 을 덮어쓰지 않게(Codex 리뷰)."""
     c = ep["comic"]
     picked = from_cards(c, ep["date"])
     fonts = font_css()
@@ -176,7 +179,7 @@ def build(ep, video, outdir):
             "<div style='margin-top:30px;font-weight:600;font-size:30px;color:#3d3a35'>숫자·출처 전문은 프로필 링크 뉴스레터에서</div></div>")
     shot(page(fonts, body), outdir / f"c{n}.jpg")
     alts[f"c{n}.jpg"] = "H 극장 끝 장 — 매일 아침 8시 30분 EDIT H 뉴스레터, 팔로우 안내"
-    (outdir.parent / "comic_alt.json").write_text(json.dumps(alts, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    (alt_path or outdir.parent / "comic_alt.json").write_text(json.dumps(alts, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     return n
 
 
@@ -188,7 +191,7 @@ def main():
     a = ap.parse_args()
     ep = json.loads(Path(a.episode).read_text(encoding="utf-8"))
     out = Path(a.out) if a.out else ROOT / "instagram" / ep["date"] / "comic"
-    n = build(ep, Path(a.video), out)
+    n = build(ep, Path(a.video), out, alt_path=out / "comic_alt.json" if a.out else None)
     print(f"ok {out} {n}장")
 
 
