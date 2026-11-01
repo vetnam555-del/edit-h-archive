@@ -1,0 +1,164 @@
+{
+ "date": "2026-11-01",
+ "extra": 6,
+ "story": "오늘 아침 5가지 — 메인 5개(big_issue·items[0..3])를 20초 한 편에(2026-11-01 운영자) — content/2026-11-01.json",
+ "hook": "숫자 먼저",
+ "items": [
+  "BYD",
+  "반도체 급락",
+  "아이폰 듀오",
+  "서울마라톤",
+  "샘 올트먼"
+ ],
+ "seedance": {
+  "model": "seedance_2_5",
+  "made_by": "운영자 힉스필드 앱(20초 720p)",
+  "job": "a8b6477e-2d7a-4f04-b9db-5cdf613c8141",
+  "drive": "1101_all.mp4",
+  "prompt": "탁자 위 미니 세계 다섯 개 — 빨간 장난감 차가 흰 차들을 제침 · 칩 탑이 무너짐 · 접는 폰 금과 수리 로봇 · 통제 도로와 우회 버스 · 놀던 로봇을 일 시키기. 사람·글자·로고 없음(automation/reviews/2026-11-01-ai-video.md '오늘 아침 5가지')",
+  "cut": "장면 시각은 받은 뒤 재서 맞춘다(초안)"
+ },
+ "trim": [
+  0.0,
+  20.0
+ ],
+ "end_seconds": 3.3,
+ "captions": [
+  {
+   "start": 0.0,
+   "end": 2.0,
+   "size": 90,
+   "html": "<div class=\"kick\">아침 브리핑</div><div class=\"main\">오늘 아침 소식<br>딱 <span class=\"hl\">5가지</span></div>"
+  },
+  {
+   "start": 2.0,
+   "end": 5.5,
+   "size": 84,
+   "html": "<div class=\"kick\">1/5 · 자동차</div><div class=\"main\">중국 BYD 1~9월<br><span class=\"hl\">2만137대</span> 등록</div><div class=\"sub\">9월엔 수입차 4위까지</div>"
+  },
+  {
+   "start": 5.5,
+   "end": 9.0,
+   "size": 84,
+   "html": "<div class=\"kick\">2/5 · 미국 증시</div><div class=\"main\">인텔 하루 새<br><span class=\"hl\">28.58%</span> 폭락</div><div class=\"sub\">1970년대 이후 가장 큰 하락</div>"
+  },
+  {
+   "start": 9.0,
+   "end": 12.5,
+   "size": 84,
+   "html": "<div class=\"kick\">3/5 · 테크</div><div class=\"main\">아이폰 듀오<br>화면 <span class=\"hl\">균열</span></div><div class=\"sub\">애플, 점검 후 수리·교체 지침</div>"
+  },
+  {
+   "start": 12.5,
+   "end": 16.0,
+   "size": 84,
+   "html": "<div class=\"kick\">4/5 · 서울마라톤</div><div class=\"main\">버스 <span class=\"hl\">190개 노선</span><br>임시 우회</div><div class=\"sub\">3만5000여 명 참가 · 광화문 출발</div>"
+  },
+  {
+   "start": 16.0,
+   "end": 20.0,
+   "size": 84,
+   "html": "<div class=\"kick\">5/5 · AI</div><div class=\"main\">AI는 도입보다<br><span class=\"hl\">어떻게 활용</span>하느냐</div><div class=\"sub\">샘 올트먼 · 삼성 사장단 50여 명 간담회</div>"
+  }
+ ],
+ "end_card": {
+  "line": "더 자세한 건 프로필 링크 뉴스레터에서!",
+  "sub": "2030의 아침을 편집합니다 · 경제부터 트렌드까지",
+  "note": "숫자는 기사 2곳 이상에서 확인했어요<br>(출처는 캡션에)"
+ },
+ "voices": [
+  {
+   "file": "stems/b0_open.mp3",
+   "start": 0.05,
+   "tempo": 1.3,
+   "text": "오늘 아침 소식, 딱 다섯 가지!",
+   "voice": "qwen_audio_tts · Hana"
+  },
+  {
+   "file": "stems/b1_byd.mp3",
+   "start": 2.1,
+   "tempo": 1.3,
+   "text": "BYD, 구월까지 이만 백삼십칠 대 등록!",
+   "voice": "qwen_audio_tts · Hana",
+   "tts": "비와이디, 구월까지 이만 백삼십칠 대 등록! — 받아쓰기가 'BYD'로 적어 원고도 그렇게 둔다(ADR 때와 같음)"
+  },
+  {
+   "file": "stems/b2_intel.mp3",
+   "start": 5.6,
+   "tempo": 1.15,
+   "text": "인텔이 하루 새 이십팔 점 오팔 퍼센트 빠졌어!",
+   "voice": "qwen_audio_tts · Hana"
+  },
+  {
+   "file": "stems/b3_duo.mp3",
+   "start": 9.1,
+   "tempo": 1.2,
+   "text": "아이폰 듀오 화면 균열, 점검 후 수리 교체래.",
+   "voice": "qwen_audio_tts · Hana"
+  },
+  {
+   "file": "stems/b4_marathon.mp3",
+   "start": 12.6,
+   "tempo": 1.25,
+   "text": "서울 마라톤에 버스 백구십 개 노선이 우회했어!",
+   "voice": "qwen_audio_tts · Hana"
+  },
+  {
+   "file": "stems/b5_altman.mp3",
+   "start": 16.1,
+   "tempo": 1.2,
+   "text": "샘 올트먼, AI는 도입보다 활용이 중요하대!",
+   "voice": "qwen_audio_tts · Hana"
+  },
+  {
+   "file": "../signoffs/bye_newsletter.mp3",
+   "start": 20.1,
+   "tempo": 1.15,
+   "text": "더 자세한 건 프로필 링크 뉴스레터에서!",
+   "voice": "qwen_audio_tts · Hana (signoffs 재사용)"
+  }
+ ],
+ "music": [
+  {
+   "file": "../2026-10-31/stems/m1_chase.m4a",
+   "start": 0.0,
+   "offset": 1.7,
+   "dur": 4.2,
+   "fade_out": 0.3
+  },
+  {
+   "file": "../2026-10-31/stems/m1_chase.m4a",
+   "start": 4.0,
+   "offset": 1.75,
+   "dur": 4.15,
+   "fade_in": 0.2,
+   "fade_out": 0.4
+  },
+  {
+   "file": "../2026-10-31/stems/m2_morning.m4a",
+   "start": 7.6,
+   "dur": 7.95,
+   "fade_in": 0.3,
+   "fade_out": 0.4
+  },
+  {
+   "file": "../2026-10-31/stems/m2_morning.m4a",
+   "start": 15.3,
+   "dur": 7.95,
+   "lufs": -18,
+   "fade_in": 0.3,
+   "fade_out": 0.8
+  }
+ ],
+ "sfx": [
+  [
+   0,
+   999,
+   0.35
+  ]
+ ],
+ "music_note": "m1_chase 앞 1.7초는 조용한 도입(-35~-40dB)이라 대사 숨 사이에 소리가 꺼진다 → 1.7초부터 쓴다. 곡 이음은 0.25초 넘게 겹치고, 끝 화면 끝인사 숨(20.9초께)에 m2_morning 5.75초 강박이 오게 15.3초에 다시 깐다(11/01 시험 렌더)",
+ "duck": {
+  "mix": 0.6
+ }
+}
