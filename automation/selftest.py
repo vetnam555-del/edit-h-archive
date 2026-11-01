@@ -1529,6 +1529,162 @@ def t_save_cards():
     return f"체크리스트 {ig.get('todo_card_from')}~ · 차트 {ig.get('chart_card_from')}~ · 막는 차트 {len(bad)}가지"
 
 
+def _dive_sample(steps=4, worst=False, day=None):
+    """딥다이브 시험 원고 — 최근 데일리 원고를 연재 날(config.instagram.dive_card_from)로 옮기고 cards.dive 를 붙인다.
+    worst=True 면 모든 칸을 글자 한도까지 채운다(카드가 넘치지 않는지 렌더링으로 본다)."""
+    from edith import content as content_mod
+    ig = load_config()["instagram"]
+    day = day or str(ig.get("dive_card_from") or "2026-11-04")
+    data = json.loads((CONTENT_DIR / f"{daily_issues(1)[0]}.json").read_text(encoding="utf-8"))
+    data.update({"date": day, "series": {"name": "H의 장부"}, "briefs_short_reason": "자동 점검용 원고"})
+    data.pop("vol", None)
+    lim = content_mod.CARD_LIMITS
+
+    def fill(n, words="매출 이익 가격 점유율 회원 객단가 영업이익 이익률 커피 한 잔 남는 돈"):
+        out = ""
+        while len(out) < n:
+            out += (" " if out else "") + words.split()[len(out) % len(words.split())]
+        return out[:n].rstrip() if worst else out[: max(4, n // 2)].rstrip()
+
+    box = {"title": fill(lim["dive_box_title"]), "text": fill(lim["dive_box_text"])}
+    kinds = [
+        {"table": {"head": ["회사", "2025년 매출", "영업이익", "이익률"][: 4 if worst else 3],
+                   "rows": [["가나다라마", "1,234,567대", "12조3456억", "12.34%"][: 4 if worst else 3]] * (4 if worst else 2), "highlight": 0}},
+        {"line": {"title": fill(22), "points": [{"label": f"{20 + i}년", "value": v, "text": f"{v:,}원"[:9]}
+                                                for i, v in enumerate([136000, 98000, 120000, 70000, 52000, 41000, 39400][: 7 if worst else 4])]}},
+        {"chart": {"title": fill(22), "unit": "%", "points": [{"label": f"{2020 + i}년", "value": 10 + i * 3} for i in range(6 if worst else 3)]}},
+        {"points": [fill(lim["dive_point"])] * (3 if worst else 2), "label": "다른 업종 비유"[: lim["dive_label"]]},
+        {"stat": {"value": "1조2345억원", "label": fill(lim["dive_stat_label"])}},
+    ]
+    poses = ["point", "thinking", "newspaper", "surprised", "celebrate"]
+    data["cards"]["dive"] = {
+        "by": "H가 숫자로 읽어 주는",
+        "steps": [{**kinds[i % len(kinds)], "q": "얼마나 ==" + fill(lim["dive_q"] - 5) + "==?", "say": fill(lim["dive_say"]),
+                   "source": f"자료{i + 1}·자료{i + 2}", "pose": poses[i % len(poses)], **({"box": box} if worst else {})}
+                  for i in range(steps)],
+        "verdict": {"text": fill(lim["dive_verdict"] // 2) + " — " + fill(lim["dive_verdict"] - lim["dive_verdict"] // 2 - 3)},
+    }
+    data["todo"] = [fill(lim["todo"])] * 3
+    data["cards"]["issues"][0]["ask"] = "얼마나 팔렸나?"
+    data["cards"]["deep"]["ask"] = "왜 잘 팔릴까?"
+    return data
+
+
+def t_dive_cards():
+    """딥다이브 카드(2026-11-01 운영자 '딥다이브 카드 지금 바로' — 머니그라피 딥다이브 문법, E4 「H의 장부」 11/04~):
+    연재 날에만, 표지 이름표 → H PICK → 질문 장 3~5 → H의 판정 → 5가지 한눈에 → 마무리(10장 안), 지난 호·다른 날은 그대로,
+    원고 검사(그림 하나·출처·글자 수·질문 말풍선), 첫 댓글 출처, 스토리·카드 릴스가 고르는 장 이름."""
+    import copy
+    import make_reel
+    from edith import cards, common, content as content_mod, site, story_frames
+    ig = load_config()["instagram"]
+    start = ig.get("dive_card_from")
+    expect(start is None or str(start) >= "2026-11-04", "dive_card_from 이 11/04 전이다 — 지난 호 카드가 바뀐다(E4 첫 편이 11/04)")
+    base = _dive_sample(4)
+    d = content_mod.prepare(copy.deepcopy(base), base["date"])
+    page, files = cards.build(d, "")
+    names = [f.rsplit("_", 1)[-1][:-4] for f in files]
+    expect(names == ["cover", "pick", "dive1", "dive2", "dive3", "dive4", "verdict", "summary", "cta"], f"딥다이브 날 카드 순서가 틀린다: {names}")
+    expect(page.count('<section class="card"') == len(files), "카드 수와 파일 수가 다르다")
+    for want in ("H가 숫자로 읽어 주는", "H의 판정", "다음 편 · 다음 주 수요일", "「H의 장부」 #2", "얼마나 팔렸나?", "최고 ", "자료 · 자료1", "밀어서 숫자로 읽기"):
+        expect(want in page, f"딥다이브 카드에 '{want}' 가 없다")
+    expect("Q1" in page and "Q3" in page and "다른 업종 비유" in page, "질문 장 머리표(Q1·비유)가 없다")
+    five = content_mod.prepare(_dive_sample(5), base["date"])
+    expect(len(cards.build(five, "")[1]) == 10, "질문 장 5개면 10장(인스타 캐러셀 한도)이어야 한다")
+    # 장 이름 — 스토리 카드 화면은 pick·summary, 카드 릴스는 cover·pick·cta 를 그대로 고른다
+    expect([story_frames.role(f) for f in story_frames.choose(files, True)] == ["pick", "summary"], "스토리 카드 화면이 딥다이브 날 장을 못 고른다")
+    expect([make_reel.reel_cards([Path(f) for f in files])[i].stem.rsplit("_", 1)[-1] for i in range(3)] == ["cover", "pick", "cta"],
+           "카드 릴스가 딥다이브 날 장을 못 고른다")
+    comment = site.first_comment(d)
+    expect("딥다이브 장 · 자료1·자료2" in comment.splitlines()[2], f"첫 댓글에 질문 장 출처가 없다: {comment[:120]}")
+    # 시작일 전·연재 아닌 날·원고에 dive 가 없는 날은 예전 10장 그대로
+    real = common.load_config
+    try:
+        common.load_config = lambda: {**real(), "instagram": {**real()["instagram"], "dive_card_from": "2999-01-01"}}
+        off = cards.build(content_mod.prepare(copy.deepcopy(base), base["date"]), "")[1]
+    finally:
+        common.load_config = real
+    expect([f.rsplit("_", 1)[-1][:-4] for f in off] == cards.CARD_NAMES_2B, "시작일 전인데 딥다이브 카드가 나간다")
+    plain_day = copy.deepcopy(base)
+    plain_day["cards"].pop("dive")
+    expect([f.rsplit("_", 1)[-1][:-4] for f in cards.build(content_mod.prepare(plain_day, base["date"]), "")[1]] == cards.CARD_NAMES_2B,
+           "원고에 dive 가 없는데 카드 순서가 바뀐다")
+    no_series = copy.deepcopy(base)
+    no_series.pop("series")
+    bad = {"연재 아닌 날": no_series}
+
+    def patched(fn):
+        x = copy.deepcopy(base)
+        fn(x["cards"]["dive"])
+        return x
+
+    bad.update({
+        "질문 장 2개": patched(lambda v: v.update(steps=v["steps"][:2])),
+        "질문 장 6개": patched(lambda v: v.update(steps=v["steps"] * 2)),
+        "그림 둘": patched(lambda v: v["steps"][0].update(stat={"value": "1", "label": "가"})),
+        "그림 없음": patched(lambda v: v["steps"][0].pop("table")),
+        "표 칸 수": patched(lambda v: v["steps"][0]["table"]["rows"].append(["가"])),
+        "표 칸 글자": patched(lambda v: v["steps"][0]["table"]["rows"][0].__setitem__(1, "가" * 11)),
+        "선 점 하나": patched(lambda v: v["steps"][1]["line"].update(points=v["steps"][1]["line"]["points"][:1])),
+        "선 값 글자": patched(lambda v: v["steps"][1]["line"]["points"][0].update(value="많음")),
+        "막대 음수": patched(lambda v: v["steps"][2]["chart"]["points"][0].update(value=-1)),
+        "출처 없음": patched(lambda v: v["steps"][3].pop("source")),
+        "자세 이름": patched(lambda v: v["steps"][0].update(pose="dance")),
+        "판정 없음": patched(lambda v: v.pop("verdict")),
+        "질문 글자 수": patched(lambda v: v["steps"][0].update(q="가" * 30)),
+        "판정 글자 수": patched(lambda v: v["verdict"].update(text="가 " * 40)),
+    })
+    no_q = copy.deepcopy(base)
+    no_q["cards"]["deep"]["ask"] = "왜 중요해"
+    bad["말풍선 물음표"] = no_q
+    for why, x in bad.items():
+        try:
+            content_mod.prepare(x, base["date"])
+            raise AssertionError(f"딥다이브 원고 검사가 '{why}'를 통과시켰다")
+        except content_mod.ContentError:
+            pass
+    return f"{start}~ 연재 날 · 9~10장 · 막는 원고 {len(bad)}가지 · 지난 호·dive 없는 날 그대로"
+
+
+def t_dive_render():
+    """딥다이브 카드가 글자 한도를 꽉 채워도 넘치지 않는다 — 4:5(체크리스트 있음·없음)·3:4 를 실제로 렌더링(node·Playwright)."""
+    import copy
+    from edith import cards, common, content as content_mod
+    from edith.fonts import font_css
+    real = common.load_config
+    cfg = real()
+    combos = {"4:5": (None, None), "4:5 + 체크리스트": (None, "2026-11-04"), "3:4 + 체크리스트": ("2026-11-04", "2026-11-04")}
+    out = []
+    for name, (ratio, todo) in combos.items():
+        fake = lambda: {**cfg, "instagram": {**cfg["instagram"], "card_ratio_from": ratio, "todo_card_from": todo,  # noqa: E731
+                                              "dive_card_from": "2026-11-04"}}
+        common.load_config = cards.load_config = fake
+        try:
+            data = _dive_sample(5, worst=True, day="2026-11-04")
+            data["cards"]["cover"].pop("photo", None)   # 사진 크기 검사와 상관없이(3:4 는 1440px 사진이 필요) 마스코트 표지로
+            d = content_mod.prepare(copy.deepcopy(data), "2026-11-04")
+            page, files = cards.build(d, font_css())
+        finally:
+            common.load_config = real
+            cards.load_config = real
+        # 옆으로 넘치는 상자(.fitw)를 렌더러가 넘침으로 잡는지 — 일부러 넓은 한 장을 끝에 붙인다
+        page = page.replace("</body>", '<section class="card"><div class="body"><div class="fitw" style="width:400px;margin-top:200px;">'
+                                       '<div style="width:700px;height:20px;"></div></div></div></section></body>')
+        files = [*files, "zz_wide.png"]
+        with tempfile.TemporaryDirectory() as tmp:
+            (Path(tmp) / "c.html").write_text(page, encoding="utf-8")
+            proc = subprocess.run(["node", str(AUTOMATION / "render_cards.cjs"), str(Path(tmp) / "c.html"), tmp, *files],
+                                  capture_output=True, text=True)
+        expect(proc.returncode == 0, f"{name} 렌더링 실패: {proc.stderr[-300:]}")
+        rep = json.loads(proc.stdout.strip().splitlines()[-1])["cards"]
+        expect(rep[-1]["overflow"], "옆으로 넘치는 상자(.fitw)를 렌더러가 못 잡는다")
+        rep = rep[:-1]
+        bad = [c["file"].rsplit("_", 1)[-1] for c in rep if c["overflow"]]
+        expect(not bad, f"{name}: 글자 한도를 채우면 넘치는 장 — {bad}")
+        out.append(f"{name} 최소 배율 {min(c['k'] for c in rep)}")
+    return " · ".join(out)
+
+
 def t_mascot():
     """마스코트(2026-11-01 운영자 '마스코트 캐릭터 만들어 줘'): 자세 9장이 512×512 투명 PNG 로 있고, 설정 문서가 파일마다 쓰임을 적었다."""
     from edith.common import image_size
@@ -2114,6 +2270,7 @@ def main():
     check("검색 알림(IndexNow)", t_indexnow)
     check("주간 특집 저장각(E13)", t_weekly_save)
     check("데일리 저장각(체크리스트·차트)", t_save_cards)
+    check("딥다이브 카드(「H의 장부」 연재 날)", t_dive_cards)
     check("마스코트(안경 동그라미 H)", t_mascot)
     check("첫 화면 구독·사이트 그림(index.html)", t_home)
     check("문구·마크 2판(2030 대표 한 줄·마스코트 얼굴)", t_brand_v2)
@@ -2123,6 +2280,7 @@ def main():
     check("경쟁 매체 인스타(비즈니스 탐색)", t_competitors_ig)
     check("경쟁 매체 웹(토큰 없이·robots 지킴)", t_competitors_web)
     if not args.quick:
+        check("딥다이브 카드 글자 한도 렌더링(넘침 없음)", t_dive_render)
         rebuild(daily_issues(args.issues), args.strict)
     if NOTES:
         print("\n달라진 글(의도한 변경인지 확인):")

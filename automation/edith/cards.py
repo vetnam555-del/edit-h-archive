@@ -24,7 +24,7 @@ import base64
 import mimetypes
 import re
 
-from .common import ROOT, card_height, esc as _esc, load_config, send_time_ko
+from .common import ROOT, card_height, dive_on, esc as _esc, load_config, send_time_ko
 
 W, H = 1080, 1350
 TEXT, SUB, MUTED = "#282F38", "#555558", "#939393"
@@ -173,6 +173,9 @@ _POSE_GOOD = re.compile(r"혜택|지원금|할인|무료|환급|돌파|흑자|�
 _POSE_DATE = re.compile(r"마감|시행|신청|접수|일정|D-\d|부터")
 
 
+ON_DARK = "filter:" + " ".join(f"drop-shadow({x}px {y}px 0 #FFFFFF)" for x, y in ((2, 0), (-2, 0), (0, 2), (0, -2))) + ";"
+
+
 def mascot_on(d):
     return str(d.get("date") or "")[:10] >= MASCOT_CARDS_FROM
 
@@ -211,8 +214,8 @@ def _mascot_hero(d, cov, l1, l2, height):
     return (say + f'<div style="position:absolute;left:30px;bottom:-30px;z-index:1;">{mascot_img(pose, body)}</div>')
 
 
-def cover(d, kicker=None, foot=None):
-    """머리말 → 띠 제목 두 줄 → (사진 또는 핵심어 대형 마커) + 오늘의 다른 이슈 스티커 3개."""
+def cover(d, kicker=None, foot=None, tag=None):
+    """머리말 → (딥다이브 날 이름표) → 띠 제목 두 줄 → (사진 또는 핵심어 대형 마커) + 오늘의 다른 이슈 스티커 3개."""
     cov = d["cards"]["cover"]
     photo = cov.get("photo")
     l1, *rest = str(cov.get("title") or d["hero_title"]).split("\n")
@@ -247,14 +250,15 @@ def cover(d, kicker=None, foot=None):
     extra = card_height(d["date"]) - H   # 3:4 카드(1440)면 늘어난 90px 을 핵심어·스티커 자리에 나눠 준다(아래가 비지 않게)
     foot_color = "#FFFFFF" if photo else MUTED
     head_color, kick_color = ("#FFFFFF", "rgba(255,255,255,.92)") if photo else (TEXT, "#5A5A5E")
+    pill = f'\n  <div style="flex:none;margin-top:20px;">{persona_pill(tag)}</div>' if tag else ""   # 딥다이브 날 이름표(지난 호 HTML 은 그대로)
     credit = (f'<div style="position:absolute;right:40px;bottom:24px;font-size:19px;color:rgba(255,255,255,.85);{shadow}">'
               f'{esc(cov["credit"])}</div>') if photo and cov.get("credit") else ""
     return _frame(f"""{bg}
 <div class="body" style="padding:64px 60px 0;align-items:center;text-align:center;">
   <div style="font-weight:900;font-size:34px;line-height:1;letter-spacing:-1px;color:{head_color};{shadow}">EDIT H<span style="color:{ACC};">.</span></div>
-  <div style="margin-top:22px;font-weight:700;font-size:28px;color:{kick_color};{shadow}">{esc(kicker)}</div>
+  <div style="margin-top:22px;font-weight:700;font-size:28px;color:{kick_color};{shadow}">{esc(kicker)}</div>{pill}
   <div style="flex:none;margin-top:26px;display:flex;flex-direction:column;align-items:center;gap:14px;">{_strip(l1, "#FFFFFF")}{_strip(l2, ACC_FILL)}</div>
-  <div style="flex:none;position:relative;margin-top:{70 + extra // 2}px;width:100%;height:{560 + extra // 2}px;">{hero}{sticker_html}</div>
+  <div style="flex:none;position:relative;margin-top:{70 + extra // 2 - (74 if tag else 0)}px;width:100%;height:{560 + extra // 2}px;">{hero}{sticker_html}</div>
 </div>
 <div style="position:absolute;left:0;right:0;bottom:60px;text-align:center;font-weight:700;font-size:26px;color:{foot_color};{shadow}">{esc(foot)}</div>{credit}""", mark=False)
 
@@ -299,9 +303,9 @@ def dialogue(take, dark, pose=None):
     line = "#FFFFFF" if dark else TEXT
     ask = (f'<div style="background:{q_bg};border:3px solid {line};border-radius:22px 22px 22px 6px;'
            f'padding:14px 24px;font-weight:600;font-size:{fs(28)};line-height:1.2;color:{q_fg};">그래서 뭐가 달라져?</div>')
-    if pose:   # H 가 독자 대신 묻는다(11/01~) — 말풍선 왼쪽에 작은 H
+    if pose:   # H 가 독자 대신 묻는다(11/01~) — 말풍선 왼쪽에 작은 H. 검정 카드에선 검은 팔다리가 묻히지 않게 흰 테두리
         ask = (f'<div style="align-self:flex-start;display:flex;align-items:flex-end;gap:6px;margin-left:-14px;">'
-               f'{mascot_img(pose, 180, "margin:-44px 0 -16px;")}{ask}</div>')
+               f'{mascot_img(pose, 180, "margin:-44px 0 -16px;" + (ON_DARK if dark else ""))}{ask}</div>')
     else:
         ask = ask.replace('<div style="', '<div style="align-self:flex-start;', 1)
     return (f'<div style="flex:none;width:100%;margin-top:26px;display:flex;flex-direction:column;gap:10px;">'
@@ -333,7 +337,7 @@ def issue_card(it, n, date=None):
             f'(H PICK · {esc(it.get("series_label") or "오늘의 핵심")})</div>') if dark else ""
     return _frame(f"""
 <div class="body" style="padding:0 80px 190px;justify-content:flex-end;align-items:center;text-align:center;">
-  {bubble(it["tag"])}
+  {bubble(it.get("ask") or it["tag"])}
   {hero}
   {tiles}
   <div style="flex:none;height:{20 if dark else 38}px;"></div>
@@ -369,9 +373,10 @@ def _on(d, key):
     return bool(start) and str(d["date"])[:10] >= str(start)
 
 
-def chart_box(ch):
+def chart_box(ch, bg=BOX, show_source=True, frame=""):
     """숫자 비교·추이 막대 차트 — 주장 하나, 출처는 그림 안에(Chartr·Visual Capitalist, 2026-10-31 경쟁 비교 '자기만의 재료').
-    ch: {'title', 'points': [{'label', 'value', 'text'?}] 3~6개, 'unit'?, 'highlight'?(기본 마지막), 'source'}. 값은 0 이상."""
+    ch: {'title', 'points': [{'label', 'value', 'text'?}] 3~6개, 'unit'?, 'highlight'?(기본 마지막), 'source'}. 값은 0 이상.
+    딥다이브 장은 흰 바탕·테두리(frame)로, 출처는 장 아래 '자료 ·' 한 줄에 모은다(show_source=False)."""
     pts = ch["points"]
     top = max(float(p["value"]) for p in pts) or 1
     hi = ch.get("highlight", len(pts) - 1)
@@ -387,12 +392,13 @@ def chart_box(ch):
     labels = "".join(
         f'<div style="flex:1;min-width:0;text-align:center;font-weight:{700 if i == hi else 500};font-size:{fs(24)};line-height:1.25;'
         f'color:{TEXT if i == hi else SUB};">{esc(p["label"])}</div>' for i, p in enumerate(pts))
-    return (f'<div style="flex:none;width:100%;margin-top:40px;background:{BOX};border-radius:24px;padding:28px 28px 22px;">'
+    src = (f'<div style="margin-top:14px;font-weight:500;font-size:{fs(21)};line-height:1.35;color:{SRC_LIGHT};text-align:right;">'
+           f'자료 · {esc(ch["source"])}</div>') if show_source else ""
+    return (f'<div style="flex:none;width:100%;margin-top:40px;background:{bg};border-radius:24px;padding:28px 28px 22px;{frame}">'
             f'<div style="font-weight:800;font-size:{fs(32)};line-height:1.3;color:{TEXT};">{mk(ch["title"])}</div>'
             f'<div style="margin-top:18px;height:250px;display:flex;gap:12px;align-items:flex-end;border-bottom:3px solid {TEXT};">{bars}</div>'
             f'<div style="margin-top:12px;display:flex;gap:12px;">{labels}</div>'
-            f'<div style="margin-top:14px;font-weight:500;font-size:{fs(21)};line-height:1.35;color:{SRC_LIGHT};text-align:right;">'
-            f'자료 · {esc(ch["source"])}</div></div>')
+            f'{src}</div>')
 
 
 def deep_card(d):
@@ -414,7 +420,7 @@ def deep_card(d):
     src = d["card_issues"][0]["source"]
     return _frame(f"""
 <div class="body" style="padding:110px 70px 140px;justify-content:center;">
-  <div style="text-align:center;">{bubble("왜 중요해?")}</div>
+  <div style="text-align:center;">{bubble(deep.get("ask") or "왜 중요해?")}</div>
   <div class="bal" style="text-align:center;font-weight:800;font-size:{fs(74)};line-height:1.3;letter-spacing:-1.5px;color:{TEXT};">{mk(deep["headline"])}</div>
   {chart_box(chart) if chart else f'<div style="flex:none;display:flex;gap:14px;width:100%;margin-top:46px;">{tiles}</div>'}
   <div style="flex:none;margin-top:40px;border-top:3px solid {TEXT};">{points}</div>
@@ -608,6 +614,216 @@ def cta_follow(d):
 </div>""")
 
 
+# ── 딥다이브 카드(config.instagram.dive_card_from~ 연재 날, content.cards.dive 가 있을 때) ─────────────────────────────
+# 2026-11-01 운영자 '딥다이브 카드 지금 바로 만들어줘'. 머니그라피 인스타 딥다이브 캐러셀(reviews/2026-11-01-moneygraphy.md '인스타 화면' A)을
+# 우리 숫자로 옮겼다: 표지 이름표('H가 숫자로 읽어 주는') → H PICK → 질문 장 3~5(장마다 질문 제목 + 표·선 그래프·막대·큰 숫자·요점 중 하나 +
+# H 의 해석 한두 줄, 어려운 개념은 상자 하나, 다른 업종 비유 한 장) → H의 판정 → 5가지 한눈에 → 마무리.
+# 16.6만 계정에서도 리캡(소식 모음)은 댓글 0·리포스트 2, 질문 하나를 이름 있는 목소리가 숫자로 푼 편은 댓글 8·리포스트 6이었다.
+# 바탕은 「H의 장부」 이름에 맞춘 장부 종이(옅은 가로줄 + 왼쪽 붉은 여백선).
+DIVE_BY = "H가 숫자로 읽어 주는"
+LEDGER, LEDGER_RULE, LEDGER_EDGE, LEDGER_SRC, LEDGER_BOX = "#FBF8F1", "rgba(40,47,56,.07)", "#E6E0D3", "#66625B", "#F1EBDD"
+DIVE_STEP_POSES = ("point", "thinking", "newspaper", "point", "thinking")   # 질문 장 H 자세(장마다 바뀌게, 원고 pose 가 먼저)
+LINE_W, LINE_H, LINE_SIDE, LINE_TOP, LINE_BOTTOM, LINE_ROOM = 932, 350, 84, 78, 16, 88   # 선 그래프 그림 크기 — 글자는 HTML 로 얹어 늘어나지 않게
+
+
+def persona_pill(text):
+    """딥다이브 표지 이름표 — 머니그라피 '이재용 회계사가 읽어주는'. 안경 마크(에디터 H) + 글자, 어떤 사진 위에서도 읽히게 흰 상자."""
+    return (f'<div style="display:inline-flex;align-items:center;gap:14px;background:#FFFFFF;border:3px solid {TEXT};border-radius:999px;'
+            f'padding:8px 30px 8px 10px;box-shadow:0 5px 0 {ACC_FILL};">{avatar(50)}'
+            f'<span style="font-weight:800;font-size:30px;line-height:1;letter-spacing:-.5px;color:{TEXT};white-space:nowrap;">{esc(text)}</span></div>')
+
+
+def _ledger(inner, d):
+    """장부 종이 카드 — 옅은 가로줄 + 왼쪽 붉은 여백선, 오른쪽 위에 연재 이름표(한 장만 공유돼도 어떤 연재인지 보이게)."""
+    tag = (d.get("series") or {}).get("label") or "H PICK 딥다이브"
+    paper = (f'<div style="position:absolute;inset:0;background:repeating-linear-gradient(180deg,transparent 0 63px,{LEDGER_RULE} 63px 64px);"></div>'
+             f'<div style="position:absolute;top:0;bottom:0;left:38px;width:3px;background:rgba(255,82,51,.32);"></div>'
+             f'<div style="position:absolute;right:56px;top:36px;z-index:2;background:{ACC_BG};color:{ACC_INK};font-weight:800;font-size:24px;'
+             f'line-height:1;padding:10px 16px;border-radius:10px;white-space:nowrap;">{esc(tag)}</div>')
+    return _frame(paper + inner, LEDGER)
+
+
+def _panel(inner, pad="24px 30px", top=0):
+    """흰 종이 상자(표·그래프·요점). class fitw — 안의 표가 옆으로 넘치면 렌더러가 글자를 줄이고, 그래도 넘치면 넘침으로 알린다."""
+    return (f'<div class="fitw" style="flex:none;width:100%;margin-top:{top}px;background:#FFFFFF;border:2px solid {LEDGER_EDGE};border-radius:26px;'
+            f'padding:{pad};box-shadow:0 6px 0 rgba(40,47,56,.05);">{inner}</div>')
+
+
+def dive_table(tb):
+    """표 하나 — 첫 열(이름)은 왼쪽, 숫자 열은 오른쪽 정렬. highlight 줄은 복숭아색(우리가 보는 회사·기간)."""
+    head, rows, hi = tb["head"], tb["rows"], tb.get("highlight")
+    size = {2: 48, 3: 44}.get(len(head), 38)   # 열이 많을수록 작게 — 4열 × 10자 칸도 한 줄에
+    th = "".join(
+        f'<th style="padding:4px 10px 16px;text-align:{"left" if j == 0 else "right"};font-weight:700;font-size:{fs(27)};line-height:1.2;'
+        f'color:{SUB};white-space:nowrap;">{esc(h)}</th>' for j, h in enumerate(head))
+    trs = "".join(
+        f'<tr style="border-top:2px solid #ECE6D9;{f"background:{ACC_FILL};" if i == hi else ""}">' + "".join(
+            f'<td style="padding:{fs(28 if len(rows) <= 3 else 24)} 10px;text-align:{"left" if j == 0 else "right"};font-weight:{800 if i == hi else (700 if j == 0 else 600)};'
+            f'font-size:{fs(size - 6 if j == 0 else size)};line-height:1.2;color:{TEXT};white-space:nowrap;font-variant-numeric:tabular-nums;">{esc(str(c))}</td>'
+            for j, c in enumerate(row)) + '</tr>'
+        for i, row in enumerate(rows))
+    return _panel(f'<table style="width:100%;border-collapse:collapse;"><thead><tr style="border-bottom:3px solid {TEXT};">{th}</tr></thead>'
+                  f'<tbody>{trs}</tbody></table>', "22px 26px 10px")
+
+
+def line_chart(ln):
+    """선 그래프 — 꼭대기·마지막 값에 이름표(머니그라피 '136,000원 → 39,400원'). 꼭대기가 마지막이면 처음·마지막에 단다.
+    이름표는 이웃 점보다 높은 점이면 위에, 낮은 점이면 아래에 — 선을 가리지 않게(가장 낮은 값 아래에 LINE_ROOM 만큼 자리를 둔다).
+    두 점이면 사이를 점선으로(재지 않은 구간). 그림(SVG)은 정해진 크기로 그리고 숫자·칸 이름은 HTML 로 얹는다 — 글자가 늘어나거나 찌그러지지 않게."""
+    pts = ln["points"]
+    n, unit = len(pts), ln.get("unit", "")
+    vals = [float(p["value"]) for p in pts]
+    shown = [p.get("text") or f"{v:g}{unit}" for p, v in zip(pts, vals)]
+    lo, top = min(vals), max(vals)
+    base = LINE_H - LINE_BOTTOM
+    y_lo = base - LINE_ROOM
+    xs = [LINE_SIDE + i * (LINE_W - 2 * LINE_SIDE) / (n - 1) for i in range(n)]
+    ys = [(LINE_TOP + y_lo) / 2 if top == lo else LINE_TOP + (top - v) / (top - lo) * (y_lo - LINE_TOP) for v in vals]
+    peak, last = vals.index(top), n - 1
+    marks = {0: "first", last: "last"} if peak == last else {peak: "peak", last: "last"}
+
+    def above(i):
+        near = [ys[j] for j in (i - 1, i + 1) if 0 <= j < n]
+        return marks.get(i) == "peak" or all(ys[i] <= y + 1 for y in near)
+
+    if peak == last - 1 and above(last) and abs(ys[peak] - ys[last]) < 64:   # 꼭대기가 바로 앞 칸이고 높이가 비슷하면 이름표가 겹친다 — 마지막만
+        marks = {last: "last"}
+    path = " ".join(f"{'M' if i == 0 else 'L'}{x:.1f},{y:.1f}" for i, (x, y) in enumerate(zip(xs, ys)))
+    dash = ' stroke-dasharray="22 16"' if n == 2 else ""
+    dots = "".join(
+        f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{11 if i in marks else 7}" fill="{ACC if i == last else "#FFFFFF"}" '
+        f'stroke="{"#FFFFFF" if i == last else ACC}" stroke-width="{5 if i == last else 4}"/>'
+        for i, (x, y) in enumerate(zip(xs, ys)))
+    svg = (f'<svg width="{LINE_W}" height="{LINE_H}" viewBox="0 0 {LINE_W} {LINE_H}" style="display:block;overflow:visible;">'
+           f'<defs><linearGradient id="dive-area" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="{ACC}" stop-opacity=".18"/>'
+           f'<stop offset="1" stop-color="{ACC}" stop-opacity="0"/></linearGradient></defs>'
+           f'<path d="{path} L{xs[-1]:.1f},{base} L{xs[0]:.1f},{base} Z" fill="url(#dive-area)"/>'
+           f'<line x1="0" y1="{base}" x2="{LINE_W}" y2="{base}" stroke="{TEXT}" stroke-width="3"/>'
+           f'<path d="{path}" fill="none" stroke="{ACC}" stroke-width="7" stroke-linejoin="round" stroke-linecap="round"{dash}/>{dots}</svg>')
+
+    def tag(i, kind):
+        x_shift = "-30px" if i == 0 else ("calc(-100% + 30px)" if i == last else "-50%")
+        up = above(i)
+        look = (f"background:{ACC};color:#FFFFFF;border:3px solid {ACC};" if kind == "last"
+                else f"background:#FFFFFF;color:{TEXT};border:3px solid {TEXT};")
+        word = '<span style="font-weight:600;opacity:.7;">최고 </span>' if kind == "peak" else ""
+        return (f'<div style="position:absolute;left:{xs[i]:.0f}px;top:{ys[i] + (-22 if up else 22):.0f}px;'
+                f'transform:translate({x_shift},{"-100%" if up else "0"});{look}'
+                f'border-radius:14px;padding:9px 15px;font-weight:800;font-size:{fs(30)};line-height:1;white-space:nowrap;">{word}{esc(shown[i])}</div>')
+
+    labels = "".join(
+        f'<div style="position:absolute;left:{x:.0f}px;top:0;transform:translateX(-50%);font-weight:{700 if i in marks else 500};'
+        f'font-size:{fs(23)};line-height:1.2;color:{TEXT if i in marks else SUB};white-space:nowrap;">{esc(p["label"])}</div>'
+        for i, (x, p) in enumerate(zip(xs, pts)))
+    title = (f'<div style="padding:0 30px;font-weight:800;font-size:{fs(30)};line-height:1.3;color:{TEXT};margin-bottom:4px;">{mk(ln["title"])}</div>'
+             if ln.get("title") else "")
+    return _panel(f'{title}<div style="position:relative;width:{LINE_W}px;height:{LINE_H}px;">{svg}'
+                  f'{"".join(tag(i, k) for i, k in marks.items())}</div>'
+                  f'<div style="position:relative;width:{LINE_W}px;height:32px;margin-top:10px;">{labels}</div>', "22px 0 16px")
+
+
+def dive_stat(stat):
+    return (f'<div style="flex:none;width:100%;text-align:center;">{marked_number(stat["value"])}'
+            f'<div class="bal" style="margin-top:18px;font-weight:600;font-size:{fs(33)};line-height:1.4;color:{SUB};">{mk(stat["label"])}</div></div>')
+
+
+def dive_points(points):
+    rows = "".join(
+        f'<div style="display:flex;gap:20px;align-items:flex-start;padding:{fs(24)} 0;{"border-top:2px solid #ECE6D9;" if i > 1 else ""}">'
+        f'<div style="flex:none;margin-top:4px;width:52px;height:52px;border-radius:12px;background:{TEXT};color:#FFFFFF;display:flex;align-items:center;'
+        f'justify-content:center;font-weight:700;font-size:27px;">{i}</div>'
+        f'<div class="bal" style="font-weight:600;font-size:{fs(40)};line-height:1.45;color:{TEXT};">{mk(pt)}</div></div>'
+        for i, pt in enumerate(points, 1))
+    return _panel(rows, "6px 30px")
+
+
+def dive_box(box):
+    """어려운 개념은 상자 하나로(머니그라피 '기업가치/현금창출능력 = 5~6')."""
+    return (f'<div style="flex:none;width:100%;margin-top:24px;display:flex;gap:18px;background:{LEDGER_BOX};border-radius:20px;padding:20px 26px;">'
+            f'<div style="flex:none;width:10px;border-radius:5px;background:{ACC};"></div>'
+            f'<div style="min-width:0;"><div style="font-weight:800;font-size:{fs(26)};line-height:1.2;color:{ACC_INK};">{esc(box["title"])}</div>'
+            f'<div class="bal" style="margin-top:8px;font-weight:600;font-size:{fs(31)};line-height:1.45;color:{TEXT};">{mk(box["text"])}</div></div></div>')
+
+
+def dive_say(text, pose):
+    """H 의 해석 한두 줄 — 작은 H 가 말풍선으로 읽어 준다(이름 있는 목소리)."""
+    return (f'<div style="flex:none;width:100%;margin-top:28px;display:flex;align-items:flex-end;">'
+            f'{mascot_img(pose, 168, "flex:none;margin:0 -10px -20px -28px;")}'
+            f'<div class="bal" style="flex:1;min-width:0;background:{ACC_FILL};border:3px solid {TEXT};border-radius:26px 26px 26px 6px;'
+            f'padding:18px 26px;font-weight:700;font-size:{fs(33)};line-height:1.45;color:{TEXT};">{mk(text)}</div></div>')
+
+
+def dive_step(d, st, n):
+    """질문 장 — 머리표(Q1·비유로 보면) + 질문 제목 → 그림 하나 → (개념 상자) → H 의 해석 → 자료 출처.
+    질문은 늘 같은 자리(위) — 넘겨 볼 때 눈이 같은 곳에서 시작하게. 그림·상자·H 의 해석은 한 덩어리로 그 아래 가운데에."""
+    kind = next(k for k in ("table", "line", "chart", "stat", "points") if st.get(k))
+    if kind == "chart":
+        visual = chart_box(st["chart"], "#FFFFFF", False, f"border:2px solid {LEDGER_EDGE};margin-top:0;")
+    else:
+        visual = {"table": dive_table, "line": line_chart, "stat": dive_stat, "points": dive_points}[kind](st[kind])
+    label = st.get("label") or f"Q{n}"
+    head = (f'<div style="flex:none;display:inline-flex;align-self:flex-start;align-items:center;height:58px;padding:0 20px;border-radius:16px;'
+            f'background:{ACC};color:#FFFFFF;font-weight:900;font-size:30px;line-height:1;letter-spacing:-.5px;white-space:nowrap;">{esc(label)}</div>'
+            f'<div class="bal" style="flex:none;margin-top:22px;font-weight:800;font-size:{fs(72)};line-height:1.26;letter-spacing:-2px;color:{TEXT};">{mk(st["q"])}</div>')
+    pose = st.get("pose") or DIVE_STEP_POSES[(n - 1) % len(DIVE_STEP_POSES)]
+    return _ledger(f"""
+<div class="body" style="padding:132px 72px 116px;">
+  {head}
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding-top:28px;">
+    {visual}
+    {dive_box(st["box"]) if st.get("box") else ""}
+    {dive_say(st["say"], pose)}
+  </div>
+</div>
+<div style="position:absolute;left:72px;right:72px;bottom:54px;font-size:23px;line-height:1.35;color:{LEDGER_SRC};">자료 · {esc(st["source"])}</div>""", d)
+
+
+def dive_verdict(d, vd):
+    """H의 판정 — 머니그라피 마지막 장(결론 + 진행자 얼굴). ' — ' 뒤 결론에 형광 마커, 오른쪽 아래 큰 H, 맨 아래 '다음 편' 예고.
+    오늘 챙길 것(todo_card_from~)이 있으면 판정 아래에 체크리스트(노트 카드 대신 이 장이 H 의 마지막 말이라)."""
+    text = str(vd["text"])
+    h, sep, tail = text.partition(" — ")
+    body = (f"{mk(h)} — <span style=\"background:linear-gradient(180deg,transparent 58%,{ACC_FILL} 58%);font-weight:800;color:{TEXT};\">{mk(tail)}</span>"
+            if sep else mk(text))
+    todo = [x for x in d.get("todo") or [] if str(x).strip()][:3] if _on(d, "todo_card_from") else []
+    checks = "".join(
+        f'<div style="display:flex;gap:16px;align-items:flex-start;margin-top:{0 if i == 0 else 14}px;">'
+        f'<div style="flex:none;margin-top:4px;width:32px;height:32px;border:3px solid {TEXT};border-radius:8px;background:#FFFFFF;"></div>'
+        f'<div class="bal" style="font-weight:600;font-size:{fs(32)};line-height:1.4;color:{TEXT};">{mk(x)}</div></div>'
+        for i, x in enumerate(todo))
+    todo_box = (f'<div style="flex:none;margin-top:34px;padding:26px 30px;border-radius:22px;background:{LEDGER_BOX};">'
+                f'<div style="font-weight:800;font-size:{fs(27)};line-height:1;margin-bottom:20px;color:{ACC_INK};">오늘 챙길 것 · 저장해 두고 체크</div>'
+                f'{checks}</div>') if todo else ""
+    s = d.get("series") or {}
+    nxt = (f'다음 편 · 다음 주 {WEEKDAY_FULL[d["weekday"]]} 「{s["name"]}」 #{int(s["no"]) + 1}'
+           if s.get("name") and str(s.get("no", "")).isdigit() else "")
+    size = 250 if todo else 420
+    return _ledger(f"""
+<div class="body" style="padding:130px 80px {150 if nxt else 110}px;justify-content:center;">
+  <div style="flex:none;display:flex;align-items:center;gap:16px;font-weight:800;font-size:34px;color:{TEXT};">
+    <div style="width:26px;height:26px;background:{ACC};"></div>H의 판정</div>
+  <div style="flex:none;margin-top:30px;font-weight:900;font-size:140px;line-height:.7;height:64px;color:{ACC_FILL};">“</div>
+  <div class="bal" style="flex:none;font-weight:700;font-size:{fs(58 if todo else 70)};line-height:1.45;letter-spacing:-1.5px;color:{TEXT};">{body}</div>
+  {todo_box}
+  <div style="flex:none;display:flex;align-items:flex-end;justify-content:space-between;margin-top:{20 if todo else 26}px;">
+    <div style="padding-bottom:{30 if todo else 60}px;font-weight:600;font-size:30px;color:{SUB};">— 에디터 H</div>
+    {mascot_img(vd.get("pose") or "point", size, "margin:0 -24px -24px 0;")}
+  </div>
+</div>
+{f'<div style="position:absolute;left:80px;right:80px;bottom:58px;padding-top:22px;border-top:3px dashed {LEDGER_EDGE};font-weight:700;font-size:28px;line-height:1.3;color:{ACC_INK};">{esc(nxt)} →</div>' if nxt else ""}""", d)
+
+
+def dive_cards(d):
+    """(카드 목록, 이름 목록) — 딥다이브 날: 표지(이름표) → H PICK → 질문 장 3~5 → H의 판정 → 5가지 한눈에 → 마무리(최대 10장).
+    'pick'·'summary'·'cta' 이름은 그대로라 스토리 카드 화면(story_frames.ROLES)·카드 릴스(make_reel.REEL_PARTS)가 같은 장을 고른다."""
+    dv, issues = d["cards"]["dive"], d["card_issues"]
+    steps = dv["steps"]
+    out = ([cover(d, foot="밀어서 숫자로 읽기 →", tag=dv.get("by") or DIVE_BY), issue_card(issues[0], 1, d["date"])]
+           + [dive_step(d, st, n) for n, st in enumerate(steps, 1)]
+           + [dive_verdict(d, dv["verdict"]), summary(d), cta_follow(d) if follow_on(d) else cta(d)])
+    return out, ["cover", "pick"] + [f"dive{n}" for n in range(1, len(steps) + 1)] + ["verdict", "summary", "cta"]
+
+
 CARD_NAMES = ["cover", "summary", "issue1", "issue2", "issue3", "issue4", "issue5", "issue6", "observation", "cta"]
 CARD_NAMES_2 = ["cover", "summary", "pick", "deep", "issue2", "issue3", "issue4", "issue5", "note", "cta"]
 # 2026-10-06~ (성장 검토 실험 2): 두 번째 장에 가장 센 숫자(H PICK) — 2장까지 넘긴 사람은 대개 끝까지 본다.
@@ -625,7 +841,9 @@ def height_css(date):
 def build(d, font_css):
     """(html 문자열, 파일명 목록)을 돌려준다. 카드 순서 = 파일명 순서."""
     issues = d["card_issues"]
-    if d.get("format") == 2 and d["date"] >= PICK_FIRST_FROM and not d.get("rewind"):
+    if dive_on(d) and d["date"] >= PICK_FIRST_FROM:
+        cards, names = dive_cards(d)
+    elif d.get("format") == 2 and d["date"] >= PICK_FIRST_FROM and not d.get("rewind"):
         cards = ([cover(d), issue_card(issues[0], 1, d["date"]), deep_card(d), summary(d)]
                  + [issue_card(it, i, d["date"]) for i, it in enumerate(issues[1:], 2)] + [note_card(d), cta_follow(d) if follow_on(d) else cta(d)])
         names = CARD_NAMES_2B

@@ -2,7 +2,7 @@
 import json
 import re
 
-from .common import card_height, load_config, INDEX, MANIFEST, ROOT, esc, plain, send_time_ko
+from .common import card_height, dive_on, load_config, INDEX, MANIFEST, ROOT, esc, plain, send_time_ko
 from .gift import active_gift
 
 
@@ -382,6 +382,11 @@ def first_comment(d):
         src = plain(it.get("source") or "").replace("\u2060", "").strip()
         if src:
             rows.append(f"{i}. {src}")
+    if dive_on(d):   # 딥다이브 날: 질문 장마다 쓴 자료(공시·IR·통계)도 — 1번(H PICK) 뒤에 한 줄로
+        steps = [plain(st.get("source") or "").replace("\u2060", "").strip() for st in d["cards"]["dive"]["steps"]]
+        extra = list(dict.fromkeys(x for x in steps if x))
+        if extra and rows:
+            rows.insert(1, "↳ 딥다이브 장 · " + " / ".join(extra))
     if not rows:
         return dm_line(short=True) or ""
     return "\n".join([_pick(["카드에 쓴 자료 출처 모아둘게요", "오늘 카드 출처예요", "출처는 여기 정리해둘게요"], d), *rows])

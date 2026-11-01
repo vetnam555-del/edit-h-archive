@@ -51,6 +51,14 @@ def card_height(date=None):
     return CARD_H_34 if start and day >= start else CARD_H_45
 
 
+def dive_on(d):
+    """딥다이브 카드 날인가 — 형식 2 정규 호에 cards.dive 가 있고 config.instagram.dive_card_from 날짜부터.
+    2026-11-01 운영자 '딥다이브 카드 지금 바로 만들어줘'(reviews/2026-11-01-moneygraphy.md '인스타 화면' A). 끄려면 dive_card_from 을 null."""
+    start = (load_config().get("instagram") or {}).get("dive_card_from")
+    return bool(start and str(d.get("date") or "")[:10] >= str(start) and d.get("format") == 2 and not d.get("rewind")
+                and (d.get("cards") or {}).get("dive"))
+
+
 def cover_photo_problem(rel_path, height=CARD_H_45):
     """표지 사진이 1080×height(카드 크기)를 꽉 채울 때 10% 넘게 늘어나면(흐려지면) 이유를 돌려준다. 문제 없으면 None."""
     size = image_size(ROOT / rel_path)
