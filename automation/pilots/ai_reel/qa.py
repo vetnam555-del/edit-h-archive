@@ -509,8 +509,13 @@ def main():
 
     # 1·5 숫자 대조
     texts = [(f"자막 {i + 1}", plain(c["html"])) for i, c in enumerate(ep.get("captions", []))]
+    if ep.get("comic"):   # card=N 컷(5가지 웹툰, 11/02~)은 그날 카드 글로 채운 뒤 같은 숫자 검사를 받는다
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        import comic as comic_mod
+        comic_mod.from_cards(ep["comic"], day)
     for i, p in enumerate((ep.get("comic") or {}).get("panels", []), 1):
-        texts += [(f"만화 {i} 말풍선", plain(p["bubble"])), (f"만화 {i} 설명", plain(p.get("box", "")))]
+        texts += [(f"만화 {i} 말풍선", plain(p.get("bubble", ""))), (f"만화 {i} 설명", plain(p.get("box", "")))]
+        texts += [(f"만화 {i} {k}", plain(p[k])) for k, _ in (("body", 0), ("take", 0)) if p.get(k)]
     if ep.get("comic"):
         texts.append(("만화 제목", plain(ep["comic"]["title"])))
     if not (folder / "reel_ai_caption.txt").exists():
