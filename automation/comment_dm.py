@@ -36,14 +36,17 @@ DEFAULTS = {"enabled": True, "keywords": ["구독"], "max_chars": 20, "lookback_
             "public_reply": True, "fallback_reply": True, "link_ref": "ig-dm", "repeat_days": 30}
 TOKEN_CODES = {190}                          # 토큰 만료·무효 — 이번 실행을 멈춘다
 RATE_CODES = {4, 17, 32, 613}                # 호출 한도 — 이번 실행을 멈추고 다음 실행에 이어서
+TRANSIENT_CODES = {1, 2}                     # 알 수 없는 오류·서비스 잠시 중단 — 접속 실패·5xx 와 같이 다음 실행에 다시
 PERMISSION_CODES = {3, 10} | set(range(200, 300))   # 앱 권한·기능 없음 — DM 만 막힌 것으로 보고 공개 답글로
 # 같은 code 10 이어도 하위 코드가 있으면 그 댓글 사정(창 7일 지남·이미 답장함 등)이라 권한 문제로 보지 않는다.
 
 
 class ApiError(RuntimeError):
-    def __init__(self, status, code=None, subcode=None, message=""):
+    def __init__(self, status, code=None, subcode=None, message="", transient=False):
         super().__init__(f"{status} (code {code}{'/' + str(subcode) if subcode else ''}): {message}")
-        self.code, self.subcode = code, subcode
+        self.status, self.code, self.subcode = status, code, subcode
+        # 접속 실패·시간 초과·서버 오류(5xx) — 댓글 사정이 아니라 잠깐의 문제라 다음 실행에 다시(Codex 리뷰)
+        self.transient = transient or (isinstance(status, int) and status >= 500) or code in TRANSIENT_CODES
 
 
 class Api:
@@ -71,17 +74,17 @@ class Api:
                 raise ApiError(e.code, message=body[:200]) from None
             raise ApiError(e.code, err.get("code"), err.get("error_subcode"),
                            err.get("error_user_msg") or err.get("message") or "") from None
-        except urllib.error.URLError as e:
-            raise ApiError("접속 실패", message=str(e.reason)) from None
+        except (urllib.error.URLError, TimeoutError, OSError) as e:
+            raise ApiError("접속 실패", message=str(getattr(e, "reason", e)), transient=True) from None
 
 
 def kind_of(e):
-    """'token'·'rate'·'permission'·'comment'(그 댓글만의 사정)."""
+    """'token'·'retry'(호출 한도·접속 실패·서버 오류 — 다음 실행에 다시)·'permission'·'comment'(그 댓글만의 사정)."""
     code, sub = getattr(e, "code", None), getattr(e, "subcode", None)
     if code in TOKEN_CODES:
         return "token"
-    if code in RATE_CODES:
-        return "rate"
+    if code in RATE_CODES or getattr(e, "transient", False):
+        return "retry"
     if code in PERMISSION_CODES and not sub:
         return "permission"
     return "comment"
@@ -210,7 +213,9 @@ def candidates(g, me, now, s):
     since = now - dt.timedelta(days=s["lookback_days"])
     out = []
     for m in recent_media(g, me["id"], now, s):
-        for c in get_all(g, f"{m['id']}/comments", fields="id,text,timestamp,from,username,replies{id,from,username}", limit=50):
+        # 댓글은 끝까지 읽는다(50개씩 최대 40장 = 2,000개 — 앞 몇 장만 읽으면 뒤쪽 키워드 댓글을 영영 못 본다, Codex 리뷰)
+        for c in get_all(g, f"{m['id']}/comments", pages=40,
+                         fields="id,text,timestamp,from,username,replies{id,from,username}", limit=50):
             who = c.get("from") or {}
             if who.get("id") == me["id"] or c.get("username") == me["username"]:
                 continue
@@ -256,8 +261,8 @@ def process(g, me, now, st, s, dry=False, log=print):
                 log(f"  ✓ DM 보냄 {ck}")
             except Exception as e:  # noqa: BLE001 — 권한·창·사람 사정은 댓글마다 다르다
                 k = kind_of(e)
-                if k in ("token", "rate"):
-                    log(f"  ✗ {'토큰 문제' if k == 'token' else '호출 한도'} — 이번 실행은 여기까지 ({short_err(e)})")
+                if k in ("token", "retry"):
+                    log(f"  ✗ {'토큰 문제' if k == 'token' else '호출 한도·접속 문제'} — 이번 실행은 여기까지 ({short_err(e)})")
                     if k == "token":
                         raise
                     break
@@ -284,14 +289,14 @@ def process(g, me, now, st, s, dry=False, log=print):
                     log(f"  ✓ 공개 답글 {ck}")
                 except Exception as e:  # noqa: BLE001
                     k = kind_of(e)
-                    if k in ("token", "rate"):
+                    if k in ("token", "retry"):
                         # DM 이 나갔으면 다시 보내지 않게 기록하고, 아무것도 못 보냈으면 숫자를 되돌려 다음 실행에 처음부터(Codex 리뷰)
                         if sent:
                             st["handled"][ck] = rec
                         else:
                             day.clear()
                             day.update(before)
-                        log(f"  ✗ {'토큰 문제' if k == 'token' else '호출 한도'} — 이번 실행은 여기까지 ({short_err(e)})")
+                        log(f"  ✗ {'토큰 문제' if k == 'token' else '호출 한도·접속 문제'} — 이번 실행은 여기까지 ({short_err(e)})")
                         if k == "token":
                             raise
                         break
@@ -358,7 +363,7 @@ def main(argv=None):
             print(f"  키워드 댓글 {n}건 처리" if n else "  새 키워드 댓글 없음")
     except ApiError as e:
         print(f"✗ 멈춤 — {short_err(e)}")
-        code = 1
+        code = 0 if kind_of(e) == "retry" else 1    # 잠깐의 문제(한도·접속)는 다음 실행에 — 실패 메일을 20분마다 보내지 않게
     finally:            # 멈춰도 처리한 것까지는 기록한다(같은 댓글에 두 번 보내지 않게)
         if not args.dry_run and json.dumps(st, sort_keys=True, ensure_ascii=False) != before:
             save_state(st)

@@ -2409,7 +2409,12 @@ def t_comment_dm():
     f = Fake(cd.ApiError(400, 10, 2534022, "outside of allowed window"))
     run(f, st)
     expect(st["dm"]["ok"] is None and st["daily"]["2026-11-02"]["failed"] == 3, f"댓글 사정 오류를 권한 문제로 봤다: {st['dm']} {st['daily']}")
-    expect(cd.kind_of(cd.ApiError(400, 4)) == "rate" and cd.kind_of(cd.ApiError(400, 190)) == "token", "오류 종류")
+    expect(cd.kind_of(cd.ApiError(400, 4)) == "retry" and cd.kind_of(cd.ApiError(400, 190)) == "token"
+           and cd.kind_of(cd.ApiError("접속 실패", transient=True)) == "retry" and cd.kind_of(cd.ApiError(503)) == "retry"
+           and cd.kind_of(cd.ApiError(500, 2)) == "retry" and cd.kind_of(cd.ApiError(400, 100, 2018001)) == "comment", "오류 종류")
+    st = cd.load_state(Path("/nonexistent/state.json"))
+    run(Fake(cd.ApiError("접속 실패", message="DNS", transient=True)), st)
+    expect(not st["handled"] and "2026-11-02" not in st["daily"], "접속 실패면 처리 표시 없이 다음 실행으로 넘겨야 한다(Codex 리뷰)")
     st = cd.load_state(Path("/nonexistent/state.json"))
     run(Fake(cd.ApiError(400, 4, None, "limit")), st)
     expect(not st["handled"] and "2026-11-02" not in st["daily"], "호출 한도면 처리 표시 없이 다음 실행으로 넘겨야 한다")
@@ -2435,6 +2440,23 @@ def t_comment_dm():
     st = cd.load_state(Path("/nonexistent/state.json"))
     run(SentThenLimited(), st)
     expect([v["dm"] for v in st["handled"].values()] == [True] and st["daily"]["2026-11-02"]["dm"] == 1, f"보낸 DM 기록: {st}")
+
+    cpages = {f"https://next/c{i}": {"data": [{"id": f"x{i}-{j}", "text": "좋아요", "timestamp": ts(1), "from": {"id": f"v{i}{j}"}}
+                                          for j in range(50)], "paging": {"next": f"https://next/c{i + 1}"}} for i in range(1, 5)}
+    cpages["https://next/c5"] = {"data": [{"id": "late", "text": "에디트", "timestamp": ts(0.1), "from": {"id": "u-late"}}]}
+
+    class ManyComments(Fake):       # 앞 네 장은 일반 댓글, 다섯째 장에 키워드 댓글(Codex 리뷰)
+        def call(self, method, path, **params):
+            if path == "m1/comments":
+                self.calls.append((method, path, params))
+                return {"data": [], "paging": {"next": "https://next/c1"}}
+            if path in cpages:
+                return cpages[path]
+            return super().call(method, path, **params)
+    f = ManyComments()
+    run(f, cd.load_state(Path("/nonexistent/state.json")))
+    expect([json.loads(c[2]["recipient"])["comment_id"] for c in f.calls if c[1] == "900/messages"] == ["late"],
+           "다섯째 장 이후 키워드 댓글을 못 읽었다")
 
     pages = {"900/media": {"data": [{"id": f"p{i}", "timestamp": ts(i * 0.4), "comments_count": 1} for i in range(30)],
                            "paging": {"next": "https://graph.instagram.com/v23.0/next1"}},
