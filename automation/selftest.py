@@ -1773,15 +1773,22 @@ def t_ai_reel():
     expect(len(same) == 4 and any("첫 마디 '헉'" in f for f in same) and any("훅 종류" in f for f in same)
            and any("머리말" in f for f in same) and any("끝인사" in f for f in same), f"같은 틀 반복을 못 잡았다: {same}")
     expect(fresh == [] and old == [], f"다른 틀·11/01 기록을 막았다: {fresh} {old}")
-    # 기사·출처 맞춤(2026-11-02~) — 11/01 운영자 "기사 및 소스에 맞춰서 진행해 달라"
-    corpus_src = json.dumps({"items": [{"sources": [{"name": "헤럴드경제"}, {"name": "서울경제"}]}]}, ensure_ascii=False)
-    ok_ep = {"date": "2026-11-02", "sources": ["헤럴드경제", "서울경제"], "end_card": {"note": "숫자는 기사 2곳 이상에서 확인했어요<br>(헤럴드경제·서울경제 보도 기준)"}}
-    ok_cap = "본문\n출처: 헤럴드경제·서울경제(10.31)\n이 영상과 목소리는 AI로 만들었어요."
-    expect(qa.source_gaps(ok_ep, corpus_src, ok_cap) == [], "출처를 다 적은 릴스를 막았다")
-    expect(qa.source_gaps({**ok_ep, "sources": ["헤럴드경제"]}, corpus_src, ok_cap), "출처 1곳만 적은 릴스가 통과했다")
-    expect(qa.source_gaps({**ok_ep, "sources": ["헤럴드경제", "조선일보"]}, corpus_src, ok_cap), "content 에 없는 매체를 출처로 적은 릴스가 통과했다")
-    expect(qa.source_gaps(ok_ep, corpus_src, "본문만"), "캡션에 출처 줄이 없는데 통과했다")
-    expect(qa.source_gaps({"date": "2026-11-01"}, corpus_src, "") == [], "11/01 기록 회차를 출처 규칙으로 막았다")
+    # 기사·출처 맞춤(2026-11-02~) — 11/01 운영자 "기사 및 소스에 맞춰서 진행해 달라", Codex: 그 이슈의 sources 안에서만
+    content_src = {"big_issue": {"tag": "BYD", "sources": [{"name": "서울경제"}, {"name": "TV조선"}]},
+                   "items": [{"tag": "반도체 급락", "sources": [{"name": "전자신문"}, {"name": "헤럴드경제"}]},
+                             {"tag": "샘 올트먼", "sources": [{"name": "서울경제"}, {"name": "MBC"}]}]}
+    ok_ep = {"date": "2026-11-02", "item": "반도체 급락", "sources": ["전자신문", "헤럴드경제"],
+             "end_card": {"note": "숫자는 기사 2곳 이상에서 확인했어요<br>(전자신문·헤럴드경제 보도 기준)"}}
+    ok_cap = "본문\n출처: 전자신문·헤럴드경제(10.31)\n이 영상과 목소리는 AI로 만들었어요."
+    wrong = {**ok_ep, "sources": ["서울경제", "MBC"], "end_card": {"note": "(서울경제·MBC 보도 기준)"}}
+    expect(qa.source_gaps(ok_ep, content_src, ok_cap) == [], "출처를 다 적은 릴스를 막았다")
+    expect(qa.source_gaps(wrong, content_src, "출처: 서울경제·MBC"), "다른 이슈(올트먼)의 매체를 적은 인텔 릴스가 통과했다")
+    expect(qa.source_gaps({**ok_ep, "sources": ["전자신문"]}, content_src, ok_cap), "출처 1곳만 적은 릴스가 통과했다")
+    expect(qa.source_gaps({**ok_ep, "item": "없는 이슈"}, content_src, ok_cap), "content 에 없는 이슈를 적은 릴스가 통과했다")
+    expect(qa.source_gaps(ok_ep, content_src, "본문만"), "캡션에 출처 줄이 없는데 통과했다")
+    expect(qa.source_gaps({**ok_ep, "item": "BYD", "sources": ["서울경제", "TV조선"], "end_card": {"note": "서울경제·TV조선"}},
+                          content_src, "출처: 서울경제·TV조선") == [], "H PICK(big_issue) 출처를 막았다")
+    expect(qa.source_gaps({"date": "2026-11-01"}, content_src, "") == [], "11/01 기록 회차를 출처 규칙으로 막았다")
     # 어림 '여'(3만5000여 명·50여 명) — 대사·받아쓰기·화면 모두 단위까지 읽는다(11/01 서울마라톤·올트먼 편: 대사 숫자가 검사에서 빠졌다)
     approx = "3만5000여 명이 참가, 사장단 50여 명과"
     expect(qa.spoken_numbers("삼만 오천여 명이 달립니다") == [(35000.0, "명", "")] and qa.spoken_numbers("35,000여 명") == [(35000.0, "명", "")]
