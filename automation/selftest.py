@@ -1757,6 +1757,22 @@ def t_ai_reel():
            "content 에 없는 숫자가 통과했다")
     expect(not qa.check_numbers([("t", "1조6000억원 넘게 · 3.48% · 장중 5599 · 3만 명")], "1조 6000억원 순매도 3.48% 5599.42 3만 명"),
            "content 에 있는 숫자를 막았다")
+    # 같은 틀 반복 금지(2026-11-02~) — 11/01 운영자 "패턴이 똑같네? 헉으로 시작하고 멘트가 비슷하다"
+    with tempfile.TemporaryDirectory() as tmp:
+        def ep_at(day, name, word, hook, kick, bye):
+            d = Path(tmp) / day; d.mkdir(exist_ok=True)
+            e = {"date": day, "hook": hook, "voices": [{"text": f"{word} 시작 대사"}, {"text": bye}],
+                 "captions": [{"html": f'<div class="kick">{kick}</div><div class="main">x</div>'}]}
+            (d / name).write_text(json.dumps(e, ensure_ascii=False), encoding="utf-8")
+            return d / name, e
+        ep_at("2026-11-01", "episode.json", "헉…", None, "그래서 나는?", "내일 아침 여덟 시 반에 또 만나요!")
+        ep_at("2026-11-02", "episode.json", "28.58%.", "숫자 먼저", "오늘 할 일", "팔로우하면 내일 아침에도 알려 줄게!")
+        same = qa.pattern_repeats(*ep_at("2026-11-02", "extra2.json", "헉…", "숫자 먼저", "오늘 할 일", "팔로우하면 내일 아침에도 알려 줄게!"))
+        fresh = qa.pattern_repeats(*ep_at("2026-11-02", "extra3.json", "버스가", "질문", "기억할 것", "저장해 두고, 필요할 때 꺼내 봐!"))
+        old = qa.pattern_repeats(*ep_at("2026-11-01", "extra2.json", "헉…", None, "그래서 나는?", "내일 아침 여덟 시 반에 또 만나요!"))
+    expect(len(same) == 4 and any("첫 마디 '헉'" in f for f in same) and any("훅 종류" in f for f in same)
+           and any("머리말" in f for f in same) and any("끝인사" in f for f in same), f"같은 틀 반복을 못 잡았다: {same}")
+    expect(fresh == [] and old == [], f"다른 틀·11/01 기록을 막았다: {fresh} {old}")
     # 어림 '여'(3만5000여 명·50여 명) — 대사·받아쓰기·화면 모두 단위까지 읽는다(11/01 서울마라톤·올트먼 편: 대사 숫자가 검사에서 빠졌다)
     approx = "3만5000여 명이 참가, 사장단 50여 명과"
     expect(qa.spoken_numbers("삼만 오천여 명이 달립니다") == [(35000.0, "명", "")] and qa.spoken_numbers("35,000여 명") == [(35000.0, "명", "")]

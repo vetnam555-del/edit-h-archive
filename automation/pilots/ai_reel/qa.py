@@ -11,8 +11,11 @@
  5. 캡션 — reel_ai_caption.txt·comic_caption.txt 에 'AI로 만들' 한 줄, 해시태그 5개 이하, 같은 숫자 대조(끝 화면·만화 끝 장 문구도).
  6. 만화 — comic/ JPEG 3~10장, 1080×1350.
  7. 금지 — 화면 글자에 'AI로 만든 영상' 표시 없음(운영자 11/01), 실존 인물·회사 로고는 사람이 프레임 캡처로 한 번 더 본다(자동 아님).
+ 8. 같은 틀 반복 금지(2026-11-02~) — 첫 마디(전날까지)·훅 종류·끝 자막 머리말·끝인사가 같은 날 다른 릴스와 겹치면 실패
+    (11/01 운영자 "패턴이 똑같네? 헉으로 시작하고 멘트가 비슷하다").
 """
 import argparse
+import datetime as dt
 import difflib
 import html as htmlmod
 import json
@@ -273,6 +276,63 @@ def hangul(s):
     return re.sub(r"[^가-힣]", "", s)
 
 
+# 11/01 운영자 "패턴이 똑같네? 헉으로 시작하고 멘트가 비슷한 거 아니야?" — 그날 릴스 6편이 모두 '헉…'으로 열고 '~해 보자!'·'그래서 나는?'·같은 끝인사로 닫았다.
+# 2026-11-02 부터 릴스마다 훅 종류(hook)를 적고, 같은 날 다른 릴스와 겹치지 않게 한다. 목록·예시는 reviews/2026-11-01-ai-video.md '같은 틀 반복 금지'.
+HOOK_RULE_FROM = "2026-11-02"
+HOOK_KINDS = ("숫자 먼저", "질문", "반전", "상황", "할 일 먼저", "비교", "대화")
+
+
+def first_word(ep):
+    """첫 대사의 첫 마디('헉… 인텔이' → '헉')."""
+    text = ((ep.get("voices") or [{}])[0]).get("text", "")
+    m = re.match(r"\s*([^\s,.!?…~]+)", text)
+    return m.group(1) if m else ""
+
+
+def closing_kick(ep):
+    """마지막 자막의 머리말(kick) — '그래서 나는?' 같은 것."""
+    caps = ep.get("captions") or []
+    m = re.search(r'class="kick">(.*?)</div>', caps[-1]["html"]) if caps else None
+    return plain(m.group(1)) if m else ""
+
+
+def sign_off(ep):
+    """끝인사(마지막 대사) 원고."""
+    voices = ep.get("voices") or []
+    return voices[-1].get("text", "").strip() if len(voices) > 1 else ""
+
+
+def pattern_repeats(epath, ep):
+    """같은 날(첫 마디는 전날까지) 다른 릴스와 같은 틀이면 → 실패 목록. 2026-11-02 전 회차는 검사하지 않는다(기록)."""
+    if ep.get("date", "") < HOOK_RULE_FROM:
+        return []
+    fails = []
+    if ep.get("hook") not in HOOK_KINDS:
+        fails.append(f"hook(훅 종류)이 없거나 목록 밖이다: {ep.get('hook')!r} — {', '.join(HOOK_KINDS)} 중 하나, 같은 날 다른 릴스와 다르게")
+    day = dt.date.fromisoformat(ep["date"])
+    for d in (day, day - dt.timedelta(days=1)):
+        folder = epath.parent.parent / d.isoformat()
+        for p in sorted(folder.glob("episode.json")) + sorted(folder.glob("extra*.json")):
+            if p.resolve() == epath.resolve():
+                continue
+            try:
+                other = json.loads(p.read_text(encoding="utf-8"))
+            except ValueError:
+                continue
+            name = f"{d.isoformat()} {p.stem}"
+            if first_word(ep) and first_word(ep) == first_word(other):
+                fails.append(f"첫 마디 '{first_word(ep)}'가 {name} 와 같다 — 훅을 돌려쓴다")
+            if d != day:
+                continue
+            if ep.get("hook") and ep.get("hook") == other.get("hook"):
+                fails.append(f"훅 종류 '{ep['hook']}'가 같은 날 {name} 와 같다")
+            if closing_kick(ep) and closing_kick(ep) == closing_kick(other):
+                fails.append(f"끝 자막 머리말 '{closing_kick(ep)}'가 같은 날 {name} 와 같다")
+            if sign_off(ep) and sign_off(ep) == sign_off(other):
+                fails.append(f"끝인사 '{sign_off(ep)[:16]}…'가 같은 날 {name} 와 같다")
+    return fails
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("episode")
@@ -326,6 +386,7 @@ def main():
                 continue
             if sn[:2] not in BRAND_SPOKEN and not any(_num_match(sn, c, strict=True) for c in cvals):
                 fails.append(f"content 에 없는 숫자 — 대사 '{vline.get('text', '')[:20]}…': {_say(sn)}")
+    fails += pattern_repeats(epath, ep)
     if any("AI로 만든 영상" in plain(c["html"]) for c in ep.get("captions", [])):
         fails.append("화면 글자에 'AI로 만든 영상' 표시가 있다(운영자 11/01: 빼기)")
 
