@@ -1130,6 +1130,65 @@ def t_reel_hook():
     return f"첫 장 {timing['first']}초 · {total:.1f}초"
 
 
+def t_goal_line():
+    """북극성(2026-11-01 운영자 '구독자 1만 명'): 성과표 한눈에 목표 줄 — 지금 숫자·7일 변화·필요한 주간 성장률·지금 속도로 닿는 날."""
+    import tempfile
+    import collect_metrics as cm
+    from edith import common
+    goal = (common.load_config().get("goal") or {})
+    expect(goal.get("subscribers") == 10000 and goal.get("by"), "config.goal(1만 명·목표일)이 없다")
+    with tempfile.TemporaryDirectory() as tmp:
+        m = Path(tmp)
+        (m / "daily").mkdir()
+        (m / "daily" / "2026-11-01.json").write_text(json.dumps(
+            {"collected_at": "2026-11-01T21:30:00+09:00", "subscribers": {"sending": 100}, "instagram": {"followers": 200}}), encoding="utf-8")
+        snap = {"collected_at": "2026-11-08T21:30:00+09:00", "subscribers": {"sending": 110}, "instagram": {"followers": 200}}
+        saved = cm.METRICS, cm.load_config
+        cm.METRICS = m
+        cm.load_config = lambda: {"goal": {"subscribers": 10000, "by": "2027-11-08"}}
+        try:
+            lines = cm._goal_lines(snap)
+        finally:
+            cm.METRICS, cm.load_config = saved
+        # 수집이 빠져 2주 전 것만 있으면 비교하지 않는다(2주 증가를 한 주로 셈하지 않게 — 11/01 Codex)
+        cm.METRICS = m
+        cm.load_config = lambda: {"goal": {"subscribers": 10000, "by": "2027-11-08"}}
+        try:
+            gap_lines = cm._goal_lines({**snap, "collected_at": "2026-11-15T21:30:00+09:00"})
+        finally:
+            cm.METRICS, cm.load_config = saved
+    expect("7일 전 자료 없음" in "\n".join(gap_lines) and "+10" not in "\n".join(gap_lines), f"2주 전 자료로 7일 변화를 셈했다: {gap_lines}")
+    text = "\n".join(lines)
+    expect("뉴스레터 **110**(7일 +10)" in text and "인스타 **200**(7일 +0)" in text, f"목표 줄 숫자가 틀린다: {text}")
+    expect("뉴스레터 9.0%" in text and "인스타 닿지 않음" in text and "뉴스레터 2027-" in text, f"필요 성장률·닿는 날이 틀린다: {text}")
+    return lines[0][:60]
+
+
+def t_mascot_cards():
+    """캐러셀이 글자만으로 나가지 않는다(2026-11-01 운영자 '문구만 만들지 마 — 이미지나 캐릭터 이미지로'): MASCOT_CARDS_FROM 부터
+    사진 없는 표지는 마스코트 H + 핵심어 말풍선, 이슈 카드마다 H 가 '그래서 뭐가 달라져?'를 묻는다. 사진 표지는 사진 그대로, 지난 호는 그대로."""
+    from edith import cards, content
+    sig = 'alt="" style="display:block;width:'
+    d = content.load("2026-10-31")   # 사진 없는 표지(급락)
+    expect(not d["cards"]["cover"].get("photo"), "시험 원고(10/31)에 표지 사진이 생겼다 — 사진 없는 호로 바꾸기")
+    n_issue = len(d["card_issues"])
+    page_old, _ = cards.build(d, "")
+    expect(sig not in page_old, "지난 호(10/31) 카드에 마스코트가 들어간다 — 기록이 바뀐다")
+    page, files = cards.build({**d, "date": cards.MASCOT_CARDS_FROM}, "")
+    cover = page.split('<section class="card"')[1]
+    expect(sig in cover and d["cards"]["cover"]["keyword"] in cover, "사진 없는 표지에 마스코트·핵심어 말풍선이 없다")
+    expect(page.count(sig) == 1 + n_issue, f"이슈 카드마다 H 가 없다({page.count(sig) - 1}/{n_issue})")
+    d2 = content.load("2026-10-30")   # 사진 표지
+    page2, _ = cards.build({**d2, "date": cards.MASCOT_CARDS_FROM}, "")
+    cover2 = page2.split('<section class="card"')[1]
+    expect("background:url(" in cover2 and sig not in cover2, "사진 표지가 마스코트 표지로 바뀌었다(사진이 먼저)")
+    expect(cards.mascot_pose("코스피 3.48% 급락") == "surprised" and cards.mascot_pose("청년 지원금 환급 돌파") == "celebrate"
+           and cards.mascot_pose("내일부터 신청 접수") == "calendar" and cards.mascot_pose("AI 검색") == "thinking", "H 자세 고르기가 틀린다")
+    expect(all((cards.MASCOT_DIR / f"h-{x}.png").exists() for x in ("point", "surprised", "celebrate", "calendar", "thinking", "hello")),
+           "마스코트 자세 그림이 없다")
+    return f"{cards.MASCOT_CARDS_FROM}~ 사진 없는 표지 H·이슈 카드 {n_issue}장 H · 사진 표지·지난 호 그대로"
+
+
 def t_card_ratio():
     """3:4 카드(2026-10-30 템플릿 ver.3 검토): 날짜로 1350/1440 을 나누고, 표지 사진·카드 CSS·스토리 카드 화면·갤러리가 그 크기를 따른다.
     API 가 3:4 를 받는지 확인하는 probe-ratio 는 게시(media_publish)를 부르지 않는다. 팔로우 카드는 follow_card_from 부터."""
@@ -1633,7 +1692,139 @@ def t_ai_reel():
         expect(len(g.calls) == 1, "라벨을 거절당한 뒤 라벨 없는 스토리 컨테이너를 만든다")
     expect("want_reel" in src.split("AI_REEL")[1][:400], "AI 릴스가 릴스 게시 설정(reel=false)을 무시한다")
     expect("AI_REEL" in inspect.getsource(pi.prune), "오래된 AI 릴스 영상을 정리하지 않는다")
-    return "reel_ai.mp4 → 형식 ai · 캡션 따로 · 스토리 영상 · AI 정보 라벨(안 받으면 라벨 없이)"
+    # 'H 극장' 만화 캐러셀: 08:30 캐러셀 실행(only=carousel)에선 안 올리고, 라벨·AI 한 줄·정리 대상
+    expect("post_comic" in src and "COMIC_DIR" in inspect.getsource(pi.prune), "만화 캐러셀 게시·정리 단계가 없다")
+    expect('args.only != "carousel"' in src.split("H 극장 만화")[0][-600:], "만화 캐러셀이 08:30 캐러셀 실행에서 올라갈 수 있다")
+    with tempfile.TemporaryDirectory() as tmp:
+        folder = Path(tmp)
+        (folder / pi.COMIC_DIR).mkdir()
+        for i in (1, 2, 3):
+            (folder / pi.COMIC_DIR / f"c{i}.jpg").write_bytes(b"x")
+        (folder / "comic_caption.txt").write_text("만화 캡션", encoding="utf-8")
+        g = G(True)
+        saved_wp, saved_wr, saved_pub = pi.wait_public, getattr(G, "wait_ready", None), pi.publish
+        pi.wait_public = lambda urls, **k: None
+        G.wait_ready = lambda self, cid, what, timeout=600: None
+        pi.publish = lambda g_, uid, cid, what, tries=6: "m1"
+        try:
+            mid, info = pi.post_comic(g, "u", "2026-11-01", folder, "https://x", False)
+        finally:
+            pi.wait_public, pi.publish = saved_wp, saved_pub
+        parent = g.calls[-1]
+        expect(mid == "m1" and info.get("ai_label") is True and parent.get("is_ai_generated") == "true"
+               and pi.AI_NOTE_KEY in parent.get("caption", "") and parent.get("media_type") == "CAROUSEL", "만화 캐러셀에 AI 라벨·AI 한 줄이 없다")
+
+    # 게시 전 숫자 검수 — 큰 금액은 한 덩어리로 대조한다(11/01 Codex: '1조6000억원'이 '1조5000억원과 6000억원'에서 통과하면 안 된다)
+    sys.path.insert(0, str(ROOT / "automation" / "pilots" / "ai_reel"))
+    import qa
+    expect(qa.check_numbers([("t", "1조6000억원")], "1조5000억원과 6000억원"), "쪼갠 금액 조각으로 '1조6000억원'이 통과했다")
+    expect(qa.check_numbers([("t", "1조7000억원")], "1조6000억원") and qa.check_numbers([("t", "12거래일")], "11거래일, 12.64"),
+           "content 에 없는 숫자가 통과했다")
+    expect(not qa.check_numbers([("t", "1조6000억원 넘게 · 3.48% · 장중 5599 · 3만 명")], "1조 6000억원 순매도 3.48% 5599.42 3만 명"),
+           "content 에 있는 숫자를 막았다")
+    # 등락 부호 — '+7.08%'는 '-7.08%'로 통과 못 하고, '-3.02%'는 '3.02% 내린'으로 통과한다(11/01 Codex)
+    signed = "2026-11-01 SK하이닉스 -7.08%, 삼성전자는 3.02% 내린 22만5000원, 생산이 3.0% 늘어"
+    expect(qa.check_numbers([("t", "SK하이닉스 +7.08%")], signed) and qa.check_numbers([("t", "+3.02%")], signed)
+           and qa.check_numbers([("t", "-3.0%")], signed), "등락 부호가 뒤집힌 숫자가 통과했다")
+    expect(not qa.check_numbers([("t", "SK하이닉스 -7.08% · 삼성전자 -3.02% · 생산 +3.0% · 2026-11-01")], signed),
+           "content 와 같은 방향의 등락 숫자를 막았다")
+    # 끝 화면 문구 — 고정 문구(8시 30분·2030)는 통과, 그 밖의 숫자는 content 와 대조(11/01 Codex)
+    expect(not qa.check_numbers([("끝", "내일 아침 8시 30분에 또 만나요! 2030의 아침을 편집합니다")], "3.48%", allow=qa.BRAND_TOKENS)
+           and qa.check_numbers([("끝", "코스피 99.99% 하락")], "3.48%", allow=qa.BRAND_TOKENS), "끝 화면 숫자 검수가 틀린다")
+    expect('"끝 화면 {k}"' in inspect.getsource(qa.main) or "끝 화면" in inspect.getsource(qa.main), "qa.main 이 끝 화면 문구를 보지 않는다")
+    # 목소리 숫자 — 대사 원고(한글 읽기)는 content 와, 들린 숫자는 대사와 같은 값이어야 한다(11/01 Codex: 자막이 맞아도 '일조 칠천억'을 말하면 막는다)
+    script = qa.spoken_numbers("외국인이 하루 만에 일조 육천억 원 넘게 팔았대! 프로그램 매도 오 분간 멈춥니다. 삼 점 사팔 퍼센트")
+    expect([x[:2] for x in script] == [(1.6e12, "원"), (5.0, "분"), (3.48, "%")], f"한글 숫자 읽기가 틀린다: {script}")
+    expect(all(x[:2] in qa.BRAND_SPOKEN for x in qa.spoken_numbers("사이드카가 하루 만에 울렸대, 삼성 이 회사, 내일 아침 여덟 시 반, 네, 한국 대해")),
+           f"숫자가 아닌 말을 숫자로 읽었다: {qa.spoken_numbers('사이드카가 하루 만에 울렸대, 삼성 이 회사, 내일 아침 여덟 시 반, 네, 한국 대해')}")
+    # 세는 말 단위('대'·'종목' …) — '이만 백삼십칠 대' = content '2만137대', 받아쓰기 '2만 137대'(11/01 BYD 편)
+    cars = qa.spoken_numbers("비와이디가 올해 구월까지 이만 백삼십칠 대나 팔렸대!")
+    expect([x[:2] for x in cars] == [(9.0, "월"), (20137.0, "대")] and not qa.check_spoken(cars, "BYD가 올해 9월까지 2만 137대나 팔렸대")[1]
+           and all(any(qa._num_match(x, c, strict=True) for c in qa.content_values("올해 1~9월 국내에서 2만137대 신규 등록")) for x in cars),
+           f"차 대수(대) 읽기가 틀린다: {cars}")
+    # 고유어 수사 — '두 종목'을 '세 종목'으로 말하면 막는다, '두 종목'은 content 와 대조(11/01 Codex)
+    two = qa.spoken_numbers("내 계좌가 반도체 두 종목에 얼마나 몰렸는지")
+    expect([x[:2] for x in two] == [(2.0, "종목")] and qa.check_spoken(two, "내 계좌가 반도체 세 종목에 얼마나")[1]
+           and not qa.check_spoken(two, "내 계좌가 반도체 두 종목에 얼마나")[1], f"고유어 수사 검사가 틀린다: {two}")
+    expect(any(qa._num_match(two[0], c) for c in qa.content_values("반도체 두 종목에 얼마나 몰려 있는지")), "content 의 '두 종목'을 못 읽는다")
+    # 단위가 있으면 content 도 같은 단위 — 날짜(2026-10-31)의 31 로 '31%'가 통과하면 안 된다, 화면의 '세 종목'·'3종목'도 대조(11/01 Codex)
+    dated = '{"date": "2026-10-31", "t": "코스피 3.48% 내린 5730.74, 반도체 두 종목"}'
+    expect(qa.check_numbers([("t", "코스피 31% 하락")], dated) and qa.check_numbers([("t", "반도체 세 종목")], dated)
+           and qa.check_numbers([("t", "반도체 3종목")], dated), "단위 없는 날짜 숫자나 다른 수량으로 화면 숫자가 통과했다")
+    expect(not qa.check_numbers([("t", "코스피 3.48% · 5730 · 반도체 두 종목 · 한 번 더 · 2종목 · 숫자는 기사 2곳 이상에서 확인했어요")], dated),
+           "content 와 같은 화면 숫자(또는 고정 확인 문구)를 막았다")
+    # 백 단위 금액·화면 등락 말 — '3백억원' ↔ '4백억원', '3.48% 상승' ↔ content '3.48% 하락'은 막는다(11/01 Codex)
+    expect(qa.check_numbers([("t", "3백억원")], "4백억원") and not qa.check_numbers([("t", "5천6백만 원 · 3백억원")], "5600만원, 300억원"),
+           "백 단위 금액 검사가 틀린다")
+    expect(qa.check_numbers([("t", "코스피 3.48% 상승")], "코스피 3.48% 하락") and not qa.check_numbers([("t", "코스피 3.48% 빠졌다고?! 장중 5599까지 밀렸어요")], "3.48% 내린 5730.74, 장중 5599.42"),
+           "화면의 등락 말을 content 방향과 대조하지 않는다(또는 지수 수준을 잘못 막았다)")
+    # 퍼센트 ≠ 퍼센트포인트 — '2.1%' ↔ '2.1%p'는 어느 쪽으로도 통과 못 한다(11/01 Codex)
+    expect(qa.check_numbers([("t", "기준금리 2.1%")], "금리 2.1%p 우대") and qa.check_numbers([("t", "2.1%p 우대")], "기준금리 2.1%")
+           and not qa.check_numbers([("t", "2.1%p 우대")], "금리 2.1%p 우대"), "퍼센트와 퍼센트포인트를 같은 단위로 봤다")
+    expect([x[:2] for x in qa.spoken_numbers("이 점 일 퍼센트 포인트 우대")] == [(2.1, "%p")], "말로 한 퍼센트포인트를 못 읽는다")
+    # 천 단위 금액 — '3천억원'은 '4천억원'으로 통과 못 하고 '3000억원'과는 같은 값(11/01 Codex)
+    expect(qa.check_numbers([("t", "3천억원")], "4천억원") and not qa.check_numbers([("t", "3천억원 · 5천만원 · 2만5천명")], "3000억원, 5000만원, 2만5000명"),
+           "천 단위 금액 검사가 틀린다")
+    day = lambda t: [x[:2] for x in qa.spoken_numbers(t)]  # noqa: E731
+    expect(day("11월 30일") == [(11.0, "월"), (30.0, "일")] and day("삼십 일 동안") == [(30.0, "일")]
+           and day("삼십일 일") == [(31.0, "일")], f"날짜·기간의 '일'을 숫자로 삼켰다: {day('11월 30일')}")
+    # 등락 방향 — 목소리가 '플러스'로, 또는 '올랐대'로 뒤집어 말하면 막는다(11/01 Codex)
+    _, flip = qa.check_spoken(qa.spoken_numbers("마이너스 칠 점 영팔 퍼센트"), "플러스 칠 점 영팔 퍼센트")
+    expect(flip, "목소리가 등락 부호를 뒤집어 말해도 통과했다")
+    cv7 = qa.content_values("SK하이닉스 -7.08%, 삼성전자는 3.02% 내린")
+    expect(not any(qa._num_match(x, c) for x in qa.spoken_numbers("칠 점 영팔 퍼센트 올랐대") for c in cv7)
+           and all(any(qa._num_match(x, c) for c in cv7) for x in qa.spoken_numbers("칠 점 영팔 퍼센트 빠졌대, 삼 점 영이 퍼센트 내렸어")),
+           "대사의 등락 방향을 content 와 대조하지 않는다")
+    _, bad_day = qa.check_spoken(qa.spoken_numbers("삼십 일 동안"), "31일 동안")
+    expect(bad_day, "30일을 31일로 말해도 통과했다")
+    cv = qa.content_values("외국인이 1조6000억원 넘게 팔았고 5분간 멈췄다, 3.48% 내린")
+    expect(all(any(qa._num_match(x, c) for c in cv) for x in script), "content 와 같은 대사 숫자를 막았다")
+    expect(not any(qa._num_match((1.7e12, "원"), c) for c in cv), "content 에 없는 대사 금액이 통과했다")
+    _, bad = qa.check_spoken(script, "외국인이 하루 만에 1조 7천억 원 넘게 팔았대 프로그램 매도 5분간 멈춥니다 3.48%")
+    expect(any("1.7e+12" in b for b in bad) and any("1.6e+12" in b for b in bad), f"목소리가 틀린 금액을 말해도 통과했다: {bad}")
+    _, ok = qa.check_spoken(script, "외국인이 하루 만에 1조 6천억 원 넘게 팔았대 프로그램 매도 5분간 멈춥니다 3.48% 내일 아침 8시 반에")
+    expect(not ok, f"맞게 말한 숫자를 막았다: {ok}")
+    # 만화 10장 순서 — 사전순이면 c10(끝 장)이 두 번째로 올라간다
+    with tempfile.TemporaryDirectory() as tmp:
+        folder = Path(tmp)
+        (folder / pi.COMIC_DIR).mkdir()
+        for i in range(1, 11):
+            (folder / pi.COMIC_DIR / f"c{i}.jpg").write_bytes(b"x")
+        (folder / "comic_caption.txt").write_text("만화 캡션", encoding="utf-8")
+        g = G(True)
+        saved_wp, saved_pub = pi.wait_public, pi.publish
+        pi.wait_public = lambda urls, **k: None
+        pi.publish = lambda g_, uid, cid, what, tries=6: "m1"
+        try:
+            pi.post_comic(g, "u", "2026-11-01", folder, "https://x", False)
+        finally:
+            pi.wait_public, pi.publish = saved_wp, saved_pub
+        order = [c["image_url"].rsplit("/", 1)[1] for c in g.calls if c.get("is_carousel_item")]
+        expect(order == [f"c{i}.jpg" for i in range(1, 11)], f"만화 순서가 틀렸다: {order}")
+
+    # 만화·AI 릴스 성과는 각자 게시 시각에서 24시간 뒤 스냅숏으로 잰다(캐러셀 시각으로 고르면 늦게 올린 만화가 빠진다 — 11/01 Codex)
+    import collect_metrics as cm
+    with tempfile.TemporaryDirectory() as tmp:
+        auto = Path(tmp)
+        (auto / "ig_posted").mkdir()
+        (auto / "metrics" / "daily").mkdir(parents=True)
+        (auto / "ig_posted" / "2026-11-01.json").write_text(json.dumps(
+            {"carousel": {"at": "2026-11-01T08:30:00+09:00"}, "comic": {"at": "2026-11-02T10:00:00+09:00"}}), encoding="utf-8")
+        snaps = [("2026-11-02T21:00:00+09:00", 1), ("2026-11-03T21:00:00+09:00", 2)]
+        for at, n in snaps:
+            (auto / "metrics" / "daily" / f"{at[:10]}.json").write_text(json.dumps(
+                {"collected_at": at, "instagram": {"posts": {"2026-11-01": {"reach": 100 * n, "comic": {"reach": 10 * n}}}}}), encoding="utf-8")
+        saved = cm.AUTOMATION, cm.METRICS
+        cm.AUTOMATION, cm.METRICS = auto, auto / "metrics"
+        try:
+            main_row = cm._at_age("2026-11-01", {})
+            comic_row = cm._at_age("2026-11-01", {}, kind="comic")
+            none_row = cm._at_age("2026-11-01", {}, kind="reel_ai")
+        finally:
+            cm.AUTOMATION, cm.METRICS = saved
+        expect(main_row.get("reach") == 100 and comic_row == {"reach": 20} and none_row == {},
+               f"만화 24시간 스냅숏을 캐러셀 시각으로 골랐다({main_row}, {comic_row}, {none_row})")
+    return "reel_ai.mp4 → 형식 ai · 캡션 따로 · 스토리 영상 · AI 정보 라벨 · H 극장 만화 캐러셀 · 숫자 검수 · 각자 24시간 성과"
 
 
 def t_competitors_ig():
@@ -1796,6 +1987,8 @@ def main():
     check("첫 화면 구독·사이트 그림(index.html)", t_home)
     check("문구·마크 2판(2030 대표 한 줄·마스코트 얼굴)", t_brand_v2)
     check("AI 영상 릴스·스토리(reel_ai.mp4)", t_ai_reel)
+    check("캐러셀 이미지(마스코트 H)", t_mascot_cards)
+    check("구독자 1만 목표 줄", t_goal_line)
     check("경쟁 매체 인스타(비즈니스 탐색)", t_competitors_ig)
     check("경쟁 매체 웹(토큰 없이·robots 지킴)", t_competitors_web)
     if not args.quick:

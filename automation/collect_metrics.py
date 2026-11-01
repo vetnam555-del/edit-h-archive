@@ -264,6 +264,12 @@ def instagram(days, weekly_days=()):
                     row["reel_ai"]["avg_watch_s"] = round(ms["ig_reels_avg_watch_time"] / 1000, 1)
             except IGError as e:
                 row["reel_ai_error"] = str(e)[:120]
+        mid = (log.get("comic") or {}).get("id")
+        if mid:   # 'H 극장' 만화 캐러셀(2026-11-01~) — 08:30 캐러셀과 따로 잰다
+            try:
+                row["comic"] = _media_row(g, mid, 0, out)
+            except IGError as e:
+                row["comic_error"] = str(e)[:120]
         story = _story_row(g, day, log)
         if story:
             row["story"] = story
@@ -375,25 +381,44 @@ def _reel_cell(p):
     return cell + (f" (반응 {extra})" if extra else "")
 
 
-def _at_age(day, snap, hours=24):
+def _at_age(day, snap, hours=24, kind="carousel"):
     """그 호 캐러셀의 '게시 hours 시간 뒤 첫 스냅숏' 숫자({reach, views, …}). 아직 그만큼 안 지났으면 {}.
-    스냅숏은 하루 1~2번이라 실제 나이는 24~48시간 사이 — 누적 숫자를 그대로 비교하는 것보다 공정하다."""
+    스냅숏은 하루 1~2번이라 실제 나이는 24~48시간 사이 — 누적 숫자를 그대로 비교하는 것보다 공정하다.
+    kind='comic'·'reel_ai' 면 따로 올린 그 게시물의 게시 시각(ig_posted 의 at)으로 재고 그 칸만 돌려준다 —
+    캐러셀 시각으로 고르면 늦게 올린 만화가 24시간이 안 된 채 비교되거나 영영 빠진다(2026-11-01 Codex)."""
     log = AUTOMATION / "ig_posted" / f"{day}.json"
-    at = ((json.loads(log.read_text(encoding="utf-8")).get("carousel") or {}).get("at") if log.exists() else None) or f"{day}T08:00:00+09:00"
+    entry = (json.loads(log.read_text(encoding="utf-8")).get(kind) or {}) if log.exists() else {}
+    at = entry.get("at") or (f"{day}T08:00:00+09:00" if kind == "carousel" else None)
+    if not at:
+        return {}
     due = dt.datetime.fromisoformat(at) + dt.timedelta(hours=hours)
     snaps = [json.loads(q.read_text(encoding="utf-8")) for q in sorted((METRICS / "daily").glob("*.json"))] + [snap]
     for s in sorted(snaps, key=lambda s: s.get("collected_at") or ""):
         row = ((s.get("instagram") or {}).get("posts") or {}).get(day)
+        if kind != "carousel":
+            row = (row or {}).get(kind)
         if row and s.get("collected_at") and dt.datetime.fromisoformat(s["collected_at"]) >= due:
             return row
     return {}
 
 
-def _reel_compare(scored):
+def _comic_compare(scored, snap):
+    """'H 극장' 만화 캐러셀(2026-11-01~) vs 같은 날 08:30 캐러셀 — 각자 게시 24시간 뒤 도달·저장·공유(호 수)."""
+    pairs = [(c, a) for d, _, _, a in scored if a.get("reach") is not None
+             for c in [_at_age(d, snap, kind="comic")] if c.get("reach") is not None]
+    if not pairs:
+        return []
+    avg = lambda rows, k: sum((r.get(k) or 0) for r in rows) / len(rows)  # noqa: E731
+    comic, main = [c for c, _ in pairs], [a for _, a in pairs]
+    return [f"- H 극장 만화: 도달 {avg(comic, 'reach'):.0f}·저장 {avg(comic, 'saved'):.1f}·공유 {avg(comic, 'shares'):.1f}"
+            f" vs 같은 날 캐러셀 도달 {avg(main, 'reach'):.0f}·저장 {avg(main, 'saved'):.1f}·공유 {avg(main, 'shares'):.1f}({len(pairs)}호)"]
+
+
+def _reel_compare(scored, snap):
     """릴스 형식(세로·카드)·게시 시각대별 — 게시 24시간 뒤 도달, 평균 시청 시간과 길이 대비 비율(2026-10-02 실험 축)."""
     groups = {}
     for d, f, sc, a in scored:
-        x = a.get("reel_ai") or {}   # 그날 릴스와 따로 올린 AI 영상 릴스
+        x = _at_age(d, snap, kind="reel_ai")   # 그날 릴스와 따로 올린 AI 영상 릴스 — 그 게시 시각에서 24시간
         if x.get("reach") is not None:
             groups.setdefault("AI 영상·따로", []).append((x.get("reach"), x.get("avg_watch_s"), x.get("seconds")))
         r = a.get("reel") or {}
@@ -478,6 +503,57 @@ def _account_lines(ig, posts):
     return out
 
 
+def _goal_lines(snap):
+    """북극성 — 구독자 1만(2026-11-01 운영자 '매일매일 발전해서 구독자 1만 명 달성할 수 있게끔'). config.goal.
+    뉴스레터 발송 대상·인스타 팔로워 지금 숫자, 7일 전 스냅숏과의 차이, 목표일까지 닿으려면 필요한 주간 성장률, 지금 속도로 닿는 날."""
+    import math
+    goal = load_config().get("goal") or {}
+    target, by = goal.get("subscribers"), goal.get("by")
+    if not target or not by:
+        return []
+    try:
+        now = dt.datetime.fromisoformat(str(snap.get("collected_at")))
+        days_left = (dt.date.fromisoformat(str(by)) - now.date()).days
+    except ValueError:
+        return []
+    old, gap = None, None
+    for q in sorted((METRICS / "daily").glob("*.json")):
+        s = json.loads(q.read_text(encoding="utf-8"))
+        at = s.get("collected_at")
+        if not at:
+            continue
+        days = (now - dt.datetime.fromisoformat(at)).total_seconds() / 86400
+        # 약 7일 전(6.5~10일)만 비교한다 — 수집이 빠져 2주 전 것을 쓰면 2주 증가를 한 주로 셈하게 된다(11/01 Codex)
+        if 6.5 <= days <= 10 and (gap is None or abs(days - 7) < abs(gap - 7)):
+            old, gap = s, days
+    cur = {"뉴스레터": (snap.get("subscribers") or {}).get("sending"), "인스타": (snap.get("instagram") or {}).get("followers")}
+    prev = {"뉴스레터": ((old or {}).get("subscribers") or {}).get("sending"), "인스타": ((old or {}).get("instagram") or {}).get("followers")}
+    parts, needs, eta = [], [], []
+    for k, v in cur.items():
+        if not isinstance(v, int) or v <= 0:
+            continue
+        pv = prev.get(k)
+        delta = v - pv if isinstance(pv, int) else None
+        parts.append(f"{k} **{v:,}**" + (f"({round(gap)}일 {delta:+d})" if delta is not None else "(7일 전 자료 없음)"))
+        if days_left > 0 and v < target:
+            needs.append(f"{k} {100 * ((target / v) ** (7 / days_left) - 1):.1f}%")
+        if v >= target:
+            continue
+        if delta is None:
+            eta.append(f"{k} 알 수 없음(7일 전 자료 없음)")
+        elif delta > 0 and pv > 0:
+            days_to = math.log(target / v) / math.log(v / pv) * gap   # 실제 경과 일수로 나눈 성장 속도
+            eta.append(f"{k} {(now.date() + dt.timedelta(days=days_to)).isoformat()}")
+        else:
+            eta.append(f"{k} 닿지 않음(늘지 않음)")
+    if not parts:
+        return []
+    out = [f"- **목표 구독자 {target:,}명**({by}까지) — 지금 " + " · ".join(parts)]
+    if needs:
+        out.append("  - 닿으려면 매주 " + " · ".join(needs) + " 늘어야 한다 · 지금 속도로 닿는 날: " + " · ".join(eta))
+    return out
+
+
 def summary_md(snap):
     ig = snap.get("instagram") or {}
     posts = ig.get("posts") or {}
@@ -495,6 +571,7 @@ def summary_md(snap):
               + (" · 도달·저장 인사이트 권한 없음(좋아요·댓글만)" if ig.get("insights") is False else ""),
               f"- 메일 발송 대상 **{sub.get('sending', '–')}**명 (명단 {sub.get('listed', '–')} · 수신 제외 {sub.get('excluded', '–')})"
               f" · 최근 {DAYS}일 구독 신청 {mb.get('signups_14d', '–')} · 수신 거부 {mb.get('unsubs_14d', '–')}"]
+    lines += _goal_lines(snap)
     lines += _account_lines(ig, posts)
     refs = mb.get("signup_refs_14d") or {}
     if refs:
@@ -542,7 +619,8 @@ def summary_md(snap):
                   f"- 요일: {avg_by('weekday')}",
                   *([f"- 독자 축: {avg_by('audience')}"] if len({f.get('audience') for _, f, _, _ in scored}) > 1 else []),
                   *_series_compare(snap),
-                  *_reel_compare(scored),
+                  *_reel_compare(scored, snap),
+                  *_comic_compare(scored, snap),
                   f"- 가장 좋았던 호: {best[0]} 「{best[1]['title']}」 {best[2]}점·도달 {best[3].get('reach', '–')}"
                   f" · 가장 약했던 호: {worst[0]} 「{worst[1]['title']}」 {worst[2]}점·도달 {worst[3].get('reach', '–')}",
                   "", "※ 호 수가 적을 때의 차이는 우연일 수 있다. 원칙은 같은 방향의 근거가 3호 이상 쌓였을 때만 바꾼다."]

@@ -164,6 +164,53 @@ def _sticker(text, rotate):
             f'box-shadow:0 3px 8px rgba(0,0,0,.14);">{esc(text)}</div>')
 
 
+# 2026-11-01 운영자 "캐러셀 만들 때 문구만 만들지 마 — 이미지를 쓰거나 캐릭터를 쓴 이미지로. 문구만으로는 들어오고 싶은 마음이 없다".
+# 사진 없는 표지(10/31 '급락'·주간 특집 'TOP5')가 글자뿐이었다 → 사진이 없으면 마스코트 H 가 반응하는 표지, 안쪽 이슈 카드엔 H 가 '그래서 뭐가 달라져?'를 묻는다.
+MASCOT_CARDS_FROM = "2026-11-02"   # 11/01 호는 이 변경 머지(09:00 뒤) 전에 만들어져 08:30 에 나간다
+MASCOT_DIR = ROOT / "assets" / "mascot"
+_POSE_SHOCK = re.compile(r"급락|폭락|하락|떨어|빠졌|유출|해킹|사고|적자|감소|경고|위기|급등|폭등|사이드카|과징금|제재|파산|연체")
+_POSE_GOOD = re.compile(r"혜택|지원금|할인|무료|환급|돌파|흑자|역대|출시|오픈|당첨|최대")
+_POSE_DATE = re.compile(r"마감|시행|신청|접수|일정|D-\d|부터")
+
+
+def mascot_on(d):
+    return str(d.get("date") or "")[:10] >= MASCOT_CARDS_FROM
+
+
+def mascot_pose(text, default="thinking"):
+    """소식 글자로 H 의 자세를 고른다 — 놀라운 소식 surprised, 좋은 소식 celebrate, 날짜·마감 calendar, 그 밖엔 default."""
+    t = plain(str(text or ""))
+    if _POSE_SHOCK.search(t):
+        return "surprised"
+    if _POSE_GOOD.search(t):
+        return "celebrate"
+    if _POSE_DATE.search(t):
+        return "calendar"
+    return default
+
+
+def mascot_img(pose, size, style=""):
+    f = MASCOT_DIR / f"h-{pose}.png"
+    if not f.exists():
+        f = MASCOT_DIR / "h-hello.png"
+    return (f'<img src="{_photo_uri(f.relative_to(ROOT))}" alt="" '
+            f'style="display:block;width:{size}px;height:{size}px;object-fit:contain;{style}">')
+
+
+def _mascot_hero(d, cov, l1, l2, height):
+    """사진 없는 표지 — 왼쪽에 크게 H(소식에 맞는 자세), 오른쪽 위에 H 가 외치는 핵심어 말풍선."""
+    kw = cov.get("keyword") or ""
+    pose = cov.get("mascot") or mascot_pose(f"{kw} {l1} {l2}", "point")
+    size = min(128, fit_size(kw, 860) * 600 // 860) if kw else 0   # 핵심어 5자 이하 — 말풍선이 오른쪽 절반 안에
+    say = (f'<div style="position:absolute;right:0;top:10px;z-index:2;background:#FFFFFF;border:5px solid {TEXT};'
+           f'border-radius:44px;padding:10px 36px 16px;font-weight:900;font-size:{size}px;line-height:1.1;letter-spacing:-3px;color:{TEXT};'
+           f'white-space:nowrap;box-shadow:0 8px 0 {ACC_FILL};">{esc(kw)}'
+           f'<div style="position:absolute;left:46px;bottom:-24px;width:38px;height:38px;background:#FFFFFF;'
+           f'border-right:5px solid {TEXT};border-bottom:5px solid {TEXT};transform:rotate(45deg);"></div></div>') if kw else ""
+    body = min(height + 40, 600)
+    return (say + f'<div style="position:absolute;left:30px;bottom:-30px;z-index:1;">{mascot_img(pose, body)}</div>')
+
+
 def cover(d, kicker=None, foot=None):
     """머리말 → 띠 제목 두 줄 → (사진 또는 핵심어 대형 마커) + 오늘의 다른 이슈 스티커 3개."""
     cov = d["cards"]["cover"]
@@ -186,6 +233,10 @@ def cover(d, kicker=None, foot=None):
               '<div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.62) 0%,rgba(0,0,0,.35) 22%,'
               'rgba(0,0,0,0) 42%,rgba(0,0,0,0) 72%,rgba(0,0,0,.55) 100%);"></div>')
         hero, sticker_html = "", ""
+    elif mascot_on(d):
+        hero = _mascot_hero(d, cov, l1, l2, 560 + (card_height(d["date"]) - H) // 2)
+        spots = [("right:10px;top:250px;", 2), ("right:60px;top:360px;", -2), ("right:0;top:470px;", 1.5)]   # H 오른쪽 아래로
+        sticker_html = "".join(f'<div style="position:absolute;z-index:3;{pos}">{_sticker(t, r)}</div>' for t, (pos, r) in zip(stickers, spots))
     else:
         kw = cov["keyword"]
         size = fit_size(kw, 380)
@@ -241,21 +292,29 @@ def stat_tiles(metrics, dark):
     return f'<div style="flex:none;display:flex;gap:14px;width:100%;margin-top:30px;">{tiles}</div>'
 
 
-def dialogue(take, dark):
+def dialogue(take, dark, pose=None):
     """대화 — 흰 질문 말풍선 '그래서 뭐가 달라져?' → 복숭아색 답 말풍선(이 뉴스로 바뀌는 것, 누구나 읽을 수 있게). 키트 본문 21(Q&A) 문법과도 맞다.
     답이 'A — B' 꼴이면 줄표 뒤에서 줄을 바꿔 두 마디로 읽히게 하고, 렌더러(.shrink)가 말풍선 폭을 가장 긴 줄에 맞춘다."""
     q_bg, q_fg = ("#1E1E21", "#FFFFFF") if dark else ("#FFFFFF", TEXT)
     line = "#FFFFFF" if dark else TEXT
+    ask = (f'<div style="background:{q_bg};border:3px solid {line};border-radius:22px 22px 22px 6px;'
+           f'padding:14px 24px;font-weight:600;font-size:{fs(28)};line-height:1.2;color:{q_fg};">그래서 뭐가 달라져?</div>')
+    if pose:   # H 가 독자 대신 묻는다(11/01~) — 말풍선 왼쪽에 작은 H
+        ask = (f'<div style="align-self:flex-start;display:flex;align-items:flex-end;gap:6px;margin-left:-14px;">'
+               f'{mascot_img(pose, 180, "margin:-44px 0 -16px;")}{ask}</div>')
+    else:
+        ask = ask.replace('<div style="', '<div style="align-self:flex-start;', 1)
     return (f'<div style="flex:none;width:100%;margin-top:26px;display:flex;flex-direction:column;gap:10px;">'
-            f'<div style="align-self:flex-start;background:{q_bg};border:3px solid {line};border-radius:22px 22px 22px 6px;'
-            f'padding:14px 24px;font-weight:600;font-size:{fs(28)};line-height:1.2;color:{q_fg};">그래서 뭐가 달라져?</div>'
+            f'{ask}'
             f'<div class="bal shrink" style="align-self:flex-end;max-width:92%;background:{ACC_FILL};border:3px solid {line};'
             f'border-radius:22px 22px 6px 22px;padding:16px 26px;text-align:left;font-weight:700;font-size:{fs(31)};'
             f'line-height:1.45;color:{TEXT};">{mk(take, TEXT).replace(" — ", " —<br>")}</div></div>')
 
 
-def issue_card(it, n):
+def issue_card(it, n, date=None):
     dark = bool(it.get("accent"))
+    pose = (("point" if dark else mascot_pose(f'{it.get("tag", "")} {it.get("headline", "")}'))
+            if mascot_on({"date": date}) else None)
     fg = "#FFFFFF" if dark else TEXT
     cmp = it.get("compare")
     if cmp:
@@ -282,7 +341,7 @@ def issue_card(it, n):
   {pick}
   <div class="bal" style="margin-top:{22 if dark else 32}px;font-weight:700;font-size:{fs(56)};line-height:1.34;letter-spacing:-1px;color:{fg};">{mk(it["headline"], fg, dark)}</div>
   <div class="bal" style="margin-top:22px;font-weight:400;font-size:{fs(33)};line-height:1.55;color:{"#BDBDBD" if dark else SUB};">{mk(it["body"], fg, dark)}</div>
-  {dialogue(it["takeaway"], dark)}
+  {dialogue(it["takeaway"], dark, pose)}
 </div>
 <div style="position:absolute;left:60px;right:60px;bottom:80px;text-align:center;font-size:24px;line-height:1.4;color:{MUTED if dark else SRC_LIGHT};">출처 · {esc(it["source"])}</div>""",
                   "#000000" if dark else "#FFFFFF")
@@ -567,8 +626,8 @@ def build(d, font_css):
     """(html 문자열, 파일명 목록)을 돌려준다. 카드 순서 = 파일명 순서."""
     issues = d["card_issues"]
     if d.get("format") == 2 and d["date"] >= PICK_FIRST_FROM and not d.get("rewind"):
-        cards = ([cover(d), issue_card(issues[0], 1), deep_card(d), summary(d)]
-                 + [issue_card(it, i) for i, it in enumerate(issues[1:], 2)] + [note_card(d), cta_follow(d) if follow_on(d) else cta(d)])
+        cards = ([cover(d), issue_card(issues[0], 1, d["date"]), deep_card(d), summary(d)]
+                 + [issue_card(it, i, d["date"]) for i, it in enumerate(issues[1:], 2)] + [note_card(d), cta_follow(d) if follow_on(d) else cta(d)])
         names = CARD_NAMES_2B
     elif d.get("format") == 2:
         cards = ([cover(d), summary(d), issue_card(issues[0], 1), deep_card(d)]
