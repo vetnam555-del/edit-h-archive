@@ -34,37 +34,37 @@
    "start": 2.0,
    "end": 5.5,
    "size": 84,
-   "html": "<div class=\"kick\">1/5 · 자동차</div><div class=\"main\">중국 BYD 1~9월<br><span class=\"hl\">2만137대</span> 등록</div><div class=\"sub\">9월엔 수입차 4위까지</div>"
+   "html": "<div class=\"kick\">1/5 · 자동차</div><div class=\"main\">중국 BYD 1~9월<br><span class=\"hl\">2만137대</span> 등록</div><div class=\"sub\">9월엔 수입차 4위까지</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 서울경제·TV조선</div>"
   },
   {
    "start": 5.5,
    "end": 9.0,
    "size": 84,
-   "html": "<div class=\"kick\">2/5 · 미국 증시</div><div class=\"main\">인텔 하루 새<br><span class=\"hl\">28.58%</span> 폭락</div><div class=\"sub\">1970년대 이후 가장 큰 하락</div>"
+   "html": "<div class=\"kick\">2/5 · 미국 증시</div><div class=\"main\">인텔 하루 새<br><span class=\"hl\">28.58%</span> 폭락</div><div class=\"sub\">1970년대 이후 가장 큰 하락</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 전자신문·헤럴드경제</div>"
   },
   {
    "start": 9.0,
    "end": 12.5,
    "size": 84,
-   "html": "<div class=\"kick\">3/5 · 테크</div><div class=\"main\">아이폰 듀오<br>화면 <span class=\"hl\">균열</span></div><div class=\"sub\">애플, 점검 후 수리·교체 지침</div>"
+   "html": "<div class=\"kick\">3/5 · 테크</div><div class=\"main\">아이폰 듀오<br>화면 <span class=\"hl\">균열</span></div><div class=\"sub\">애플, 점검 후 수리·교체 지침</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 파이낸셜뉴스·지디넷코리아</div>"
   },
   {
    "start": 12.5,
    "end": 16.0,
    "size": 84,
-   "html": "<div class=\"kick\">4/5 · 서울마라톤</div><div class=\"main\">버스 <span class=\"hl\">190개 노선</span><br>임시 우회</div><div class=\"sub\">3만5000여 명 참가 · 광화문 출발</div>"
+   "html": "<div class=\"kick\">4/5 · 서울마라톤</div><div class=\"main\">버스 <span class=\"hl\">190개 노선</span><br>임시 우회</div><div class=\"sub\">3만5000여 명 참가 · 광화문 출발</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 헤럴드경제·서울경제</div>"
   },
   {
    "start": 16.0,
    "end": 20.0,
    "size": 84,
-   "html": "<div class=\"kick\">5/5 · AI</div><div class=\"main\">AI는 도입보다<br><span class=\"hl\">어떻게 활용</span>하느냐</div><div class=\"sub\">샘 올트먼 · 삼성 사장단 50여 명 간담회</div>"
+   "html": "<div class=\"kick\">5/5 · AI</div><div class=\"main\">AI는 도입보다<br><span class=\"hl\">어떻게 활용</span>하느냐</div><div class=\"sub\">샘 올트먼 · 삼성 사장단 50여 명 간담회</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 서울경제·MBC</div>"
   }
  ],
  "end_card": {
   "line": "더 자세한 건 프로필 링크 뉴스레터에서!",
   "sub": "2030의 아침을 편집합니다 · 경제부터 트렌드까지",
-  "note": "숫자는 기사 2곳 이상에서 확인했어요<br>(출처는 캡션에)"
+  "note": "숫자는 기사 2곳 이상에서 확인했어요<br>(출처는 장면마다·캡션에)"
  },
  "voices": [
   {
@@ -160,5 +160,6 @@
  "music_note": "m1_chase 앞 1.7초는 조용한 도입(-35~-40dB)이라 대사 숨 사이에 소리가 꺼진다 → 1.7초부터 쓴다. 곡 이음은 0.25초 넘게 겹치고, 끝 화면 끝인사 숨(20.9초께)에 m2_morning 5.75초 강박이 오게 15.3초에 다시 깐다(11/01 시험 렌더)",
  "duck": {
   "mix": 0.6
- }
+ },
+ "source_note": "장면마다 그 소식의 매체 2곳을 작게 띄운다 — 11/01 운영자 공유 레퍼런스: 아르헨티나 AI 뉴스 앱 Lisa 는 사실마다 매체를 밝혀 신뢰를 얻었다(Nieman Lab 2026-10-01). 캡션 '출처:' 칸과 같은 매체"
 }
