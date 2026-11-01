@@ -188,8 +188,16 @@ def get_all(g, path, pages=4, **params):
 def recent_media(g, uid, now, s):
     """댓글이 달린 게시물 — 게시는 2배 창(14일)까지 본다. 지난주 글에 오늘 달린 댓글도 7일 안이면 답장할 수 있다."""
     since = now - dt.timedelta(days=s["lookback_days"] * 2)
-    rows = g.call("GET", f"{uid}/media", fields="id,timestamp,comments_count,media_product_type", limit=30).get("data") or []
-    return [m for m in rows if parse_time(m["timestamp"]) >= since and (m.get("comments_count") or 0) > 0]
+    out, url, params = [], f"{uid}/media", {"fields": "id,timestamp,comments_count,media_product_type", "limit": 30}
+    for _ in range(8):      # 최신순 — 창 밖 게시물이 나올 때까지 다음 장(캐러셀·릴스·만화로 2주 30개를 넘을 수 있다, Codex 리뷰)
+        r = g.call("GET", url, **params)
+        rows = r.get("data") or []
+        out += [m for m in rows if parse_time(m["timestamp"]) >= since and (m.get("comments_count") or 0) > 0]
+        url = (r.get("paging") or {}).get("next")
+        if not url or not rows or parse_time(rows[-1]["timestamp"]) < since:
+            break
+        params = {}
+    return out
 
 
 def our_reply(c, me):
@@ -233,7 +241,7 @@ def process(g, me, now, st, s, dry=False, log=print):
             done += 1
             continue
         rec = {"d": today.isoformat(), "dm": False, "reply": False}
-        sent = False
+        sent, before = False, dict(day)
         if repeat:
             rec["repeat"] = True            # repeat_days 안에 이미 DM 을 받은 사람 — 공개 답글만
         elif not dm_blocked:
@@ -275,8 +283,18 @@ def process(g, me, now, st, s, dry=False, log=print):
                     day["reply"] += 1
                     log(f"  ✓ 공개 답글 {ck}")
                 except Exception as e:  # noqa: BLE001
-                    if kind_of(e) == "token":
-                        raise
+                    k = kind_of(e)
+                    if k in ("token", "rate"):
+                        # DM 이 나갔으면 다시 보내지 않게 기록하고, 아무것도 못 보냈으면 숫자를 되돌려 다음 실행에 처음부터(Codex 리뷰)
+                        if sent:
+                            st["handled"][ck] = rec
+                        else:
+                            day.clear()
+                            day.update(before)
+                        log(f"  ✗ {'토큰 문제' if k == 'token' else '호출 한도'} — 이번 실행은 여기까지 ({short_err(e)})")
+                        if k == "token":
+                            raise
+                        break
                     day["failed"] += 1
                     log(f"  ✗ 공개 답글 실패 {ck}: {short_err(e)}")
         st["handled"][ck] = rec

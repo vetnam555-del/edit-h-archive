@@ -2414,6 +2414,41 @@ def t_comment_dm():
     run(Fake(cd.ApiError(400, 4, None, "limit")), st)
     expect(not st["handled"] and "2026-11-02" not in st["daily"], "호출 한도면 처리 표시 없이 다음 실행으로 넘겨야 한다")
 
+    class ReplyLimited(Fake):       # DM 권한 없음 + 공개 답글도 호출 한도 → 다음 실행에 다시(Codex 리뷰)
+        def call(self, method, path, **params):
+            if path.endswith("/replies") and self.dm_error:
+                self.calls.append((method, path, params))
+                raise cd.ApiError(400, 4, None, "limit")
+            return super().call(method, path, **params)
+    st = cd.load_state(Path("/nonexistent/state.json"))
+    run(ReplyLimited(cd.ApiError(403, 10, None, "no permission")), st)
+    expect(not st["handled"] and "2026-11-02" not in st["daily"], f"공개 답글이 호출 한도면 다음 실행에 다시 해야 한다: {st}")
+    f = Fake()
+    run(f, st)
+    expect(len([c for c in f.calls if c[0] == "POST"]) == 4, "호출 한도 뒤 다음 실행에서 처리하지 않았다")
+
+    class SentThenLimited(Fake):    # DM 은 나갔는데 공개 답글이 호출 한도 → DM 은 기록(두 번 보내지 않게)
+        def call(self, method, path, **params):
+            if path.endswith("/replies"):
+                raise cd.ApiError(400, 4, None, "limit")
+            return super().call(method, path, **params)
+    st = cd.load_state(Path("/nonexistent/state.json"))
+    run(SentThenLimited(), st)
+    expect([v["dm"] for v in st["handled"].values()] == [True] and st["daily"]["2026-11-02"]["dm"] == 1, f"보낸 DM 기록: {st}")
+
+    pages = {"900/media": {"data": [{"id": f"p{i}", "timestamp": ts(i * 0.4), "comments_count": 1} for i in range(30)],
+                           "paging": {"next": "https://graph.instagram.com/v23.0/next1"}},
+             "https://graph.instagram.com/v23.0/next1": {"data": [{"id": "p30", "timestamp": ts(13), "comments_count": 2},
+                                                                  {"id": "p31", "timestamp": ts(15), "comments_count": 2}],
+                                                         "paging": {"next": "https://graph.instagram.com/v23.0/next2"}}}
+
+    class Paged:
+        def call(self, method, path, **params):
+            expect(path in pages, f"창 밖까지 다음 장을 읽었다: {path}")
+            return pages[path]
+    ids = [m["id"] for m in cd.recent_media(Paged(), "900", now, s)]
+    expect(len(ids) == 31 and ids[-1] == "p30", f"14일 안 게시물을 다음 장까지 모두 읽어야 한다: {len(ids)} {ids[-2:]}")
+
     st = {"handled": {"a": {"d": "2026-10-20"}, "b": {"d": "2026-11-01"}}, "users": {"x": "2026-09-01", "y": "2026-10-30"},
           "dm": {"ok": None}, "daily": {"2026-08-01": {}, "2026-11-01": {}}}
     cd.prune(st, _dt.date(2026, 11, 2), s)
@@ -2440,8 +2475,14 @@ def t_comment_dm():
                and _site.dm_line("2026-11-06-weekly", short=True), "DM 약속은 켠 날짜 이후 호에만")
         _site.load_config = lambda: {**cfg, "instagram": {**cfg["instagram"], "dm_auto_reply_from": None}}
         expect(_site.dm_line("2026-12-01") is None, "날짜가 없으면 약속하지 않는다")
+        _site.load_config = lambda: {**cfg, "instagram": {**cfg["instagram"], "dm_auto_reply_from": "2026-11-05",
+                                                          "dm_auto_reply_until": "2026-11-20"}}
+        expect(_site.dm_line("2026-11-20") and _site.dm_line("2026-11-21") is None, "끈 날짜(until) 뒤 호에는 약속하지 않는다")
     finally:
         _site.load_config = real
+    igc = cfg["instagram"]
+    expect(igc.get("comment_dm", {}).get("enabled", True) or not igc.get("dm_auto_reply_from") or igc.get("dm_auto_reply_until"),
+           "자동 답장을 껐는데(comment_dm.enabled=false) DM 약속이 끝나지 않는다 — dm_auto_reply_until 에 마지막 날짜를 넣을 것")
     wf = (ROOT / ".github" / "workflows" / "comment-dm.yml").read_text(encoding="utf-8")
     expect("secrets.IG_ACCESS_TOKEN" in wf and "git add automation/comment_dm" in wf and "if: always()" in wf, "댓글 DM 워크플로")
     import collect_metrics as _cm

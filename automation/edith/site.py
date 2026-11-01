@@ -365,11 +365,11 @@ def alt_texts(report):
 
 
 def dm_line(day, short=False):
-    """'댓글 남기면 DM' 안내. 자동 답장(comment_dm.py)이 실제로 DM 을 보낸 뒤 켠 날짜(config.instagram.dm_auto_reply_from)
-    이후 호에만 약속하고, 아니면 None — 날짜로 가르니 지난 호를 다시 빌드해도 캡션이 그대로다."""
+    """'댓글 남기면 DM' 안내. 자동 답장(comment_dm.py)이 실제로 DM 을 보낸 뒤 켠 날짜(config.instagram.dm_auto_reply_from)부터
+    끈 날짜(dm_auto_reply_until, 있으면)까지의 호에만 약속하고, 아니면 None — 날짜로 가르니 지난 호를 다시 빌드해도 캡션이 그대로다."""
     ig = load_config().get("instagram") or {}
-    kw, since = ig.get("dm_keyword"), ig.get("dm_auto_reply_from")
-    if not (kw and since and str(day)[:10] >= since):
+    kw, since, until = ig.get("dm_keyword"), ig.get("dm_auto_reply_from"), ig.get("dm_auto_reply_until")
+    if not (kw and since and since <= str(day)[:10] <= (until or "9999-12-31")):
         return None
     return (f"📩 '{kw}' 댓글 남기면 뉴스레터 구독 링크를 DM으로 보내드려요" if short
             else f"📩 댓글에 '{kw}' 남기면 뉴스레터 구독 링크를 DM으로 보내드려요")

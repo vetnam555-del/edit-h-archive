@@ -216,7 +216,7 @@ GitHub 예약(cron)은 아침(05~09시)엔 0~3시간, 낮·저녁엔 3~6시간 �
 - 같은 사람은 30일 안에 DM 한 번(그 뒤 댓글엔 'DM에 링크 있어요' 공개 답글만). 우리 계정 댓글·긴 댓글(대화)·7일 지난 댓글은 건드리지 않는다(비공개 답장은 댓글 7일 안에만 된다).
 - **DM 권한이 없거나 막히면** 공개 답글로 '프로필 링크에서 구독'을 안내한다(댓글 권한만으로 된다). 권한 확인: Actions → EDIT H comment DM → mode `probe`.
 - 기록 `automation/comment_dm/state.json` — 댓글·사람은 해시 16자리, 날짜별 숫자(키워드 댓글·DM·공개 답글·실패)만. 아이디·이름·댓글 글은 남기지 않는다. 바뀐 때만 커밋.
-- 캡션의 '댓글 남기면 DM' 약속은 실제로 DM 이 한 번 나간 뒤(`state.json` 의 `dm.ok: true`) `config.instagram.dm_auto_reply_from` 에 날짜를 넣어 그날 호부터 켠다(지난 호를 다시 빌드해도 캡션 그대로).
+- 캡션의 '댓글 남기면 DM' 약속은 실제로 DM 이 한 번 나간 뒤(`state.json` 의 `dm.ok: true`) `config.instagram.dm_auto_reply_from` 에 날짜를 넣어 그날 호부터 켠다(지난 호를 다시 빌드해도 캡션 그대로). 자동 답장을 끌 때는 `comment_dm.enabled=false` 와 함께 `dm_auto_reply_until` 에 마지막 약속 날짜를 넣는다(selftest 가 빠뜨림을 막는다).
 - 효과: 성과표 '구독 경로'의 **인스타 댓글→DM**(ref `ig-dm`) 신청 수.
 
 ## 스레드(Threads) 자동 게시 (준비됨 — 토큰을 넣으면 시작)
