@@ -305,8 +305,8 @@ def instagram_caption(d, site):
     ask = _ask(d) + _share(d)
     if ask:
         lines += ["", *ask]
-    if dm_line():
-        lines += ["", dm_line()]
+    if dm_line(d["date"]):
+        lines += ["", dm_line(d["date"])]
     # 표지 사진·음악 출처는 캡션에 쓰지 않는다(2026-09-25 요청) — 사진 출처는 표지 카드 안에, 음악 출처는 릴스 영상 안에 있다.
     n_briefs = len(d.get("briefs") or [])
     from .content import BRIEFS_FROM
@@ -364,11 +364,12 @@ def alt_texts(report):
     return out
 
 
-def dm_line(short=False):
-    """'댓글 남기면 DM' 안내. DM 자동 답장(config.instagram.dm_auto_reply)이 켜져 있을 때만 약속하고, 아니면 None."""
+def dm_line(day, short=False):
+    """'댓글 남기면 DM' 안내. 자동 답장(comment_dm.py)이 실제로 DM 을 보낸 뒤 켠 날짜(config.instagram.dm_auto_reply_from)부터
+    끈 날짜(dm_auto_reply_until, 있으면)까지의 호에만 약속하고, 아니면 None — 날짜로 가르니 지난 호를 다시 빌드해도 캡션이 그대로다."""
     ig = load_config().get("instagram") or {}
-    kw = ig.get("dm_keyword")
-    if not (kw and ig.get("dm_auto_reply")):
+    kw, since, until = ig.get("dm_keyword"), ig.get("dm_auto_reply_from"), ig.get("dm_auto_reply_until")
+    if not (kw and since and since <= str(day)[:10] <= (until or "9999-12-31")):
         return None
     return (f"📩 '{kw}' 댓글 남기면 뉴스레터 구독 링크를 DM으로 보내드려요" if short
             else f"📩 댓글에 '{kw}' 남기면 뉴스레터 구독 링크를 DM으로 보내드려요")
@@ -388,5 +389,5 @@ def first_comment(d):
         if extra and rows:
             rows.insert(1, "↳ 딥다이브 장 · " + " / ".join(extra))
     if not rows:
-        return dm_line(short=True) or ""
+        return dm_line(d["date"], short=True) or ""
     return "\n".join([_pick(["카드에 쓴 자료 출처 모아둘게요", "오늘 카드 출처예요", "출처는 여기 정리해둘게요"], d), *rows])
