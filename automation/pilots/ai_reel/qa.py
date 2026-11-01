@@ -516,6 +516,8 @@ def main():
     for i, p in enumerate((ep.get("comic") or {}).get("panels", []), 1):
         texts += [(f"만화 {i} 말풍선", plain(p.get("bubble", ""))), (f"만화 {i} 설명", plain(p.get("box", "")))]
         texts += [(f"만화 {i} {k}", plain(p[k])) for k, _ in (("body", 0), ("take", 0)) if p.get(k)]
+        if p.get("number"):   # 두 컷 장(웹툰 3판)의 숫자 스티커 — 손으로 바꿔 쓴 값도 content 숫자여야 한다(기본은 카드 number)
+            texts.append((f"만화 {i} 숫자 스티커", plain(str(p["number"]))))
     if ep.get("comic"):
         texts.append(("만화 제목", plain(ep["comic"]["title"])))
     if not (folder / "reel_ai_caption.txt").exists():

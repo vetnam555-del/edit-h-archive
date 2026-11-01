@@ -152,37 +152,75 @@
  "source_video_prep": "ffmpeg -i <원본> -filter_complex \"[0:v]delogo=x=490:y=665:w=82:h=122:enable='between(t,9.85,10.6)',split=3[base][a][b];[a]crop=720:600:0:680,boxblur=10:2[ablur];color=black:s=720x600:r=24:d=20.05,format=gray,geq=lum='clip(Y*255/110\\,0\\,255)'[amask];[ablur][amask]alphamerge[aa];[b]crop=720:300:0:980,boxblur=10:2[bblur];color=black:s=720x300:r=24:d=20.05,format=gray,geq=lum='clip(Y*255/80\\,0\\,255)'[bmask];[bblur][bmask]alphamerge[bb];[base][aa]overlay=0:680:enable='between(t,10.6,12.55)'[t1];[t1][bb]overlay=0:980:enable='between(t,12.55,13.4)',format=yuv420p[out]\" -map [out] -map 0:a -c:v libx264 -crf 14 -c:a copy → episode.py 입력",
  "comic": {
   "series": "오늘 아침 5가지",
+  "layout": "duo",
   "title": "인텔 <span class='hl'>28.58%</span> 폭락부터,<br>오늘 아침 5가지",
+  "cover": {
+   "img": "stills/cover.png",
+   "pos": "50% 45%",
+   "job": "69979bfd-a304-4e49-80be-070a2a77770f"
+  },
   "summary": true,
   "panels": [
    {
-    "t": 2.95,
-    "pos": "50% 74%",
-    "card": 2
+    "card": 2,
+    "img_a": "stills/intel_a.png",
+    "pos_a": "50% 55%",
+    "img_b": "stills/intel_b.png",
+    "pos_b": "50% 30%",
+    "say_side": "right",
+    "jobs": [
+     "026c36c3-1db5-4e03-8afc-f51bd9ccfb3b",
+     "3e550729-797b-46ac-a6f5-b6ef09193fba"
+    ]
    },
    {
-    "t": 4.3,
-    "pos": "50% 50%",
     "card": 1,
-    "tail": "left:120px;"
+    "img_a": "stills/byd_a.png",
+    "pos_a": "50% 70%",
+    "img_b": "stills/byd_b.png",
+    "pos_b": "50% 35%",
+    "say_side": "left",
+    "jobs": [
+     "e8dd84a3-e45c-4605-82ff-42eb9ddbedff",
+     "0874d268-68e7-4bf8-b121-18a870f7e9da"
+    ]
    },
    {
-    "t": 8.8,
-    "pos": "50% 52%",
     "card": 3,
-    "tail": "left:260px;"
+    "img_a": "stills/iphone_a.png",
+    "pos_a": "50% 50%",
+    "img_b": "stills/iphone_b.png",
+    "pos_b": "50% 30%",
+    "say_side": "left",
+    "jobs": [
+     "b297f218-6d81-492e-9964-a204402d1158",
+     "8cd207e8-445d-481c-b07a-07562313d5c0"
+    ]
    },
    {
-    "t": 12.4,
-    "pos": "50% 38%",
     "card": 4,
-    "tail": "left:300px;"
+    "img_a": "stills/marathon_a.png",
+    "pos_a": "50% 50%",
+    "img_b": "stills/marathon_b.png",
+    "pos_b": "50% 45%",
+    "say_side": "left",
+    "jobs": [
+     "cfa422c3-356a-491d-bba6-d8717f8c6d65",
+     "811fa563-dc5a-4f66-9424-fb3dd53273e8"
+    ]
    },
    {
-    "t": 16.6,
-    "pos": "50% 48%",
     "card": 5,
-    "tail": "left:300px;"
+    "img_a": "stills/altman_a.png",
+    "pos_a": "50% 20%",
+    "img_b": "stills/altman_b.png",
+    "pos_b": "50% 25%",
+    "say_side": "right",
+    "stk_side": "left",
+    "jobs": [
+     "8349f17f-2723-4691-ac58-ef23cd0aca72",
+     "b27e7c63-f6ed-4941-b4e5-842ca49e269a"
+    ]
    }
   ],
   "sources": "장마다 표시",
@@ -191,5 +229,5 @@
    "sub": "경제부터 트렌드까지, 오늘 소식 5가지를<br>웹툰으로 풀어 드려요"
   }
  },
- "comic_note": "5가지 웹툰 본보기(11/01 시안 — 게시 안 함, 11/02~ 매일). 컷마다 card=N 이면 그날 카드의 제목·본문·'그래서 나는?'·출처를 그대로 쓴다(운영자 11/01 '웹툰은 텍스트가 기존보다 부족하다'). summary=true 면 '오늘의 5가지 한눈에' 장을 끝 장 앞에. t·pos 는 손질한 영상(source_video_prep 결과)에서 고른다. 렌더: comic.py brief.json <손질한 영상> [--out 미리보기 폴더]"
+ "comic_note": "5가지 웹툰 3판 본보기(11/01 시안 — 게시 안 함, 11/02~ 매일). 운영자 11/01 '이게 최선이야?' → 한 장에 두 컷(위 = 상황: 내레이션 상자에 카드 제목·숫자 스티커, 가운데 = 카드 본문, 아래 = H 의 반응: 말풍선에 '그래서 나는?'), 그림은 그날 새로 그린 정지 그림(gpt_image_2_5 4:3 1k, 장당 0.25 크레딧 — 영상 장면 캡처보다 선명). card=N 이면 그날 카드의 제목·본문·'그래서 나는?'·출처·숫자를 그대로 쓴다. 그림 프롬프트·구도 규칙: automation/pilots/ai_reel/webtoon_prompt.md. stills/ 는 저장소에 올리지 않는다(.gitignore — 공개할 건 렌더한 장 instagram/{날짜}/comic/ 뿐, 원본은 jobs 로 다시 받는다). 렌더: comic.py brief.json [--out 미리보기 폴더](영상 없이). 2판(영상 장면 한 컷)은 layout 없이 t·pos 로 — H 극장(episode.json) 이 쓴다."
 }

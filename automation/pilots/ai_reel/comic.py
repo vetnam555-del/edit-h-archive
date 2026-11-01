@@ -12,11 +12,15 @@ episode.json 의 "comic": {series, title, panels:[{t, pos, who, bubble, box, src
   t = 원래 AI 영상에서 뽑을 시각(초), pos = 그림 자르는 기준점(CSS object-position), bubble·box 의 숫자는 content 에서만.
   src = 그 컷의 출처(5가지 웹툰처럼 컷마다 소식이 다를 때 — 없으면 sources). 2026-11-01 운영자 '캐러셀을 H 극장처럼 웹툰으로' →
   11/02~ '오늘 아침 5가지' 영상 장면 5컷으로 5가지 웹툰(brief.json 의 comic).
+웹툰 3판(2026-11-01 운영자 '이게 최선이야?'): "layout": "duo" 면 영상 없이 그날 생성한 정지 그림으로 한 장에 두 컷(상황 → H 의 반응) —
+  표지(cover.img + 오늘 5가지 목차) + 두 컷 장(panels[i].img_a·img_b) + 요약 + 끝 장. 그림 규칙·손잡이: webtoon_prompt.md.
+  사용: python3 automation/pilots/ai_reel/comic.py <brief.json> [--out 폴더]   (그림 경로는 brief.json 폴더 기준)
 """
 import argparse
 import html as htmlmod
 import json
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -59,6 +63,26 @@ html,body{{margin:0;width:1080px;height:1350px;background:#F5F1E8;font-family:'P
 .row .n{{flex:none;width:58px;height:58px;border-radius:14px;background:#111;color:#fff;font-weight:900;font-size:30px;display:flex;align-items:center;justify-content:center}}
 .row .h{{flex:1;min-width:0;font-weight:800;font-size:40px;line-height:1.3;letter-spacing:-1px}}
 .row .v{{flex:none;font-weight:900;font-size:40px;background:linear-gradient(180deg,transparent 58%,#FFC9AD 58%)}}
+.duo{{position:absolute;left:56px;right:56px;top:106px;bottom:80px;display:flex;flex-direction:column}}
+.fr{{position:relative;flex:1 1 470px;min-height:250px;border:7px solid #111;border-radius:26px;overflow:hidden;background:#ddd}}
+.fr.b{{flex-basis:400px}}
+.fr img{{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}}
+.stk{{position:absolute;top:16px;right:16px;background:#FF5233;color:#fff;font-weight:900;font-size:44px;padding:10px 22px;border:5px solid #111;border-radius:18px;box-shadow:5px 5px 0 #111;letter-spacing:-1px;white-space:nowrap}}
+.stk.l{{right:auto;left:88px}}
+.narr{{position:relative;z-index:2;align-self:flex-start;max-width:740px;margin-top:-84px;background:#FFF6D8;border:5px solid #111;border-radius:6px;padding:16px 24px;font-weight:850;font-size:40px;line-height:1.25;letter-spacing:-1px;box-shadow:6px 6px 0 #111}}
+.narr .k{{display:block;font-size:22px;font-weight:800;color:#B23A0F;letter-spacing:0;margin-bottom:4px}}
+.body3{{margin:20px 8px 0;font-size:31px;line-height:1.45;font-weight:600;color:#3d3a35}}
+.say{{position:relative;z-index:2;max-width:660px;margin:24px 30px -58px;background:#fff;border:6px solid #111;border-radius:36px;padding:18px 28px;font-weight:850;font-size:38px;line-height:1.28;letter-spacing:-1px;box-shadow:0 8px 0 rgba(0,0,0,.12)}}
+.say.l{{align-self:flex-start}} .say.r{{align-self:flex-end}}
+.say .who{{display:block;font-size:23px;font-weight:800;color:#FF5233;letter-spacing:0;margin-bottom:4px}}
+.say:after{{content:'';position:absolute;bottom:-26px;width:40px;height:40px;background:#fff;border-right:6px solid #111;border-bottom:6px solid #111;transform:rotate(45deg)}}
+.say.l:after{{right:90px}} .say.r:after{{left:90px}} .say.l.out:after{{right:auto;left:90px}} .say.r.out:after{{left:auto;right:90px}}
+.cov{{position:absolute;left:56px;right:56px;top:104px;bottom:124px;display:flex;flex-direction:column}}
+.ct{{font-weight:900;font-size:62px;line-height:1.18;letter-spacing:-2.5px;margin:0 4px}}
+.cov .fr{{flex:1 1 560px;min-height:300px;margin-top:30px}}
+.idx{{margin:30px 6px 0}}
+.idx div{{display:flex;gap:16px;align-items:baseline;font-weight:800;font-size:32px;line-height:1.25;padding:9px 0;border-bottom:2px solid #E4DED2}}
+.idx b{{flex:none;color:#FF5233;font-weight:900}} .idx i{{font-style:normal;margin-left:auto;font-weight:900;background:linear-gradient(180deg,transparent 58%,#FFC9AD 58%)}}
 """
 
 
@@ -72,11 +96,14 @@ def shot(html, out):
     with tempfile.TemporaryDirectory() as t:
         p = Path(t) / "p.html"
         p.write_text(html, encoding="utf-8")
-        png = Path(t) / "p.png"
-        r = subprocess.run(["node", str(SHOT), str(p), str(png), str(W), str(H)], check=True, capture_output=True, text=True)
-        if "Pretendard" not in json.loads(r.stdout.strip().splitlines()[-1])["fonts"]:
+        jpg = Path(t) / "p.jpg"   # 인스타 API 는 JPEG 만 — 렌더러가 바로 JPEG(품질 95)로 찍는다(ffmpeg 없는 곳에서도, 2026-11-01)
+        r = subprocess.run(["node", str(SHOT), str(p), str(jpg), str(W), str(H)], check=True, capture_output=True, text=True)
+        info = json.loads(r.stdout.strip().splitlines()[-1])
+        if "Pretendard" not in info["fonts"]:
             raise SystemExit("Pretendard 없이 그렸다(한글이 깨진다)")
-        subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(png), "-q:v", "2", str(out)], check=True)  # 인스타 API 는 JPEG 만
+        if info.get("overflow"):   # 두 컷 장: 글이 너무 길어 두 컷을 최소 높이까지 줄여도 넘쳤다 — 반쯤 잘린 장을 올리지 않는다
+            raise SystemExit(f"{Path(out).name}: 글이 칸을 넘쳤어요({', '.join(info['overflow'])}) — 카드 글을 줄이거나 그림 위치를 다시 보세요")
+        shutil.copyfile(jpg, out)   # 검사를 통과한 장만 내보낸다
 
 
 def plain(s):
@@ -111,13 +138,56 @@ def from_cards(c, date):
     return [issues[n - 1] for n in order]
 
 
-def build(ep, video, outdir, alt_path=None):
+def _src(p, c):
+    return htmlmod.escape(htmlmod.unescape(re.sub(r"<[^>]+>", "", str(p.get("src") or c.get("sources") or "")))).replace("\u2060", "")
+
+
+def duo_cover(c, picked, img, pos):
+    """두 컷 웹툰 표지 — 제목(그날 가장 센 사실) + 생성 그림 한 컷 + 오늘 다룰 5가지 목차(번호·주제·숫자).
+    세로로 쌓아 제목·목차가 길면 그림이 줄어든다(넘치면 렌더가 멈춘다)."""
+    rows = "".join(f"<div><b>{j}</b>{htmlmod.escape(it.get('tag') or '')}<i>{htmlmod.escape(str(it.get('number') or ''))}</i></div>"
+                   for j, it in enumerate(picked, 1))
+    return (f"<div class='cov fit'><div class='ct'>{c['title']}</div>"
+            f"<div class='fr'><img src='{img.as_uri()}' style='object-position:{pos}'></div>"
+            f"<div class='idx'>{rows}</div></div><div class='swipe'>넘겨서 {len(picked)}가지 보기 →</div>")
+
+
+def duo_slide(c, i, p, img_a, img_b):
+    """두 컷 한 장(2026-11-01 운영자 '이게 최선이야?' → 웹툰 3판): 위 컷 = 상황(아래 왼쪽에 걸친 내레이션 상자에 카드 제목,
+    오른쪽 위 숫자 스티커), 가운데 = 카드 본문, 아래 컷 = H 의 반응(두 컷 사이 경계에 걸친 말풍선에 카드 '그래서 나는?').
+    세로로 쌓고(flex) 글이 길면 두 컷이 같이 줄어든다 — 말풍선·상자가 컷 안쪽은 가장자리만 덮어 얼굴을 가리지 않게.
+    그림은 그날 생성한 정지 그림(영상 캡처보다 선명). say_side = 말풍선 쪽(left·right), tail = 'out' 이면 꼬리를 바깥 끝에,
+    stk_side = 숫자 스티커 자리(right 기본·left·none) — 그림을 보고 인물을 덮지 않는 쪽으로."""
+    side = "r" if p.get("say_side") == "right" else "l"
+    out = " out" if p.get("tail") == "out" else ""
+    stk_side = p.get("stk_side") or "right"
+    stk = (f"<div class='stk{' l' if stk_side == 'left' else ''}'>{htmlmod.escape(str(p.get('number') or ''))}</div>"
+           if p.get("number") and stk_side != "none" else "")
+    return (f"<div class='duo fit'>"
+            f"<div class='fr'><img src='{img_a.as_uri()}' style='object-position:{p.get('pos_a', '50% 50%')}'><div class='num'>{i - 1}</div>{stk}</div>"
+            f"<div class='narr'><span class='k'>{htmlmod.escape(p.get('tag') or '')}</span>{p['bubble'].replace('<br>', ' ')}</div>"
+            f"<div class='body3'>{p.get('body', '')}</div>"
+            f"<div class='say {side}{out}'><span class='who'>H · 그래서 나는?</span>{p.get('take', '')}</div>"
+            f"<div class='fr b'><img src='{img_b.as_uri()}' style='object-position:{p.get('pos_b', '50% 30%')}'></div>"
+            f"</div><div class='src'>출처 · {_src(p, c)}</div>")
+
+
+def build(ep, video, outdir, alt_path=None, base=None):
     """컷 JPEG 를 outdir 에, 대체 텍스트를 alt_path(기본 outdir 옆 comic_alt.json — 게시 코드 post_comic 이 읽는 자리)에.
     미리보기(--out)는 대체 텍스트도 미리보기 폴더 안에 둔다 — 게시용 comic_alt.json 을 덮어쓰지 않게(Codex 리뷰)."""
     c = ep["comic"]
     picked = from_cards(c, ep["date"])
     fonts = font_css()
-    n = len(c["panels"]) + 1 + bool(c.get("summary") and picked)
+    duo = c.get("layout") == "duo"   # 두 컷 웹툰(생성 그림) — 표지가 따로 한 장
+    n = len(c["panels"]) + 1 + bool(c.get("summary") and picked) + duo
+    img = lambda q: (Path(q) if Path(q).is_absolute() else Path(base or ".") / q).resolve()  # noqa: E731
+    if duo:   # 그림이 하나라도 없으면 아무것도 지우거나 그리기 전에 멈춘다(지난 장을 반쯤 덮어쓰지 않게)
+        need = [(c.get("cover") or {}).get("img")] + [p.get(k) for p in c["panels"] for k in ("img_a", "img_b")]
+        missing = [str(q) for q in need if not q or not img(q).exists()]
+        if missing:
+            raise SystemExit(f"두 컷 웹툰 그림이 없어요: {', '.join(missing)} — cover.img·panels[i].img_a·img_b(brief.json 폴더 기준)")
+    elif video is None:
+        raise SystemExit("영상 장면 만화(layout 없음)는 영상이 필요해요 — comic.py <episode.json> <영상.mp4>")
     outdir.mkdir(parents=True, exist_ok=True)
     for old in outdir.glob("c*.jpg"):
         old.unlink()
@@ -125,8 +195,20 @@ def build(ep, video, outdir, alt_path=None):
                      "<div class='logo'>EDIT H<b>.</b></div></div>")
     src_line = lambda p: f"<div class='src'>출처 · {p.get('src') or c['sources']}</div>"  # noqa: E731
     alts = {}
+    if duo:
+        cov = c.get("cover") or {}
+        shot(page(fonts, top(1) + duo_cover(c, picked, img(cov["img"]), cov.get("pos", "50% 50%"))), outdir / "c1.jpg")
+        alts["c1.jpg"] = f"H 극장 표지 — {plain(c['title'])} · 오늘 다룰 {len(picked)}가지: " + " / ".join(str(it.get("tag") or "") for it in picked)
+        cards = iter(picked)   # picked = card 가 있는 컷만, 컷 순서대로(from_cards) — card 없는 컷이 섞여도 어긋나지 않게
+        for i, p in enumerate(c["panels"], 2):
+            it = next(cards) if p.get("card") else {}
+            p.setdefault("number", it.get("number"))
+            p.setdefault("tag", it.get("tag"))
+            shot(page(fonts, top(i) + duo_slide(c, i, p, img(p["img_a"]), img(p["img_b"]))), outdir / f"c{i}.jpg")
+            alts[f"c{i}.jpg"] = (f"H 극장 {i - 1}번 소식 — {plain(p['bubble'])}. {plain(p.get('body', ''))} "
+                                 f"H: 그래서 나는? {plain(p.get('take', ''))}")
     with tempfile.TemporaryDirectory() as tmp:
-        for i, p in enumerate(c["panels"], 1):
+        for i, p in enumerate([] if duo else c["panels"], 1):
             frame = Path(tmp) / f"f{i}.jpg"
             subprocess.run(["ffmpeg", "-v", "error", "-y", "-ss", str(p["t"]), "-i", str(video), "-frames:v", "1", "-q:v", "2", str(frame)], check=True)
             bubble = f"<div class='bubble'><span class='who'>{p.get('who', 'H')}</span>{p['bubble']}</div>"
@@ -186,12 +268,13 @@ def build(ep, video, outdir, alt_path=None):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("episode")
-    ap.add_argument("video")
+    ap.add_argument("video", nargs="?", help="장면을 뽑을 AI 영상 — 두 컷 웹툰(layout duo, 생성 그림)이면 없어도 된다")
     ap.add_argument("--out", help="미리보기 폴더(기본 instagram/{날짜}/comic — 게시 폴더)")
     a = ap.parse_args()
     ep = json.loads(Path(a.episode).read_text(encoding="utf-8"))
     out = Path(a.out) if a.out else ROOT / "instagram" / ep["date"] / "comic"
-    n = build(ep, Path(a.video), out, alt_path=out / "comic_alt.json" if a.out else None)
+    n = build(ep, Path(a.video) if a.video else None, out, alt_path=out / "comic_alt.json" if a.out else None,
+              base=Path(a.episode).resolve().parent)
     print(f"ok {out} {n}장")
 
 

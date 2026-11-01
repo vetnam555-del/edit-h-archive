@@ -21,8 +21,13 @@ function loadPlaywright() {
   await page.waitForTimeout(300);
   const missing = await page.evaluate(() => [...document.images].filter((i) => !i.complete || !i.naturalWidth).map((i) => i.src));
   if (missing.length) { console.error('그림을 못 읽음: ' + missing.join(', ')); process.exit(1); }
-  await page.screenshot({ path: outPath, omitBackground: flags.includes('--transparent') });
+  // .jpg 로 받으면 JPEG(품질 95)로 바로 찍는다 — 웹툰 장(comic.py)이 ffmpeg 없이도 인스타용 JPEG 를 만든다. 나머지는 지금처럼 PNG.
+  const jpeg = /\.jpe?g$/i.test(outPath);
+  await page.screenshot(jpeg ? { path: outPath, type: 'jpeg', quality: 95 } : { path: outPath, omitBackground: flags.includes('--transparent') });
   const fonts = await page.evaluate(() => [...document.fonts].filter((f) => f.status === 'loaded').map((f) => f.family));
-  console.log(JSON.stringify({ out: outPath, fonts: [...new Set(fonts)] }));
+  // class 'fit' 상자가 넘쳤나(글이 길어 칸 밖으로) — 부르는 쪽(웹툰 comic.py)이 실패로 다룬다. 다른 쪽은 이 칸을 안 읽는다.
+  const overflow = await page.evaluate(() => [...document.querySelectorAll('.fit')]
+    .filter((e) => e.scrollHeight > e.clientHeight + 1 || e.scrollWidth > e.clientWidth + 1).map((e) => e.className));
+  console.log(JSON.stringify({ out: outPath, fonts: [...new Set(fonts)], overflow }));
   await browser.close();
 })();
