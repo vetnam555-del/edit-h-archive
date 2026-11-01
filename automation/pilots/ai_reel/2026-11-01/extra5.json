@@ -1,0 +1,122 @@
+{
+ "date": "2026-11-01",
+ "extra": 5,
+ "story": "샘 올트먼, 삼성 사장단 50여 명과 간담회 — 'AI 는 도입보다 활용' — content/2026-11-01.json items[3]",
+ "seedance": {
+  "model": "seedance_2_5",
+  "made_by": "운영자 힉스필드 앱(20초 720p)",
+  "job": "5d3cd62f-c2b4-488f-900e-b0df7294cc78",
+  "drive": "1101_5.mp4",
+  "prompt": "회의실 의자마다 켜져만 있는 도우미 로봇 → H 가 하나를 책상에 올리자 서류 정리 → H 어깨(머리) 위 로봇과 커피. 사람·회사 이름 없음",
+  "cut": "끝 16초 뒤(가만히 앉아 있는 장면)는 뺐다"
+ },
+ "trim": [
+  0.8,
+  16.0
+ ],
+ "end_seconds": 2.5,
+ "captions": [
+  {
+   "start": 0.0,
+   "end": 2.5,
+   "size": 90,
+   "html": "<div class=\"kick\">오픈AI CEO 샘 올트먼</div><div class=\"main\">AI, 들여놓기만<br>하면 <span class=\"hl\">끝?</span></div>"
+  },
+  {
+   "start": 2.5,
+   "end": 7.2,
+   "size": 84,
+   "html": "<div class=\"kick\">10월 31일 · 경기 용인</div><div class=\"main\">삼성 사장단<br><span class=\"hl\">50여 명</span>과 간담회</div><div class=\"sub\">같은 날 최태원 SK그룹 회장과 오찬도</div>"
+  },
+  {
+   "start": 7.2,
+   "end": 11.2,
+   "size": 84,
+   "html": "<div class=\"kick\">올트먼이 강조한 것</div><div class=\"main\">도입보다<br><span class=\"hl\">어떻게 활용</span>하느냐</div><div class=\"sub\">그게 경쟁 우위를 만든다</div>"
+  },
+  {
+   "start": 11.2,
+   "end": 15.2,
+   "size": 82,
+   "html": "<div class=\"kick\">그래서 나는?</div><div class=\"main\">내 업무에 쓸 AI<br><span class=\"hl\">한 가지</span>부터</div>",
+   "top": 220
+  }
+ ],
+ "end_card": {
+  "line": "내일 아침 8시 30분에 또 만나요!",
+  "note": "숫자는 기사 2곳 이상에서 확인했어요<br>(10월 31일 서울경제·MBC 보도 기준)"
+ },
+ "voices": [
+  {
+   "file": "stems/x5_v1_h_idle.mp3",
+   "start": 0.05,
+   "tempo": 1.25,
+   "text": "헉… AI를 들여놓기만 하고 안 쓰는 거야?!",
+   "voice": "qwen_audio_tts · Hana"
+  },
+  {
+   "file": "stems/x5_v2_h_50.mp3",
+   "start": 2.55,
+   "tempo": 1.3,
+   "text": "샘 올트먼이 삼성 사장단 오십여 명을 만났대!",
+   "voice": "qwen_audio_tts · Hana"
+  },
+  {
+   "file": "stems/x5_v3_h_use.mp3",
+   "start": 7.3,
+   "tempo": 1.2,
+   "text": "중요한 건 도입보다, 어떻게 활용하느냐래!",
+   "voice": "qwen_audio_tts · Hana"
+  },
+  {
+   "file": "stems/x5_v4_h_one.mp3",
+   "start": 11.3,
+   "tempo": 1.2,
+   "text": "내 업무 어디에 AI를 쓸지, 한 가지부터 정해 보자!",
+   "voice": "qwen_audio_tts · Hana"
+  },
+  {
+   "file": "../2026-10-31/stems/v5_h_bye.mp3",
+   "start": 15.35,
+   "tempo": 1.15,
+   "text": "내일 아침 여덟 시 반에 또 만나요!",
+   "voice": "qwen_audio_tts · Hana (10/31 녹음 재사용)"
+  }
+ ],
+ "music": [
+  {
+   "file": "../2026-10-31/stems/m1_chase.m4a",
+   "start": 0.0,
+   "dur": 5.9,
+   "fade_out": 0.3
+  },
+  {
+   "file": "../2026-10-31/stems/m1_chase.m4a",
+   "start": 5.7,
+   "offset": 1.85,
+   "dur": 4.25,
+   "lufs": -21,
+   "fade_in": 0.25,
+   "fade_out": 0.4
+  },
+  {
+   "file": "../2026-10-31/stems/m2_morning.m4a",
+   "start": 9.75,
+   "dur": 7.95,
+   "fade_in": 0.35,
+   "fade_out": 0.7
+  }
+ ],
+ "sfx": [
+  [
+   0,
+   11.2,
+   0.4
+  ],
+  [
+   11.2,
+   999,
+   0.25
+  ]
+ ]
+}
