@@ -7,7 +7,8 @@
  2. 대사 — 완성본을 음성 인식(faster-whisper small)으로 받아 적어, 대사 줄마다 낱말이 충분히 들리나.
     대사 원고의 숫자(한글 읽기)는 content 와, 들린 숫자는 대사 숫자와 같은 값이어야 한다(11/01 Codex — 목소리가 틀린 금액을 말하면 막는다).
  3. 소리 — 통합 음량 -14±1.5 LUFS, 음성 트랙이 있다, 중간에 끊기는 곳이 없다(11/01 운영자 "소리가 중간중간 끊긴다").
- 4. 영상 — 1080×1920, 길이 8~30초.
+ 4. 영상 — 1080×1920, 길이 8~30초, 검은 화면·어둡게 번쩍이는 프레임이 한 프레임도 없다
+    (11/01 운영자 "영상 중간중간에 검은색으로 끊기는 것 같다" — 끝 화면 페이드 인이 2프레임 검게 튀었다).
  5. 캡션 — reel_ai_caption.txt·comic_caption.txt 에 'AI로 만들' 한 줄, 해시태그 5개 이하, 같은 숫자 대조(끝 화면·만화 끝 장 문구도).
  6. 만화 — comic/ JPEG 3~10장, 1080×1350.
  7. 금지 — 화면 글자에 'AI로 만든 영상' 표시 없음(운영자 11/01), 실존 인물·회사 로고는 사람이 프레임 캡처로 한 번 더 본다(자동 아님).
@@ -15,6 +16,7 @@
     (11/01 운영자 "패턴이 똑같네? 헉으로 시작하고 멘트가 비슷하다").
  9. 기사·출처 맞춤(2026-11-02~) — item(다루는 이슈 tag)과 sources 에 그 이슈의 원 기사 매체 2곳 이상(그 이슈 sources 안의 매체),
     끝 화면 note·reel_ai_caption.txt '출처' 줄에 그 매체 이름이 다 있어야 한다(11/01 운영자 "기사 및 소스에 맞춰서 진행해 달라").
+    '오늘 아침 5가지' 브리핑(items 목록)은 캡션 '출처:' 줄을 영상 순서대로 이슈마다 한 칸(' / ')씩 — 그 이슈 매체 2곳, 다른 이슈 매체 없이 — 끝 화면 note 엔 출처 안내만(2026-11-01 운영자).
 """
 import argparse
 import datetime as dt
@@ -22,6 +24,7 @@ import difflib
 import html as htmlmod
 import json
 import re
+import statistics
 import subprocess
 import sys
 from pathlib import Path
@@ -98,9 +101,44 @@ def check_numbers(texts, corpus, allow=()):
                 bad.append(f"{label}: '{t}'")
         # 화면의 고유어 수사 + 세는 말('반도체 세 종목') — '한 번·한 달' 같은 관용구(1)는 뺀다(11/01 Codex)
         for _, n in native_numbers(text):
-            if n[0] != 1 and not any(_num_match(n, c, strict=True) for c in cvals):
+            if n[0] != 1 and _say(n) not in allow and not any(_num_match(n, c, strict=True) for c in cvals):
                 bad.append(f"{label}: '{_say(n)}'")
     return bad
+
+
+def parse_blackdetect(stderr):
+    """ffmpeg blackdetect 출력 → [(시작초, 끝초)]."""
+    return [(float(a), float(b)) for a, b in re.findall(r"black_start:([\d.]+) black_end:([\d.]+)", stderr)]
+
+
+def black_frames(video):
+    """화면의 90% 이상이 검은(밝기 12% 아래) 구간 — 한 프레임(0.033초)이라도 잡는다(11/01 운영자 '검은색으로 끊긴다')."""
+    er = subprocess.run(["ffmpeg", "-v", "info", "-i", str(video), "-vf", "blackdetect=d=0.02:pix_th=0.12:pic_th=0.90",
+                         "-an", "-f", "null", "-"], capture_output=True, text=True).stderr
+    return parse_blackdetect(er)
+
+
+def flash_frames(ts, ys, win=8, ratio=0.45, floor=30):
+    """앞뒤보다 갑자기 어두운 프레임(번쩍임) → [(시각, 밝기, 앞뒤 밝기)].
+    앞 win 프레임과 뒤 win 프레임 밝기 중앙값 중 작은 쪽의 ratio 배보다 어두우면 잡는다 — 밤 장면으로 넘어가는 컷은 뒤가 어두워서 걸리지 않는다."""
+    hits = []
+    for i, y in enumerate(ys):
+        before, after = ys[max(0, i - win):i], ys[i + 1:i + 1 + win]
+        if not before or not after:
+            continue
+        ctx = min(statistics.median(before), statistics.median(after))
+        if ctx > floor and y < ctx * ratio:
+            hits.append((round(ts[i], 3), round(y, 1), round(ctx, 1)))
+    return hits
+
+
+def dark_flashes(video):
+    """완성본 프레임마다 평균 밝기(YAVG)를 재서 flash_frames 로 번쩍임을 찾는다."""
+    out = subprocess.run(["ffmpeg", "-v", "error", "-i", str(video), "-vf", "signalstats,metadata=print:key=lavfi.signalstats.YAVG:file=-",
+                          "-an", "-f", "null", "-"], capture_output=True, text=True).stdout
+    ts = [float(x) for x in re.findall(r"pts_time:([\d.]+)", out)]
+    ys = [float(x) for x in re.findall(r"YAVG=([\d.]+)", out)]
+    return flash_frames(ts, ys)
 
 
 def dropouts(video, head=0.3, tail=0.8):
@@ -262,14 +300,16 @@ def _say(n):
     return f"{n[2] if len(n) > 2 else ''}{n[0]:g}{n[1]}"
 
 
-def check_spoken(script_nums, said):
-    """들린 숫자 ↔ 대사 숫자 — 목소리가 다른 금액·반대 방향을 말했거나(들린 숫자가 대사에 없음) 숫자를 빼먹었으면 실패. → (들린 숫자, 실패 목록)"""
+def check_spoken(script_nums, said, allow=()):
+    """들린 숫자 ↔ 대사 숫자 — 목소리가 다른 금액·반대 방향을 말했거나(들린 숫자가 대사에 없음) 숫자를 빼먹었으면 실패. → (들린 숫자, 실패 목록)
+    allow: 이 영상에서 content 숫자가 아닌 고정 표현 (값, 단위) — 예: '5가지' 브리핑의 (5.0, '가지')."""
+    skip = set(BRAND_SPOKEN) | set(allow)
     heard_nums, bad = spoken_numbers(said), []
     for h in heard_nums:
-        if h[:2] not in BRAND_SPOKEN and not any(_num_match(h, x) for x in script_nums):
+        if h[:2] not in skip and not any(_num_match(h, x) for x in script_nums):
             bad.append(f"목소리 숫자 — 들린 '{_say(h)}' 가 대사에 없다(받아쓰기: {said.strip()[:60]})")
     for x in script_nums:
-        if x[:2] not in BRAND_SPOKEN and not any(_num_match(h, x) for h in heard_nums):
+        if x[:2] not in skip and not any(_num_match(h, x) for h in heard_nums):
             bad.append(f"목소리 숫자 — 대사의 '{_say(x)}' 가 들리지 않는다(받아쓰기: {said.strip()[:60]})")
     return heard_nums, bad
 
@@ -314,12 +354,14 @@ def pattern_repeats(epath, ep):
     day = dt.date.fromisoformat(ep["date"])
     for d in (day, day - dt.timedelta(days=1)):
         folder = epath.parent.parent / d.isoformat()
-        for p in sorted(folder.glob("episode.json")) + sorted(folder.glob("extra*.json")):
+        for p in sorted(folder.glob("*.json")):   # episode·extraN·brief 등 그날 릴스 설정 전부(11/01 Codex: brief.json 이 빠졌다)
             if p.resolve() == epath.resolve():
                 continue
             try:
                 other = json.loads(p.read_text(encoding="utf-8"))
             except ValueError:
+                continue
+            if not isinstance(other, dict) or "voices" not in other:
                 continue
             name = f"{d.isoformat()} {p.stem}"
             if first_word(ep) and first_word(ep) == first_word(other):
@@ -346,12 +388,62 @@ def covered_item(ep, content):
     return next((it for it in content.get("items") or [] if it.get("tag") == tag), None)
 
 
+def brief_series(ep):
+    """'오늘 아침 5가지' 브리핑이면 그 숫자 표현(화면 '5가지'·목소리 '다섯 가지')은 content 숫자가 아니다 → (화면 allow, 목소리 allow)."""
+    items = ep.get("items") if isinstance(ep.get("items"), list) else []
+    if not items:
+        return set(), set()
+    n = len(items)
+    return {f"{n}가지", f"{n}개"}, {(float(n), "가지"), (float(n), "개")}
+
+
+def brief_source_gaps(ep, content, caption):
+    """'오늘 아침 5가지'(2026-11-01 운영자 '메인 5개를 20초 한 편에') — 이슈마다 그 이슈의 원 기사 매체 2곳이 캡션 '출처:' 줄의 한 칸(/ 로 나눔)에 있어야 한다.
+    끝 화면에는 10곳을 다 못 쓰니 note 에 '출처'(캡션·뉴스레터에 있다는 말)만 있으면 된다."""
+    tags = [str(t).strip() for t in ep.get("items") or []]
+    if len(tags) < 2:
+        return [f"items(다루는 이슈 tag 목록)가 2개 미만이다: {tags}"]
+    fails = []
+    note = plain(str((ep.get("end_card") or {}).get("note") or ""))
+    if "출처" not in note:
+        fails.append("끝 화면 note 에 출처 안내가 없다 — 예: '출처는 캡션·뉴스레터에'")
+    src_line = next((ln for ln in caption.splitlines() if ln.strip().startswith("출처")), "")
+    cells = [c for c in re.split(r"\s*/\s*", src_line.split(":", 1)[-1]) if c.strip()]
+    # 칸은 영상 순서(items 순서)대로 이슈 하나씩 — 칸과 이슈를 순서로 짝지어야 두 이슈의 매체 묶음을 바꿔 적은 것도 잡는다(11/01 Codex)
+    if len(cells) != len(tags):
+        fails.append(f"reel_ai_caption.txt '출처:' 줄 칸 {len(cells)}개 ≠ 이슈 {len(tags)}개 — 영상 순서대로 이슈마다 한 칸(' / ' 로 나눔)")
+    per_item = []
+    for tag in tags:
+        item = covered_item({"item": tag}, content)
+        if item is None:
+            fails.append(f"items 의 '{tag}' 가 content(big_issue·items 의 tag)에 없다")
+            per_item.append(None)
+            continue
+        names = {s.get("name") for s in item.get("sources") or [] if s.get("name")}
+        if len(names) < 2:
+            fails.append(f"이슈 '{tag}' 의 출처가 content 에 2곳 미만이다 — 이 이슈는 브리핑에 넣지 않는다")
+        per_item.append(names)
+    known = set().union(*[n for n in per_item if n])
+    for i, (tag, names) in enumerate(zip(tags, per_item)):
+        if not names or len(names) < 2:
+            continue
+        cell = cells[i] if i < len(cells) else ""
+        if sum(n in cell for n in names) < 2:
+            fails.append(f"'출처:' {i + 1}번째 칸에 '{tag}' 의 매체 2곳({'·'.join(sorted(names))} 중)이 없다")
+        stray = sorted(n for n in known - names if n in cell)
+        if stray:
+            fails.append(f"'출처:' {i + 1}번째 칸('{tag}')에 다른 이슈의 매체 {'·'.join(stray)} 가 있다")
+    return fails
+
+
 def source_gaps(ep, content, caption):
     """기사·출처 맞춤(11/02~) — 그 릴스가 다루는 이슈(item)의 원 기사 매체 2곳 이상을 sources 에 적고, 그 매체가 끝 화면·캡션 '출처' 줄에 다 있나 → 실패 목록.
     11/01 운영자 "기사 및 소스에 맞춰서 진행해 달라": 대본은 그 이슈의 원 기사(read_article.py)를 읽고 쓴다 — 기사에 없는 말·한 곳에만 있는 사실은 쓰지 않는다.
     매체는 그날 content 전체가 아니라 그 이슈의 sources 안에서만 인정한다(11/01 Codex: 다른 이슈의 매체를 적어도 통과하면 안 된다)."""
     if ep.get("date", "") < HOOK_RULE_FROM:
         return []
+    if isinstance(ep.get("items"), list):
+        return brief_source_gaps(ep, content, caption)
     item = covered_item(ep, content)
     if item is None:
         return [f"item(다루는 이슈의 tag)이 없거나 content 에 없다: {ep.get('item')!r} — big_issue·items 의 tag 그대로"]
@@ -408,7 +500,8 @@ def main():
             tags = re.findall(r"#\S+", p.read_text(encoding="utf-8"))
             if len(tags) > 5:
                 fails.append(f"{name}: 해시태그 {len(tags)}개(5개 이하)")
-    bad = check_numbers(texts, corpus)
+    series_screen, series_spoken = brief_series(ep)
+    bad = check_numbers(texts, corpus, allow=series_screen)
     # 끝 화면(영상)·만화 끝 장도 화면에 나간다(11/01 Codex) — 고정 문구 숫자(8시 30분·2030)만 예외
     ends = [(f"끝 화면 {k}", plain(str((ep.get("end_card") or {}).get(k) or ""))) for k in ("line", "sub", "note")]
     ends += [(f"만화 끝 장 {k}", plain(str(((ep.get("comic") or {}).get("end") or {}).get(k) or ""))) for k in ("title", "sub")]
@@ -422,7 +515,7 @@ def main():
             script_nums.append(sn)
             if sn[1] in COUNTERS.split("|") and sn[0] == 1:   # '한 번·한 달' 같은 관용구는 content 와 대조하지 않는다(받아쓰기 대조는 한다)
                 continue
-            if sn[:2] not in BRAND_SPOKEN and not any(_num_match(sn, c, strict=True) for c in cvals):
+            if sn[:2] not in BRAND_SPOKEN and sn[:2] not in series_spoken and not any(_num_match(sn, c, strict=True) for c in cvals):
                 fails.append(f"content 에 없는 숫자 — 대사 '{vline.get('text', '')[:20]}…': {_say(sn)}")
     fails += pattern_repeats(epath, ep)
     cap_path = folder / "reel_ai_caption.txt"
@@ -451,6 +544,14 @@ def main():
         if lufs is None or abs(lufs + 14) > 1.5:
             fails.append(f"음량 {lufs} LUFS(-14±1.5)")
         notes.append(f"영상 {dur:.1f}초 · {lufs} LUFS")
+        blacks = black_frames(video)
+        if blacks:
+            fails.append("검은 화면 " + ", ".join(f"{a:.2f}~{b:.2f}초" for a, b in blacks)
+                         + " — 끝 화면은 겹쳐 넘기고(episode.py XFADE), 원본 영상의 검은 컷은 trim 으로 잘라 낸다")
+        flashes = dark_flashes(video)
+        if flashes:
+            fails.append("어둡게 번쩍이는 프레임 " + ", ".join(f"{t:.2f}초(밝기 {y}, 앞뒤 {c})" for t, y, c in flashes[:6]))
+        notes.append(f"검은 화면 {len(blacks)}곳 · 번쩍임 {len(flashes)}곳")
         gaps = dropouts(video)
         if gaps:
             fails.append("소리 끊김 " + ", ".join(f"{a:.2f}초부터 {b:.2f}초({m}dB)" for a, b, m in gaps)
@@ -462,7 +563,7 @@ def main():
             segs, _ = WhisperModel("small", device="cpu", compute_type="int8").transcribe(str(video), language="ko", beam_size=5)
             said = " ".join(s.text for s in segs)
             heard = hangul(said)
-            heard_nums, bad_nums = check_spoken(script_nums, said)
+            heard_nums, bad_nums = check_spoken(script_nums, said, allow=series_spoken)
             fails += bad_nums
             notes.append(f"들린 숫자 {', '.join(_say(n) for n in heard_nums) or '없음'}")
             for vline in ep["voices"]:

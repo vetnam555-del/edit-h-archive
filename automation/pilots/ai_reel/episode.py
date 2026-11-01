@@ -86,6 +86,8 @@ def shot(html, out, transparent):
         raise SystemExit(f"Pretendard 없이 그렸다(한글이 깨진다): {info['fonts']}")
 
 
+XFADE = 0.3   # 본편 → 끝 화면 겹침(초) — 검은 프레임 없이 넘어간다
+
 def render_cards(ep, work):
     fonts = font_css()
     paths = []
@@ -107,7 +109,9 @@ def compose(ep, base, src, out, work):
     main = round(t1 - t0, 3)
     endsec = ep.get("end_seconds", 2.5)
     total = main + endsec
-    inputs = ["-i", str(src)] + sum((["-i", str(p)] for p in caps), []) + ["-loop", "1", "-t", str(endsec), "-framerate", "30", "-i", str(end)]
+    # 끝 화면은 본편 마지막 XFADE 초와 겹쳐 녹아들게 넣는다 — 검은색에서 밝아지게(fade in) 넣으면 넘어가는 순간 2프레임이 검게 튄다
+    # (11/01 운영자 "영상 중간중간에 검은색으로 끊기는 것 같다" — 10/31·11/01 릴스 6편 모두 본편→끝 화면 사이 0.07초 검은 화면)
+    inputs = ["-i", str(src)] + sum((["-i", str(p)] for p in caps), []) + ["-loop", "1", "-t", f"{endsec + XFADE:.3f}", "-framerate", "30", "-i", str(end)]
     vi = len(caps) + 2
     voices, music = ep.get("voices", []), ep.get("music", [])
     inputs += sum((["-i", str(base / v["file"])] for v in voices), [])
@@ -119,9 +123,9 @@ def compose(ep, base, src, out, work):
     for k, c in enumerate(ep["captions"]):
         f.append(f"[{last}][{k + 1}:v]overlay=0:0:enable='between(t,{c['start']},{c['end']})'[vc{k}]")
         last = f"vc{k}"
-    f.append(f"[{last}]trim=0:{main},setpts=PTS-STARTPTS[vm]")
-    f.append(f"[{len(caps) + 1}:v]fps=30,format=yuv420p,setsar=1,fade=t=in:st=0:d=0.25[ve]")
-    f.append("[vm][ve]concat=n=2:v=1:a=0[v]")
+    f.append(f"[{last}]trim=0:{main},setpts=PTS-STARTPTS,format=yuv420p,setsar=1,settb=1/30[vm]")
+    f.append(f"[{len(caps) + 1}:v]fps=30,format=yuv420p,setsar=1,settb=1/30[ve]")
+    f.append(f"[vm][ve]xfade=transition=fade:duration={XFADE}:offset={main - XFADE:.3f}[v]")   # 길이는 그대로(main + endsec)
     # 효과음(원래 AI 영상 소리) — 구간별 볼륨
     expr = "0.3"
     for a, b, vol in reversed(ep.get("sfx", [[0, 999, 0.4]])):

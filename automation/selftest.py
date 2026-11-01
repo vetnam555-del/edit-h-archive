@@ -1803,6 +1803,50 @@ def t_ai_reel():
     expect(qa.source_gaps({**ok_ep, "item": "BYD", "sources": ["서울경제", "TV조선"], "end_card": {"note": "서울경제·TV조선"}},
                           content_src, "출처: 서울경제·TV조선") == [], "H PICK(big_issue) 출처를 막았다")
     expect(qa.source_gaps({"date": "2026-11-01"}, content_src, "") == [], "11/01 기록 회차를 출처 규칙으로 막았다")
+    # '오늘 아침 5가지' 브리핑(2026-11-01 운영자 "메인 5개를 20초 한 편에") — 이슈마다 매체 2곳이 캡션 '출처:' 줄 한 칸에
+    brief = {"date": "2026-11-02", "items": ["BYD", "반도체 급락", "샘 올트먼"], "end_card": {"note": "숫자는 기사 2곳 이상에서 확인했어요<br>(출처는 캡션에)"}}
+    brief_cap = "출처: BYD 서울경제·TV조선 / 인텔 전자신문·헤럴드경제 / 올트먼 서울경제·MBC"
+    expect(qa.source_gaps(brief, content_src, brief_cap) == [], "출처를 다 적은 5가지 브리핑을 막았다")
+    expect(qa.source_gaps(brief, content_src, "출처: BYD 서울경제·TV조선 / 인텔 전자신문·헤럴드경제"),
+           "한 이슈(올트먼)의 출처를 빼먹은 브리핑이 통과했다")
+    expect(qa.source_gaps(brief, content_src, "출처: BYD 서울경제·MBC / 인텔 전자신문·헤럴드경제 / 올트먼 TV조선"),
+           "출처 매체를 이슈끼리 섞어 적은 브리핑이 통과했다")
+    expect(qa.source_gaps({**brief, "end_card": {"note": "숫자는 기사 2곳 이상에서 확인했어요"}}, content_src, brief_cap),
+           "끝 화면에 출처 안내가 없는 브리핑이 통과했다")
+    expect(qa.source_gaps({**brief, "items": ["BYD", "없는 이슈"]}, content_src, brief_cap), "content 에 없는 이슈를 담은 브리핑이 통과했다")
+    # Codex: 두 이슈의 매체 묶음을 통째로 바꿔 적으면(인텔 칸에 올트먼 매체) 막아야 한다 — 칸은 영상 순서대로 이슈와 짝
+    expect(qa.source_gaps(brief, content_src, "출처: BYD 서울경제·TV조선 / 인텔 서울경제·MBC / 올트먼 전자신문·헤럴드경제"),
+           "두 이슈의 출처 묶음을 바꿔 적은 브리핑이 통과했다")
+    expect(qa.source_gaps(brief, content_src, "출처: BYD 서울경제·TV조선 / 인텔 전자신문·헤럴드경제·MBC / 올트먼 서울경제·MBC"),
+           "한 칸에 다른 이슈의 매체를 섞은 브리핑이 통과했다")
+    expect(qa.source_gaps(brief, content_src, "출처: BYD 서울경제·TV조선 / 인텔 전자신문·헤럴드경제 / 올트먼 서울경제·MBC / 덤 MBC·TV조선"),
+           "이슈 수와 칸 수가 다른 브리핑이 통과했다")
+    # Codex: brief.json 도 같은 틀 반복 검사 대상(전날 브리핑과 같은 첫 마디)
+    with tempfile.TemporaryDirectory() as tmp:
+        for day, name, word in (("2026-11-02", "brief.json", "오늘"), ("2026-11-03", "brief.json", "오늘")):
+            d = Path(tmp) / day
+            d.mkdir(exist_ok=True)
+            (d / name).write_text(json.dumps({"date": day, "hook": "숫자 먼저", "voices": [{"text": f"{word} 아침 다섯 가지"}, {"text": "끝"}],
+                                              "captions": [{"html": '<div class="kick">x</div>'}]}, ensure_ascii=False), encoding="utf-8")
+        again = qa.pattern_repeats(Path(tmp) / "2026-11-03" / "brief.json", json.loads((Path(tmp) / "2026-11-03" / "brief.json").read_text(encoding="utf-8")))
+    expect(any("첫 마디 '오늘'" in f for f in again), f"전날 brief.json 과 같은 첫 마디를 못 잡았다: {again}")
+    screen_ok, spoken_ok = qa.brief_series(brief)
+    expect(qa.check_numbers([("t", "오늘 아침 3가지")], "숫자 없음", allow=screen_ok) == []
+           and qa.check_numbers([("t", "오늘 아침 4가지")], "숫자 없음", allow=screen_ok)
+           and qa.check_spoken([(3.0, "가지", "")], "오늘 아침 세 가지", allow=spoken_ok)[1] == [],
+           "브리핑 개수 표현('3가지')을 content 숫자로 막았거나, 다른 개수를 통과시켰다")
+    # 검은 화면·어둡게 번쩍이는 프레임(11/01 운영자 "영상 중간중간에 검은색으로 끊기는 것 같다") — 끝 화면 페이드 인이 2프레임 검게 튀었다
+    expect(qa.parse_blackdetect("[blackdetect @ 0x1] black_start:14.6333 black_end:14.7 black_duration:0.0666667") == [(14.6333, 14.7)],
+           "blackdetect 출력을 못 읽는다")
+    ts30 = [i / 30 for i in range(60)]
+    old_fade = [110.0] * 30 + [16.0, 40.7] + [230.0] * 28     # 본편 → 검게 튄 2프레임 → 끝 화면(옛 페이드 인)
+    crossfade = [110.0] * 30 + [150.0, 190.0] + [230.0] * 28  # 겹쳐 넘기기
+    night_cut = [110.0] * 30 + [20.0] * 30                    # 밤 장면으로 바뀌는 컷은 번쩍임이 아니다
+    expect([h[0] for h in qa.flash_frames(ts30, old_fade)] == [1.0, 1.033], "끝 화면 앞 검은 2프레임을 못 잡는다")
+    expect(qa.flash_frames(ts30, crossfade) == [] and qa.flash_frames(ts30, night_cut) == [], "겹쳐 넘기기·밤 장면 컷을 번쩍임으로 잡았다")
+    ep_src = (ROOT / "automation" / "pilots" / "ai_reel" / "episode.py").read_text(encoding="utf-8")
+    expect("xfade=" in ep_src and "fade=t=in:st=0:d=0.25[ve]" not in ep_src, "끝 화면을 검은색에서 밝아지게 넣는다(검은 2프레임) — 겹쳐 넘겨야 한다")
+    expect("black_frames(video)" in inspect.getsource(qa.main) and "dark_flashes(video)" in inspect.getsource(qa.main), "검수가 검은 화면을 보지 않는다")
     # 어림 '여'(3만5000여 명·50여 명) — 대사·받아쓰기·화면 모두 단위까지 읽는다(11/01 서울마라톤·올트먼 편: 대사 숫자가 검사에서 빠졌다)
     approx = "3만5000여 명이 참가, 사장단 50여 명과"
     expect(qa.spoken_numbers("삼만 오천여 명이 달립니다") == [(35000.0, "명", "")] and qa.spoken_numbers("35,000여 명") == [(35000.0, "명", "")]
