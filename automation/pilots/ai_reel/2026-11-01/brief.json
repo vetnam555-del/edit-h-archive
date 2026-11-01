@@ -12,10 +12,10 @@
  ],
  "seedance": {
   "model": "seedance_2_5",
-  "made_by": "크레딧 API(720p 20초, 140 크레딧) — 운영자 11/01 '무료 영상은 대기가 많아 안 될 것 같다, 크레딧 써서 정말 재미있게'",
-  "job": "83fe6f92-b8bf-402f-b1dc-5a99829b28b9",
+  "made_by": "크레딧 API(720p 20초, 140 크레딧) — 꽉 찬 화면으로 다시 만듦(11/01 운영자 '화면이 꽉 차지 않고 가로형 같다 — H PICK 처럼 꽉 차게'). 처음 판(job 83fe6f92, instagram/2026-11-01/extra/6 로 게시)은 프롬프트의 '가운데 띠에 모아라'를 Seedance 가 가로 띠 + 위아래 흐린 채움으로 그렸다",
+  "job": "90f3f7cf-f226-427d-be55-dc5e9955aecd",
   "prompt": "첫 프레임부터 칩 탑이 H 위로 무너짐 → 경주 트랙 깃발 든 H 가 바람에 팽이처럼 돎 → 접는 폰 금·로봇이 새 화면 → H 가 버스 지붕 서핑·우회 → 졸던 로봇들을 호루라기로 깨워 서류 정리 춤 → 커피 들고 윙크. 장면 사이 휙 넘김(검은 화면 없음), 사람·글자·로고 없음. 전문: automation/reviews/2026-11-01-ai-video.md '오늘 아침 5가지'",
-  "cut": "장면 경계(프레임 차이로 잼): 칩 0~3.6 · 경주 3.6~7.0 · 수리점 7.0~10.4 · 도시 10.4~14.3 · 회의실 14.3~18.0 · 커피 윙크 18.0~20.05. 검은 화면 0. 수리점 계산대 종이에 AI가 그린 엉터리 글자('BAKI')가 있어 7.12~10.22초 delogo 로 지웠다(카메라 고정 구간, 앞뒤는 휙 넘김 흐림)",
+  "cut": "장면 경계(프레임 차이로 잼): 칩 0~3.5 · 경주 3.5~7.08 · 수리점 7.08~10.55 · 도시 10.55~13.95(휙 넘김 10.5~10.67·13.88~14.08) · 회의실 14.05~18.0 · 커피 윙크 18.0~20.05. 검은 화면 0. 꽉 찬 화면 검수(아래 띠 선명도 중앙값 0.39). 수리점 새 화면에 AI 가 그린 엉터리 UI 글자 → 9.85~10.6초 delogo. 도시 장면 운동화 옆 줄무늬가 실제 상표 무늬처럼 보여 아래쪽을 틸트시프트처럼 흐리게(10.6~12.55초 높이 680~, 12.55~13.4초 높이 980~, H 는 흐리지 않음)",
   "prompt_file": "brief_prompt.txt"
  },
  "trim": [
@@ -26,30 +26,30 @@
  "captions": [
   {
    "start": 0.0,
-   "end": 3.6,
+   "end": 3.5,
    "size": 84,
    "html": "<div class=\"kick\">오늘 아침 5가지 · 1/5 미국 증시</div><div class=\"main\">인텔 하루 만에<br><span class=\"hl\">28.58%</span> 폭락</div><div class=\"sub\">1970년대 이후 가장 큰 하락</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 전자신문·헤럴드경제</div>"
   },
   {
-   "start": 3.6,
-   "end": 7.0,
+   "start": 3.5,
+   "end": 7.1,
    "size": 84,
    "html": "<div class=\"kick\">2/5 · 자동차</div><div class=\"main\">중국 BYD 1~9월<br><span class=\"hl\">2만137대</span> 등록</div><div class=\"sub\">9월엔 수입차 4위까지</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 서울경제·TV조선</div>"
   },
   {
-   "start": 7.0,
-   "end": 10.4,
+   "start": 7.1,
+   "end": 10.6,
    "size": 84,
    "html": "<div class=\"kick\">3/5 · 테크</div><div class=\"main\">아이폰 듀오<br>화면 <span class=\"hl\">균열</span></div><div class=\"sub\">애플, 점검 후 수리·교체 지침</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 파이낸셜뉴스·지디넷코리아</div>"
   },
   {
-   "start": 10.4,
-   "end": 14.3,
+   "start": 10.6,
+   "end": 14.05,
    "size": 84,
    "html": "<div class=\"kick\">4/5 · 서울마라톤</div><div class=\"main\">버스 <span class=\"hl\">190개 노선</span><br>임시 우회</div><div class=\"sub\">3만5000여 명 참가 · 광화문 출발</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 헤럴드경제·서울경제</div>"
   },
   {
-   "start": 14.3,
+   "start": 14.05,
    "end": 18.0,
    "size": 84,
    "html": "<div class=\"kick\">5/5 · AI</div><div class=\"main\">AI는 도입보다<br><span class=\"hl\">어떻게 활용</span>하느냐</div><div class=\"sub\">샘 올트먼 · 삼성 사장단 50여 명 간담회</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 서울경제·MBC</div>"
@@ -70,7 +70,7 @@
   },
   {
    "file": "stems/b1_byd.mp3",
-   "start": 3.7,
+   "start": 3.6,
    "tempo": 1.3,
    "text": "BYD, 구월까지 이만 백삼십칠 대 등록!",
    "voice": "qwen_audio_tts · Hana",
@@ -78,21 +78,21 @@
   },
   {
    "file": "stems/b3_duo.mp3",
-   "start": 7.15,
+   "start": 7.2,
    "tempo": 1.2,
    "text": "아이폰 듀오 화면 균열, 점검 후 수리 교체래.",
    "voice": "qwen_audio_tts · Hana"
   },
   {
    "file": "stems/b4_marathon.mp3",
-   "start": 10.55,
+   "start": 10.7,
    "tempo": 1.25,
    "text": "서울 마라톤에 버스 백구십 개 노선이 우회했어!",
    "voice": "qwen_audio_tts · Hana"
   },
   {
    "file": "stems/b5_altman.mp3",
-   "start": 14.45,
+   "start": 14.15,
    "tempo": 1.2,
    "text": "샘 올트먼, AI는 도입보다 활용이 중요하대!",
    "voice": "qwen_audio_tts · Hana"
@@ -149,5 +149,5 @@
   "mix": 0.6
  },
  "source_note": "장면마다 그 소식의 매체 2곳을 작게 띄운다 — 11/01 운영자 공유 레퍼런스: 아르헨티나 AI 뉴스 앱 Lisa 는 사실마다 매체를 밝혀 신뢰를 얻었다(Nieman Lab 2026-10-01). 캡션 '출처:' 칸과 같은 매체",
- "source_video_prep": "ffmpeg -i <원본> -vf \"delogo=x=234:y=820:w=86:h=66:enable='between(t,7.12,10.22)'\" -c:v libx264 -crf 14 → episode.py 입력"
+ "source_video_prep": "ffmpeg -i <원본> -filter_complex \"[0:v]delogo=x=490:y=665:w=82:h=122:enable='between(t,9.85,10.6)',split=3[base][a][b];[a]crop=720:600:0:680,boxblur=10:2[ablur];color=black:s=720x600:r=24:d=20.05,format=gray,geq=lum='clip(Y*255/110\\,0\\,255)'[amask];[ablur][amask]alphamerge[aa];[b]crop=720:300:0:980,boxblur=10:2[bblur];color=black:s=720x300:r=24:d=20.05,format=gray,geq=lum='clip(Y*255/80\\,0\\,255)'[bmask];[bblur][bmask]alphamerge[bb];[base][aa]overlay=0:680:enable='between(t,10.6,12.55)'[t1];[t1][bb]overlay=0:980:enable='between(t,12.55,13.4)',format=yuv420p[out]\" -map [out] -map 0:a -c:v libx264 -crf 14 -c:a copy → episode.py 입력"
 }

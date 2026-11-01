@@ -5,10 +5,12 @@
 AI 릴스와 함께 따로 올리는 두 번째 캐러셀이다(post_instagram.py 가 instagram/{날짜}/comic/*.jpg 를 올린다, AI 정보 라벨).
 같은 AI 영상에서 장면을 뽑으므로 크레딧이 더 들지 않는다.
 
-사용: python3 automation/pilots/ai_reel/comic.py <episode.json> <힉스필드 영상.mp4>
-     → instagram/{날짜}/comic/c1.jpg … + comic_alt.json(대체 텍스트)
-episode.json 의 "comic": {series, title, panels:[{t, pos, who, bubble, box}], sources, end:{title, sub}}
+사용: python3 automation/pilots/ai_reel/comic.py <episode.json> <힉스필드 영상.mp4> [--out 폴더]
+     → instagram/{날짜}/comic/c1.jpg … + comic_alt.json(대체 텍스트). --out 은 미리보기용(게시 폴더를 덮어쓰지 않게)
+episode.json 의 "comic": {series, title, panels:[{t, pos, who, bubble, box, src?}], sources, end:{title, sub}}
   t = 원래 AI 영상에서 뽑을 시각(초), pos = 그림 자르는 기준점(CSS object-position), bubble·box 의 숫자는 content 에서만.
+  src = 그 컷의 출처(5가지 웹툰처럼 컷마다 소식이 다를 때 — 없으면 sources). 2026-11-01 운영자 '캐러셀을 H 극장처럼 웹툰으로' →
+  11/02~ '오늘 아침 5가지' 영상 장면 5컷으로 5가지 웹툰(brief.json 의 comic).
 """
 import argparse
 import html as htmlmod
@@ -82,7 +84,7 @@ def build(ep, video, outdir):
         old.unlink()
     top = lambda i: (f"<div class='top'><div class='series'><span class='pill'>H 극장</span>{c['series']} · {i}/{n}</div>"  # noqa: E731
                      "<div class='logo'>EDIT H<b>.</b></div></div>")
-    src = f"<div class='src'>출처 · {c['sources']}</div>"
+    src_line = lambda p: f"<div class='src'>출처 · {p.get('src') or c['sources']}</div>"  # noqa: E731
     alts = {}
     with tempfile.TemporaryDirectory() as tmp:
         for i, p in enumerate(c["panels"], 1):
@@ -93,11 +95,14 @@ def build(ep, video, outdir):
             if i == 1:   # 표지: 제목 + 큰 컷 + 넘기기 안내
                 body = (top(i) + f"<div class='title'>{c['title']}</div>"
                         f"<div class='panel'><img src='{frame.as_uri()}'><div class='num'>1</div></div>"
-                        f"<div class='stack'>{bubble}{box}</div><div class='swipe'>넘겨서 {len(c['panels'])}컷으로 보기 →</div>")
-                html = page(fonts, body, ptop=310, ph=760, pos=p.get("pos", "50% 40%"), bt=990, ml=60, mr=140, tail="left:150px;")
+                        f"<div class='stack'>{bubble}{box}</div><div class='swipe'>넘겨서 {len(c['panels'])}컷으로 보기 →</div>"
+                        # 컷마다 출처가 다른 날(5가지 웹툰): 표지 출처는 제목 아래 한 줄 — 아래쪽은 설명·넘기기 안내 자리라 겹친다
+                        + (src_line(p).replace("class='src'", "class='src' style='top:282px;bottom:auto;font-size:22px'") if p.get("src") else ""))
+                html = page(fonts, body, ptop=320 if p.get("src") else 310, ph=750 if p.get("src") else 760,
+                            pos=p.get("pos", "50% 40%"), bt=990, ml=60, mr=140, tail="left:150px;")
             else:
                 body = (top(i) + f"<div class='panel'><img src='{frame.as_uri()}'><div class='num'>{i}</div></div>"
-                        f"<div class='stack'>{bubble}{box}</div>{src}")
+                        f"<div class='stack'>{bubble}{box}</div>{src_line(p)}")
                 html = page(fonts, body, ph=p.get("ph", 740), bt=p.get("ph", 740) + 60, pos=p.get("pos", "50% 45%"),
                             tail=p.get("tail", "left:170px;"))
             shot(html, outdir / f"c{i}.jpg")
@@ -121,9 +126,10 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("episode")
     ap.add_argument("video")
+    ap.add_argument("--out", help="미리보기 폴더(기본 instagram/{날짜}/comic — 게시 폴더)")
     a = ap.parse_args()
     ep = json.loads(Path(a.episode).read_text(encoding="utf-8"))
-    out = ROOT / "instagram" / ep["date"] / "comic"
+    out = Path(a.out) if a.out else ROOT / "instagram" / ep["date"] / "comic"
     n = build(ep, Path(a.video), out)
     print(f"ok {out} {n}장")
 
