@@ -1685,6 +1685,30 @@ def t_dive_render():
     return " · ".join(out)
 
 
+def t_webtoon():
+    """5가지 웹툰(2026-11-02~, 운영자 '캐러셀을 H 극장처럼 웹툰으로' → '텍스트가 기존보다 부족하다'): card=N 컷은 그날 카드의
+    제목·본문·'그래서 나는?'·출처를 그대로 가져오고, summary 장은 컷 순서대로 5가지를 싣는다. 지난 만화 설정(card 없음)은 그대로."""
+    sys.path.insert(0, str(AUTOMATION / "pilots" / "ai_reel"))
+    import comic
+    from edith import content as content_mod
+    day = daily_issues(1)[0]
+    issues = content_mod.load(day)["card_issues"]
+    cfg = {"panels": [{"t": 1, "card": 2}, {"t": 2, "card": 1, "bubble": "직접 쓴 말풍선"}], "summary": True}
+    picked = comic.from_cards(cfg, day)
+    first, second = cfg["panels"]
+    expect(re.sub(r"<[^>]+>", "", first["bubble"]).replace("<br>", "") and first["take"] and first["body"] and first["src"],
+           "card 컷에 제목·본문·'그래서 나는?'·출처가 다 들어오지 않는다")
+    expect(comic.plain(first["take"]) == comic.plain(comic._md(issues[1]["takeaway"])), "'그래서 나는?'이 카드 takeaway 와 다르다")
+    expect("\u2060" not in first["src"], "출처에 줄바꿈 방지 문자가 남았다")
+    expect(second["bubble"] == "직접 쓴 말풍선", "직접 쓴 말풍선을 카드 글이 덮어썼다")
+    expect([it["headline"] for it in picked] == [issues[1]["headline"], issues[0]["headline"]], "요약 장 순서가 컷 순서가 아니다")
+    old = {"panels": [{"t": 1, "bubble": "옛 만화", "box": "설명"}]}
+    expect(comic.from_cards(old, day) == [] and "take" not in old["panels"][0], "card 없는 지난 만화 설정이 바뀐다")
+    expect("<span class='hl'>" in comic._md("==28%== 폭락") and "<br>" in comic._md("가\n나") and "&lt;" in comic._md("<b>"),
+           "카드 글 → 말풍선 HTML 바꾸기가 틀린다")
+    return f"{day} 카드 {len(picked)}장 → 컷·요약 · 지난 만화 설정 그대로"
+
+
 def t_mascot():
     """마스코트(2026-11-01 운영자 '마스코트 캐릭터 만들어 줘'): 자세 9장이 512×512 투명 PNG 로 있고, 설정 문서가 파일마다 쓰임을 적었다."""
     from edith.common import image_size
@@ -2000,6 +2024,9 @@ def t_ai_reel():
     night_cut = [110.0] * 30 + [20.0] * 30                    # 밤 장면으로 바뀌는 컷은 번쩍임이 아니다
     expect([h[0] for h in qa.flash_frames(ts30, old_fade)] == [1.0, 1.033], "끝 화면 앞 검은 2프레임을 못 잡는다")
     expect(qa.flash_frames(ts30, crossfade) == [] and qa.flash_frames(ts30, night_cut) == [], "겹쳐 넘기기·밤 장면 컷을 번쩍임으로 잡았다")
+    # 꽉 찬 화면(11/01 운영자 'H PICK 처럼 꽉 차게') — 위아래 흐린 띠(가로 띠 영상)는 막고, 얕은 초점으로 바닥이 흐린 장면 몇 개는 통과
+    expect(qa.letterboxed([0.11] * 30 + [0.4] * 5) and not qa.letterboxed([0.35] * 20 + [0.12] * 10) and not qa.letterboxed([]),
+           "흐린 위아래 띠(가로 띠 영상) 판정이 틀린다")
     ep_src = (ROOT / "automation" / "pilots" / "ai_reel" / "episode.py").read_text(encoding="utf-8")
     expect("xfade=" in ep_src and "fade=t=in:st=0:d=0.25[ve]" not in ep_src, "끝 화면을 검은색에서 밝아지게 넣는다(검은 2프레임) — 겹쳐 넘겨야 한다")
     expect("black_frames(video)" in inspect.getsource(qa.main) and "dark_flashes(video)" in inspect.getsource(qa.main), "검수가 검은 화면을 보지 않는다")
@@ -2271,6 +2298,7 @@ def main():
     check("주간 특집 저장각(E13)", t_weekly_save)
     check("데일리 저장각(체크리스트·차트)", t_save_cards)
     check("딥다이브 카드(「H의 장부」 연재 날)", t_dive_cards)
+    check("5가지 웹툰(카드 글 그대로·요약 장)", t_webtoon)
     check("마스코트(안경 동그라미 H)", t_mascot)
     check("첫 화면 구독·사이트 그림(index.html)", t_home)
     check("문구·마크 2판(2030 대표 한 줄·마스코트 얼굴)", t_brand_v2)
