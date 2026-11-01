@@ -113,6 +113,7 @@
       {"handle": "edit.h.kr", "name": "EDIT H(우리)", "self": true, "group": "경제·뉴스 브리핑 — 독자가 겹친다"},
       {"handle": "newneek.official", "name": "뉴닉", "group": "경제·뉴스 브리핑 — 독자가 겹친다"},
       {"handle": "uppity.official", "name": "어피티", "group": "경제·뉴스 브리핑 — 독자가 겹친다"},
+      {"handle": "moneygraphyworld", "name": "머니그라피(토스)", "group": "경제·뉴스 브리핑 — 독자가 겹친다"},
       {"handle": "careet.official", "name": "캐릿", "group": "트렌드 미디어"},
       {"handle": "gogumafarm.kr", "name": "고구마팜", "group": "트렌드 미디어"},
       {"handle": "trendaword", "name": "트렌드어워드", "group": "트렌드 미디어"},
