@@ -1,0 +1,30 @@
+{
+ "_note": "끝인사 돌려쓰기(2026-11-02~). 같은 날 릴스끼리 겹치지 않게(qa.py 8). end_line 은 끝 화면 end_card.line 에 그대로. 녹음 qwen_audio_tts · Hana, bye_tomorrow 는 10/31 녹음.",
+ "signoffs": {
+  "bye_tomorrow.mp3": {
+   "text": "내일 아침 여덟 시 반에 또 만나요!",
+   "end_line": "내일 아침 8시 30분에 또 만나요!",
+   "cta": "다시 보기"
+  },
+  "bye_follow.mp3": {
+   "text": "팔로우하면 내일 아침에도 알려 줄게!",
+   "end_line": "팔로우하면 내일 아침에도 알려 줄게요!",
+   "cta": "팔로우"
+  },
+  "bye_save.mp3": {
+   "text": "저장해 두고, 필요할 때 꺼내 봐!",
+   "end_line": "저장해 두고 필요할 때 꺼내 보세요!",
+   "cta": "저장"
+  },
+  "bye_share.mp3": {
+   "text": "이 소식, 필요한 친구한테 보내 줘!",
+   "end_line": "필요한 친구에게 보내 주세요!",
+   "cta": "공유"
+  },
+  "bye_newsletter.mp3": {
+   "text": "더 자세한 건 프로필 링크 뉴스레터에서!",
+   "end_line": "더 자세한 건 프로필 링크 뉴스레터에서!",
+   "cta": "뉴스레터 신청"
+  }
+ }
+}

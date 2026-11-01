@@ -1757,6 +1757,38 @@ def t_ai_reel():
            "content 에 없는 숫자가 통과했다")
     expect(not qa.check_numbers([("t", "1조6000억원 넘게 · 3.48% · 장중 5599 · 3만 명")], "1조 6000억원 순매도 3.48% 5599.42 3만 명"),
            "content 에 있는 숫자를 막았다")
+    # 같은 틀 반복 금지(2026-11-02~) — 11/01 운영자 "패턴이 똑같네? 헉으로 시작하고 멘트가 비슷하다"
+    with tempfile.TemporaryDirectory() as tmp:
+        def ep_at(day, name, word, hook, kick, bye):
+            d = Path(tmp) / day; d.mkdir(exist_ok=True)
+            e = {"date": day, "hook": hook, "voices": [{"text": f"{word} 시작 대사"}, {"text": bye}],
+                 "captions": [{"html": f'<div class="kick">{kick}</div><div class="main">x</div>'}]}
+            (d / name).write_text(json.dumps(e, ensure_ascii=False), encoding="utf-8")
+            return d / name, e
+        ep_at("2026-11-01", "episode.json", "헉…", None, "그래서 나는?", "내일 아침 여덟 시 반에 또 만나요!")
+        ep_at("2026-11-02", "episode.json", "28.58%.", "숫자 먼저", "오늘 할 일", "팔로우하면 내일 아침에도 알려 줄게!")
+        same = qa.pattern_repeats(*ep_at("2026-11-02", "extra2.json", "헉…", "숫자 먼저", "오늘 할 일", "팔로우하면 내일 아침에도 알려 줄게!"))
+        fresh = qa.pattern_repeats(*ep_at("2026-11-02", "extra3.json", "버스가", "질문", "기억할 것", "저장해 두고, 필요할 때 꺼내 봐!"))
+        old = qa.pattern_repeats(*ep_at("2026-11-01", "extra2.json", "헉…", None, "그래서 나는?", "내일 아침 여덟 시 반에 또 만나요!"))
+    expect(len(same) == 4 and any("첫 마디 '헉'" in f for f in same) and any("훅 종류" in f for f in same)
+           and any("머리말" in f for f in same) and any("끝인사" in f for f in same), f"같은 틀 반복을 못 잡았다: {same}")
+    expect(fresh == [] and old == [], f"다른 틀·11/01 기록을 막았다: {fresh} {old}")
+    # 기사·출처 맞춤(2026-11-02~) — 11/01 운영자 "기사 및 소스에 맞춰서 진행해 달라", Codex: 그 이슈의 sources 안에서만
+    content_src = {"big_issue": {"tag": "BYD", "sources": [{"name": "서울경제"}, {"name": "TV조선"}]},
+                   "items": [{"tag": "반도체 급락", "sources": [{"name": "전자신문"}, {"name": "헤럴드경제"}]},
+                             {"tag": "샘 올트먼", "sources": [{"name": "서울경제"}, {"name": "MBC"}]}]}
+    ok_ep = {"date": "2026-11-02", "item": "반도체 급락", "sources": ["전자신문", "헤럴드경제"],
+             "end_card": {"note": "숫자는 기사 2곳 이상에서 확인했어요<br>(전자신문·헤럴드경제 보도 기준)"}}
+    ok_cap = "본문\n출처: 전자신문·헤럴드경제(10.31)\n이 영상과 목소리는 AI로 만들었어요."
+    wrong = {**ok_ep, "sources": ["서울경제", "MBC"], "end_card": {"note": "(서울경제·MBC 보도 기준)"}}
+    expect(qa.source_gaps(ok_ep, content_src, ok_cap) == [], "출처를 다 적은 릴스를 막았다")
+    expect(qa.source_gaps(wrong, content_src, "출처: 서울경제·MBC"), "다른 이슈(올트먼)의 매체를 적은 인텔 릴스가 통과했다")
+    expect(qa.source_gaps({**ok_ep, "sources": ["전자신문"]}, content_src, ok_cap), "출처 1곳만 적은 릴스가 통과했다")
+    expect(qa.source_gaps({**ok_ep, "item": "없는 이슈"}, content_src, ok_cap), "content 에 없는 이슈를 적은 릴스가 통과했다")
+    expect(qa.source_gaps(ok_ep, content_src, "본문만"), "캡션에 출처 줄이 없는데 통과했다")
+    expect(qa.source_gaps({**ok_ep, "item": "BYD", "sources": ["서울경제", "TV조선"], "end_card": {"note": "서울경제·TV조선"}},
+                          content_src, "출처: 서울경제·TV조선") == [], "H PICK(big_issue) 출처를 막았다")
+    expect(qa.source_gaps({"date": "2026-11-01"}, content_src, "") == [], "11/01 기록 회차를 출처 규칙으로 막았다")
     # 어림 '여'(3만5000여 명·50여 명) — 대사·받아쓰기·화면 모두 단위까지 읽는다(11/01 서울마라톤·올트먼 편: 대사 숫자가 검사에서 빠졌다)
     approx = "3만5000여 명이 참가, 사장단 50여 명과"
     expect(qa.spoken_numbers("삼만 오천여 명이 달립니다") == [(35000.0, "명", "")] and qa.spoken_numbers("35,000여 명") == [(35000.0, "명", "")]
