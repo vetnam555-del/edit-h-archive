@@ -14,5 +14,27 @@
    "18642448510040249"
   ],
   "at": "2026-11-02T08:32:08+09:00"
+ },
+ "reel": {
+  "id": "18348142984251819",
+  "at": "2026-11-02T08:49:36+09:00",
+  "track": "AI 영상(자체 음악·목소리)",
+  "style": "ai",
+  "seconds": 22.7,
+  "feed": false,
+  "hook": true,
+  "ai_label": true,
+  "permalink": "https://www.instagram.com/reel/DfN8wlJCtvG/"
+ },
+ "story_ai": {
+  "id": "17990010129065455",
+  "at": "2026-11-02T08:50:07+09:00",
+  "ai_label": true
+ },
+ "comic": {
+  "id": "18141051835728033",
+  "at": "2026-11-02T08:50:50+09:00",
+  "ai_label": true,
+  "permalink": "https://www.instagram.com/p/DfN89ZXDwae/"
  }
 }
