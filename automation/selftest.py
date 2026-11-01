@@ -1379,6 +1379,20 @@ def t_evening():
     # 예비 호는 GITHUB_TOKEN 으로 푸시해 push 로는 사슬이 안 뜬다 — rewind.yml 이 직접 띄워야 21:30 수집이 제때 돈다(10/7)
     rewind = (ROOT / ".github" / "workflows" / "rewind.yml").read_text(encoding="utf-8")
     expect("gh workflow run evening.yml" in rewind, "예비 호(rewind.yml)가 저녁 일정 사슬을 띄우지 않는다")
+    # 자정 뒤 언제 시작한 사슬이든 17:30 에 본 작업이 시작되고, 본 작업(6시간 제한)이 21:30 수집까지 덮어야 한다.
+    # 11/01: 04:26 에 다른 html 푸시(PR #101)로 시작한 사슬이 대기 둘(350분씩)로는 16:07 에 본 작업을 시작해
+    # 21:07 에 5시간 제한으로 끊길 뻔했다(21:30 수집 빠짐 + '실패' 알림 메일).
+    ev = (ROOT / ".github" / "workflows" / "evening.yml").read_text(encoding="utf-8")
+    waits = re.findall(r"\n  (wait\d+):\n    needs: \[?([\w, ]+)\]?\n(?:.*\n)*?.*evening\.py sleep [^\n]*--max-min (\d+)", ev)
+    anchor = sum(int(x) * f for x, f in zip(evening.ANCHOR.split(":"), (60, 1)))
+    metrics = sum(int(x) * f for x, f in zip(evening.METRICS_AT.split(":"), (60, 1)))
+    expect(sum(int(w[2]) for w in waits) >= anchor,
+           f"대기 작업 합계 {sum(int(w[2]) for w in waits)}분 — 자정 뒤 시작한 사슬이 {evening.ANCHOR} 전에 본 작업을 시작해 21:30 전에 끊긴다")
+    for prev, cur in zip(waits, waits[1:]):
+        expect(prev[0] in cur[1], f"{cur[0]} 가 {prev[0]} 뒤에 돌지 않는다")
+    run_job = re.search(r"\n  run:\n    needs: \[([\w, ]+)\]\n(?:.*\n)*?    timeout-minutes: (\d+)", ev)
+    expect(run_job and waits and waits[-1][0] in run_job.group(1), "본 작업(run)이 마지막 대기 작업 뒤에 돌지 않는다")
+    expect(run_job and int(run_job.group(2)) >= metrics - anchor + 15, "본 작업 시간 제한이 17:30→21:30 수집을 덮지 못한다")
     return f"{day}: " + ", ".join(f"{t} {n}" for n, (t, _) in sorted(items.items(), key=lambda kv: kv[1][0]))
 
 
