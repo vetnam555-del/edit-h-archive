@@ -1814,6 +1814,22 @@ def t_ai_reel():
     expect(qa.source_gaps({**brief, "end_card": {"note": "숫자는 기사 2곳 이상에서 확인했어요"}}, content_src, brief_cap),
            "끝 화면에 출처 안내가 없는 브리핑이 통과했다")
     expect(qa.source_gaps({**brief, "items": ["BYD", "없는 이슈"]}, content_src, brief_cap), "content 에 없는 이슈를 담은 브리핑이 통과했다")
+    # Codex: 두 이슈의 매체 묶음을 통째로 바꿔 적으면(인텔 칸에 올트먼 매체) 막아야 한다 — 칸은 영상 순서대로 이슈와 짝
+    expect(qa.source_gaps(brief, content_src, "출처: BYD 서울경제·TV조선 / 인텔 서울경제·MBC / 올트먼 전자신문·헤럴드경제"),
+           "두 이슈의 출처 묶음을 바꿔 적은 브리핑이 통과했다")
+    expect(qa.source_gaps(brief, content_src, "출처: BYD 서울경제·TV조선 / 인텔 전자신문·헤럴드경제·MBC / 올트먼 서울경제·MBC"),
+           "한 칸에 다른 이슈의 매체를 섞은 브리핑이 통과했다")
+    expect(qa.source_gaps(brief, content_src, "출처: BYD 서울경제·TV조선 / 인텔 전자신문·헤럴드경제 / 올트먼 서울경제·MBC / 덤 MBC·TV조선"),
+           "이슈 수와 칸 수가 다른 브리핑이 통과했다")
+    # Codex: brief.json 도 같은 틀 반복 검사 대상(전날 브리핑과 같은 첫 마디)
+    with tempfile.TemporaryDirectory() as tmp:
+        for day, name, word in (("2026-11-02", "brief.json", "오늘"), ("2026-11-03", "brief.json", "오늘")):
+            d = Path(tmp) / day
+            d.mkdir(exist_ok=True)
+            (d / name).write_text(json.dumps({"date": day, "hook": "숫자 먼저", "voices": [{"text": f"{word} 아침 다섯 가지"}, {"text": "끝"}],
+                                              "captions": [{"html": '<div class="kick">x</div>'}]}, ensure_ascii=False), encoding="utf-8")
+        again = qa.pattern_repeats(Path(tmp) / "2026-11-03" / "brief.json", json.loads((Path(tmp) / "2026-11-03" / "brief.json").read_text(encoding="utf-8")))
+    expect(any("첫 마디 '오늘'" in f for f in again), f"전날 brief.json 과 같은 첫 마디를 못 잡았다: {again}")
     screen_ok, spoken_ok = qa.brief_series(brief)
     expect(qa.check_numbers([("t", "오늘 아침 3가지")], "숫자 없음", allow=screen_ok) == []
            and qa.check_numbers([("t", "오늘 아침 4가지")], "숫자 없음", allow=screen_ok)

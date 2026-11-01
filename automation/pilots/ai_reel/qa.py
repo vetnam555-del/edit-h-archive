@@ -16,7 +16,7 @@
     (11/01 운영자 "패턴이 똑같네? 헉으로 시작하고 멘트가 비슷하다").
  9. 기사·출처 맞춤(2026-11-02~) — item(다루는 이슈 tag)과 sources 에 그 이슈의 원 기사 매체 2곳 이상(그 이슈 sources 안의 매체),
     끝 화면 note·reel_ai_caption.txt '출처' 줄에 그 매체 이름이 다 있어야 한다(11/01 운영자 "기사 및 소스에 맞춰서 진행해 달라").
-    '오늘 아침 5가지' 브리핑(items 목록)은 이슈마다 매체 2곳이 캡션 '출처:' 줄 한 칸에, 끝 화면 note 엔 출처 안내만(2026-11-01 운영자).
+    '오늘 아침 5가지' 브리핑(items 목록)은 캡션 '출처:' 줄을 영상 순서대로 이슈마다 한 칸(' / ')씩 — 그 이슈 매체 2곳, 다른 이슈 매체 없이 — 끝 화면 note 엔 출처 안내만(2026-11-01 운영자).
 """
 import argparse
 import datetime as dt
@@ -354,12 +354,14 @@ def pattern_repeats(epath, ep):
     day = dt.date.fromisoformat(ep["date"])
     for d in (day, day - dt.timedelta(days=1)):
         folder = epath.parent.parent / d.isoformat()
-        for p in sorted(folder.glob("episode.json")) + sorted(folder.glob("extra*.json")):
+        for p in sorted(folder.glob("*.json")):   # episode·extraN·brief 등 그날 릴스 설정 전부(11/01 Codex: brief.json 이 빠졌다)
             if p.resolve() == epath.resolve():
                 continue
             try:
                 other = json.loads(p.read_text(encoding="utf-8"))
             except ValueError:
+                continue
+            if not isinstance(other, dict) or "voices" not in other:
                 continue
             name = f"{d.isoformat()} {p.stem}"
             if first_word(ep) and first_word(ep) == first_word(other):
@@ -407,16 +409,30 @@ def brief_source_gaps(ep, content, caption):
         fails.append("끝 화면 note 에 출처 안내가 없다 — 예: '출처는 캡션·뉴스레터에'")
     src_line = next((ln for ln in caption.splitlines() if ln.strip().startswith("출처")), "")
     cells = [c for c in re.split(r"\s*/\s*", src_line.split(":", 1)[-1]) if c.strip()]
+    # 칸은 영상 순서(items 순서)대로 이슈 하나씩 — 칸과 이슈를 순서로 짝지어야 두 이슈의 매체 묶음을 바꿔 적은 것도 잡는다(11/01 Codex)
+    if len(cells) != len(tags):
+        fails.append(f"reel_ai_caption.txt '출처:' 줄 칸 {len(cells)}개 ≠ 이슈 {len(tags)}개 — 영상 순서대로 이슈마다 한 칸(' / ' 로 나눔)")
+    per_item = []
     for tag in tags:
         item = covered_item({"item": tag}, content)
         if item is None:
             fails.append(f"items 의 '{tag}' 가 content(big_issue·items 의 tag)에 없다")
+            per_item.append(None)
             continue
         names = {s.get("name") for s in item.get("sources") or [] if s.get("name")}
         if len(names) < 2:
             fails.append(f"이슈 '{tag}' 의 출처가 content 에 2곳 미만이다 — 이 이슈는 브리핑에 넣지 않는다")
-        elif not any(sum(n in c for n in names) >= 2 for c in cells):
-            fails.append(f"reel_ai_caption.txt '출처:' 줄에 '{tag}' 의 매체 2곳({'·'.join(sorted(names))} 중)이 한 칸에 없다")
+        per_item.append(names)
+    known = set().union(*[n for n in per_item if n])
+    for i, (tag, names) in enumerate(zip(tags, per_item)):
+        if not names or len(names) < 2:
+            continue
+        cell = cells[i] if i < len(cells) else ""
+        if sum(n in cell for n in names) < 2:
+            fails.append(f"'출처:' {i + 1}번째 칸에 '{tag}' 의 매체 2곳({'·'.join(sorted(names))} 중)이 없다")
+        stray = sorted(n for n in known - names if n in cell)
+        if stray:
+            fails.append(f"'출처:' {i + 1}번째 칸('{tag}')에 다른 이슈의 매체 {'·'.join(stray)} 가 있다")
     return fails
 
 
