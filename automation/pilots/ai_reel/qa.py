@@ -13,6 +13,8 @@
  7. 금지 — 화면 글자에 'AI로 만든 영상' 표시 없음(운영자 11/01), 실존 인물·회사 로고는 사람이 프레임 캡처로 한 번 더 본다(자동 아님).
  8. 같은 틀 반복 금지(2026-11-02~) — 첫 마디(전날까지)·훅 종류·끝 자막 머리말·끝인사가 같은 날 다른 릴스와 겹치면 실패
     (11/01 운영자 "패턴이 똑같네? 헉으로 시작하고 멘트가 비슷하다").
+ 9. 기사·출처 맞춤(2026-11-02~) — sources 에 그 이슈의 원 기사 매체 2곳 이상(content 에 있는 매체),
+    끝 화면 note·reel_ai_caption.txt '출처' 줄에 그 매체 이름이 다 있어야 한다(11/01 운영자 "기사 및 소스에 맞춰서 진행해 달라").
 """
 import argparse
 import datetime as dt
@@ -333,6 +335,27 @@ def pattern_repeats(epath, ep):
     return fails
 
 
+def source_gaps(ep, corpus, caption):
+    """기사·출처 맞춤(11/02~) — 원 기사 매체 2곳 이상을 sources 에 적고, 그 매체가 content·끝 화면·캡션 '출처' 줄에 다 있나 → 실패 목록.
+    11/01 운영자 "기사 및 소스에 맞춰서 진행해 달라": 대본은 그 이슈의 원 기사(read_article.py)를 읽고 쓴다 — 기사에 없는 말·한 곳에만 있는 사실은 쓰지 않는다."""
+    if ep.get("date", "") < HOOK_RULE_FROM:
+        return []
+    names = [n.strip() for n in ep.get("sources") or [] if n.strip()]
+    fails = []
+    if len(set(names)) < 2:
+        return [f"sources 에 원 기사 매체가 2곳 이상 없다: {names} — 그 이슈의 원 기사를 read_article.py 로 읽고 적는다"]
+    note = plain(str((ep.get("end_card") or {}).get("note") or ""))
+    src_line = next((ln for ln in caption.splitlines() if ln.strip().startswith("출처")), "")
+    for n in names:
+        if f'"name": "{n}"' not in corpus:
+            fails.append(f"출처 '{n}' 이 content 의 sources 에 없다 — 확인한 기사만 출처로")
+        if n not in note:
+            fails.append(f"끝 화면 note 에 출처 '{n}' 이 없다")
+        if n not in src_line:
+            fails.append(f"reel_ai_caption.txt '출처' 줄에 '{n}' 이 없다")
+    return fails
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("episode")
@@ -387,6 +410,8 @@ def main():
             if sn[:2] not in BRAND_SPOKEN and not any(_num_match(sn, c, strict=True) for c in cvals):
                 fails.append(f"content 에 없는 숫자 — 대사 '{vline.get('text', '')[:20]}…': {_say(sn)}")
     fails += pattern_repeats(epath, ep)
+    cap_path = folder / "reel_ai_caption.txt"
+    fails += source_gaps(ep, corpus, cap_path.read_text(encoding="utf-8") if cap_path.exists() else "")
     if any("AI로 만든 영상" in plain(c["html"]) for c in ep.get("captions", [])):
         fails.append("화면 글자에 'AI로 만든 영상' 표시가 있다(운영자 11/01: 빼기)")
 
