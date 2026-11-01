@@ -1819,6 +1819,18 @@ def t_ai_reel():
            and qa.check_numbers([("t", "오늘 아침 4가지")], "숫자 없음", allow=screen_ok)
            and qa.check_spoken([(3.0, "가지", "")], "오늘 아침 세 가지", allow=spoken_ok)[1] == [],
            "브리핑 개수 표현('3가지')을 content 숫자로 막았거나, 다른 개수를 통과시켰다")
+    # 검은 화면·어둡게 번쩍이는 프레임(11/01 운영자 "영상 중간중간에 검은색으로 끊기는 것 같다") — 끝 화면 페이드 인이 2프레임 검게 튀었다
+    expect(qa.parse_blackdetect("[blackdetect @ 0x1] black_start:14.6333 black_end:14.7 black_duration:0.0666667") == [(14.6333, 14.7)],
+           "blackdetect 출력을 못 읽는다")
+    ts30 = [i / 30 for i in range(60)]
+    old_fade = [110.0] * 30 + [16.0, 40.7] + [230.0] * 28     # 본편 → 검게 튄 2프레임 → 끝 화면(옛 페이드 인)
+    crossfade = [110.0] * 30 + [150.0, 190.0] + [230.0] * 28  # 겹쳐 넘기기
+    night_cut = [110.0] * 30 + [20.0] * 30                    # 밤 장면으로 바뀌는 컷은 번쩍임이 아니다
+    expect([h[0] for h in qa.flash_frames(ts30, old_fade)] == [1.0, 1.033], "끝 화면 앞 검은 2프레임을 못 잡는다")
+    expect(qa.flash_frames(ts30, crossfade) == [] and qa.flash_frames(ts30, night_cut) == [], "겹쳐 넘기기·밤 장면 컷을 번쩍임으로 잡았다")
+    ep_src = (ROOT / "automation" / "pilots" / "ai_reel" / "episode.py").read_text(encoding="utf-8")
+    expect("xfade=" in ep_src and "fade=t=in:st=0:d=0.25[ve]" not in ep_src, "끝 화면을 검은색에서 밝아지게 넣는다(검은 2프레임) — 겹쳐 넘겨야 한다")
+    expect("black_frames(video)" in inspect.getsource(qa.main) and "dark_flashes(video)" in inspect.getsource(qa.main), "검수가 검은 화면을 보지 않는다")
     # 어림 '여'(3만5000여 명·50여 명) — 대사·받아쓰기·화면 모두 단위까지 읽는다(11/01 서울마라톤·올트먼 편: 대사 숫자가 검사에서 빠졌다)
     approx = "3만5000여 명이 참가, 사장단 50여 명과"
     expect(qa.spoken_numbers("삼만 오천여 명이 달립니다") == [(35000.0, "명", "")] and qa.spoken_numbers("35,000여 명") == [(35000.0, "명", "")]

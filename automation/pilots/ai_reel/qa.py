@@ -7,7 +7,8 @@
  2. 대사 — 완성본을 음성 인식(faster-whisper small)으로 받아 적어, 대사 줄마다 낱말이 충분히 들리나.
     대사 원고의 숫자(한글 읽기)는 content 와, 들린 숫자는 대사 숫자와 같은 값이어야 한다(11/01 Codex — 목소리가 틀린 금액을 말하면 막는다).
  3. 소리 — 통합 음량 -14±1.5 LUFS, 음성 트랙이 있다, 중간에 끊기는 곳이 없다(11/01 운영자 "소리가 중간중간 끊긴다").
- 4. 영상 — 1080×1920, 길이 8~30초.
+ 4. 영상 — 1080×1920, 길이 8~30초, 검은 화면·어둡게 번쩍이는 프레임이 한 프레임도 없다
+    (11/01 운영자 "영상 중간중간에 검은색으로 끊기는 것 같다" — 끝 화면 페이드 인이 2프레임 검게 튀었다).
  5. 캡션 — reel_ai_caption.txt·comic_caption.txt 에 'AI로 만들' 한 줄, 해시태그 5개 이하, 같은 숫자 대조(끝 화면·만화 끝 장 문구도).
  6. 만화 — comic/ JPEG 3~10장, 1080×1350.
  7. 금지 — 화면 글자에 'AI로 만든 영상' 표시 없음(운영자 11/01), 실존 인물·회사 로고는 사람이 프레임 캡처로 한 번 더 본다(자동 아님).
@@ -23,6 +24,7 @@ import difflib
 import html as htmlmod
 import json
 import re
+import statistics
 import subprocess
 import sys
 from pathlib import Path
@@ -102,6 +104,41 @@ def check_numbers(texts, corpus, allow=()):
             if n[0] != 1 and _say(n) not in allow and not any(_num_match(n, c, strict=True) for c in cvals):
                 bad.append(f"{label}: '{_say(n)}'")
     return bad
+
+
+def parse_blackdetect(stderr):
+    """ffmpeg blackdetect 출력 → [(시작초, 끝초)]."""
+    return [(float(a), float(b)) for a, b in re.findall(r"black_start:([\d.]+) black_end:([\d.]+)", stderr)]
+
+
+def black_frames(video):
+    """화면의 90% 이상이 검은(밝기 12% 아래) 구간 — 한 프레임(0.033초)이라도 잡는다(11/01 운영자 '검은색으로 끊긴다')."""
+    er = subprocess.run(["ffmpeg", "-v", "info", "-i", str(video), "-vf", "blackdetect=d=0.02:pix_th=0.12:pic_th=0.90",
+                         "-an", "-f", "null", "-"], capture_output=True, text=True).stderr
+    return parse_blackdetect(er)
+
+
+def flash_frames(ts, ys, win=8, ratio=0.45, floor=30):
+    """앞뒤보다 갑자기 어두운 프레임(번쩍임) → [(시각, 밝기, 앞뒤 밝기)].
+    앞 win 프레임과 뒤 win 프레임 밝기 중앙값 중 작은 쪽의 ratio 배보다 어두우면 잡는다 — 밤 장면으로 넘어가는 컷은 뒤가 어두워서 걸리지 않는다."""
+    hits = []
+    for i, y in enumerate(ys):
+        before, after = ys[max(0, i - win):i], ys[i + 1:i + 1 + win]
+        if not before or not after:
+            continue
+        ctx = min(statistics.median(before), statistics.median(after))
+        if ctx > floor and y < ctx * ratio:
+            hits.append((round(ts[i], 3), round(y, 1), round(ctx, 1)))
+    return hits
+
+
+def dark_flashes(video):
+    """완성본 프레임마다 평균 밝기(YAVG)를 재서 flash_frames 로 번쩍임을 찾는다."""
+    out = subprocess.run(["ffmpeg", "-v", "error", "-i", str(video), "-vf", "signalstats,metadata=print:key=lavfi.signalstats.YAVG:file=-",
+                          "-an", "-f", "null", "-"], capture_output=True, text=True).stdout
+    ts = [float(x) for x in re.findall(r"pts_time:([\d.]+)", out)]
+    ys = [float(x) for x in re.findall(r"YAVG=([\d.]+)", out)]
+    return flash_frames(ts, ys)
 
 
 def dropouts(video, head=0.3, tail=0.8):
@@ -491,6 +528,14 @@ def main():
         if lufs is None or abs(lufs + 14) > 1.5:
             fails.append(f"음량 {lufs} LUFS(-14±1.5)")
         notes.append(f"영상 {dur:.1f}초 · {lufs} LUFS")
+        blacks = black_frames(video)
+        if blacks:
+            fails.append("검은 화면 " + ", ".join(f"{a:.2f}~{b:.2f}초" for a, b in blacks)
+                         + " — 끝 화면은 겹쳐 넘기고(episode.py XFADE), 원본 영상의 검은 컷은 trim 으로 잘라 낸다")
+        flashes = dark_flashes(video)
+        if flashes:
+            fails.append("어둡게 번쩍이는 프레임 " + ", ".join(f"{t:.2f}초(밝기 {y}, 앞뒤 {c})" for t, y, c in flashes[:6]))
+        notes.append(f"검은 화면 {len(blacks)}곳 · 번쩍임 {len(flashes)}곳")
         gaps = dropouts(video)
         if gaps:
             fails.append("소리 끊김 " + ", ".join(f"{a:.2f}초부터 {b:.2f}초({m}dB)" for a, b, m in gaps)
