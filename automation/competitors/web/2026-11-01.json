@@ -1,5 +1,5 @@
 {
- "collected_at": "2026-11-01 03:42 KST",
+ "collected_at": "2026-11-01 20:57 KST",
  "window_days": 7,
  "ours": [
   "2026-10-26",
@@ -7,7 +7,8 @@
   "2026-10-28",
   "2026-10-29",
   "2026-10-30",
-  "2026-10-31"
+  "2026-10-31",
+  "2026-11-01"
  ],
  "gaps": [
   {
@@ -124,9 +125,47 @@
    "ok": true,
    "items": [
     {
+     "title": "배우 최불암 씨 별세, 향년 87세…'수사반장'·'전원일기' 남기고 떠난 '국민 아버지' 🕯️",
+     "link": "https://newneek.co/@newneek/article/48254",
+     "date": "2026-11-01",
+     "recent": true,
+     "overlap": []
+    },
+    {
+     "title": "1조 달러 돌파 눈앞에 둔 한국 수출, 10월 수출 '반도체 쏠림'이 이끌었다고?",
+     "link": "https://newneek.co/@newneek/article/48292",
+     "date": "2026-11-01",
+     "recent": true,
+     "overlap": [
+      "달러",
+      "반도체"
+     ]
+    },
+    {
+     "title": "소득 계층 오른 사람 10명 중 2명도 안 된다, 4년 연속 하락한 계층 이동률 📉",
+     "link": "https://newneek.co/@newneek/article/48261",
+     "date": "2026-11-01",
+     "recent": true,
+     "overlap": []
+    },
+    {
+     "title": "퇴직금 사외 적립 의무화·기금형 퇴직연금 전면 도입, 2030년까지 어떻게 바뀔까? 💰",
+     "link": "https://newneek.co/@newneek/article/48263",
+     "date": "2026-11-01",
+     "recent": true,
+     "overlap": []
+    },
+    {
+     "title": "'햄버거 회동' 전직 군인 8명 1심 전원 무죄, 법원이 \"국헌문란 목적 인정 안 돼\"라고 한 이유는?",
+     "link": "https://newneek.co/@newneek/article/48269",
+     "date": "2026-11-01",
+     "recent": true,
+     "overlap": []
+    },
+    {
      "title": "세계 최대 가상자산 거래소 바이낸스, 약 8조 4000억 원 해킹 피해…비트코인 급락에 코스피도 흔들 📉",
      "link": "https://newneek.co/@newneek/article/48277",
-     "date": "2026-10-30",
+     "date": "2026-11-01",
      "recent": true,
      "overlap": [
       "급락",
@@ -134,27 +173,6 @@
       "코스피",
       "해킹"
      ]
-    },
-    {
-     "title": "퇴직금 사외 적립 의무화·기금형 퇴직연금 전면 도입, 2030년까지 어떻게 바뀔까? 💰",
-     "link": "https://newneek.co/@newneek/article/48263",
-     "date": "2026-10-30",
-     "recent": true,
-     "overlap": []
-    },
-    {
-     "title": "소득 계층 오른 사람 10명 중 2명도 안 된다, 4년 연속 하락한 계층 이동률 📉",
-     "link": "https://newneek.co/@newneek/article/48261",
-     "date": "2026-10-30",
-     "recent": true,
-     "overlap": []
-    },
-    {
-     "title": "햄버거 회동' 전직 군인 8명 1심 전원 무죄, 법원이 \"국헌문란 목적 인정 안 돼\"라고 한 이유는?",
-     "link": "https://newneek.co/@newneek/article/48269",
-     "date": "2026-10-30",
-     "recent": true,
-     "overlap": []
     },
     {
      "title": "위기의 프랑스, 정말 이민자 때문일까? 🇫🇷",
@@ -198,20 +216,6 @@
     {
      "title": "디즈니+ 광고형 요금제 월 7,000원으로 출시, 기존 요금제는 신규 가입자부터 인상 💸",
      "link": "https://newneek.co/@newneek/article/48280",
-     "date": "2026-10-30",
-     "recent": true,
-     "overlap": []
-    },
-    {
-     "title": "[선한 오지랖 클럽] 우리는 왜 평일 저녁에 노트북을 들고 모였을까? 👀",
-     "link": "https://newneek.co/@newneek/article/48258",
-     "date": "2026-10-30",
-     "recent": true,
-     "overlap": []
-    },
-    {
-     "title": "북한, 자폭 드론으로 한국군 GP·K9·전차 모형 타격하고 600mm 방사포까지 쐈다고? 복합 무기 시위 총정리 🚨",
-     "link": "https://newneek.co/@newneek/article/48276",
      "date": "2026-10-30",
      "recent": true,
      "overlap": []
@@ -412,7 +416,7 @@
      "overlap": []
     },
     {
-     "title": "[Trend A Word #643] 안녕~ 문문입니다! 이거 제 이모지야 🤯 26.10.26 (월) '이거 제 이모지야'. 용례 1. 이거 제 이모지야 🐖 강00씨 2. 이거 제 이모지야 🐿️ 손00씨 2026.10.26 · 조회 6.54K",
+     "title": "[Trend A Word #643] 안녕~ 문문입니다! 이거 제 이모지야 🤯 26.10.26 (월) '이거 제 이모지야'. 용례 1. 이거 제 이모지야 🐖 강00씨 2. 이거 제 이모지야 🐿️ 손00씨 2026.10.26 · 조회 6.61K",
      "link": "https://maily.so/trendaword/posts/92zenwqnzep",
      "date": "2026-10-26",
      "recent": true,
