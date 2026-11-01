@@ -1803,6 +1803,22 @@ def t_ai_reel():
     expect(qa.source_gaps({**ok_ep, "item": "BYD", "sources": ["서울경제", "TV조선"], "end_card": {"note": "서울경제·TV조선"}},
                           content_src, "출처: 서울경제·TV조선") == [], "H PICK(big_issue) 출처를 막았다")
     expect(qa.source_gaps({"date": "2026-11-01"}, content_src, "") == [], "11/01 기록 회차를 출처 규칙으로 막았다")
+    # '오늘 아침 5가지' 브리핑(2026-11-01 운영자 "메인 5개를 20초 한 편에") — 이슈마다 매체 2곳이 캡션 '출처:' 줄 한 칸에
+    brief = {"date": "2026-11-02", "items": ["BYD", "반도체 급락", "샘 올트먼"], "end_card": {"note": "숫자는 기사 2곳 이상에서 확인했어요<br>(출처는 캡션에)"}}
+    brief_cap = "출처: BYD 서울경제·TV조선 / 인텔 전자신문·헤럴드경제 / 올트먼 서울경제·MBC"
+    expect(qa.source_gaps(brief, content_src, brief_cap) == [], "출처를 다 적은 5가지 브리핑을 막았다")
+    expect(qa.source_gaps(brief, content_src, "출처: BYD 서울경제·TV조선 / 인텔 전자신문·헤럴드경제"),
+           "한 이슈(올트먼)의 출처를 빼먹은 브리핑이 통과했다")
+    expect(qa.source_gaps(brief, content_src, "출처: BYD 서울경제·MBC / 인텔 전자신문·헤럴드경제 / 올트먼 TV조선"),
+           "출처 매체를 이슈끼리 섞어 적은 브리핑이 통과했다")
+    expect(qa.source_gaps({**brief, "end_card": {"note": "숫자는 기사 2곳 이상에서 확인했어요"}}, content_src, brief_cap),
+           "끝 화면에 출처 안내가 없는 브리핑이 통과했다")
+    expect(qa.source_gaps({**brief, "items": ["BYD", "없는 이슈"]}, content_src, brief_cap), "content 에 없는 이슈를 담은 브리핑이 통과했다")
+    screen_ok, spoken_ok = qa.brief_series(brief)
+    expect(qa.check_numbers([("t", "오늘 아침 3가지")], "숫자 없음", allow=screen_ok) == []
+           and qa.check_numbers([("t", "오늘 아침 4가지")], "숫자 없음", allow=screen_ok)
+           and qa.check_spoken([(3.0, "가지", "")], "오늘 아침 세 가지", allow=spoken_ok)[1] == [],
+           "브리핑 개수 표현('3가지')을 content 숫자로 막았거나, 다른 개수를 통과시켰다")
     # 어림 '여'(3만5000여 명·50여 명) — 대사·받아쓰기·화면 모두 단위까지 읽는다(11/01 서울마라톤·올트먼 편: 대사 숫자가 검사에서 빠졌다)
     approx = "3만5000여 명이 참가, 사장단 50여 명과"
     expect(qa.spoken_numbers("삼만 오천여 명이 달립니다") == [(35000.0, "명", "")] and qa.spoken_numbers("35,000여 명") == [(35000.0, "명", "")]
