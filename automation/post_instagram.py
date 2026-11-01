@@ -717,6 +717,9 @@ def main():
         if content.exists() and json.loads(content.read_text(encoding="utf-8")).get("rewind"):
             print("예비 호(다시 보기) — 메인 AI 영상은 올리지 않습니다")
             return
+        if not (cfg.get("reel", True) and (args.kind == "daily" or cfg.get("weekly_reel", True))):
+            print("릴스 게시 설정(config.instagram.reel·weekly_reel)이 꺼져 있어 메인 AI 릴스를 올리지 않습니다")
+            return   # 다른 릴스와 같은 설정을 따른다(Codex 리뷰)
         slot = f"reel_ai_x{args.extra}"
         if log.get(slot):
             print(f"메인 {args.extra}번 AI 릴스는 이미 올렸습니다 — 건너뜀")

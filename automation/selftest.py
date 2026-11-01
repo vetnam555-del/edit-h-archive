@@ -1718,6 +1718,9 @@ def t_ai_reel():
     expect("--extra" in inspect.getsource(pi.main) and "EXTRA_DIR" in inspect.getsource(pi.prune), "메인 2~5번 AI 영상 게시·정리 단계가 없다")
     wf = (ROOT / ".github" / "workflows" / "post-instagram.yml").read_text(encoding="utf-8")
     expect("IN_EXTRA" in wf and "--extra $IN_EXTRA" in wf, "post-instagram.yml 에 extra 입력이 없다")
+    xsrc = inspect.getsource(pi.main).split("if args.extra:", 1)[-1].split("post_extra(", 1)[0]
+    expect('cfg.get("reel", True)' in xsrc and 'cfg.get("weekly_reel", True)' in xsrc,
+           "메인 AI 릴스가 릴스 게시 설정(config.instagram.reel·weekly_reel)을 보지 않는다(11/01 Codex)")
     with tempfile.TemporaryDirectory() as tmp:
         saved = pi.INSTAGRAM_DIR, pi.publish_video, pi.wait_public, pi.publish
         pi.INSTAGRAM_DIR = Path(tmp)
