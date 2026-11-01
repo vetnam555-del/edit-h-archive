@@ -1,0 +1,126 @@
+{
+ "date": "2026-11-01",
+ "extra": 3,
+ "story": "아이폰 듀오 화면 균열 — 애플 '점검 후 수리·교체' 지침, 애플케어 교체 문의 — content/2026-11-01.json items[1]",
+ "seedance": {
+  "model": "seedance_2_5",
+  "made_by": "운영자 힉스필드 앱(20초 720p)",
+  "job": "510b5564-b73e-49fa-a7fd-aa777dd0c735",
+  "drive": "1101_3.mp4",
+  "prompt": "두 화면 장난감 폰에 금 → 돋보기로 살핌 → 로봇 수리점에서 새 화면 → H 가 고친 폰으로 안심. 실제 폰 디자인·로고 없음",
+  "cut": "끝 15.8초 뒤(가만히 앉아 있는 장면)는 뺐다"
+ },
+ "trim": [
+  1.2,
+  15.8
+ ],
+ "end_seconds": 2.5,
+ "captions": [
+  {
+   "start": 0.0,
+   "end": 2.7,
+   "size": 90,
+   "html": "<div class=\"kick\">애플 첫 폴더블폰</div><div class=\"main\">헉… 아이폰 듀오<br>화면에<br><span class=\"hl\">균열?!</span></div>"
+  },
+  {
+   "start": 2.7,
+   "end": 5.8,
+   "size": 84,
+   "html": "<div class=\"kick\">대표 증상</div><div class=\"main\">힌지 주변 균열<br>화면 가운데<br><span class=\"hl\">밝은 선</span></div>"
+  },
+  {
+   "start": 5.8,
+   "end": 9.1,
+   "size": 86,
+   "html": "<div class=\"kick\">애플 지침</div><div class=\"main\">점검 후<br><span class=\"hl\">수리·교체</span></div><div class=\"sub\">애플스토어·공인 서비스센터</div>"
+  },
+  {
+   "start": 9.1,
+   "end": 14.6,
+   "size": 82,
+   "html": "<div class=\"kick\">그래서 나는?</div><div class=\"main\">균열이 보이면<br><span class=\"hl\">애플케어</span>에 문의</div><div class=\"sub\">애플이 일부 기기 화면 결함을 인정했어요</div>"
+  }
+ ],
+ "end_card": {
+  "line": "내일 아침 8시 30분에 또 만나요!",
+  "note": "내용은 기사 2곳 이상에서 확인했어요<br>(10월 31일 파이낸셜뉴스·지디넷코리아 보도 기준)"
+ },
+ "voices": [
+  {
+   "file": "stems/x3_v1_h_crack.mp3",
+   "start": 0.05,
+   "tempo": 1.3,
+   "text": "헉… 접는 폰 화면에 금이 갔어?!",
+   "voice": "qwen_audio_tts · Hana"
+  },
+  {
+   "file": "stems/x3_v2_h_symptom.mp3",
+   "start": 2.8,
+   "tempo": 1.3,
+   "text": "힌지 쪽 균열, 가운데 밝은 선이 대표 증상이래.",
+   "voice": "qwen_audio_tts · Hana"
+  },
+  {
+   "file": "stems/x3_v3_robot_fix.mp3",
+   "start": 5.9,
+   "tempo": 1.15,
+   "text": "점검 후 수리, 교체해 드립니다!",
+   "voice": "elevenlabs_v4 · Knox"
+  },
+  {
+   "file": "stems/x3_v4_h_applecare.mp3",
+   "start": 9.2,
+   "tempo": 1.2,
+   "text": "아이폰 듀오에 균열이 보이면, 애플케어에 교체를 문의해 보자!",
+   "voice": "qwen_audio_tts · Hana"
+  },
+  {
+   "file": "../2026-10-31/stems/v5_h_bye.mp3",
+   "start": 14.75,
+   "tempo": 1.15,
+   "text": "내일 아침 여덟 시 반에 또 만나요!",
+   "voice": "qwen_audio_tts · Hana (10/31 녹음 재사용)"
+  }
+ ],
+ "music": [
+  {
+   "file": "../2026-10-31/stems/m1_chase.m4a",
+   "start": 0.0,
+   "dur": 5.9,
+   "fade_out": 0.3
+  },
+  {
+   "file": "../2026-10-31/stems/m1_chase.m4a",
+   "start": 5.7,
+   "offset": 1.85,
+   "dur": 3.95,
+   "lufs": -21,
+   "fade_in": 0.25,
+   "fade_out": 0.4
+  },
+  {
+   "file": "../2026-10-31/stems/m2_morning.m4a",
+   "start": 9.45,
+   "dur": 7.65,
+   "fade_in": 0.35,
+   "fade_out": 0.7
+  }
+ ],
+ "sfx": [
+  [
+   0,
+   5.8,
+   0.45
+  ],
+  [
+   5.8,
+   9.1,
+   0.3
+  ],
+  [
+   9.1,
+   999,
+   0.25
+  ]
+ ]
+}
