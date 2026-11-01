@@ -278,11 +278,12 @@ def main():
     ap.add_argument("episode")
     ap.add_argument("--no-asr", action="store_true")
     ap.add_argument("--video", help="instagram/{날짜}/reel_ai.mp4 대신 볼 영상(고쳐 본 판)")
+    ap.add_argument("--extra", type=int, help="메인 N번 AI 영상(instagram/{날짜}/extra/N/) — 운영자가 앱에서 만든 영상, 만화는 없다")
     a = ap.parse_args()
     epath = Path(a.episode).resolve()
     ep = json.loads(epath.read_text(encoding="utf-8"))
     day = ep["date"]
-    folder = ROOT / "instagram" / day
+    folder = ROOT / "instagram" / day / ("extra/%d" % a.extra if a.extra else "")
     content = json.loads((ROOT / "content" / f"{day}.json").read_text(encoding="utf-8"))
     corpus = json.dumps(content, ensure_ascii=False)
     # 출처 날짜(MM.DD)는 화면에서 'M월 D일'로 쓴다 — 그 형태도 확인된 것으로 본다

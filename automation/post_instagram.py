@@ -372,6 +372,34 @@ def post_reel(g, uid, key, folder, cfg, dry, ffmpeg, site_url):
     return media_id, track
 
 
+EXTRA_DIR = "extra"   # 2026-11-01 운영자 '나머지 4개는 내가 앱에서 무료로' — 메인 2~5번 AI 영상: instagram/{날짜}/extra/{n}/reel_ai.mp4
+
+
+def post_extra(g, uid, key, n, cfg, dry, ffmpeg, site_url):
+    """메인 n번 이슈의 AI 영상 릴스(운영자가 앱에서 만든 원본 + 대사·자막, qa.py 검수) — (게시 id, 정보).
+    캡션은 그 폴더의 reel_ai_caption.txt 만 쓴다(검수한 캡션이 없으면 올리지 않는다). AI 정보 라벨, 스토리·만화는 H PICK 만."""
+    folder = INSTAGRAM_DIR / key / EXTRA_DIR / str(n)
+    video = folder / AI_REEL
+    if not video.exists():
+        raise IGError(f"{key} 메인 {n}번: {EXTRA_DIR}/{n}/{AI_REEL} 이 없습니다")
+    if not (folder / "reel_ai_caption.txt").exists():
+        raise IGError(f"{key} 메인 {n}번: reel_ai_caption.txt 가 없습니다 — 검수한 캡션 없이 올리지 않는다")
+    track = ai_track(video, ffmpeg)
+    if dry:
+        print(f"  (dry-run) 메인 {n}번 AI 릴스는 올리지 않음 · {track['seconds']}초")
+        return None, track
+    publish_video(video, key)
+    url = f"{site_url}/instagram/{key}/{EXTRA_DIR}/{n}/{AI_REEL}"
+    wait_public([url], timeout=900, kind="video")
+    print(f"  영상 공개 주소 {url}")
+    track["feed"] = reel_to_feed(cfg, key)
+    params = dict(media_type="REELS", video_url=url, caption=reel_caption(folder, track),
+                  share_to_feed="true" if track["feed"] else "false", thumb_offset="800")
+    cid = create_with_ai_label(g, uid, params, track)
+    g.wait_ready(cid, "릴스", timeout=900)
+    return publish(g, uid, cid, "릴스"), track
+
+
 CREATOR = "MEDIA_CREATOR"   # API 스토리 게시는 비즈니스 계정만 된다(Meta) — 크리에이터 계정이면 시도하지 않는다(Codex 리뷰)
 
 
@@ -601,6 +629,11 @@ def prune(days):
             for f in d.glob("*.jpg"):
                 f.unlink()
             d.rmdir()
+    for f in INSTAGRAM_DIR.glob(f"*/{EXTRA_DIR}/*/{AI_REEL}"):   # 메인 2~5번 AI 영상(instagram/{날짜}/extra/{n}/)도 같은 보관 기간
+        folder = f.parents[2]
+        m = re.match(r"(\d{4}-\d{2}-\d{2})", folder.name)
+        if m and dt.date.fromisoformat(m.group(1)) < cutoff and (LOG_DIR / f"{folder.name}.json").exists():
+            f.unlink()
     for f in [*INSTAGRAM_DIR.glob("*/reel.mp4"), *INSTAGRAM_DIR.glob(f"*/{AI_REEL}"),   # AI 영상 릴스도 같은 보관 기간(Codex 리뷰)
               *INSTAGRAM_DIR.glob("*/reel_frames/*.jpg"), *INSTAGRAM_DIR.glob("*/story/*.jpg"),
               *INSTAGRAM_DIR.glob(f"*/{COMIC_DIR}/*.jpg")]:
@@ -617,6 +650,8 @@ def main():
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--check", action="store_true")
     ap.add_argument("--only", choices=["carousel", "reel"])
+    ap.add_argument("--extra", type=int, choices=range(2, 11), metavar="N",
+                    help="메인 N번 이슈의 AI 영상 릴스만 올린다(instagram/{키}/extra/N/, 2026-11-01~ 운영자가 앱에서 만든 영상)")
     ap.add_argument("--ffmpeg", default="ffmpeg")
     ap.add_argument("--event", default="manual", help="schedule | push | workflow_dispatch | manual")
     ap.add_argument("--probe-trial", action="store_true",
@@ -676,6 +711,32 @@ def main():
     log = load_log(key)
     site_url = cfg_all["site_url"].rstrip("/")
     failures = []
+
+    if args.extra:   # 메인 2~5번 AI 영상 — 이것만 올리고 끝낸다(한 번만, 예비 호 날은 안 올림)
+        content = ROOT / "content" / f"{key}.json"
+        if content.exists() and json.loads(content.read_text(encoding="utf-8")).get("rewind"):
+            print("예비 호(다시 보기) — 메인 AI 영상은 올리지 않습니다")
+            return
+        slot = f"reel_ai_x{args.extra}"
+        if log.get(slot):
+            print(f"메인 {args.extra}번 AI 릴스는 이미 올렸습니다 — 건너뜀")
+            return
+        try:
+            print(f"메인 {args.extra}번 AI 영상 릴스 게시 중…")
+            media_id, track = post_extra(g, uid, key, args.extra, cfg, args.dry_run, args.ffmpeg, site_url)
+        except IGError as e:
+            sys.exit(f"✗ 메인 {args.extra}번 AI 릴스: {e}")
+        if media_id:
+            log[slot] = {"id": media_id, "at": now_kst().isoformat(timespec="seconds"), "style": "ai",
+                         "seconds": track.get("seconds"), "ai_label": track.get("ai_label")}
+            save_log(key, log)
+            try:
+                log[slot]["permalink"] = g.call("GET", media_id, fields="permalink").get("permalink")
+                save_log(key, log)
+            except IGError:
+                pass
+            print(f"  ✓ 메인 {args.extra}번 AI 릴스 게시 {log[slot].get('permalink') or media_id}")
+        return
 
     if args.only != "reel" and not log.get("carousel"):
         try:

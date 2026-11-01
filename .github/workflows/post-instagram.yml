@@ -33,6 +33,9 @@ on:
         type: choice
         options: [both, carousel, reel]
         default: both
+      extra:
+        description: "메인 N번 AI 영상 릴스만(2~10, 비우면 안 씀) — instagram/{키}/extra/N/ (2026-11-01~ 운영자가 앱에서 만든 영상)"
+        required: false
 
 permissions:
   contents: write
@@ -91,6 +94,7 @@ jobs:
           IN_KEY: ${{ inputs.key }}
           IN_MODE: ${{ inputs.mode }}
           IN_ONLY: ${{ inputs.only }}
+          IN_EXTRA: ${{ inputs.extra }}
           PLAN_ONLY: ${{ steps.what.outputs.only }}
         run: |
           args="--kind $KIND --event $EVENT"
@@ -99,6 +103,9 @@ jobs:
           [ "$IN_MODE" = "dry-run" ] && args="$args --dry-run"
           [ "$IN_MODE" = "probe-trial" ] && args="$args --probe-trial"
           [ "$IN_MODE" = "probe-ratio" ] && args="$args --probe-ratio"
+          if [ -n "$IN_EXTRA" ]; then
+            case "$IN_EXTRA" in [2-9]|10) args="$args --extra $IN_EXTRA" ;; *) echo "extra 는 2~10" ; exit 1 ;; esac
+          fi
           if [ -n "$IN_ONLY" ] && [ "$IN_ONLY" != "both" ]; then args="$args --only $IN_ONLY"
           elif [ -n "$PLAN_ONLY" ]; then args="$args --only $PLAN_ONLY"; fi   # 저녁 게시: 아침=carousel · 저녁=reel
           python3 automation/post_instagram.py $args

@@ -1714,6 +1714,38 @@ def t_ai_reel():
         expect(mid == "m1" and info.get("ai_label") is True and parent.get("is_ai_generated") == "true"
                and pi.AI_NOTE_KEY in parent.get("caption", "") and parent.get("media_type") == "CAROUSEL", "만화 캐러셀에 AI 라벨·AI 한 줄이 없다")
 
+    # 메인 2~5번 AI 영상(운영자 앱 제작, 11/01~) — instagram/{키}/extra/N/ 를 AI 라벨 릴스로, 검수한 캡션 없으면 안 올림
+    expect("--extra" in inspect.getsource(pi.main) and "EXTRA_DIR" in inspect.getsource(pi.prune), "메인 2~5번 AI 영상 게시·정리 단계가 없다")
+    wf = (ROOT / ".github" / "workflows" / "post-instagram.yml").read_text(encoding="utf-8")
+    expect("IN_EXTRA" in wf and "--extra $IN_EXTRA" in wf, "post-instagram.yml 에 extra 입력이 없다")
+    with tempfile.TemporaryDirectory() as tmp:
+        saved = pi.INSTAGRAM_DIR, pi.publish_video, pi.wait_public, pi.publish
+        pi.INSTAGRAM_DIR = Path(tmp)
+        xdir = Path(tmp) / "2026-11-01" / pi.EXTRA_DIR / "3"
+        xdir.mkdir(parents=True)
+        (xdir / pi.AI_REEL).write_bytes(b"x")
+        pi.publish_video = lambda out, key: None
+        pi.wait_public = lambda urls, **k: None
+        pi.publish = lambda g_, uid, cid, what, tries=6: "x3"
+        G.wait_ready = lambda self, cid, what, timeout=600: None
+        try:
+            g = G(True)
+            no_cap = None
+            try:
+                pi.post_extra(g, "u", "2026-11-01", 3, {}, False, "ffmpeg", "https://x")
+            except pi.IGError as e:
+                no_cap = str(e)
+            (xdir / "reel_ai_caption.txt").write_text("메인 3번 캡션 #EDITH", encoding="utf-8")
+            mid, info = pi.post_extra(g, "u", "2026-11-01", 3, {}, False, "ffmpeg", "https://x")
+        finally:
+            pi.INSTAGRAM_DIR, pi.publish_video, pi.wait_public, pi.publish = saved
+        reel = g.calls[-1]
+        expect(no_cap and "reel_ai_caption" in no_cap, "검수한 캡션 없이 메인 AI 릴스를 올리려 했다")
+        expect(mid == "x3" and reel.get("is_ai_generated") == "true" and reel.get("media_type") == "REELS"
+               and reel.get("video_url", "").endswith("/instagram/2026-11-01/extra/3/reel_ai.mp4")
+               and "메인 3번 캡션" in reel.get("caption", "") and pi.AI_NOTE_KEY in reel.get("caption", ""),
+               f"메인 AI 릴스 게시 값이 틀린다: {reel}")
+
     # 게시 전 숫자 검수 — 큰 금액은 한 덩어리로 대조한다(11/01 Codex: '1조6000억원'이 '1조5000억원과 6000억원'에서 통과하면 안 된다)
     sys.path.insert(0, str(ROOT / "automation" / "pilots" / "ai_reel"))
     import qa
