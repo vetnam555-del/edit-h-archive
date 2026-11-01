@@ -2326,6 +2326,129 @@ def t_competitors_web():
     return f"{len(sources)}곳 · robots 지킴"
 
 
+def t_comment_dm():
+    """댓글 키워드 → 구독 링크 DM(2026-11-02): 짧은 키워드 댓글만 잡고, 우리 댓글·7일 지난 댓글은 건너뛰고, DM(비공개 답장)+공개 답글을
+    한 번만 하고, 같은 사람은 공개 답글만, DM 권한이 없으면 공개 답글로 안내하고, 댓글 사정 오류·호출 한도를 가르고,
+    기록에는 해시·숫자만 남기고(아이디·이름·댓글 글 없음), 토큰이 없으면 네트워크 없이 0. 캡션 DM 약속은 켠 날짜 이후 호에만."""
+    import datetime as _dt
+    import comment_dm as cd
+    from edith import site as _site
+    s = cd.settings()
+    expect({"에디트", "구독"} <= set(s["keywords"]), f"키워드: {s['keywords']}")
+    url = cd.subscribe_url(s)
+    expect(url.endswith("/subscribe.html?ref=ig-dm") and re.fullmatch(r"[a-z0-9_-]{1,14}", s["link_ref"]), f"구독 링크·경로 이름: {url}")
+    for t, want in [("에디트!!", True), ("구 독 해요🙏", True), ("에디트", True), ("좋아요", False), ("", False),
+                    ("에디트 매일 아침 잘 보고 있어요 오늘 내용 특히 좋았습니다", False)]:
+        expect(cd.matches(t, s) is want, f"키워드 판정 {t!r} → {not want}")
+    text = cd.dm_text(s, "2026-11-02")
+    expect(url in text and "8시 30분" in text and "무료" in text and "수신 거부" in text, f"DM 글: {text}")
+    KST = _dt.timezone(_dt.timedelta(hours=9))
+    now = _dt.datetime(2026, 11, 2, 12, 0, tzinfo=KST)
+    me = {"id": "900", "username": "edit.h.kr"}
+
+    def ts(days_ago):
+        return (now - _dt.timedelta(days=days_ago)).astimezone(_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S+0000")
+
+    comments = {"m1": [
+        {"id": "c-own", "text": "에디트", "timestamp": ts(1), "from": {"id": "900", "username": "edit.h.kr"}},
+        {"id": "c-a1", "text": "에디트!", "timestamp": ts(1), "from": {"id": "u-a", "username": "user_a"}},
+        {"id": "c-a2", "text": "구독", "timestamp": ts(0.5), "from": {"id": "u-a", "username": "user_a"}},
+        {"id": "c-old", "text": "에디트", "timestamp": ts(8), "from": {"id": "u-b", "username": "user_b"}},
+        {"id": "c-chat", "text": "오늘 카드 좋네요", "timestamp": ts(1), "from": {"id": "u-c", "username": "user_c"}},
+        {"id": "c-d", "text": "구독이요", "timestamp": ts(0.2), "from": {"id": "u-d", "username": "user_d"},
+         "replies": {"data": [{"id": "r1", "from": {"id": "900", "username": "edit.h.kr"}}]}}]}
+
+    class Fake:
+        def __init__(self, dm_error=None):
+            self.calls, self.dm_error = [], dm_error
+
+        def call(self, method, path, **params):
+            self.calls.append((method, path, params))
+            if path == "900/media":
+                return {"data": [{"id": "m1", "timestamp": ts(1), "comments_count": 6},
+                                 {"id": "m-old", "timestamp": ts(15), "comments_count": 3}]}
+            if path.endswith("/comments"):
+                expect(path == "m1/comments", f"창 밖 게시물 댓글을 읽었다: {path}")
+                return {"data": comments["m1"]}
+            if path == "900/messages":
+                if self.dm_error:
+                    raise self.dm_error
+                return {"recipient_id": "x", "message_id": "y"}
+            if path.endswith("/replies"):
+                return {"id": "r"}
+            raise AssertionError(f"모르는 호출 {method} {path}")
+
+    def run(fake, st):
+        with contextlib.redirect_stdout(io.StringIO()):
+            return cd.process(fake, me, now, st, s, log=lambda *_: None)
+
+    st = cd.load_state(Path("/nonexistent/state.json"))
+    f = Fake()
+    expect(run(f, st) == 3, "키워드 댓글 3건(a1·a2·d)을 처리해야 한다")
+    dms = [c for c in f.calls if c[1] == "900/messages"]
+    expect([json.loads(c[2]["recipient"])["comment_id"] for c in dms] == ["c-a1", "c-d"], f"DM 대상: {dms}")
+    expect(url in json.loads(dms[0][2]["message"])["text"], "DM 에 구독 링크가 없다")
+    replies = [(c[1], c[2]["message"]) for c in f.calls if c[1].endswith("/replies")]
+    expect([r[0] for r in replies] == ["c-a1/replies", "c-a2/replies"], f"공개 답글(우리 답글 있는 c-d 는 건너뜀): {replies}")
+    expect(replies[0][1] in cd.REPLY_SENT and replies[1][1] in cd.REPLY_REPEAT, f"답글 문구: {replies}")
+    expect(st["dm"]["ok"] is True and st["daily"]["2026-11-02"] == {"matched": 3, "dm": 2, "reply": 2, "failed": 0}, f"기록: {st['dm']} {st['daily']}")
+    dump = json.dumps(st, ensure_ascii=False)
+    expect(not any(x in dump for x in ("user_a", "u-a", "c-a1", "에디트", "구독")), "기록에 아이디·이름·댓글 글이 남았다")
+    f2 = Fake()
+    expect(run(f2, st) == 0 and not [c for c in f2.calls if c[0] == "POST"], "같은 댓글을 두 번 처리했다")
+
+    st = cd.load_state(Path("/nonexistent/state.json"))
+    f = Fake(cd.ApiError(403, 10, None, "Application does not have permission for this action"))
+    run(f, st)
+    expect(len([c for c in f.calls if c[1] == "900/messages"]) == 1, "권한이 없으면 DM 을 한 번만 시도해야 한다")
+    fb = [c[2]["message"] for c in f.calls if c[1].endswith("/replies")]
+    expect(len(fb) == 2 and all(m in cd.REPLY_FALLBACK for m in fb), f"권한 없을 때 공개 답글 안내: {fb}")
+    expect(st["dm"]["ok"] is False and not st["users"], f"권한 없음 기록: {st['dm']}")
+
+    st = cd.load_state(Path("/nonexistent/state.json"))
+    f = Fake(cd.ApiError(400, 10, 2534022, "outside of allowed window"))
+    run(f, st)
+    expect(st["dm"]["ok"] is None and st["daily"]["2026-11-02"]["failed"] == 3, f"댓글 사정 오류를 권한 문제로 봤다: {st['dm']} {st['daily']}")
+    expect(cd.kind_of(cd.ApiError(400, 4)) == "rate" and cd.kind_of(cd.ApiError(400, 190)) == "token", "오류 종류")
+    st = cd.load_state(Path("/nonexistent/state.json"))
+    run(Fake(cd.ApiError(400, 4, None, "limit")), st)
+    expect(not st["handled"] and "2026-11-02" not in st["daily"], "호출 한도면 처리 표시 없이 다음 실행으로 넘겨야 한다")
+
+    st = {"handled": {"a": {"d": "2026-10-20"}, "b": {"d": "2026-11-01"}}, "users": {"x": "2026-09-01", "y": "2026-10-30"},
+          "dm": {"ok": None}, "daily": {"2026-08-01": {}, "2026-11-01": {}}}
+    cd.prune(st, _dt.date(2026, 11, 2), s)
+    expect(list(st["handled"]) == ["b"] and list(st["users"]) == ["y"] and list(st["daily"]) == ["2026-11-01"], f"오래된 기록 정리: {st}")
+
+    saved = cd.Api.call, dict(os.environ)
+    cd.Api.call = lambda *a, **k: (_ for _ in ()).throw(AssertionError("토큰 없이 네트워크를 썼다"))
+    try:
+        os.environ.pop("IG_ACCESS_TOKEN", None)
+        with contextlib.redirect_stdout(io.StringIO()):
+            expect(cd.main([]) == 0, "토큰이 없을 때 0 으로 끝나지 않았다")
+    finally:
+        cd.Api.call = saved[0]
+        os.environ.clear()
+        os.environ.update(saved[1])
+
+    cfg = load_config()
+    expect(cfg["instagram"].get("dm_auto_reply_from") is None or _site.dm_line(cfg["instagram"]["dm_auto_reply_from"]),
+           "dm_auto_reply_from 날짜 호에 DM 약속이 없다")
+    real = _site.load_config
+    try:
+        _site.load_config = lambda: {**cfg, "instagram": {**cfg["instagram"], "dm_auto_reply_from": "2026-11-05"}}
+        expect(_site.dm_line("2026-11-04") is None and "'에디트'" in (_site.dm_line("2026-11-05") or "")
+               and _site.dm_line("2026-11-06-weekly", short=True), "DM 약속은 켠 날짜 이후 호에만")
+        _site.load_config = lambda: {**cfg, "instagram": {**cfg["instagram"], "dm_auto_reply_from": None}}
+        expect(_site.dm_line("2026-12-01") is None, "날짜가 없으면 약속하지 않는다")
+    finally:
+        _site.load_config = real
+    wf = (ROOT / ".github" / "workflows" / "comment-dm.yml").read_text(encoding="utf-8")
+    expect("secrets.IG_ACCESS_TOKEN" in wf and "git add automation/comment_dm" in wf and "if: always()" in wf, "댓글 DM 워크플로")
+    import collect_metrics as _cm
+    expect("ig-dm" in Path(_cm.__file__).read_text(encoding="utf-8"), "성과표 구독 경로 이름에 ig-dm 이 없다")
+    return f"키워드 {', '.join(s['keywords'])} · 링크 ref={s['link_ref']}"
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--quick", action="store_true", help="다시 빌드 생략")
@@ -2377,6 +2500,7 @@ def main():
     check("구독자 1만 목표 줄", t_goal_line)
     check("경쟁 매체 인스타(비즈니스 탐색)", t_competitors_ig)
     check("경쟁 매체 웹(토큰 없이·robots 지킴)", t_competitors_web)
+    check("댓글 키워드 → 구독 링크 DM", t_comment_dm)
     if not args.quick:
         check("딥다이브 카드 글자 한도 렌더링(넘침 없음)", t_dive_render)
         check("웹툰 두 컷 장 글자 한도 렌더링(넘침 없음·넘침 잡음)", t_webtoon_render)

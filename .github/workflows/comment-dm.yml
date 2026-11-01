@@ -1,0 +1,57 @@
+# 댓글 키워드 → 구독 링크 DM (automation/comment_dm.py, 2026-11-02 운영자 '그냥 모든 걸 다 너가 알아서').
+# 최근 7일 게시물의 짧은 키워드 댓글('에디트'·'구독')에 공식 API 비공개 답장(DM)으로 구독 링크를 보내고 공개 답글을 단다.
+# DM 권한이 없으면 공개 답글로 '프로필 링크' 안내. 기록(automation/comment_dm/state.json)은 해시·숫자만, 바뀐 때만 커밋한다.
+# 예약 실행은 늦을 수 있어 낮 동안(07:07~00:47 KST) 20분마다 건다. 새벽엔 쉰다.
+name: EDIT H comment DM
+
+on:
+  schedule:
+    - cron: "7,27,47 0-15,22,23 * * *"    # UTC 22~15시 = KST 07~00시, 20분마다
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "run(처리) · dry(보여 주기만) · probe(권한 확인)"
+        type: choice
+        options: [run, dry, probe]
+        default: run
+
+permissions:
+  contents: write
+
+concurrency:
+  group: comment-dm
+  cancel-in-progress: false
+
+jobs:
+  reply:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Reply
+        env:
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          IN_MODE: ${{ inputs.mode }}
+        run: |
+          case "$IN_MODE" in
+            dry) python3 automation/comment_dm.py --dry-run ;;
+            probe) python3 automation/comment_dm.py --probe ;;
+            *) python3 automation/comment_dm.py ;;
+          esac
+
+      - name: Record
+        if: always()
+        run: |
+          if [ -n "$(git status --porcelain automation/comment_dm)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add automation/comment_dm
+            git commit -m "Record comment DM replies ($(TZ=Asia/Seoul date +%F))"
+            for i in 1 2 3 4; do
+              git pull --rebase origin main && git push origin HEAD:main && break
+              sleep $((i * 5))
+            done
+          fi

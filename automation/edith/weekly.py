@@ -185,7 +185,7 @@ def caption(w):
         lines += ["", "달력에 적어 둘 날짜"]
         lines += [f"· {r['month']}/{r['day']}({r['weekday']}) {plain(r['what'])}" for r in w["dates"]]
     lines += ["", "이 중에 제일 와닿은 건 몇 번이었어요?"]
-    if dm_line():
-        lines += ["", dm_line()]
+    if dm_line(w["date"]):
+        lines += ["", dm_line(w["date"])]
     lines += ["", _pick(_LETTER, w).format(when=_when(w)), "— 에디터 H", "", _tags(w, spec.get("hashtags") or ["주간정리"])]
     return "\n".join(lines)
