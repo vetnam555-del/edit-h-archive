@@ -264,6 +264,19 @@ def instagram(days, weekly_days=()):
                     row["reel_ai"]["avg_watch_s"] = round(ms["ig_reels_avg_watch_time"] / 1000, 1)
             except IGError as e:
                 row["reel_ai_error"] = str(e)[:120]
+        for slot in sorted(k for k in log if re.fullmatch(r"reel_ai_x\d+", k)):   # 메인 2~5번 AI 영상(운영자가 앱에서, 2026-11-01~)
+            xid = (log.get(slot) or {}).get("id")
+            if not xid:
+                continue
+            try:
+                row[slot] = _media_row(g, xid, 0, out)
+                row[slot]["seconds"] = (log.get(slot) or {}).get("seconds")
+                data = g.call("GET", f"{xid}/insights", metric=REEL_WATCH_METRICS).get("data", [])
+                ms = {d["name"]: _num(d.get("total_value", {}).get("value", (d.get("values") or [{}])[0].get("value"))) for d in data}
+                if ms.get("ig_reels_avg_watch_time") is not None:
+                    row[slot]["avg_watch_s"] = round(ms["ig_reels_avg_watch_time"] / 1000, 1)
+            except IGError as e:
+                row[f"{slot}_error"] = str(e)[:120]
         mid = (log.get("comic") or {}).get("id")
         if mid:   # 'H 극장' 만화 캐러셀(2026-11-01~) — 08:30 캐러셀과 따로 잰다
             try:
@@ -421,6 +434,10 @@ def _reel_compare(scored, snap):
         x = _at_age(d, snap, kind="reel_ai")   # 그날 릴스와 따로 올린 AI 영상 릴스 — 그 게시 시각에서 24시간
         if x.get("reach") is not None:
             groups.setdefault("AI 영상·따로", []).append((x.get("reach"), x.get("avg_watch_s"), x.get("seconds")))
+        for n in range(2, 11):   # 메인 2~5번 AI 영상(운영자 앱 제작) — 각자 게시 시각에서 24시간
+            x = _at_age(d, snap, kind=f"reel_ai_x{n}")
+            if x.get("reach") is not None:
+                groups.setdefault("AI 영상·메인2~5", []).append((x.get("reach"), x.get("avg_watch_s"), x.get("seconds")))
         r = a.get("reel") or {}
         if not f.get("reel_style") or r.get("reach") is None:
             continue
