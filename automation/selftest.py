@@ -2000,6 +2000,9 @@ def t_ai_reel():
     night_cut = [110.0] * 30 + [20.0] * 30                    # 밤 장면으로 바뀌는 컷은 번쩍임이 아니다
     expect([h[0] for h in qa.flash_frames(ts30, old_fade)] == [1.0, 1.033], "끝 화면 앞 검은 2프레임을 못 잡는다")
     expect(qa.flash_frames(ts30, crossfade) == [] and qa.flash_frames(ts30, night_cut) == [], "겹쳐 넘기기·밤 장면 컷을 번쩍임으로 잡았다")
+    # 꽉 찬 화면(11/01 운영자 'H PICK 처럼 꽉 차게') — 위아래 흐린 띠(가로 띠 영상)는 막고, 얕은 초점으로 바닥이 흐린 장면 몇 개는 통과
+    expect(qa.letterboxed([0.11] * 30 + [0.4] * 5) and not qa.letterboxed([0.35] * 20 + [0.12] * 10) and not qa.letterboxed([]),
+           "흐린 위아래 띠(가로 띠 영상) 판정이 틀린다")
     ep_src = (ROOT / "automation" / "pilots" / "ai_reel" / "episode.py").read_text(encoding="utf-8")
     expect("xfade=" in ep_src and "fade=t=in:st=0:d=0.25[ve]" not in ep_src, "끝 화면을 검은색에서 밝아지게 넣는다(검은 2프레임) — 겹쳐 넘겨야 한다")
     expect("black_frames(video)" in inspect.getsource(qa.main) and "dark_flashes(video)" in inspect.getsource(qa.main), "검수가 검은 화면을 보지 않는다")

@@ -141,6 +141,32 @@ def dark_flashes(video):
     return flash_frames(ts, ys)
 
 
+def band_ratios(video, skip_tail=3.0, step=0.5, w=270, h=480):
+    """프레임마다 아래 띠(높이 86~97%) 선명도 ÷ 가운데 띠(40~60%) 선명도. 끝 화면(skip_tail 초)은 뺀다.
+    11/01 운영자 "화면이 꽉 차지 않고 가로형인가 다른 형태" — Seedance 가 프롬프트의 '가운데 띠에 모아라'를 가로 띠 영상 + 위아래 흐린 채움으로
+    그렸다(11/01 5가지 편 20초 중 17초). 흐린 채움은 아래 띠가 가운데의 0.1배 안팎, 꽉 찬 영상(운영자 앱 H PICK 4편·10/31·11/01 편)은 0.26~0.48."""
+    import numpy as np
+    dur = float(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(video)],
+                               capture_output=True, text=True).stdout or 0)
+    raw = subprocess.run(["ffmpeg", "-v", "error", "-i", str(video), "-t", f"{max(dur - skip_tail, 1):.2f}",
+                          "-vf", f"fps={1 / step},scale={w}:{h},format=gray", "-f", "rawvideo", "-"], capture_output=True).stdout
+    n = len(raw) // (w * h)
+    frames = np.frombuffer(raw[:n * w * h], dtype=np.uint8).reshape(n, h, w).astype(np.float32)
+    out = []
+    for f in frames:
+        rows = (np.abs(np.diff(f, axis=1))[:-1, :] + np.abs(np.diff(f, axis=0))[:, :-1]).mean(1)
+        mid = float(np.median(rows[int(.40 * h):int(.60 * h)]))
+        out.append(float(np.median(rows[int(.86 * h):int(.97 * h)])) / (mid + 1e-6))
+    return out
+
+
+def letterboxed(ratios, low=0.2, share=0.6, med=0.18):
+    """흐린 위아래 띠(가로 띠 영상)인가 — 프레임 share 이상이 low 아래이고 중앙값도 med 아래일 때. 얕은 초점으로 바닥이 흐린 장면 몇 개로는 걸리지 않는다."""
+    if not ratios:
+        return False
+    return sum(r < low for r in ratios) / len(ratios) >= share and statistics.median(ratios) < med
+
+
 def dropouts(video, head=0.3, tail=0.8):
     """소리 끊김 — 50ms 창 음량(dBFS)이 (가) -32 아래로 150ms 넘게 있거나 (나) 앞뒤 1초 중앙값보다 18dB 넘게 100ms 넘게 꺼지면 끊김.
     11/01 운영자 "소리가 중간중간 끊기는 것 같다": 10/31 편은 '정적' 구간이 -45~-52dB 로 0.6초, 대사 사이가 -36dB 로 꺼졌다.
@@ -552,6 +578,12 @@ def main():
         if flashes:
             fails.append("어둡게 번쩍이는 프레임 " + ", ".join(f"{t:.2f}초(밝기 {y}, 앞뒤 {c})" for t, y, c in flashes[:6]))
         notes.append(f"검은 화면 {len(blacks)}곳 · 번쩍임 {len(flashes)}곳")
+        ratios = band_ratios(video, skip_tail=float(ep.get("end_seconds") or 2.5) + 0.5)
+        if ratios:
+            notes.append(f"아래 띠 선명도 중앙값 {statistics.median(ratios):.2f}(가운데 대비) · 흐린 띠 프레임 {sum(r < 0.2 for r in ratios) / len(ratios):.0%}")
+        if letterboxed(ratios):
+            fails.append("화면이 꽉 차지 않는다 — 위아래가 흐린 띠인 가로 띠 영상(11/01 운영자 'H PICK 처럼 꽉 차게'). "
+                         "프롬프트에 'FULL-BLEED VERTICAL FRAMING'·NEGATIVE 'no letterboxing, no blurred bars' 를 넣어 다시 만든다(brief_prompt.txt)")
         gaps = dropouts(video)
         if gaps:
             fails.append("소리 끊김 " + ", ".join(f"{a:.2f}초부터 {b:.2f}초({m}dB)" for a, b, m in gaps)
