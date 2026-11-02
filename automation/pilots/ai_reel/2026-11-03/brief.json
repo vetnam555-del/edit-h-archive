@@ -1,0 +1,271 @@
+{
+ "date": "2026-11-03",
+ "story": "오늘 아침 5가지 — 메인 5개(big_issue·items 4개)를 20초 한 편에. 가장 센 장면(로켓 수레가 달팽이를 앞질러 돈주머니를 H 에게 — 주식 결제 이틀 → 다음 날)을 맨 앞에 — content/2026-11-03.json",
+ "hook": "비교",
+ "items": [
+  "T+1 결제",
+  "G마켓 보상",
+  "가상자산 점검",
+  "메타 AI 광고",
+  "한본어"
+ ],
+ "seedance": {
+  "model": "seedance_2_5",
+  "made_by": "크레딧 API(720p 20초, 140 크레딧)",
+  "job": "224e27e8-4aa0-4af2-be5d-5936228fb54a",
+  "prompt": "첫 프레임부터 장난감 경주로에서 로켓 수레가 돈주머니를 끄는 달팽이를 앞질러 H 품에 주머니를 던짐 → 빨간 우체통이 빈 종이를 뱉고 하얀 도우미 로봇이 H 자루에 금화 한 닢 → 금고 방, 문 열린 주황 금고에서 금화가 쏟아지자 H 가 문을 닫고 파란 금고가 얼음으로 잠김 → 옥상에서 로봇이 빈 포스터를 칠해 쌓은 기둥이 H 를 하늘로 → 카페 테라스, 로봇 둘의 빈 말풍선이 하트로 터지고 H 가 응원봉 춤 → 부엌 의자에서 H 가 커피잔을 들고 폴짝. 장면 사이 휙 넘김(검은 화면 없음), 사람·글자·로고 없음. 전문: brief_prompt.txt",
+  "cut": "장면 경계(scene 점수 봉우리): 경주로 0~3.0 · 우체통 3.0~7.04 · 금고 7.04~10.08 · 옥상 10.08~14.04 · 카페 14.04~17.42 · 부엌 끝인사 17.42~20.04. 검은 화면 0. 꽉 찬 화면(원본 아래 띠 선명도 중앙값 0.46). 1초 넘게 멈춘 구간 없음(push 없음). 0.5초 프레임·원본 확대로 사람·로고·글자 없음 확인 — 우체통 흰 판·카페 차양 줄무늬·금고 다이얼에 글자 없음, 글자 지우기 없음",
+  "prompt_file": "brief_prompt.txt"
+ },
+ "trim": [
+  0.0,
+  20.0
+ ],
+ "end_seconds": 2.6,
+ "captions": [
+  {
+   "start": 0.0,
+   "end": 1.3,
+   "top": 300,
+   "size": 92,
+   "html": "<div class=\"kick\">11월 3일 · 오늘 아침 5가지</div><div class=\"main\">주식 판 돈<br>이틀 뒤 → <span class=\"hl\">다음 날</span></div><div class=\"sub\">이르면 2028년부터 바뀌어요</div>"
+  },
+  {
+   "start": 1.3,
+   "end": 3.0,
+   "size": 80,
+   "html": "<div class=\"kick\">1/5 · 증시</div><div class=\"main\">1972년부터 쓴 T+2,<br><span class=\"hl\">50여 년</span> 만에 바뀐다</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 한겨레·머니투데이</div>"
+  },
+  {
+   "start": 3.0,
+   "end": 7.04,
+   "size": 84,
+   "html": "<div class=\"kick\">2/5 · 쇼핑</div><div class=\"main\">G마켓 유출 고객<br><span class=\"hl\">1만원</span> 보상</div><div class=\"sub\">e쿠폰 피해는 액면가 전액</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 동아일보·MBC</div>"
+  },
+  {
+   "start": 7.04,
+   "end": 10.08,
+   "size": 80,
+   "html": "<div class=\"kick\">3/5 · 코인</div><div class=\"main\">바이낸스에서 약<br><span class=\"hl\">63억 달러</span> 빠져나가</div><div class=\"sub\">금융위, 국내 거래소 긴급 점검</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 금융위원회·디지털타임스</div>"
+  },
+  {
+   "start": 10.08,
+   "end": 11.2,
+   "size": 84,
+   "html": "<div class=\"kick\">4/5 · 광고</div><div class=\"main\">메타 광고 매출<br><span class=\"hl\">26%</span> 늘었다</div><div class=\"sub\">구글 검색은 12% · 격차 2021년 이후 최대</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 아시아경제·뉴시스</div>"
+  },
+  {
+   "start": 11.2,
+   "end": 14.04,
+   "size": 84,
+   "html": "<div class=\"kick\">4/5 · 광고</div><div class=\"main\">메타 광고 매출<br><span class=\"hl\">26%</span> 늘었다</div><div class=\"sub\">구글 검색은 12% · 격차 2021년 이후 최대</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 아시아경제·뉴시스</div>",
+   "top": 1150
+  },
+  {
+   "start": 14.04,
+   "end": 17.42,
+   "size": 84,
+   "html": "<div class=\"kick\">5/5 · 트렌드</div><div class=\"main\">일본 Z세대<br><span class=\"hl\">한본어</span> 유행</div><div class=\"sub\">'진짜'·'괜찮아' 섞어 써요 · 2018년 기점</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 전자신문·연합뉴스</div>"
+  }
+ ],
+ "end_card": {
+  "line": "더 자세한 건 프로필 링크 뉴스레터에서!",
+  "sub": "2030의 아침을 편집합니다 · 경제부터 트렌드까지",
+  "note": "숫자는 기사 2곳 이상에서 확인했어요<br>(출처는 장면마다·캡션에)"
+ },
+ "voices": [
+  {
+   "file": "stems/i1_t1.mp3",
+   "start": 0.1,
+   "tempo": 1.0,
+   "text": "주식 판 돈, 하루 일찍 받게 돼요!",
+   "voice": "Hana(qwen_audio_tts, '귀여운 만화 캐릭터, 깜짝 놀라서 신나게 전하는 말투') — 처음 녹음 '2028년부터 다음 날 들어와요'는 4.1초로 경주로 칸(3.0초)을 넘어 줄여 다시"
+  },
+  {
+   "file": "stems/i2_gmarket.mp3",
+   "start": 3.12,
+   "tempo": 1.0,
+   "text": "G마켓 유출 고객, 스마일 캐시 만 원 확인해요!",
+   "voice": "Hana(qwen, '귀여운 만화 캐릭터, 또박또박 분명하게 알려 주는 말투') — '나'에게 닿는 줄. 처음 녹음은 받아쓰기 79%('곡에·스마일캣이')라 다시",
+   "tts": "지마켓 유출 고객, 스마일 캐시 만 원 확인해요!"
+  },
+  {
+   "file": "stems/i3_binance.mp3",
+   "start": 7.06,
+   "tempo": 1.04,
+   "text": "바이낸스, 약 63억 달러가 털렸습니다!",
+   "voice": "Knox(elevenlabs_v4, '[excited]' 중계 아나운서) — 그날 가장 센 숫자 한 줄",
+   "tts": "[excited] 바이낸스, 약 육십삼억 달러가 털렸습니다!"
+  },
+  {
+   "file": "stems/i4_meta.mp3",
+   "start": 10.2,
+   "tempo": 1.0,
+   "text": "메타 광고 매출, 26% 뛰었대요!",
+   "voice": "Hana(qwen, '귀엽고 장난스러운 만화 캐릭터, 놀라서 또박또박 전하는 말투')",
+   "tts": "메타 광고 매출, 이십육 퍼센트 뛰었대요!"
+  },
+  {
+   "file": "stems/i5_hanbon.mp3",
+   "start": 14.08,
+   "tempo": 1.06,
+   "text": "일본 Z세대, 대화에 한국어를 섞어요!",
+   "voice": "Hana(qwen, '귀여운 만화 캐릭터, 신나서 들뜬 말투로 또박또박') — '진짜·괜찮아 섞어 쓴대요'(4.3초·80%), '섞어(서) 쓴대요'(음악과 섞이면 '섞었는데요'로 들림)를 거쳐 '대화에 한국어를 섞어요'로",
+   "tts": "일본 제트 세대, 대화에 한국어를 섞어요!"
+  },
+  {
+   "file": "stems/i_bye_newsletter.mp3",
+   "start": 17.6,
+   "tempo": 1.0,
+   "text": "더 자세한 건 프로필 링크 뉴스레터에서!",
+   "voice": "Hana(qwen, '귀엽고 밝은 만화 캐릭터, 경쾌하게 인사') — signoffs bye_newsletter 문구를 그날 새로 녹음"
+  }
+ ],
+ "music": [
+  {
+   "file": "../2026-10-31/stems/m1_chase.m4a",
+   "start": 0.0,
+   "offset": 1.7,
+   "dur": 4.2,
+   "fade_out": 0.3
+  },
+  {
+   "file": "../2026-10-31/stems/m1_chase.m4a",
+   "start": 3.9,
+   "offset": 1.75,
+   "dur": 4.15,
+   "fade_in": 0.2,
+   "fade_out": 0.4
+  },
+  {
+   "file": "../2026-10-31/stems/m2_morning.m4a",
+   "start": 7.6,
+   "dur": 7.6,
+   "fade_in": 0.3,
+   "fade_out": 0.4
+  },
+  {
+   "file": "../2026-10-31/stems/m2_morning.m4a",
+   "start": 14.9,
+   "dur": 7.7,
+   "lufs": -18,
+   "fade_in": 0.3,
+   "fade_out": 0.8
+  }
+ ],
+ "sfx": [
+  [
+   0,
+   7.0,
+   0.4
+  ],
+  [
+   7.0,
+   10.1,
+   0.15
+  ],
+  [
+   10.1,
+   14.0,
+   0.4
+  ],
+  [
+   14.0,
+   17.4,
+   0.12
+  ],
+  [
+   17.4,
+   999,
+   0.4
+  ]
+ ],
+ "music_note": "11/02 와 같은 곡 이음(m1_chase 1.7초부터, 곡 이음 0.3초 겹침). 끝인사가 17.6~20.7초라 m2_morning 5.75초 강박이 끝인사 숨(20.65초께)에 오게 14.9초에 다시 깐다",
+ "duck": {
+  "mix": 0.6
+ },
+ "source_note": "장면마다 그 소식의 매체 2곳을 작게 띄운다. 원 기사 대조(read_article.py 로 10곳 모두 읽음): T+1 '2028년부터·1972년·50여 년·2거래일 → 다음 거래일' 한겨레·머니투데이(월→수/화 예시는 한겨레에만 있어 자막은 '이틀 뒤 → 다음 날'로), G마켓 '스마일캐시 1만 원·e쿠폰 피해 액면가 전액' 동아일보·MBC(MBC 의 '90여만 명'은 동아일보에 '알려지지 않았다'라 쓰지 않음), 바이낸스 '핫월렛 약 63억 달러·금융위 2일 긴급 점검' 금융위원회 보도자료·디지털타임스(사고 날짜가 10/30·10/29 로 갈려 날짜는 쓰지 않음), 메타 '631억 달러·26%·구글 12%·격차 2021년 이후 최대' 아시아경제·뉴시스, 한본어 '진짜·괜찮아·2018년 기점(NYT)' 전자신문·연합뉴스. 동아일보는 첫 접속이 시간 초과, 다시 읽어 확인",
+ "comic": {
+  "series": "오늘 아침 5가지",
+  "layout": "duo",
+  "title": "주식 판 돈 <span class='hl'>다음 날</span> 입금,<br>오늘 아침 5가지",
+  "cover": {
+   "img": "stills/cover.png",
+   "pos": "50% 40%",
+   "job": "572546e4-116e-4a1b-af9d-16308a1126c5"
+  },
+  "summary": true,
+  "panels": [
+   {
+    "card": 1,
+    "img_a": "stills/t1_a.png",
+    "pos_a": "50% 40%",
+    "img_b": "stills/t1_b.png",
+    "pos_b": "50% 30%",
+    "say_side": "left",
+    "stk_side": "left",
+    "jobs": [
+     "5a64f36a-dc3f-4522-bf19-2f70da9fce64",
+     "11b388f2-763b-425e-a3d6-102ae4b929ca"
+    ]
+   },
+   {
+    "card": 2,
+    "img_a": "stills/gm_a.png",
+    "pos_a": "50% 40%",
+    "img_b": "stills/gm_b.png",
+    "pos_b": "50% 35%",
+    "say_side": "right",
+    "jobs": [
+     "7034dc9f-51e5-4c2a-addb-f0a9ecbbdbd8",
+     "f45a64c5-3e70-47c7-990d-a1154e7c829d"
+    ]
+   },
+   {
+    "card": 3,
+    "img_a": "stills/bn_a.png",
+    "pos_a": "50% 40%",
+    "img_b": "stills/bn_b.png",
+    "pos_b": "50% 35%",
+    "say_side": "left",
+    "jobs": [
+     "a1d49101-cf15-4fec-8a2f-9fd48953f358",
+     "a4163450-980c-4463-8af6-406752262e8e"
+    ]
+   },
+   {
+    "card": 4,
+    "img_a": "stills/mt_a.png",
+    "pos_a": "50% 0%",
+    "img_b": "stills/mt_b.png",
+    "pos_b": "50% 35%",
+    "say_side": "right",
+    "stk_side": "left",
+    "jobs": [
+     "2a86e53c-03e7-460c-886c-e2319520bfc9",
+     "2ad3920d-205d-4d66-8d15-a76b6f048d3e"
+    ]
+   },
+   {
+    "card": 5,
+    "img_a": "stills/hb_a.png",
+    "pos_a": "50% 35%",
+    "img_b": "stills/hb_b.png",
+    "pos_b": "50% 35%",
+    "say_side": "left",
+    "jobs": [
+     "fba0d519-df58-4274-b898-209bef72f4da",
+     "e0f4f116-6fb7-4136-9017-3d234cd253a4"
+    ]
+   }
+  ],
+  "sources": "장마다 표시",
+  "end": {
+   "title": "오늘 아침 5가지,<br>매일 8시 30분",
+   "sub": "경제부터 트렌드까지, 오늘 소식 5가지를<br>웹툰으로 풀어 드려요"
+  }
+ },
+ "comic_note": "5가지 웹툰 3판(E20 11/02~11/08 — 같은 날 08:30 카드와 도달·저장+공유 비교, 판정 11/09). 그림 11장 gpt_image_2_5 4:3 1k(장당 0.25 크레딧), 프롬프트·구도 규칙 automation/pilots/ai_reel/webtoon_prompt.md. stills/ 는 저장소에 올리지 않는다(jobs 로 다시 받는다). 눈 검수: H 모양·사람·로고·글자 없음(계산기 화면·버튼, 봉투, 폰 화면, 포스터 확대로 확인).",
+ "sfx_note": "효과음(원래 AI 영상 소리)은 0.4, 금고(7.0~10.1)·카페(14.0~17.4) 칸만 낮춘다 — 첫 렌더 받아쓰기에서 금화 소리에 '63억'이 '64억'으로, 카페 말풍선 소리에 '섞어서 쓴대요'가 69%로 들렸다",
+ "captions_note": "옥상 장면은 11.2초부터 H 가 포스터 기둥을 타고 화면 위쪽으로 올라가 위 자막에 가린다 — 같은 자막을 11.2~14.04초엔 아래(top 1150)로 내린다"
+}
