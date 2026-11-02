@@ -410,6 +410,20 @@ def story_on(cfg, key, account_type=None):
     return bool(start and str(key)[:10] >= start and "weekly" not in str(key) and account_type != CREATOR)
 
 
+def story_reel_only(cfg, key):
+    """2026-11-02 운영자 '스토리에 올릴 때는 릴스만 올리는 건 어때?' — config.instagram.story_reel_only_from 부터 데일리 호의 스토리는
+    그날 AI 릴스 영상 한 장만 올린다(아침 카드 스토리 4장은 안 올림). 근거: 카드 4장 + AI 영상 1장(하루 5장)이 된 10/31 부터
+    카드 스토리 첫 장 도달이 23~36 → 13~14 로 줄었다. 예비 호 날·AI 릴스를 못 만든 날은 카드 스토리를 그대로(릴스 실행이 대신 올린다)."""
+    start = cfg.get("story_reel_only_from")
+    return bool(start and str(key)[:10] >= start and "weekly" not in str(key))
+
+
+def is_rewind(key, kind="daily"):
+    """그날 content 가 예비 호(다시 보기)인가."""
+    content = ROOT / "content" / f"{str(key)[:10]}.json"
+    return kind == "daily" and content.exists() and bool(json.loads(content.read_text(encoding="utf-8")).get("rewind"))
+
+
 def story_image(folder, key, site_url):
     """스토리용 이미지 공개 주소 — 세로 릴스 첫 장(r1_hook.jpg, 1080×1920)이 있으면 그것, 없으면(예비 호) 표지 JPEG."""
     if (folder / "reel_frames" / "r1_hook.jpg").exists():
@@ -770,7 +784,11 @@ def main():
         print(f"캐러셀은 이미 게시됨 ({log['carousel'].get('permalink') or log['carousel']['id']})")
 
     # 아침 스토리(E9) — 캐러셀이 올라간 뒤에만. 실패해도 게시 작업은 실패로 치지 않는다(기록만, 다음 실행이 다시 시도)
-    want_story = args.only != "reel" and args.kind == "daily" and log.get("carousel") and not log.get("story")
+    # 11/03~ '스토리는 릴스만'(story_reel_only) 날은 아침 카드 스토리를 건너뛴다 — 예비 호 날은 그대로(그날은 릴스가 없다)
+    reel_only = args.kind == "daily" and story_reel_only(cfg, key) and not is_rewind(key, args.kind)
+    want_story = args.only != "reel" and args.kind == "daily" and log.get("carousel") and not log.get("story") and not reel_only
+    if reel_only and args.only != "reel" and log.get("carousel") and not log.get("story"):
+        print("스토리는 그날 AI 릴스 영상만(story_reel_only_from) — 아침 카드 스토리는 건너뜀")
     account_type = None
     if want_story:
         try:   # 계정 종류 — 이 필드를 못 읽어도 게시는 계속(모르면 한 번 시도)
@@ -781,7 +799,7 @@ def main():
             log["story_error"] = "creator"
             save_log(key, log)
             print("  ⚠ 크리에이터 계정이라 API 로 스토리를 올릴 수 없습니다 — 비즈니스 계정 전환은 automation/OWNER_TODO.md")
-    if want_story and story_on(cfg, key, account_type):
+    def card_story():
         try:
             print("스토리 게시 중…")
             ids = post_story(g, uid, key, folder, site_url, args.dry_run, done=log.get("story_partial") or [])
@@ -797,6 +815,9 @@ def main():
             log["story_error"] = str(e)[:200]
             save_log(key, log)
             print(f"  ⚠ 스토리 실패(게시는 계속): {e}")
+
+    if want_story and story_on(cfg, key, account_type):
+        card_story()
 
     # 예비 호(다시 보기)는 릴스를 올리지 않는다 — 이미 올린 카드를 다시 엮은 영상은 재게시로 잡혀 추천을 깎을 수 있다.
     # 어느 경로(예약·수동·rewind.yml)로 돌든 여기서 막는다.
@@ -888,6 +909,13 @@ def main():
                 log["story_ai_error"] = str(e)[:200]
                 save_log(key, log)
                 print(f"  ⚠ AI 영상 스토리 실패(게시는 계속): {e}")
+
+    # '스토리는 릴스만' 날인데 AI 릴스를 못 만들었으면(영상 파일 없음) 릴스 실행(저녁 사슬 19:30 등)이 아침 카드 스토리를 대신 올린다
+    # — 스토리가 하나도 없는 날을 만들지 않는다(E9: 스토리가 팔로워 도달을 약 2배로).
+    if (reel_only and args.only != "carousel" and not ai.exists() and log.get("carousel") and not log.get("story")
+            and not log.get("story_ai") and not args.dry_run and story_on(cfg, key)):
+        print("AI 릴스가 없는 날 — 아침 카드 스토리를 대신 올립니다")
+        card_story()
 
     # 'H 극장' 만화 캐러셀 — 08:30 캐러셀 실행(only=carousel)이 아니라 AI 릴스와 함께(수동·저녁 실행) 한 번만
     if (args.only != "carousel" and not rewind and cfg.get("comic", True) and any((folder / COMIC_DIR).glob("*.jpg"))

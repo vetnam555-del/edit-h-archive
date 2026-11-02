@@ -1260,6 +1260,17 @@ def t_story():
            "스토리 시작 날짜·주간 특집 제외가 틀린다")
     expect(post_instagram.story_on(cfg, "2026-10-10", "BUSINESS") and not post_instagram.story_on(cfg, "2026-10-10", "MEDIA_CREATOR"),
            "크리에이터 계정에서도 스토리를 시도한다(API 스토리는 비즈니스 계정만)")
+    # '스토리는 릴스만'(2026-11-02 운영자) — 시작 날짜부터 데일리만, 아침 카드 스토리는 건너뛰고 AI 릴스가 없는 날은 릴스 실행이 대신 올린다
+    ro = {"story_reel_only_from": "2026-11-03"}
+    expect([post_instagram.story_reel_only(ro, k) for k in ("2026-11-02", "2026-11-03", "2026-11-06-weekly")] == [False, True, False]
+           and not post_instagram.story_reel_only({}, "2026-11-03"), "스토리 릴스만 날짜·주간 특집 제외가 틀린다")
+    real_cfg = json.loads((ROOT / "automation" / "config.json").read_text(encoding="utf-8"))["instagram"]
+    expect(real_cfg.get("story_reel_only_from") == "2026-11-03", "config 에 story_reel_only_from 이 없다")
+    import inspect as _inspect
+    pi_src = _inspect.getsource(post_instagram.main)
+    expect("and not reel_only" in pi_src and "not ai.exists()" in pi_src and "card_story()" in pi_src,
+           "아침 카드 스토리를 릴스만 날에 건너뛰지 않거나, AI 릴스가 없는 날의 대신 올리기가 없다")
+    expect(collect_metrics._story_cell({"story": {"reach": 20, "video": True}}) == " (스토리 영상 20)", "AI 영상 스토리 도달 표시가 틀린다")
     calls = []
 
     class FakeGraph:

@@ -165,12 +165,15 @@ def _story_row(g, day, log):
     """E9 스토리 도달·조회·답장(첫 장). 여러 장이면(2026-10-30~) 장마다 도달도 frames 에 — 끝 장까지 남는 비율을 본다.
     24시간이 지나 인사이트가 닫혔으면 지난 스냅숏에 남긴 값을 그대로 쓴다."""
     from post_instagram import IGError
-    story = log.get("story") or {}
+    story = log.get("story") or log.get("story_ai") or {}   # 11/03~ '스토리는 릴스만' 날은 AI 영상 스토리 한 장(story_ai)
+    video = not log.get("story") and bool(log.get("story_ai"))
     sid = story.get("id")
     if not sid:
         return None
     try:
         got = _values(g.call("GET", f"{sid}/insights", metric=STORY_METRICS).get("data"))
+        if got and video:
+            got["video"] = True
         if got:
             ids = story.get("ids") or []
             if len(ids) > 1:
@@ -494,7 +497,8 @@ def _story_cell(p):
     if st.get("reach") is None:
         return ""
     last = (st.get("frames") or [None])[-1]
-    return f" (스토리 {st['reach']}→{last})" if len(st.get("frames") or []) > 1 and last is not None else f" (스토리 {st['reach']})"
+    name = "스토리 영상" if st.get("video") else "스토리"   # 11/03~ AI 릴스 영상 한 장 스토리
+    return f" ({name} {st['reach']}→{last})" if len(st.get("frames") or []) > 1 and last is not None else f" ({name} {st['reach']})"
 
 
 def _account_lines(ig, posts):
