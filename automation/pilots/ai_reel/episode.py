@@ -88,6 +88,38 @@ def shot(html, out, transparent):
 
 XFADE = 0.3   # 본편 → 끝 화면 겹침(초) — 검은 프레임 없이 넘어간다
 
+# 2026-11-02 운영자 '영상 중간에 끊기는 부분 없는지 점검해봐': 11/02 편은 프레임·소리가 빠진 곳은 없었지만 두 가지가 '끊기는' 느낌을 줬다.
+# ① 24fps AI 원본을 30fps 로 내면서 다섯 프레임마다 한 프레임이 겹쳐(4:1) 휙 넘김·이동이 미세하게 덜컥인다 → 이날 설정부터 원본 fps 그대로 낸다.
+# ② Seedance 가 장면 끝에 자세를 1초 가까이 멈춰 화면이 정지한 것처럼 보인다(11/02 도시 12.8~13.8초) → 설정의 "push": [[시작, 끝], …] 구간을
+#    천천히 다가가게(1 → 1+push_zoom) 해 움직임을 살린다. 끝은 장면 경계(휙 넘김)에 맞춘다 — 거기서 원래 크기로 돌아가는 게 가려진다. qa.py 가 1초 넘게 멈춘 구간을 막는다.
+SRC_RATE_FROM = "2026-11-03"
+
+
+def out_rate(ep, src):
+    """완성본 fps — SRC_RATE_FROM 설정부터 원본 fps(23~61 밖이면 30), 그 전 설정은 30(지난 편을 다시 렌더해도 같게)."""
+    if str(ep.get("date", "")) < SRC_RATE_FROM:
+        return 30
+    r = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=avg_frame_rate", "-of", "csv=p=0", str(src)],
+                       capture_output=True, text=True).stdout.strip()
+    try:
+        num, den = r.split("/")
+        fps = float(num) / float(den)
+    except (ValueError, ZeroDivisionError):
+        return 30
+    return round(fps) if 23 <= fps <= 61 else 30
+
+
+def push_filter(ep, rate):
+    """"push" 구간마다 천천히 다가가는 zoompan(없으면 빈 문자열) — 1080×1920·rate 로 낸다. 시각은 trim 뒤 본편 기준."""
+    spans = [(float(a), float(b)) for a, b in ep.get("push") or [] if float(b) > float(a)]
+    if not spans:
+        return ""
+    z = float(ep.get("push_zoom", 0.06))
+    expr = "1"
+    for a, b in reversed(spans):
+        expr = f"if(between(it\\,{a}\\,{b})\\,1+{z}*(it-{a})/{b - a:.3f}\\,{expr})"
+    return f",zoompan=z='{expr}':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=1:s=1080x1920:fps={rate}"
+
 def render_cards(ep, work):
     fonts = font_css()
     paths = []
@@ -111,20 +143,21 @@ def compose(ep, base, src, out, work):
     total = main + endsec
     # 끝 화면은 본편 마지막 XFADE 초와 겹쳐 녹아들게 넣는다 — 검은색에서 밝아지게(fade in) 넣으면 넘어가는 순간 2프레임이 검게 튄다
     # (11/01 운영자 "영상 중간중간에 검은색으로 끊기는 것 같다" — 10/31·11/01 릴스 6편 모두 본편→끝 화면 사이 0.07초 검은 화면)
-    inputs = ["-i", str(src)] + sum((["-i", str(p)] for p in caps), []) + ["-loop", "1", "-t", f"{endsec + XFADE:.3f}", "-framerate", "30", "-i", str(end)]
+    rate = out_rate(ep, src)
+    inputs = ["-i", str(src)] + sum((["-i", str(p)] for p in caps), []) + ["-loop", "1", "-t", f"{endsec + XFADE:.3f}", "-framerate", str(rate), "-i", str(end)]
     vi = len(caps) + 2
     voices, music = ep.get("voices", []), ep.get("music", [])
     inputs += sum((["-i", str(base / v["file"])] for v in voices), [])
     mi = vi + len(voices)
     inputs += sum((["-i", str(base / m["file"])] for m in music), [])
 
-    f = [f"[0:v]trim={t0}:{t1},setpts=PTS-STARTPTS,scale=1080:1920:flags=lanczos,fps=30,setsar=1[v0]"]
+    f = [f"[0:v]trim={t0}:{t1},setpts=PTS-STARTPTS,scale=1080:1920:flags=lanczos,fps={rate}{push_filter(ep, rate)},setsar=1[v0]"]
     last = "v0"
     for k, c in enumerate(ep["captions"]):
         f.append(f"[{last}][{k + 1}:v]overlay=0:0:enable='between(t,{c['start']},{c['end']})'[vc{k}]")
         last = f"vc{k}"
-    f.append(f"[{last}]trim=0:{main},setpts=PTS-STARTPTS,format=yuv420p,setsar=1,settb=1/30[vm]")
-    f.append(f"[{len(caps) + 1}:v]fps=30,format=yuv420p,setsar=1,settb=1/30[ve]")
+    f.append(f"[{last}]trim=0:{main},setpts=PTS-STARTPTS,format=yuv420p,setsar=1,settb=1/{rate}[vm]")
+    f.append(f"[{len(caps) + 1}:v]fps={rate},format=yuv420p,setsar=1,settb=1/{rate}[ve]")
     f.append(f"[vm][ve]xfade=transition=fade:duration={XFADE}:offset={main - XFADE:.3f}[v]")   # 길이는 그대로(main + endsec)
     # 효과음(원래 AI 영상 소리) — 구간별 볼륨
     expr = "0.3"

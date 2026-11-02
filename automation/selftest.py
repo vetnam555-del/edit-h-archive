@@ -2109,6 +2109,18 @@ def t_ai_reel():
     # 꽉 찬 화면(11/01 운영자 'H PICK 처럼 꽉 차게') — 위아래 흐린 띠(가로 띠 영상)는 막고, 얕은 초점으로 바닥이 흐린 장면 몇 개는 통과
     expect(qa.letterboxed([0.11] * 30 + [0.4] * 5) and not qa.letterboxed([0.35] * 20 + [0.12] * 10) and not qa.letterboxed([]),
            "흐린 위아래 띠(가로 띠 영상) 판정이 틀린다")
+    # 멈춘 듯한 구간(11/02 운영자 '영상 중간에 끊기는 부분 없는지') — 1초 넘게 거의 안 움직이면 막고 0.8초는 통과, 천천히 다가가기(push)로 푼다
+    still = [(round(i * 0.2, 1), 3.0) for i in range(10)] + [(round(2.0 + i * 0.2, 1), 0.2) for i in range(5)] + [(3.0, 25.0)]
+    short = [(round(i * 0.2, 1), 3.0) for i in range(10)] + [(round(2.0 + i * 0.2, 1), 0.2) for i in range(4)] + [(2.8, 25.0)]
+    expect(qa.stalls(still) == [(2.0, 3.0)] and qa.stalls(short) == [] and qa.stalls([(0.0, 0.1)] * 1) == [],
+           "멈춘 듯한 구간(1초 이상) 판정이 틀린다")
+    expect("stalls(motion_windows(video" in inspect.getsource(qa.main), "검수가 멈춘 듯한 구간을 보지 않는다")
+    import episode as ep_mod
+    pf = ep_mod.push_filter({"push": [[12.75, 13.96]]}, 24)
+    expect("zoompan=" in pf and "between(it\\,12.75\\,13.96)" in pf and "fps=24" in pf and ep_mod.push_filter({}, 24) == "",
+           "push(천천히 다가가기) 필터가 틀린다")
+    expect(ep_mod.out_rate({"date": "2026-11-02"}, "없는파일.mp4") == 30 and ep_mod.out_rate({"date": "2026-11-03"}, "없는파일.mp4") == 30,
+           "11/02 까지 설정의 fps 가 30 이 아니거나, 원본을 못 읽을 때 30 으로 돌아가지 않는다")
     ep_src = (ROOT / "automation" / "pilots" / "ai_reel" / "episode.py").read_text(encoding="utf-8")
     expect("xfade=" in ep_src and "fade=t=in:st=0:d=0.25[ve]" not in ep_src, "끝 화면을 검은색에서 밝아지게 넣는다(검은 2프레임) — 겹쳐 넘겨야 한다")
     expect("black_frames(video)" in inspect.getsource(qa.main) and "dark_flashes(video)" in inspect.getsource(qa.main), "검수가 검은 화면을 보지 않는다")
