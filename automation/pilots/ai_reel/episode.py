@@ -99,12 +99,12 @@ def out_rate(ep, src):
     """완성본 fps — SRC_RATE_FROM 설정부터 원본 fps(23~61 밖이면 30), 그 전 설정은 30(지난 편을 다시 렌더해도 같게)."""
     if str(ep.get("date", "")) < SRC_RATE_FROM:
         return 30
-    r = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=avg_frame_rate", "-of", "csv=p=0", str(src)],
-                       capture_output=True, text=True).stdout.strip()
     try:
+        r = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=avg_frame_rate", "-of", "csv=p=0",
+                            str(src)], capture_output=True, text=True).stdout.strip()
         num, den = r.split("/")
         fps = float(num) / float(den)
-    except (ValueError, ZeroDivisionError):
+    except (OSError, ValueError, ZeroDivisionError):   # ffprobe 가 없거나(자동 점검 러너) 원본을 못 읽으면 30
         return 30
     return round(fps) if 23 <= fps <= 61 else 30
 
