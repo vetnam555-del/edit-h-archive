@@ -309,10 +309,40 @@ def process(g, me, now, st, s, dry=False, log=print):
 
 
 def probe(g, me, now, st, s, log=print):
-    """토큰 계정·최근 댓글 읽기·메시지 권한(대화 목록 읽기)만 본다. 보내지 않는다."""
+    """토큰 계정·최근 댓글 읽기·메시지 권한(대화 목록 읽기)만 본다. 보내지 않는다.
+    2026-11-02 진단: 첫 probe 가 '댓글 있는 게시물 16개·읽은 댓글 0개'(우리 계정 첫 댓글도 안 읽힘)였다. 그래서 게시물마다(앞 6개)
+    comments_count 와 두 가지 읽기(…/comments · ?fields=comments{…})의 개수, 응답 칸 이름(값 없이)을 남겨 원인(권한·앱 모드·필드)을 가린다.
+    기록엔 숫자·칸 이름·오류 요약만(아이디·이름·댓글 글 없음)."""
     media = recent_media(g, me["id"], now, s)
-    n = sum(len(get_all(g, f"{m['id']}/comments", pages=1, fields="id,timestamp", limit=50)) for m in media)
-    log(f"  ✓ 계정 @{me['username']} · 최근 {s['lookback_days']}일 댓글 있는 게시물 {len(media)}개 · 읽은 댓글 {n}개")
+    rows, n = [], 0
+    for m in media:
+        try:
+            r = g.call("GET", f"{m['id']}/comments", fields="id,timestamp", limit=50)
+            got, keys = len(r.get("data") or []), sorted(r)
+        except ApiError as e:
+            if kind_of(e) == "token":
+                raise
+            got, keys = None, [f"오류 {short_err(e)[:90]}"]
+        n += got or 0
+        if len(rows) >= 6:
+            continue
+        try:
+            r2 = g.call("GET", m["id"], fields="comments_count,comments.limit(5){id,timestamp}")
+            alt, alt_keys = len(((r2.get("comments") or {}).get("data")) or []), sorted(k for k in r2 if k != "id")
+        except ApiError as e:
+            if kind_of(e) == "token":
+                raise
+            alt, alt_keys = None, [f"오류 {short_err(e)[:90]}"]
+        rows.append({"type": m.get("media_product_type") or "", "count": m.get("comments_count") or 0,
+                     "read": got, "keys": keys, "alt": alt, "alt_keys": alt_keys})
+    log(f"  ✓ 계정 @{me['username']} · 최근 {s['lookback_days'] * 2}일 댓글 있는 게시물 {len(media)}개 · 읽은 댓글 {n}개")
+    for r in rows:
+        log(f"    · {r['type'] or '?'} 댓글 수 {r['count']} → /comments {r['read']}개(칸 {','.join(r['keys'])})"
+            f" · fields=comments {r['alt']}개(칸 {','.join(r['alt_keys'])})")
+    blind = bool(media) and n == 0
+    if blind:
+        log("  ✗ 댓글 수는 있는데 하나도 못 읽는다 — 토큰에 instagram_business_manage_comments 권한이 없거나, 앱이 개발 모드라"
+            " 역할 없는 계정의 댓글이 가려진 것이다(OWNER_TODO '댓글 구독 → 링크 DM' ②③)")
     try:
         g.call("GET", f"{me['id']}/conversations", platform="instagram", limit=1)
         msg = {"ok": True}
@@ -322,7 +352,8 @@ def probe(g, me, now, st, s, log=print):
             raise
         msg = {"ok": False, "error": short_err(e)}
         log(f"  ✗ 메시지 권한 없음 — {short_err(e)}")
-    st["probe"] = {"d": now.astimezone(KST).date().isoformat(), "media": len(media), "comments": n, "messages": msg}
+    st["probe"] = {"d": now.astimezone(KST).date().isoformat(), "media": len(media), "comments": n, "messages": msg,
+                   "rows": rows, "blind": blind, "me_id_is_user_id": me.get("id") == me.get("user_id")}
 
 
 def save_state(st, path=STATE):

@@ -2533,6 +2533,26 @@ def t_comment_dm():
     expect("secrets.IG_ACCESS_TOKEN" in wf and "git add automation/comment_dm" in wf and "if: always()" in wf, "댓글 DM 워크플로")
     import collect_metrics as _cm
     expect("ig-dm" in Path(_cm.__file__).read_text(encoding="utf-8"), "성과표 구독 경로 이름에 ig-dm 이 없다")
+    # probe 진단(2026-11-02 '댓글 있는 게시물 16개·읽은 댓글 0개') — 게시물마다 댓글 수·두 가지 읽기 개수·응답 칸 이름만, 아이디는 기록에 없다
+    class Blind:
+        def call(self, method, path, **params):
+            if path == "900/media":
+                return {"data": [{"id": "m1", "timestamp": ts(1), "comments_count": 4, "media_product_type": "REELS"}]}
+            if path == "m1/comments":
+                return {"data": []}
+            if path == "m1":
+                return {"id": "m1", "comments_count": 4}
+            if path == "900/conversations":
+                return {"data": []}
+            raise AssertionError(f"probe 가 모르는 호출 {method} {path}")
+    st_p = cd.load_state(Path("/nonexistent/state.json"))
+    logs = []
+    cd.probe(Blind(), {**me, "user_id": "900"}, now, st_p, s, log=logs.append)
+    pr = st_p["probe"]
+    expect(pr["blind"] and pr["comments"] == 0 and pr["rows"] == [{"type": "REELS", "count": 4, "read": 0, "keys": ["data"],
+                                                                   "alt": 0, "alt_keys": ["comments_count"]}]
+           and pr["messages"] == {"ok": True} and pr["me_id_is_user_id"], f"probe 진단 기록이 틀린다: {pr}")
+    expect("m1" not in json.dumps(pr) and any("하나도 못 읽는다" in x for x in logs), "probe 기록에 게시물 아이디가 남았거나 원인 안내가 없다")
     return f"키워드 {', '.join(s['keywords'])} · 링크 ref={s['link_ref']}"
 
 
