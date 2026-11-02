@@ -1875,7 +1875,7 @@ def t_home():
             head = f.read(24)
         return struct.unpack(">II", head[16:24])
     for name, size in (("og_image.png", (1200, 630)), ("favicon.png", (64, 64)), ("apple-touch-icon.png", (180, 180)),
-                       ("assets/mascot/avatar-96.png", (96, 96))):
+                       ("assets/mascot/avatar-96.png", (96, 96)), ("assets/mascot/avatar-192.png", (192, 192))):
         expect((ROOT / name).exists() and png_size(ROOT / name) == size, f"{name} 이 없거나 {size} 가 아니다(build_site_assets.py)")
     expect((ROOT / "og_image.png").stat().st_size > 40_000, "og_image.png 가 너무 작다 — 한글이 □ 로 깨졌던 옛 그림일 수 있다")
     return f"구독 칸 → {action.rsplit('/', 1)[-1]} · 생성 표시 3곳"
@@ -1907,7 +1907,19 @@ def t_brand_v2():
                and "트렌드 한 입" not in page and "TREND BRIEF" not in page,
                f"{name} 에 옛 문구가 남았거나 새 대표 문구가 없다")
     expect("트렌드 한 입" not in inspect.getsource(site_mod.write_feeds), "RSS 제목이 옛 문구다")
-    return f"{newsletter.BRAND_V2_FROM} 호부터 · '{newsletter.BRAND_LINE}'"
+    # 11/03 호부터 프로필·노트 마크는 프로필과 같은 그림(2026-11-02 운영자 '메일 로고가 프로필 로고랑 다르다') — 11/02 호까지는 도형 그대로
+    img = f'<img src="{site}/{newsletter.MARK_IMG}"'
+    last_shape = copy_mod.deepcopy(d)
+    last_shape["date"] = "2026-11-02"
+    first_img = copy_mod.deepcopy(d)
+    first_img["date"] = newsletter.MARK_IMG_FROM
+    c, e = newsletter.render(last_shape, site, 10), newsletter.render(first_img, site, 10)
+    expect(img not in c and "border-radius:0 0" in c, "11/02 호까지의 마크가 바뀌었다(지난 호는 기록)")
+    expect(e.count(img) == 2 and 'width="58" height="58" alt=""' in e and 'width="40" height="40" alt=""' in e,
+           f"{newsletter.MARK_IMG_FROM} 호 프로필 카드·노트 마크가 프로필 그림({newsletter.MARK_IMG})이 아니다")
+    expect('bgcolor="#FF5233"' in e and "border-radius:0 0" not in e, "그림을 막는 메일에서 볼 주황 동그라미 바탕이 없거나 도형 얼굴이 남았다")
+    expect((ROOT / newsletter.MARK_IMG).exists(), f"{newsletter.MARK_IMG} 가 없다(build_site_assets.py)")
+    return f"{newsletter.BRAND_V2_FROM} 호부터 · '{newsletter.BRAND_LINE}' · 마크 그림 {newsletter.MARK_IMG_FROM}~"
 
 
 def t_ai_reel():
@@ -2097,6 +2109,18 @@ def t_ai_reel():
     # 꽉 찬 화면(11/01 운영자 'H PICK 처럼 꽉 차게') — 위아래 흐린 띠(가로 띠 영상)는 막고, 얕은 초점으로 바닥이 흐린 장면 몇 개는 통과
     expect(qa.letterboxed([0.11] * 30 + [0.4] * 5) and not qa.letterboxed([0.35] * 20 + [0.12] * 10) and not qa.letterboxed([]),
            "흐린 위아래 띠(가로 띠 영상) 판정이 틀린다")
+    # 멈춘 듯한 구간(11/02 운영자 '영상 중간에 끊기는 부분 없는지') — 1초 넘게 거의 안 움직이면 막고 0.8초는 통과, 천천히 다가가기(push)로 푼다
+    still = [(round(i * 0.2, 1), 3.0) for i in range(10)] + [(round(2.0 + i * 0.2, 1), 0.2) for i in range(5)] + [(3.0, 25.0)]
+    short = [(round(i * 0.2, 1), 3.0) for i in range(10)] + [(round(2.0 + i * 0.2, 1), 0.2) for i in range(4)] + [(2.8, 25.0)]
+    expect(qa.stalls(still) == [(2.0, 3.0)] and qa.stalls(short) == [] and qa.stalls([(0.0, 0.1)] * 1) == [],
+           "멈춘 듯한 구간(1초 이상) 판정이 틀린다")
+    expect("stalls(motion_windows(video" in inspect.getsource(qa.main), "검수가 멈춘 듯한 구간을 보지 않는다")
+    import episode as ep_mod
+    pf = ep_mod.push_filter({"push": [[12.75, 13.96]]}, 24)
+    expect("zoompan=" in pf and "between(it\\,12.75\\,13.96)" in pf and "fps=24" in pf and ep_mod.push_filter({}, 24) == "",
+           "push(천천히 다가가기) 필터가 틀린다")
+    expect(ep_mod.out_rate({"date": "2026-11-02"}, "없는파일.mp4") == 30 and ep_mod.out_rate({"date": "2026-11-03"}, "없는파일.mp4") == 30,
+           "11/02 까지 설정의 fps 가 30 이 아니거나, 원본을 못 읽을 때 30 으로 돌아가지 않는다")
     ep_src = (ROOT / "automation" / "pilots" / "ai_reel" / "episode.py").read_text(encoding="utf-8")
     expect("xfade=" in ep_src and "fade=t=in:st=0:d=0.25[ve]" not in ep_src, "끝 화면을 검은색에서 밝아지게 넣는다(검은 2프레임) — 겹쳐 넘겨야 한다")
     expect("black_frames(video)" in inspect.getsource(qa.main) and "dark_flashes(video)" in inspect.getsource(qa.main), "검수가 검은 화면을 보지 않는다")
@@ -2509,6 +2533,31 @@ def t_comment_dm():
     expect("secrets.IG_ACCESS_TOKEN" in wf and "git add automation/comment_dm" in wf and "if: always()" in wf, "댓글 DM 워크플로")
     import collect_metrics as _cm
     expect("ig-dm" in Path(_cm.__file__).read_text(encoding="utf-8"), "성과표 구독 경로 이름에 ig-dm 이 없다")
+    # probe 진단(2026-11-02 '댓글 있는 게시물 16개·읽은 댓글 0개') — 게시물마다 댓글 수·두 가지 읽기 개수·응답 칸 이름만, 아이디는 기록에 없다
+    class Blind:
+        def call(self, method, path, **params):
+            if path == "900/media":
+                return {"data": [{"id": "m1", "timestamp": ts(1), "comments_count": 4, "media_product_type": "REELS"}]}
+            if path == "m1/comments":
+                return {"data": []}
+            if path == "m1":
+                return {"id": "m1", "comments_count": 4}
+            if path == "900/conversations":
+                return {"data": []}
+            raise AssertionError(f"probe 가 모르는 호출 {method} {path}")
+    st_p = cd.load_state(Path("/nonexistent/state.json"))
+    logs = []
+    acct = cd.account({"id": "app-scoped-1", "user_id": "900", "username": "edit.h.kr"})   # main() 이 GET me 응답을 바꾸는 그대로(Codex 리뷰)
+    expect(acct["id"] == "900" and acct["raw_id"] == "app-scoped-1" and acct["user_id"] == "900"
+           and cd.account({"id": "900", "username": "x"})["id"] == "900", f"GET me 응답 정리가 틀린다: {acct}")
+    import inspect as _inspect
+    expect("me = account(me)" in _inspect.getsource(cd.main), "main() 이 account() 로 계정 정보를 만들지 않는다")
+    cd.probe(Blind(), acct, now, st_p, s, log=logs.append)
+    pr = st_p["probe"]
+    expect(pr["blind"] and pr["comments"] == 0 and pr["rows"] == [{"type": "REELS", "count": 4, "read": 0, "keys": ["data"],
+                                                                   "alt": 0, "alt_keys": ["comments_count"]}]
+           and pr["messages"] == {"ok": True} and pr["ids"] == {"has_user_id": True, "same": False}, f"probe 진단 기록이 틀린다: {pr}")
+    expect("m1" not in json.dumps(pr) and any("하나도 못 읽는다" in x for x in logs), "probe 기록에 게시물 아이디가 남았거나 원인 안내가 없다")
     return f"키워드 {', '.join(s['keywords'])} · 링크 ref={s['link_ref']}"
 
 

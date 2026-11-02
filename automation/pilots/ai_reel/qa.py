@@ -9,6 +9,7 @@
  3. 소리 — 통합 음량 -14±1.5 LUFS, 음성 트랙이 있다, 중간에 끊기는 곳이 없다(11/01 운영자 "소리가 중간중간 끊긴다").
  4. 영상 — 1080×1920, 길이 8~30초, 검은 화면·어둡게 번쩍이는 프레임이 한 프레임도 없다
     (11/01 운영자 "영상 중간중간에 검은색으로 끊기는 것 같다" — 끝 화면 페이드 인이 2프레임 검게 튀었다).
+    11/03 설정부터 화면이 1초 넘게 멈춘 듯한 구간도 막는다(11/02 운영자 "영상 중간에 끊기는 부분 없는지" — 장면 끝에 자세가 멈췄다).
  5. 캡션 — reel_ai_caption.txt·comic_caption.txt 에 'AI로 만들' 한 줄, 해시태그 5개 이하, 같은 숫자 대조(끝 화면·만화 끝 장 문구도).
  6. 만화 — comic/ JPEG 3~10장, 1080×1350.
  7. 금지 — 화면 글자에 'AI로 만든 영상' 표시 없음(운영자 11/01), 실존 인물·회사 로고는 사람이 프레임 캡처로 한 번 더 본다(자동 아님).
@@ -165,6 +166,50 @@ def letterboxed(ratios, low=0.2, share=0.6, med=0.18):
     if not ratios:
         return False
     return sum(r < low for r in ratios) / len(ratios) >= share and statistics.median(ratios) < med
+
+
+STALL_RULE_FROM = "2026-11-03"
+
+
+def motion_windows(video, end_at, step=0.2, w=90, h=160):
+    """완성본 본편(end_at 초 전까지)을 step 초 창으로 나눠 창마다 이웃 프레임 차이의 최댓값(90×160 회색 평균 절대 차) → [(창 시작초, 값)].
+    겹친 프레임(24→30fps)은 차이 0 이라 최댓값으로 본다."""
+    import numpy as np
+    raw = subprocess.run(["ffmpeg", "-v", "error", "-i", str(video), "-t", f"{max(end_at, 0.5):.2f}",
+                          "-vf", f"scale={w}:{h},format=gray", "-f", "rawvideo", "-"], capture_output=True).stdout
+    rate = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=avg_frame_rate", "-of", "csv=p=0",
+                           str(video)], capture_output=True, text=True).stdout.strip()
+    num, den = (rate.split("/") + ["1"])[:2]
+    fps = float(num) / float(den or 1)
+    n = len(raw) // (w * h)
+    f = np.frombuffer(raw[:n * w * h], dtype=np.uint8).reshape(n, h, w).astype(np.float32)
+    d = np.abs(np.diff(f, axis=0)).mean(axis=(1, 2))
+    t = np.arange(1, n) / fps
+    out, s = [], 0.0
+    while s + step <= end_at + 1e-6:
+        m = (t >= s) & (t < s + step)
+        if m.any():
+            out.append((round(s, 2), float(d[m].max())))
+        s += step
+    return out
+
+
+def stalls(wins, thr=0.6, min_len=1.0, step=0.2):
+    """멈춘 듯한 구간 — 움직임이 thr 아래인 창이 min_len 초 이상 이어지면 [(시작초, 끝초)].
+    2026-11-02 운영자 '영상 중간에 끊기는 부분 없는지': 11/02 편 도시 장면 12.8~13.8초가 1초 동안 거의 멈춰(창 최댓값 0.12~0.5) 끊긴 듯 보였다.
+    천천히 다가가기(episode.py "push")를 걸면 같은 구간이 2 안팎이 된다. 0.8초(공항·책상)는 통과."""
+    runs, start, last = [], None, None
+    for s, v in wins:
+        if v < thr:
+            start = s if start is None else start
+            last = s + step
+        else:
+            if start is not None and last - start >= min_len - 1e-6:
+                runs.append((round(start, 2), round(last, 2)))
+            start = None
+    if start is not None and last - start >= min_len - 1e-6:
+        runs.append((round(start, 2), round(last, 2)))
+    return runs
 
 
 def dropouts(video, head=0.3, tail=0.8):
@@ -591,6 +636,12 @@ def main():
         if letterboxed(ratios):
             fails.append("화면이 꽉 차지 않는다 — 위아래가 흐린 띠인 가로 띠 영상(11/01 운영자 'H PICK 처럼 꽉 차게'). "
                          "프롬프트에 'FULL-BLEED VERTICAL FRAMING'·NEGATIVE 'no letterboxing, no blurred bars' 를 넣어 다시 만든다(brief_prompt.txt)")
+        if str(ep.get("date", "")) >= STALL_RULE_FROM:
+            held = stalls(motion_windows(video, dur - float(ep.get("end_seconds") or 2.5) - 0.3))
+            if held:
+                fails.append("화면이 멈춘 듯한 구간 " + ", ".join(f"{x:.1f}~{y:.1f}초" for x, y in held)
+                             + ' — 설정에 "push": [[시작, 끝]] 로 천천히 다가가게(끝은 장면 경계) 하거나 그 장면을 다시 만든다(episode.py)')
+            notes.append(f"멈춘 듯한 구간 {len(held)}곳(1초 이상)")
         gaps = dropouts(video)
         if gaps:
             fails.append("소리 끊김 " + ", ".join(f"{a:.2f}초부터 {b:.2f}초({m}dB)" for a, b, m in gaps)

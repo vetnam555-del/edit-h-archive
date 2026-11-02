@@ -212,13 +212,34 @@ AVATAR_MARK = ('<table role="presentation" aria-hidden="true" width="58" height=
 
 # 2026-11-01 운영자 '내 돈·일·소비 같은 문구가 촌스럽다 … 프로필 이미지도 최신본으로'(automation/reviews/2026-11-01-copy.md).
 # 이날 호부터 ① 프로필·노트 마크를 마스코트 얼굴(안경 + 미소, assets/mascot/profile.png)로 ② 바닥·추천 메일 문구를 새 한 줄
-# '2030의 아침을 편집합니다'로(같은 날 운영자 '직장인보다 2030 마케팅·트렌드·경제 폭넓게'로 고침). 지난 호를 다시 빌드하면 예전 그대로 나온다(기록). 메일엔 여전히 그림 파일을 쓰지 않고 도형으로 그린다.
+# '2030의 아침을 편집합니다'로(같은 날 운영자 '직장인보다 2030 마케팅·트렌드·경제 폭넓게'로 고침). 지난 호를 다시 빌드하면 예전 그대로 나온다(기록). 마크는 11/02 호까지 도형으로 그렸다(11/03 호부터 그림 — 아래 MARK_IMG_FROM).
 BRAND_V2_FROM = "2026-11-01"
 BRAND_LINE = "2030의 아침을 편집합니다"   # 11/01 운영자: 직장인보다 2030 마케팅·트렌드·경제 폭넓게
 
 
 def _v2(d):
     return str(d.get("date", "")) >= BRAND_V2_FROM
+
+
+# 2026-11-02 운영자 '메일 뉴스레터 로고가 프로필 로고랑 다른 것 같다': 도형으로 그린 얼굴(_face_mark)은 눈이 작고 눈동자가 위로 쏠려
+# 프로필(assets/mascot/profile.png)과 달라 보였고, box-sizing 을 지우는 메일에선 안경이 원 밖으로 삐져나온다.
+# 이날 호부터 프로필과 같은 그림(assets/mascot/avatar-192.png — build_site_assets.py 가 profile.png 로 만든 동그라미)을 싣는다.
+# 그림을 막는 메일에선 칸 배경의 주황 동그라미만 보인다(alt 없음 — 장식). 지난 호를 다시 빌드하면 예전 그대로(기록).
+MARK_IMG_FROM = "2026-11-03"
+MARK_IMG = "assets/mascot/avatar-192.png"
+
+
+def _face(d, site, px):
+    """프로필·노트 마크 — 11/03 호부터 프로필과 같은 그림, 11/01~11/02 호는 도형 얼굴, 그 전은 안경만."""
+    if site and str(d.get("date", "")) >= MARK_IMG_FROM:
+        return (f'<table role="presentation" aria-hidden="true" width="{px}" height="{px}" cellpadding="0" cellspacing="0" border="0" '
+                f'style="width:{px}px;height:{px}px;border-radius:50%;background:#FF5233;"><tr>'
+                f'<td align="center" valign="middle" bgcolor="#FF5233" style="font-size:0;line-height:0;border-radius:50%;">'
+                f'<img src="{site}/{MARK_IMG}" width="{px}" height="{px}" alt="" '
+                f'style="display:block;width:{px}px;height:{px}px;border:0;border-radius:50%;"></td></tr></table>')
+    if _v2(d):
+        return _face_mark(px)
+    return AVATAR_MARK if px == 58 else _mini_avatar(px)
 
 
 def _face_mark(px=58):
@@ -280,9 +301,9 @@ def _todo(d):
     return _box(_div(f"font-size:12.5px;font-weight:700;line-height:1.3;color:{CHIP_FG};", "오늘 챙길 것") + rows, mt=16)
 
 
-def _note(d):
+def _note(d, site=None):
     """에디터 H 노트 — 고정 코너. 안경 마크 + 1인칭 편지 + 오늘의 목록(10/16~ 짧게 읽는 소식까지 10가지) + H의 한 줄."""
-    head = (f'<table role="presentation" cellpadding="0" cellspacing="0"><tr><td valign="middle">{_face_mark(40) if _v2(d) else _mini_avatar()}</td>'
+    head = (f'<table role="presentation" cellpadding="0" cellspacing="0"><tr><td valign="middle">{_face(d, site, 40)}</td>'
             f'<td valign="middle" style="padding-left:10px;">'
             + _div(f"font-size:17px;font-weight:700;line-height:1.3;color:{INK};",
                    '에디터 H 노트 <span style="color:#C4C4C4;font-weight:400;">|</span> '
@@ -450,7 +471,7 @@ def _cta(d, site, campaign, n_cards):
                     else f"매일 아침 {n_topics}가지 트렌드 이슈를<br>한 번에 정리해 드려요!"), True)
             + f"""<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:16px;background:#FFFFFF;border:1px solid {RULE};border-radius:18px;box-shadow:0 2px 6px rgba(0,0,0,.08);"><tr><td style="padding:18px 16px;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
-    <td valign="middle" style="width:70px;">{_face_mark(58) if _v2(d) else AVATAR_MARK}</td>
+    <td valign="middle" style="width:70px;">{_face(d, site, 58)}</td>
     <td valign="middle" style="padding-left:12px;">{_div(f"font-size:15px;font-weight:500;line-height:1.2;color:{INK};", "edit.h.kr")}
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:8px;"><tr>{stats}</tr></table>
     </td>
@@ -492,7 +513,7 @@ def render(d, site, n_cards):
     campaign = "daily_" + d["date"].replace("-", "")
     title = plain(d["title"])
     if d.get("format") == 2:
-        body = [_header(d), _divider(), _note(d), _divider(30), _pick(d), _divider(0),
+        body = [_header(d), _divider(), _note(d, site), _divider(30), _pick(d), _divider(0),
                 f'<tr><td class="px" style="padding:30px 36px 0;">{_chips([("02–05", True), ("함께 볼 4가지", False)])}</td></tr>']
         body.extend(_item(it) for it in d["items"])
         body.append(_briefs(d, "짧게 읽는 소식" if str(d.get("date", "")) >= BRIEFS_FROM else "한 줄 뉴스", start=len(d["all_items"]) + 1))
