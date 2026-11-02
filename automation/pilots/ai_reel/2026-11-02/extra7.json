@@ -1,0 +1,149 @@
+{
+ "date": "2026-11-02",
+ "story": "계정 소개(프로필 고정용) — H 가 아침마다 뉴스를 골라(①) 기사 2곳으로 확인하고(②) 8시 30분 메일로 보내고(③) 인스타에선 카드뉴스·릴스로(④). 사실은 subscribe.html(매일 아침 8시 30분·무료·광고 없음)·AGENTS.md(2030·경제·트렌드·마케팅·테크)·RUNBOOK(숫자 2곳 확인) 그대로.",
+ "seedance": {
+  "model": "seedance_2_5",
+  "made_by": "크레딧 API(720p 20초, 140 크레딧)",
+  "job": "34ff508d-ae52-48a2-b82e-046e4a5bdf46"
+ },
+ "trim": [
+  0.0,
+  20.0
+ ],
+ "end_seconds": 2.6,
+ "captions": [
+  {
+   "start": 0.0,
+   "end": 1.3,
+   "size": 90,
+   "html": "<div class=\"kick\">EDIT H · 에디트 에이치</div><div class=\"main\">뉴스 볼 틈 없는<br><span class=\"hl\">2030</span>의 아침</div><div class=\"sub\">오늘 꼭 알아야 할 것만 골라 드려요</div>",
+   "top": 300
+  },
+  {
+   "start": 1.3,
+   "end": 3.05,
+   "size": 84,
+   "html": "<div class=\"kick\">EDIT H 는요</div><div class=\"main\">매일 아침 <span class=\"hl\">8시 30분</span><br>무료 뉴스레터</div><div class=\"sub\">광고 없이 메일로 받아 보세요</div>"
+  },
+  {
+   "start": 3.4,
+   "end": 6.92,
+   "size": 78,
+   "html": "<div class=\"kick\">① 골라요</div><div class=\"main\">경제부터 트렌드까지<br><span class=\"hl\">꼭 알아야 할 것만</span></div><div class=\"sub\">마케팅·테크 소식도 함께</div>"
+  },
+  {
+   "start": 6.92,
+   "end": 9.9,
+   "size": 80,
+   "html": "<div class=\"kick\">② 확인해요</div><div class=\"main\">숫자는 기사<br><span class=\"hl\">2곳 이상</span>에서 확인</div><div class=\"sub\">확인 못 한 건 쓰지 않아요</div>"
+  },
+  {
+   "start": 9.9,
+   "end": 14.0,
+   "size": 80,
+   "html": "<div class=\"kick\">③ 보내요</div><div class=\"main\">매일 아침 <span class=\"hl\">8시 30분</span><br>메일함에 도착</div><div class=\"sub\">출근길에 가볍게 읽어요</div>"
+  },
+  {
+   "start": 14.0,
+   "end": 17.6,
+   "size": 80,
+   "html": "<div class=\"kick\">④ 인스타에서도</div><div class=\"main\">카드뉴스·릴스로<br><span class=\"hl\">매일 아침</span> 만나요</div><div class=\"sub\">저장해 두고 꺼내 보세요</div>"
+  }
+ ],
+ "end_card": {
+  "line": "프로필 링크에서 무료로 구독하세요!",
+  "sub": "2030의 아침을 편집합니다 · 경제부터 트렌드까지",
+  "note": "매일 아침 8시 30분 · 무료 · 광고 없음"
+ },
+ "voices": [
+  {
+   "file": "stems/intro_v1_hook.mp3",
+   "start": 0.1,
+   "tempo": 1.0,
+   "text": "뉴스 볼 틈 없는 아침, 걱정 마세요!",
+   "voice": "Hana(qwen, 귀여운 만화 캐릭터 — 신나서 들뜬)"
+  },
+  {
+   "file": "stems/intro_v2_pick.mp3",
+   "start": 3.45,
+   "tempo": 1.0,
+   "text": "2030이 알아야 할 것만 골라요!",
+   "voice": "Hana(qwen, 귀여운 만화 캐릭터 — 자신 있게 또박또박)",
+   "tts": "이공삼공이 알아야 할 것만 골라요!"
+  },
+  {
+   "file": "stems/intro_v3_check.mp3",
+   "start": 6.95,
+   "tempo": 1.0,
+   "text": "숫자는 기사 2곳 이상에서 확인해요!",
+   "voice": "Hana(qwen, 귀여운 만화 캐릭터 — 또박또박 자신 있게)",
+   "tts": "숫자는 기사 두 곳 이상에서 확인해요!"
+  },
+  {
+   "file": "stems/intro_v4_knox_830.mp3",
+   "start": 10.15,
+   "tempo": 1.0,
+   "text": "매일 아침 8시 반, 이메일로 도착합니다!",
+   "voice": "Knox(elevenlabs_v4, [excited] 중계 아나운서)",
+   "tts": "[excited] 매일 아침 여덟 시 반, 이메일로 도착합니다!"
+  },
+  {
+   "file": "stems/intro_v5_insta.mp3",
+   "start": 14.1,
+   "tempo": 1.0,
+   "text": "인스타에선 카드뉴스랑 릴스로 만나요!",
+   "voice": "Hana(qwen, 귀엽고 장난스러운 만화 캐릭터 — 신나서 또박또박)"
+  },
+  {
+   "file": "stems/intro_v6_bye.mp3",
+   "start": 17.65,
+   "tempo": 1.0,
+   "text": "프로필 링크에서 무료로 구독하세요!",
+   "voice": "Hana(qwen, 귀엽고 밝은 만화 캐릭터 — 경쾌하게 인사)"
+  }
+ ],
+ "music": [
+  {
+   "file": "../2026-10-31/stems/m1_chase.m4a",
+   "start": 0.0,
+   "offset": 1.7,
+   "dur": 4.2,
+   "fade_out": 0.3
+  },
+  {
+   "file": "../2026-10-31/stems/m1_chase.m4a",
+   "start": 4.0,
+   "offset": 1.75,
+   "dur": 4.15,
+   "fade_in": 0.2,
+   "fade_out": 0.4
+  },
+  {
+   "file": "../2026-10-31/stems/m2_morning.m4a",
+   "start": 7.6,
+   "dur": 7.3,
+   "fade_in": 0.3,
+   "fade_out": 0.4
+  },
+  {
+   "file": "../2026-10-31/stems/m2_morning.m4a",
+   "start": 14.6,
+   "dur": 8.0,
+   "lufs": -18,
+   "fade_in": 0.3,
+   "fade_out": 0.8
+  }
+ ],
+ "sfx": [
+  [
+   0,
+   999,
+   0.4
+  ]
+ ],
+ "music_note": "11/02 brief 와 같은 2026-10-31/stems 곡 배치",
+ "cut_note": "장면 경계(프레임 차이): 3.1~3.45 밝은 창으로 휙 넘김, 6.92, 9.9, 14.0, 17.6 — 자막·대사를 장면 안에 맞춤",
+ "thumb_offset": 2.4,
+ "extra": 7,
+ "render_note": "계정 소개(프로필 고정용) 릴스 — 운영자 11/02 23시 '우리 계정을 소개하는 영상을 만들어 계정 첫 화면에 고정'. 렌더 때는 date 를 2026-11-03 으로 두어 원본 24fps 그대로 뽑았다(episode.py SRC_RATE_FROM). 다시 뽑을 때도 그렇게. 원본 영상은 seedance job(저장소에 안 올림), 영어 프롬프트는 extra7_prompt.txt. 목소리 Hana(qwen 만화 캐릭터)·Knox(elevenlabs [excited]) — 11/02 운영자가 고른 조합. 사실 근거: subscribe.html(매일 아침 8시 30분·무료·광고 없음), AGENTS.md(2030·경제·트렌드·마케팅·테크), RUNBOOK(숫자는 서로 다른 출처 2곳)."
+}
