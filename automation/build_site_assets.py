@@ -9,6 +9,7 @@
 매일 빌드와 상관없다 — 문구·마스코트를 바꿀 때만 손으로 돌리고 결과 그림을 커밋한다.
   python3 automation/build_site_assets.py
 만드는 것: og_image.png(1200×630) · favicon.png(64, 동그라미) · apple-touch-icon.png(180) · assets/mascot/avatar-96.png(96, 동그라미)
+· assets/mascot/avatar-192.png(192, 동그라미 — 메일 프로필·노트 마크, 58px 를 3배 화면에서도 선명하게, 2026-11-03 호~)
 """
 import json
 import subprocess
@@ -75,7 +76,8 @@ def main():
     print(f"  ✓ og_image.png 1200×630 (글꼴 {', '.join(og['fonts'])})")
     for name, size, rounded, transparent in (("favicon.png", 64, True, True),
                                               ("apple-touch-icon.png", 180, False, False),
-                                              ("assets/mascot/avatar-96.png", 96, True, True)):
+                                              ("assets/mascot/avatar-96.png", 96, True, True),
+                                              ("assets/mascot/avatar-192.png", 192, True, True)):
         shot(ICON_HTML.format(size=size, round="border-radius:50%" if rounded else "", face=face), ROOT / name, size, size, transparent)
         print(f"  ✓ {name} {size}×{size}")
     return 0

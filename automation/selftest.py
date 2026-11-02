@@ -1875,7 +1875,7 @@ def t_home():
             head = f.read(24)
         return struct.unpack(">II", head[16:24])
     for name, size in (("og_image.png", (1200, 630)), ("favicon.png", (64, 64)), ("apple-touch-icon.png", (180, 180)),
-                       ("assets/mascot/avatar-96.png", (96, 96))):
+                       ("assets/mascot/avatar-96.png", (96, 96)), ("assets/mascot/avatar-192.png", (192, 192))):
         expect((ROOT / name).exists() and png_size(ROOT / name) == size, f"{name} 이 없거나 {size} 가 아니다(build_site_assets.py)")
     expect((ROOT / "og_image.png").stat().st_size > 40_000, "og_image.png 가 너무 작다 — 한글이 □ 로 깨졌던 옛 그림일 수 있다")
     return f"구독 칸 → {action.rsplit('/', 1)[-1]} · 생성 표시 3곳"
@@ -1907,7 +1907,19 @@ def t_brand_v2():
                and "트렌드 한 입" not in page and "TREND BRIEF" not in page,
                f"{name} 에 옛 문구가 남았거나 새 대표 문구가 없다")
     expect("트렌드 한 입" not in inspect.getsource(site_mod.write_feeds), "RSS 제목이 옛 문구다")
-    return f"{newsletter.BRAND_V2_FROM} 호부터 · '{newsletter.BRAND_LINE}'"
+    # 11/03 호부터 프로필·노트 마크는 프로필과 같은 그림(2026-11-02 운영자 '메일 로고가 프로필 로고랑 다르다') — 11/02 호까지는 도형 그대로
+    img = f'<img src="{site}/{newsletter.MARK_IMG}"'
+    last_shape = copy_mod.deepcopy(d)
+    last_shape["date"] = "2026-11-02"
+    first_img = copy_mod.deepcopy(d)
+    first_img["date"] = newsletter.MARK_IMG_FROM
+    c, e = newsletter.render(last_shape, site, 10), newsletter.render(first_img, site, 10)
+    expect(img not in c and "border-radius:0 0" in c, "11/02 호까지의 마크가 바뀌었다(지난 호는 기록)")
+    expect(e.count(img) == 2 and 'width="58" height="58" alt=""' in e and 'width="40" height="40" alt=""' in e,
+           f"{newsletter.MARK_IMG_FROM} 호 프로필 카드·노트 마크가 프로필 그림({newsletter.MARK_IMG})이 아니다")
+    expect('bgcolor="#FF5233"' in e and "border-radius:0 0" not in e, "그림을 막는 메일에서 볼 주황 동그라미 바탕이 없거나 도형 얼굴이 남았다")
+    expect((ROOT / newsletter.MARK_IMG).exists(), f"{newsletter.MARK_IMG} 가 없다(build_site_assets.py)")
+    return f"{newsletter.BRAND_V2_FROM} 호부터 · '{newsletter.BRAND_LINE}' · 마크 그림 {newsletter.MARK_IMG_FROM}~"
 
 
 def t_ai_reel():
