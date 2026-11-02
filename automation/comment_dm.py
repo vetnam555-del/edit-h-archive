@@ -353,7 +353,14 @@ def probe(g, me, now, st, s, log=print):
         msg = {"ok": False, "error": short_err(e)}
         log(f"  ✗ 메시지 권한 없음 — {short_err(e)}")
     st["probe"] = {"d": now.astimezone(KST).date().isoformat(), "media": len(media), "comments": n, "messages": msg,
-                   "rows": rows, "blind": blind, "me_id_is_user_id": me.get("id") == me.get("user_id")}
+                   "rows": rows, "blind": blind,
+                   "ids": {"has_user_id": bool(me.get("user_id")), "same": bool(me.get("user_id")) and me.get("raw_id") == me.get("user_id")}}
+
+
+def account(raw):
+    """GET me 응답 → 쓰는 계정 정보. API 호출은 user_id(인스타 전문가 계정 아이디)로 하고, probe 진단용으로 응답의 id·user_id 를 그대로 둔다(Codex 리뷰)."""
+    return {"id": str(raw.get("user_id") or raw.get("id")), "username": raw.get("username"),
+            "raw_id": str(raw.get("id") or ""), "user_id": str(raw.get("user_id") or "")}
 
 
 def save_state(st, path=STATE):
@@ -381,7 +388,7 @@ def main(argv=None):
     except ApiError as e:
         print(f"✗ 토큰으로 계정을 못 읽음 — {short_err(e)}")
         return 1
-    me = {"id": str(me.get("user_id") or me.get("id")), "username": me.get("username")}
+    me = account(me)
     st = load_state()
     before = json.dumps(st, sort_keys=True, ensure_ascii=False)
     print(f"댓글 DM — 키워드 {', '.join(s['keywords'])} · 최근 {s['lookback_days']}일")

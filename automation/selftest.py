@@ -2547,11 +2547,16 @@ def t_comment_dm():
             raise AssertionError(f"probe 가 모르는 호출 {method} {path}")
     st_p = cd.load_state(Path("/nonexistent/state.json"))
     logs = []
-    cd.probe(Blind(), {**me, "user_id": "900"}, now, st_p, s, log=logs.append)
+    acct = cd.account({"id": "app-scoped-1", "user_id": "900", "username": "edit.h.kr"})   # main() 이 GET me 응답을 바꾸는 그대로(Codex 리뷰)
+    expect(acct["id"] == "900" and acct["raw_id"] == "app-scoped-1" and acct["user_id"] == "900"
+           and cd.account({"id": "900", "username": "x"})["id"] == "900", f"GET me 응답 정리가 틀린다: {acct}")
+    import inspect as _inspect
+    expect("me = account(me)" in _inspect.getsource(cd.main), "main() 이 account() 로 계정 정보를 만들지 않는다")
+    cd.probe(Blind(), acct, now, st_p, s, log=logs.append)
     pr = st_p["probe"]
     expect(pr["blind"] and pr["comments"] == 0 and pr["rows"] == [{"type": "REELS", "count": 4, "read": 0, "keys": ["data"],
                                                                    "alt": 0, "alt_keys": ["comments_count"]}]
-           and pr["messages"] == {"ok": True} and pr["me_id_is_user_id"], f"probe 진단 기록이 틀린다: {pr}")
+           and pr["messages"] == {"ok": True} and pr["ids"] == {"has_user_id": True, "same": False}, f"probe 진단 기록이 틀린다: {pr}")
     expect("m1" not in json.dumps(pr) and any("하나도 못 읽는다" in x for x in logs), "probe 기록에 게시물 아이디가 남았거나 원인 안내가 없다")
     return f"키워드 {', '.join(s['keywords'])} · 링크 ref={s['link_ref']}"
 
