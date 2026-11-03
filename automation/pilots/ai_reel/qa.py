@@ -450,6 +450,7 @@ SYNC_LEAD = 0.6    # 자막이 목소리보다 먼저 떠도 되는 최대(초) 
 SYNC_LATE = 0.15   # 목소리가 자막보다 먼저 나와도 되는 최대(초)
 SYNC_TAIL = 0.15   # 목소리가 자막이 바뀐 뒤까지 이어져도 되는 최대(초)
 STEM_MIN = 0.95    # 녹음 파일 하나(음악 없이)를 받아 적은 말이 녹음 원고(tts)와 맞는 비율 — 11/02·11/03 잘못 들린 줄은 88~94%
+TTS_SAME = 0.85   # tts(녹음 문구)가 대사(text)를 소리 나는 대로 읽은 것인지 — 11/01~11/03 tts 는 모두 100%
 MIX_MIN = 0.85     # 완성본에서 그 줄이 나오는 시간(앞뒤 0.3초)에 들린 말이 원고와 맞는 비율 — 음악·효과음에 묻히거나 자리가 어긋나면 낮다
 TRIM_AF = ("silenceremove=start_periods=1:start_threshold=-40dB,areverse,"
            "silenceremove=start_periods=1:start_threshold=-40dB,areverse")   # episode.py 와 같은 앞뒤 무음 자르기
@@ -458,6 +459,7 @@ _LETTER = {"A": "에이", "B": "비", "C": "씨", "D": "디", "E": "이", "F": "
            "K": "케이", "L": "엘", "M": "엠", "N": "엔", "O": "오", "P": "피", "Q": "큐", "R": "알", "S": "에스", "T": "티", "U": "유",
            "V": "브이", "W": "더블유", "X": "엑스", "Y": "와이", "Z": "제트"}
 _DIGIT = "영일이삼사오육칠팔구"
+_ENGLISH_DIGIT = ("제로", "원", "투", "쓰리", "포", "파이브", "식스", "세븐", "에잇", "나인")
 
 
 def _sino(n):
@@ -489,13 +491,43 @@ def read_number(tok, next_char=""):
     return out + ("점" + "".join(_DIGIT[int(c)] for c in frac) if frac else "")
 
 
-def read_ko(text):
-    """받아쓴 말·원고를 '소리 나는 대로' 한글로 — 숫자는 한자어 읽기(6월 유월·10월 시월), %는 퍼센트, 영문은 글자 이름(G마켓 → 지마켓), 말투 표시는 뺀다."""
+_NATIVE_SAY_TENS = {1: "열", 2: "스물", 3: "서른", 4: "마흔", 5: "쉰", 6: "예순", 7: "일흔", 8: "여든", 9: "아흔"}
+_NATIVE_SAY_ONES = {1: "한", 2: "두", 3: "세", 4: "네", 5: "다섯", 6: "여섯", 7: "일곱", 8: "여덟", 9: "아홉"}
+
+
+def read_native(n):
+    """1~99 → 세는 말 앞 고유어 읽기('2' → '두', '20' → '스무', '12' → '열두')."""
+    tens, ones = divmod(n, 10)
+    if tens == 2 and not ones:
+        return "스무"
+    return _NATIVE_SAY_TENS.get(tens, "") + _NATIVE_SAY_ONES.get(ones, "")
+
+
+def read_ko(text, prefer=""):
+    """받아쓴 말·원고를 '소리 나는 대로' 한글로 — 숫자는 한자어 읽기(6월 유월·10월 시월), %는 퍼센트, 영문은 글자 이름(G마켓 → 지마켓), 말투 표시는 뺀다.
+    prefer(원고를 이미 읽은 글)에 '두 곳'처럼 고유어로 읽은 꼴이 있으면 받아쓰기의 '2곳'도 고유어로 읽는다(11/03 Codex — '두 곳'을 '이곳'으로 읽어 바른 녹음을 막았다)."""
     t = _TAG.sub(" ", text)
     t = re.sub(r"(?<!\d)6\s?월", "유월", t)
     t = re.sub(r"(?<!\d)10\s?월", "시월", t)
     t = t.replace("%p", "퍼센트포인트").replace("%", "퍼센트").replace("+", "플러스")
-    t = re.sub(r"\d[\d,]*(?:\.\d+)?", lambda m: read_number(m.group(0), t[m.end():m.end() + 1]), t)
+
+    def num(m):
+        tok, rest = m.group(0), t[m.end():]
+        sino = read_number(tok, rest[:1])
+        if not prefer or not tok.isdigit():
+            return sino
+        c = re.match(rf"\s?({COUNTERS})", rest)
+        if c and 0 < int(tok) < 100 and read_native(int(tok)) + c.group(1) in prefer:   # '2곳' = '두 곳'
+            return read_native(int(tok))
+        if len(tok) >= 3:   # '2030'을 '이공삼공'처럼 한 자씩 읽은 원고
+            for zero in "공영":
+                each = "".join(zero if d == "0" else _DIGIT[int(d)] for d in tok)
+                if each in prefer:
+                    return each
+        if len(tok) == 1 and sino and sino not in prefer and _ENGLISH_DIGIT[int(tok)] in prefer:   # 'T+1' = '티 플러스 원'
+            return _ENGLISH_DIGIT[int(tok)]
+        return sino
+    t = re.sub(r"\d[\d,]*(?:\.\d+)?", num, t)
     t = re.sub(r"[A-Za-z]", lambda m: _LETTER[m.group(0).upper()], t)
     return hangul(t)
 
@@ -503,7 +535,8 @@ def read_ko(text):
 def heard_ratio(want, heard, recall=False):
     """원고와 들린 말이 얼마나 같은가(0~1) — 둘 다 read_ko 로 소리 나는 대로 바꾼 뒤 글자 단위로 견준다.
     기본은 빠진 말·더 들린 말 모두 깎는다(녹음 파일 하나). recall 이면 원고 글자 중 들린 비율만(완성본 시간대 — 앞뒤 줄 낱말이 섞여 들어온다)."""
-    a, b = read_ko(want), read_ko(heard)
+    a = read_ko(want)
+    b = read_ko(heard, prefer=a)
     if not a:
         return 1.0
     sm = difflib.SequenceMatcher(None, a, b)
@@ -528,11 +561,26 @@ def tts_gaps(ep):
             fails.append(f"대사 {i} tts '{tts[:24]}' 에 숫자·영문이 남아 있다 — 소리 나는 대로 한글로")
         if re.search(r"[—()（）]|받아쓰기", tts):
             fails.append(f"대사 {i} tts '{tts[:24]}…' 에 메모가 섞였다 — tts 칸엔 녹음한 말만(메모는 voice 칸에)")
-        a = sorted(n[:2] for n in spoken_numbers(text))
-        b = sorted(n[:2] for n in spoken_numbers(_TAG.sub("", tts)))
-        if a != b:
-            fails.append(f"대사 {i} tts 숫자 {', '.join(_say(n) for n in b) or '없음'} ≠ 대사 숫자 {', '.join(_say(n) for n in a) or '없음'}")
+        # 숫자 — 대사의 숫자마다 그 읽기('63억' → 육십삼억·'2곳' → 두 곳·'10월' → 시월·'2030' → 이공삼공)가 tts 에 있고,
+        # tts 에서 읽히는 숫자는 모두 대사에 있어야 한다(11/03 Codex — '시월·유월'을 숫자로 못 읽어 바른 tts 를 막았다)
+        pref = read_ko(tts)
+        lost = [m.group(0) for m in re.finditer(r"\d[\d,]*(?:\.\d+)?[^\s\d,.!?]{0,2}", _TAG.sub(" ", text))
+                if read_ko(m.group(0), prefer=pref) not in pref]
+        said = [n[:2] for n in spoken_numbers(text)]
+        extra = [n for n in spoken_numbers(_month_digits(_TAG.sub("", tts))) if n[:2] not in said]
+        if lost or extra:
+            fails.append(f"대사 {i} tts 숫자가 대사와 다르다 — " + " · ".join(
+                [f"대사 '{x}' 의 읽기가 tts 에 없다" for x in lost] + [f"tts 의 '{_say(n)}' 가 대사에 없다" for n in extra]))
+        # 녹음·완성본 받아쓰기는 tts 와 견주므로, tts 가 대사를 소리 나는 대로 읽은 것인지 먼저 본다(11/03 Codex — 다른 말을 녹음해도 통과했다)
+        same = heard_ratio(tts, text)
+        if same < TTS_SAME:
+            fails.append(f"대사 {i} tts '{_TAG.sub('', tts).strip()[:24]}' 가 대사 '{text[:24]}' 와 다른 말이다({same:.0%}) — "
+                         "tts 는 대사를 소리 나는 대로 읽은 것만(영문 이름은 대사에도 한글로: 'Meta' → '메타')")
     return fails
+
+
+def _month_digits(t):
+    return re.sub(r"(?<![가-힣])유월", "6월", re.sub(r"(?<![가-힣])시월", "10월", t))
 
 
 def voice_spans(ep, base):
