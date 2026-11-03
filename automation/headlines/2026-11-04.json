@@ -1,0 +1,508 @@
+{
+ "fetched_at": "2026-11-04T07:43+09:00",
+ "failed": [],
+ "clusters": [
+  {
+   "section": "경제",
+   "count": 77,
+   "title": "국민연금 10년 부은 평균소득자, 기초연금보다 덜 받는다…‘급여 역전’",
+   "press": "세계일보",
+   "lede": "국민연금 10년 가입 평균소득자 A값의 10.75%, 기초연금은 10.95% 최소가입기간 상향·기초연금액 조정 검토 제안 뉴시스 국민연금 보험료를 최소가입기간인 10년 동안 낸 평균소득자의 연금액이 세금으로 주는 기",
+   "url": "https://n.news.naver.com/mnews/article/022/0004172312",
+   "cluster": "https://news.naver.com/cluster/c_202611020010_00000713/section/101"
+  },
+  {
+   "section": "사회",
+   "count": 72,
+   "title": "남해·산청·통영·진주, 교육혁신 선도지역 선정",
+   "press": "한국경제",
+   "lede": "경남도교육청은 교육부가 주관한 ‘교육혁신 선도지역’ 공모에서 남해군·산청군·통영시·진주시 등 4개 지역이 선정됐다고 3일 밝혔다. 교육혁신 선도지역은 학생 수 감소와 지역 간 교육격차 문제를 지역이 스스로 풀어갈 수",
+   "url": "https://n.news.naver.com/mnews/article/015/0005349722",
+   "cluster": "https://news.naver.com/cluster/c_202611031420_00000014/section/102"
+  },
+  {
+   "section": "경제",
+   "count": 70,
+   "title": "한진칼 이사 3명 내년 3월 임기 만료…호반, 이사회 진출 가능성은?",
+   "press": "뉴스1",
+   "lede": "조원태 한진그룹 회장이 한진칼(180640) 지분을 추가 매입하면서 호반그룹과의 경영권 분쟁 가능성은 사실상 희박해졌다는 평가가 나온다. 이에 따라 호반그룹이 내년 3월 정기 주주총회에서 이사회 진입을 시도할 수 있",
+   "url": "https://n.news.naver.com/mnews/article/421/0009267881",
+   "cluster": "https://news.naver.com/cluster/c_202611021110_00000002/section/101"
+  },
+  {
+   "section": "경제",
+   "count": 65,
+   "title": "애플 무난한 실적, 시장은 만족 못해…메모리 가격 상승에 이익률↓",
+   "press": "머니투데이",
+   "lede": "애플이 2일(현지시간) 장 마감 후 양호한 분기 실적을 발표했음에도 시간외거래에서 주가는 2.8% 하락했다. 최근의 주가 상승에 반영된 투자자들의 높은 기대를 충족시키지 못했다는 반응과 함께 메모리 가격 상승으로 매",
+   "url": "https://n.news.naver.com/mnews/article/008/0005435939",
+   "cluster": "https://news.naver.com/cluster/c_202611030650_00000004/section/101"
+  },
+  {
+   "section": "세계",
+   "count": 60,
+   "title": "[속보] WSJ “미국, 이란 호르무즈 요충지 게슘섬 타격”",
+   "press": "매일경제",
+   "lede": "미국이 2일(현지시간) 호르무즈 해협에 있는 이란의 전략적 요충지인 게슘 섬을 공격했다고 월스트리트저널(WSJ)이 미 당국자들을 인용해 보도했다. 게슘섬은 호르무즈 해협의 북부 해역에 있는 섬으로 이 해협을 통제하려",
+   "url": "https://n.news.naver.com/mnews/article/009/0005758001",
+   "cluster": "https://news.naver.com/cluster/c_202611031020_00000028/section/104"
+  },
+  {
+   "section": "세계",
+   "count": 59,
+   "title": "유럽서 냉장·냉동 설비 이상…\"AI 개입 사이버 공격 가능성 높아\"",
+   "press": "동아사이언스",
+   "lede": "벨기에·스웨덴 등 유럽 7개국의 슈퍼마켓에서 같은 날 냉장·냉동 설비 이상이 보고되면서 사이버 공격을 당했을 가능성이 제기됐다. 미군도 지난 8월 기지 내 식료품점에서 발생한 냉동고 이상을 두고 사이버 공격 가능성을",
+   "url": "https://n.news.naver.com/mnews/article/584/0000039983",
+   "cluster": "https://news.naver.com/cluster/c_202611021930_00000014/section/104"
+  },
+  {
+   "section": "경제",
+   "count": 57,
+   "title": "LG엔솔, 국산 LFP로 북미 ESS 공급망 강화…\"非중국 대응력 확대\"[종합]",
+   "press": "디지털데일리",
+   "lede": "LG에너지솔루션이 북미 에너지저장장치(ESS) 사업 확대에 맞춰 국내산 리튬인산철(LFP) 양극재 확보에 속도를 낸다. 미국의 비금지외국기관(Non-PFE) 규제에 대응해 소재 공급처를 늘리는 한편, 46시리즈와 탭",
+   "url": "https://n.news.naver.com/mnews/article/138/0002247064",
+   "cluster": "https://news.naver.com/cluster/c_202611031020_00000002/section/101"
+  },
+  {
+   "section": "사회",
+   "count": 48,
+   "title": "정은경, 오늘 경찰청장 직무대행 만난다…필수의료 수사지침 논의",
+   "press": "뉴스1",
+   "lede": "아주대병원 소아전문응급의료센터 압수수색을 둘러싸고 의료계 반발이 이어지는 가운데 정부와 경찰이 수사 절차 개선을 위한 논의에 나선다. 3일 복지부에 따르면 정 장관은 이날 오후 5시 김종철 경찰청장 직무대행과 만나",
+   "url": "https://n.news.naver.com/mnews/article/421/0009266207",
+   "cluster": "https://news.naver.com/cluster/c_202610271720_00000134/section/102"
+  },
+  {
+   "section": "경제",
+   "count": 46,
+   "title": "매출 14조 넘긴 쿠팡, 3분기 연속 적자…누적 순손실 2조 육박(상보)",
+   "press": "아시아경제",
+   "lede": "쿠팡이 올해 3분기 14조원이 넘는 매출을 기록했지만 6000억원대 영업손실을 내며 적자에서 벗어나지 못했다. 매출은 전년 동기 대비 두 자릿수 성장했지만 영업이익과 당기순이익 모두 적자로 돌아섰다. 올해 들어 3분",
+   "url": "https://n.news.naver.com/mnews/article/277/0005837620",
+   "cluster": "https://news.naver.com/cluster/c_202611040620_00000001/section/101"
+  },
+  {
+   "section": "세계",
+   "count": 41,
+   "title": "기로에 선 중동…美-이란 협상판 띄워놓고 호르무즈 국지적 폭음",
+   "press": "연합뉴스",
+   "lede": "美중간선거 전날 중동 정세도 긴박…트럼프·이란 간접회담 진전 시사 호르무즈 해협에선 유조선 화재 속출…미, 게슘섬 방어적 타격 중동 정세는 2일(현지시간) 바다 건너 미국 중간선거를 하루 앞에 두고 미국과 이란의 정",
+   "url": "https://n.news.naver.com/mnews/article/001/0016418111",
+   "cluster": "https://news.naver.com/cluster/c_202611011450_00000009/section/104"
+  },
+  {
+   "section": "세계",
+   "count": 41,
+   "title": "美 중간선거, 전국서 본투표 개시…4일 오후 승부 가늠",
+   "press": "헤럴드경제",
+   "lede": "도널드 트럼프 미국 대통령에 대한 중간평가 성격인 미국 중간선거 본투표가 3일(현지시간) 막을 올렸다. 본투표가 시작하며, 그간 선거분석기관 예측대로 민주당이 상·하원 중 1곳 이상을 탈환하게 되면 미국의 정치 지형",
+   "url": "https://n.news.naver.com/mnews/article/016/0002718355",
+   "cluster": "https://news.naver.com/cluster/c_202611021040_00000158/section/104"
+  },
+  {
+   "section": "사회",
+   "count": 41,
+   "title": "\"행정사무감사서 답 찾아야\"…민주당, 서울시 상대 한강버스 의혹 공세 강화",
+   "press": "데일리안",
+   "lede": "더불어민주당이 3일부터 시작되는 서울시의회 행정사무감사에서 한강버스 관련 의혹에 대한 검증을 예고했다. 그러면서 추가적인 비리나 은폐 정황, 위법행위가 드러난다면 추가적인 법적 대응에 나서겠다고도 밝혔다. 민주당 한",
+   "url": "https://n.news.naver.com/mnews/article/119/0003150654",
+   "cluster": "https://news.naver.com/cluster/c_202611021230_00000019/section/102"
+  },
+  {
+   "section": "경제",
+   "count": 40,
+   "title": "다세대·다가구주택 면적제한 완화…\"공급확대 기대\"",
+   "press": "연합뉴스TV",
+   "lede": "오는 12일부터 다세대·다가구주택의 면적 제한이 기존 660 제곱미터에서 1천 제곱미터로 완화됩니다. 다가구주택의 층수 제한도 3층에서 4층으로 상향 조정됩니다. 국토교통부는 오늘(3일) 국무회의에서 이 같은 내용을",
+   "url": "https://n.news.naver.com/mnews/article/422/0000922562",
+   "cluster": "https://news.naver.com/cluster/c_202611031320_00000027/section/101"
+  },
+  {
+   "section": "사회",
+   "count": 40,
+   "title": "반려견에 비비탄총 ‘37분간 난사’, 견주도 위협…해병대원 등 3명 실형",
+   "press": "디지털타임스",
+   "lede": "지난해 경상남도 거제 한 식당에서 키우는 개들에게 비비탄 권총을 난사해 다치게 한 혐의로 기소된 해병대원 등 20대 남성 3명이 1심 실형을 선고 받았다. 끝까지 피해 견주의 회복과 합의를 구하기 위해 노력하라는 취",
+   "url": "https://n.news.naver.com/mnews/article/029/0003056882",
+   "cluster": "https://news.naver.com/cluster/c_202611031500_00000015/section/102"
+  },
+  {
+   "section": "사회",
+   "count": 36,
+   "title": "대통령 집값 폭락 언급에...오세훈 \"혼자 딴 세상 사나\"",
+   "press": "YTN",
+   "lede": "이재명 대통령이 서울 집값 폭락을 걱정하는 쪽도 생겨나고 있다고 언급한 것과 관련해 오세훈 서울시장은 대통령 혼자 딴 세상에 살고 있느냐며 비판했습니다. 오 시장은 SNS에 서울 아파트값이 90주 연속 오르고 있고,",
+   "url": "https://n.news.naver.com/mnews/article/052/0002427987",
+   "cluster": "https://news.naver.com/cluster/c_202611031630_00000031/section/102"
+  },
+  {
+   "section": "경제",
+   "count": 35,
+   "title": "엘앤에프, LFP 양극재 … LG엔솔에 1조원 공급",
+   "press": "매일경제",
+   "lede": "올 배터리 3사에 3조 계약 非중국 수요 늘어 증설도 2차전지 소재 기업 엘앤에프가 LG에너지솔루션과 1조원 규모의 리튬인산철(LFP) 양극재 공급 계약을 체결했다고 3일 밝혔다. 엘앤에프는 올해 에만 배터리 3사(",
+   "url": "https://n.news.naver.com/mnews/article/009/0005758383",
+   "cluster": "https://news.naver.com/cluster/c_202611020920_00000001/section/101"
+  },
+  {
+   "section": "사회",
+   "count": 30,
+   "title": "[단독] 스마트 안경 커닝 기승에 운전면허 필기시험장에 전파탐지기 도입",
+   "press": "세계일보",
+   "lede": "산업인력공단, 스마트 안경 감독관 221명 위촉 운전면허 필기시험장에 인공지능(AI) 스마트 안경 부정행위 방지를 위한 전파탐지기가 도입된다. 한국도로교통공사 측은 지난달 말 고사장에서 활용할 전파탐지기를 구입했다고",
+   "url": "https://n.news.naver.com/mnews/article/022/0004172218",
+   "cluster": "https://news.naver.com/cluster/c_202610121250_00000565/section/102"
+  },
+  {
+   "section": "사회",
+   "count": 30,
+   "title": "윤석열 측 \"만취상태로 계엄 논의 의혹 비상식…절박한 선택\"",
+   "press": "아시아경제",
+   "lede": "내란 우두머리 혐의로 1심에서 무기징역을 선고받은 윤석열 전 대통령 측이 항소심 최종변론에서 비상계엄을 장기간 준비했다는 의혹을 부인하며, 군 지휘관들과의 만찬은 통상적인 격려 자리였다고 주장했다. 윤 전 대통령 측",
+   "url": "https://n.news.naver.com/mnews/article/277/0005837579",
+   "cluster": "https://news.naver.com/cluster/c_202611031250_00000036/section/102"
+  },
+  {
+   "section": "IT",
+   "count": 27,
+   "title": "한국군도 이제 ‘갤럭시 전술폰’ 쓰나…“S26 TE, 내년 시범 운용” [밀리터리+]",
+   "press": "서울신문",
+   "lede": "삼성전자가 갤럭시 S26을 군용으로 개조한 ‘전술폰’(Tactical Edition·TE)이 한국군에서도 내년부터 시범 운용될 예정인 것으로 알려졌다. 서울경제신문은 3일 “국군이 내년부터 삼성전자 갤럭시를 전술 스",
+   "url": "https://n.news.naver.com/mnews/article/081/0003695420",
+   "cluster": "https://news.naver.com/cluster/c_202611021000_00000486/section/105"
+  },
+  {
+   "section": "세계",
+   "count": 26,
+   "title": "런던발 여객기 폭탄 위협…헝가리 전투기 호위 속 긴급 착륙",
+   "press": "중앙일보",
+   "lede": "영국 런던에서 출발해 불가리아 소피아로 향하던 위즈에어 여객기가 폭탄 위협을 받고 헝가리 부다페스트에 긴급 착륙했다. 2일(현지시간) 로이터통신과 헝가리 현지 언론 등에 따르면 위즈에어 소속 에어버스 A321neo",
+   "url": "https://n.news.naver.com/mnews/article/025/0003562352",
+   "cluster": "https://news.naver.com/cluster/c_202611031950_00002078/section/104"
+  },
+  {
+   "section": "경제",
+   "count": 25,
+   "title": "KAI, 3Q 영업익 794억 전년比 32%↑…\"KF-21 등 완제기 납품 증가 영향\"",
+   "press": "뉴시스",
+   "lede": "한국항공우주산업(KAI)가 올해 3분기 매출 1조643억원, 영업이익 794억원을 달성했다고 3일 밝혔다. 3분기 매출은 지난해 3분기보다 51.6% 급증했으며, 같은 기간 영업이익도 31.9% 늘었다. 이는 약 1",
+   "url": "https://n.news.naver.com/mnews/article/003/0014298726",
+   "cluster": "https://news.naver.com/cluster/c_202611031630_00000002/section/101"
+  },
+  {
+   "section": "생활",
+   "count": 23,
+   "title": "수요일 아침 내륙 짙은 안개…늦은 오후 제주부터 가을비",
+   "press": "연합뉴스",
+   "lede": "아침 3∼11도·낮 15∼19도…비 전국으로 확대돼 목요일 오후까지 내려 수요일인 4일 아침 내륙 곳곳에 가시거리 200ｍ 미만의 짙은 안개가 끼겠다. 늦은 오후에는 제주를 시작으로 가을비가 내리기 시작해 목요일인",
+   "url": "https://n.news.naver.com/mnews/article/001/0016419418",
+   "cluster": "https://news.naver.com/cluster/c_202611031720_00000003/section/103"
+  },
+  {
+   "section": "세계",
+   "count": 23,
+   "title": "트럼프 정부 사상최대 감시단 파견…주 방위군 동원[미국 중간선거]",
+   "press": "MBN",
+   "lede": "미국 법무부는 현지시각 3일 보도자료를 내고 \"법무부의 가장 중요한 임무 중 하나는 선거의 공정성을 보장하고 자유롭고 공정한 선거를 지원하며 미 전역에서 시민 투표권을 보호하는 것\"이라며 \"법무부는 오늘 역사상 최대",
+   "url": "https://n.news.naver.com/mnews/article/057/0001976574",
+   "cluster": "https://news.naver.com/cluster/c_202611030920_00000381/section/104"
+  },
+  {
+   "section": "세계",
+   "count": 23,
+   "title": "미·러·우, 10~11일 아부다비서 종전 협상···미·중·러 정상회담도 조율",
+   "press": "경향신문",
+   "lede": "미국·러시아·우크라이나의 3자 종전 협상이 오는 10∼11일 아랍에미리트연합(UAE) 아부다비에서 재개된다. 지난 2월 말 미국과 이란 전쟁으로 협상이 중단된 지 약 9개월 만이다. 타스통신에 따르면 드미트리 페스코",
+   "url": "https://n.news.naver.com/mnews/article/032/0003480515",
+   "cluster": "https://news.naver.com/cluster/c_202611030950_00000082/section/104"
+  },
+  {
+   "section": "세계",
+   "count": 23,
+   "title": "北 ‘중국통’ 김성남 베이징 방문…북중 ‘당 대 당’ 교류 강화",
+   "press": "중앙일보",
+   "lede": "김성남 북한 노동당 국제비서 겸 국제부장이 3일 중국공산당 중앙위원회의 초청으로 당 대표단을 이끌고 중국 방문에 나섰다. 일본 교도통신은 이날 김 비서가 평양을 출발해 중국 베이징에 도착했다고 보도했다. 마오닝(毛寧",
+   "url": "https://n.news.naver.com/mnews/article/025/0003562581",
+   "cluster": "https://news.naver.com/cluster/c_202611031540_00000006/section/104"
+  },
+  {
+   "section": "경제",
+   "count": 21,
+   "title": "고려아연 “MBK·영풍, 소모적 여론전 멈추고 책임부터 돌아봐야”",
+   "press": "헤럴드경제",
+   "lede": "고려아연이 최윤범 회장의 투자 관련 의혹을 거듭 제기하고 있는 MBK파트너스(이하 MBK)와 영풍을 향해 자신들이 직면한 법적·경영적 책임부터 해명하라고 촉구했다. 장형진 영풍 고문의 환경오염 의혹 재수사와 김병주",
+   "url": "https://n.news.naver.com/mnews/article/016/0002718334",
+   "cluster": "https://news.naver.com/cluster/c_202611021050_00000004/section/101"
+  },
+  {
+   "section": "IT",
+   "count": 19,
+   "title": "국내 첫 휴머노이드 데이터 팩토리 구축…\"서비스는 2027년 말\"",
+   "press": "지디넷코리아",
+   "lede": "국내 처음 인공지능(AI) 휴머노이드 데이터 팩토리가 문을 열었다. 한국기계연구원이 총괄 주관하는 '자율성장 AI 휴머노이드 글로벌 TOP 전략연구단(단장 박찬훈)'은 한국전자통신연구원(ETRI)과 함께 기계연 내에",
+   "url": "https://n.news.naver.com/mnews/article/092/0002443640",
+   "cluster": "https://news.naver.com/cluster/c_202611031510_00000008/section/105"
+  },
+  {
+   "section": "IT",
+   "count": 18,
+   "title": "SKT 사내 AI 경연대회… 악성 앱 분석 에이전트에 대상",
+   "press": "한국일보",
+   "lede": "SK텔레콤이 사내 AI 에이전트 경연대회 ‘AX 스파크’ 파이널 행사를 열고 우수작을 시상했다고 3일 밝혔다. AX 스파크는 구성원이 직접 개발해 업무에 활용하는 AI 에이전트를 발굴·검증하는 프로젝트다. 대상은 스",
+   "url": "https://n.news.naver.com/mnews/article/469/0000963334",
+   "cluster": "https://news.naver.com/cluster/c_202611031310_00000003/section/105"
+  },
+  {
+   "section": "사회",
+   "count": 18,
+   "title": "소득불문, 혜택 多준다… '다문화 가족법' 손볼때",
+   "press": "머니투데이",
+   "lede": "공공산후조리원 우선이용 등의 근거가 되는 '다문화가족지원법'에 18년간 소득요건이 생기지 않은 것으로 나타났다. 소득을 기준으로 지원대상을 제한하는 '한부모가족지원법'과 대조된다. 다문화가족의 소득수준이 최근 10여",
+   "url": "https://n.news.naver.com/mnews/article/008/0005435517",
+   "cluster": "https://news.naver.com/cluster/c_202611011700_00000679/section/102"
+  },
+  {
+   "section": "생활",
+   "count": 17,
+   "title": "뮤지컬 [워더링 하이츠] 내년 1월 서울서 초연...신춘수 \"티켓 값보다 관객이 우선\"",
+   "press": "YTN",
+   "lede": "'위대한 개츠비' 등으로 본토인 브로드웨이에서 성공한 뮤지컬 제작사 오디컴퍼니가 내년 초 서울 예술의전당에서 신작을 올립니다. 신춘수 대표는 오늘 오전 서울 잠실 롯데월드타워에서 소설 '폭풍의 언덕'을 원작으로 하는",
+   "url": "https://n.news.naver.com/mnews/article/052/0002427699",
+   "cluster": "https://news.naver.com/cluster/c_202611031400_00000100/section/103"
+  },
+  {
+   "section": "사회",
+   "count": 17,
+   "title": "70세 前삼성전자 사장, 25살 연하 슈퍼모델 김자연과 화촉",
+   "press": "국민일보",
+   "lede": "2003년 SBS 슈퍼모델 선발대회 1위 출신인 트렌드 분석가 김자연(45)이 25세 연상인 손영권(70) 전 삼성전자 사장과 결혼했다고 밝혔다. 두 사람은 2년 전 미국 매사추세츠공과대(MIT) 선후배로 처음 만났",
+   "url": "https://n.news.naver.com/mnews/article/005/0001882778",
+   "cluster": "https://news.naver.com/cluster/c_202611031640_00000002/section/102"
+  },
+  {
+   "section": "경제",
+   "count": 15,
+   "title": "하이브, 3분기 영업익 1885억 원…BTS 효과에 분기 최대 실적",
+   "press": "이데일리",
+   "lede": "하이브(352820)는 연결 기준 올해 3분기 매출액이 1조 5257억 원을, 영업이익이 1885억 원을 기록했다고 3일 밝혔다. 매출액은 전년 동기 대비 109.8% 증가했고, 영업이익은 흑자 전환했다. 매출액과",
+   "url": "https://n.news.naver.com/mnews/article/018/0006402960",
+   "cluster": "https://news.naver.com/cluster/c_202611031610_00000002/section/101"
+  },
+  {
+   "section": "IT",
+   "count": 13,
+   "title": "육군, 카카오 플랫폼 기술 얹는다…유·무인 복합전투 관제 혁신",
+   "press": "연합뉴스",
+   "lede": "무인 이동체 일대다 원격 운용…전장 데이터와 민간 AI 역량 결합 판교-대전 거점 테스트베드 구축…차세대 국방 모빌리티 인프라 선점 카카오모빌리티가 육군과 손잡고 모빌리티 플랫폼과 피지컬 인공지능(AI) 기술을 국방",
+   "url": "https://n.news.naver.com/mnews/article/001/0016419373",
+   "cluster": "https://news.naver.com/cluster/c_202611031710_00000004/section/105"
+  },
+  {
+   "section": "생활",
+   "count": 13,
+   "title": "\"북한에 태권도 뺏겼다\"? 유네스코 등재 따져보니[팩트체크]",
+   "press": "JTBC",
+   "lede": "태권도를 유네스코 무형문화유산에 올려달라는 북한의 신청이 이르면 내일 받아들여질 것으로 보입니다. 이렇게 되면 태권도 종주국이, 우리나라가 아닌 북한이 되는 것이냐는 우려가 나오는데요. 결론부터 말하면 사실이 아닙니",
+   "url": "https://n.news.naver.com/mnews/article/437/0000518959",
+   "cluster": "https://news.naver.com/cluster/c_202611021330_00000078/section/103"
+  },
+  {
+   "section": "사회",
+   "count": 13,
+   "title": "‘양주 3살 아들 학대 사망’ 친부에 징역 30년 구형",
+   "press": "KBS",
+   "lede": "경기 양주시에서 3세 아들을 학대해 숨지게 한 혐의로 구속기소 된 친부에게 공소청이 징역 30년을 구형했습니다. 오늘(3일) 의정부지법 형사11부(양철한 부장판사) 심리로 열린 결심공판에서 공소청은 아동학대치사 등",
+   "url": "https://n.news.naver.com/mnews/article/056/0012286417",
+   "cluster": "https://news.naver.com/cluster/c_202611031730_00000005/section/102"
+  },
+  {
+   "section": "IT",
+   "count": 12,
+   "title": "넥써쓰, 3Q 매출 329억·영업손 48억",
+   "press": "매일경제",
+   "lede": "넥써쓰(대표 장현국)는 지난 3분기에 연결 기준 매출 329억원을 기록했다고 3일 밝혔다. 이는 전년동기 대비 257.4%, 전분기 대비 467.3% 증가한 결과다. 다만 영업손실 48억원을 기록하며 전년동기 대비",
+   "url": "https://n.news.naver.com/mnews/article/009/0005758379",
+   "cluster": "https://news.naver.com/cluster/c_202611031710_00000003/section/105"
+  },
+  {
+   "section": "세계",
+   "count": 11,
+   "title": "美 \"북한 사이버범죄, 전지구적 문제\"…北 '바이낸스 해킹' 부인 반박",
+   "press": "연합뉴스",
+   "lede": "국무부 \"암호화폐 탈취·자금 세탁으로 제재 우회, 탄도미사일 자금조달\" 김여정 \"美, 사이버범죄로 매도\"…국무부 \"北, 점점 더 사이버범죄 의존\" 장동우 홍정규 특파원 = 미국은 '바이낸스 가상화폐 해킹 사건'의 배",
+   "url": "https://n.news.naver.com/mnews/article/001/0016420038",
+   "cluster": "https://news.naver.com/cluster/c_202611011340_00000001/section/104"
+  },
+  {
+   "section": "생활",
+   "count": 10,
+   "title": "호텔 혜택 덜 챙기는 한국인…힐튼 “일상 지출을 숙박 경험으로”",
+   "press": "헤럴드경제",
+   "lede": "“여행은 호텔에 체크인하는 순간 시작되는 것이 아니라, 일상 소비를 통해 준비하는 훨씬 이전부터 시작됩니다.” 3일 서울 여의도 콘래드 서울에서 열린 ‘힐튼 아너스 코브랜드 카드 미디어 데이’에서 헤더 라번 힐튼 인",
+   "url": "https://n.news.naver.com/mnews/article/016/0002718269",
+   "cluster": "https://news.naver.com/cluster/c_202611031540_00000008/section/103"
+  },
+  {
+   "section": "IT",
+   "count": 9,
+   "title": "스노우플레이크, 기업용 AI 에이전트 공개…\"업무흐름 자동화\"",
+   "press": "연합뉴스",
+   "lede": "코코·코워크, 단순 AI 도구에서 자율형 에이전트로 고도화 권영전 특파원 = AI 클라우드 데이터 기업 스노우플레이크가 기존의 단순 질문 답변형 인공지능(AI) 도구를 24시간 자율적으로 업무를 수행하는 AI 에이전",
+   "url": "https://n.news.naver.com/mnews/article/001/0016420027",
+   "cluster": "https://news.naver.com/cluster/c_202611032310_00000001/section/105"
+  },
+  {
+   "section": "생활",
+   "count": 8,
+   "title": "중부 내륙 일교차 커…아침 최저 3~11도[내일 날씨]",
+   "press": "아시아경제",
+   "lede": "수요일인 4일은 중부 내륙을 중심으로 일교차가 크게 벌어지겠다. 아침 최저기온은 3∼11도, 낮 최고기온은 15∼19도로 예보됐다. 강원 내륙과 산지 일부 지역에는 서리가 내리는 곳도 있겠다. 제주도에는 늦은 오후부",
+   "url": "https://n.news.naver.com/mnews/article/277/0005837583",
+   "cluster": "https://news.naver.com/cluster/c_202611032130_00000024/section/103"
+  },
+  {
+   "section": "생활",
+   "count": 8,
+   "title": "2026년 11월 3일 띠별 운세[오늘의 운세]",
+   "press": "이데일리",
+   "lede": "오늘의 운세 - 2026년 11월 3일 오늘의 띠별 운세 쥐띠 평소보다 고급스러운 자리를 가게 되므로 조심스럽게 행동해라. 48년생 - 말로 인한 구설수를 조심해라. 60년생 - 쓸데 없는 미련은 아무런 도움이 되질",
+   "url": "https://n.news.naver.com/mnews/article/018/0006402437",
+   "cluster": "https://news.naver.com/cluster/c_202609200020_00000469/section/103"
+  },
+  {
+   "section": "IT",
+   "count": 7,
+   "title": "엔비디아, 네이버에 1조3412억원 투자 확정⋯3대 주주로, 지분 4.13% 전망",
+   "press": "아이뉴스24",
+   "lede": "네이버는 엔비디아의 10억 달러 규모 투자에 따른 원화 조달 금액이 약 1조3412억원으로 확정됐다고 3일 공시했다. 이번 절차가 모두 마무리되면 엔비디아는 네이버 지분 약 4.13%를 확보해 3대 주주에 오르게 된",
+   "url": "https://n.news.naver.com/mnews/article/031/0001071948",
+   "cluster": "https://news.naver.com/cluster/c_202611031900_00000148/section/105"
+  },
+  {
+   "section": "세계",
+   "count": 7,
+   "title": "3개월간 태평양 5400㎞ 표류한 5명 극적 구조…함께 탄 4명은 실종",
+   "press": "주간조선",
+   "lede": "태평양에서 실종된 소형 보트 탑승자 5명이 약 석 달 동안 5400㎞에 달하는 망망대해를 표류한 끝에 극적으로 구조됐다. 당초 보트에는 9명이 타고 있었지만, 나머지 4명의 행방은 여전히 확인되지 않고 있다. 3일(",
+   "url": "https://n.news.naver.com/mnews/article/053/0000062821",
+   "cluster": "https://news.naver.com/cluster/c_202611032120_00000008/section/104"
+  },
+  {
+   "section": "IT",
+   "count": 6,
+   "title": "과기정통부, 국민 AI 서비스 개발할 민간 전문가 19명 추가 채용",
+   "press": "이데일리",
+   "lede": "과학기술정보통신부가 국민이 일상에서 활용할 수 있는 인공지능(AI) 서비스 개발을 위해 민간 전문가 19명을 추가 채용한다. 과기정통부는 국민인공지능서비스혁신추진단(이하 추진단)에서 근무할 전문임기제 공무원 19명을",
+   "url": "https://n.news.naver.com/mnews/article/018/0006403009",
+   "cluster": "https://news.naver.com/cluster/c_202611031750_00000036/section/105"
+  },
+  {
+   "section": "생활",
+   "count": 6,
+   "title": "‘혐한 논란’ 방송사, 90도 사과했다…日 우익들 박살낸 그녀",
+   "press": "중앙일보",
+   "lede": "“사과하고 싶지 않은데 억지로 사과하는 게 보이는 겁니다. 사과하고 싶지 않으면 사과하지 않으면 되는 겁니다.” 1999년 일본 TV 아사히 토론방송에서 일본군 위안부 문제에 관한 거듭된 사과 요구가 결국 “돈 달라",
+   "url": "https://n.news.naver.com/mnews/article/025/0003562666",
+   "cluster": "https://news.naver.com/cluster/c_202611031540_00001393/section/103"
+  }
+ ],
+ "popular": [
+  {
+   "title": "\"70세 삼성전자 전 사장과 결혼\"…45세 슈퍼모델 출신 김자연, 25세 나이 차 화제",
+   "url": "https://n.news.naver.com/article/014/0005598981",
+   "presses": [
+    "파이낸셜뉴스 1위",
+    "한국경제TV 2위",
+    "조선비즈 3위",
+    "아이뉴스24 3위"
+   ]
+  },
+  {
+   "title": "美증시 혼조 마감…다우 -0.38%, S&P500 +0.36%, 나스닥 +0.83%",
+   "url": "https://n.news.naver.com/article/374/0000541528",
+   "presses": [
+    "SBS Biz 1위",
+    "이데일리 2위",
+    "디지털데일리 3위"
+   ]
+  },
+  {
+   "title": "\"약봉지마다 현금이…\" 세상 떠난 남편이 남긴 3000만원",
+   "url": "https://n.news.naver.com/article/015/0005349917",
+   "presses": [
+    "한국경제 3위",
+    "이데일리 3위",
+    "매일경제 4위"
+   ]
+  },
+  {
+   "title": "[속보] 김여정, 바이낸스사태에 \"선택지 대화 있지만 국익 동일시 아냐\"",
+   "url": "https://n.news.naver.com/article/015/0005349957",
+   "presses": [
+    "한국경제 4위",
+    "헤럴드경제 4위",
+    "파이낸셜뉴스 5위"
+   ]
+  },
+  {
+   "title": "현대차 울산공장 제네시스 생산라인, 이틀 만에 재가동",
+   "url": "https://n.news.naver.com/article/092/0002443697",
+   "presses": [
+    "지디넷코리아 1위",
+    "전자신문 3위"
+   ]
+  },
+  {
+   "title": "'학폭 의혹' 차예련, 또 터졌다…이번엔 '골프장 갑질' 주장",
+   "url": "https://n.news.naver.com/article/015/0005349926",
+   "presses": [
+    "한국경제 2위",
+    "매일경제 3위"
+   ]
+  },
+  {
+   "title": "“꼬박꼬박 국민연금 낸 우린 뭔가”…국민연금 가입자 10년 부었더니 ‘맙소사’",
+   "url": "https://n.news.naver.com/article/009/0005757939",
+   "presses": [
+    "매일경제 1위"
+   ]
+  },
+  {
+   "title": "\"축의금 돌려드려요\"…쌍둥이맘 '파격 이혼식'에 반응 터졌다 [박수빈의 요즘것들]",
+   "url": "https://n.news.naver.com/article/015/0005349902",
+   "presses": [
+    "한국경제 1위"
+   ]
+  },
+  {
+   "title": "'제발 적당히 좀 해라' 3만5000명 뛴 마라톤에 난리…\"빵은 오늘까지, 쓰레기 난장판\"",
+   "url": "https://n.news.naver.com/article/277/0005837057",
+   "presses": [
+    "아시아경제 1위"
+   ]
+  },
+  {
+   "title": "'AI 아니었어?' 난리난 국어 강사 미모에…\"다시 공부합니다\"",
+   "url": "https://n.news.naver.com/article/018/0006403194",
+   "presses": [
+    "이데일리 1위"
+   ]
+  },
+  {
+   "title": "“절대적 주가 저평가” 시총 8위 털썩 현대차, 다시 ‘주도주’ 된다는 이유가? [종목Pick]",
+   "url": "https://n.news.naver.com/article/016/0002718367",
+   "presses": [
+    "헤럴드경제 1위"
+   ]
+  },
+  {
+   "title": "“평소와 다르게 짖더라니”…주인 부부 이끌고 얼음장 물에 빠진 이웃 구한 '영웅견'",
+   "url": "https://n.news.naver.com/article/030/0003481829",
+   "presses": [
+    "전자신문 1위"
+   ]
+  }
+ ]
+}
