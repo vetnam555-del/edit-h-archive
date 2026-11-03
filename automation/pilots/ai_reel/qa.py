@@ -415,6 +415,27 @@ def sign_off(ep):
     return voices[-1].get("text", "").strip() if len(voices) > 1 else ""
 
 
+# 2026-11-03 운영자 "처음에 릴스 시작할 때 1번 주제 이야기할 때 문구가 2번 확확 바뀐다" — 11/03 편은 0~1.3초 후킹 → 1.3~3.0초 1번 자막 →
+# 3.0초 2번 주제로, 자막이 1.3·1.7초만 떠 읽기 전에 바뀌었다(옥상 장면 자막 옮김도 1.1초). 11/04 부터 자막 한 장은 2초 이상 —
+# 첫 장면은 후킹 제목이 1번 주제 자막을 겸하고, H 를 피해야 하면 장면 처음부터 다른 자리에 둔다(중간에 옮기지 않는다).
+CAPTION_RULE_FROM = "2026-11-04"
+CAPTION_MIN_S = 2.0
+
+
+def short_captions(ep):
+    """2초도 안 떠 있다가 바뀌는 자막 → 실패 목록. 2026-11-04 전 회차는 보지 않는다(기록)."""
+    if ep.get("date", "") < CAPTION_RULE_FROM:
+        return []
+    fails = []
+    for i, c in enumerate(ep.get("captions") or []):
+        dur = float(c.get("end", 0)) - float(c.get("start", 0))
+        if dur < CAPTION_MIN_S - 1e-6:
+            what = plain(c.get("html", ""))[:24]
+            fails.append(f"자막 {i + 1}('{what}…')이 {dur:.2f}초만 뜬다 — 한 장은 {CAPTION_MIN_S:g}초 이상"
+                         "(첫 장면은 후킹이 1번 주제 자막을 겸한다, 자리를 옮기려면 장면 처음부터)")
+    return fails
+
+
 def pattern_repeats(epath, ep):
     """같은 날(첫 마디는 전날까지) 다른 릴스와 같은 틀이면 → 실패 목록. 2026-11-02 전 회차는 검사하지 않는다(기록)."""
     if ep.get("date", "") < HOOK_RULE_FROM:
@@ -596,6 +617,7 @@ def main():
             if sn[:2] not in BRAND_SPOKEN and sn[:2] not in series_spoken and not any(_num_match(sn, c, strict=True) for c in cvals):
                 fails.append(f"content 에 없는 숫자 — 대사 '{vline.get('text', '')[:20]}…': {_say(sn)}")
     fails += pattern_repeats(epath, ep)
+    fails += short_captions(ep)
     cap_path = folder / "reel_ai_caption.txt"
     fails += source_gaps(ep, content, cap_path.read_text(encoding="utf-8") if cap_path.exists() else "")
     if any("AI로 만든 영상" in plain(c["html"]) for c in ep.get("captions", [])):

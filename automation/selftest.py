@@ -177,6 +177,49 @@ def t_runners():
 
 
 
+def t_anjang_wait():
+    """평일 07:55 전 fallback 빌드는 오늘 안장 글을 확인한 기록이 있을 때만(11/03 운영자 '안장출근길 소스가 너무 좋다' — 10/15·10/29 먼저 만들어 겹침 0~1/10)."""
+    import build_issue
+    import fetch_anjang
+    kst = now_kst().tzinfo
+    tue, sat = dt.date(2026, 11, 3), dt.date(2026, 11, 7)
+    at = lambda day, h, m: dt.datetime(day.year, day.month, day.day, h, m, tzinfo=kst)   # noqa: E731
+    fb = {"date": "2026-11-03", "source_mode": "fallback"}
+    with tempfile.TemporaryDirectory() as tmp:
+        prob = lambda d, now: build_issue.anjang_wait_problem(d, now=now, state_dir=tmp)   # noqa: E731
+        os.environ.pop("EDITH_SKIP_ANJANG_WAIT", None)
+        expect(prob(fb, at(tue, 7, 16)), "평일 07:16 기록 없는 fallback 빌드를 막지 않는다(10/29)")
+        expect(not prob(fb, at(tue, 7, 56)), "07:55 가 지나도 막는다(안장이 쉬는 날 예비 호가 나간다)")
+        expect(not prob({**fb, "source_mode": "anjang"}, at(tue, 7, 16)), "안장을 쓴 호를 막는다")
+        expect(not prob({**fb, "date": "2026-11-07"}, at(sat, 7, 16)), "주말(안장 쉼) 호를 막는다")
+        expect(not prob(fb, at(dt.date(2026, 11, 4), 7, 16)), "다른 날 호(다시 빌드)를 막는다")
+        expect(not prob({**fb, "rewind": True}, at(tue, 7, 16)), "예비 호를 막는다")
+        real_now = fetch_anjang.now_kst
+        try:
+            fetch_anjang.now_kst = lambda: at(tue, 7, 20)
+            fetch_anjang.record_check(tue, 3, False, state_dir=tmp)     # 기다리지 않고 '글 없음'만 본 기록
+            expect(prob(fb, at(tue, 7, 21)), "07:55 전 '글 없음' 기록만으로 통과한다(기다리지 않았다)")
+            fetch_anjang.record_check(tue, 2, False, state_dir=tmp)     # 접속 실패
+            expect(not prob(fb, at(tue, 7, 21)), "접속 실패 기록이 있는데 막는다(그날은 WebSearch 로 간다)")
+            fetch_anjang.record_check(tue, 0, True, state_dir=tmp)      # 오늘 글 봄(그래도 fallback 은 편집 판단)
+            expect(not prob(fb, at(tue, 7, 21)), "오늘 글을 본 기록이 있는데 막는다")
+            rec = json.loads((Path(tmp) / "anjang-2026-11-03.json").read_text(encoding="utf-8"))
+            expect(rec.get("code") == 0 and rec.get("found_today") is True and rec.get("checked_at", "").startswith("2026-11-03T07:20"),
+                   f"안장 확인 기록 형식: {rec}")
+        finally:
+            fetch_anjang.now_kst = real_now
+        os.environ["EDITH_SKIP_ANJANG_WAIT"] = "1"
+        try:
+            (Path(tmp) / "anjang-2026-11-03.json").unlink()
+            expect(not prob(fb, at(tue, 7, 16)), "EDITH_SKIP_ANJANG_WAIT(다시 빌드)에도 막는다")
+        finally:
+            os.environ.pop("EDITH_SKIP_ANJANG_WAIT", None)
+    src = Path(build_issue.__file__).read_text(encoding="utf-8")
+    expect("anjang_wait_problem(d)" in src and "sys.exit(4)" in src, "build_issue 가 안장 기다리기 검사를 하지 않는다")
+    expect("automation/.state/" in (ROOT / ".gitignore").read_text(encoding="utf-8"), "안장 확인 기록이 저장소에 올라간다(.gitignore)")
+    return "07:16 fallback 막음 · 07:56·주말·안장 호·접속 실패·글 확인은 통과"
+
+
 def t_compare_anjang():
     """안장출근길 비교(회고 잣대) — 같은 소식은 고유 낱말 2개 이상, 'AI·주문' 같은 흔한 말만 겹치면 다른 소식(10/15 오판)."""
     import compare_anjang
@@ -1417,7 +1460,8 @@ def rebuild(days, strict):
         for day in days:
             for pat in TEXT_OUTPUTS:   # 복사해 온 발행본을 지워야 '빌드가 이 파일을 안 만든' 회귀를 잡는다
                 (sbx / pat.format(d=day)).unlink(missing_ok=True)
-            proc = subprocess.run([sys.executable, str(sbx / "automation" / "build_issue.py"), day], capture_output=True, text=True, cwd=sbx)
+            proc = subprocess.run([sys.executable, str(sbx / "automation" / "build_issue.py"), day], capture_output=True, text=True, cwd=sbx,
+                                  env={**os.environ, "EDITH_SKIP_ANJANG_WAIT": "1"})   # 다시 빌드는 안장 기다리기 검사 밖(11/03)
             name = f"다시 빌드 {day}"
             if proc.returncode != 0:
                 FAILS.append(f"{name}: 종료 코드 {proc.returncode}\n{(proc.stdout + proc.stderr)[-800:]}")
@@ -2139,6 +2183,14 @@ def t_ai_reel():
     approx = "3만5000여 명이 참가, 사장단 50여 명과"
     expect(qa.spoken_numbers("삼만 오천여 명이 달립니다") == [(35000.0, "명", "")] and qa.spoken_numbers("35,000여 명") == [(35000.0, "명", "")]
            and qa.spoken_numbers("오십여 명을") == [(50.0, "명", "")] and qa.spoken_numbers("이 여자") == [], "어림 '여'가 붙은 숫자를 못 읽는다")
+    # 자막 한 장은 2초 이상(11/03 운영자 "1번 주제 문구가 2번 확확 바뀐다" — 11/04 부터)
+    def _caps(day, spans):
+        return {"date": day, "captions": [{"start": s, "end": e, "html": f'<div class="main">자막 {k}</div>'} for k, (s, e) in enumerate(spans)]}
+    expect(len(qa.short_captions(_caps("2026-11-04", [(0, 1.3), (1.3, 3.0), (3.0, 7.0)]))) == 2
+           and not qa.short_captions(_caps("2026-11-04", [(0, 3.2), (3.2, 7.0), (7.0, 9.0)]))
+           and not qa.short_captions(_caps("2026-11-03", [(0, 1.3), (1.3, 3.0)]))
+           and "short_captions(ep)" in inspect.getsource(qa.main),
+           "2초도 안 떠 있는 자막을 검수가 막지 않는다(11/04~)")
     # '달러'는 '달'(개월)이 아니다(11/03 바이낸스 '약 63억 달러' — 단위가 '달'로 읽혀 content 의 '63억 달러'와 못 맞췄다)
     expect(qa.spoken_numbers("바이낸스, 약 육십삼억 달러가 털렸습니다") == [(6300000000.0, "달러", "")]
            and qa.spoken_numbers("약 63억 달러가") == [(6300000000.0, "달러", "")] and qa.spoken_numbers("석 달 만에") == [(3.0, "달", "")],
@@ -2589,6 +2641,7 @@ def main():
     check("워크플로 서버 고정", t_runners)
     check("봇 커밋 이름은 KST 날짜", t_commit_dates)
     check("안장출근길 비교(회고 잣대)", t_compare_anjang)
+    check("평일 안장 글 기다리기(07:55 전 fallback 빌드 막음)", t_anjang_wait)
     check("발송 시각(지난 호는 08:00)", t_send_time)
     check("짧게 읽는 소식 점검", t_brief_check)
     check("새 호 막는 점검(짧은 소식 개수·H PICK 중복)", t_strict_content)

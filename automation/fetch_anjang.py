@@ -112,6 +112,20 @@ def parse_post(page):
 
 
 WAIT_POLL = 120
+# 오늘 안장 글을 확인한 기록(저장소에 올리지 않는다 — .gitignore) — build_issue.py 가 평일 07:55 전 fallback 빌드를 막을 때 본다(2026-11-03)
+STATE_DIR = Path(__file__).resolve().parent / ".state"
+
+
+def record_check(day, code, found_today, state_dir=None):
+    """오늘(day) 글을 확인한 결과를 남긴다 — code 0 글 있음 · 2 접속 실패 · 3 글 없음. 실패해도 조용히 넘어간다(소스 수집이 먼저)."""
+    try:
+        folder = Path(state_dir or STATE_DIR)
+        folder.mkdir(parents=True, exist_ok=True)
+        (folder / f"anjang-{day.isoformat()}.json").write_text(json.dumps(
+            {"date": day.isoformat(), "code": code, "found_today": bool(found_today),
+             "checked_at": now_kst().isoformat(timespec="seconds")}, ensure_ascii=False), encoding="utf-8")
+    except OSError:
+        pass
 
 
 def _should_wait(posts, day, wait_until, now=None):
@@ -141,13 +155,19 @@ def main():
             time.sleep(WAIT_POLL)
             posts = list_posts(load_config()["primary_source"]["url"])
     except (urllib.error.URLError, OSError) as e:
+        if until == now_kst().date():
+            record_check(until, 2, False)
         print(f"✗ 안장출근길에 접속하지 못했습니다({e}) — 네트워크 허용 목록에 *.naver.com 이 있는지 확인하세요. "
               "오늘은 WebSearch 로 소스를 모읍니다(RUNBOOK 1-2).")
         sys.exit(2)
     if not posts:
+        if until == now_kst().date():
+            record_check(until, 2, False)
         print("✗ 안장출근길 목록에서 글을 찾지 못했습니다(페이지 구조가 바뀌었을 수 있음) — WebSearch 로 대체하세요.")
         sys.exit(2)
     targets = [p for p in posts if since < p[0] <= until]
+    if until == now_kst().date():
+        record_check(until, 0 if targets else 3, any(p[0] == until for p in posts))
     if not targets:
         latest = posts[0]
         print(f"… {since + dt.timedelta(days=1)}~{until} 안장출근길 글이 아직 없습니다. 가장 최근 글: {latest[0]} {latest[1]}")
