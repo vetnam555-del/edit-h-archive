@@ -18,6 +18,24 @@ class ContentError(ValueError):
 # 카드 한 장에 들어가는 글자 수 상한(공백·마크업 제외). 넘치면 렌더러가 폰트를 줄이는데,
 # 그 전에 여기서 먼저 막아 '글이 빽빽한 카드'를 원천적으로 줄인다. 기준은 VOL.092 카드 + 개선안(B) 실측.
 NUMBER_UNIT_FROM = "2026-11-04"   # 카드 큰 숫자의 '억$' 꼴을 막는 날(지난 호는 기록)
+TAKEAWAY_LINK_FROM = "2026-11-04"  # 카드 '그래서 나는?'이 카드에 없는 돈 이야기로 튀는 것을 막는 날
+# 11/03 카드 ① '주식 판 돈 다음 날 입금' → '급한 돈이면 담보대출 금리부터 보세요' — 뉴스레터에선 '판 돈을 미리 당겨 쓰는
+# 매도대금담보대출 금리를 낮춘다'는 설명이 있었는데 카드로 줄이며 빠져, 카드만 본 사람에겐 왜 금리를 보라는지 끊겼다(운영자 지적).
+CARD_MONEY_TERMS = ("대출", "금리", "담보", "적금", "예금", "보험", "청약", "연금", "세금", "세액", "공제", "환율", "이자",
+                    "수수료", "증거금", "신용", "한도", "DSR", "ETF", "배당", "포인트", "적립", "쿠폰", "환급", "지원금", "보조금")
+
+
+def takeaway_link_problem(it):
+    """카드 takeaway 가 돈 관련 말을 2개 넘게 꺼내는데 그중 하나도 그 카드 제목·본문·숫자에 없으면 그 말들을 돌려준다.
+    (한 개만 새로 나오는 건 '분양 → 청약'처럼 자연스러운 이어짐이 많아 그냥 둔다 — 9/24~11/03 카드 207장 중 걸리는 건 11/03 ① 하나.)"""
+    tk = str(it.get("takeaway") or "")
+    ctx = " ".join(str(it.get(k) or "") for k in ("headline", "body", "number", "ask", "tag"))
+    ctx += " " + " ".join(f"{m.get('value', '')} {m.get('label', '')}" for m in it.get("metrics") or [])
+    if it.get("compare"):
+        ctx += " " + json.dumps(it["compare"], ensure_ascii=False)
+    terms = [t for t in CARD_MONEY_TERMS if t in tk]
+    return terms if len(terms) >= 2 and not any(t in ctx for t in terms) else None
+
 CARD_LIMITS = {
     "cover_title": 34,       # 표지 두 줄 제목 합계
     "number": 9,             # 이슈 카드의 큰 숫자 (예: 300억원, 8.9조원, 82%)
@@ -523,6 +541,9 @@ def prepare(data, date_str):
         _len_check(it["headline"], CARD_LIMITS["headline"], f"{w}.headline", problems)
         _len_check(it["body"], CARD_LIMITS["body"], f"{w}.body", problems)
         _len_check(it["takeaway"], CARD_LIMITS["takeaway"], f"{w}.takeaway", problems)
+        if str(data.get("date", ""))[:10] >= TAKEAWAY_LINK_FROM and (cut := takeaway_link_problem(it)):
+            problems.append(f"{w}.takeaway '{it['takeaway']}' — '{'·'.join(cut)}'이(가) 카드 제목·본문에 없어요. 카드만 본 사람도 "
+                            "이어지게 그 카드 소식에서 바로 나오는 한 문장으로 쓰세요(RUNBOOK 4단계 cards.issues)")
         for j, m in enumerate(it.get("metrics") or [], 1):
             _len_check(m["value"], CARD_LIMITS["metric_value"], f"{w}.metrics[{j}].value", problems)
             _len_check(m["label"], CARD_LIMITS["metric_label"], f"{w}.metrics[{j}].label", problems)
