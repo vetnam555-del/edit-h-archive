@@ -200,6 +200,33 @@ def t_card_marks():
     return "11/04~ 프로필 그림 마크 · '억$' 숫자 막음"
 
 
+def t_card_takeaway_link():
+    """11/03 운영자 '주식 판 돈 다음 날 입금인데 그래서 나는이 왜 금리부터 보는 거야?' — 11/04~ 카드 takeaway 가 카드에 없는 돈 이야기로 튀면 막는다."""
+    import copy
+    from edith import content
+    raw = json.loads((CONTENT_DIR / "2026-11-03.json").read_text(encoding="utf-8"))
+    t1 = raw["cards"]["issues"][0]
+    expect(content.takeaway_link_problem(t1) == ["대출", "금리", "담보"], "11/03 ① '담보대출 금리' takeaway 를 못 잡는다")
+    ok = [{"headline": "기준금리 동결 11월 ==인상== 전망", "body": "금통위원 7명 전원 일치.", "takeaway": "변동금리 대출 이자 변경일부터 확인하세요"},
+          {"headline": "10월 분양 쏟아지는데 ==서울==은 491가구", "body": "대부분 경기·인천이에요.", "takeaway": "청약 준비 중이라면 경기·인천 일정부터 챙기세요"},
+          {**t1, "takeaway": "2028년까진 이틀 뒤 입금 — 쓸 날 이틀 앞서 파세요"}]
+    for it in ok:
+        expect(content.takeaway_link_problem(it) is None, f"이어지는 takeaway 를 막는다: {it['takeaway']}")
+    for day, bad in (("2026-11-03", False), ("2026-11-04", True)):
+        d = copy.deepcopy(raw)
+        d["date"] = day
+        for ci in d["cards"]["issues"]:   # 큰 숫자 규칙(t_card_marks)과 따로 본다
+            if "number" in ci:
+                ci["number"] = re.sub(r"([만억조])\s*[$€¥]", r"\1 달러", str(ci["number"]))
+        try:
+            content.prepare(d, day)
+            got = False
+        except content.ContentError as e:
+            got = "담보" in str(e) and "cards.issues[1].takeaway" in str(e)
+        expect(got == bad, f"{day} 카드 takeaway 이어짐 검사가 {'막아야' if bad else '지나가야'} 한다")
+    return "11/04~ 카드에 없는 돈 이야기로 튀는 '그래서 나는?' 막음"
+
+
 def t_anjang_wait():
     """평일 07:55 전 fallback 빌드는 오늘 안장 글을 확인한 기록이 있을 때만(11/03 운영자 '안장출근길 소스가 너무 좋다' — 10/15·10/29 먼저 만들어 겹침 0~1/10)."""
     import build_issue
@@ -1619,6 +1646,8 @@ def _dive_sample(steps=4, worst=False, day=None):
     for ci in (data.get("cards") or {}).get("issues") or []:   # 지난 호 원고의 '63억$' 꼴은 11/04~ content 가 막는다 — 옮겨 쓸 때 새 규칙대로
         if isinstance(ci.get("number"), str):
             ci["number"] = re.sub(r"([만억조])\s*[$€¥]", r"\1 달러", ci["number"])
+        if content_mod.takeaway_link_problem(ci):   # 11/03 ① '담보대출 금리' 꼴도 11/04~ 막힌다 — 옮겨 쓸 때 이어지는 말로
+            ci["takeaway"] = "이 소식이 내 돈에 닿는 날부터 챙겨 두세요"
     lim = content_mod.CARD_LIMITS
 
     def fill(n, words="매출 이익 가격 점유율 회원 객단가 영업이익 이익률 커피 한 잔 남는 돈"):
@@ -2669,6 +2698,7 @@ def main():
     check("안장출근길 비교(회고 잣대)", t_compare_anjang)
     check("평일 안장 글 기다리기(07:55 전 fallback 빌드 막음)", t_anjang_wait)
     check("카드 마크·큰 숫자 단위(11/04~)", t_card_marks)
+    check("카드 '그래서 나는?' 이어짐(11/04~)", t_card_takeaway_link)
     check("발송 시각(지난 호는 08:00)", t_send_time)
     check("짧게 읽는 소식 점검", t_brief_check)
     check("새 호 막는 점검(짧은 소식 개수·H PICK 중복)", t_strict_content)
