@@ -376,13 +376,36 @@ def _say(n):
     return f"{n[2] if len(n) > 2 else ''}{n[0]:g}{n[1]}"
 
 
-def check_spoken(script_nums, said, allow=()):
+def digit_words(said, script):
+    """받아쓰기가 숫자로 적은 대사 낱말 → [(값, 단위)] — 숫자 바로 뒤에 한글이 붙은 덩어리('1주일에')를 한글로 읽어('일주일에')
+    대사(녹음 원고, 한글 읽기)에 그대로 있을 때만. 11/04 '일주일에 삼백팔십오 건'이 '1주일에 385건'으로 적혀 '대사에 없는 숫자 1'로 걸렸다.
+    다른 값을 말했으면('이주일'을 '1주일'로) 대사에 그 낱말이 없어 그대로 잡힌다."""
+    if not script:
+        return []
+    ref = read_ko(script)
+    # 낱말 머리부터 맞아야 한다 — read_ko 는 띄어쓰기까지 지우므로 원고를 먼저 띄어쓰기로 나눠 낱말마다 읽는다
+    # (한 덩어리로 찾으면 '2개'(이개)가 '미시간이 개최'에 걸린다)
+    words = [w for w in (read_ko(tok, prefer=ref) for tok in _TAG.sub(" ", script).split()) if w]
+    out = []
+    for m in re.finditer(r"(?<![\d.,])\d+[가-힣]+", said):
+        reading = read_ko(m.group(0), prefer=ref)
+        if reading and any(w.startswith(reading) for w in words):
+            out += [n[:2] for n in spoken_numbers(m.group(0))]
+    return out
+
+
+def check_spoken(script_nums, said, allow=(), script=""):
     """들린 숫자 ↔ 대사 숫자 — 목소리가 다른 금액·반대 방향을 말했거나(들린 숫자가 대사에 없음) 숫자를 빼먹었으면 실패. → (들린 숫자, 실패 목록)
-    allow: 이 영상에서 content 숫자가 아닌 고정 표현 (값, 단위) — 예: '5가지' 브리핑의 (5.0, '가지')."""
+    allow: 이 영상에서 content 숫자가 아닌 고정 표현 (값, 단위) — 예: '5가지' 브리핑의 (5.0, '가지').
+    script: 대사 원고(tts) 전체 — 받아쓰기가 숫자로 적은 대사 낱말('일주일' → '1주일')은 숫자로 보지 않는다(digit_words)."""
     skip = set(BRAND_SPOKEN) | set(allow)
     heard_nums, bad = spoken_numbers(said), []
+    words = digit_words(said, script)
     for h in heard_nums:
         if h[:2] not in skip and not any(_num_match(h, x) for x in script_nums):
+            if h[:2] in words:
+                words.remove(h[:2])
+                continue
             bad.append(f"목소리 숫자 — 들린 '{_say(h)}' 가 대사에 없다(받아쓰기: {said.strip()[:60]})")
     for x in script_nums:
         if x[:2] not in skip and not any(_num_match(h, x) for h in heard_nums):
@@ -920,7 +943,8 @@ def main():
             segs = list(segs)
             said = " ".join(s.text for s in segs)
             heard = hangul(said)
-            heard_nums, bad_nums = check_spoken(script_nums, said, allow=series_spoken)
+            heard_nums, bad_nums = check_spoken(script_nums, said, allow=series_spoken,
+                                                script=" ".join(v.get("tts") or v.get("text", "") for v in ep["voices"]))
             fails += bad_nums
             notes.append(f"들린 숫자 {', '.join(_say(n) for n in heard_nums) or '없음'}")
             if synced:   # 11/04~ 줄마다 녹음 파일 하나 + 완성본의 그 줄 시간대(위 sync 검사와 같은 구간)
