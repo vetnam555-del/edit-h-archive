@@ -17,6 +17,7 @@ class ContentError(ValueError):
 
 # 카드 한 장에 들어가는 글자 수 상한(공백·마크업 제외). 넘치면 렌더러가 폰트를 줄이는데,
 # 그 전에 여기서 먼저 막아 '글이 빽빽한 카드'를 원천적으로 줄인다. 기준은 VOL.092 카드 + 개선안(B) 실측.
+NUMBER_UNIT_FROM = "2026-11-04"   # 카드 큰 숫자의 '억$' 꼴을 막는 날(지난 호는 기록)
 CARD_LIMITS = {
     "cover_title": 34,       # 표지 두 줄 제목 합계
     "number": 9,             # 이슈 카드의 큰 숫자 (예: 300억원, 8.9조원, 82%)
@@ -516,6 +517,9 @@ def prepare(data, date_str):
         w = f"cards.issues[{i}]"
         if "number" in it:
             _len_check(it["number"], CARD_LIMITS["number"], f"{w}.number", problems)
+            # 2026-11-03 카드 ③ '63억$' — 한글 단위 뒤 '$'는 어색하다(바이낸스 해킹액이 국내 거래소 숫자처럼도 읽혔다, RUNBOOK 4단계 cards.issues)
+            if str(data.get("date", ""))[:10] >= NUMBER_UNIT_FROM and re.search(r"[만억조]\s*[$€¥]", str(it["number"])):
+                problems.append(f"{w}.number '{it['number']}' — 돈 단위는 '63억 달러'처럼 한글로 쓰세요(9자 안)")
         _len_check(it["headline"], CARD_LIMITS["headline"], f"{w}.headline", problems)
         _len_check(it["body"], CARD_LIMITS["body"], f"{w}.body", problems)
         _len_check(it["takeaway"], CARD_LIMITS["takeaway"], f"{w}.takeaway", problems)
