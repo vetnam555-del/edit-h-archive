@@ -1812,6 +1812,11 @@ def t_webtoon():
     expect("\u2060" not in first["src"], "출처에 줄바꿈 방지 문자가 남았다")
     expect(second["bubble"] == "직접 쓴 말풍선", "직접 쓴 말풍선을 카드 글이 덮어썼다")
     expect([it["headline"] for it in picked] == [issues[1]["headline"], issues[0]["headline"]], "요약 장 순서가 컷 순서가 아니다")
+    # 컷에서 바꾼 숫자(한 매체에만 있던 카드 숫자 → 두 매체 공통 사실, 2026-11-04 카톡 '12년 만' → '처음')는 표지 목차·'한눈에'에도 — 카드 원본은 그대로
+    fixed = comic.from_cards({"panels": [{"t": 1, "card": 1, "number": "처음"}, {"t": 2, "card": 2}], "summary": True}, day)
+    expect([it.get("number") for it in fixed] == ["처음", issues[1].get("number")], "컷에서 바꾼 숫자가 표지 목차·요약 장에 안 들어간다")
+    expect(content_mod.load(day)["card_issues"][0].get("number") == issues[0].get("number"), "컷 숫자 바꾸기가 content 카드를 덮어썼다")
+    expect(len(comic.from_cards({"panels": [{"t": 1}], "summary": True}, day)) == len(issues), "card 없는 요약 장이 카드 전부를 싣지 않는다")
     old = {"panels": [{"t": 1, "bubble": "옛 만화", "box": "설명"}]}
     expect(comic.from_cards(old, day) == [] and "take" not in old["panels"][0], "card 없는 지난 만화 설정이 바뀐다")
     expect("<span class='hl'>" in comic._md("==28%== 폭락") and "<br>" in comic._md("가\n나") and "&lt;" in comic._md("<b>"),
@@ -2363,6 +2368,13 @@ def t_ai_reel():
     expect(any("1.7e+12" in b for b in bad) and any("1.6e+12" in b for b in bad), f"목소리가 틀린 금액을 말해도 통과했다: {bad}")
     _, ok = qa.check_spoken(script, "외국인이 하루 만에 1조 6천억 원 넘게 팔았대 프로그램 매도 5분간 멈춥니다 3.48% 내일 아침 8시 반에")
     expect(not ok, f"맞게 말한 숫자를 막았다: {ok}")
+    # 받아쓰기가 숫자로 적은 대사 낱말(11/04 '일주일에 삼백팔십오 건' → '1주일에 385건')은 숫자가 아니다 — 대사에 그 낱말이 그대로 있을 때만
+    week = qa.spoken_numbers("헤드스파 예약, 일주일에 385건!")
+    tts = "헤드스파 예약, 일주일에 삼백팔십오 건!"
+    expect(not qa.check_spoken(week, "헤드스파 예약 1주일에 385건", script=tts)[1], "'일주일'을 '1주일'로 받아 적은 것을 다른 숫자로 막았다")
+    expect(qa.check_spoken(week, "헤드스파 예약 1주일에 385건")[1], "대사 원고 없이도 '1'을 낱말로 넘겼다(예전 동작이 바뀌었다)")
+    expect(qa.check_spoken(week, "헤드스파 예약 2주일에 385건", script=tts)[1], "'일주일'을 '이주일'로 말해도 통과했다")
+    expect(qa.check_spoken(week, "헤드스파 예약 1주일에 386건", script=tts)[1], "385건을 386건으로 말해도 통과했다")
     # 만화 10장 순서 — 사전순이면 c10(끝 장)이 두 번째로 올라간다
     with tempfile.TemporaryDirectory() as tmp:
         folder = Path(tmp)

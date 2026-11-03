@@ -134,8 +134,12 @@ def from_cards(c, date):
         p.setdefault("body", _md(it["body"]))
         p.setdefault("take", _md(it["takeaway"]))
         p.setdefault("src", it["source"].replace("\u2060", ""))
-    order = [int(p["card"]) for p in c["panels"] if p.get("card")] or list(range(1, len(issues) + 1))
-    return [issues[n - 1] for n in order]
+    # \ucef7\uc5d0\uc11c \uc22b\uc790\ub97c \ubc14\uafe8\uc73c\uba74 \ud45c\uc9c0 \ubaa9\ucc28\u00b7'\ud55c\ub208\uc5d0' \uc7a5\ub3c4 \uac19\uc740 \uc22b\uc790\ub85c(2026-11-04 \u2014 \uce74\ub4dc \u2463 '12\ub144 \ub9cc'\uc774 \uc870\uc120\ube44\uc988\uc5d0\ub9cc \uc788\uc5b4 \ucef7\uc740 \ub450 \ub9e4\uccb4 \uacf5\ud1b5 '\ucc98\uc74c'\uc73c\ub85c
+    # \ubc14\uafe8\ub294\ub370 \ubaa9\ucc28\u00b7\uc694\uc57d\uc740 \uce74\ub4dc \uc22b\uc790\ub97c \uadf8\ub300\ub85c \uc2e4\uc5c8\ub2e4). content \uce74\ub4dc\ub294 \uac74\ub4dc\ub9ac\uc9c0 \uc54a\uac8c \ubcf5\uc0ac\ubcf8\uc5d0\ub9cc \ub36e\ub294\ub2e4.
+    with_card = [p for p in c["panels"] if p.get("card")]
+    if not with_card:
+        return list(issues)
+    return [dict(issues[int(p["card"]) - 1], **({"number": p["number"]} if p.get("number") else {})) for p in with_card]
 
 
 def _src(p, c):

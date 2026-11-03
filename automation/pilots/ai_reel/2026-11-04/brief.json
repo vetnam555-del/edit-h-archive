@@ -1,0 +1,242 @@
+{
+ "date": "2026-11-04",
+ "story": "오늘 아침 5가지 — 메인 5개(big_issue·items 4개)를 20초 한 편에. 가장 센 반전(쿠팡 — 상자 산사태를 받아 내는 H 발밑 돼지 저금통에서 동전이 샌다: 석 달에 14조 팔고도 적자)을 맨 앞에 — content/2026-11-04.json",
+ "hook": "반전",
+ "items": [
+  "쿠팡 실적",
+  "국민연금",
+  "옥외광고",
+  "카톡 광고",
+  "K헤어"
+ ],
+ "seedance": {
+  "model": "seedance_2_5",
+  "made_by": "크레딧 API(480p 20초, 화질 high, 60 크레딧 — 11/03 운영자 '480p로 해줘', 짝수 날 영상)",
+  "job": "fbc2a19b-32e1-49d4-bd49-4410a12b4ff2",
+  "prompt": "첫 프레임부터 장난감 창고에서 컨베이어가 쏟는 상자를 H 가 받아 내고 발밑 돼지 저금통에서 동전이 샘 → 거실 시소 위 유리병 두 개, H 가 작은 병에 동전을 붓자 시소가 기운다 → 장난감 거리, 빈 종이 광고판이 빛나는 빈 화면으로 바뀌고 H 가 유리 엘리베이터로 올라감 → 책상, 로고 없는 노트북 아래에서 코랄 배너가 툭 → 헤드스파, 로봇이 거품 머리 마사지·밖엔 빈 표를 든 로봇 줄 → 현관, 상자에서 H 가 튀어나와 손 흔듦. 장면 사이 휙 넘김(검은 화면 없음), 사람·글자·로고 없음. 전문: brief_prompt.txt",
+  "cut": "장면 경계(휙 넘김 가운데): 창고 0~3.42 · 거실 3.42~7.2 · 거리 7.2~11.85 · 책상 11.85~14.98 · 헤드스파 14.98~17.85 · 현관 끝인사 17.85~20.06. 검은 화면 0. 13.75~14.83초 책상 장면 끝에 자세가 1.08초 멈춤(freezedetect) → push 13.5~14.95(휙 넘김에서 원래 크기). 0.5초 프레임으로 사람·로고·글자 없음 확인 — 날리는 달력 종이·광고판·노트북·배너·표에 글자 없음, 거품 왕관은 금빛 왕관 모양(로고 아님)",
+  "prompt_file": "brief_prompt.txt"
+ },
+ "trim": [
+  0.0,
+  20.0
+ ],
+ "end_seconds": 2.6,
+ "push": [
+  [
+   13.5,
+   14.95
+  ]
+ ],
+ "captions": [
+  {
+   "start": 0.0,
+   "end": 3.42,
+   "size": 84,
+   "html": "<div class=\"kick\">11월 4일 · 오늘 아침 5가지 · 1/5 · 유통</div><div class=\"main\">쿠팡 <span class=\"hl\">14조</span> 팔고도 적자<br>와우 회원인 나는?</div><div class=\"sub\">영업손실 6423억원 · 세 분기째 적자</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 아시아경제·머니투데이</div>"
+  },
+  {
+   "start": 3.42,
+   "end": 7.2,
+   "size": 84,
+   "html": "<div class=\"kick\">2/5 · 연금</div><div class=\"main\">국민연금 10년,<br><span class=\"hl\">기초연금</span>보다 적다</div><div class=\"sub\">10년 가입하면 A값의 10.75% · 기초연금은 10.95%</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 세계일보·KBS</div>"
+  },
+  {
+   "start": 7.2,
+   "end": 11.85,
+   "size": 84,
+   "html": "<div class=\"kick\">3/5 · 광고</div><div class=\"main\">옥외광고 <span class=\"hl\">4.6조</span>,<br>역대 최대</div><div class=\"sub\">디지털 옥외광고 6.1% 늘어 · 비중 38.0%</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 아시아경제·문화일보</div>"
+  },
+  {
+   "start": 11.85,
+   "end": 14.98,
+   "size": 84,
+   "html": "<div class=\"kick\">4/5 · 테크</div><div class=\"main\">맥 카톡에도<br><span class=\"hl\">광고</span> 생겼다</div><div class=\"sub\">v26.9.0 업데이트부터 화면 아래 광고 칸</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 조선비즈·조선일보</div>"
+  },
+  {
+   "start": 14.98,
+   "end": 18.1,
+   "size": 84,
+   "html": "<div class=\"kick\">5/5 · 트렌드</div><div class=\"main\">일본 미용실<br><span class=\"hl\">K헤어</span> 헤드스파</div><div class=\"sub\">예약 하루 만에 170건 · 일주일에 385건</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 한국경제·지디넷코리아</div>"
+  }
+ ],
+ "end_card": {
+  "line": "더 자세한 건 프로필 링크 뉴스레터에서!",
+  "sub": "2030의 아침을 편집합니다 · 경제부터 트렌드까지",
+  "note": "숫자는 기사 2곳 이상에서 확인했어요<br>(출처는 장면마다·캡션에)"
+ },
+ "voices": [
+  {
+   "file": "stems/i1_coupang.mp3",
+   "start": 0.1,
+   "tempo": 1.0,
+   "text": "쿠팡, 석 달 동안 14조 팔고도 적자입니다!",
+   "tts": "[excited] 쿠팡, 석 달 동안 십사조 팔고도 적자입니다!",
+   "voice": "Knox(elevenlabs_v4, '[excited]' 중계 아나운서) — 0초 여는 한 마디(B0). '석 달에 십사조'는 두 번 다 받아쓰기 94%('석 달의'·'8구도')라 '석 달 동안'으로 바꿔 100%"
+  },
+  {
+   "file": "stems/i2_pension.mp3",
+   "start": 3.55,
+   "tempo": 1.0,
+   "text": "국민연금 10년 내면, 기초연금보다 적대요!",
+   "tts": "국민연금 십 년 내면, 기초연금보다 적대요!",
+   "voice": "Hana(qwen_audio_tts, '귀여운 만화 캐릭터, 놀라서 또박또박 전하는 말투')"
+  },
+  {
+   "file": "stems/i3_ooh.mp3",
+   "start": 7.3,
+   "tempo": 1.0,
+   "text": "거리 광고 역대 최대, 디지털 화면이 끌었대요!",
+   "voice": "Hana(qwen, '귀여운 만화 캐릭터, 신나서 또박또박 전하는 말투') — '옥외광고'는 두 번 다 '5개 광고'로 들려(89%) 더 흔한 말 '거리 광고'로 바꿔 100%(자막·캡션은 기사 말 그대로 '옥외광고')"
+  },
+  {
+   "file": "stems/i4_kakao.mp3",
+   "start": 11.95,
+   "tempo": 1.05,
+   "text": "맥으로 카톡 하면, 화면 아래 광고가 떠요!",
+   "voice": "Hana(qwen, '귀여운 만화 캐릭터, 다정하게 또박또박 알려 주는 말투') — 3.25초라 책상 장면(3.13초)에 맞게 1.05배"
+  },
+  {
+   "file": "stems/i5_khair.mp3",
+   "start": 15.08,
+   "tempo": 1.06,
+   "text": "헤드스파 예약, 일주일에 385건!",
+   "tts": "헤드스파 예약, 일주일에 삼백팔십오 건!",
+   "voice": "Hana(qwen, '귀여운 만화 캐릭터, 신나서 경쾌하고 빠르게, 또박또박') — 처음 녹음 'K헤어 헤드스파, 일주일에 385건'은 말 사이 쉼이 길어 4.6초로 헤드스파 장면(2.9초)을 넘어 줄여 다시. '케이헤어 헤드스파, 일본서 예약 몰려요'(3.0초)는 받아쓰기에 '케이예어·물려요'로 들려 '헤드스파 예약, 일주일에 385건'(3.25초, 1.06배)으로"
+  },
+  {
+   "file": "stems/i_bye_newsletter.mp3",
+   "start": 18.25,
+   "tempo": 1.0,
+   "text": "더 자세한 건 프로필 링크 뉴스레터에서!",
+   "voice": "Hana(qwen, '귀엽고 밝은 만화 캐릭터, 경쾌하게 인사') — signoffs bye_newsletter 문구를 그날 새로 녹음"
+  }
+ ],
+ "music": [
+  {
+   "file": "../2026-10-31/stems/m1_chase.m4a",
+   "start": 0.0,
+   "offset": 1.7,
+   "dur": 4.2,
+   "fade_out": 0.3
+  },
+  {
+   "file": "../2026-10-31/stems/m1_chase.m4a",
+   "start": 3.9,
+   "offset": 1.75,
+   "dur": 4.15,
+   "fade_in": 0.2,
+   "fade_out": 0.4
+  },
+  {
+   "file": "../2026-10-31/stems/m2_morning.m4a",
+   "start": 7.6,
+   "dur": 8.4,
+   "fade_in": 0.3,
+   "fade_out": 0.4
+  },
+  {
+   "file": "../2026-10-31/stems/m2_morning.m4a",
+   "start": 15.64,
+   "dur": 7.1,
+   "lufs": -18,
+   "fade_in": 0.3,
+   "fade_out": 0.8
+  }
+ ],
+ "sfx": [
+  [
+   0,
+   999,
+   0.4
+  ]
+ ],
+ "music_note": "11/02·11/03 과 같은 곡 이음(m1_chase 1.7초부터, 곡 이음 0.3초 겹침). 끝인사가 18.25~21.39초라 m2_morning 5.75초 강박이 끝인사 숨(21.4초께)에 오게 15.64초에 다시 깐다",
+ "duck": {
+  "mix": 0.6
+ },
+ "source_note": "장면마다 그 소식의 매체 2곳을 작게 띄운다. 원 기사 대조(read_article.py 로 11곳 모두 읽음): 쿠팡 '14조2209억·영업손실 6423억·3분기 연속 적자·11%' 아시아경제·아이뉴스24·머니투데이 셋 다(화재 손실은 약 3500억·약 3540억으로 갈려 쓰지 않음), 국민연금 '10년 가입 A값의 10.75%·기초연금 10.95%' 세계일보·KBS, 옥외광고 '4조6472억·역대 최대·디지털 6.1%·1조7649억·38.0%' 아시아경제·문화일보, 카톡 'v26.9.0 업데이트·맥에 처음으로·화면 하단 광고' 조선비즈·조선일보(카드 ④의 '12년 만'·'AD' 표시는 조선비즈에만 있어 영상·웹툰에 쓰지 않음), K헤어 '예약 하루 만에 170건·일주일에 385건' 한국경제·지디넷코리아",
+ "comic": {
+  "series": "오늘 아침 5가지",
+  "layout": "duo",
+  "title": "쿠팡 14조 팔고도 <span class='hl'>적자</span>,<br>오늘 아침 5가지",
+  "cover": {
+   "img": "stills/cover.png",
+   "pos": "50% 40%",
+   "job": "19440a69-04a1-4034-b9aa-bced4f000a89"
+  },
+  "summary": true,
+  "panels": [
+   {
+    "card": 1,
+    "img_a": "stills/cp_a.png",
+    "pos_a": "50% 40%",
+    "img_b": "stills/cp_b.png",
+    "pos_b": "50% 35%",
+    "say_side": "left",
+    "stk_side": "left",
+    "jobs": [
+     "06c5bf7c-a7cb-44f3-b588-78278421e0e5",
+     "5cfcf53d-fe82-4ea8-88e2-c99fcd9f93b7"
+    ]
+   },
+   {
+    "card": 2,
+    "img_a": "stills/pn_a.png",
+    "pos_a": "50% 40%",
+    "img_b": "stills/pn_b.png",
+    "pos_b": "50% 35%",
+    "say_side": "right",
+    "jobs": [
+     "9a93bf94-0c66-4b9d-b51d-30633f9f6541",
+     "cd280821-aaff-4ef9-b1f0-0cd0e30db3f8"
+    ]
+   },
+   {
+    "card": 3,
+    "img_a": "stills/oh_a.png",
+    "pos_a": "50% 40%",
+    "img_b": "stills/oh_b.png",
+    "pos_b": "50% 35%",
+    "say_side": "left",
+    "jobs": [
+     "70e65cb0-fbcd-436d-82b9-f98bec5ec155",
+     "6b26719e-195e-4199-987c-6d34d7005d7d"
+    ]
+   },
+   {
+    "card": 4,
+    "img_a": "stills/kt_a.png",
+    "pos_a": "50% 40%",
+    "img_b": "stills/kt_b.png",
+    "pos_b": "50% 35%",
+    "say_side": "right",
+    "stk_side": "left",
+    "number": "처음",
+    "body": "업데이트 v26.9.0부터 화면 아래에 광고 칸이 생겨요.",
+    "jobs": [
+     "899331c9-67f8-4725-b7a5-2ab498bdcff7",
+     "8bb3b45b-6eac-458a-bb09-e8ad9941e3fb"
+    ]
+   },
+   {
+    "card": 5,
+    "img_a": "stills/kh_a.png",
+    "pos_a": "50% 40%",
+    "img_b": "stills/kh_b.png",
+    "pos_b": "50% 35%",
+    "say_side": "left",
+    "jobs": [
+     "436b0932-be82-4729-ab3f-47baf5e40a1f",
+     "f41b6b69-21e0-48ce-a324-42b19c456453"
+    ]
+   }
+  ],
+  "sources": "장마다 표시",
+  "end": {
+   "title": "오늘 아침 5가지,<br>매일 8시 30분",
+   "sub": "경제부터 트렌드까지, 오늘 소식 5가지를<br>웹툰으로 풀어 드려요"
+  }
+ },
+ "comic_note": "5가지 웹툰 3판(E20 11/02~11/08 — 같은 날 08:30 카드와 도달·저장+공유 비교, 판정 11/09). 그림 11장 gpt_image_2_5 4:3 1k(장당 0.25 크레딧), 프롬프트·구도 규칙 automation/pilots/ai_reel/webtoon_prompt.md. stills/ 는 저장소에 올리지 않는다(jobs 로 다시 받는다). 카드 ④의 숫자 '12년 만'·본문 'AD' 칸은 조선비즈에만 있어(조선일보는 '처음으로'·'배너 광고') 이 장만 number '처음'·body 를 두 매체 공통 사실로 바꿔 싣는다."
+}
