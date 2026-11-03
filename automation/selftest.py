@@ -2375,6 +2375,7 @@ def t_ai_reel():
     expect(qa.check_spoken(week, "헤드스파 예약 1주일에 385건")[1], "대사 원고 없이도 '1'을 낱말로 넘겼다(예전 동작이 바뀌었다)")
     expect(qa.check_spoken(week, "헤드스파 예약 2주일에 385건", script=tts)[1], "'일주일'을 '이주일'로 말해도 통과했다")
     expect(qa.check_spoken(week, "헤드스파 예약 1주일에 386건", script=tts)[1], "385건을 386건으로 말해도 통과했다")
+    expect(qa.check_spoken([], "결승은 2개 도시에서", script="결승은 미시간이 개최해요")[1], "낱말 머리가 아닌 글자('미시간이 개최'의 '이개')로 '2개'를 넘겼다")
     # 만화 10장 순서 — 사전순이면 c10(끝 장)이 두 번째로 올라간다
     with tempfile.TemporaryDirectory() as tmp:
         folder = Path(tmp)

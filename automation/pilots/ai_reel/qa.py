@@ -382,10 +382,14 @@ def digit_words(said, script):
     다른 값을 말했으면('이주일'을 '1주일'로) 대사에 그 낱말이 없어 그대로 잡힌다."""
     if not script:
         return []
-    want = re.sub(r"\s", "", read_ko(_TAG.sub(" ", script)))
+    ref = read_ko(script)
+    # 낱말 머리부터 맞아야 한다 — read_ko 는 띄어쓰기까지 지우므로 원고를 먼저 띄어쓰기로 나눠 낱말마다 읽는다
+    # (한 덩어리로 찾으면 '2개'(이개)가 '미시간이 개최'에 걸린다)
+    words = [w for w in (read_ko(tok, prefer=ref) for tok in _TAG.sub(" ", script).split()) if w]
     out = []
     for m in re.finditer(r"(?<![\d.,])\d+[가-힣]+", said):
-        if re.sub(r"\s", "", read_ko(m.group(0), prefer=want)) in want:
+        reading = read_ko(m.group(0), prefer=ref)
+        if reading and any(w.startswith(reading) for w in words):
             out += [n[:2] for n in spoken_numbers(m.group(0))]
     return out
 
