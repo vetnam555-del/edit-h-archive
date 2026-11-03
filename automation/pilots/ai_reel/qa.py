@@ -2,10 +2,15 @@
 """AI 릴스·H 극장 만화 검수 — 올리기 전에 반드시 돌린다(2026-11-01 운영자 "검수도 잘해주고").
 
 사용: python3 automation/pilots/ai_reel/qa.py <episode.json> [--no-asr] [--video 다른 영상.mp4]
+      python3 automation/pilots/ai_reel/qa.py <episode.json> --stems   # 녹음 직후(렌더 전) — 녹음 원고·자막↔목소리 맞춤·녹음 받아쓰기만
 검사(하나라도 ✗ 면 올리지 않는다):
  1. 숫자 대조 — 화면 글자·말풍선·설명·캡션에 나온 숫자가 그날 content/{날짜}.json 에 그대로 있나(확인된 숫자만).
  2. 대사 — 완성본을 음성 인식(faster-whisper small)으로 받아 적어, 대사 줄마다 낱말이 충분히 들리나.
     대사 원고의 숫자(한글 읽기)는 content 와, 들린 숫자는 대사 숫자와 같은 값이어야 한다(11/01 Codex — 목소리가 틀린 금액을 말하면 막는다).
+    2026-11-04 설정부터(11/03 운영자 "자막이나 목소리 입힐 때 싱크 맞추고 발음도 똑바로"):
+    · 녹음 원고 — 대사에 숫자·영문이 있으면 "tts" 칸에 한글 읽기로(숫자는 대사와 같은 값, 메모 금지).
+    · 발음 — 녹음 파일 하나씩(음악 없이) 받아 적어 원고와 95% 이상, 완성본의 그 줄 시간대에서도 85% 이상.
+    · 싱크 — 대사 한 줄이 들리는 동안 자막은 한 장, 자막은 목소리 0.6초 앞 ~ 0.15초 뒤에 떠서 목소리가 끝날 때까지 남고, 같은 낱말이 하나는 있다.
  3. 소리 — 통합 음량 -14±1.5 LUFS, 음성 트랙이 있다, 중간에 끊기는 곳이 없다(11/01 운영자 "소리가 중간중간 끊긴다").
  4. 영상 — 1080×1920, 길이 8~30초, 검은 화면·어둡게 번쩍이는 프레임이 한 프레임도 없다
     (11/01 운영자 "영상 중간중간에 검은색으로 끊기는 것 같다" — 끝 화면 페이드 인이 2프레임 검게 튀었다).
@@ -436,6 +441,173 @@ def short_captions(ep):
     return fails
 
 
+# ── 싱크·발음(2026-11-04~) — 11/03 운영자 "영상에서 자막이나 목소리 입힐 때 싱크 맞추고 발음도 똑바로 말하게" ──
+# 11/02·11/03 편을 다시 재 보니: ① 첫 줄(약 2.6~3.1초)이 말하는 동안 자막이 두 번 바뀌었고(후킹 1.3초 → 1/5), 11/03 4번 줄도 중간(11.2초)에 바뀌었다.
+# ② 녹음 파일만 받아 적으면 'Z세대'→'제2세대'·'면세'→'연세'·'내일'→'매일'·'뛰었대요'→'띄었대요'로 들렸는데, 예전 검사는
+#    한글만 남겨 완성본 전체 글에서 찾아(60%) 다 통과했다. 이제 줄마다 ⓐ 녹음 파일 하나(음악 없이) ⓑ 완성본의 그 줄 시간대에서 따로 받아 적는다.
+SYNC_RULE_FROM = "2026-11-04"
+SYNC_LEAD = 0.6    # 자막이 목소리보다 먼저 떠도 되는 최대(초) — 장면이 바뀌고 말이 조금 뒤에 나오는 정도
+SYNC_LATE = 0.15   # 목소리가 자막보다 먼저 나와도 되는 최대(초)
+SYNC_TAIL = 0.15   # 목소리가 자막이 바뀐 뒤까지 이어져도 되는 최대(초)
+STEM_MIN = 0.95    # 녹음 파일 하나(음악 없이)를 받아 적은 말이 녹음 원고(tts)와 맞는 비율 — 11/02·11/03 잘못 들린 줄은 88~94%
+MIX_MIN = 0.85     # 완성본에서 그 줄이 나오는 시간(앞뒤 0.3초)에 들린 말이 원고와 맞는 비율 — 음악·효과음에 묻히거나 자리가 어긋나면 낮다
+TRIM_AF = ("silenceremove=start_periods=1:start_threshold=-40dB,areverse,"
+           "silenceremove=start_periods=1:start_threshold=-40dB,areverse")   # episode.py 와 같은 앞뒤 무음 자르기
+_TAG = re.compile(r"\[[^\]]*\]")   # Knox(elevenlabs) 말투 표시 '[excited]'
+_LETTER = {"A": "에이", "B": "비", "C": "씨", "D": "디", "E": "이", "F": "에프", "G": "지", "H": "에이치", "I": "아이", "J": "제이",
+           "K": "케이", "L": "엘", "M": "엠", "N": "엔", "O": "오", "P": "피", "Q": "큐", "R": "알", "S": "에스", "T": "티", "U": "유",
+           "V": "브이", "W": "더블유", "X": "엑스", "Y": "와이", "Z": "제트"}
+_DIGIT = "영일이삼사오육칠팔구"
+
+
+def _sino(n):
+    """0~9999 → 한자어 읽기(1은 십·백·천 앞에서 뺀다: 10 '십', 1000 '천')."""
+    if n == 0:
+        return "영"
+    out = ""
+    for unit, name in ((1000, "천"), (100, "백"), (10, "십")):
+        d, n = divmod(n, unit)
+        if d:
+            out += ("" if d == 1 else _DIGIT[d]) + name
+    return out + (_DIGIT[n] if n else "")
+
+
+def read_number(tok, next_char=""):
+    """'63' '1,000' '93.7' → '육십삼' '천' '구십삼점칠'. 뒤가 만·천·백·십이면 '1'은 읽지 않는다('1만원' → '만원')."""
+    whole, _, frac = tok.replace(",", "").partition(".")
+    n = int(whole or 0)
+    if n == 1 and not frac and next_char and next_char in "만천백십":
+        return ""
+    parts, big = [], ["", "만", "억", "조"]
+    for i in range(4):
+        n, chunk = divmod(n, 10000)
+        if chunk:
+            parts.append(("" if chunk == 1 and i == 1 else _sino(chunk)) + big[i])
+        if not n:
+            break
+    out = "".join(reversed(parts)) or "영"
+    return out + ("점" + "".join(_DIGIT[int(c)] for c in frac) if frac else "")
+
+
+def read_ko(text):
+    """받아쓴 말·원고를 '소리 나는 대로' 한글로 — 숫자는 한자어 읽기(6월 유월·10월 시월), %는 퍼센트, 영문은 글자 이름(G마켓 → 지마켓), 말투 표시는 뺀다."""
+    t = _TAG.sub(" ", text)
+    t = re.sub(r"(?<!\d)6\s?월", "유월", t)
+    t = re.sub(r"(?<!\d)10\s?월", "시월", t)
+    t = t.replace("%p", "퍼센트포인트").replace("%", "퍼센트").replace("+", "플러스")
+    t = re.sub(r"\d[\d,]*(?:\.\d+)?", lambda m: read_number(m.group(0), t[m.end():m.end() + 1]), t)
+    t = re.sub(r"[A-Za-z]", lambda m: _LETTER[m.group(0).upper()], t)
+    return hangul(t)
+
+
+def heard_ratio(want, heard, recall=False):
+    """원고와 들린 말이 얼마나 같은가(0~1) — 둘 다 read_ko 로 소리 나는 대로 바꾼 뒤 글자 단위로 견준다.
+    기본은 빠진 말·더 들린 말 모두 깎는다(녹음 파일 하나). recall 이면 원고 글자 중 들린 비율만(완성본 시간대 — 앞뒤 줄 낱말이 섞여 들어온다)."""
+    a, b = read_ko(want), read_ko(heard)
+    if not a:
+        return 1.0
+    sm = difflib.SequenceMatcher(None, a, b)
+    return sum(m.size for m in sm.get_matching_blocks()) / len(a) if recall else sm.ratio()
+
+
+def tts_gaps(ep):
+    """녹음 원고 검사 → 실패 목록. 대사(text)에 숫자·영문이 있으면 실제로 녹음할 'tts' 칸에 한글 읽기로 적어야 한다
+    (TTS 가 '63억'·'Z세대'·'G마켓'을 제멋대로 읽는다 — 11/03 'Z세대'는 '제트 세대'로 적어 녹음했는데도 '제2세대'로 들렸다).
+    tts 의 숫자는 대사와 같은 값이어야 한다. 2026-11-04 전 회차는 보지 않는다."""
+    if ep.get("date", "") < SYNC_RULE_FROM:
+        return []
+    fails = []
+    for i, v in enumerate(ep.get("voices") or [], 1):
+        text, tts = v.get("text", ""), v.get("tts")
+        if tts is None:
+            if re.search(r"[0-9A-Za-z%]", _TAG.sub("", text)):
+                fails.append(f"대사 {i} '{text[:24]}' 에 숫자·영문이 있다 — 녹음은 \"tts\" 칸에 한글 읽기로"
+                             "(예 '63억 달러' → '육십삼억 달러', '26%' → '이십육 퍼센트', 'G마켓' → '지마켓')")
+            continue
+        if re.search(r"[0-9A-Za-z%]", _TAG.sub("", tts)):
+            fails.append(f"대사 {i} tts '{tts[:24]}' 에 숫자·영문이 남아 있다 — 소리 나는 대로 한글로")
+        if re.search(r"[—()（）]|받아쓰기", tts):
+            fails.append(f"대사 {i} tts '{tts[:24]}…' 에 메모가 섞였다 — tts 칸엔 녹음한 말만(메모는 voice 칸에)")
+        a = sorted(n[:2] for n in spoken_numbers(text))
+        b = sorted(n[:2] for n in spoken_numbers(_TAG.sub("", tts)))
+        if a != b:
+            fails.append(f"대사 {i} tts 숫자 {', '.join(_say(n) for n in b) or '없음'} ≠ 대사 숫자 {', '.join(_say(n) for n in a) or '없음'}")
+    return fails
+
+
+def voice_spans(ep, base):
+    """대사 줄마다 완성본에서 들리는 구간 [(시작, 끝)] — episode.py 처럼 앞뒤 무음을 자르고 tempo 를 건 길이(ffmpeg 필요)."""
+    spans = []
+    for v in ep.get("voices") or []:
+        raw = subprocess.run(["ffmpeg", "-v", "error", "-i", str(base / v["file"]), "-af",
+                              f"aresample=16000,aformat=channel_layouts=mono,{TRIM_AF},atempo={v.get('tempo', 1.0)}", "-f", "s16le", "-"],
+                             capture_output=True).stdout
+        start = float(v.get("start", 0))
+        spans.append((start, round(start + len(raw) / 32000, 3)))
+    return spans
+
+
+def _words(text):
+    """대사·자막의 낱말 머리(두 글자) — '같은 소식을 말하나' 가늠용."""
+    return {w[:2] for w in re.findall(r"[가-힣A-Za-z0-9]{2,}", _TAG.sub(" ", text))}
+
+
+def sync_gaps(ep, spans):
+    """자막 ↔ 목소리 맞춤 → 실패 목록. 대사 한 줄이 들리는 동안 자막은 한 장이고, 그 자막은 목소리와 함께(0.6초 앞 ~ 0.15초 뒤) 떠서
+    목소리가 끝날 때까지 남아 있으며, 같은 소식을 말한다(낱말 하나 이상 같음). 자막이 없는 줄은 마무리 끝인사만 된다. 2026-11-04 전 회차는 보지 않는다."""
+    if ep.get("date", "") < SYNC_RULE_FROM:
+        return []
+    caps, voices, fails = ep.get("captions") or [], ep.get("voices") or [], []
+    for i, ((vs, ve), v) in enumerate(zip(spans, voices), 1):
+        on = [(k, c) for k, c in enumerate(caps, 1) if float(c["start"]) < ve - SYNC_TAIL and float(c["end"]) > vs + SYNC_LATE]
+        line = v.get("text", "")[:20]
+        if not on:
+            if i != len(voices):
+                fails.append(f"대사 {i} '{line}…'({vs:.2f}~{ve:.2f}초)에 자막이 없다")
+            continue
+        if len(on) > 1:
+            cut = ", ".join(f"{float(c['start']):.2f}초" for _, c in on[1:])
+            fails.append(f"대사 {i} '{line}…'({vs:.2f}~{ve:.2f}초)를 말하는 동안 자막이 {cut}에 바뀐다 — 한 줄에 자막 한 장(장면 경계에서만 바꾼다)")
+        k, c = on[0]
+        cs, ce = float(c["start"]), float(c["end"])
+        if cs > vs + SYNC_LATE:
+            fails.append(f"대사 {i} 목소리({vs:.2f}초)가 자막 {k}({cs:.2f}초)보다 {cs - vs:.2f}초 먼저 나온다 — 자막 시작을 {max(0, vs - 0.1):.2f}초 안팎으로")
+        elif cs < vs - SYNC_LEAD and not (k == 1 and cs == 0):
+            fails.append(f"대사 {i} 자막 {k}({cs:.2f}초)가 목소리({vs:.2f}초)보다 {vs - cs:.2f}초 먼저 뜬다 — 목소리 start 를 당기거나 자막을 {vs - 0.1:.2f}초 안팎에")
+        if len(on) == 1 and ve > ce + SYNC_TAIL:
+            fails.append(f"대사 {i} 목소리가 자막 {k}이 끝난 뒤({ce:.2f}초)에도 {ve - ce:.2f}초 이어진다(목소리 끝 {ve:.2f}초) — 대사를 줄이거나 자막 end 를 {ve + 0.05:.2f}초로")
+        if not _words(v.get("text", "")) & _words(plain(c.get("html", ""))):
+            fails.append(f"대사 {i} '{v.get('text', '')[:24]}' 와 그때 자막 {k} '{plain(c.get('html', ''))[:24]}…' 에 같은 낱말이 없다 — 같은 소식을 말하게")
+    return fails
+
+
+def stem_heard(ep, base, model):
+    """녹음 파일 하나씩(음악 없이) 받아 적어 원고(tts, 없으면 text)와 견준다 → (메모, 실패). 발음이 뭉개지면 여기서 잡힌다."""
+    notes, fails = [], []
+    for i, v in enumerate(ep.get("voices") or [], 1):
+        segs, _ = model.transcribe(str(base / v["file"]), language="ko", beam_size=5)
+        said = " ".join(s.text for s in segs).strip()
+        want = v.get("tts") or v.get("text", "")
+        got = heard_ratio(want, said)
+        msg = f"대사 {i} 녹음만 받아쓰기 {got:.0%} — 원고 '{_TAG.sub('', want).strip()}' / 들린 '{said}'"
+        (notes if got >= STEM_MIN else fails).append(msg + ("" if got >= STEM_MIN else
+            f" — {STEM_MIN:.0%} 미만: 같은 말투로 다시 녹음(2번까지), 그래도 같은 낱말이 틀리면 더 흔한 말로 바꿔 쓴다"))
+    return notes, fails
+
+
+def mix_heard(ep, spans, words):
+    """완성본 받아쓰기(낱말 시각 포함)에서 대사 줄마다 그 시간대(앞뒤 0.3초)에 들린 말만 모아 견준다 → (메모, 실패).
+    words: [(시작, 끝, 낱말)]. 음악·효과음에 묻히거나 목소리 자리가 어긋나면 낮게 나온다."""
+    notes, fails = [], []
+    for i, ((vs, ve), v) in enumerate(zip(spans, ep.get("voices") or []), 1):
+        said = "".join(w for a, b, w in words if vs - 0.3 <= (a + b) / 2 <= ve + 0.3).strip()
+        got = heard_ratio(v.get("tts") or v.get("text", ""), said, recall=True)
+        msg = f"대사 {i} 완성본 {vs:.1f}~{ve:.1f}초 받아쓰기 {got:.0%} — 들린 '{said}'"
+        (notes if got >= MIX_MIN else fails).append(msg + ("" if got >= MIX_MIN else
+            f" — {MIX_MIN:.0%} 미만: 그 구간 음악·효과음(sfx)을 낮추거나 목소리 start 를 장면에 맞춘다"))
+    return notes, fails
+
+
 def pattern_repeats(epath, ep):
     """같은 날(첫 마디는 전날까지) 다른 릴스와 같은 틀이면 → 실패 목록. 2026-11-02 전 회차는 검사하지 않는다(기록)."""
     if ep.get("date", "") < HOOK_RULE_FROM:
@@ -559,6 +731,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("episode")
     ap.add_argument("--no-asr", action="store_true")
+    ap.add_argument("--stems", action="store_true", help="녹음 직후(렌더 전): 녹음 원고(tts)·자막↔목소리 맞춤·녹음 파일 받아쓰기만 본다")
     ap.add_argument("--video", help="instagram/{날짜}/reel_ai.mp4 대신 볼 영상(고쳐 본 판)")
     ap.add_argument("--extra", type=int, help="메인 N번 AI 영상(instagram/{날짜}/extra/N/) — 운영자가 앱에서 만든 영상, 만화는 없다")
     a = ap.parse_args()
@@ -618,6 +791,27 @@ def main():
                 fails.append(f"content 에 없는 숫자 — 대사 '{vline.get('text', '')[:20]}…': {_say(sn)}")
     fails += pattern_repeats(epath, ep)
     fails += short_captions(ep)
+    fails += tts_gaps(ep)
+    spans = voice_spans(ep, epath.parent) if ep.get("voices") and ep.get("date", "") >= SYNC_RULE_FROM else []
+    fails += sync_gaps(ep, spans)
+    if spans:
+        notes.append("목소리 구간 " + " · ".join(f"{i}) {a:.2f}~{b:.2f}" for i, (a, b) in enumerate(spans, 1)))
+    if a.stems:   # 녹음 직후(렌더 전) 빠른 점검 — 녹음 원고·자막 맞춤·녹음 파일 받아쓰기만
+        if ep.get("voices"):
+            from faster_whisper import WhisperModel
+            n1, f1 = stem_heard(ep, epath.parent, WhisperModel("small", device="cpu", compute_type="int8"))
+            notes += n1
+            fails += f1
+        fails = [f for f in fails if f.startswith(("대사", "자막", "content 에 없는 숫자 — 대사"))]
+        for n in notes:
+            print("  ·", n)
+        if fails:
+            print("✗ 녹음·자막 점검 실패 — 다시 녹음하거나 자막 시각을 고친 뒤 렌더한다")
+            for f in fails:
+                print("  -", f)
+            sys.exit(1)
+        print(f"✓ 녹음·자막 점검 통과 ({day}) — episode.py 로 렌더한 뒤 qa.py 를 다시(전체) 돌린다")
+        return
     cap_path = folder / "reel_ai_caption.txt"
     fails += source_gaps(ep, content, cap_path.read_text(encoding="utf-8") if cap_path.exists() else "")
     if any("AI로 만든 영상" in plain(c["html"]) for c in ep.get("captions", [])):
@@ -672,19 +866,28 @@ def main():
         # 2 대사
         if not a.no_asr and ep.get("voices"):
             from faster_whisper import WhisperModel
-            segs, _ = WhisperModel("small", device="cpu", compute_type="int8").transcribe(str(video), language="ko", beam_size=5)
+            model = WhisperModel("small", device="cpu", compute_type="int8")
+            synced = ep.get("date", "") >= SYNC_RULE_FROM
+            segs, _ = model.transcribe(str(video), language="ko", beam_size=5, word_timestamps=synced)
+            segs = list(segs)
             said = " ".join(s.text for s in segs)
             heard = hangul(said)
             heard_nums, bad_nums = check_spoken(script_nums, said, allow=series_spoken)
             fails += bad_nums
             notes.append(f"들린 숫자 {', '.join(_say(n) for n in heard_nums) or '없음'}")
-            for vline in ep["voices"]:
-                want = hangul(re.sub(r"[일이삼사오육칠팔구십백천만억조점퍼센트]+(?=\s|$|[,.!?…])", "", vline.get("text", "")))
-                if len(want) < 4:
-                    continue
-                sm = difflib.SequenceMatcher(None, want, heard)
-                got = sum(b.size for b in sm.get_matching_blocks()) / len(want)
-                (notes if got >= 0.6 else fails).append(f"대사 '{vline.get('text', '')[:24]}…' 들림 {got:.0%}")
+            if synced:   # 11/04~ 줄마다 녹음 파일 하나 + 완성본의 그 줄 시간대(위 sync 검사와 같은 구간)
+                n1, f1 = stem_heard(ep, epath.parent, model)
+                n2, f2 = mix_heard(ep, spans, [(w.start, w.end, w.word) for s in segs for w in (s.words or [])])
+                notes += n1 + n2
+                fails += f1 + f2
+            else:
+                for vline in ep["voices"]:
+                    want = hangul(re.sub(r"[일이삼사오육칠팔구십백천만억조점퍼센트]+(?=\s|$|[,.!?…])", "", vline.get("text", "")))
+                    if len(want) < 4:
+                        continue
+                    sm = difflib.SequenceMatcher(None, want, heard)
+                    got = sum(b.size for b in sm.get_matching_blocks()) / len(want)
+                    (notes if got >= 0.6 else fails).append(f"대사 '{vline.get('text', '')[:24]}…' 들림 {got:.0%}")
 
     # 6 만화
     comic = sorted((folder / "comic").glob("c*.jpg"))

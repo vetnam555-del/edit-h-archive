@@ -2246,6 +2246,44 @@ def t_ai_reel():
            and not qa.short_captions(_caps("2026-11-03", [(0, 1.3), (1.3, 3.0)]))
            and "short_captions(ep)" in inspect.getsource(qa.main),
            "2초도 안 떠 있는 자막을 검수가 막지 않는다(11/04~)")
+    # 싱크·발음(11/04~) — 11/03 운영자 "자막이나 목소리 입힐 때 싱크 맞추고 발음도 똑바로"
+    expect([qa.read_ko(x) for x in ("63억 달러", "1만원", "93.7%", "10월 수출", "G마켓", "Z세대", "T+1", "2만개", "[excited] 1억")]
+           == ["육십삼억달러", "만원", "구십삼점칠퍼센트", "시월수출", "지마켓", "제트세대", "티플러스일", "이만개", "일억"],
+           "받아쓴 숫자·영문을 소리 나는 대로 읽지 못한다")
+    expect(qa.heard_ratio("바이낸스, 약 육십삼억 달러가 털렸습니다!", "바이낸스 약 63억 달러가 털렸습니다") == 1.0
+           and qa.heard_ratio("일본 제트 세대, 대화에 한국어를 섞어요!", "일본 제2세대 대화에 한국어를 섞어요.") < qa.STEM_MIN
+           and qa.heard_ratio("메타 광고 매출, 이십육 퍼센트 뛰었대요!", "메타 광고 매출 26% 띄었대요.") < qa.STEM_MIN
+           and qa.heard_ratio("팔로우하면 내일 아침에도 알려 줄게요!", "팔로우 하면 매일 아침에도 알려줄게요") < qa.STEM_MIN
+           and qa.heard_ratio("지마켓 유출 고객", "지마켓 유출 고객 바이낸스", recall=True) == 1.0,
+           "11/02·11/03 잘못 들린 줄('제2세대'·'띄었대요'·'매일')을 받아쓰기 비교가 못 잡거나, 맞게 들린 줄을 막는다")
+    tts_ep = lambda day, *vs: {"date": day, "voices": [dict(v) for v in vs]}   # noqa: E731
+    expect(not qa.tts_gaps(tts_ep("2026-11-04", {"text": "바이낸스, 약 63억 달러!", "tts": "[excited] 바이낸스, 약 육십삼억 달러!"},
+                                  {"text": "주식 판 돈, 하루 일찍 받게 돼요!"}))
+           and qa.tts_gaps(tts_ep("2026-11-04", {"text": "메타 광고 매출, 26% 뛰었대요!"}))
+           and qa.tts_gaps(tts_ep("2026-11-04", {"text": "G마켓 만 원", "tts": "G마켓 만 원"}))
+           and qa.tts_gaps(tts_ep("2026-11-04", {"text": "약 63억 달러!", "tts": "약 육십사억 달러!"}))
+           and qa.tts_gaps(tts_ep("2026-11-04", {"text": "시월 수출", "tts": "시월 수출 — 받아쓰기가 '10월'로 적어"}))
+           and not qa.tts_gaps(tts_ep("2026-11-03", {"text": "메타 광고 매출, 26% 뛰었대요!"})),
+           "녹음 원고 검사(숫자·영문은 tts 한글 읽기로·숫자 같게·메모 금지, 11/04~)가 틀린다")
+    b03 = json.loads((ROOT / "automation" / "pilots" / "ai_reel" / "2026-11-03" / "brief.json").read_text(encoding="utf-8"))
+    spans03 = [(0.10, 2.69), (3.12, 6.87), (7.06, 10.01), (10.20, 13.41), (14.08, 17.35), (17.60, 20.63)]   # 11/03 녹음을 잰 값
+    got03 = qa.sync_gaps({**b03, "date": "2026-11-04"}, spans03)
+    caps_ok = [dict(c) for c in b03["captions"]]
+    caps_ok[0]["end"], caps_ok[1]["start"] = 3.0, 3.0   # 후킹이 첫 줄 내내 — 1/5 자막은 빼고
+    del caps_ok[1]
+    caps_ok[3]["end"] = 14.04
+    del caps_ok[4]                                      # 4번 장면 자막을 중간에 옮기지 않는다
+    fixed = {**b03, "date": "2026-11-04", "captions": caps_ok}
+    late = {**fixed, "captions": [dict(c, start=3.6) if i == 1 else c for i, c in enumerate(caps_ok)]}
+    short = {**fixed, "captions": [dict(c, end=6.4) if i == 1 else c for i, c in enumerate(caps_ok)]}
+    other = {**fixed, "captions": [dict(c, html="<div class='main'>전혀 다른 말</div>") if i == 2 else c for i, c in enumerate(caps_ok)]}
+    expect(len(got03) == 2 and all("자막이" in f and "바뀐다" in f for f in got03) and not qa.sync_gaps(fixed, spans03)
+           and any("먼저 나온다" in f for f in qa.sync_gaps(late, spans03))
+           and any("끝난 뒤" in f for f in qa.sync_gaps(short, spans03))
+           and any("같은 낱말이 없다" in f for f in qa.sync_gaps(other, spans03))
+           and not qa.sync_gaps(b03, spans03)
+           and all(x in inspect.getsource(qa.main) for x in ("tts_gaps(ep)", "sync_gaps(ep, spans)", "stem_heard(", "mix_heard(")),
+           "자막↔목소리 맞춤 검사(한 줄에 자막 한 장·같이 뜨기·끝까지 남기·같은 소식, 11/04~)가 틀린다")
     # '달러'는 '달'(개월)이 아니다(11/03 바이낸스 '약 63억 달러' — 단위가 '달'로 읽혀 content 의 '63억 달러'와 못 맞췄다)
     expect(qa.spoken_numbers("바이낸스, 약 육십삼억 달러가 털렸습니다") == [(6300000000.0, "달러", "")]
            and qa.spoken_numbers("약 63억 달러가") == [(6300000000.0, "달러", "")] and qa.spoken_numbers("석 달 만에") == [(3.0, "달", "")],

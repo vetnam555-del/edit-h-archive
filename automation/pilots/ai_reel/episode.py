@@ -12,7 +12,9 @@ episode.json (경로는 이 파일 기준 상대경로):
   end_seconds 2.5                  끝 화면 길이
   captions    [{start, end, top, size, html}]   화면 글자(대사와 같은 말 + 확인된 숫자를 <span class="hl">로)
   end_card    {line, sub, note}    끝 화면 문구
-  voices      [{file, start, tempo, robot}]     대사 파일(음성 인식으로 확인한 것)
+  voices      [{file, start, tempo, robot, text, tts}]   대사 파일(음성 인식으로 확인한 것) — text 는 화면·검수용 원고,
+              tts 는 실제로 녹음한 말(숫자·영문을 한글 읽기로: '63억' → '육십삼억', 'G마켓' → '지마켓', 2026-11-04~ qa 가 요구)
+              자막 시작은 그 줄 목소리 0~0.6초 앞(장면 경계), 끝은 목소리가 끝난 뒤 — 한 줄 말하는 동안 자막은 한 장(qa.sync_gaps)
   music       [{file, start, dur, fade_in, fade_out, offset, lufs, lowpass}]   곡 사이에 빈 구간을 두지 않는다 —
               '정적'은 무음이 아니라 같은 곡을 낮고 먹먹하게(lowpass·lufs -30 안팎) 깐다(11/01 "소리가 끊긴다")
   duck        {threshold, ratio, attack, release, mix}   대사 밑 음악 줄이기(기본 0.05·3·20·650·0.75)
