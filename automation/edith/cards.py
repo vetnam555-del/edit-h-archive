@@ -250,7 +250,7 @@ def cover(d, kicker=None, foot=None, tag=None):
     extra = card_height(d["date"]) - H   # 3:4 카드(1440)면 늘어난 90px 을 핵심어·스티커 자리에 나눠 준다(아래가 비지 않게)
     foot_color = "#FFFFFF" if photo else MUTED
     head_color, kick_color = ("#FFFFFF", "rgba(255,255,255,.92)") if photo else (TEXT, "#5A5A5E")
-    pill = f'\n  <div style="flex:none;margin-top:20px;">{persona_pill(tag)}</div>' if tag else ""   # 딥다이브 날 이름표(지난 호 HTML 은 그대로)
+    pill = f'\n  <div style="flex:none;margin-top:20px;">{persona_pill(tag, d.get("date"))}</div>' if tag else ""   # 딥다이브 날 이름표(지난 호 HTML 은 그대로)
     credit = (f'<div style="position:absolute;right:40px;bottom:24px;font-size:19px;color:rgba(255,255,255,.85);{shadow}">'
               f'{esc(cov["credit"])}</div>') if photo and cov.get("credit") else ""
     return _frame(f"""{bg}
@@ -430,7 +430,7 @@ def deep_card(d):
 
 def note_card(d):
     """형식 2 — 에디터 H 노트(고정 코너). 안경 마크로 에디터를 캐릭터로 세운다. 투표 결과가 있는 날은 결과를 싣는다."""
-    head = (f'<div style="display:flex;align-items:center;gap:22px;">{avatar(96)}'
+    head = (f'<div style="display:flex;align-items:center;gap:22px;">{avatar(96, d.get("date"))}'
             f'<div><div style="font-weight:800;font-size:38px;line-height:1.1;color:{TEXT};">에디터 H 노트</div>'
             f'<div style="font-weight:500;font-size:24px;line-height:1;margin-top:10px;color:{SUB};letter-spacing:1px;">EDITOR H&#39;S NOTE</div></div></div>')
     r = d.get("poll_result")
@@ -516,8 +516,18 @@ def calendar_card(label, title, rows):
 </div>""")
 
 
-def avatar(size=148):
-    """@edit.h.kr 프로필 마크 — 버밀리언 원 + 안경(렌즈 2개). 뉴스레터 58px 마크를 같은 비율로 키웠다."""
+# 2026-11-03 운영자(팔로우 카드 캡처) '여기 캐릭터 로고가 좀 이상하다' — 카드의 도형 마크는 안경만 원 한가운데에 있고 미소가 없어
+# 프로필 사진(assets/mascot/profile.png — 안경은 위쪽 절반, 아래 미소)과 다른 얼굴로 보였다. 뉴스레터는 11/03 호부터 프로필 그림을 싣는다
+# (newsletter.MARK_IMG_FROM). 카드도 11/04 호부터 같은 그림 — 팔로우 카드·에디터 H 노트·딥다이브 이름표. 지난 호 카드는 다시 만들어도 예전 그대로(기록).
+AVATAR_IMG_FROM = "2026-11-04"
+AVATAR_IMG = ROOT / "assets" / "mascot" / "avatar-192.png"
+
+
+def avatar(size=148, day=None):
+    """@edit.h.kr 프로필 마크 — 11/04 호부터 프로필과 같은 그림(주황 원 + 안경 + 미소), 그 전은 버밀리언 원 + 안경(렌즈 2개) 도형."""
+    if day and str(day)[:10] >= AVATAR_IMG_FROM and AVATAR_IMG.exists():
+        return (f'<img src="{_photo_uri(AVATAR_IMG.relative_to(ROOT))}" alt="" '
+                f'style="flex:none;display:block;width:{size}px;height:{size}px;border-radius:50%;background:{ACC};">')
     s = size / 58
     lens = (f'<div style="width:{round(21 * s)}px;height:{round(21 * s)}px;border-radius:50%;border:{round(3 * s)}px solid {INK};'
             f'background:{PAPER};display:flex;justify-content:center;">'
@@ -555,7 +565,7 @@ def cta(d):
 <div class="body" style="padding:60px 78px;justify-content:center;">
   {top}
   <div style="flex:none;margin-top:{40 if poll else 50}px;background:#FFFFFF;border:1.5px solid #EAEAEA;border-radius:34px;box-shadow:0 4px 10px rgba(0,0,0,.10);padding:36px 40px;display:flex;align-items:center;gap:40px;">
-    {avatar()}
+    {avatar(148, d.get('date'))}
     <div style="flex:1;">
       <div style="font-weight:500;font-size:31px;line-height:1;color:{TEXT};">edit.h.kr</div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);margin-top:26px;">{stat_html}</div>
@@ -603,7 +613,7 @@ def cta_follow(d):
   <div class="bal" style="margin-top:18px;text-align:center;font-weight:400;font-size:{fs(30)};line-height:1.5;color:{SUB};">{mk(c["sub"])}</div>
   <div style="flex:none;margin-top:46px;background:#FFFFFF;border:1.5px solid #EAEAEA;border-radius:36px;box-shadow:0 6px 16px rgba(0,0,0,.10);
     padding:44px 48px 40px;display:flex;flex-direction:column;align-items:center;text-align:center;">
-    {avatar(132)}
+    {avatar(132, d.get('date'))}
     <div style="margin-top:22px;font-weight:800;font-size:{fs(40)};line-height:1;color:{TEXT};">edit.h.kr</div>
     <div class="bal" style="margin-top:16px;font-weight:500;font-size:{fs(30)};line-height:1.45;color:{SUB};">{follow_line(d, when, n)}</div>
     <div style="flex:none;width:100%;display:grid;grid-template-columns:repeat(3,1fr);margin-top:28px;">{stat_html}</div>
@@ -626,10 +636,10 @@ DIVE_STEP_POSES = ("point", "thinking", "newspaper", "point", "thinking")   # �
 LINE_W, LINE_H, LINE_SIDE, LINE_TOP, LINE_BOTTOM, LINE_ROOM = 932, 350, 84, 78, 16, 88   # 선 그래프 그림 크기 — 글자는 HTML 로 얹어 늘어나지 않게
 
 
-def persona_pill(text):
+def persona_pill(text, day=None):
     """딥다이브 표지 이름표 — 머니그라피 '이재용 회계사가 읽어주는'. 안경 마크(에디터 H) + 글자, 어떤 사진 위에서도 읽히게 흰 상자."""
     return (f'<div style="display:inline-flex;align-items:center;gap:14px;background:#FFFFFF;border:3px solid {TEXT};border-radius:999px;'
-            f'padding:8px 30px 8px 10px;box-shadow:0 5px 0 {ACC_FILL};">{avatar(50)}'
+            f'padding:8px 30px 8px 10px;box-shadow:0 5px 0 {ACC_FILL};">{avatar(50, day)}'
             f'<span style="font-weight:800;font-size:30px;line-height:1;letter-spacing:-.5px;color:{TEXT};white-space:nowrap;">{esc(text)}</span></div>')
 
 

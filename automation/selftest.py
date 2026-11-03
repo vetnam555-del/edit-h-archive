@@ -177,6 +177,29 @@ def t_runners():
 
 
 
+def t_card_marks():
+    """11/03 운영자 '캐릭터 로고가 좀 이상하다' — 11/04 호부터 카드 마크는 프로필 그림(안경 + 미소), 큰 숫자 '63억$' 꼴은 막는다."""
+    import copy
+    from edith import cards, content
+    new, old = cards.avatar(50, "2026-11-04"), cards.avatar(50, "2026-11-03")
+    expect("data:image/png;base64," in new and "border-radius:50%" in new, "11/04 카드 마크가 프로필 그림이 아니다")
+    expect("data:image" not in old, "지난 호 카드 마크가 바뀐다(기록)")
+    src = Path(cards.__file__).read_text(encoding="utf-8")
+    expect("avatar(96, d.get(\"date\"))" in src and "avatar(132, d.get('date'))" in src and "persona_pill(tag, d.get(\"date\"))" in src,
+           "노트·팔로우 카드·딥다이브 이름표가 날짜를 넘기지 않는다")
+    raw = json.loads((CONTENT_DIR / "2026-11-03.json").read_text(encoding="utf-8"))
+    for day, bad in (("2026-11-03", False), ("2026-11-04", True)):
+        d = copy.deepcopy(raw)
+        d["date"] = day
+        try:
+            content.prepare(d, day)
+            got = False
+        except content.ContentError as e:
+            got = "63억 달러" in str(e)
+        expect(got == bad, f"{day} 카드 큰 숫자 '63억$' 검사가 {'막아야' if bad else '지나가야'} 한다")
+    return "11/04~ 프로필 그림 마크 · '억$' 숫자 막음"
+
+
 def t_anjang_wait():
     """평일 07:55 전 fallback 빌드는 오늘 안장 글을 확인한 기록이 있을 때만(11/03 운영자 '안장출근길 소스가 너무 좋다' — 10/15·10/29 먼저 만들어 겹침 0~1/10)."""
     import build_issue
@@ -1593,6 +1616,9 @@ def _dive_sample(steps=4, worst=False, day=None):
     data = json.loads((CONTENT_DIR / f"{daily_issues(1)[0]}.json").read_text(encoding="utf-8"))
     data.update({"date": day, "series": {"name": "H의 장부"}, "briefs_short_reason": "자동 점검용 원고"})
     data.pop("vol", None)
+    for ci in (data.get("cards") or {}).get("issues") or []:   # 지난 호 원고의 '63억$' 꼴은 11/04~ content 가 막는다 — 옮겨 쓸 때 새 규칙대로
+        if isinstance(ci.get("number"), str):
+            ci["number"] = re.sub(r"([만억조])\s*[$€¥]", r"\1 달러", ci["number"])
     lim = content_mod.CARD_LIMITS
 
     def fill(n, words="매출 이익 가격 점유율 회원 객단가 영업이익 이익률 커피 한 잔 남는 돈"):
@@ -2642,6 +2668,7 @@ def main():
     check("봇 커밋 이름은 KST 날짜", t_commit_dates)
     check("안장출근길 비교(회고 잣대)", t_compare_anjang)
     check("평일 안장 글 기다리기(07:55 전 fallback 빌드 막음)", t_anjang_wait)
+    check("카드 마크·큰 숫자 단위(11/04~)", t_card_marks)
     check("발송 시각(지난 호는 08:00)", t_send_time)
     check("짧게 읽는 소식 점검", t_brief_check)
     check("새 호 막는 점검(짧은 소식 개수·H PICK 중복)", t_strict_content)
