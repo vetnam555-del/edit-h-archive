@@ -16,6 +16,11 @@
   ② 안 오면 Meta 개발자 앱 → Instagram → Instagram 로그인을 사용한 API 설정 → 권한에 `instagram_business_manage_messages` 가 있는지 보고, 없으면 더한 뒤
   **토큰을 새로 만들어** GitHub Secret `IG_ACCESS_TOKEN` 만 바꾼다(채팅에 붙여 넣지 말 것). ③ 그래도 안 오면 앱이 '개발 모드'라 앱 역할이 없는 사람에게는 DM 이 막힌 것 —
   앱 검수(이 권한의 고급 액세스)가 필요하다. 그때 단계를 따로 정리한다.
+  **11/02 진단(①을 해 봤다):** 운영자가 개인 계정으로 '에디트' 댓글을 달았는데 아무 답이 없었다. 게시물의 댓글 수(comments_count)는 0보다 큰데,
+  댓글 목록(`/comments`·`fields=comments`)은 오류 없이 빈 목록(`data: []`)으로 온다 — 우리 댓글도 운영자 댓글도 읽히지 않는다. 댓글 쓰기·메시지 권한은 된다.
+  → Meta 앱이 **개발 모드**이거나 **댓글 읽기(`instagram_business_manage_comments`) 고급 권한**이 없는 것으로 본다. 운영자 할 일:
+  ⓐ 앱 대시보드에서 앱 모드가 **'라이브'** 인지 ⓑ 권한에 `instagram_business_manage_comments`·`instagram_business_manage_messages` 가 둘 다 있는지
+  ⓒ 둘 다 맞는데도 안 되면 앱 검수(고급 액세스) — 검수 신청 문안 초안은 Claude 가 써 준다. 고쳤다고 알려 주면 `comment-dm.yml` 을 수동으로 돌려 확인부터 다시 본다.
 - [ ] **구글 서치 콘솔에 웹 보관함 등록** — 구글은 IndexNow 를 받지 않는다(네이버·빙은 10/31~ 자동).
 - [ ] (비용 — 결정만) **광고 시험** 하루 1만 원 × 7일로 신청 1명당 비용 재기. 하지 않아도 된다.
 

@@ -125,6 +125,39 @@ def print_style(d):
             print(f"      {n}")
 
 
+# 2026-11-03 운영자 '안장출근길 소스가 너무 좋다' — 10/15~11/02 평일 13일 중 안장을 제대로 쓴 날은 7일이었고, 2일(10/15·10/29)은
+# 안장 글(평일 07:29~07:40)이 올라오기 전에 먼저 만들어 겹침 0~1/10 이었다. 평일 07:55 전 fallback 빌드는 오늘 안장 글을 확인한
+# 기록(fetch_anjang.py — 글 있음 또는 접속 실패)이 있을 때만 한다. 07:55 가 지나면(안장이 쉬는 날 포함) 그대로 — 막다가 예비 호가 나가면 더 나쁘다.
+ANJANG_WAIT_UNTIL = (7, 55)
+
+
+def anjang_wait_problem(d, now=None, state_dir=None):
+    """평일 정규 호가 오늘 안장출근길 글을 보기 전에 fallback 으로 빌드되려 하면 → 사유(문자열), 아니면 None.
+    selftest 의 다시 빌드처럼 지난 호를 다시 만드는 실행은 EDITH_SKIP_ANJANG_WAIT=1 로 건너뛴다."""
+    import datetime as _dt
+    import os
+    from edith.common import now_kst
+    if os.environ.get("EDITH_SKIP_ANJANG_WAIT"):
+        return None
+    now = now or now_kst()
+    day = _dt.date.fromisoformat(str(d.get("date"))[:10])
+    if day != now.date() or day.weekday() >= 5 or d.get("rewind") or d.get("source_mode") != "fallback":
+        return None
+    if (now.hour, now.minute) >= ANJANG_WAIT_UNTIL:
+        return None
+    rec = Path(state_dir or (AUTOMATION / ".state")) / f"anjang-{day.isoformat()}.json"
+    try:
+        r = json.loads(rec.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        r = {}
+    if r.get("found_today") or r.get("code") == 2:   # 오늘 글을 봤거나(그래도 fallback 은 편집 판단) 접속이 안 된다
+        return None
+    since = "{recent_issues 의 마지막 발행일}"
+    return (f"평일({day}) {now:%H:%M} — 안장출근길 오늘 글을 아직 확인하지 않았는데 source_mode 가 fallback 이에요. "
+            f"안장 글은 평일 07:29~07:40 에 올라와요. python3 automation/fetch_anjang.py --since {since} --wait-until 07:55 로 "
+            "기다려 주제를 다시 고른 뒤 빌드하세요(07:55 가 지나면 이 검사는 넘어가요 — RUNBOOK 1-1)")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("date", help="YYYY-MM-DD (KST)")
@@ -142,6 +175,11 @@ def main():
         print(f"✓ content/{args.date}.json 검증 통과 (VOL.{d['vol']}, 아이템 {len(d['all_items'])}개)")
         print_style(d)
         return
+
+    wait = anjang_wait_problem(d)
+    if wait:
+        print(f"✗ {wait}")
+        sys.exit(4)
 
     site_url = args.site_url or cfg["site_url"]
     d["send_time_kst"] = send_time_on(d["date"], cfg)  # 뉴스레터 푸터·카드 하단·캡션의 발송 시각 문구(지난 호는 그때 시각)
