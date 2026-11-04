@@ -406,6 +406,62 @@ def t_repeat_check():
     return None
 
 
+def t_twosource():
+    """숫자 2곳 대조(2026-11-05 호~, edith/twosource.py·check_sources.py·build_issue 의 막음): 11/03·11/04 호에 원 기사 한 곳에만 있는 숫자가
+    2~4개씩 나갔다. 표기 차이(쉼표·띄어쓰기·%포인트·세는 말)와 어림값은 같은 값으로 보고, 한 곳뿐인 숫자는 막고, 못 읽은 기사·날짜는 경고만."""
+    import check_sources
+    import build_issue
+    from edith import twosource as ts
+    num = lambda s: ts.numbers(s)[0]   # noqa: E731
+    art = lambda s: ts.article_numbers({"body": s})   # noqa: E731
+    match = lambda c, a: any(ts.same(num(c), x) for x in art(a))   # noqa: E731
+    expect(match("14조2209억원", "매출 14조 2,209억 원을 기록") and match("14.2조", "14조2209억원") and match("4.6조", "4조6472억원"),
+           "표기·어림값이 같은 숫자를 다르다고 본다")
+    expect(match("6000억원 넘게", "6423억원") and match("약 34만 원", "34만3300원") and match("3만5000여 명", "3만5200명"), "어림말이 붙은 숫자를 못 맞춘다")
+    expect(not match("34만3000원", "34만3300원") and not match("10년", "12년") and not match("30%", "30년"), "다른 숫자를 같다고 본다")
+    expect(match("0.25%포인트", "0.25%p") and match("광고주 1000만 곳", "광고주 1000만명"), "%포인트·세는 말 표기 차이를 못 맞춘다")
+    expect(not ts.numbers("11/4 — SEC 보고서 · 2030세대 · https://x.kr/view?id=198581810 · 3분기"), "날짜 꼴·고정 표현·주소 번호·한 자리 수를 숫자로 본다")
+    d = {"date": "2026-11-05", "format": 2, "card_issues": [{"tag": "가", "number": "14.2조", "body": "영업손실 6423억원"}],
+         "all_items": [{"tag": "가", "body": "미국은 2024년 5월 바꿨고 매출 14조2209억원", "sources": [{"name": "A", "url": "u1"}, {"name": "B", "url": "u2"}]},
+                       {"tag": "나", "body": "예약 385건, 30일부터", "sources": [{"name": "C", "url": "u3"}, {"name": "D", "url": "u4"}]}]}
+    arts = {"u1": {"body": "매출 14조2209억원, 영업손실 6423억원. 미국은 2024년 5월"}, "u2": {"body": "14조2209억원 매출에 6,423억원 손실"},
+            "u3": {"body": "일주일에 385건, 이달 30일부터"}, "u4": None}
+    r = ts.check(d, arts)
+    expect(len(r["blocked"]) == 1 and "'2024년'" in r["blocked"][0] and "A에만" in r["blocked"][0], f"한 곳에만 있는 숫자를 막지 않는다: {r['blocked']}")
+    expect(any("[나]" in w and "1곳만 읽음" in w for w in r["warnings"]), "못 읽은 기사가 있는 이슈를 알리지 않는다")
+    arts["u4"] = {"body": "예약 385건"}
+    r = ts.check(d, arts)
+    expect(any("'30일'" in w and "경고만" in w for w in r["warnings"]) and not any("30일" in b for b in r["blocked"]), "날짜(일)를 경고가 아니라 막음으로 본다")
+    d["all_items"][0]["body"] += ", 점유율 7.22%"
+    expect(any("'7.22%'" in w and "어디에도 없어요" in w for w in ts.check(d, arts)["warnings"]), "기사 어디에도 없는 숫자를 알리지 않는다")
+    expect(check_sources.usable({"body": "2026년 10월 수출입 동향 — 첨부 PDF https://www.korea.kr/x?fileId=198581810"}) is False
+           and check_sources.usable({"body": "수출 1153억 달러, 93.7% 증가, 반도체 564억 달러"}), "제목·안내문만 읽힌 보도자료를 읽은 것으로 본다")
+    # 빌드 막음 — 그날(2026-11-05~) 새 호만, 읽어 둔 기사로 네트워크 없이
+    kst = dt.timezone(dt.timedelta(hours=9))
+    at = dt.datetime(2026, 11, 5, 7, 55, tzinfo=kst)
+    saved = os.environ.pop("EDITH_SKIP_SOURCE_CHECK", None)
+    try:
+        with tempfile.TemporaryDirectory() as tmp:
+            single, notes = build_issue.source_check_problem(d, now=at, cache=tmp)
+            expect(not single and any("check_sources.py" in n for n in notes), "읽어 둔 기사가 없을 때 막거나 알리지 않는다")
+            for url, a in arts.items():
+                p = check_sources.cache_path(url, tmp)
+                p.write_text(json.dumps(a, ensure_ascii=False), encoding="utf-8")
+            single, _ = build_issue.source_check_problem(d, now=at, cache=tmp)
+            expect(len(single) == 1 and "2024년" in single[0], f"한 곳에만 있는 숫자가 있는데 빌드를 막지 않는다: {single}")
+            expect(build_issue.source_check_problem({**d, "date": "2026-11-04"}, now=at.replace(day=4), cache=tmp) == ([], []),
+                   "시작일(2026-11-05) 전 호를 막는다")
+            expect(build_issue.source_check_problem(d, now=at.replace(day=6), cache=tmp) == ([], []), "지난 호를 다시 빌드할 때 막는다")
+            expect(build_issue.source_check_problem({**d, "rewind": True}, now=at, cache=tmp) == ([], []), "예비 호를 막는다")
+            os.environ["EDITH_SKIP_SOURCE_CHECK"] = "1"
+            expect(build_issue.source_check_problem(d, now=at, cache=tmp) == ([], []), "EDITH_SKIP_SOURCE_CHECK(다시 빌드)에도 막는다")
+    finally:
+        os.environ.pop("EDITH_SKIP_SOURCE_CHECK", None)
+        if saved is not None:
+            os.environ["EDITH_SKIP_SOURCE_CHECK"] = saved
+    return "표기·어림값 맞춤 · 한 곳뿐 막음 · 못 읽음·날짜·없는 숫자 경고 · 빌드 막음은 그날 새 호만"
+
+
 def t_releases():
     """원문(보도자료) 읽기·H PICK 원문 점검(2026-10-22 운영자 '기사 소스가 부족하다' — 정규 11호 55건 중 원문 0건)."""
     import fetch_releases as fr
@@ -1511,7 +1567,8 @@ def rebuild(days, strict):
             for pat in TEXT_OUTPUTS:   # 복사해 온 발행본을 지워야 '빌드가 이 파일을 안 만든' 회귀를 잡는다
                 (sbx / pat.format(d=day)).unlink(missing_ok=True)
             proc = subprocess.run([sys.executable, str(sbx / "automation" / "build_issue.py"), day], capture_output=True, text=True, cwd=sbx,
-                                  env={**os.environ, "EDITH_SKIP_ANJANG_WAIT": "1"})   # 다시 빌드는 안장 기다리기 검사 밖(11/03)
+                                  env={**os.environ, "EDITH_SKIP_ANJANG_WAIT": "1",   # 다시 빌드는 안장 기다리기 검사 밖(11/03)
+                                       "EDITH_SKIP_SOURCE_CHECK": "1"})   # 숫자 2곳 대조도 — 발행 때 이미 봤고, 지난 호는 기록(11/04)
             name = f"다시 빌드 {day}"
             if proc.returncode != 0:
                 FAILS.append(f"{name}: 종료 코드 {proc.returncode}\n{(proc.stdout + proc.stderr)[-800:]}")
@@ -1836,6 +1893,59 @@ def t_webtoon():
     cov = comic.duo_cover({"title": "제목"}, [{"tag": "반도체", "number": "28.58%"}, {"tag": "BYD", "number": "2만137대"}], img, "50% 50%")
     expect("class='cov fit'" in cov and "<b>2</b>BYD<i>2만137대</i>" in cov and "넘겨서 2가지 보기" in cov, "두 컷 웹툰 표지 목차가 틀리다")
     return f"{day} 카드 {len(picked)}장 → 컷·요약 · 지난 만화 설정 그대로 · 두 컷 장 칸 순서"
+
+
+def t_comic_only():
+    """웹툰만 만든 날 검수(qa --comic — 11월 크레딧 계획: 홀수 날은 AI 영상·목소리 없이 5가지 웹툰만, 19:30 저녁 사슬이 올린다):
+    영상·목소리·릴스 캡션이 없어도 통과하고, 만화 장수·크기·캡션('AI로 만들'·해시태그)·content 에 없는 숫자·'출처:' 칸은 그대로 막는다."""
+    sys.path.insert(0, str(AUTOMATION / "pilots" / "ai_reel"))
+    import qa
+    from edith import content as content_mod
+    day = daily_issues(1)[0]
+    raw = json.loads((ROOT / "content" / f"{day}.json").read_text(encoding="utf-8"))
+    corpus = json.dumps(raw, ensure_ascii=False)
+    picked = [(n, it) for n, it in enumerate(content_mod.load(day)["card_issues"], 1)
+              if len({s.get("name") for s in (qa.covered_item({"item": it["tag"]}, raw) or {}).get("sources") or []}) >= 2][:3]
+    expect(len(picked) >= 2, f"{day} 호에 출처 2곳인 카드가 2장 미만이다")
+    cells = ["·".join(sorted({s["name"] for s in qa.covered_item({"item": it["tag"]}, raw)["sources"]})[:2]) for _, it in picked]
+
+    def brief():
+        return {"date": day, "items": [it["tag"] for _, it in picked],
+                "comic": {"series": "오늘 아침", "layout": "duo", "title": "오늘 아침 소식", "cover": {"img": "cover.png"}, "summary": True,
+                          "panels": [{"card": n, "img_a": "a.png", "img_b": "b.png"} for n, _ in picked],
+                          "end": {"title": "오늘 아침 소식,<br>매일 8시 30분", "sub": "경제부터 트렌드까지"}}}
+
+    def jpeg(w, h):   # SOF0 머리만 있는 JPEG — 검수는 크기만 읽는다(ffprobe 없이)
+        return (b"\xff\xd8\xff\xe0" + (16).to_bytes(2, "big") + b"JFIF\x00" + b"\x00" * 9 + b"\xff\xc0" + (17).to_bytes(2, "big")
+                + b"\x08" + h.to_bytes(2, "big") + w.to_bytes(2, "big") + b"\x03" + b"\x00" * 9 + b"\xff\xd9")
+
+    good_cap = ("오늘 아침 소식 넘겨서 보기\n\n이 그림은 AI로 만들었어요. 숫자는 기사 2곳 이상에서 확인했어요.\n"
+                f"출처: {' / '.join(cells)}\n#경제뉴스 #EDITH")
+    with tempfile.TemporaryDirectory() as tmp:
+        folder = Path(tmp)
+        (folder / "comic").mkdir()
+
+        def run(pages=4, size=(1080, 1350), cap=good_cap, ep=None):
+            for old in (folder / "comic").glob("*.jpg"):
+                old.unlink()
+            for i in range(1, pages + 1):
+                (folder / "comic" / f"c{i}.jpg").write_bytes(jpeg(*(size if i == pages else (1080, 1350))))
+            (folder / "comic_caption.txt").write_text(cap, encoding="utf-8")
+            return qa.comic_only(ep or brief(), folder, raw, corpus)
+
+        ok = run()
+        expect(ok == [], f"영상·목소리 없는 웹툰만 설정이 통과하지 못한다: {ok}")
+        expect(qa.jpeg_size(folder / "comic" / "c1.jpg") == (1080, 1350), "JPEG 머리에서 크기를 읽지 못한다")
+        expect(any("2장" in f for f in run(pages=2)), "만화 2장을 통과시켰다")
+        expect(any("1080×1920" in f for f in run(size=(1080, 1920))), "1080×1350 이 아닌 장을 통과시켰다")
+        expect(any("AI로 만들" in f for f in run(cap=good_cap.replace("이 그림은 AI로 만들었어요. ", ""))), "'AI로 만들' 줄 없는 캡션을 통과시켰다")
+        expect(any("해시태그 6개" in f for f in run(cap=good_cap + " #a #b #c #d")), "해시태그 6개를 통과시켰다")
+        expect(any("content 에 없는 숫자" in f for f in run(cap=good_cap.replace("넘겨서 보기", "987654명이 봤어요"))),
+               "content 에 없는 숫자를 통과시켰다")
+        swapped = good_cap.replace(f"출처: {' / '.join(cells)}", f"출처: {' / '.join(reversed(cells))}")
+        expect(any("출처" in f for f in run(cap=swapped)), "'출처:' 칸 순서가 바뀐 캡션을 통과시켰다")
+        expect(any('"comic"' in f for f in run(ep={"date": day, "items": brief()["items"]})), "comic 설정 없는 brief 를 통과시켰다")
+    return f"{day} 카드 {len(picked)}장 웹툰만 — 통과 · 장수·크기·AI 줄·해시태그·숫자·출처 칸은 막음"
 
 
 def t_webtoon_render():
@@ -2766,6 +2876,7 @@ def main():
     check("새 호 막는 점검(짧은 소식 개수·H PICK 중복)", t_strict_content)
     check("월요일 투표 쉼(2026-10-19~)", t_poll_paused)
     check("원문(보도자료)·H PICK 원문 점검(2026-10-23~)", t_releases)
+    check("숫자 2곳 대조(2026-11-05 호~, 한 곳뿐 막음)", t_twosource)
     check("큰 소식·놓침 비교·출처 품질(2026-10-23~)", t_headlines)
     check("AGENTS.md(GPT 인수인계)가 가리키는 파일", t_agents_doc)
     check("Codex 자동 대체(Claude 가 멈춘 날)", t_codex_fallback)
@@ -2791,6 +2902,7 @@ def main():
     check("데일리 저장각(체크리스트·차트)", t_save_cards)
     check("딥다이브 카드(「H의 장부」 연재 날)", t_dive_cards)
     check("5가지 웹툰(카드 글 그대로·요약 장)", t_webtoon)
+    check("웹툰만 검수(qa --comic — 11월 홀수 날)", t_comic_only)
     check("마스코트(안경 동그라미 H)", t_mascot)
     check("첫 화면 구독·사이트 그림(index.html)", t_home)
     check("문구·마크 2판(2030 대표 한 줄·마스코트 얼굴)", t_brand_v2)

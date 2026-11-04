@@ -51,6 +51,7 @@
   예비 호(08:35)에 맡긴 뒤 이유를 보고한다.
 - 소스(RUNBOOK 1-1~1-3): 안장출근길(`fetch_anjang.py`, 평일) · 보도자료 원문(`fetch_releases.py`) · 큰 소식(`fetch_headlines.py --save`) · 원 기사(`read_article.py`).
   숫자·날짜·고유명사는 **서로 다른 출처 2건** 이상, 통신사 2건으로 채우지 않는다. 확인 못 한 사실은 쓰지 않는다.
+  빌드 전에 `python3 automation/check_sources.py`(숫자 2곳 대조, 2026-11-05 호~) — 원 기사 한 곳에만 있는 숫자는 빌드(`build_issue.py`)가 막는다(RUNBOOK 3단계).
 - 마지막에 RUNBOOK 6단계 형식으로 보고.
 
 ### 2-2. 08:50 점검
