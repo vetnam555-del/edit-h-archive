@@ -732,21 +732,21 @@ def brief_series(ep):
     return {f"{n}가지", f"{n}개"}, {(float(n), "가지"), (float(n), "개")}
 
 
-def brief_source_gaps(ep, content, caption):
+def brief_source_gaps(ep, content, caption, note=True, what="reel_ai_caption.txt"):
     """'오늘 아침 5가지'(2026-11-01 운영자 '메인 5개를 20초 한 편에') — 이슈마다 그 이슈의 원 기사 매체 2곳이 캡션 '출처:' 줄의 한 칸(/ 로 나눔)에 있어야 한다.
-    끝 화면에는 10곳을 다 못 쓰니 note 에 '출처'(캡션·뉴스레터에 있다는 말)만 있으면 된다."""
+    끝 화면에는 10곳을 다 못 쓰니 note 에 '출처'(캡션·뉴스레터에 있다는 말)만 있으면 된다.
+    웹툰만 만든 날(qa --comic)은 끝 화면이 없어 note=False, 캡션은 comic_caption.txt(what)."""
     tags = [str(t).strip() for t in ep.get("items") or []]
     if len(tags) < 2:
         return [f"items(다루는 이슈 tag 목록)가 2개 미만이다: {tags}"]
     fails = []
-    note = plain(str((ep.get("end_card") or {}).get("note") or ""))
-    if "출처" not in note:
+    if note and "출처" not in plain(str((ep.get("end_card") or {}).get("note") or "")):
         fails.append("끝 화면 note 에 출처 안내가 없다 — 예: '출처는 캡션·뉴스레터에'")
     src_line = next((ln for ln in caption.splitlines() if ln.strip().startswith("출처")), "")
     cells = [c for c in re.split(r"\s*/\s*", src_line.split(":", 1)[-1]) if c.strip()]
     # 칸은 영상 순서(items 순서)대로 이슈 하나씩 — 칸과 이슈를 순서로 짝지어야 두 이슈의 매체 묶음을 바꿔 적은 것도 잡는다(11/01 Codex)
     if len(cells) != len(tags):
-        fails.append(f"reel_ai_caption.txt '출처:' 줄 칸 {len(cells)}개 ≠ 이슈 {len(tags)}개 — 영상 순서대로 이슈마다 한 칸(' / ' 로 나눔)")
+        fails.append(f"{what} '출처:' 줄 칸 {len(cells)}개 ≠ 이슈 {len(tags)}개 — 영상 순서대로 이슈마다 한 칸(' / ' 로 나눔)")
     per_item = []
     for tag in tags:
         item = covered_item({"item": tag}, content)
@@ -798,6 +798,100 @@ def source_gaps(ep, content, caption):
             fails.append(f"reel_ai_caption.txt '출처' 줄에 '{n}' 이 없다")
     return fails
 
+def comic_texts(ep):
+    """만화 글 → [(이름, 글)]: 컷마다 말풍선·설명·카드 본문·'그래서 나는?'·숫자 스티커 + 제목.
+    card=N 컷(5가지 웹툰, 11/02~)은 그날 카드 글로 먼저 채운다(comic.from_cards) — 손으로 바꾼 숫자 스티커도 content 숫자여야 한다."""
+    c = ep.get("comic")
+    if not c:
+        return []
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import comic as comic_mod
+    comic_mod.from_cards(c, ep["date"])
+    texts = []
+    for i, p in enumerate(c.get("panels", []), 1):
+        texts += [(f"만화 {i} 말풍선", plain(p.get("bubble", ""))), (f"만화 {i} 설명", plain(p.get("box", "")))]
+        texts += [(f"만화 {i} {k}", plain(p[k])) for k in ("body", "take") if p.get(k)]
+        if p.get("number"):
+            texts.append((f"만화 {i} 숫자 스티커", plain(str(p["number"]))))
+    texts.append(("만화 제목", plain(c["title"])))
+    return texts
+
+
+def caption_texts(path):
+    """캡션 파일 → ([(파일 이름, 해시태그 줄을 뺀 글)], 실패) — 'AI로 만들' 한 줄, 해시태그 5개 이하."""
+    raw = path.read_text(encoding="utf-8")
+    body = "\n".join(x for x in raw.splitlines() if not x.startswith("#"))
+    fails = []
+    if "AI로 만들" not in body:
+        fails.append(f"{path.name}: 'AI로 만들었어요' 한 줄이 없다")
+    tags = re.findall(r"#\S+", raw)
+    if len(tags) > 5:
+        fails.append(f"{path.name}: 해시태그 {len(tags)}개(5개 이하)")
+    return [(path.name, body)], fails
+
+
+_SOF = {0xC0, 0xC1, 0xC2, 0xC3, 0xC5, 0xC6, 0xC7, 0xC9, 0xCA, 0xCB, 0xCD, 0xCE, 0xCF}
+
+
+def jpeg_size(path):
+    """JPEG 머리(SOF)에서 (가로, 세로) — ffprobe 없이(웹툰만 검수·selftest). JPEG 가 아니거나 못 읽으면 None."""
+    data = Path(path).read_bytes()
+    if data[:2] != b"\xff\xd8":
+        return None
+    i = 2
+    while i + 9 <= len(data):
+        if data[i] != 0xFF:
+            i += 1
+            continue
+        marker = data[i + 1]
+        if marker == 0xFF or marker == 0x01 or 0xD0 <= marker <= 0xD8:   # 채움 바이트·길이 없는 표시
+            i += 1 if marker == 0xFF else 2
+            continue
+        if marker in _SOF:
+            return int.from_bytes(data[i + 7:i + 9], "big"), int.from_bytes(data[i + 5:i + 7], "big")
+        i += 2 + int.from_bytes(data[i + 2:i + 4], "big")
+    return None
+
+
+def comic_file_gaps(ep, folder):
+    """만화 JPEG 3~10장·장마다 1080×1350·comic_caption.txt → 실패 목록(설정에 comic 이 있을 때만)."""
+    if not ep.get("comic"):
+        return []
+    pages = sorted((folder / "comic").glob("c*.jpg"))
+    fails = [] if 3 <= len(pages) <= 10 else [f"만화 {len(pages)}장(3~10장)"]
+    for c in pages:
+        size = jpeg_size(c)
+        if size != (1080, 1350):
+            fails.append(f"{c.name} 크기 {size[0]}×{size[1]}" if size else f"{c.name} 크기를 읽지 못했다(JPEG 가 아니다)")
+    if not (folder / "comic_caption.txt").exists():
+        fails.append("comic_caption.txt 가 없다")
+    return fails
+
+
+def comic_only(ep, folder, content, corpus):
+    """웹툰만 만든 날 검수 → 실패 목록. 11월 크레딧 계획(11/04 운영자 '480p로 해줘' — 짝수 날만 AI 영상, 홀수 날은 영상·목소리 없이
+    5가지 웹툰만, 19:30 저녁 사슬이 카드 릴스와 함께 올린다)의 홀수 날 몫이다. 영상·소리·목소리·싱크·릴스 캡션(reel_ai_caption.txt)은 보지 않고,
+    만화 글·끝 장 숫자(content 숫자만)·comic_caption('AI로 만들'·해시태그 5개 이하·숫자·'출처:' 칸)·만화 3~10장·1080×1350 만 본다."""
+    if not ep.get("comic"):
+        return ['brief.json 에 "comic" 이 없다 — 웹툰만 검수(--comic)는 그날 5가지 웹툰 설정을 본다']
+    texts, fails = comic_texts(ep), []
+    cap = folder / "comic_caption.txt"
+    body = cap.read_text(encoding="utf-8") if cap.exists() else ""
+    if cap.exists():
+        t, f = caption_texts(cap)
+        texts += t
+        fails += f
+    series_screen, _ = brief_series(ep)
+    bad = check_numbers(texts, corpus, allow=series_screen)
+    ends = [(f"만화 끝 장 {k}", plain(str((ep["comic"].get("end") or {}).get(k) or ""))) for k in ("title", "sub")]
+    bad += check_numbers([x for x in ends if x[1]], corpus, allow=BRAND_TOKENS)
+    fails += [f"content 에 없는 숫자 — {b}" for b in bad]
+    if cap.exists():
+        fails += brief_source_gaps(ep, content, body, note=False, what="comic_caption.txt")
+    fails += comic_file_gaps(ep, folder)
+    return fails
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("episode")
@@ -805,6 +899,8 @@ def main():
     ap.add_argument("--stems", action="store_true", help="녹음 직후(렌더 전): 녹음 원고(tts)·자막↔목소리 맞춤·녹음 파일 받아쓰기만 본다")
     ap.add_argument("--video", help="instagram/{날짜}/reel_ai.mp4 대신 볼 영상(고쳐 본 판)")
     ap.add_argument("--extra", type=int, help="메인 N번 AI 영상(instagram/{날짜}/extra/N/) — 운영자가 앱에서 만든 영상, 만화는 없다")
+    ap.add_argument("--comic", action="store_true",
+                    help="웹툰만 만든 날(11월 홀수 날 — 크레딧 계획): 영상·소리·목소리·싱크·릴스 캡션은 건너뛰고 만화 글 숫자·comic_caption·만화 장수·크기·출처만 본다")
     a = ap.parse_args()
     epath = Path(a.episode).resolve()
     ep = json.loads(epath.read_text(encoding="utf-8"))
@@ -816,33 +912,28 @@ def main():
     for mm, dd in set(re.findall(r'"date":\s*"(\d{1,2})\.(\d{1,2})"', corpus)):
         corpus += f" {int(mm)}월 {int(dd)}일 {int(dd)}일"
     fails, notes = [], []
+    if a.comic:   # 웹툰만 만든 날(11월 홀수 날) — 영상·목소리 검사 없이
+        fails = comic_only(ep, folder, content, corpus)
+        if fails:
+            print("✗ 웹툰 검수 실패 — 올리지 않는다")
+            for f in fails:
+                print("  -", f)
+            sys.exit(1)
+        print(f"✓ 웹툰 검수 통과 ({day}) — 그림을 눈으로 한 번 더 본 뒤 커밋한다(19:30 저녁 사슬이 카드 릴스와 함께 올린다)")
+        return
 
     # 1·5 숫자 대조
     texts = [(f"자막 {i + 1}", plain(c["html"])) for i, c in enumerate(ep.get("captions", []))]
-    if ep.get("comic"):   # card=N 컷(5가지 웹툰, 11/02~)은 그날 카드 글로 채운 뒤 같은 숫자 검사를 받는다
-        sys.path.insert(0, str(Path(__file__).resolve().parent))
-        import comic as comic_mod
-        comic_mod.from_cards(ep["comic"], day)
-    for i, p in enumerate((ep.get("comic") or {}).get("panels", []), 1):
-        texts += [(f"만화 {i} 말풍선", plain(p.get("bubble", ""))), (f"만화 {i} 설명", plain(p.get("box", "")))]
-        texts += [(f"만화 {i} {k}", plain(p[k])) for k, _ in (("body", 0), ("take", 0)) if p.get(k)]
-        if p.get("number"):   # 두 컷 장(웹툰 3판)의 숫자 스티커 — 손으로 바꿔 쓴 값도 content 숫자여야 한다(기본은 카드 number)
-            texts.append((f"만화 {i} 숫자 스티커", plain(str(p["number"]))))
-    if ep.get("comic"):
-        texts.append(("만화 제목", plain(ep["comic"]["title"])))
+    texts += comic_texts(ep)
     if not (folder / "reel_ai_caption.txt").exists():
         # 없으면 게시 코드가 reel_caption.txt·caption.txt 로 대신 만든다 — 그건 이 검수가 보지 않으므로 반드시 쓴다(11/01 Codex)
         fails.append("reel_ai_caption.txt 가 없다 — AI 릴스 캡션은 따로 써서 검수한다(대체 캡션은 검수 밖)")
     for name in ("reel_ai_caption.txt", "comic_caption.txt"):
         p = folder / name
         if p.exists():
-            body = "\n".join(x for x in p.read_text(encoding="utf-8").splitlines() if not x.startswith("#"))
-            texts.append((name, body))
-            if "AI로 만들" not in body:
-                fails.append(f"{name}: 'AI로 만들었어요' 한 줄이 없다")
-            tags = re.findall(r"#\S+", p.read_text(encoding="utf-8"))
-            if len(tags) > 5:
-                fails.append(f"{name}: 해시태그 {len(tags)}개(5개 이하)")
+            t, f = caption_texts(p)
+            texts += t
+            fails += f
     series_screen, series_spoken = brief_series(ep)
     bad = check_numbers(texts, corpus, allow=series_screen)
     # 끝 화면(영상)·만화 끝 장도 화면에 나간다(11/01 Codex) — 고정 문구 숫자(8시 30분·2030)만 예외
@@ -962,17 +1053,7 @@ def main():
                     (notes if got >= 0.6 else fails).append(f"대사 '{vline.get('text', '')[:24]}…' 들림 {got:.0%}")
 
     # 6 만화
-    comic = sorted((folder / "comic").glob("c*.jpg"))
-    if ep.get("comic"):
-        if not 3 <= len(comic) <= 10:
-            fails.append(f"만화 {len(comic)}장(3~10장)")
-        for c in comic:
-            pr = json.loads(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "stream=width,height", "-of", "json", str(c)],
-                                           capture_output=True, text=True).stdout)["streams"][0]
-            if (pr["width"], pr["height"]) != (1080, 1350):
-                fails.append(f"{c.name} 크기 {pr['width']}×{pr['height']}")
-        if not (folder / "comic_caption.txt").exists():
-            fails.append("comic_caption.txt 가 없다")
+    fails += comic_file_gaps(ep, folder)
 
     for n in notes:
         print("  ·", n)

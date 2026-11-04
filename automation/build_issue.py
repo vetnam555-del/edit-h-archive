@@ -158,6 +158,26 @@ def anjang_wait_problem(d, now=None, state_dir=None):
             "기다려 주제를 다시 고른 뒤 빌드하세요(07:55 가 지나면 이 검사는 넘어가요 — RUNBOOK 1-1)")
 
 
+def source_check_problem(d, now=None, cache=None):
+    """새 호(오늘, 2026-11-05~, 예비 호 아님)의 숫자가 원 기사 한 곳에만 있으면 → (막을 줄 목록, 알림 줄 목록).
+    check_sources.py 가 읽어 둔 기사(.state/articles)로 네트워크 없이 다시 대조한다 — content 를 고친 뒤 빌드해도 다시 본다(edith/twosource.py).
+    읽어 둔 기사가 하나도 없으면 알림만(발행을 멈추지 않는다), 못 읽은 기사도 알림만. selftest 의 다시 빌드는 EDITH_SKIP_SOURCE_CHECK=1."""
+    import os
+    import check_sources
+    from edith import twosource
+    from edith.common import now_kst
+    if os.environ.get("EDITH_SKIP_SOURCE_CHECK"):
+        return [], []
+    day = str(d.get("date"))[:10]
+    if day != (now or now_kst()).date().isoformat() or day < twosource.FROM or d.get("rewind") or d.get("format") != 2:
+        return [], []
+    arts = check_sources.articles_for(d, offline=True, cache=cache)
+    if not any(arts.values()):
+        return [], ["숫자 2곳 대조를 아직 안 돌렸어요 — python3 automation/check_sources.py (RUNBOOK 3단계). 원 기사 한 곳에만 있는 숫자는 빌드가 막아요"]
+    res = twosource.check(d, arts)
+    return res["blocked"], res["warnings"]
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("date", help="YYYY-MM-DD (KST)")
@@ -180,6 +200,15 @@ def main():
     if wait:
         print(f"✗ {wait}")
         sys.exit(4)
+    # 숫자 2곳 대조(2026-11-05~, 원칙 2) — 11/03·11/04 호에 원 기사 한 곳에만 있는 숫자가 2~4개씩 나갔다
+    single, notes = source_check_problem(d)
+    for n in notes:
+        print(f"  ↘ {n}")
+    if single:
+        print("✗ 숫자 2곳 대조 — 원 기사 한 곳에만 있는 숫자(원칙 2). content 를 고친 뒤 다시 빌드하세요:")
+        for b in single:
+            print(f"    {b}")
+        sys.exit(5)
 
     site_url = args.site_url or cfg["site_url"]
     d["send_time_kst"] = send_time_on(d["date"], cfg)  # 뉴스레터 푸터·카드 하단·캡션의 발송 시각 문구(지난 호는 그때 시각)
