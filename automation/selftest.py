@@ -421,6 +421,52 @@ def t_twosource():
     expect(not match("34만3000원", "34만3300원") and not match("10년", "12년") and not match("30%", "30년"), "다른 숫자를 같다고 본다")
     expect(match("0.25%포인트", "0.25%p") and match("광고주 1000만 곳", "광고주 1000만명"), "%포인트·세는 말 표기 차이를 못 맞춘다")
     expect(not ts.numbers("11/4 — SEC 보고서 · 2030세대 · https://x.kr/view?id=198581810 · 3분기"), "날짜 꼴·고정 표현·주소 번호·한 자리 수를 숫자로 본다")
+    # 조·억·만 자리에서 자른·반올림한 값(11/05 ELS '국민은행 1723억원' = 기사 '1723억3400만원' — '어디에도 없다'고 잘못 알렸다)
+    expect(match("1723억원", "과징금 1723억3400만원") and match("1724억원", "1723억 6000만 원") and match("3619억원", "3619억6000만원"),
+           "조·억·만 자리에서 자르거나 반올림한 숫자를 못 맞춘다")
+    expect(not match("1724억원", "1722억5000만원") and not match("1723억원", "1724억1000만원") and not match("34만원", "35만원")
+           and not match("1.5억원", "1억5900만원"), "자리 맞춤이 너무 넓다")
+    # 보도자료 첨부 PDF 를 하나라도 못 받으면 그 보도자료는 '못 읽음'(11/05 고용 — 두 번째 PDF 접속 끊김, 반쯤 읽은 본문으로 324만명·19.9% 를 막았다)
+    import urllib.error
+    import urllib.request
+
+    import fetch_releases
+    gov = "https://www.korea.kr/briefing/pressReleaseView.do?newsId=1"
+    page = ("고용 동향 — 취업자 1,234만명, 5.6% 늘어 7조원\n첨부 PDF: 1.pdf\n    https://www.korea.kr/common/download.do?fileId=1\n"
+            "첨부 PDF: 2.pdf\n    https://www.korea.kr/common/download.do?fileId=2")
+
+    def half_pdf(u):
+        if u.endswith("fileId=2"):
+            raise ConnectionResetError("reset")
+        return "1년 안에 일할 생각 324만명(19.9%)"
+    real_read, real_pdf, real_open = fetch_releases.read, check_sources.pdf_text, urllib.request.urlopen
+    fetch_releases.read, check_sources.pdf_text = (lambda u: page), half_pdf
+    calls = []
+
+    def flaky(req, timeout=None):
+        calls.append(req.full_url)
+        if "gone" in req.full_url:
+            raise urllib.error.HTTPError(req.full_url, 404, "Not Found", {}, None)
+        if len(calls) == 1:
+            raise ConnectionResetError("reset")
+        return io.BytesIO(b"%PDF-1.4")
+    try:
+        with tempfile.TemporaryDirectory() as tmp, contextlib.redirect_stderr(io.StringIO()):
+            expect(check_sources.fetch(gov, cache=tmp) is None and not check_sources.cache_path(gov, tmp).exists(),
+                   "첨부 PDF 하나를 못 받은 보도자료를 읽은 것으로 본다(반쯤 읽은 본문으로 막는다)")
+            check_sources.pdf_text = lambda u: "1년 안에 일할 생각 324만명(19.9%)"
+            a = check_sources.fetch(gov, cache=tmp)
+            expect(a and "19.9%" in a["body"] and check_sources.cache_path(gov, tmp).exists(), "첨부 PDF 를 다 받은 보도자료를 못 읽는다")
+        urllib.request.urlopen = flaky
+        expect(check_sources.download("https://x.kr/1.pdf", wait=0) == b"%PDF-1.4" and len(calls) == 2, "끊긴 PDF 를 다시 받지 않는다")
+        calls.clear()
+        try:
+            check_sources.download("https://x.kr/gone.pdf", wait=0)
+            expect(False, "없는 PDF(404)를 받은 것으로 본다")
+        except urllib.error.HTTPError:
+            expect(len(calls) == 1, f"없는 PDF(404)를 여러 번 다시 받는다: {calls}")
+    finally:
+        fetch_releases.read, check_sources.pdf_text, urllib.request.urlopen = real_read, real_pdf, real_open
     d = {"date": "2026-11-05", "format": 2, "card_issues": [{"tag": "가", "number": "14.2조", "body": "영업손실 6423억원"}],
          "all_items": [{"tag": "가", "body": "미국은 2024년 5월 바꿨고 매출 14조2209억원", "sources": [{"name": "A", "url": "u1"}, {"name": "B", "url": "u2"}]},
                        {"tag": "나", "body": "예약 385건, 30일부터", "sources": [{"name": "C", "url": "u3"}, {"name": "D", "url": "u4"}]}]}

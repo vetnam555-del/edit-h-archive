@@ -10,6 +10,7 @@
   경고 — 기사 어디에도 없는 숫자(우리가 계산·환산했으면 괜찮다), 기사를 다 못 읽은 이슈(발행을 멈추지 않는다)
 값 맞추기: '14조2209억원' = '14조 2,209억 원', '1만원' = '1만 원', '%포인트' = '%p'. content 가 어림값이면('14.2조'·'약 3500억'·
 '6000억원 넘게') 마지막 자리 반올림 안에서 같다고 본다 — 소수점이 있거나 조·억·만 앞이 0으로 끝날 때만(맨숫자 '10년'은 정확히).
+content 가 조·억·만 자리에서 끝나면('1723억원') 기사의 더 자세한 값('1723억3400만원')을 그 자리에서 자르거나 반올림한 것도 같다(11/05~).
 """
 import re
 
@@ -82,13 +83,26 @@ def numbers(text):
     return out
 
 
+def _unit_scale(raw):
+    """content 숫자가 조·억·만 자리에서 끝난 정수면 그 자리 크기('1723억원' → 1e8, '14조2209억' → 1e8), 아니면 0('3만5000명'·'1.58%')."""
+    parts = re.findall(r"(\d+(?:\.\d+)?)([조억만천백]?)", re.sub(r"[,\s]", "", raw))
+    if not parts or "." in parts[-1][0]:
+        return 0.0
+    return _BIG.get(parts[-1][1], 0.0)
+
+
 def same(c, a):
-    """content 숫자 c(원문, 값, 단위, 폭) ↔ 기사 숫자 a — 단위는 둘 다 있을 때만 같아야 한다."""
+    """content 숫자 c(원문, 값, 단위, 폭) ↔ 기사 숫자 a — 단위는 둘 다 있을 때만 같아야 한다.
+    content 가 조·억·만 자리에서 끝나면 기사의 더 자세한 값을 그 자리에서 자르거나 반올림한 것도 같은 숫자로 본다
+    (2026-11-05 ELS '국민은행 1723억원' = 기사 '1723억3400만원' — 자른 값이라 '어디에도 없다'고 잘못 알렸다)."""
     _, cv, cu, tol = c
     _, av, au, _ = a
     if cu and au and cu != au and not (cu in _COUNT and au in _COUNT):
         return False
-    return abs(cv - av) <= max(tol, 1e-9 * max(abs(cv), 1.0))
+    if abs(cv - av) <= max(tol, 1e-9 * max(abs(cv), 1.0)):
+        return True
+    s = _unit_scale(c[0])
+    return bool(s) and -0.5 * s <= av - cv < s
 
 
 def _flat(name, v):

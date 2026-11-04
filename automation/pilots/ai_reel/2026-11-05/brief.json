@@ -1,0 +1,91 @@
+{
+ "date": "2026-11-05",
+ "items": [
+  "고용",
+  "미국 증시",
+  "수면장애",
+  "갤럭시 버즈",
+  "홍콩 ELS"
+ ],
+ "comic": {
+  "series": "오늘 아침 5가지",
+  "layout": "duo",
+  "title": "일 안 하는 사람 중<br>'곧 일할래' <span class='hl'>19.9%</span>,<br>오늘 아침 5가지",
+  "cover": {
+   "img": "stills/cover.png",
+   "pos": "50% 40%",
+   "job": "e6cec481-7e40-484c-8ebf-d1c813d04e5c"
+  },
+  "summary": true,
+  "panels": [
+   {
+    "card": 1,
+    "img_a": "stills/jy_a.png",
+    "pos_a": "50% 40%",
+    "img_b": "stills/jy_b.png",
+    "pos_b": "50% 35%",
+    "say_side": "left",
+    "body": "비경제활동인구의 19.9%. 30대가 쉰 이유 1위는 '원하는 일자리를 찾기 어려워서'예요.",
+    "jobs": [
+     "9336e758-4b8c-4d17-bd17-bb7307c03e62",
+     "961ccf0b-2eeb-4c66-9a28-43d5b87fe25a"
+    ]
+   },
+   {
+    "card": 2,
+    "img_a": "stills/us_a.png",
+    "pos_a": "50% 40%",
+    "img_b": "stills/us_b.png",
+    "pos_b": "50% 35%",
+    "say_side": "right",
+    "jobs": [
+     "5e94cd88-a559-46fd-9063-fc21b869137a",
+     "767ed2ab-b87c-452b-a935-1677cae13ea3"
+    ]
+   },
+   {
+    "card": 3,
+    "img_a": "stills/sl_a.png",
+    "pos_a": "50% 40%",
+    "img_b": "stills/sl_b.png",
+    "pos_b": "50% 35%",
+    "say_side": "left",
+    "jobs": [
+     "8a44960a-8ebe-4ec9-ba7a-c3566acb9a7a",
+     "9bdbd30c-9ff5-4426-a7de-e83aa741e88c"
+    ]
+   },
+   {
+    "card": 4,
+    "img_a": "stills/bz_a.png",
+    "pos_a": "50% 40%",
+    "img_b": "stills/bz_b.png",
+    "pos_b": "50% 35%",
+    "say_side": "right",
+    "jobs": [
+     "bddf8a6c-3782-45dc-93f4-255c17634f00",
+     "4c7b9617-f147-4deb-94cc-a782e8419016"
+    ]
+   },
+   {
+    "card": 5,
+    "img_a": "stills/el_a.png",
+    "pos_a": "50% 40%",
+    "img_b": "stills/el_b.png",
+    "pos_b": "50% 35%",
+    "say_side": "left",
+    "stk_side": "left",
+    "jobs": [
+     "5e41474e-c279-4c55-8849-cdf4b08e5011",
+     "ce65b113-7f9b-4f95-ad1c-7d96a725a29d"
+    ]
+   }
+  ],
+  "sources": "장마다 표시",
+  "end": {
+   "title": "오늘 아침 5가지,<br>매일 8시 30분",
+   "sub": "경제부터 트렌드까지, 오늘 소식 5가지를<br>웹툰으로 풀어 드려요"
+  }
+ },
+ "comic_note": "5가지 웹툰 3판(E20 11/02~11/08 — 같은 날 08:30 카드와 도달·저장+공유 비교, 판정 11/09). 11월 크레딧 계획의 홀수 날이라 영상·목소리 없이 웹툰만(19:30 저녁 사슬이 카드 릴스와 함께 올린다). 그림 11장 gpt_image_2_5 4:3 1k(장당 0.25 크레딧), 프롬프트·구도 규칙 automation/pilots/ai_reel/webtoon_prompt.md. stills/ 는 저장소에 올리지 않는다(jobs 로 다시 받는다). 카드 ①의 본문 '쉬었음은 4년 만에 줄었어요'는 이데일리에만 있어(정책브리핑 보도자료엔 '4년 만'이 없다) 이 장만 body 를 두 곳 공통 사실(19.9%·30대가 쉰 이유 1위 '원하는 일자리를 찾기 어려워서' — 보도자료 32.3%·이데일리 32.3%)로 바꿔 싣는다."
+}
