@@ -48,7 +48,9 @@ def is_gov(url):
 
 
 def read_one(url):
-    """기사·보도자료 한 곳 → dict. 정책브리핑 등 부처 보도자료는 fetch_releases.read(본문 칸·첨부 PDF 주소), 그 밖은 read_article.read."""
+    """기사·보도자료 한 곳 → dict. 정책브리핑 등 부처 보도자료는 fetch_releases.read(본문 칸·첨부 PDF 주소), 그 밖은 read_article.read.
+    첨부 PDF 를 하나라도 못 읽으면 그 보도자료는 통째로 '못 읽음'(OSError → 경고만) — 반쯤 읽은 본문으로 대조하면 못 받은 PDF 에만 있는
+    숫자를 '다른 기사 한 곳에만 있다'고 잘못 막는다(2026-11-05 고용 '324만명'·'19.9%' — 두 번째 PDF 가 접속 끊김으로 안 받아졌다)."""
     if is_gov(url):
         import fetch_releases
         text = fetch_releases.read(url)
@@ -56,27 +58,42 @@ def read_one(url):
         for pdf in re.findall(r"첨부 PDF:[^\n]*\n\s*(https?://\S+)", text)[:2]:   # 본문이 첨부 PDF 에만 있는 보도자료가 많다(11/02 수출입 동향)
             try:
                 extra.append(pdf_text(pdf))
-            except Exception as e:   # noqa: BLE001 — pdftotext 없음·내려받기 실패는 본문 없이(→ 숫자가 적으면 '못 읽음')
-                print(f"  · 첨부 PDF 못 읽음 {pdf} ({str(e)[:60]})", file=sys.stderr)
+            except Exception as e:   # 내려받기 실패·PDF 아님·pdftotext 없음 모두
+                raise OSError(f"첨부 PDF 못 읽음 {pdf} ({str(e)[:60]}) — 본문 일부만 읽힌 보도자료라 대조에 안 쓴다") from e
         return {"url": url, "title": "", "press": "", "date": "", "description": "", "body": "\n".join([text, *extra])}
     import read_article
     return read_article.read(url)
 
 
-def pdf_text(url, timeout=40):
-    """첨부 PDF → 글(pdftotext). PDF 가 아니면 빈 글."""
-    import subprocess
-    import tempfile
+def download(url, timeout=40, tries=3, wait=2.0):
+    """주소 → 바이트. 끊김·시간 초과·5xx 는 tries 번까지 다시(11/05 정책브리핑 PDF 'connection reset'), 4xx 는 바로 실패."""
+    import urllib.error
     import urllib.request
     from read_article import UA
-    with urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": UA}), timeout=timeout) as r:
-        data = r.read()
+    for i in range(tries):
+        try:
+            with urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": UA}), timeout=timeout) as r:
+                return r.read()
+        except urllib.error.HTTPError as e:
+            if e.code < 500 or i + 1 >= tries:
+                raise
+        except Exception:   # 접속 끊김(ConnectionResetError)·시간 초과·덜 받은 응답(IncompleteRead)
+            if i + 1 >= tries:
+                raise
+        time.sleep(wait * (i + 1))
+
+
+def pdf_text(url, timeout=40):
+    """첨부 PDF → 글(pdftotext). PDF 가 아닌 응답(오류 페이지)·pdftotext 실패는 오류 — 그 보도자료는 '못 읽음'(read_one)."""
+    import subprocess
+    import tempfile
+    data = download(url, timeout=timeout)
     if not data.startswith(b"%PDF"):
-        return ""
+        raise ValueError("PDF 가 아닌 응답(오류 페이지·다른 문서 형식)")
     with tempfile.NamedTemporaryFile(suffix=".pdf") as f:
         f.write(data)
         f.flush()
-        return subprocess.run(["pdftotext", "-layout", f.name, "-"], capture_output=True, text=True, timeout=60).stdout
+        return subprocess.run(["pdftotext", "-layout", f.name, "-"], capture_output=True, text=True, timeout=60, check=True).stdout
 
 
 def usable(a):
