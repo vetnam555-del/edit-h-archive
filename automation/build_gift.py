@@ -20,16 +20,38 @@ GIFTS = AUTOMATION / "gifts"
 OUT = ROOT / "gift"
 
 
+def until_attr(it):
+    """항목의 마지막 날 → li 속성(브라우저가 그날이 지나면 숨긴다 — 페이지를 날마다 다시 만들지 않아도 지난 항목이 안 보이게)."""
+    return f' data-until="{html.escape(it["until"])}"' if it.get("until") else ""
+
+
+# 지난 항목 숨기기 — 한국 시각 날짜가 data-until 을 넘으면 숨기고, 'N가지'를 남은 수로, 빈 묶음은 제목째 숨긴다(2026-11-05 구독 길 점검:
+# 4분기 선물 18가지 중 4가지가 10월에 끝났는데 그대로 보였다). 자바스크립트가 꺼져 있으면 전부 보인다.
+HIDE_PAST = """<script>
+(function () {
+  var today = new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10), hidden = 0;
+  document.querySelectorAll('li[data-until]').forEach(function (li) {
+    if (li.getAttribute('data-until') < today) { li.hidden = true; hidden++; }
+  });
+  document.querySelectorAll('section').forEach(function (s) {
+    if (!s.querySelector('li:not([hidden])')) s.hidden = true;
+  });
+  var n = document.getElementById('n');
+  if (n && hidden) n.textContent = String(Number(n.textContent) - hidden);
+})();
+</script>"""
+
+
 def render(data, site):
     esc = html.escape
     groups = []
     for grp in data["groups"]:
         rows = "".join(
-            f'<li><label><input type="checkbox"><span class="when">{esc(it["when"])}</span>'
+            f'<li{until_attr(it)}><label><input type="checkbox"><span class="when">{esc(it["when"])}</span>'
             f'<span class="do">{esc(it["do"])}</span></label>'
             f'<p class="detail">{esc(it["detail"])} <a href="{site}/{it["issue"]}.html">출처·원문 →</a></p></li>'
             for it in grp["items"])
-        groups.append(f'<h2>{esc(grp["name"])}</h2><ul>{rows}</ul>')
+        groups.append(f'<section><h2>{esc(grp["name"])}</h2><ul>{rows}</ul></section>')
     count = sum(len(grp["items"]) for grp in data["groups"])
     return f"""<!DOCTYPE html>
 <html lang="ko"><head><meta charset="UTF-8">
@@ -66,12 +88,14 @@ def render(data, site):
   <div class="logo">EDIT<span class="h"> H</span></div>
   <div class="divider"></div>
   <h1>{esc(data["title"])}</h1>
-  <p class="sub">{esc(data["subtitle"])} — {count}가지</p>
+  <p class="sub">{esc(data["subtitle"])} — <span id="n">{count}</span>가지</p>
   <p class="note">EDIT H 구독자 선물이에요. 모두 뉴스레터에서 원 기사로 확인해 다룬 내용이고, 항목마다 그 호로 가면 출처가 있어요.
-  {esc(data["as_of"].replace("-", "."))} 기준이라 신청 전엔 공식 사이트에서 한 번 더 확인하세요. 체크 표시는 이 화면에서만 보여요.</p>
+  {esc(data["as_of"].replace("-", "."))} 기준이라 신청 전엔 공식 사이트에서 한 번 더 확인하세요. 날짜가 지난 항목은 이 화면에서 저절로 빠지고, 체크 표시는 이 화면에서만 보여요.</p>
   {''.join(groups)}
   <p class="foot">매일 아침 8시 30분, 이런 '할 일이 있는 숫자'를 5가지씩 보내드려요 — <a href="{site}/subscribe.html?ref=gift">EDIT H 구독</a> · <a href="{site}/">지난 호 전체</a></p>
-</div></body></html>
+</div>
+{HIDE_PAST}
+</body></html>
 """
 
 

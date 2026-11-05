@@ -817,10 +817,18 @@ def comic_texts(ep):
     return texts
 
 
-def caption_texts(path):
-    """캡션 파일 → ([(파일 이름, 해시태그 줄을 뺀 글)], 실패) — 'AI로 만들' 한 줄, 해시태그 5개 이하."""
+def promo_lines(day):
+    """캡션 끝 '구독하면 받는 것' 한 줄(edith.site.reel_letter — 2026-11-06~, 같은 날은 늘 같은 줄). 선물 이름·가짓수는
+    content 숫자가 아니라 숫자 대조에서 뺀다 — 한 글자라도 다르면 빼지 않는다(손으로 고친 줄은 검사한다)."""
+    sys.path.insert(0, str(ROOT / "automation"))
+    from edith import gift, site
+    return [site.reel_letter(day)] if str(day)[:10] >= gift.PROMO_FROM else []
+
+
+def caption_texts(path, skip=()):
+    """캡션 파일 → ([(파일 이름, 해시태그 줄·skip 줄을 뺀 글)], 실패) — 'AI로 만들' 한 줄, 해시태그 5개 이하."""
     raw = path.read_text(encoding="utf-8")
-    body = "\n".join(x for x in raw.splitlines() if not x.startswith("#"))
+    body = "\n".join(x for x in raw.splitlines() if not x.startswith("#") and x.strip() not in skip)
     fails = []
     if "AI로 만들" not in body:
         fails.append(f"{path.name}: 'AI로 만들었어요' 한 줄이 없다")
@@ -878,7 +886,7 @@ def comic_only(ep, folder, content, corpus):
     cap = folder / "comic_caption.txt"
     body = cap.read_text(encoding="utf-8") if cap.exists() else ""
     if cap.exists():
-        t, f = caption_texts(cap)
+        t, f = caption_texts(cap, skip=promo_lines(ep["date"]))
         texts += t
         fails += f
     series_screen, _ = brief_series(ep)
@@ -931,7 +939,7 @@ def main():
     for name in ("reel_ai_caption.txt", "comic_caption.txt"):
         p = folder / name
         if p.exists():
-            t, f = caption_texts(p)
+            t, f = caption_texts(p, skip=promo_lines(day))
             texts += t
             fails += f
     series_screen, series_spoken = brief_series(ep)

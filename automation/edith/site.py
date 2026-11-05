@@ -2,8 +2,8 @@
 import json
 import re
 
-from .common import card_height, dive_on, load_config, INDEX, MANIFEST, ROOT, esc, plain, send_time_ko
-from .gift import active_gift
+from .common import card_height, dive_on, load_config, INDEX, MANIFEST, ROOT, esc, plain, send_time_ko, send_time_on
+from .gift import PROMO_FROM, active_gift
 
 
 def update_manifest(d, site, n_cards, publish_time):
@@ -235,6 +235,16 @@ _LETTER_BRIEFS = [
     "출처랑 짧게 읽는 소식 {n}개는 {when} 경제 뉴스레터에 있어요. 구독은 프로필 링크에서요.",
 ]
 _REEL_TAIL = ["넘겨보는 카드는 피드에 올려뒀어요.", "카드 전체는 피드 게시물에 있어요.", "자세한 숫자는 피드 카드에서 볼 수 있어요."]
+# 릴스·웹툰 캡션 끝의 '구독하면 받는 것' 한 줄(2026-11-05 구독 길 점검: 릴스는 비팔로워에게 주 2,800번 닿는데 캡션엔 구독 안내가 없고
+# '아침 카드'로만 보냈다 — 14일 신청 0·프로필 방문 2). 이 날짜 호부터 카드 릴스 캡션에 붙이고, AI 릴스·웹툰 캡션도 같은 줄을 쓴다(qa 가 숫자 검사에서 뺀다).
+REEL_LETTER_FROM = PROMO_FROM
+_REEL_LETTER_GIFT = [
+    "프로필 링크에서 경제 뉴스레터를 구독하면 '{title}'({n}가지)부터 보내드려요.",
+    "구독 선물은 '{title}'({n}가지) — 프로필 링크에서 경제 뉴스레터를 구독하면 환영 메일로 와요.",
+    "경제 뉴스레터 구독 선물, '{title}'({n}가지). 구독은 프로필 링크에서요.",
+]
+_REEL_LETTER = ["매일 {when} 경제 뉴스레터로도 보내드려요. 구독은 프로필 링크에서요.",
+                "출처까지 담은 경제 뉴스레터는 매일 {when}, 프로필 링크에서 구독할 수 있어요."]
 # 저녁 릴스(config.instagram.reel_evening_from~): 짧은 영상 → 아침 카드 → 뉴스레터로 이어지게(머니그라피의 숏폼 → 본편 고리)
 _REEL_TAIL_EVENING = ["나머지 {n}가지는 아침에 올린 카드에 있어요.", "같은 날 아침 카드 게시물에 {n}가지가 더 있어요.",
                       "아침에 올린 카드에서 나머지 {n}가지도 볼 수 있어요."]
@@ -340,8 +350,19 @@ def reel_caption(d):
         teaser = (m.group(1) if m else parts[1]).strip()
     tail = (_pick(_REEL_TAIL_EVENING, d).format(n=len(d["card_issues"]) - 1) if _evening_reel(d)
             else _pick(_REEL_TAIL, d))
-    lines = [hook, ""] + ([teaser] if teaser else []) + [tail, *_share(d), _tags(d, ig.get("hashtags"), limit=3)]
+    letter = [reel_letter(d["date"])] if str(d["date"])[:10] >= REEL_LETTER_FROM else []
+    lines = [hook, ""] + ([teaser] if teaser else []) + [tail, *letter, *_share(d), _tags(d, ig.get("hashtags"), limit=3)]
     return "\n".join(lines)
+
+
+def reel_letter(day):
+    """릴스·웹툰 캡션 끝 '구독하면 받는 것' 한 줄 — 선물 기간이면 선물 이름·아직 안 지난 가짓수(edith/gift), 아니면 뉴스레터 시간.
+    같은 날은 늘 같은 줄(AI 릴스·웹툰 캡션에 그대로 붙이고 qa 가 이 줄만 숫자 검사에서 뺀다)."""
+    day = str(day)[:10]
+    gift = active_gift(day)
+    if gift:
+        return _pick(_REEL_LETTER_GIFT, {"date": day}).format(title=gift["title"], n=gift["count"])
+    return _pick(_REEL_LETTER, {"date": day}).format(when=send_time_ko(send_time_on(day)).replace("오전", "아침"))
 
 
 ALT_MAX = 1000   # 인스타 API alt_text 한도
