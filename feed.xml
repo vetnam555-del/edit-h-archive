@@ -6,7 +6,14 @@
   <atom:link href="https://vetnam555-del.github.io/edit-h-archive/feed.xml" rel="self" type="application/rss+xml"/>
   <description>매일 아침 8시 30분, 경제부터 트렌드까지 2030이 알아야 할 소식을 확인된 숫자로</description>
   <language>ko</language>
-  <lastBuildDate>Thu, 05 Nov 2026 08:30:00 +0900</lastBuildDate>
+  <lastBuildDate>Fri, 06 Nov 2026 08:30:00 +0900</lastBuildDate>
+  <item>
+    <title>VOL.136 선거 랠리 하루 만에, 나스닥 5.5% 폭락이라고?</title>
+    <link>https://vetnam555-del.github.io/edit-h-archive/2026-11-06.html</link>
+    <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-11-06.html</guid>
+    <pubDate>Fri, 06 Nov 2026 08:30:00 +0900</pubDate>
+    <description>AI 규제 공포에 나스닥 5.5%↓·코인 세금 2029년으로·스타벅스 굿즈 9잔·빅아치 2주 100만 개·Z세대 1순위 직무 — 오늘의 5가지</description>
+  </item>
   <item>
     <title>VOL.135 일 안 하는 사람 중 &#x27;곧 일할래&#x27; 19.9%라고?</title>
     <link>https://vetnam555-del.github.io/edit-h-archive/2026-11-05.html</link>
@@ -209,13 +216,6 @@
     <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-10-08.html</guid>
     <pubDate>Thu, 08 Oct 2026 08:00:00 +0900</pubDate>
     <description>치킨값 담합 조사·삼성전자 오늘 실적·미국 금리 24년 만에 최고·배달앱 수수료 상한제·해킹 2차 피해 막는 법 — 오늘의 5가지</description>
-  </item>
-  <item>
-    <title>VOL.106 놓쳤다면, 다시 볼 만한 5가지</title>
-    <link>https://vetnam555-del.github.io/edit-h-archive/2026-10-07.html</link>
-    <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-10-07.html</guid>
-    <pubDate>Wed, 07 Oct 2026 08:00:00 +0900</pubDate>
-    <description>지난 호 다시 보기 — 전셋값 86주째, 39세도 청년 대출 된다고? · 신한은행 고객 2만5천명, 연소득·대출한도까지 샜다 · 대미투자 1호는 텍사스 발전소, 원전 8기도 · 물가 2.9%로 내려왔지만, 기름값은 14.8% · 한국은행 직원 186명, 위탁업체 통해 정보 샜다</description>
   </item>
 </channel>
 </rss>
