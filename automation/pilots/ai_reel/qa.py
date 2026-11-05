@@ -766,14 +766,14 @@ def brief_source_gaps(ep, content, caption, note=True, what="reel_ai_caption.txt
         if not names or len(names) < 2:
             continue
         cell = cells[i] if i < len(cells) else ""
-        if sum(n in cell for n in names) < 2:
+        # 매체는 칸을 '·'로 나눈 온전한 이름끼리만 맞춘다('BYD 서울경제'처럼 앞에 붙은 말은 허용) — 부분 글자로 맞추면 '연합뉴스TV' 칸이
+        # 다른 이슈의 '연합뉴스'로도, 거꾸로 '연합뉴스' 이슈 칸에 적은 '연합뉴스TV'가 제 매체로도 잡힌다(11/06 스타벅스·Z세대, Codex)
+        toks = [t.strip() for t in re.split(r"[·,]", cell) if t.strip()]
+        def _named(n):
+            return any(t == n or t.endswith(" " + n) for t in toks)
+        if sum(_named(n) for n in names) < 2:
             fails.append(f"'출처:' {i + 1}번째 칸에 '{tag}' 의 매체 2곳({'·'.join(sorted(names))} 중)이 없다")
-        # 이 이슈의 매체 이름을 먼저 지우고(긴 이름부터) 남은 글에서 다른 이슈의 매체를 찾는다 — '연합뉴스TV' 칸 속 '연합뉴스'(다른 이슈 매체)를
-        # 섞였다고 막지 않게(11/06 스타벅스 '세계일보·연합뉴스TV' + Z세대 '연합뉴스')
-        rest = cell
-        for n in sorted(names, key=len, reverse=True):
-            rest = rest.replace(n, " ")
-        stray = sorted(n for n in known - names if n in rest)
+        stray = sorted(n for n in known - names if _named(n))
         if stray:
             fails.append(f"'출처:' {i + 1}번째 칸('{tag}')에 다른 이슈의 매체 {'·'.join(stray)} 가 있다")
     return fails

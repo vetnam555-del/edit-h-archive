@@ -2477,8 +2477,9 @@ def t_ai_reel():
              "items": [{"tag": "나", "sources": [{"name": "연합뉴스", "url": "u3"}, {"name": "농민신문", "url": "u4"}]}]}
     b_yna = {"date": "2026-11-06", "items": ["가", "나"], "end_card": {"note": "숫자는 기사 2곳 이상에서 확인했어요<br>(출처는 캡션에)"}}
     expect(qa.source_gaps(b_yna, c_yna, "출처: 세계일보·연합뉴스TV / 연합뉴스·농민신문") == []
-           and qa.source_gaps(b_yna, c_yna, "출처: 세계일보·연합뉴스TV·연합뉴스 / 연합뉴스·농민신문"),
-           "'연합뉴스TV' 칸의 '연합뉴스'를 다른 이슈 매체로 막거나, 정말 덧붙인 '연합뉴스'를 놓친다")
+           and qa.source_gaps(b_yna, c_yna, "출처: 세계일보·연합뉴스TV·연합뉴스 / 연합뉴스·농민신문")
+           and qa.source_gaps(b_yna, c_yna, "출처: 세계일보·연합뉴스TV / 연합뉴스TV·농민신문"),   # Codex — 거꾸로 '연합뉴스' 이슈 칸의 '연합뉴스TV'
+           "'연합뉴스TV' 칸의 '연합뉴스'를 다른 이슈 매체로 막거나, 정말 덧붙인 '연합뉴스'·'연합뉴스' 이슈 칸의 '연합뉴스TV'를 놓친다")
     # Codex: brief.json 도 같은 틀 반복 검사 대상(전날 브리핑과 같은 첫 마디)
     with tempfile.TemporaryDirectory() as tmp:
         for day, name, word in (("2026-11-02", "brief.json", "오늘"), ("2026-11-03", "brief.json", "오늘")):
