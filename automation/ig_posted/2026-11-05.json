@@ -4,5 +4,31 @@
   "at": "2026-11-05T08:31:33+09:00",
   "permalink": "https://www.instagram.com/p/DfVpHzEILnH/",
   "first_comment": true
+ },
+ "reel": {
+  "id": "18072576599783770",
+  "at": "2026-11-05T19:33:23+09:00",
+  "track": "Bright New Day",
+  "style": "vertical",
+  "seconds": 7.9,
+  "feed": false,
+  "hook": true,
+  "permalink": "https://www.instagram.com/reel/DfW01VqHyxI/"
+ },
+ "story": {
+  "id": "18083898977397455",
+  "ids": [
+   "18083898977397455",
+   "17988206502095660",
+   "18041659547836999",
+   "18008294474789853"
+  ],
+  "at": "2026-11-05T19:34:21+09:00"
+ },
+ "comic": {
+  "id": "18157869808564119",
+  "at": "2026-11-05T19:35:03+09:00",
+  "ai_label": true,
+  "permalink": "https://www.instagram.com/p/DfW1EX-m8-0/"
  }
 }
