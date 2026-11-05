@@ -962,7 +962,7 @@ def t_gift():
     y, m, d = map(int, g["from"].split("-"))
     msg = sync_subscribers.welcome_message("a@example.com", "b@example.com", load_config(), now=dt.datetime(y, m, d, 7, 10, tzinfo=tz))
     expect(gift["url"] in msg.get_body(preferencelist=("plain",)).get_content(), "환영 메일에 선물 링크가 없다")
-    # 아직 안 지난 항목만 센다(2026-11-06~ — 11/05 구독 길 점검: 첫 화면·캡션은 '18가지'였는데 4가지는 10월에 끝났다). 그 전 날짜는 모두(지난 캡션 그대로)
+    # 아직 안 지난 항목만 센다(2026-11-06~ — 11/05 구독 길 점검: 첫 화면·캡션은 '18가지'였는데 3가지는 10월에 끝났다). 그 전 날짜는 모두(지난 캡션 그대로)
     from edith import gift as gift_mod
     from edith import site as site_mod
     every = gift_mod.items(data)
@@ -981,6 +981,8 @@ def t_gift():
     html_page = page.read_text(encoding="utf-8")
     expect(html_page.count("data-until=") == sum(1 for it in every if it.get("until")) and "li[data-until]" in html_page
            and '<span id="n">' in html_page, "선물 페이지가 지난 항목을 숨기지 못한다(data-until·숨김 스크립트·가짓수 칸)")
+    expect(f"if (today < '{gift_mod.LIVE_FROM}') return;" in html_page,
+           "선물 페이지가 가짓수 세기 시작일(LIVE_FROM) 전부터 숨긴다 — 그날 환영 메일·캡션의 'N가지'와 페이지가 어긋난다(Codex 리뷰)")
     for name, text in (("index.html", home), ("subscribe.html", sub)):
         box = re.search(r'<div class="gift" id="gift"[^>]*>(.*?)</div>', text, re.DOTALL)
         expect(box and not re.search(r"\d+\s*가지", re.sub(r"<[^>]+>", "", box.group(1))),

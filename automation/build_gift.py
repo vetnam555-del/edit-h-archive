@@ -15,6 +15,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from edith.common import AUTOMATION, ROOT, load_config  # noqa: E402
+from edith.gift import LIVE_FROM  # noqa: E402
 
 GIFTS = AUTOMATION / "gifts"
 OUT = ROOT / "gift"
@@ -26,10 +27,12 @@ def until_attr(it):
 
 
 # 지난 항목 숨기기 — 한국 시각 날짜가 data-until 을 넘으면 숨기고, 'N가지'를 남은 수로, 빈 묶음은 제목째 숨긴다(2026-11-05 구독 길 점검:
-# 4분기 선물 18가지 중 4가지가 10월에 끝났는데 그대로 보였다). 자바스크립트가 꺼져 있으면 전부 보인다.
+# 4분기 선물 18가지 중 3가지가 10월에 끝났는데 그대로 보였다). 가짓수 세기와 같은 날(gift.LIVE_FROM)부터 — 그 전엔 환영 메일·캡션이
+# 모두 센 수를 말하니 페이지도 모두 보인다(Codex 리뷰). 자바스크립트가 꺼져 있으면 전부 보인다.
 HIDE_PAST = """<script>
 (function () {
   var today = new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10), hidden = 0;
+  if (today < '__LIVE_FROM__') return;
   document.querySelectorAll('li[data-until]').forEach(function (li) {
     if (li.getAttribute('data-until') < today) { li.hidden = true; hidden++; }
   });
@@ -39,7 +42,7 @@ HIDE_PAST = """<script>
   var n = document.getElementById('n');
   if (n && hidden) n.textContent = String(Number(n.textContent) - hidden);
 })();
-</script>"""
+</script>""".replace("__LIVE_FROM__", LIVE_FROM)
 
 
 def render(data, site):
