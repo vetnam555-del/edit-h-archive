@@ -29,6 +29,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "automation"))
 from edith.fonts import font_css  # noqa: E402
+from edith.gift import PROMO_FROM, screen_line  # noqa: E402
 
 SHOT = ROOT / "automation" / "screenshot.cjs"
 FACE = (ROOT / "assets" / "mascot" / "profile.png").as_uri()
@@ -262,9 +263,10 @@ def build(ep, video, outdir, alt_path=None, base=None):
             f"{e.get('sub', '경제부터 트렌드까지, 오늘 소식 하나를<br>4컷으로 풀어 드려요')}</div>"
             "<div style='display:inline-block;margin-top:50px;background:#111;color:#fff;font-weight:800;font-size:42px;padding:28px 60px;border-radius:999px'>"
             "팔로우하고 내일 아침에 받기</div>"
-            "<div style='margin-top:30px;font-weight:600;font-size:30px;color:#3d3a35'>숫자·출처 전문은 프로필 링크 뉴스레터에서</div></div>")
+            f"<div style='margin-top:30px;font-weight:600;font-size:30px;color:#3d3a35'>{screen_line(ep['date'])}</div></div>")
     shot(page(fonts, body), outdir / f"c{n}.jpg")
-    alts[f"c{n}.jpg"] = "H 극장 끝 장 — 매일 아침 8시 30분 EDIT H 뉴스레터, 팔로우 안내"
+    alts[f"c{n}.jpg"] = "H 극장 끝 장 — 매일 아침 8시 30분 EDIT H 뉴스레터, 팔로우 안내" + (
+        f" · {screen_line(ep['date'])}" if str(ep["date"])[:10] >= PROMO_FROM else "")
     (alt_path or outdir.parent / "comic_alt.json").write_text(json.dumps(alts, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     return n
 

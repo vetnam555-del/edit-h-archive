@@ -962,7 +962,53 @@ def t_gift():
     y, m, d = map(int, g["from"].split("-"))
     msg = sync_subscribers.welcome_message("a@example.com", "b@example.com", load_config(), now=dt.datetime(y, m, d, 7, 10, tzinfo=tz))
     expect(gift["url"] in msg.get_body(preferencelist=("plain",)).get_content(), "환영 메일에 선물 링크가 없다")
-    return f"{gift['title']} {gift['count']}가지"
+    # 아직 안 지난 항목만 센다(2026-11-06~ — 11/05 구독 길 점검: 첫 화면·캡션은 '18가지'였는데 3가지는 10월에 끝났다). 그 전 날짜는 모두(지난 캡션 그대로)
+    from edith import gift as gift_mod
+    from edith import site as site_mod
+    every = gift_mod.items(data)
+    for it in every:
+        expect(not it.get("until") or (re.fullmatch(r"\d{4}-\d{2}-\d{2}", it["until"]) and it["until"] <= g["until"]),
+               f"선물 항목 '{it['do']}' 의 until 이 날짜(YYYY-MM-DD, 선물 기간 안)가 아니다: {it.get('until')}")
+    before = (dt.date.fromisoformat(gift_mod.LIVE_FROM) - dt.timedelta(days=1)).isoformat()
+    if g["from"] <= before:
+        expect(active_gift(before)["count"] == len(every), "LIVE_FROM 전 날짜는 모두 세야 한다(게시된 캡션을 다시 빌드해도 같게)")
+    for day in (gift_mod.LIVE_FROM, "2026-12-01", g["until"]):
+        live = gift_mod.live_items(data, day)
+        expect((active_gift(day) or {}).get("count") == (len(live) or None), f"{day} 선물 가짓수가 남은 항목 수({len(live)})와 다르다")
+        expect(all(not it.get("until") or it["until"] >= day for it in live), f"{day}: 지난 항목을 남은 것으로 센다")
+    expect(any(it.get("until") and it["until"] < gift_mod.LIVE_FROM for it in every)
+           and active_gift(gift_mod.LIVE_FROM)["count"] < len(every), "10월에 끝난 항목이 LIVE_FROM 부터 빠지지 않는다")
+    html_page = page.read_text(encoding="utf-8")
+    expect(html_page.count("data-until=") == sum(1 for it in every if it.get("until")) and "li[data-until]" in html_page
+           and '<span id="n">' in html_page, "선물 페이지가 지난 항목을 숨기지 못한다(data-until·숨김 스크립트·가짓수 칸)")
+    expect(f"if (today < '{gift_mod.LIVE_FROM}') return;" in html_page,
+           "선물 페이지가 가짓수 세기 시작일(LIVE_FROM) 전부터 숨긴다 — 그날 환영 메일·캡션의 'N가지'와 페이지가 어긋난다(Codex 리뷰)")
+    for name, text in (("index.html", home), ("subscribe.html", sub)):
+        box = re.search(r'<div class="gift" id="gift"[^>]*>(.*?)</div>', text, re.DOTALL)
+        expect(box and not re.search(r"\d+\s*가지", re.sub(r"<[^>]+>", "", box.group(1))),
+               f"{name} 선물 상자에 가짓수를 박아 두었다 — 항목이 지나면 틀린 숫자가 된다(가짓수는 캡션·환영 메일이 그날 센다)")
+    # 릴스·웹툰 끝 '구독하면 받는 것'(PROMO_FROM~): 카드 릴스 캡션·끝 장 문구, AI 릴스·웹툰 캡션의 그 줄은 qa 숫자 대조에서 뺀다
+    start = gift_mod.PROMO_FROM
+    prev = (dt.date.fromisoformat(start) - dt.timedelta(days=1)).isoformat()
+    from edith import content as content_mod
+    d = dict(content_mod.load(daily_issues(1)[0]))
+    letter = site_mod.reel_letter(start)
+    expect(letter in site_mod.reel_caption(dict(d, date=start)) and site_mod.reel_letter(prev) not in site_mod.reel_caption(dict(d, date=prev)),
+           "카드 릴스 캡션의 '구독하면 받는 것' 줄이 시작일부터만 붙지 않는다")
+    expect(f"({active_gift(start)['count']}가지)" in letter and gift["title"] in letter, f"릴스 줄에 선물 이름·남은 가짓수가 없다: {letter}")
+    expect(gift_mod.screen_line(prev) == "숫자·출처 전문은 프로필 링크 뉴스레터에서" and data.get("short", data["title"]) in gift_mod.screen_line(start)
+           and not re.search(r"\d", gift_mod.screen_line(start) + gift_mod.screen_line(start, short=True)),
+           "끝 장 문구가 시작일 전엔 그대로, 뒤엔 숫자 없이 선물 이름이어야 한다")
+    sys.path.insert(0, str(AUTOMATION / "pilots" / "ai_reel"))
+    import qa
+    with tempfile.TemporaryDirectory() as tmp:
+        cap = Path(tmp) / "comic_caption.txt"
+        cap.write_text(f"오늘 소식\n이 그림은 AI로 만들었어요.\n{letter}\n#EDITH\n", encoding="utf-8")
+        body = qa.caption_texts(cap, skip=qa.promo_lines(start))[0][0][1]
+        expect(letter not in body and qa.promo_lines(prev) == [], "qa 가 '구독하면 받는 것' 줄을 숫자 대조에서 빼지 않는다(시작일 전엔 빼지 않는다)")
+        cap.write_text(f"이 그림은 AI로 만들었어요.\n{letter.replace('가지)', '가지 넘게)')}\n", encoding="utf-8")
+        expect("넘게" in qa.caption_texts(cap, skip=qa.promo_lines(start))[0][0][1], "손으로 바꾼 선물 줄까지 숫자 대조에서 뺀다")
+    return f"{gift['title']} {gift['count']}가지 · {gift_mod.LIVE_FROM}~ 남은 것 {active_gift(gift_mod.LIVE_FROM)['count']}가지 · 릴스·웹툰 끝 한 줄"
 
 
 def t_photo_library():
