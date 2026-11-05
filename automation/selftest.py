@@ -250,12 +250,16 @@ def t_card_takeaway_topic():
     expect(hits == ["2026-11-05 2"], f"지난 카드 중 걸리는 것이 11/05 ② 하나가 아니다: {hits}")
     ok = [{"headline": "휘발유값 ==19주== 연속 하락", "takeaway": "더 기다리기보다 오피넷에서 동네 최저가를 찾아요"},
           {"headline": "오늘 전국에\n==비==, 내일 추워요", "takeaway": "우산 챙기고, 내일은 패딩 꺼내 두세요"},
+          {"headline": "주말 내내 비가 와요", "takeaway": "우산 챙기세요"},
+          {"headline": "신제품 가격 ==20%== 인상", "takeaway": "사기 전에 최저가부터 비교해요"},   # 값이 바뀐 소식의 최저가 비교는 이어진다
           {"headline": "프리랜서 세금, 28년 만에 ==2.2%==로", "takeaway": "홈택스·손택스에서 미환급금부터 조회하세요"},
           {"headline": "1년 안에 일할 생각\n==324만명==", "takeaway": "고용센터에서 지원 대상인지 확인해요"}]
     for it in ok:
         expect(content.takeaway_topic_problem(it) is None, f"이어지는 takeaway 를 막는다: {it['headline']} → {it['takeaway']}")
     bad = [{"headline": "코스피 ==3%== 급등", "takeaway": "출근길 우산 꼭 챙기세요"},
-           {"headline": "엔비디아 실적 ==사상 최대==", "takeaway": "청약홈에서 이번 주 일정을 보세요"}]
+           {"headline": "엔비디아 실적 ==사상 최대==", "takeaway": "청약홈에서 이번 주 일정을 보세요"},
+           {"headline": "매출, 지난해에 ==비해== 20% 증가", "takeaway": "출근길 우산 챙기세요"},   # '비해'·'비용'은 비 소식이 아니다(Codex 리뷰)
+           {"headline": "물류 비용 ==20%== 줄였다", "takeaway": "우산 챙기고 나가세요"}]
     for it in bad:
         expect(content.takeaway_topic_problem(it), f"제목과 따로 노는 takeaway 를 못 잡는다: {it['headline']} → {it['takeaway']}")
     for day, block in (("2026-11-05", False), ("2026-11-06", True)):   # 11/05 는 이미 나간 기록 — 11/06 호부터 막는다
