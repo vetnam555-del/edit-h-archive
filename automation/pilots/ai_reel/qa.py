@@ -259,7 +259,8 @@ _SINO = {"영": 0, "공": 0, "일": 1, "이": 2, "삼": 3, "사": 4, "오": 5, "
 _SMALL = {"십": 10, "백": 100, "천": 1000}
 _BIG = {"만": 10 ** 4, "억": 10 ** 8, "조": 10 ** 12}
 _PIECE = r"\d[\d,]*(?:\.\d+)?|[영공일이삼사오육칠팔구십백천만억조점]"
-SPOKEN = re.compile(rf"(?<![가-힣\d.])((?:{_PIECE})(?:\s?(?:{_PIECE}))*)\s?(?:여\s?)?(퍼센트\s?포인트|%p|퍼센트|%|거래일|시간|원|분|명|건|개|배|호|위|년|월|일|시|초|대|종목|가지|군데|곳|번|살|달러|달|채)?")   # '달러'를 '달'(개월)보다 먼저 — 11/03 '63억 달러'를 '63억 달'로 읽어 content 와 못 맞췄다
+SPOKEN = re.compile(rf"(?<![가-힣\d.])((?:{_PIECE})(?:\s?(?:{_PIECE}))*)\s?(?:여\s?)?(퍼센트\s?포인트|%p|퍼센트|%|거래일|시간|원|분|명|건|개|배|호|위|년|월|일|시|초|대|종목|가지|군데|곳|번|살|달러|달|채|잔)?")   # '달러'를 '달'(개월)보다 먼저 — 11/03 '63억 달러'를 '63억 달'로 읽어 content 와 못 맞췄다
+# '잔'(11/06 '9잔' — 숫자로 쓴 '9잔'은 단위 없이, 한글로 읽은 '아홉 잔'은 '잔'으로 읽혀 tts 숫자 검사가 같은 값을 다르다고 막았다)
 # 퍼센트(%)와 퍼센트포인트(%p)는 다른 단위다 — 금리 '2.1%p 우대'를 '2.1%'로 쓰면 막는다(11/01 Codex)
 UNIT_SAME = {"퍼센트": "%", "퍼센트포인트": "%p", "퍼센트 포인트": "%p", "%포인트": "%p"}
 # 브랜드 고정 말(발송 시각 '여덟 시 반' = 08:30) — content 숫자가 아니어도 된다
@@ -337,6 +338,8 @@ def spoken_numbers(text):
         if not unit and run.endswith("일") and len(run) > 1 and (re.search(r"\d", run[:-1]) or run[:-1].endswith(" ")):
             run, unit = run[:-1].strip(), "일"
         if not re.search(r"\d", run) and not unit:
+            continue
+        if unit == "잔" and not re.search(r"\d", run):   # '아홉 잔'은 고유어 수사(native_numbers)가 읽는다 — '이 잔'(this cup)을 2잔으로 읽지 않게
             continue
         if re.fullmatch(r"[점\s]+", run):
             continue
@@ -765,7 +768,12 @@ def brief_source_gaps(ep, content, caption, note=True, what="reel_ai_caption.txt
         cell = cells[i] if i < len(cells) else ""
         if sum(n in cell for n in names) < 2:
             fails.append(f"'출처:' {i + 1}번째 칸에 '{tag}' 의 매체 2곳({'·'.join(sorted(names))} 중)이 없다")
-        stray = sorted(n for n in known - names if n in cell)
+        # 이 이슈의 매체 이름을 먼저 지우고(긴 이름부터) 남은 글에서 다른 이슈의 매체를 찾는다 — '연합뉴스TV' 칸 속 '연합뉴스'(다른 이슈 매체)를
+        # 섞였다고 막지 않게(11/06 스타벅스 '세계일보·연합뉴스TV' + Z세대 '연합뉴스')
+        rest = cell
+        for n in sorted(names, key=len, reverse=True):
+            rest = rest.replace(n, " ")
+        stray = sorted(n for n in known - names if n in rest)
         if stray:
             fails.append(f"'출처:' {i + 1}번째 칸('{tag}')에 다른 이슈의 매체 {'·'.join(stray)} 가 있다")
     return fails
