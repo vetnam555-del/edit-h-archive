@@ -36,6 +36,81 @@ def takeaway_link_problem(it):
     terms = [t for t in CARD_MONEY_TERMS if t in tk]
     return terms if len(terms) >= 2 and not any(t in ctx for t in terms) else None
 
+
+TAKEAWAY_TOPIC_FROM = "2026-11-06"  # 카드 '그래서 나는?'이 제목 소식과 상관없는 기관·생활 팁으로 튀는 것을 막는 날(지난 호는 기록)
+# 11/05 카드 ② '민주당 압승에 다우 3.03% 급등' → '주유 전 오피넷 최저가를 비교해요' — 본문 끝 'WTI 8.3% 급락'에서 따온, 오늘 소식이
+# 없어도 맞는 팁이라 제목 소식과 따로 놀았다(운영자 '소식과 그 결과로 적합한지 전체적으로 검토한 거 맞아?' — 11/03 ①에 이어 사흘에 두 번).
+# takeaway 에 왼쪽 말이 나오면 오른쪽 말(또는 왼쪽 말 그 자체) 하나가 그 카드 제목(headline)에 있어야 한다. 이어지는 곳은 제목이라
+# 본문은 보지 않는다(②의 'WTI 8.3% 급락'은 본문 끝 곁가지였다). 9/24~11/05 카드 217장 중 걸리는 건 11/05 ② 하나다.
+# 비 소식의 '비'만 — '전국에 비'·'비가 와요'·'비 소식'은 되고 '지난해에 비해'·'비용'·'비트코인'은 안 된다(Codex 리뷰)
+_RAIN = re.compile(r"(?<![가-힣])비(?:(?![가-힣])|(?=가|는|도|와|소식|예보|구름|바람|오|온|내))")
+TAKEAWAY_TOPICS = (
+    (("오피넷", "주유"), ("휘발유", "경유", "유가", "기름", "유류세", "등유", "LPG")),
+    (("고용센터", "고용24", "워크넷", "국민취업지원", "실업급여"),
+     ("실업", "구직", "취업", "고용", "일자리", "채용", "일할", "일하", "쉬었음", "퇴사", "해고", "근로")),
+    (("홈택스", "손택스", "국세청", "연말정산"),
+     ("세금", "세액", "소득세", "환급", "원천징수", "종합소득", "부가세", "부가가치세", "신고", "공제", "세율", "납세", "국세",
+      "양도세", "종부세", "증여", "상속", "프리랜서")),
+    (("위택스",), ("지방세", "재산세", "자동차세", "취득세", "주민세", "환급")),
+    (("정부24", "주민센터", "행정복지센터"), ("정부", "민원", "증명서", "행정", "주민등록", "신분증", "여권", "전입", "지원금", "신청")),
+    (("어카운트인포",), ("계좌", "유출", "휴면", "은행", "금융", "샜", "해킹", "명의", "대출")),
+    (("청약홈",), ("청약", "분양", "아파트", "주택", "입주", "특공")),
+    (("복지로",), ("복지", "지원금", "수당", "급여", "바우처", "양육", "출산", "육아", "기초")),
+    (("내보험찾아줌", "숨은 보험금", "숨은 금융자산"), ("보험", "금융", "예금", "적금", "숨은", "휴면", "환급")),
+    (("최저가",), ("가격", "요금", "할인", "인상", "인하", "물가", "휘발유", "경유", "유가", "기름", "최저")),
+    (("우산", "우비"), (_RAIN, "비구름", "장마", "태풍", "호우", "날씨", "강수", "소나기", "폭우")),
+    (("패딩", "옷차림", "보온", "핫팩", "내복"), ("추위", "한파", "기온", "영하", "날씨", "추워", "쌀쌀", "겨울")),
+    (("마스크",), ("미세먼지", "황사", "감기", "독감", "코로나", "감염", "호흡기", "바이러스")),
+    (("선크림", "자외선"), ("자외선", "폭염", "더위", "햇빛", "여름")),
+)
+
+
+def _headline_text(it):
+    return re.sub(r"\s+", " ", str(it.get("headline") or "").replace("==", "")).strip()
+
+
+def takeaway_topic_problem(it):
+    """카드 takeaway 가 할 곳(오피넷·홈택스…)이나 늘 맞는 생활 팁(최저가·우산…)을 꺼내는데 그 카드 제목에 그 소식이 없으면
+    → [(꺼낸 말, 제목에 있어야 할 말들)], 아니면 None (RUNBOOK 4단계 cards.issues — 이어지는 곳은 headline)."""
+    tk = str(it.get("takeaway") or "")
+    raw = str(it.get("headline") or "").replace("==", "")
+    heads = (raw.replace("\n", " "), raw.replace("\n", ""))   # 두 줄 제목의 줄바꿈이 낱말 가운데에 와도 찾는다
+    out = []
+    for said, topic in TAKEAWAY_TOPICS:
+        hit = next((w for w in said if w in tk), None)
+        if hit and not any((w.search(h) if hasattr(w, "search") else w in h) for h in heads for w in said + topic):
+            out.append((hit, topic))
+    return out or None
+
+
+def card_rule_problems(it, day, w="cards.issues[?]"):
+    """날짜로 켜진 카드 글 규칙에 걸리는 줄 목록 — 큰 숫자 '억$'(11/04~)·카드에 없는 돈 말(11/04~)·제목에 없는 소식의 기관·생활 팁(11/06~).
+    prepare 가 이 줄로 빌드를 막고, 예비 호(build_rewind)는 이 규칙에 걸리는 지난 카드를 고르지 않는다 — 지난 카드를 그대로 다시 실으면
+    그날 날짜로 검사를 받아 예비 호 빌드까지 멈춘다."""
+    day = str(day or "")[:10]
+    out = []
+    # 2026-11-03 카드 ③ '63억$' — 한글 단위 뒤 '$'는 어색하다(바이낸스 해킹액이 국내 거래소 숫자처럼도 읽혔다, RUNBOOK 4단계 cards.issues)
+    if "number" in it and day >= NUMBER_UNIT_FROM and re.search(r"[만억조]\s*[$€¥]", str(it["number"])):
+        out.append(f"{w}.number '{it['number']}' — 돈 단위는 '63억 달러'처럼 한글로 쓰세요(9자 안)")
+    if day >= TAKEAWAY_LINK_FROM and (cut := takeaway_link_problem(it)):
+        out.append(f"{w}.takeaway '{it['takeaway']}' — '{'·'.join(cut)}'이(가) 카드 제목·본문에 없어요. 카드만 본 사람도 "
+                   "이어지게 그 카드 소식에서 바로 나오는 한 문장으로 쓰세요(RUNBOOK 4단계 cards.issues)")
+    if day >= TAKEAWAY_TOPIC_FROM and (off := takeaway_topic_problem(it)):
+        said = "·".join(f"'{s}'({'·'.join(t if isinstance(t, str) else '비' for t in topic[:4])} 소식)" for s, topic in off)
+        out.append(f"{w}.takeaway '{it['takeaway']}' — {said}이(가) 카드 제목 '{_headline_text(it)}'과(와) 이어지지 않아요. "
+                   "제목의 소식 때문에 오늘 달라지는 할 일로 바꾸세요 — 본문 곁가지에서 따온 할 일·오늘 소식이 없어도 맞는 "
+                   "생활 팁은 쓰지 않아요(RUNBOOK 4단계 cards.issues)")
+    return out
+
+
+def read_through(d):
+    """카드마다 '제목 → 그래서 나는?' 한 줄(①~⑤) — 빌드가 끝에 보여 주어 제작이 '그래서'로 이어지는지 다시 읽게 한다(2026-11-06~)."""
+    if d.get("format") != 2 or d.get("rewind") or str(d.get("date", ""))[:10] < TAKEAWAY_TOPIC_FROM:
+        return []
+    marks = "①②③④⑤⑥⑦⑧⑨⑩"
+    return [f"{marks[(int(it.get('no') or i) - 1) % 10]} {_headline_text(it)} → {it.get('takeaway') or ''}"
+            for i, it in enumerate(d.get("card_issues") or [], 1)]
+
 CARD_LIMITS = {
     "cover_title": 34,       # 표지 두 줄 제목 합계
     "number": 9,             # 이슈 카드의 큰 숫자 (예: 300억원, 8.9조원, 82%)
@@ -535,15 +610,10 @@ def prepare(data, date_str):
         w = f"cards.issues[{i}]"
         if "number" in it:
             _len_check(it["number"], CARD_LIMITS["number"], f"{w}.number", problems)
-            # 2026-11-03 카드 ③ '63억$' — 한글 단위 뒤 '$'는 어색하다(바이낸스 해킹액이 국내 거래소 숫자처럼도 읽혔다, RUNBOOK 4단계 cards.issues)
-            if str(data.get("date", ""))[:10] >= NUMBER_UNIT_FROM and re.search(r"[만억조]\s*[$€¥]", str(it["number"])):
-                problems.append(f"{w}.number '{it['number']}' — 돈 단위는 '63억 달러'처럼 한글로 쓰세요(9자 안)")
         _len_check(it["headline"], CARD_LIMITS["headline"], f"{w}.headline", problems)
         _len_check(it["body"], CARD_LIMITS["body"], f"{w}.body", problems)
         _len_check(it["takeaway"], CARD_LIMITS["takeaway"], f"{w}.takeaway", problems)
-        if str(data.get("date", ""))[:10] >= TAKEAWAY_LINK_FROM and (cut := takeaway_link_problem(it)):
-            problems.append(f"{w}.takeaway '{it['takeaway']}' — '{'·'.join(cut)}'이(가) 카드 제목·본문에 없어요. 카드만 본 사람도 "
-                            "이어지게 그 카드 소식에서 바로 나오는 한 문장으로 쓰세요(RUNBOOK 4단계 cards.issues)")
+        problems += card_rule_problems(it, data.get("date", ""), w)
         for j, m in enumerate(it.get("metrics") or [], 1):
             _len_check(m["value"], CARD_LIMITS["metric_value"], f"{w}.metrics[{j}].value", problems)
             _len_check(m["label"], CARD_LIMITS["metric_label"], f"{w}.metrics[{j}].label", problems)
@@ -595,5 +665,5 @@ def prepare(data, date_str):
         _len_check(p["title"], CARD_LIMITS["lead_point_title"], f"lead_points[{i}].title", problems)
         _len_check(p["text"], CARD_LIMITS["lead_point_text"], f"lead_points[{i}].text", problems)
     if problems:
-        raise ContentError("글자 수 초과:\n  - " + "\n  - ".join(problems))
+        raise ContentError("글자 수·카드 글 점검:\n  - " + "\n  - ".join(problems))
     return data

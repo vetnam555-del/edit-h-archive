@@ -227,6 +227,64 @@ def t_card_takeaway_link():
     return "11/04~ 카드에 없는 돈 이야기로 튀는 '그래서 나는?' 막음"
 
 
+def t_card_takeaway_topic():
+    """11/05 운영자 '민주당 압승에 다우가 급등했는데 주유 전 오피넷 최저가를 비교한다던지 — 소식과 그 결과로 적합한지 검토한 거 맞아?'
+    11/06~ 카드 '그래서 나는?'이 제목에 없는 소식의 기관·생활 팁(오피넷·최저가·우산…)으로 튀면 막고, 빌드가 '제목 → 그래서 나는?'을 보여 준다."""
+    import copy
+
+    from edith import content
+    raw = json.loads((CONTENT_DIR / "2026-11-05.json").read_text(encoding="utf-8"))
+    by_no = {int(ci["no"]): ci for ci in raw["cards"]["issues"]}
+    expect([s for s, _ in content.takeaway_topic_problem(by_no[2]) or []] == ["오피넷", "최저가"],
+           "11/05 ② '다우 급등 → 주유 전 오피넷 최저가' 를 못 잡는다")
+    for no in (1, 3, 4, 5):
+        expect(content.takeaway_topic_problem(by_no[no]) is None, f"11/05 {no}번(이어지는 카드)을 막는다: {by_no[no]['takeaway']}")
+    # 지난 카드 전부(9/24~)에서 걸리는 건 11/05 ② 하나 — 늘어나면 거짓 경보부터 의심한다(낱말 목록 TAKEAWAY_TOPICS)
+    hits = []
+    for p in sorted(CONTENT_DIR.glob("2026-*.json")):
+        if p.stem > "2026-11-05":
+            break
+        for ci in (json.loads(p.read_text(encoding="utf-8")).get("cards") or {}).get("issues") or []:
+            if content.takeaway_topic_problem(ci):
+                hits.append(f"{p.stem} {ci.get('no')}")
+    expect(hits == ["2026-11-05 2"], f"지난 카드 중 걸리는 것이 11/05 ② 하나가 아니다: {hits}")
+    ok = [{"headline": "휘발유값 ==19주== 연속 하락", "takeaway": "더 기다리기보다 오피넷에서 동네 최저가를 찾아요"},
+          {"headline": "오늘 전국에\n==비==, 내일 추워요", "takeaway": "우산 챙기고, 내일은 패딩 꺼내 두세요"},
+          {"headline": "주말 내내 비가 와요", "takeaway": "우산 챙기세요"},
+          {"headline": "신제품 가격 ==20%== 인상", "takeaway": "사기 전에 최저가부터 비교해요"},   # 값이 바뀐 소식의 최저가 비교는 이어진다
+          {"headline": "프리랜서 세금, 28년 만에 ==2.2%==로", "takeaway": "홈택스·손택스에서 미환급금부터 조회하세요"},
+          {"headline": "1년 안에 일할 생각\n==324만명==", "takeaway": "고용센터에서 지원 대상인지 확인해요"}]
+    for it in ok:
+        expect(content.takeaway_topic_problem(it) is None, f"이어지는 takeaway 를 막는다: {it['headline']} → {it['takeaway']}")
+    bad = [{"headline": "코스피 ==3%== 급등", "takeaway": "출근길 우산 꼭 챙기세요"},
+           {"headline": "엔비디아 실적 ==사상 최대==", "takeaway": "청약홈에서 이번 주 일정을 보세요"},
+           {"headline": "매출, 지난해에 ==비해== 20% 증가", "takeaway": "출근길 우산 챙기세요"},   # '비해'·'비용'은 비 소식이 아니다(Codex 리뷰)
+           {"headline": "물류 비용 ==20%== 줄였다", "takeaway": "우산 챙기고 나가세요"}]
+    for it in bad:
+        expect(content.takeaway_topic_problem(it), f"제목과 따로 노는 takeaway 를 못 잡는다: {it['headline']} → {it['takeaway']}")
+    for day, block in (("2026-11-05", False), ("2026-11-06", True)):   # 11/05 는 이미 나간 기록 — 11/06 호부터 막는다
+        d = copy.deepcopy(raw)
+        d["date"] = day
+        try:
+            out = content.prepare(d, day)
+            got = False
+        except content.ContentError as e:
+            got = "cards.issues[2].takeaway" in str(e) and "오피넷" in str(e) and "다우" in str(e)
+            out = None
+        expect(got == block, f"{day} 카드 ② '오피넷' 검사가 {'막아야' if block else '지나가야'} 한다")
+        if out is not None:
+            expect(content.read_through(out) == [], "11/05(지난 호)에도 '이어 읽기'를 보여 준다")
+    d = copy.deepcopy(raw)
+    d["date"] = "2026-11-06"
+    for ci in d["cards"]["issues"]:
+        if int(ci["no"]) == 2:
+            ci["takeaway"] = "내 미국 주식, 빅테크인지 반도체인지 확인해요"
+    lines = content.read_through(content.prepare(d, "2026-11-06"))
+    expect(len(lines) == 5 and lines[1] == "② 민주당 압승에 다우 3.03% 급등 → 내 미국 주식, 빅테크인지 반도체인지 확인해요",
+           f"'이어 읽기' 다섯 줄이 '② 제목 → 그래서 나는?' 꼴이 아니다: {lines[:2]}")
+    return "11/06~ 제목에 없는 기관·생활 팁으로 튀는 '그래서 나는?' 막음 · 이어 읽기 5줄"
+
+
 def t_anjang_wait():
     """평일 07:55 전 fallback 빌드는 오늘 안장 글을 확인한 기록이 있을 때만(11/03 운영자 '안장출근길 소스가 너무 좋다' — 10/15·10/29 먼저 만들어 겹침 0~1/10)."""
     import build_issue
@@ -909,7 +967,21 @@ def t_rewind():
     expect(len(items) == 4, "예비 호 아이템 4개")
     if len(days) < 3:   # pick() 의 마지막 완화 단계(한 호에서 여러 개)는 허용된 동작 — 실패가 아니라 알림
         NOTES.append(f"예비 호가 {len(days)}개 호에서만 골랐다 — 최근 3주에 쓸 만한 호가 적다(완화 단계로 선정)")
-    return f"{len(days)}개 호에서 5개"
+    # 오늘 날짜로 다시 실으면 막히는 지난 카드는 고르지 않는다 — 골랐다간 예비 호 빌드(content.prepare)까지 멈춘다
+    # (11/03 ① '담보대출 금리'·③ '63억$'은 11/04~, 11/05 ② '다우 급등 → 오피넷 최저가'는 11/06~ 규칙에 걸린다)
+    from edith import content as content_mod
+    keys = {(x[2], int(x[1]["no"])) for x in build_rewind.pool("2026-11-06")}
+    expect(keys and not keys & {("2026-11-03", 1), ("2026-11-03", 3), ("2026-11-05", 2)},
+           f"예비 호 후보에 오늘 규칙으로 막히는 지난 카드가 있다: {sorted(keys & {('2026-11-03', 1), ('2026-11-03', 3), ('2026-11-05', 2)})}")
+    with contextlib.redirect_stdout(io.StringIO()):
+        rw = build_rewind.build("2026-11-06")
+    try:
+        content_mod.prepare(rw, "2026-11-06")
+        ok = True
+    except content_mod.ContentError as e:
+        ok = str(e)
+    expect(ok is True, f"11/06 예비 호가 카드 글 점검에 막힌다: {ok}")
+    return f"{len(days)}개 호에서 5개 · 막히는 지난 카드 안 고름"
 
 
 def t_metrics():
@@ -2963,6 +3035,7 @@ def main():
     check("평일 안장 글 기다리기(07:55 전 fallback 빌드 막음)", t_anjang_wait)
     check("카드 마크·큰 숫자 단위(11/04~)", t_card_marks)
     check("카드 '그래서 나는?' 이어짐(11/04~)", t_card_takeaway_link)
+    check("카드 '그래서 나는?' 제목 소식 맞춤·이어 읽기(11/06~)", t_card_takeaway_topic)
     check("발송 시각(지난 호는 08:00)", t_send_time)
     check("짧게 읽는 소식 점검", t_brief_check)
     check("새 호 막는 점검(짧은 소식 개수·H PICK 중복)", t_strict_content)
