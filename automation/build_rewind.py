@@ -27,6 +27,7 @@ import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from edith import content  # noqa: E402
 from edith.common import AUTOMATION, CONTENT_DIR, MANIFEST, ROOT, load_config, now_kst, parse_date, weekday_ko  # noqa: E402
 
 POOL_DAYS = 21
@@ -234,7 +235,10 @@ def pool(date):
         if c.get("rewind"):
             continue
         fmt2 = "items" in c and "sections" not in c
-        specs = {int(ci["no"]): ci for ci in (c.get("cards") or {}).get("issues") or []}
+        # 오늘 날짜로 다시 실으면 막히는 지난 카드(11/03 ① '담보대출 금리'·③ '63억$'·11/05 ② '다우 급등 → 오피넷')는 고르지 않는다 —
+        # 골랐다간 예비 호 빌드(content.prepare)까지 멈춰 그날 메일이 아예 안 나간다
+        specs = {int(ci["no"]): ci for ci in (c.get("cards") or {}).get("issues") or []
+                 if not content.card_rule_problems(ci, date)}
         items = c["items"] if fmt2 else [it for sec in c.get("sections") or [] for it in sec.get("items") or []]
         if fmt2 and 1 in specs and (c.get("cards") or {}).get("deep") and c["big_issue"].get("why"):
             out.append((c["big_issue"], specs[1], day, True, c))

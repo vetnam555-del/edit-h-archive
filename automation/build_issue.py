@@ -125,6 +125,17 @@ def print_style(d):
             print(f"      {n}")
 
 
+def print_read_through(d):
+    """카드마다 '제목 → 그래서 나는?'(2026-11-06~) — 11/05 운영자 '소식과 그 결과로 적합한지 전체적으로 검토한 거 맞아?'.
+    제목에 없는 기관·생활 팁은 content 가 막고, 그 밖의 어긋남은 제작이 이 줄을 읽고 고친다(RUNBOOK 3단계)."""
+    lines = content.read_through(d)
+    if lines:
+        print("  ↘ 이어 읽기 — 카드 제목에서 '그래서 나는?'으로 '그래서'가 바로 이어지나요? 본문 곁가지·늘 맞는 팁이면 고쳐서 다시 빌드"
+              "(RUNBOOK 4단계 cards.issues):")
+        for ln in lines:
+            print(f"      {ln}")
+
+
 # 2026-11-03 운영자 '안장출근길 소스가 너무 좋다' — 10/15~11/02 평일 13일 중 안장을 제대로 쓴 날은 7일이었고, 2일(10/15·10/29)은
 # 안장 글(평일 07:29~07:40)이 올라오기 전에 먼저 만들어 겹침 0~1/10 이었다. 평일 07:55 전 fallback 빌드는 오늘 안장 글을 확인한
 # 기록(fetch_anjang.py — 글 있음 또는 접속 실패)이 있을 때만 한다. 07:55 가 지나면(안장이 쉬는 날 포함) 그대로 — 막다가 예비 호가 나가면 더 나쁘다.
@@ -194,6 +205,7 @@ def main():
     if args.check:
         print(f"✓ content/{args.date}.json 검증 통과 (VOL.{d['vol']}, 아이템 {len(d['all_items'])}개)")
         print_style(d)
+        print_read_through(d)
         return
 
     wait = anjang_wait_problem(d)
@@ -249,6 +261,7 @@ def main():
     for c in shrunk:
         print(f"  ↘ {c['file']}: 글자 {round((1 - c['k']) * 100)}% 자동 축소 — 가능하면 문장을 줄이세요")
     print_style(d)
+    print_read_through(d)
     if (d.get("format") == 2 and not d.get("rewind") and len(d["briefs"]) < content.BRIEFS_TARGET
             and str(d["date"]) < content.BRIEFS_FROM):   # 10/16~ 는 style.brief_check 가 알린다(주말·공휴일 3개 허용 — Codex 리뷰)
         # 2026-10-03 회고: '괜찮아요'라고 알려 줘서 10/2·10/3 이틀 연속 3개로 나갔다 — 원칙 1(5개)을 분명히 한다
