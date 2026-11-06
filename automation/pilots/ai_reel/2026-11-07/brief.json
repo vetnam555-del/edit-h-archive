@@ -1,0 +1,91 @@
+{
+ "date": "2026-11-07",
+ "items": [
+  "반대매매",
+  "미국 증시",
+  "일본 여행",
+  "테슬라",
+  "엔비디아·네이버"
+ ],
+ "comic": {
+  "series": "오늘 아침 5가지",
+  "layout": "duo",
+  "title": "코스피 이틀 새<br><span class='hl'>11%</span> 급락,<br>오늘 아침 5가지",
+  "cover": {
+   "img": "stills/cover.png",
+   "pos": "50% 40%",
+   "job": "e7b0ee98-7ffa-4234-a434-5ac88b59e3ed"
+  },
+  "summary": true,
+  "panels": [
+   {
+    "card": 1,
+    "img_a": "stills/bj_a.png",
+    "pos_a": "50% 40%",
+    "img_b": "stills/bj_b.png",
+    "pos_b": "50% 35%",
+    "say_side": "right",
+    "stk_side": "left",
+    "jobs": [
+     "4cb63a38-cb1c-49a4-b219-ec2f09276935",
+     "ee95f0b7-0ff5-4644-aede-3d19f7cda8fc"
+    ]
+   },
+   {
+    "card": 2,
+    "img_a": "stills/nq_a.png",
+    "pos_a": "50% 40%",
+    "img_b": "stills/nq_b.png",
+    "pos_b": "50% 35%",
+    "say_side": "left",
+    "jobs": [
+     "544f898b-355c-4c36-8cdf-73fa448f8135",
+     "f66add67-2916-4abb-b530-77d9d9f090e3"
+    ]
+   },
+   {
+    "card": 3,
+    "img_a": "stills/jn_a.png",
+    "pos_a": "50% 40%",
+    "img_b": "stills/jn_b.png",
+    "pos_b": "50% 35%",
+    "say_side": "right",
+    "jobs": [
+     "7a0f43e0-e7a1-4e83-9742-f0065b7e3295",
+     "63aa1c5c-84bb-4a9f-a5cb-4f22a05fdf09"
+    ]
+   },
+   {
+    "card": 4,
+    "img_a": "stills/ts_a.png",
+    "pos_a": "50% 40%",
+    "img_b": "stills/ts_b.png",
+    "pos_b": "50% 35%",
+    "say_side": "right",
+    "stk_side": "left",
+    "jobs": [
+     "add46a8d-d0bd-496c-9ef1-ac9476803a73",
+     "990292d8-57a1-44c2-bf03-1751ddf04eef"
+    ]
+   },
+   {
+    "card": 5,
+    "img_a": "stills/nv_a.png",
+    "pos_a": "50% 40%",
+    "img_b": "stills/nv_b.png",
+    "pos_b": "50% 35%",
+    "say_side": "right",
+    "jobs": [
+     "045ac46a-fd4e-4378-805b-1995b5b34cca",
+     "835d72bf-8cbf-4cdb-9ba6-2e6400277acf"
+    ]
+   }
+  ],
+  "sources": "장마다 표시",
+  "end": {
+   "title": "오늘 아침 5가지,<br>매일 8시 30분",
+   "sub": "경제부터 트렌드까지, 오늘 소식 5가지를<br>웹툰으로 풀어 드려요"
+  }
+ },
+ "comic_note": "5가지 웹툰 3판(E20 11/02~11/08 — 같은 날 08:30 카드와 도달·저장+공유 비교, 판정 11/09). 11월 크레딧 계획의 홀수 날이라 영상·목소리 없이 웹툰만(19:30 저녁 사슬이 카드 릴스와 함께 올린다). 그림 11장 gpt_image_2_5 4:3 1k(장당 0.25 크레딧), 프롬프트·구도 규칙 automation/pilots/ai_reel/webtoon_prompt.md. stills/ 는 저장소에 올리지 않는다(jobs 로 다시 받는다). 장면: 표지 옥상 테라스 커피 · ① 빌린 블록 탑을 도우미 로봇이 아래서 빼고 H 가 붙잡음(반대매매) → 은행 창구 빈 안내문 읽기 · ② 트램펄린에서 튀어 오르며 칩 줍기(반도체 저가 매수 반등) → 안락의자에서 차 마시며 '서두르지 않기' · ③ 바닷가 공항에서 꽃섬으로 줄지어 뜨는 장난감 비행기(일본 노선) → 빈 표 세 장 고르기 · ④ 왕관 쓴 흰 장난감 차 시상대와 셀카봉(1위 자랑) → 두 달 쌓은 차 높이 비교 · ⑤ 칩 로봇이 둥근 집 굴뚝에 금화(투자) → 세 번째 의자 내주기(3대 주주). 원 기사 대조: check_sources 막음 0·경고 2(1000만원·109만원은 이틀 하락률로 계산한 값)·13/13곳, 네이버 신주 655만8435주는 YTN 에 '655만 8,435주'로 있어 두 곳 확인."
+}
