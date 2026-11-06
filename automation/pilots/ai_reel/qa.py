@@ -254,6 +254,51 @@ def dropouts(video, head=0.3, tail=0.8):
     return merged
 
 
+# 대사 도중 소리 구멍(2026-11-07 회차~) — 11/06 운영자 "릴스 보니까 중간에 목소리 끊기는 것 같은데": 코인 줄 '코인 세금,' 뒤
+# 0.3초가 그 줄 말소리보다 19dB 꺼졌는데(영상 한가운데 11.35초) 바닥이 -25dB 라 dropouts(-32dB·18dB)는 지나갔다.
+HOLE_RULE_FROM = "2026-11-07"
+HOLE_DB, HOLE_MIN = 12, 0.25
+
+
+def hole_runs(db, spans, step=0.05):
+    """50ms 창 음량(dB) 목록 + 대사 구간 → 구멍 [(시작초, 길이초, 꺼진 dB)]. 한 줄이 들리는 동안(앞뒤 0.1초 빼고) 음량이 그 줄
+    말소리(75번째 백분위)보다 HOLE_DB 넘게 HOLE_MIN 초 이상 꺼진 곳. 지난 편으로 잰 값: 10/31(운영자 '소리가 중간중간 끊긴다')·
+    11/01·11/03·11/06 은 걸리고 11/02·11/04 는 지나간다."""
+    out = []
+    for a, b in spans:
+        i0, i1 = int(a / step) + 2, min(len(db), int(b / step) - 2)
+        if i1 - i0 < 4:
+            continue
+        seg = sorted(db[i0:i1])
+        ref = seg[int(0.75 * (len(seg) - 1))]
+        i = i0
+        while i < i1:
+            if db[i] >= ref - HOLE_DB:
+                i += 1
+                continue
+            j = i
+            while j < i1 and db[j] < ref - HOLE_DB:
+                j += 1
+            if (j - i) * step >= HOLE_MIN - 1e-9:
+                out.append((round(i * step, 2), round((j - i) * step, 2), round(ref - min(db[i:j]), 1)))
+            i = j
+    return out
+
+
+def voice_holes(video, spans):
+    """완성본 소리에서 대사 도중 구멍 — dropouts 와 같은 50ms 창으로 hole_runs."""
+    import numpy as np
+    raw = subprocess.run(["ffmpeg", "-v", "error", "-i", str(video), "-vn", "-ac", "1", "-ar", "48000", "-f", "f32le", "-"],
+                         capture_output=True, check=True).stdout
+    x = np.frombuffer(raw, dtype=np.float32)
+    win = 2400
+    n = len(x) // win
+    if n == 0:
+        return []
+    db = 20 * np.log10(np.sqrt((x[:n * win].reshape(n, win).astype(np.float64) ** 2).mean(1) + 1e-12))
+    return hole_runs(db.tolist(), spans)
+
+
 # ── 말로 읽는 숫자(대사) — 11/01 Codex: 자막이 맞아도 목소리가 '일조 칠천억'이라 말하면 막아야 한다 ──
 _SINO = {"영": 0, "공": 0, "일": 1, "이": 2, "삼": 3, "사": 4, "오": 5, "육": 6, "칠": 7, "팔": 8, "구": 9}
 _SMALL = {"십": 10, "백": 100, "천": 1000}
@@ -610,14 +655,22 @@ def _month_digits(t):
 
 
 def voice_spans(ep, base):
-    """대사 줄마다 완성본에서 들리는 구간 [(시작, 끝)] — episode.py 처럼 앞뒤 무음을 자르고 tempo 를 건 길이(ffmpeg 필요)."""
+    """대사 줄마다 완성본에서 들리는 구간 [(시작, 끝)] — episode.py 처럼 앞뒤 무음을 자르고 tempo 를 건 길이(ffmpeg 필요).
+    11/07 회차부터는 episode.py 와 같이 대사 속 긴 쉼도 줄인 길이(episode.cap_pauses)."""
+    import tempfile
+
+    from episode import cap_pauses, pause_cap_on
     spans = []
-    for v in ep.get("voices") or []:
-        raw = subprocess.run(["ffmpeg", "-v", "error", "-i", str(base / v["file"]), "-af",
-                              f"aresample=16000,aformat=channel_layouts=mono,{TRIM_AF},atempo={v.get('tempo', 1.0)}", "-f", "s16le", "-"],
-                             capture_output=True).stdout
-        start = float(v.get("start", 0))
-        spans.append((start, round(start + len(raw) / 32000, 3)))
+    with tempfile.TemporaryDirectory() as tmp:
+        for k, v in enumerate(ep.get("voices") or []):
+            src = base / v["file"]
+            if pause_cap_on(ep):
+                src = cap_pauses(src, Path(tmp) / f"v{k}.wav")[0]
+            raw = subprocess.run(["ffmpeg", "-v", "error", "-i", str(src), "-af",
+                                  f"aresample=16000,aformat=channel_layouts=mono,{TRIM_AF},atempo={v.get('tempo', 1.0)}", "-f", "s16le", "-"],
+                                 capture_output=True).stdout
+            start = float(v.get("start", 0))
+            spans.append((start, round(start + len(raw) / 32000, 3)))
     return spans
 
 
@@ -652,6 +705,10 @@ def sync_gaps(ep, spans):
             fails.append(f"대사 {i} 목소리가 자막 {k}이 끝난 뒤({ce:.2f}초)에도 {ve - ce:.2f}초 이어진다(목소리 끝 {ve:.2f}초) — 대사를 줄이거나 자막 end 를 {ve + 0.05:.2f}초로")
         if not _words(v.get("text", "")) & _words(plain(c.get("html", ""))):
             fails.append(f"대사 {i} '{v.get('text', '')[:24]}' 와 그때 자막 {k} '{plain(c.get('html', ''))[:24]}…' 에 같은 낱말이 없다 — 같은 소식을 말하게")
+    if ep.get("date", "") >= HOLE_RULE_FROM:   # 11/07~ 쉼을 줄여 tempo 를 낮추면 다음 줄과 겹칠 수 있다 — 두 목소리가 한꺼번에
+        for i in range(1, len(spans)):
+            if spans[i - 1][1] > spans[i][0] + 0.02:
+                fails.append(f"대사 {i} 목소리({spans[i - 1][1]:.2f}초 끝)가 대사 {i + 1}({spans[i][0]:.2f}초 시작)과 겹친다 — tempo 를 올리거나 다음 줄 start 를 늦춘다")
     return fails
 
 
@@ -1040,6 +1097,12 @@ def main():
         if gaps:
             fails.append("소리 끊김 " + ", ".join(f"{a:.2f}초부터 {b:.2f}초({m}dB)" for a, b, m in gaps)
                          + " — 곡 사이를 비우지 말고 낮게 깔기·덕킹 약하게(episode.json music·duck)")
+        if spans and str(ep.get("date", "")) >= HOLE_RULE_FROM:
+            holes = voice_holes(video, spans)
+            if holes:
+                fails.append("대사 도중 소리 구멍 " + ", ".join(f"{s:.2f}초부터 {ln:.2f}초({d}dB 꺼짐)" for s, ln, d in holes)
+                             + " — 쉼표 없이 다시 녹음하거나, 그 장면 효과음(sfx)을 0.3 아래로 내리지 않는다")
+            notes.append(f"대사 도중 소리 구멍 {len(holes)}곳")
 
         # 2 대사
         if not a.no_asr and ep.get("voices"):

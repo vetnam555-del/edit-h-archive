@@ -2518,6 +2518,44 @@ def t_ai_reel():
            "push(천천히 다가가기) 필터가 틀린다")
     expect(ep_mod.out_rate({"date": "2026-11-02"}, "없는파일.mp4") == 30 and ep_mod.out_rate({"date": "2026-11-03"}, "없는파일.mp4") == 30,
            "11/02 까지 설정의 fps 가 30 이 아니거나, 원본을 못 읽을 때 30 으로 돌아가지 않는다")
+    # 대사 속 긴 쉼·소리 구멍(11/07~) — 11/06 운영자 "릴스 보니까 중간에 목소리 끊기는 것 같은데": 코인 줄 '코인 세금,' 뒤 0.54초 쉼이
+    # 영상 한가운데(11.35초)에서 말소리보다 19dB 꺼졌다. 0.25초 넘는 쉼은 0.2초로 줄이고, 완성본에서 0.25초 넘게 12dB 꺼지면 막는다.
+    speech, gap = [-12.0] * 50, [-80.0] * 54
+    expect(ep_mod.pause_cuts(speech + gap + speech) == [(0.6, 0.94)]
+           and ep_mod.pause_cuts(speech + [-80.0] * 20 + speech) == []
+           and ep_mod.pause_cuts([-80.0] * 30 + speech + [-80.0] * 30) == [],
+           "대사 속 쉼 줄이기가 틀린다 — 0.54초 쉼은 0.2초만 남기고, 0.2초 쉼·앞뒤 무음은 그대로 둬야 한다")
+    expect(not ep_mod.pause_cap_on({"date": "2026-11-06"}) and ep_mod.pause_cap_on({"date": "2026-11-07"})
+           and ep_mod.pause_cap_on({"date": "2026-11-06", "pause_cap": True}) and not ep_mod.pause_cap_on({"date": "2026-11-08", "pause_cap": False})
+           and "cap_pauses(" in inspect.getsource(ep_mod.compose)
+           and "pause_cap_on(ep)" in inspect.getsource(qa.voice_spans) and "cap_pauses(" in inspect.getsource(qa.voice_spans),
+           "쉼 줄이기가 11/07 회차부터 렌더(episode.compose)와 검수 목소리 구간(qa.voice_spans)에 함께 걸리지 않는다")
+    hole_db = [-12.0] * 20 + [-32.0] * 8 + [-12.0] * 32          # 3초 줄의 1.0~1.4초가 20dB 꺼짐
+    expect(qa.hole_runs(hole_db, [(0.0, 3.0)]) == [(1.0, 0.4, 20.0)]
+           and qa.hole_runs([-12.0] * 20 + [-32.0] * 4 + [-12.0] * 36, [(0.0, 3.0)]) == []
+           and qa.hole_runs([-12.0] * 20 + [-20.0] * 8 + [-12.0] * 32, [(0.0, 3.0)]) == []
+           and qa.hole_runs(hole_db, [(1.5, 3.0)]) == []
+           and "voice_holes(video, spans)" in inspect.getsource(qa.main),
+           "대사 도중 소리 구멍 검사가 틀린다 — 0.4초 20dB 구멍은 막고, 0.2초·8dB·그 줄 밖은 지나가야 한다")
+    two = {"captions": [{"start": 0, "end": 3.15, "html": "<div class='main'>나스닥 폭락</div>"},
+                        {"start": 3.15, "end": 6.2, "html": "<div class='main'>버거 돌파</div>"}],
+           "voices": [{"text": "나스닥 폭락입니다"}, {"text": "버거 돌파래요"}]}
+    over = [(0.1, 3.2), (3.1, 6.0)]
+    expect(any("겹친다" in f for f in qa.sync_gaps({**two, "date": "2026-11-07"}, over))
+           and not qa.sync_gaps({**two, "date": "2026-11-07"}, [(0.1, 3.05), (3.15, 6.0)])
+           and not any("겹친다" in f for f in qa.sync_gaps({**two, "date": "2026-11-06"}, over)),
+           "앞 줄 목소리가 다음 줄과 겹치는 것을 11/07 회차부터 막지 않는다")
+    import importlib.util
+    if shutil.which("ffmpeg") and importlib.util.find_spec("numpy"):   # 렌더하는 세션에만 있다(CI 는 건너뛴다)
+        with tempfile.TemporaryDirectory() as tmp:
+            src = Path(tmp) / "gap.wav"
+            subprocess.run(["ffmpeg", "-v", "error", "-f", "lavfi", "-i", "sine=f=440:d=0.5", "-f", "lavfi", "-i", "anullsrc=r=48000:cl=mono:d=0.54",
+                            "-f", "lavfi", "-i", "sine=f=440:d=0.5", "-filter_complex", "[0:a][1:a][2:a]concat=n=3:v=0:a=1", "-ar", "48000", str(src)],
+                           check=True)
+            dst, cut = ep_mod.cap_pauses(src, Path(tmp) / "cap.wav")
+            dur = float(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(dst)],
+                                       capture_output=True, text=True).stdout)
+        expect(0.3 <= cut <= 0.38 and 1.15 <= dur <= 1.25, f"쉼 줄이기 파일이 틀린다 — 0.54초 쉼을 {cut}초 줄여 {dur:.2f}초(1.2초 안팎이어야)")
     ep_src = (ROOT / "automation" / "pilots" / "ai_reel" / "episode.py").read_text(encoding="utf-8")
     expect("xfade=" in ep_src and "fade=t=in:st=0:d=0.25[ve]" not in ep_src, "끝 화면을 검은색에서 밝아지게 넣는다(검은 2프레임) — 겹쳐 넘겨야 한다")
     expect("black_frames(video)" in inspect.getsource(qa.main) and "dark_flashes(video)" in inspect.getsource(qa.main), "검수가 검은 화면을 보지 않는다")
