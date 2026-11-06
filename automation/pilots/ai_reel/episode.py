@@ -36,6 +36,71 @@ from edith.fonts import font_css  # noqa: E402
 SHOT = ROOT / "automation" / "screenshot.cjs"
 FACE = (ROOT / "assets" / "mascot" / "profile.png").as_uri()
 
+# 대사 속 긴 쉼 줄이기(2026-11-07 회차~) — 11/06 운영자 "릴스 보니까 중간에 목소리 끊기는 것 같은데":
+# 11/06 코인 줄 녹음은 '코인 세금,' 뒤 0.54초가 비어(-80dB) 영상 한가운데(11.35초)에서 소리가 말소리보다 19dB 꺼졌다.
+# 쉼표마다 0.2~0.54초 쉬는 녹음이 배경(효과음 0.2·덕킹한 음악)이 얇은 장면에서 '끊김'으로 들린다.
+# 말소리 최고보다 30dB 넘게 낮은 구간이 0.25초를 넘으면 0.2초만 남긴다 — 쉼표의 짧은 쉼(0.2초 안팎)·받침·숨은 말맛이라 그대로 둔다.
+# 쉼이 줄면 낱말이 앞당겨져 그 장면 효과음과 겹칠 수 있다 — 완성본 받아쓰기(qa mix_heard)가 85% 아래면 그 줄만 다시 맞춘다.
+PAUSE_CAP_FROM = "2026-11-07"
+PAUSE_MIN, PAUSE_KEEP, PAUSE_DB, PAUSE_HOP = 0.25, 0.2, 30, 0.01
+
+
+def pause_cap_on(ep):
+    """이 회차에 대사 속 쉼 줄이기를 쓰나 — 설정의 "pause_cap"(true/false)이 먼저, 없으면 날짜(11/07~). 지난 회차는 만든 그대로 잰다."""
+    if "pause_cap" in ep:
+        return bool(ep["pause_cap"])
+    return str(ep.get("date", "")) >= PAUSE_CAP_FROM
+
+
+def pause_cuts(db, hop=PAUSE_HOP):
+    """10ms 창 음량(dB) 목록 → 지울 구간 [(시작초, 끝초)]. 앞뒤 무음은 두고(뒤 silenceremove 가 자른다) 말 사이 긴 쉼만,
+    쉼 가운데를 지우고 앞뒤로 PAUSE_KEEP/2 씩 남긴다."""
+    if not len(db):
+        return []
+    peak = max(db)
+    quiet = [d < peak - PAUSE_DB for d in db]
+    voiced = [i for i, q in enumerate(quiet) if not q]
+    cuts, i, last = [], voiced[0], voiced[-1]
+    while i <= last:
+        if not quiet[i]:
+            i += 1
+            continue
+        j = i
+        while j <= last and quiet[j]:
+            j += 1
+        if (j - i) * hop > PAUSE_MIN + 1e-9:
+            cuts.append((round(i * hop + PAUSE_KEEP / 2, 4), round(j * hop - PAUSE_KEEP / 2, 4)))
+        i = j
+    return cuts
+
+
+def cap_pauses(src, dst, sr=48000):
+    """녹음 src 의 긴 쉼(pause_cuts)을 줄여 dst(48kHz 스테레오 wav)에 쓴다 → (dst, 줄인 초). 이음매는 5ms 씩 줄였다 키운다(딸깍 소리 막기)."""
+    import numpy as np
+    raw = subprocess.run(["ffmpeg", "-v", "error", "-i", str(src), "-ac", "2", "-ar", str(sr), "-f", "f32le", "-"],
+                         capture_output=True, check=True).stdout
+    x = np.frombuffer(raw, dtype=np.float32).reshape(-1, 2)
+    hop = int(sr * PAUSE_HOP)
+    n = len(x) // hop
+    db = (20 * np.log10(np.sqrt((x[:n * hop].mean(1).reshape(n, hop).astype(np.float64) ** 2).mean(1)) + 1e-9)).tolist() if n else []
+    cuts = pause_cuts(db)
+    edges = [0] + [int(t * sr) for ab in cuts for t in ab] + [len(x)]
+    fade = int(sr * 0.005)
+    parts = []
+    for k in range(0, len(edges), 2):
+        seg = x[edges[k]:edges[k + 1]].copy()
+        if len(seg) > 2 * fade:
+            if k > 0:
+                seg[:fade] *= np.linspace(0, 1, fade, dtype=np.float32)[:, None]
+            if k + 2 < len(edges):
+                seg[-fade:] *= np.linspace(1, 0, fade, dtype=np.float32)[:, None]
+        parts.append(seg)
+    y = np.concatenate(parts) if parts else x
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "f32le", "-ar", str(sr), "-ac", "2", "-i", "-", str(dst)],
+                   input=np.ascontiguousarray(y, dtype=np.float32).tobytes(), check=True)
+    return Path(dst), round(sum(b - a for a, b in cuts), 3)
+
+
 CAPTION = """<!doctype html><html><head><meta charset="utf-8"><style>
 {fonts}
 html,body{{margin:0;width:1080px;height:1920px;background:transparent;font-family:'Pretendard',sans-serif;word-break:keep-all}}
@@ -149,7 +214,10 @@ def compose(ep, base, src, out, work):
     inputs = ["-i", str(src)] + sum((["-i", str(p)] for p in caps), []) + ["-loop", "1", "-t", f"{endsec + XFADE:.3f}", "-framerate", str(rate), "-i", str(end)]
     vi = len(caps) + 2
     voices, music = ep.get("voices", []), ep.get("music", [])
-    inputs += sum((["-i", str(base / v["file"])] for v in voices), [])
+    vfiles = [base / v["file"] for v in voices]
+    if vfiles and pause_cap_on(ep):   # 대사 속 0.25초 넘는 쉼을 0.2초로(11/07~ — 11/06 '중간에 목소리 끊김')
+        vfiles = [cap_pauses(p, work / f"voice{k}.wav")[0] for k, p in enumerate(vfiles)]
+    inputs += sum((["-i", str(p)] for p in vfiles), [])
     mi = vi + len(voices)
     inputs += sum((["-i", str(base / m["file"])] for m in music), [])
 
