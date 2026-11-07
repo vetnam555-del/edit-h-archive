@@ -338,7 +338,16 @@ def t_compare_anjang():
     r = compare_anjang.compare(items, content)
     expect([h for h, _ in r["covered"]] == [items[0]["headline"]], f"안장 비교 겹침 판정: {r['covered']}")
     expect(len(r["missed"]) == 1 and len(r["ours_only"]) == 1, "안장 비교: 놓친 것·우리만")
-    return None
+    # 주말·fallback 호 '안장 칸 N/5' 안내 줄(RUNBOOK 1-4 의 7, 11/08 호~) — 예비 호·안장 호·규칙 전 날엔 안 낸다
+    sat = {"big_issue": {"tag": "반대매매"}, "items": [{"tag": "일본 여행"}, {"tag": "테슬라"}], "source_mode": "fallback"}
+    line = compare_anjang.lane_line("2026-11-08", sat)
+    expect(bool(line) and "'안장 칸 N/5'" in line and "01 반대매매 · 02 일본 여행 · 03 테슬라" in line, f"fallback 호 안장 칸 안내 줄: {line}")
+    expect(compare_anjang.lane_line("2026-11-08", {**sat, "rewind": True}) is None
+           and compare_anjang.lane_line("2026-11-09", {**sat, "source_mode": "anjang"}) is None
+           and compare_anjang.lane_line("2026-11-07", sat) is None, "예비 호·안장 호·규칙 전 날에도 안장 칸 안내 줄이 나온다")
+    rb = (ROOT / "automation" / "RUNBOOK.md").read_text(encoding="utf-8")
+    expect("'안장이 자주 고르는 소식' 체크리스트" in rb and "안장 칸 N/5" in rb, "RUNBOOK 1-4 에 '안장이 자주 고르는 소식' 체크리스트가 없다")
+    return "같은 소식 판정 · fallback 호 안장 칸 안내 줄"
 
 
 def t_send_time():

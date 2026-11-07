@@ -13,6 +13,8 @@
   · 숫자: 우리 메인 본문에 나온 숫자 개수(안장 요약은 소식마다 숫자 2~4개)
   · 큰 소식 놓침(2026-10-23~): 제작 때 저장한 네이버 '여러 언론이 함께 다룬 소식'(경제·IT·생활 섹션, 관련 기사 BIG 건 이상)과
     '경제·IT 매체 여러 곳에서 많이 읽힌 소식' 중 우리 호에 없는 것 — 주말·공휴일(안장 없음)에도 본다
+  · 안장 칸(2026-11-08~): fallback 호(주말·공휴일 등)면 메인 5가지 태그를 늘어놓고, 회고가 RUNBOOK 1-4 의 7 ①~③ 칸에 드는 수를
+    '안장 칸 N/5'로 눈으로 세게 하는 안내 줄
 종료 코드: 0 = 비교함, 3 = 그날 안장 글도 큰 소식 기록도 없음, 2 = 접속 실패.
 """
 import argparse
@@ -29,6 +31,9 @@ AUTOMATION = Path(__file__).resolve().parent
 BIG = 20   # 관련 기사 이만큼이면 '큰 소식'(fetch_headlines 도 쓴다)
 # 점수에 넣는 섹션 — 사회(사건·정치)·세계는 목록엔 보이되 '다룸 N/M' 에선 뺀다(10/24 첫 측정 5/31 중 절반 넘게 사건·정치·해외 재난이었다)
 SCORED = ("경제", "IT", "생활")
+# 주말·fallback 호의 '안장이 자주 고르는 소식' 칸(RUNBOOK 1-4 의 7, 11/07 정함) — 회고가 '안장 칸 N/5'를 눈으로 센다.
+# 낱말로 자동 판정하지 않는다: 11/07 호 '일본 여행'(진에어 매출)·'엔비디아·네이버'(지분 투자)처럼 칸 경계가 낱말로 갈리지 않는다.
+LANE_FROM = "2026-11-08"
 _NUM = re.compile(r"\d[\d,.]*\s*(?:%|원|만|억|조|명|곳|개|배|건|kL|p)?")
 _WORD = re.compile(r"[가-힣A-Za-z0-9]{2,}")
 _STOP = {"그래서", "이번", "오늘", "지난", "올해", "내년", "있어요", "이라고", "라고", "이다", "한다", "단독",
@@ -148,6 +153,16 @@ def anjang_report(day, content):
     return 0
 
 
+def lane_line(day, content):
+    """fallback 호(주말·공휴일, 안장 글보다 먼저 만든 평일 — 예비 호는 빼고)면 회고가 '안장 칸 N/5'를 세게 하는 안내 한 줄, 아니면 None."""
+    if day < LANE_FROM or content.get("rewind") or content.get("source_mode") != "fallback":
+        return None
+    tags = [content["big_issue"].get("tag", "")] + [it.get("tag", "") for it in content.get("items") or []]
+    return ("회고 기록 한 줄(fallback 호 — RUNBOOK 1-4 의 7): '안장 칸 N/5' — 메인 "
+            + " · ".join(f"{n:02d} {t}" for n, t in enumerate(tags, 1))
+            + " 중 ①유통·소비 시즌·행사 ②AI 서비스 ③플랫폼·광고에 드는 것을 눈으로 센다(목표 2개 이상)")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--date")
@@ -160,7 +175,11 @@ def main():
     content = json.loads(path.read_text(encoding="utf-8"))
     code = anjang_report(day, content)
     print()
-    sys.exit(0 if big_report(day, content) or code == 0 else code)
+    compared = big_report(day, content)
+    line = lane_line(day, content)
+    if line:
+        print(line)
+    sys.exit(0 if compared or code == 0 else code)
 
 
 if __name__ == "__main__":

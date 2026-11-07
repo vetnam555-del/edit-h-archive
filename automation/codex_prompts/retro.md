@@ -6,6 +6,7 @@
    그날 21:00 전이면 회고 '약했던 것'에 '성과표 지연' 한 줄), `content/$EDITH_DATE.json` 과 최근 3호 content,
    `automation/sent/$EDITH_DATE.json`·`automation/ig_posted/$EDITH_DATE.json`, 있으면 `automation/alerts/$EDITH_DATE.json`.
    `python3 automation/compare_anjang.py --date $EDITH_DATE` 의 안장 비교·큰 소식 줄도 본다(접속이 안 되면 건너뛴다).
+   fallback 호면 그 끝의 '안장 칸 N/5' 안내 줄대로 메인 5가지 중 RUNBOOK 1-4 의 7 ①~③ 칸에 드는 수를 눈으로 세어 회고에 한 줄 적는다.
 2. **`automation/learnings.md` 만 고친다.** '회고 기록' 맨 위에 `### {날짜} — VOL.{vol} 「제목」` + **잘된 것 / 약했던 것 / 내일 시도할 것**
    세 줄(성과표 숫자 근거)을 쓰고, 첫 줄 끝에 `(대체 회고)` 를 붙인다. 이미 그날 항목이 있으면 새로 쓰지 말고 끝낸다.
    '지금 원칙'은 같은 방향 근거가 3호 이상일 때만 바꾼다. 실패·반복 불편은 '시스템 개선 요청'에 한 줄. 독자 개인 정보는 적지 않는다.

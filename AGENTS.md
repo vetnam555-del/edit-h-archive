@@ -70,7 +70,8 @@
 ### 2-4. 22:00 편집 회고
 1. main 최신으로. `python3 automation/request_metrics.py`(성과표가 오늘 21:00 이후 것이 아니면 수집을 요청하고 최대 9분 기다린다 — 코드 0 최신, 2 기존 것으로 진행).
 2. 읽기: `automation/learnings.md`(맨 위 규칙 포함), `automation/metrics/summary.md`, 오늘·최근 3호 `content/*.json`, 오늘 `sent`·`ig_posted`, 있으면 `automation/alerts/{날짜}.json`.
-   `python3 automation/compare_anjang.py --date {날짜}` 의 안장 비교·큰 소식 줄도 본다.
+   `python3 automation/compare_anjang.py --date {날짜}` 의 안장 비교·큰 소식 줄도 본다(fallback 호면 '안장 칸 N/5' 안내 줄대로 메인 5가지 중
+   RUNBOOK 1-4 의 7 ①~③ 칸에 드는 수를 눈으로 세어 회고에 한 줄, 2026-11-08 호~).
 3. **`automation/learnings.md` 만 고친다**: '회고 기록' 맨 위에 `### {날짜} — VOL.{vol} 「제목」` + 잘된 것 / 약했던 것 / 내일 시도할 것.
    '지금 원칙'은 같은 방향 근거가 3호 이상일 때만 바꾼다. 실패·반복 불편은 '시스템 개선 요청'에 한 줄(코드는 고치지 않는다).
 4. `git add automation/learnings.md && git commit -m "Editor retrospective {날짜}" && git push origin HEAD:main`.
