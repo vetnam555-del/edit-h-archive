@@ -4,5 +4,31 @@
   "at": "2026-11-07T08:31:17+09:00",
   "permalink": "https://www.instagram.com/p/DfaysjXoOg3/",
   "first_comment": true
+ },
+ "reel": {
+  "id": "17960030991384260",
+  "at": "2026-11-07T19:33:00+09:00",
+  "track": "Study And Relax",
+  "style": "vertical",
+  "seconds": 7.9,
+  "feed": false,
+  "hook": true,
+  "permalink": "https://www.instagram.com/reel/Dfb-aFGDJsI/"
+ },
+ "story": {
+  "id": "18653398363008428",
+  "ids": [
+   "18653398363008428",
+   "18134047714765113",
+   "18145320922607965",
+   "17965959870211634"
+  ],
+  "at": "2026-11-07T19:33:56+09:00"
+ },
+ "comic": {
+  "id": "17921726829243604",
+  "at": "2026-11-07T19:34:43+09:00",
+  "ai_label": true,
+  "permalink": "https://www.instagram.com/p/Dfb-ntRFkAB/"
  }
 }
