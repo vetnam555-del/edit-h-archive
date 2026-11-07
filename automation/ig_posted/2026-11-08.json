@@ -4,5 +4,27 @@
   "at": "2026-11-08T08:31:32+09:00",
   "permalink": "https://www.instagram.com/p/DfdXgcviZZn/",
   "first_comment": true
+ },
+ "reel": {
+  "id": "18122816122986773",
+  "at": "2026-11-08T08:44:59+09:00",
+  "track": "AI 영상(자체 음악·목소리)",
+  "style": "ai",
+  "seconds": 22.6,
+  "feed": false,
+  "hook": true,
+  "ai_label": true,
+  "permalink": "https://www.instagram.com/reel/DfdZAzcDoIa/"
+ },
+ "story_ai": {
+  "id": "17957017989036214",
+  "at": "2026-11-08T08:45:30+09:00",
+  "ai_label": true
+ },
+ "comic": {
+  "id": "17935704852420120",
+  "at": "2026-11-08T08:46:22+09:00",
+  "ai_label": true,
+  "permalink": "https://www.instagram.com/p/DfdZM6ykYqa/"
  }
 }
