@@ -1,0 +1,91 @@
+{
+ "date": "2026-11-09",
+ "items": [
+  "헬시 플레저",
+  "아파트 경매",
+  "술병 경고",
+  "닥터나우",
+  "메타 약관"
+ ],
+ "comic": {
+  "series": "오늘 아침 5가지",
+  "layout": "duo",
+  "title": "저당 아이스크림<br><span class='hl'>53.7%</span> 더 먹었다,<br>오늘 아침 5가지",
+  "cover": {
+   "img": "stills/cover.png",
+   "pos": "50% 40%",
+   "job": "98a1dcdf-f6c6-441b-8ed3-6c5f1d478cdf"
+  },
+  "summary": true,
+  "panels": [
+   {
+    "card": 1,
+    "img_a": "stills/ic_a.png",
+    "pos_a": "50% 40%",
+    "img_b": "stills/ic_b.png",
+    "pos_b": "50% 35%",
+    "say_side": "right",
+    "jobs": [
+     "9721a356-21e1-454b-b615-95b1b725bf1b",
+     "b3625618-516c-484a-add0-755bf905f226"
+    ]
+   },
+   {
+    "card": 2,
+    "img_a": "stills/au_a.png",
+    "pos_a": "50% 40%",
+    "img_b": "stills/au_b.png",
+    "pos_b": "50% 35%",
+    "say_side": "right",
+    "jobs": [
+     "0ada81c3-2fdc-44ec-940f-81045817188b",
+     "c347bd94-934c-4cfd-8421-adc5d9f4d310"
+    ]
+   },
+   {
+    "card": 3,
+    "img_a": "stills/sj_a.png",
+    "pos_a": "50% 40%",
+    "img_b": "stills/sj_b.png",
+    "pos_b": "50% 35%",
+    "say_side": "right",
+    "jobs": [
+     "360d36ac-7c7e-4a63-a7df-e531b70c41e8",
+     "3a7d35c3-ddc2-47a5-bf12-2e90bc10e73b"
+    ],
+    "stk_side": "left"
+   },
+   {
+    "card": 4,
+    "img_a": "stills/dn_a.png",
+    "pos_a": "50% 40%",
+    "img_b": "stills/dn_b.png",
+    "pos_b": "50% 35%",
+    "say_side": "right",
+    "jobs": [
+     "8c738d3e-9799-43f3-a1c9-edd61c48a772",
+     "69a2b423-dedb-44b6-be12-727cffbf437d"
+    ],
+    "stk_side": "left"
+   },
+   {
+    "card": 5,
+    "img_a": "stills/mt_a.png",
+    "pos_a": "50% 40%",
+    "img_b": "stills/mt_b.png",
+    "pos_b": "50% 20%",
+    "say_side": "right",
+    "jobs": [
+     "ffcb4f51-a0eb-4a38-801f-0af3775a8857",
+     "183569a6-e012-4038-91c1-606b4d69d165"
+    ]
+   }
+  ],
+  "sources": "장마다 표시",
+  "end": {
+   "title": "오늘 아침 5가지,<br>매일 8시 30분",
+   "sub": "경제부터 트렌드까지, 오늘 소식 5가지를<br>웹툰으로 풀어 드려요"
+  }
+ },
+ "comic_note": "5가지 웹툰 3판. 11월 크레딧 계획의 홀수 날이라 영상·목소리 없이 웹툰만(19:30 저녁 사슬이 카드 릴스와 함께 올린다). 그림 11장 gpt_image_2_5 4:3 1k(장당 0.25 크레딧) + 다시 그린 장 1(③ 술병 A — 팔이 몸 앞을 가로질러 두 번째 입처럼 보여서) = 3.0 크레딧, 규칙 automation/pilots/ai_reel/webtoon_prompt.md. stills/ 는 저장소에 올리지 않는다(jobs 로 다시 받는다). 장면: 표지 아침 장난감 여객선 갑판에서 커피·신문 · ① 소프트아이스크림 기계가 끝없이 쌓는 콘을 받치다 놀람(저당 아이스크림 53.7%↑) → 냉동고 앞에서 파스텔 통 둘 비교 · ② 경매장에서 대부분 남는 아파트 모형(유찰) → 남은 모형 창문을 손전등으로 들여다보기 · ③ 도우미 로봇이 앞면에 빨간 금지 표시 붙은 병을 돌려 놓고 H 가 깜짝 → 옛 병(빈 상표)과 새 병(빨간 표시)을 차례로 진열 · ④ 법정 망치에 별 리본 약병 단상이 넘어짐(BEST 약품 불법 광고) → 장난감 폰 속 약 목록에 주황 꼬리표 · ⑤ 거대 청소기 로봇이 가게 그림 카드를 빨아들이자 H 가 빨간 일시정지 버튼, 두루마리 넷이 멈춤(약관 4건 보류) → 긴 두루마리에서 주황 줄 하나 짚기. 숫자 스티커가 H 얼굴을 덮은 ③·④ 는 stk_side left, ⑤ B 는 pos_b 20%. 원 기사 대조: check_sources 막음 0·경고 2(술병·메타 — 머니투데이·문화일보·SBS Biz 못 읽음 → read_article 로 다시 읽어 12/12곳)·한 곳에만 있던 숫자 0. 캡션 둘째 줄 = '구독하면 받는 것'(11/09~ qa letter_top 첫날)."
+}
