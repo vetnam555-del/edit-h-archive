@@ -1588,6 +1588,11 @@ def t_story():
            and not post_instagram.story_reel_only({}, "2026-11-03"), "스토리 릴스만 날짜·주간 특집 제외가 틀린다")
     real_cfg = json.loads((ROOT / "automation" / "config.json").read_text(encoding="utf-8"))["instagram"]
     expect(real_cfg.get("story_reel_only_from") == "2026-11-03", "config 에 story_reel_only_from 이 없다")
+    # 11월 크레딧 계획의 홀수 날(AI 영상을 안 만드는 날)은 '릴스만'을 적용하지 않고 아침 카드 스토리를 올린다(11/05·11/07 회고, 11/08~)
+    ev = {"story_reel_only_from": "2026-11-03", "ai_video_even_days": {"from": "2026-11-05", "until": "2026-11-30"}}
+    expect([post_instagram.story_reel_only(ev, k) for k in ("2026-11-03", "2026-11-08", "2026-11-09", "2026-11-30", "2026-12-01")]
+           == [True, True, False, True, True], "영상 없는 홀수 날에도 아침 카드 스토리를 건너뛴다(또는 계획 밖 날을 잘못 뺀다)")
+    expect(real_cfg.get("ai_video_even_days") == {"from": "2026-11-05", "until": "2026-11-30"}, "config 에 ai_video_even_days(11월 짝수 날 계획)가 없다")
     import inspect as _inspect
     pi_src = _inspect.getsource(post_instagram.main)
     expect("and not reel_only" in pi_src and "not ai.exists()" in pi_src and "card_story()" in pi_src,
