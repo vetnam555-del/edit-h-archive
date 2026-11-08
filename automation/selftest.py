@@ -2116,7 +2116,9 @@ def t_comic_only():
         return (b"\xff\xd8\xff\xe0" + (16).to_bytes(2, "big") + b"JFIF\x00" + b"\x00" * 9 + b"\xff\xc0" + (17).to_bytes(2, "big")
                 + b"\x08" + h.to_bytes(2, "big") + w.to_bytes(2, "big") + b"\x03" + b"\x00" * 9 + b"\xff\xd9")
 
-    good_cap = ("오늘 아침 소식 넘겨서 보기\n\n이 그림은 AI로 만들었어요. 숫자는 기사 2곳 이상에서 확인했어요.\n"
+    letters = qa.promo_lines(day)   # 11/06~ '구독하면 받는 것' 한 줄 — 11/09~ 둘째 줄(qa.letter_top, 11/08 주간 루틴)
+    good_cap = ("오늘 아침 소식 넘겨서 보기\n" + "".join(f"{x}\n" for x in letters[:1])
+                + "\n이 그림은 AI로 만들었어요. 숫자는 기사 2곳 이상에서 확인했어요.\n"
                 f"출처: {' / '.join(cells)}\n#경제뉴스 #EDITH")
     with tempfile.TemporaryDirectory() as tmp:
         folder = Path(tmp)
@@ -2142,7 +2144,11 @@ def t_comic_only():
         swapped = good_cap.replace(f"출처: {' / '.join(cells)}", f"출처: {' / '.join(reversed(cells))}")
         expect(any("출처" in f for f in run(cap=swapped)), "'출처:' 칸 순서가 바뀐 캡션을 통과시켰다")
         expect(any('"comic"' in f for f in run(ep={"date": day, "items": brief()["items"]})), "comic 설정 없는 brief 를 통과시켰다")
-    return f"{day} 카드 {len(picked)}장 웹툰만 — 통과 · 장수·크기·AI 줄·해시태그·숫자·출처 칸은 막음"
+        from edith import site as site_mod
+        if letters and day >= site_mod.LETTER_TOP_FROM:
+            moved = good_cap.replace(f"\n{letters[0]}\n", "\n").replace("\n출처:", f"\n{letters[0]}\n출처:")
+            expect(any("둘째 줄" in f for f in run(cap=moved)), "'구독하면 받는 것' 줄이 둘째 줄이 아닌 웹툰 캡션을 통과시켰다(11/09~)")
+    return f"{day} 카드 {len(picked)}장 웹툰만 — 통과 · 장수·크기·AI 줄·해시태그·숫자·출처 칸·구독 줄 자리는 막음"
 
 
 def t_webtoon_render():
