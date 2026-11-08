@@ -238,6 +238,10 @@ _REEL_TAIL = ["넘겨보는 카드는 피드에 올려뒀어요.", "카드 전�
 # 릴스·웹툰 캡션 끝의 '구독하면 받는 것' 한 줄(2026-11-05 구독 길 점검: 릴스는 비팔로워에게 주 2,800번 닿는데 캡션엔 구독 안내가 없고
 # '아침 카드'로만 보냈다 — 14일 신청 0·프로필 방문 2). 이 날짜 호부터 카드 릴스 캡션에 붙이고, AI 릴스·웹툰 캡션도 같은 줄을 쓴다(qa 가 숫자 검사에서 뺀다).
 REEL_LETTER_FROM = PROMO_FROM
+# '구독하면 받는 것' 줄을 캡션 둘째 줄(첫 줄 바로 다음)로 — 2026-11-08 주간 루틴: 릴스 탭·피드는 캡션 첫 1~2줄만 보이는데
+# 11/06~ 이 줄은 소식 줄 뒤(끝)에 있어 '더 보기'를 눌러야 보였다. AI 릴스 한 편이 비팔로워 약 180명에게 닿는데(11/02~11/06)
+# 신청은 0 — 약속을 보이는 자리에 둔다. AI 릴스·웹툰 캡션(손으로 쓰는 것)은 pilots/ai_reel/qa.py 가 같은 자리를 본다.
+LETTER_TOP_FROM = "2026-11-09"
 _REEL_LETTER_GIFT = [
     "프로필 링크에서 경제 뉴스레터를 구독하면 '{title}'({n}가지)부터 보내드려요.",
     "구독 선물은 '{title}'({n}가지) — 프로필 링크에서 경제 뉴스레터를 구독하면 환영 메일로 와요.",
@@ -351,7 +355,10 @@ def reel_caption(d):
     tail = (_pick(_REEL_TAIL_EVENING, d).format(n=len(d["card_issues"]) - 1) if _evening_reel(d)
             else _pick(_REEL_TAIL, d))
     letter = [reel_letter(d["date"])] if str(d["date"])[:10] >= REEL_LETTER_FROM else []
-    lines = [hook, ""] + ([teaser] if teaser else []) + [tail, *letter, *_share(d), _tags(d, ig.get("hashtags"), limit=3)]
+    if letter and str(d["date"])[:10] >= LETTER_TOP_FROM:   # 둘째 줄 — 릴스 탭·피드는 캡션 첫 1~2줄만 보인다
+        lines = [hook, letter[0], ""] + ([teaser] if teaser else []) + [tail, *_share(d), _tags(d, ig.get("hashtags"), limit=3)]
+    else:
+        lines = [hook, ""] + ([teaser] if teaser else []) + [tail, *letter, *_share(d), _tags(d, ig.get("hashtags"), limit=3)]
     return "\n".join(lines)
 
 

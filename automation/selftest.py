@@ -1089,7 +1089,26 @@ def t_gift():
         expect(letter not in body and qa.promo_lines(prev) == [], "qa 가 '구독하면 받는 것' 줄을 숫자 대조에서 빼지 않는다(시작일 전엔 빼지 않는다)")
         cap.write_text(f"이 그림은 AI로 만들었어요.\n{letter.replace('가지)', '가지 넘게)')}\n", encoding="utf-8")
         expect("넘게" in qa.caption_texts(cap, skip=qa.promo_lines(start))[0][0][1], "손으로 바꾼 선물 줄까지 숫자 대조에서 뺀다")
-    return f"{gift['title']} {gift['count']}가지 · {gift_mod.LIVE_FROM}~ 남은 것 {active_gift(gift_mod.LIVE_FROM)['count']}가지 · 릴스·웹툰 끝 한 줄"
+    # 2026-11-09~ 그 줄은 캡션 둘째 줄(첫 줄 바로 다음) — 릴스 탭·피드는 캡션 첫 1~2줄만 보인다(11/08 주간 루틴)
+    top = site_mod.LETTER_TOP_FROM
+    before_top = (dt.date.fromisoformat(top) - dt.timedelta(days=1)).isoformat()
+    new_lines = site_mod.reel_caption(dict(d, date=top)).splitlines()
+    old_lines = site_mod.reel_caption(dict(d, date=before_top)).splitlines()
+    expect(new_lines[1] == site_mod.reel_letter(top) and new_lines.count(site_mod.reel_letter(top)) == 1 and new_lines[2] == "",
+           "카드 릴스 캡션의 '구독하면 받는 것' 줄이 LETTER_TOP_FROM 부터 둘째 줄(첫 줄 바로 다음)에 한 번만 오지 않는다")
+    expect(before_top >= gift_mod.PROMO_FROM and old_lines[1] == "" and site_mod.reel_letter(before_top) in old_lines[2:],
+           "LETTER_TOP_FROM 전 날짜 카드 릴스 캡션 순서가 바뀌었다(게시된 캡션을 다시 빌드해도 같아야 한다)")
+    with tempfile.TemporaryDirectory() as tmp:
+        cap = Path(tmp) / "reel_ai_caption.txt"
+        top_letter = qa.promo_lines(top)[0]
+        cap.write_text(f"오늘 소식 첫 줄\n{top_letter}\n\n① 소식\n이 영상은 AI로 만들었어요.\n#EDITH\n", encoding="utf-8")
+        ok = qa.letter_top(cap, top)
+        cap.write_text(f"오늘 소식 첫 줄\n\n① 소식\n{top_letter}\n이 영상은 AI로 만들었어요.\n#EDITH\n", encoding="utf-8")
+        bad, old = qa.letter_top(cap, top), qa.letter_top(cap, before_top)
+        expect(ok == [] and len(bad) == 1 and "둘째 줄" in bad[0] and old == [],
+               "qa 가 AI 릴스·웹툰 캡션의 '구독하면 받는 것' 줄 자리(LETTER_TOP_FROM~ 둘째 줄)를 보지 않는다(전 날짜는 보지 않는다)")
+    return (f"{gift['title']} {gift['count']}가지 · {gift_mod.LIVE_FROM}~ 남은 것 {active_gift(gift_mod.LIVE_FROM)['count']}가지 · "
+            f"릴스·웹툰 구독 한 줄({top}~ 둘째 줄)")
 
 
 def t_photo_library():

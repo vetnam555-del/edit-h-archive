@@ -890,6 +890,22 @@ def promo_lines(day):
     return [site.reel_letter(day)] if str(day)[:10] >= gift.PROMO_FROM else []
 
 
+def letter_top(path, day):
+    """2026-11-09~ '구독하면 받는 것' 줄(promo_lines)은 캡션 둘째 줄 — 첫 줄 바로 다음, 빈 줄 없이(edith.site.LETTER_TOP_FROM).
+    릴스 탭·피드는 캡션 첫 1~2줄만 보여서, 소식 ①~⑤ 뒤에 두면 '더 보기'를 눌러야 보였다(11/08 주간 루틴)."""
+    sys.path.insert(0, str(ROOT / "automation"))
+    from edith import site
+    letters = promo_lines(day)
+    if str(day)[:10] < site.LETTER_TOP_FROM or not letters or not path.exists():
+        return []
+    raw = path.read_text(encoding="utf-8").splitlines()
+    second = raw[1].strip() if len(raw) > 1 else ""
+    if second != letters[0]:
+        return [f"{path.name}: '구독하면 받는 것' 줄('{letters[0][:20]}…')은 첫 줄 바로 다음(둘째 줄, 빈 줄 없이)에 — "
+                f"릴스 탭·피드는 캡션 첫 1~2줄만 보인다(11/09~). 지금 둘째 줄: '{second[:20]}'"]
+    return []
+
+
 def caption_texts(path, skip=()):
     """캡션 파일 → ([(파일 이름, 해시태그 줄·skip 줄을 뺀 글)], 실패) — 'AI로 만들' 한 줄, 해시태그 5개 이하."""
     raw = path.read_text(encoding="utf-8")
@@ -953,7 +969,7 @@ def comic_only(ep, folder, content, corpus):
     if cap.exists():
         t, f = caption_texts(cap, skip=promo_lines(ep["date"]))
         texts += t
-        fails += f
+        fails += f + letter_top(cap, ep["date"])
     series_screen, _ = brief_series(ep)
     bad = check_numbers(texts, corpus, allow=series_screen)
     ends = [(f"만화 끝 장 {k}", plain(str((ep["comic"].get("end") or {}).get(k) or ""))) for k in ("title", "sub")]
@@ -1006,7 +1022,7 @@ def main():
         if p.exists():
             t, f = caption_texts(p, skip=promo_lines(day))
             texts += t
-            fails += f
+            fails += f + letter_top(p, day)
     series_screen, series_spoken = brief_series(ep)
     bad = check_numbers(texts, corpus, allow=series_screen)
     # 끝 화면(영상)·만화 끝 장도 화면에 나간다(11/01 Codex) — 고정 문구 숫자(8시 30분·2030)만 예외
