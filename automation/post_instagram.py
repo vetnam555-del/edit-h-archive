@@ -410,12 +410,24 @@ def story_on(cfg, key, account_type=None):
     return bool(start and str(key)[:10] >= start and "weekly" not in str(key) and account_type != CREATOR)
 
 
+def ai_video_day(cfg, key):
+    """그날 AI 릴스 영상을 만드는 날로 정해져 있나 — config.instagram.ai_video_even_days({from, until}, 11월 크레딧 계획: 짝수 날만)
+    기간의 홀수 날이면 아니다. 11/05·11/07 회고: 정해진 '영상 없는 날'에도 '스토리는 릴스만'이 아침 카드 스토리를 건너뛰어
+    19:30 대신 올리기(첫 장 도달 약 2시간 6·0 — 아침 영상 스토리는 18~19)만 나갔다."""
+    plan = cfg.get("ai_video_even_days") or {}
+    day = str(key)[:10]
+    if plan.get("from") and plan["from"] <= day <= plan.get("until", "9999-12-31"):
+        return int(day[8:10]) % 2 == 0
+    return True
+
+
 def story_reel_only(cfg, key):
     """2026-11-02 운영자 '스토리에 올릴 때는 릴스만 올리는 건 어때?' — config.instagram.story_reel_only_from 부터 데일리 호의 스토리는
     그날 AI 릴스 영상 한 장만 올린다(아침 카드 스토리 4장은 안 올림). 근거: 카드 4장 + AI 영상 1장(하루 5장)이 된 10/31 부터
-    카드 스토리 첫 장 도달이 23~36 → 13~14 로 줄었다. 예비 호 날·AI 릴스를 못 만든 날은 카드 스토리를 그대로(릴스 실행이 대신 올린다)."""
+    카드 스토리 첫 장 도달이 23~36 → 13~14 로 줄었다. 예비 호 날·AI 릴스를 못 만든 날은 카드 스토리를 그대로(릴스 실행이 대신 올린다).
+    AI 영상을 만들지 않기로 정한 날(ai_video_day 가 아님 — 11월 홀수 날)은 처음부터 아침 카드 스토리를 올린다(2026-11-08~)."""
     start = cfg.get("story_reel_only_from")
-    return bool(start and str(key)[:10] >= start and "weekly" not in str(key))
+    return bool(start and str(key)[:10] >= start and "weekly" not in str(key) and ai_video_day(cfg, key))
 
 
 def is_rewind(key, kind="daily"):
