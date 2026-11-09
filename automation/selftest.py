@@ -1664,6 +1664,8 @@ def t_story():
            and not post_instagram.cards_after_ai({}, "2026-11-10"), "AI 영상 스토리 뒤 카드 스토리 날짜·주간 특집 제외가 틀린다")
     expect(real_cfg.get("story_cards_after_ai_from") == "2026-11-10", "config 에 story_cards_after_ai_from(E21 되돌림)이 없다")
     after = pi_src.find("story_on(cfg, key) and cards_after_ai(cfg, key)")   # 이어 올리는 조건 줄(안내 문구가 아니라)
+    expect("card_story(hook=False)" in pi_src[after:pi_src.find("AI 릴스가 없는 날 — 아침 카드 스토리를 대신")],
+           "AI 영상 스토리 뒤 카드 스토리가 훅 화면을 빼지 않는다(AI 영상이 이미 훅 — Codex 리뷰)")
     expect(pi_src.find('log["story_ai"] = {') < after < pi_src.find("AI 릴스가 없는 날 — 아침 카드 스토리를 대신"),
            "카드 스토리 이어 올리기가 AI 영상 스토리 게시 뒤(릴스 → 카드 순서)에 있지 않다")
     expect(collect_metrics._story_cell({"story": {"reach": 20, "video": True}}) == " (스토리 영상 20)", "AI 영상 스토리 도달 표시가 틀린다")
@@ -1700,6 +1702,8 @@ def t_story():
             urls = post_instagram.story_images(folder, "k", "https://x")
             expect([u.rsplit("/", 2)[-2] + "/" + u.rsplit("/", 1)[-1] for u in urls]
                    == ["reel_frames/r1_hook.jpg", "story/s1_pick.jpg", "story/s2_summary.jpg"], f"스토리 순서가 틀린다: {urls}")
+            expect([u.rsplit("/", 1)[-1] for u in post_instagram.story_images(folder, "k", "https://x", hook=False)]
+                   == ["s1_pick.jpg", "s2_summary.jpg"], "AI 영상 스토리 뒤에 잇는 카드 스토리(E21)에 훅 화면이 또 들어간다(Codex 리뷰)")
             calls.clear()
             expect(post_instagram.post_story(FakeGraph(), "u", "k", folder, "https://x", False) == ["s1"] * 3, "스토리 3장을 다 올리지 않는다")
             expect([p["image_url"].rsplit("/", 1)[-1] for path, p in calls if path == "u/media"]
