@@ -35,6 +35,7 @@ on:
 permissions:
   contents: write
   actions: write
+  issues: write   # 알림 메일을 못 보내면 GitHub 이슈로 대신 알린다(alert.post_issue, 2026-11-09~)
 
 concurrency:
   group: codex-fallback-${{ (github.event.schedule == '50 14 * * *' || github.event.schedule == '20 17 * * *' || inputs.task == 'retro') && 'retro' || 'produce' }}

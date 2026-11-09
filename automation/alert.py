@@ -77,22 +77,55 @@ def send_mail(subject, body, dry=False):
     msg["Subject"] = subject
     msg["From"] = msg["To"] = user
     msg.set_content(body + "\n\n— EDIT H 자동 알림 (automation/alert.py)\n")
-    with smtplib.SMTP_SSL(os.environ.get("SMTP_HOST") or "smtp.gmail.com", int(os.environ.get("SMTP_PORT") or 465),
-                          context=ssl.create_default_context(), timeout=30) as smtp:
-        smtp.login(user, pw)
-        smtp.send_message(msg)
+    try:
+        with smtplib.SMTP_SSL(os.environ.get("SMTP_HOST") or "smtp.gmail.com", int(os.environ.get("SMTP_PORT") or 465),
+                              context=ssl.create_default_context(), timeout=30) as smtp:
+            smtp.login(user, pw)
+            smtp.send_message(msg)
+    except (smtplib.SMTPException, OSError) as e:   # 메일 계정 로그인이 막히면 알림도 같은 길로 못 간다 — GitHub 이슈로 대신
+        print(f"::warning::알림 메일을 보내지 못했습니다({type(e).__name__}) — GitHub 이슈로 대신 알립니다")
+        return post_issue(subject, body, e)
     print("알림 메일 보냄(SMTP_USER)")
     return True
 
 
-def _api(method, path):
-    """GitHub API(GITHUB_TOKEN) — 응답 JSON(본문이 없으면 {}). 권한이 없거나 막히면 None."""
-    repo, token = os.environ.get("GITHUB_REPOSITORY", ""), os.environ.get("GITHUB_TOKEN", "")
+ISSUE_TITLE = "EDIT H 운영 알림 — 메일로 보내지 못한 알림"
+
+
+def post_issue(subject, body, err):
+    """알림 메일을 못 보냈을 때 GitHub 이슈로 대신 알린다(issues: write) — 운영자는 GitHub 알림(앱·가입 메일)으로 받는다.
+    같은 제목의 열린 이슈가 있으면 댓글로 이어 붙인다(이슈를 쌓지 않는다). 2026-11-09: 발송용 Gmail 앱 비밀번호가 무효가 되자
+    08:30 발송과 실패 알림 메일이 같은 로그인 오류로 막혀, 운영자에게 아무 알림도 가지 않았다. 알렸으면 True."""
+    owner = os.environ.get("GITHUB_REPOSITORY_OWNER", "")
+    hint = (f"\n\n⚠ 이 알림은 메일로 보내지 못했어요(메일 서버: {type(err).__name__}). 발송용 Gmail 로그인이 막힌 것이면 "
+            "뉴스레터·환영 메일·알림 메일이 모두 멈춘 상태예요 — 발송용 Gmail 계정에서 앱 비밀번호를 새로 만들어 "
+            "GitHub 저장소 Settings → Secrets and variables → Actions 의 SMTP_PASSWORD 에 넣은 뒤, "
+            "Actions → Send EDIT H newsletter → Run workflow(date=그날)로 다시 보내 주세요.")
+    text = (f"@{owner} " if owner else "") + f"**{subject}**\n\n{body}{hint}\n\n— EDIT H 자동 알림 (automation/alert.py)"
+    issues = _api("GET", "issues?state=open&per_page=50")
+    if issues is None:
+        print("::warning::GitHub 이슈로도 알리지 못했습니다(토큰·권한 없음)")
+        return False
+    same = next((i for i in issues if isinstance(i, dict) and i.get("title") == ISSUE_TITLE and "pull_request" not in i), None)
+    made = (_api("POST", f"issues/{same['number']}/comments", {"body": text}) if same
+            else _api("POST", "issues", {"title": ISSUE_TITLE, "body": text}))
+    if made is None:
+        print("::warning::GitHub 이슈로도 알리지 못했습니다(issues: write 권한 확인)")
+        return False
+    print(f"GitHub 이슈로 알림 — {made.get('html_url', '')}")
+    return True
+
+
+def _api(method, path, payload=None):
+    """GitHub API(GITHUB_TOKEN) — 응답 JSON(본문이 없으면 {}). 권한이 없거나 막히면 None. payload 는 POST 본문(dict)."""
+    repo = os.environ.get("GITHUB_REPOSITORY", "")
+    token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN", "")   # rewind·codex 워크플로는 gh 용 GH_TOKEN 만 준다
     if not (repo and token):
         return None
-    req = urllib.request.Request(f"https://api.github.com/repos/{repo}/{path}", method=method,
-                                 data=b"{}" if method == "POST" else None,
-                                 headers={"Authorization": f"Bearer {token}", "Accept": "application/vnd.github+json"})
+    data = json.dumps(payload).encode("utf-8") if payload is not None else (b"{}" if method == "POST" else None)
+    req = urllib.request.Request(f"https://api.github.com/repos/{repo}/{path}", method=method, data=data,
+                                 headers={"Authorization": f"Bearer {token}", "Accept": "application/vnd.github+json",
+                                          "Content-Type": "application/json"})
     try:
         with urllib.request.urlopen(req, timeout=20) as r:
             body = r.read()

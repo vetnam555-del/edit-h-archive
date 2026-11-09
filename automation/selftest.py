@@ -156,6 +156,48 @@ def t_alert():
         alert._api = lambda method, path: {"workflow_runs": runs if "status=failure" in path else []}
         got = alert.rerun_failures()
         expect([k for k, _ in got] == ["rerun:7"] and "저녁 일정" in got[0][1], "자동 다시 실행 실패만(사람 재실행·첫 시도·오래된 것 제외) 골라낸다")
+        # 메일 계정 로그인이 막히면 알림을 GitHub 이슈로 대신(2026-11-09 — 발송·실패 알림 메일이 같은 로그인 오류로 막혀 아무 알림도 안 갔다)
+        import smtplib as _smtplib
+
+        class _Refused:
+            def __init__(self, *a, **k):
+                raise _smtplib.SMTPServerDisconnected("Connection unexpectedly closed")
+
+        def _fake_api(opened):
+            def f(method, path, payload=None):
+                calls.append((method, path, payload))
+                return opened if method == "GET" else (None if opened is None else {"html_url": "https://github.com/o/r/issues/9"})
+            return f
+        smtp_saved = _smtplib.SMTP_SSL
+        env2 = {k: os.environ.get(k) for k in ("SMTP_USER", "SMTP_PASSWORD", "GITHUB_REPOSITORY_OWNER")}
+        try:
+            _smtplib.SMTP_SSL = _Refused
+            os.environ.update(SMTP_USER="sender@example.com", SMTP_PASSWORD="x", GITHUB_REPOSITORY_OWNER="owner1")
+            alert.send_mail = saved["send_mail"]
+            calls = []
+            alert._api = _fake_api([{"number": 3, "title": "다른 이슈"}, {"number": 4, "title": alert.ISSUE_TITLE, "pull_request": {}}])
+            with contextlib.redirect_stdout(io.StringIO()):
+                ok = alert.send_mail("제목 A", "본문 A")
+            new = [c for c in calls if c[0] == "POST"]
+            expect(ok and len(new) == 1 and new[0][1] == "issues" and new[0][2]["title"] == alert.ISSUE_TITLE
+                   and new[0][2]["body"].startswith("@owner1 ") and "본문 A" in new[0][2]["body"] and "SMTP_PASSWORD" in new[0][2]["body"],
+                   f"메일을 못 보낸 알림을 GitHub 이슈로 새로 열지 않는다: {new}")
+            calls = []
+            alert._api = _fake_api([{"number": 5, "title": alert.ISSUE_TITLE}])
+            with contextlib.redirect_stdout(io.StringIO()):
+                ok = alert.send_mail("제목 B", "본문 B")
+            expect(ok and [c[1] for c in calls if c[0] == "POST"] == ["issues/5/comments"], "열린 알림 이슈가 있는데 새 이슈를 또 연다(댓글로 이어야 한다)")
+            alert._api = _fake_api(None)
+            with contextlib.redirect_stdout(io.StringIO()):
+                expect(alert.send_mail("제목 C", "본문 C") is False, "이슈로도 못 알렸는데 알린 것으로 친다(다음 점검이 다시 알려야 한다)")
+        finally:
+            _smtplib.SMTP_SSL = smtp_saved
+            for k, v in env2.items():
+                os.environ.pop(k, None) if v is None else os.environ.__setitem__(k, v)
+        wf = (ROOT / ".github" / "workflows" / "alerts.yml").read_text(encoding="utf-8")
+        expect(wf.count("issues: write") >= 2 and all("issues: write" in (ROOT / ".github" / "workflows" / n).read_text(encoding="utf-8")
+                                                      for n in ("rewind.yml", "codex-fallback.yml")),
+               "알림을 보내는 워크플로(alerts·rewind·codex-fallback)에 issues: write 가 없다 — 메일이 막히면 이슈로도 못 알린다")
     finally:
         for k, v in saved.items():
             setattr(alert, k, v)
@@ -1616,6 +1658,14 @@ def t_story():
     pi_src = _inspect.getsource(post_instagram.main)
     expect("and not reel_only" in pi_src and "not ai.exists()" in pi_src and "card_story()" in pi_src,
            "아침 카드 스토리를 릴스만 날에 건너뛰지 않거나, AI 릴스가 없는 날의 대신 올리기가 없다")
+    # E21 판정(11/09 되돌림): story_cards_after_ai_from 부터 AI 영상 스토리 바로 뒤에 아침 카드 스토리(순서 릴스 → 카드 — 11/03 운영자)
+    ca = {"story_cards_after_ai_from": "2026-11-10"}
+    expect([post_instagram.cards_after_ai(ca, k) for k in ("2026-11-08", "2026-11-10", "2026-11-13-weekly")] == [False, True, False]
+           and not post_instagram.cards_after_ai({}, "2026-11-10"), "AI 영상 스토리 뒤 카드 스토리 날짜·주간 특집 제외가 틀린다")
+    expect(real_cfg.get("story_cards_after_ai_from") == "2026-11-10", "config 에 story_cards_after_ai_from(E21 되돌림)이 없다")
+    after = pi_src.find("story_on(cfg, key) and cards_after_ai(cfg, key)")   # 이어 올리는 조건 줄(안내 문구가 아니라)
+    expect(pi_src.find('log["story_ai"] = {') < after < pi_src.find("AI 릴스가 없는 날 — 아침 카드 스토리를 대신"),
+           "카드 스토리 이어 올리기가 AI 영상 스토리 게시 뒤(릴스 → 카드 순서)에 있지 않다")
     expect(collect_metrics._story_cell({"story": {"reach": 20, "video": True}}) == " (스토리 영상 20)", "AI 영상 스토리 도달 표시가 틀린다")
     calls = []
 
