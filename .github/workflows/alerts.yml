@@ -4,7 +4,7 @@
 # 2) 발행 감시: 매일 09:10·10:10(KST) 오늘 호·메일 발송·인스타 게시·웹 페이지·성과 수집·인스타 토큰을 확인한다.
 #    제작 루틴이 원고를 못 올린 날은 다른 워크플로가 '실패'하지 않고 조용히 끝나서 이걸로만 잡힌다.
 #    같은 날 같은 알림은 한 번만(automation/alerts/{날짜}.json 에 종류만 기록 — 주소·토큰은 남기지 않는다).
-# 필요한 Secrets: SMTP_USER · SMTP_PASSWORD (발송과 같은 값)
+# 필요한 Secrets: SMTP_USER · SMTP_PASSWORD (발송과 같은 값). 메일을 못 보내면(로그인 실패 등) GitHub 이슈로 대신 알린다(2026-11-09~).
 name: EDIT H alerts
 
 on:
@@ -45,6 +45,7 @@ on:
 permissions:
   contents: write
   actions: read
+  issues: write   # 알림 메일을 못 보내면(메일 계정 로그인 실패 등) GitHub 이슈로 대신 알린다(alert.post_issue, 2026-11-09~)
 
 jobs:
   failed:
@@ -56,6 +57,7 @@ jobs:
     permissions:
       contents: read
       actions: write   # GitHub 서버(러너)를 못 잡아 시작도 못 한 실행을 한 번 다시 돌린다(alert.never_started)
+      issues: write    # 알림 메일을 못 보내면 GitHub 이슈로 대신(alert.post_issue)
     steps:
       - uses: actions/checkout@v4
         with:

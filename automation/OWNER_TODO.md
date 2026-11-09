@@ -8,6 +8,15 @@
 > **모두 선택이다 — 하지 않아도 매일 제작·발송·게시·개선은 그대로 돈다.** 해 주면 무엇이 좋아지는지만 적어 둔다.
 > 경쟁 매체 비교는 토큰 없이 도는 웹 추적기(`automation/competitors_web.py`, 매주 일요일)가 맡는다.
 
+## ⚠ 지금 꼭 필요한 일 (선택 아님)
+
+- [ ] **발송용 Gmail 앱 비밀번호 새로 넣기 (2026-11-09~)** — 11/09 08:30 부터 뉴스레터 발송·구독 신청 받아 오기(sync_subscribers)·알림 메일이
+  모두 같은 로그인 오류로 멈췄다(SMTP 는 연결 끊김, 같은 계정 IMAP 은 'Invalid credentials' — 07:53 까지는 됐다). 구글 비밀번호·2단계 인증을
+  바꾸면 앱 비밀번호가 무효가 된다. 발송용 Gmail 계정 → myaccount.google.com/apppasswords → 새 앱 비밀번호 →
+  GitHub 저장소 Settings → Secrets and variables → Actions → `SMTP_PASSWORD` 갱신(16자리, 띄어쓰기 없이 — 채팅에 붙이지 않는다).
+  넣은 뒤 Claude 에게 알려 주면 로그인 확인 → 그날 호 발송 → 구독 반영을 다시 돌린다(직접: Actions → Send EDIT H newsletter → Run workflow, date).
+  그때까지 실패 알림은 메일 대신 GitHub 이슈 'EDIT H 운영 알림 — 메일로 보내지 못한 알림'으로 온다(11/09 개선).
+
 ## 구독자 1만 묶음 (2026-11-01 운영자 '매일 발전해서 구독자 1만 명') — 모두 선택, 계획: `automation/reviews/2026-11-01-growth-10k.md`
 
 - [ ] **유튜브 쇼츠·틱톡** — 매일 만드는 릴스(짝수 날 AI 영상·홀수 날 카드 릴스)를 그대로 올리면 처음 보는 사람에게 닿는 양이 채널 수만큼 는다(콘텐츠 비용 0).

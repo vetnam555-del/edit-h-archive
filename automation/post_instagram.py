@@ -430,6 +430,15 @@ def story_reel_only(cfg, key):
     return bool(start and str(key)[:10] >= start and "weekly" not in str(key) and ai_video_day(cfg, key))
 
 
+def cards_after_ai(cfg, key):
+    """E21 판정(2026-11-09 되돌림) — config.instagram.story_cards_after_ai_from 부터 '스토리는 릴스만'(story_reel_only) 날에도
+    AI 영상 스토리 바로 뒤에 아침 카드 스토리를 이어 올린다. 순서는 릴스 → 카드(11/03 운영자 '스토리는 릴스가 먼저') — 08:30 캐러셀 실행은
+    그대로 카드를 건너뛰고, AI 영상 스토리를 올리는 릴스 실행이 이어 올린다. 근거: AI 영상 스토리만 올린 날(11/03·11/04·11/06·11/08)
+    첫 장 도달 19·18·10·5(평균 13) vs 카드 스토리 날(10/30~11/02) 23·13·14·17(평균 16.8), 최근 7일 팔로워 도달 63 → 51."""
+    start = cfg.get("story_cards_after_ai_from")
+    return bool(start and str(key)[:10] >= start and "weekly" not in str(key))
+
+
 def is_rewind(key, kind="daily"):
     """그날 content 가 예비 호(다시 보기)인가."""
     content = ROOT / "content" / f"{str(key)[:10]}.json"
@@ -444,16 +453,17 @@ def story_image(folder, key, site_url):
     return f"{site_url}/instagram/{key}/ig/{jpgs[0].name}" if jpgs else None
 
 
-def story_images(folder, key, site_url):
+def story_images(folder, key, site_url, hook=True):
     """스토리로 올릴 이미지 공개 주소들(올릴 순서). 2026-10-29 운영자 '훅 화면 한 장뿐이라 아무 내용이 없다':
     build_issue 가 만든 story/ 화면(H PICK 브리핑·오늘의 소식·관련 기사, 못 만들면 카드 화면 — 훅이 없는 호는 훅·표지부터)을 훅 화면 뒤에 잇는다.
     API 는 게시물·링크 스티커를 못 붙여 눌러서 피드로 보낼 수 없으니, 스토리만 넘겨도 오늘 내용이 보이게 한다.
-    story/ 가 없는 호(그 전 호·화면 만들기 실패)는 예전처럼 한 장."""
+    story/ 가 없는 호(그 전 호·화면 만들기 실패)는 예전처럼 한 장. hook=False 면 훅 화면을 빼고 브리핑 화면만 — AI 영상 스토리
+    바로 뒤에 이어 올릴 때(E21 판정, 11/10~) AI 영상이 이미 훅이라 같은 역할의 정지 화면을 또 넣지 않는다(Codex 리뷰)."""
     frames = sorted((folder / "story").glob("s*.jpg"))
     if not frames:
         one = story_image(folder, key, site_url)
         return [one] if one else []
-    hook = (folder / "reel_frames" / "r1_hook.jpg").exists() and not frames[0].stem.endswith(("_cover", "_hook"))
+    hook = hook and (folder / "reel_frames" / "r1_hook.jpg").exists() and not frames[0].stem.endswith(("_cover", "_hook"))
     return ([f"{site_url}/instagram/{key}/reel_frames/r1_hook.jpg"] if hook else []) + \
         [f"{site_url}/instagram/{key}/story/{f.name}" for f in frames]
 
@@ -529,12 +539,12 @@ def post_story_video(g, uid, url, dry, info=None):
     return publish(g, uid, cid, "스토리 영상")
 
 
-def post_story(g, uid, key, folder, site_url, dry, done=()):
+def post_story(g, uid, key, folder, site_url, dry, done=(), hook=True):
     """E9(2026-10-10~): 캐러셀을 올린 뒤 같은 날 스토리를 — 스토리는 팔로워 홈 맨 위에 뜬다.
     2026-10-09 진단: 팔로워 133명 중 이번 주 우리 게시물을 본 사람 36명. 스토리를 보고 프로필·피드로 오게.
     올린 스토리 id 목록을 돌려준다. done(이미 올린 장)은 건너뛰고, 중간에 실패하면 그때까지 올린 id 를 IGError.posted 에 담는다
     — 다음 실행이 같은 장을 두 번 올리지 않고 이어서 올린다."""
-    urls = story_images(folder, key, site_url)
+    urls = story_images(folder, key, site_url, hook)
     ids = list(done)
     if not urls or len(ids) >= len(urls):
         return ids
@@ -800,7 +810,8 @@ def main():
     reel_only = args.kind == "daily" and story_reel_only(cfg, key) and not is_rewind(key, args.kind)
     want_story = args.only != "reel" and args.kind == "daily" and log.get("carousel") and not log.get("story") and not reel_only
     if reel_only and args.only != "reel" and log.get("carousel") and not log.get("story"):
-        print("스토리는 그날 AI 릴스 영상만(story_reel_only_from) — 아침 카드 스토리는 건너뜀")
+        print("아침 카드 스토리는 AI 영상 스토리 뒤에 릴스 실행이 이어 올린다(E21 — 릴스 → 카드)" if cards_after_ai(cfg, key)
+              else "스토리는 그날 AI 릴스 영상만(story_reel_only_from) — 아침 카드 스토리는 건너뜀")
     account_type = None
     if want_story:
         try:   # 계정 종류 — 이 필드를 못 읽어도 게시는 계속(모르면 한 번 시도)
@@ -811,10 +822,10 @@ def main():
             log["story_error"] = "creator"
             save_log(key, log)
             print("  ⚠ 크리에이터 계정이라 API 로 스토리를 올릴 수 없습니다 — 비즈니스 계정 전환은 automation/OWNER_TODO.md")
-    def card_story():
+    def card_story(hook=True):
         try:
             print("스토리 게시 중…")
-            ids = post_story(g, uid, key, folder, site_url, args.dry_run, done=log.get("story_partial") or [])
+            ids = post_story(g, uid, key, folder, site_url, args.dry_run, done=log.get("story_partial") or [], hook=hook)
             if ids:   # id 는 첫 장(도달·조회는 첫 장이 가장 크다 — 성과표 '(스토리 N)')
                 log["story"] = {"id": ids[0], "ids": ids, "at": now_kst().isoformat(timespec="seconds")}
                 log.pop("story_error", None)
@@ -921,6 +932,13 @@ def main():
                 log["story_ai_error"] = str(e)[:200]
                 save_log(key, log)
                 print(f"  ⚠ AI 영상 스토리 실패(게시는 계속): {e}")
+
+    # E21 판정(11/09 되돌림): AI 영상 스토리 바로 뒤에 아침 카드 스토리 — 08:30 캐러셀 실행은 '스토리는 릴스만'이라 카드를 건너뛰었으니
+    # 여기서 이어 올린다(순서 릴스 → 카드). AI 영상 스토리가 실패한 날은 위 줄이 다음 실행에서 다시 시도한 뒤에 올린다.
+    if (reel_only and args.only != "carousel" and log.get("story_ai") and log.get("carousel") and not log.get("story")
+            and not args.dry_run and story_on(cfg, key) and cards_after_ai(cfg, key)):
+        print("AI 영상 스토리 뒤에 아침 카드 스토리를 이어 올립니다(E21 판정 — 릴스 → 카드, 훅 화면은 빼고 브리핑만)")
+        card_story(hook=False)   # AI 영상이 이미 훅 — 카드 릴스 훅 정지 화면(r1_hook)을 또 넣지 않는다(Codex 리뷰)
 
     # '스토리는 릴스만' 날인데 AI 릴스를 못 만들었으면(영상 파일 없음) 릴스 실행(저녁 사슬 19:30 등)이 아침 카드 스토리를 대신 올린다
     # — 스토리가 하나도 없는 날을 만들지 않는다(E9: 스토리가 팔로워 도달을 약 2배로).
