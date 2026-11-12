@@ -203,7 +203,10 @@ medias image_references `3d8becae-2f05-4b51-b4d2-db71e052f311`·`f485f5d5-8a54-4
 - **평일(영상 날)**: 실행 중인 post-instagram 이 없을 때 post-instagram.yml 을 workflow_dispatch(key={오늘}, mode=post, only=reel) — 릴스·AI 스토리·카드 스토리·5가지 웹툰이 함께 올라간다.
   → `automation/ig_posted/{오늘}.json` 의 reel(style ai)·permalink·ai_label·story_ai·comic(permalink) 확인.
   머지 전에는 영상 공개 주소를 curl 로 찌르지 않는다(GitHub Pages 가 404 를 몇 분 기억해 게시가 늦어진다). 게시는 한 번에 하나만, 저녁 사슬 19:30 과 겹치지 않게.
-- **주말·영상을 쉰 날**: post-instagram 은 돌리지 않는다(19:30 저녁 사슬이 main 의 웹툰을 올린다 — 릴스는 없다).
+- **주말**: post-instagram 은 돌리지 않는다(아침 카드 스토리는 08:30 에 이미 올라갔고, 19:30 저녁 사슬이 main 의 웹툰을 올린다 — 릴스는 없다).
+- **평일인데 영상을 쉰 날**(크레딧 부족·검수 탈락): 웹툰 PR 을 머지한 뒤 실행 중인 post-instagram 이 없을 때 post-instagram.yml 을
+  workflow_dispatch(key={오늘}, mode=post, only=reel)로 돌린다 — 영상 파일이 없으면 스크립트가 아침 카드 스토리와 웹툰만 올린다(릴스는 없다).
+  평일은 08:30 실행이 카드 스토리를 건너뛰기 때문에(영상 스토리 뒤에 올리려고) 그냥 두면 카드 스토리가 19:30 으로 밀린다(11/05·11/07 첫 장 도달 6·0).
 
 ### 7. 알리기·보고
 - **릴스가 올라가면 바로**(11/02 운영자): reel permalink 를 확인한 그 즉시 PushNotification(한 줄 '오늘 릴스 올라갔어요: {permalink}') +
