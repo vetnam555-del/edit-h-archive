@@ -1,6 +1,36 @@
 {
- "collected_at": "2026-11-12T04:45+09:00",
+ "collected_at": "2026-11-12T12:47+09:00",
  "issues": {
+  "2026-11-12": {
+   "title": "해외서 산 비만치료제, 3개월치 들고 온다고?",
+   "format": 2,
+   "pick_tag": "의약품 반입",
+   "title_style": "질문형",
+   "cover": "사진",
+   "weekday": "목",
+   "poll": false,
+   "source_mode": "mixed",
+   "audience": "2030",
+   "series": "없음",
+   "reel_style": "AI 영상",
+   "reel_seconds": 22.6,
+   "reel_slot": "낮",
+   "reel_feed": false,
+   "reel_hook": true,
+   "src": {
+    "main": 5,
+    "primary": 2,
+    "pick_primary": true,
+    "outlets": 22,
+    "wire": 10,
+    "solo": 0
+   },
+   "big": [
+    4,
+    23,
+    false
+   ]
+  },
   "2026-11-10": {
    "title": "놓쳤다면, 다시 볼 만한 5가지",
    "format": 2,
@@ -350,8 +380,8 @@
   }
  },
  "instagram": {
-  "followers": 163,
-  "media": 135,
+  "followers": 164,
+  "media": 137,
   "insights": true,
   "posts": {
    "2026-10-30": {
@@ -837,6 +867,44 @@
       7
      ]
     }
+   },
+   "2026-11-12": {
+    "likes": 0,
+    "comments": 0,
+    "reach": 4,
+    "saved": 0,
+    "shares": 0,
+    "views": 14,
+    "profile_visits": 0,
+    "follows": 0,
+    "reel": {
+     "likes": 0,
+     "comments": 0,
+     "reach": 0,
+     "saved": 0,
+     "shares": 0,
+     "views": 1,
+     "seconds": 22.6,
+     "avg_watch_s": 0.0
+    },
+    "comic": {
+     "likes": 0,
+     "comments": 0,
+     "reach": 0,
+     "saved": 0,
+     "shares": 0,
+     "views": 0
+    },
+    "story": {
+     "reach": 0,
+     "views": 1,
+     "replies": 0,
+     "frames": [
+      0,
+      0,
+      0
+     ]
+    }
    }
   },
   "weekly": {
@@ -877,7 +945,7 @@
    "days": 7,
    "reach": {
     "NON_FOLLOWER": 741,
-    "FOLLOWER": 38
+    "FOLLOWER": 39
    },
    "follows_and_unfollows": {
     "FOLLOWER": 4,
@@ -899,7 +967,8 @@
    "2026-11-07": 0,
    "2026-11-08": 0,
    "2026-11-09": 0,
-   "2026-11-10": 0
+   "2026-11-10": 0,
+   "2026-11-12": 0
   },
   "signups_14d": 2,
   "unsubs_14d": 0,
