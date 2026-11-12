@@ -963,8 +963,8 @@ def comic_file_gaps(ep, folder):
 
 
 def comic_only(ep, folder, content, corpus):
-    """웹툰만 만든 날 검수 → 실패 목록. 11월 크레딧 계획(11/04 운영자 '480p로 해줘' — 짝수 날만 AI 영상, 홀수 날은 영상·목소리 없이
-    5가지 웹툰만, 19:30 저녁 사슬이 카드 릴스와 함께 올린다)의 홀수 날 몫이다. 영상·소리·목소리·싱크·릴스 캡션(reel_ai_caption.txt)은 보지 않고,
+    """웹툰만 만든 날 검수 → 실패 목록. AI 영상을 만들지 않는 날(2026-11-13~ 주말·크레딧이 모자라거나 영상을 쉰 날, 그 전 11월 홀수 날 —
+    영상·목소리 없이 5가지 웹툰만, 19:30 저녁 사슬이 올린다)의 몫이다. 영상·소리·목소리·싱크·릴스 캡션(reel_ai_caption.txt)은 보지 않고,
     만화 글·끝 장 숫자(content 숫자만)·comic_caption('AI로 만들'·해시태그 5개 이하·숫자·'출처:' 칸)·만화 3~10장·1080×1350 만 본다."""
     if not ep.get("comic"):
         return ['brief.json 에 "comic" 이 없다 — 웹툰만 검수(--comic)는 그날 5가지 웹툰 설정을 본다']
@@ -994,7 +994,7 @@ def main():
     ap.add_argument("--video", help="instagram/{날짜}/reel_ai.mp4 대신 볼 영상(고쳐 본 판)")
     ap.add_argument("--extra", type=int, help="메인 N번 AI 영상(instagram/{날짜}/extra/N/) — 운영자가 앱에서 만든 영상, 만화는 없다")
     ap.add_argument("--comic", action="store_true",
-                    help="웹툰만 만든 날(11월 홀수 날 — 크레딧 계획): 영상·소리·목소리·싱크·릴스 캡션은 건너뛰고 만화 글 숫자·comic_caption·만화 장수·크기·출처만 본다")
+                    help="웹툰만 만든 날(주말·영상을 쉰 날): 영상·소리·목소리·싱크·릴스 캡션은 건너뛰고 만화 글 숫자·comic_caption·만화 장수·크기·출처만 본다")
     a = ap.parse_args()
     epath = Path(a.episode).resolve()
     ep = json.loads(epath.read_text(encoding="utf-8"))
@@ -1006,7 +1006,7 @@ def main():
     for mm, dd in set(re.findall(r'"date":\s*"(\d{1,2})\.(\d{1,2})"', corpus)):
         corpus += f" {int(mm)}월 {int(dd)}일 {int(dd)}일"
     fails, notes = [], []
-    if a.comic:   # 웹툰만 만든 날(11월 홀수 날) — 영상·목소리 검사 없이
+    if a.comic:   # 웹툰만 만든 날(주말·영상을 쉰 날) — 영상·목소리 검사 없이
         fails = comic_only(ep, folder, content, corpus)
         if fails:
             print("✗ 웹툰 검수 실패 — 올리지 않는다")

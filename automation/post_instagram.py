@@ -411,11 +411,20 @@ def story_on(cfg, key, account_type=None):
 
 
 def ai_video_day(cfg, key):
-    """그날 AI 릴스 영상을 만드는 날로 정해져 있나 — config.instagram.ai_video_even_days({from, until}, 11월 크레딧 계획: 짝수 날만)
-    기간의 홀수 날이면 아니다. 11/05·11/07 회고: 정해진 '영상 없는 날'에도 '스토리는 릴스만'이 아침 카드 스토리를 건너뛰어
-    19:30 대신 올리기(첫 장 도달 약 2시간 6·0 — 아침 영상 스토리는 18~19)만 나갔다."""
-    plan = cfg.get("ai_video_even_days") or {}
+    """그날 AI 릴스 영상을 만드는 날로 정해져 있나.
+    - config.instagram.ai_video_weekdays_from(날짜)부터는 **평일(월~금)만** — 2026-11-13 운영자 '릴스 영상은 주말만 제외하는 방향으로'.
+      주말은 영상 없이 웹툰만 만드는 날이다(automation/RUNBOOK_REEL.md).
+    - 그 전: config.instagram.ai_video_even_days({from, until}, 11월 크레딧 계획: 짝수 날만) 기간의 홀수 날이면 아니다.
+    영상을 만들지 않기로 정한 날에 '스토리는 릴스만'을 적용하면 아침 카드 스토리가 건너뛰어져 19:30 대신 올리기만 나간다
+    (11/05·11/07 회고: 첫 장 도달 약 2시간 6·0 — 아침 영상 스토리는 18~19). 그래서 그런 날은 08:30 에 카드 스토리를 올린다."""
     day = str(key)[:10]
+    weekdays_from = cfg.get("ai_video_weekdays_from")
+    if weekdays_from and day >= weekdays_from:
+        try:
+            return dt.date.fromisoformat(day).weekday() < 5   # 월 0 … 금 4
+        except ValueError:   # 날짜로 읽히지 않는 키 — 예전처럼 영상 날로 본다
+            return True
+    plan = cfg.get("ai_video_even_days") or {}
     if plan.get("from") and plan["from"] <= day <= plan.get("until", "9999-12-31"):
         return int(day[8:10]) % 2 == 0
     return True
@@ -438,7 +447,7 @@ def story_reel_only(cfg, key):
     """2026-11-02 운영자 '스토리에 올릴 때는 릴스만 올리는 건 어때?' — config.instagram.story_reel_only_from 부터 데일리 호의 스토리는
     그날 AI 릴스 영상 한 장만 올린다(아침 카드 스토리 4장은 안 올림). 근거: 카드 4장 + AI 영상 1장(하루 5장)이 된 10/31 부터
     카드 스토리 첫 장 도달이 23~36 → 13~14 로 줄었다. 예비 호 날·AI 릴스를 못 만든 날은 카드 스토리를 그대로(릴스 실행이 대신 올린다).
-    AI 영상을 만들지 않기로 정한 날(ai_video_day 가 아님 — 11월 홀수 날)은 처음부터 아침 카드 스토리를 올린다(2026-11-08~)."""
+    AI 영상을 만들지 않기로 정한 날(ai_video_day 가 아님 — 2026-11-13~ 주말, 그 전 11월 홀수 날)은 처음부터 아침 카드 스토리를 올린다(2026-11-08~)."""
     start = cfg.get("story_reel_only_from")
     return bool(start and str(key)[:10] >= start and "weekly" not in str(key) and ai_video_day(cfg, key))
 
