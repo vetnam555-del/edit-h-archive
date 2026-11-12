@@ -1,0 +1,22 @@
+when: 2026-11-12 14:18:21 KST
+pwd: /home/user/edit-h-archive
+python: Python 3.13.18
+node: v22.23.4
+playwright: ok
+ffmpeg: ffmpeg version 6.1.1-3ubuntu5 Copyright 
+pdftotext: pdftotext version 24.02.0
+faster_whisper: ModuleNotFoundError: No module named 'faster_whisper'
+numpy: 2.5.3
+naver: 200
+check_today: {|  "date": "2026-11-12",|  "weekday": "목",|
+selftest: |✓ 자동 점검 통과|
+noop_push_main: exit 0 / Everything up-to-date
+tool PushNotification: 있음
+tool SendUserFile: 있음
+tool mcp__github__create_pull_request: 있음
+tool mcp__github__actions_run_trigger: 있음
+tool Higgsfield generate_image: 있음
+tool create_session: 있음
+tool send_later: 있음
+repo_at_start: 있었음
+model: claude-fable-5-2 (설정된 id — 실제 응답 모델은 다를 수 있음)
