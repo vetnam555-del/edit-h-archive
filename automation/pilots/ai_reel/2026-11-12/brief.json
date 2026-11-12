@@ -1,0 +1,236 @@
+{
+ "date": "2026-11-12",
+ "story": "오늘 아침 5가지 — 메인 5개(big_issue·items 4개)를 20초 한 편에. 가장 센 장면(오늘부터 해외 처방 의약품 3개월치 휴대 반입 — 여행 가방을 타고 수하물 미끄럼틀을 내려온 H 앞에서 도우미 로봇이 차단봉을 올려 준다)을 맨 앞에, 끝은 도로 위에서 카메라 앞으로 미끄러져 와 두 엄지 척 — content/2026-11-12.json. 11/10(예비 호)·11/11(발행 없음) 뒤 첫 정규 호라 안장출근길 11/10·11/11 헤드라인의 '클로드 기업 계정 유출 조사'가 메인에 들어왔다. 끝인사는 뉴스레터(가장 좁은 칸 ④ 신청).",
+ "hook": "상황",
+ "items": [
+  "의약품 반입",
+  "이마트 실적",
+  "클로드 유출",
+  "증권사 수수료",
+  "유류세"
+ ],
+ "seedance": {
+  "model": "seedance_2_5",
+  "made_by": "크레딧 API(480p 20초, 화질 high, 60 크레딧 — 11월 짝수 날 영상)",
+  "job": "0dbfb761-d379-4e62-85cf-8a0805efed36",
+  "prompt": "첫 프레임부터 장난감 공항 수하물 미끄럼틀 — 민트색 상자를 안고 여행 가방에 엎드려 타고 내려오는 H 앞에서 도우미 로봇이 차단봉을 올려 준다(해외 처방 의약품 3개월치 휴대 반입) → 마트 통로, 로봇 둘이 H 팔에 상자를 자꾸 쌓아 탑이 휘청인다(이마트 분기 매출 첫 5조·초저가 자체 브랜드) → 사물함 벽, 문이 열려 빈 이름표가 쏟아지고 돋보기 든 로봇이 들여다본다, H 가 온몸으로 문을 민다(클로드 기업 계정 유출·개인정보위 조사) → 거실, 돼지 저금통 뒤 작은 구멍으로 동전이 새어 청소 로봇이 먹는다, H 가 코르크로 막는다(증권사 숨은 이용료) → 산길 쉼터, 로봇이 큰 모래시계를 뒤집자 스쿠터 탄 H 가 만세(유류세 인하 연장) → 카메라 앞으로 무릎 슬라이딩, 두 엄지 척. 전문은 brief_prompt.txt",
+  "cut": "장면 경계(휙 넘김 가운데, 24fps 프레임 차이): 수하물 미끄럼틀 0~3.04 · 마트 3.04~6.63 · 사물함 6.63~10.42 · 거실 10.42~14.38 · 산길 14.38~18.5 · 엄지 척 끝인사 18.5~20.04. 검은 화면 0, 멈춘 구간 없음. 0.5초 프레임으로 사람·로고 없음 확인. 원본은 마트·사물함 장면 아래 30%가 빈 바닥이라 '꽉 찬 화면' 검사에 걸렸다(아래 띠 선명도 0.05~0.16, 20초 중 60%가 0.2 아래·중앙값 0.126) — 그 두 장면만 위쪽 기준으로 1.15배·1.2배 당겨 잡아 바닥을 줄였다(letterboxed False, 0.2 아래 25%, 중앙값 0.339). 산길 장면 집 앞 작은 표지판에 엉터리 글자가 있어 카메라가 멈춘 14.38~18.9초에 판 안 무채색 화소만 판 색으로 눌렀다(H 의 검은 팔·주황 몸은 그대로)."
+ },
+ "trim": [
+  0.0,
+  20.0
+ ],
+ "end_seconds": 2.6,
+ "captions": [
+  {
+   "start": 0.0,
+   "end": 3.04,
+   "size": 84,
+   "html": "<div class=\"kick\">11월 12일 · 오늘 아침 5가지 · 1/5 · 의약품</div><div class=\"main\">비만치료제 <span class=\"hl\">3개월치</span><br>여행 가는 나는?</div><div class=\"sub\">해외서 정식 처방·구매한 약 · 주 1회 주사제는 12개까지</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 식약처·관세청 보도자료·서울경제</div>"
+  },
+  {
+   "start": 3.04,
+   "end": 6.63,
+   "size": 84,
+   "html": "<div class=\"kick\">2/5 · 유통</div><div class=\"main\">이마트 분기 매출<br>첫 <span class=\"hl\">5조</span> 돌파</div><div class=\"sub\">초저가 자체 브랜드 매출이 두 배 넘게 뛰었어요</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 한국경제·이데일리</div>"
+  },
+  {
+   "start": 6.63,
+   "end": 10.42,
+   "size": 84,
+   "html": "<div class=\"kick\">3/5 · AI 서비스</div><div class=\"main\">클로드 기업 계정<br><span class=\"hl\">100여 개</span> 유출</div><div class=\"sub\">개인정보위 정식 조사 · 이름·이메일 등이 노출됐을 수 있어요</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 머니투데이·YTN</div>"
+  },
+  {
+   "start": 10.42,
+   "end": 14.38,
+   "size": 84,
+   "html": "<div class=\"kick\">4/5 · 투자</div><div class=\"main\">증권사 종목 추천<br><span class=\"hl\">숨은 이용료</span> 확인</div><div class=\"sub\">12개 증권사 · 10만3000명이 쓰는 유료 서비스</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 금융감독원 보도자료·디지털데일리</div>"
+  },
+  {
+   "start": 14.38,
+   "end": 18.2,
+   "size": 84,
+   "html": "<div class=\"kick\">5/5 · 기름값</div><div class=\"main\">유류세 인하<br><span class=\"hl\">내년 1월</span>까지</div><div class=\"sub\">휘발유 L당 122원 · 경유 145원 덜 내요</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 국민일보·경향신문</div>"
+  }
+ ],
+ "end_card": {
+  "line": "더 자세한 건 프로필 링크 뉴스레터에서!",
+  "sub": "프로필 링크에서 구독하면 '돈·일 체크리스트' 선물부터",
+  "note": "숫자는 기사 2곳 이상에서 확인했어요<br>(출처는 장면마다·캡션에)"
+ },
+ "voices": [
+  {
+   "file": "stems/i1_med.mp3",
+   "start": 0.05,
+   "tempo": 1.08,
+   "text": "해외에서 산 비만치료제, 3개월치 반입됩니다!",
+   "tts": "[excited] 해외에서 산 비만 치료제, 삼 개월 치 반입됩니다!",
+   "voice": "Knox(elevenlabs_v4, '[excited]' 중계 아나운서) — 0초 여는 한 마디(B0). 녹음 3.34초가 첫 장면(3.04초)보다 길어 tempo 1.08. 첫 녹음 '해외서'가 '해외소산'으로 들려 '해외에서'로 다시 녹음"
+  },
+  {
+   "file": "stems/i2_emart.mp3",
+   "start": 3.15,
+   "tempo": 1.0,
+   "text": "이마트 분기 매출, 처음 5조 넘었대요!",
+   "tts": "이마트 분기 매출 처음 오조 넘었대요!",
+   "voice": "Hana(qwen_audio_tts, '귀여운 만화 캐릭터, 깜짝 놀라서 신나게 전하는 말투') — 다시 녹음(첫 녹음 '분기'가 '붕괴'로 들림)"
+  },
+  {
+   "file": "stems/i3_claude.mp3",
+   "start": 6.75,
+   "tempo": 1.0,
+   "text": "클로드 기업 계정 100개 넘게 유출됐대요!",
+   "tts": "클로드 기업 계정 백 개 넘게 유출됐대요!",
+   "voice": "Hana(qwen, '귀엽고 장난스러운 만화 캐릭터, 놀라서 또박또박 전하는 말투') — '백여 개'가 두 번 뭉개져('배격에'·'배경계') '백 개 넘게'로 바꿔 녹음"
+  },
+  {
+   "file": "stems/i4_fee.mp3",
+   "start": 10.52,
+   "tempo": 1.0,
+   "text": "증권사 앱, 숨은 이용료 없는지 봐요!",
+   "voice": "Hana(qwen, '귀여운 만화 캐릭터, 여유 있고 다정하게 조언하는 말투') — '나'에게 닿는 줄 — 다시 녹음(첫 녹음 '이용료'가 '이용력'으로 들림)"
+  },
+  {
+   "file": "stems/i5_fuel.mp3",
+   "start": 14.48,
+   "tempo": 1.0,
+   "text": "낮춘 유류세, 내년 1월까지 이어져요!",
+   "tts": "낮춘 유류세, 내년 일월까지 이어져요!",
+   "voice": "Hana(qwen, '귀여운 만화 캐릭터, 신나서 들뜬 말투') — '유류세 인하'의 '인하'가 세 번 '이나'로 들려 '낮춘 유류세'로 바꿔 녹음"
+  },
+  {
+   "file": "stems/i_bye_newsletter.mp3",
+   "start": 18.3,
+   "tempo": 1.0,
+   "text": "더 자세한 건 프로필 링크 뉴스레터에서!",
+   "voice": "Hana(qwen, '귀엽고 밝은 만화 캐릭터, 경쾌하게 인사') — signoffs bye_newsletter 문구를 그날 새로 녹음(가장 좁은 칸 ④ 뉴스레터 신청)"
+  }
+ ],
+ "music": [
+  {
+   "file": "../2026-10-31/stems/m1_chase.m4a",
+   "start": 0.0,
+   "offset": 1.7,
+   "dur": 4.2,
+   "fade_out": 0.3
+  },
+  {
+   "file": "../2026-10-31/stems/m1_chase.m4a",
+   "start": 3.9,
+   "offset": 1.75,
+   "dur": 4.15,
+   "fade_in": 0.2,
+   "fade_out": 0.4
+  },
+  {
+   "file": "../2026-10-31/stems/m2_morning.m4a",
+   "start": 7.6,
+   "dur": 7.95,
+   "fade_in": 0.3,
+   "fade_out": 0.4
+  },
+  {
+   "file": "../2026-10-31/stems/m2_morning.m4a",
+   "start": 15.17,
+   "dur": 7.5,
+   "lufs": -18,
+   "fade_in": 0.3,
+   "fade_out": 0.8
+  }
+ ],
+ "sfx": [
+  [
+   0,
+   999,
+   0.4
+  ]
+ ],
+ "music_note": "11/02~11/08 과 같은 곡 이음(m1_chase 1.7초부터, 곡 이음 0.3초 겹침). 끝인사가 18.30~21.0초라 m2_morning 5.75초 강박이 끝인사 숨(20.9초께)에 오게 15.17초에 다시 깐다(앞 곡과 0.38초 겹침). 효과음은 내내 0.4(0.3 아래 금지).",
+ "duck": {
+  "mix": 0.6,
+  "release": 350
+ },
+ "source_note": "장면마다 그 소식의 매체 2곳을 작게 띄운다. 원 기사 대조(check_sources.py 막음 0 · 경고 2(날짜 '19일'·'12월') · 기사 18/18곳 읽음): 의약품 '12일부터·총 6병·3개월 복용량·주 1회 주사제 12개' 식약처·관세청 원문·서울경제·서울신문, 이마트 '별도 매출 5조1040억원·5K프라이스 두 배' 한국경제·이데일리·머니투데이, 클로드 '국내 기업용 계정 100여 개·지난달 31일 신고·개인정보위 정식 조사' 연합뉴스·머니투데이·YTN, 증권사 '12개 증권사·10만3000명·0.05~0.25%' 금감원 원문(PDF)·디지털데일리·한국일보, 유류세 '내년 1월 말·휘발유 122원·경유 145원' 국민일보·경향신문.",
+ "source_video_prep": "ffmpeg -i <원본> -filter_complex \"[0:v]split=4[a][b][c][d];[a]trim=end_frame=73,setpts=PTS-STARTPTS[va];[b]trim=start_frame=73:end_frame=159,setpts=PTS-STARTPTS,crop=418:742:31:0,scale=480:854:flags=lanczos[vb];[c]trim=start_frame=159:end_frame=250,setpts=PTS-STARTPTS,crop=400:712:40:0,scale=480:854:flags=lanczos[vc];[d]trim=start_frame=250,setpts=PTS-STARTPTS[vd];[va][vb][vc][vd]concat=n=4:v=1:a=0,split[base][s];[s]crop=30:20:437:475,format=yuv444p,geq=lum='if(lt(abs(cb(X,Y)-128)+abs(cr(X,Y)-128),16)*between(lum(X,Y),50,200),166,lum(X,Y))':cb='cb(X,Y)':cr='cr(X,Y)'[p];[base][p]overlay=437:475:enable='between(t,14.38,18.9)'[v]\" -map \"[v]\" -map 0:a -c:v libx264 -crf 14 -preset medium -pix_fmt yuv420p -r 24 -c:a copy <손질한 영상>",
+ "comic_note": "5가지 웹툰 3판. 그림 11장 gpt_image_2_5 4:3 1k(장당 0.25 크레딧, 앤트로픽 상장 장면 2장은 주제를 '클로드 계정 유출'로 바꾸며 다시 그려 모두 13장 3.25 크레딧), 규칙 automation/pilots/ai_reel/webtoon_prompt.md. stills/ 는 저장소에 올리지 않는다(jobs 로 다시 받는다). 장면: 표지 공항 라운지 여행 가방 위 커피·신문 · ① 도착 게이트 차단봉이 열림 → 가방에 상자를 넣으며 손가락으로 세기 · ② 마트 통로 상자 탑 → 선반 앞에서 상자 둘 비교 · ③ 사물함에서 쏟아지는 빈 이름표 → 책상에서 빈 봉투 살펴보기 · ④ 저금통 뒤 구멍으로 새는 동전 → 돋보기로 저금통 뒤 살피기 · ⑤ 모래시계를 뒤집는 로봇 → 산길 스쿠터 엄지 척.",
+ "comic": {
+  "series": "오늘 아침 5가지",
+  "layout": "duo",
+  "title": "해외 처방 비만치료제<br><span class='hl'>3개월치</span> 반입,<br>오늘 아침 5가지",
+  "cover": {
+   "img": "stills/cover.png",
+   "pos": "50% 40%",
+   "job": "f1425dbc-78c2-451e-8b26-200534b3bf0c"
+  },
+  "summary": true,
+  "panels": [
+   {
+    "card": 1,
+    "img_a": "stills/md_a.png",
+    "pos_a": "50% 45%",
+    "img_b": "stills/md_b.png",
+    "pos_b": "50% 35%",
+    "say_side": "left",
+    "jobs": [
+     "94f607e5-6ddf-4a36-8db2-773c056e60e8",
+     "396ae7a3-7acb-4825-aa93-753f375ca052"
+    ]
+   },
+   {
+    "card": 2,
+    "img_a": "stills/em_a.png",
+    "pos_a": "50% 55%",
+    "img_b": "stills/em_b.png",
+    "pos_b": "50% 35%",
+    "say_side": "left",
+    "jobs": [
+     "403415f4-2492-433e-995e-71f00f87656d",
+     "0be1a607-b03d-4341-804b-24c093cb9fe8"
+    ]
+   },
+   {
+    "card": 3,
+    "img_a": "stills/cl_a.png",
+    "pos_a": "50% 45%",
+    "img_b": "stills/cl_b.png",
+    "pos_b": "50% 30%",
+    "say_side": "left",
+    "jobs": [
+     "9846f0fc-2028-4446-a79c-219495a68f10",
+     "b32f1936-ee5d-4ad0-a74f-a75183785d26"
+    ]
+   },
+   {
+    "card": 4,
+    "img_a": "stills/fe_a.png",
+    "pos_a": "50% 40%",
+    "img_b": "stills/fe_b.png",
+    "pos_b": "50% 35%",
+    "say_side": "left",
+    "stk_side": "left",
+    "jobs": [
+     "d1d5df30-ecac-4058-99fd-8beedb97f738",
+     "199a65e8-bc5f-4add-be31-1cf934709d69"
+    ]
+   },
+   {
+    "card": 5,
+    "img_a": "stills/fu_a.png",
+    "pos_a": "50% 50%",
+    "img_b": "stills/fu_b.png",
+    "pos_b": "50% 40%",
+    "say_side": "left",
+    "stk_side": "left",
+    "jobs": [
+     "05f5007f-82e0-4501-9ec1-75885f5e0e6e",
+     "7602ea13-f0d2-458c-9a0e-e76bac1b0925"
+    ]
+   }
+  ],
+  "sources": "장마다 표시",
+  "end": {
+   "title": "오늘 아침 5가지,<br>매일 8시 30분",
+   "sub": "경제부터 트렌드까지, 오늘 소식 5가지를<br>웹툰으로 풀어 드려요"
+  }
+ }
+}
