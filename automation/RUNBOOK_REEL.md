@@ -3,9 +3,11 @@
 매일 08:15 KST 에 **그날 새로 뜬 작업 세션**이 이 문서를 처음부터 읽고 그대로 한다(2026-11-12~ — 그 전에는 예약 지시문에 있던 내용을 옮겼다).
 지켜보는 사람이 없으니 질문하지 말고 끝까지 진행한다. 08:30 뉴스레터·카드는 07:40 제작이 이미 만들었고 여기서는 고치지 않는다(지난 호도 마찬가지).
 
-- **짝수 날(11월: 4·6·8…30일)**: AI 영상 릴스 '오늘 아침 5가지' 1편(20초 + 끝 화면) + 5가지 웹툰 8장 → 아침에 바로 게시(평소 08:50~09:05).
-- **홀수 날**: 영상·목소리 없이 5가지 웹툰만 → main 에 올려 두면 19:30 저녁 사슬이 웹툰을 올린다. 이날은 **릴스가 없다**
+- **평일(월~금)**: AI 영상 릴스 '오늘 아침 5가지' 1편(20초 + 끝 화면) + 5가지 웹툰 8장 → 아침에 바로 게시(평소 08:50~09:05).
+- **주말(토·일)**: 영상·목소리 없이 5가지 웹툰만 → main 에 올려 두면 19:30 저녁 사슬이 웹툰을 올린다. 이날은 **릴스가 없다**
   (카드·세로 프레임을 이어 붙인 이미지 릴스는 2026-11-13~ 올리지 않는다 — 운영자 11/12).
+- 요일은 한국 시각으로 본다: `TZ=Asia/Seoul date +%u` 가 1~5 면 평일(영상 날), 6·7 이면 주말(웹툰만). 날짜가 짝수인지 홀수인지는 보지 않는다.
+  평일이면 공휴일에도 만든다(2026-11-13 운영자 "릴스 영상은 주말만 제외하는 방향으로" — 그 전 11/05~11/12 는 짝수 날만 만들었다).
 - H PICK 릴스는 만들지 않는다(운영자 11/01 "5가지로만 올려줘, 내일부터도 정상적으로").
 
 ## 운영자가 정한 것 (바꾸지 않는다 — 운영자가 다시 말할 때만)
@@ -19,15 +21,19 @@
   11/03 "3초 안이 가장 중요하다"로 그중 '숫자 + 나 질문' 제목만 (B0)로 켰다.
 - 머니그라피 비교(`automation/reviews/2026-11-01-moneygraphy.md`): 쇼츠는 '삶의 결정' 한 마디가 터진다.
 - 11/12 "릴스에서 이미지 붙여서 만드는 영상 릴스는 앞으로 하지 마" → 이미지를 이어 붙인 릴스(카드 릴스)는 만들지도 올리지도 않는다
-  (`config.instagram.image_reel_until`). 릴스는 AI 영상(짝수 날)만. AI 영상을 못 만든 날 대신 올릴 릴스는 없다.
+  (`config.instagram.image_reel_until`). 릴스는 AI 영상(평일)만. AI 영상을 못 만든 날 대신 올릴 릴스는 없다.
+- 11/13 "오늘 자 나갈 때 영상 릴스 같이 나가 줘, 릴스 영상은 주말만 제외하는 방향으로" → AI 영상 릴스는 **평일(월~금) 매일**, 주말은 웹툰만
+  ('11월 짝수 날만' 계획을 바꿨다).
 - 11/02 "릴스 나오면 바로 알려줘" → 7번. 11/05 "매일 발전하고 있는 거 맞아?" → 보고 첫 줄은 구독자 목표 줄.
 
-## 크레딧 계획 (11/04 운영자 '480p로 해줘')
+## 크레딧 계획 (11/04 운영자 '480p로 해줘' · 11/13 '주말만 제외')
 
-- 11월은 **날짜가 짝수인 날만 AI 영상** — seedance 2.5 **resolution 480p · bitrate_mode high**(20초 60크레딧, 720p 는 140. 다시 만들기도 480p).
-- 홀수 날은 웹툰만(그림 11장 ≈ 2.75크레딧).
-- 시작할 때 잔액(balance)을 본다: 영상 한 편 값(60)보다 적으면 영상은 멈추고 운영자에게 알린다. 300 아래면 그날 보고에 '남은 크레딧·남은 날' 한 줄.
-- **12월 계획이 이 문서에 적히기 전에는(12/1~) 영상은 만들지 않고 웹툰만 만든다** — 11/30 잔액을 보고 운영자와 다시 정한다(계획 없이 크레딧을 쓰지 않는다).
+- **평일(월~금)은 매일 AI 영상** — seedance 2.5 **resolution 480p · bitrate_mode high**(20초 60크레딧, 720p 는 140. 다시 만들기도 480p).
+- 주말은 웹툰만(그림 11장 ≈ 2.75크레딧). 평일 하루는 영상 60 + 그림 2.75 + 목소리 약 0.5 ≈ 63크레딧(영상을 다시 만들면 +60).
+- 시작할 때 잔액(balance)을 본다: 영상 한 편 값(60)보다 적으면 그날 영상은 멈추고 웹툰만 만든 뒤 운영자에게 알린다
+  (PushNotification '크레딧이 N 남아 오늘 영상 릴스는 쉬었어요'). 크레딧을 사거나 요금제를 바꾸는 일은 운영자만 한다(여기서 하지 않는다).
+- 잔액이 300 아래면 그날 보고와 알림에 '남은 크레딧 N · 영상 약 M편(잔액 ÷ 63)' 한 줄을 붙인다(운영자가 미리 채울 수 있게).
+- 끝나는 날은 정해져 있지 않다 — 운영자가 다시 말할 때까지 평일마다 만든다(예전 '12월 계획 전에는 웹툰만' 규칙은 11/13 운영자 결정으로 없앴다).
 
 ## 새 세션 준비 (맨 처음)
 
@@ -39,8 +45,8 @@
 - 그림은 ffmpeg 로 한 장에 모아(tile) Read 로 본다(PIL 이 안 되는 환경이 있다).
 - 흐름 문서: `automation/reviews/2026-11-01-ai-video.md`('오늘 아침 5가지'·'같은 틀 반복 금지'·'기사·출처 맞춤'·'검은 화면'·'멈춘 듯한 구간'),
   웹툰 규칙 `automation/pilots/ai_reel/webtoon_prompt.md`.
-- 본보기: 가장 최근 짝수 날 `automation/pilots/ai_reel/{날짜}/brief.json`·`brief_prompt.txt`(예: 2026-11-12 — 후킹·tts 칸·source_video_prep·comic 3판),
-  홀수 날은 2026-11-09. 틀만 빌리고 장면·동작은 그날 소식으로 새로 쓴다. FULL-BLEED 문장·NEGATIVE 의 가로 띠 금지는 그대로 둔다.
+- 본보기: 가장 최근에 영상을 만든 날의 `automation/pilots/ai_reel/{날짜}/brief.json`·`brief_prompt.txt`(`brief.json` 에 "cut" 이 있는 날 — 예: 2026-11-12,
+  후킹·tts 칸·source_video_prep·comic 3판), 웹툰만 만든 날은 2026-11-09. 틀만 빌리고 장면·동작은 그날 소식으로 새로 쓴다. FULL-BLEED 문장·NEGATIVE 의 가로 띠 금지는 그대로 둔다.
 
 ## (A) 목소리 — Hana(만화 캐릭터 말투) + Knox(중계 아나운서) 한 줄
 
@@ -116,7 +122,7 @@ hook 종류가 질문이면 '…라고?', 반전이면 '…인데 …' 꼴로 �
 hook 종류(숫자 먼저·질문·반전·상황·할 일 먼저·비교·대화)·첫 마디(전날 릴스 첫 마디와도 다르게)·끝 자막 머리말·끝인사(signoffs.json — 보통 bye_newsletter, 가끔 다른 것)·
 첫/끝 그림을 날마다 바꾼다. 최근 3편의 brief.json 을 보고 겹치지 않게 고른다.
 
-### 1. 장면 짜기 (짝수 날)
+### 1. 장면 짜기 (평일 — 영상 날)
 그날 가장 센 장면(움직임이 큰 소식)을 1번으로 — 오프닝 없이 첫 프레임부터 사건, 첫 프레임에 H 가 크게 사건 한가운데((B0) ①).
 장면 5개 × 약 3.5초 + 마무리 2초(H 제스처, 날마다 다르게). 장면마다 H 가 그날 소식에 맞는 새 몸개그, 장면 사이 whip-pan(검은 화면 금지), 만화 효과음(말·노래 없음).
 실존 인물·회사·제품은 비유로만 — NEGATIVE 에 사람·관중·실제 제품 모양·로고·글자·숫자·기호·국기·검은 화면 + 가로 띠·흐린 위아래
@@ -126,7 +132,7 @@ hook 종류(숫자 먼저·질문·반전·상황·할 일 먼저·비교·대�
 운동화·옷·차는 줄무늬·로고 없는 민무늬. **멈추지 않게**: ACTION TIMELINE 장면마다 끝을 'keeps moving until the whip-pan'으로,
 CAMERA 에 'continuous motion in every shot — no held poses, no frozen moments'.
 
-### 2. 영상 (짝수 날만)
+### 2. 영상 (평일만)
 generate_video — model seedance_2_5, mode omni_reference, duration 20, resolution 480p, bitrate_mode high, aspect_ratio 9:16, generate_audio true, use_unlim false,
 medias image_references `3d8becae-2f05-4b51-b4d2-db71e052f311`·`f485f5d5-8a54-4c78-8b04-d2efcd3bed2f`·`9dc42fcf-8cdc-4c35-ac3b-1de2c6c3c21a`(@image1 시트·@image2 놀람·@image3 커피).
 프리셋 추천 notice 가 오면 declined_preset_id 를 넣어 그대로. 60크레딧, 생성 약 15분(jobs_wait 로 기다린다 — 그동안 5-1 웹툰 그림을 먼저 만든다).
@@ -177,7 +183,7 @@ medias image_references `3d8becae-2f05-4b51-b4d2-db71e052f311`·`f485f5d5-8a54-4
 - (다) brief.json 에 "comic": {"series": "오늘 아침 5가지", "layout": "duo", "title": 그날 가장 센 사실 + '오늘 아침 5가지'(숫자 hl, content 숫자만),
   "cover": {"img": "stills/cover.png", "pos", "job"}, "summary": true, "panels": 5개(영상 순서 — {"card": 그 주제의 카드 번호(제목·본문·'그래서 나는?'·출처·숫자를 카드 글 그대로),
   "img_a", "pos_a", "img_b", "pos_b", "say_side", 필요하면 "tail": "out"·"stk_side": "left"/"none", "jobs": [A, B]}), "sources": "장마다 표시",
-  "end": {"title": "오늘 아침 5가지,<br>매일 8시 30분", "sub": "경제부터 트렌드까지, 오늘 소식 5가지를<br>웹툰으로 풀어 드려요"}}. 홀수 날 brief.json 엔 date·items·comic 만 있으면 된다.
+  "end": {"title": "오늘 아침 5가지,<br>매일 8시 30분", "sub": "경제부터 트렌드까지, 오늘 소식 5가지를<br>웹툰으로 풀어 드려요"}}. 주말(웹툰만 만드는 날) brief.json 엔 date·items·comic 만 있으면 된다.
 - (라) `python3 automation/pilots/ai_reel/comic.py automation/pilots/ai_reel/{오늘}/brief.json` → `instagram/{오늘}/comic/c1~c8.jpg`·`comic_alt.json`.
   '글이 칸을 넘쳤어요'로 멈추면 카드 글 문제라 보고(카드 글은 바꾸지 않는다).
 - (마) 8장을 눈으로 본다: 내레이션 상자·숫자 스티커·말풍선이 H 얼굴을 덮나 → pos_a·pos_b(세로 % 를 줄이면 그림 위쪽이 보인다)·stk_side·say_side·tail 로 맞춘다. H 가 잘렸나, 엉터리 글자.
@@ -185,25 +191,25 @@ medias image_references `3d8becae-2f05-4b51-b4d2-db71e052f311`·`f485f5d5-8a54-4
   '이 그림은 AI로 만들었어요. 숫자는 기사 2곳 이상에서 확인했어요.' + '출처: …'(컷 순서) + 해시태그 5개 이하.
 
 ### 5-2. 검수
-- 짝수 날: `python3 automation/pilots/ai_reel/qa.py <brief.json>` ✓(숫자·싱크·발음(녹음 95%·완성본 85%)·음량·끊김·소리 구멍·검은 화면·번쩍임·꽉 찬 화면·멈춘 구간·반복·출처·만화) →
+- 평일(영상 날): `python3 automation/pilots/ai_reel/qa.py <brief.json>` ✓(숫자·싱크·발음(녹음 95%·완성본 85%)·음량·끊김·소리 구멍·검은 화면·번쩍임·꽉 찬 화면·멈춘 구간·반복·출처·만화) →
   완성본 프레임 눈 검수(0.8초 썸네일·장면마다·끝 화면 — 자막이 H 를 가리지 않나, 깨진 글자).
-- 홀수 날: `python3 automation/pilots/ai_reel/qa.py <brief.json> --comic` ✓.
+- 주말·영상을 쉰 날(웹툰만): `python3 automation/pilots/ai_reel/qa.py <brief.json> --comic` ✓.
 - `python3 automation/selftest.py` 가 '✓ 자동 점검 통과'인지도 본다(PR 의 점검과 같다).
 
 ### 6. 올리기
 - 커밋(`automation/CHANGELOG.md` 맨 위에 한 줄 — 무엇을 만들었고 무엇을 고쳤나, 다시 녹음한 줄·바꾼 컷) → 브랜치 `routine/reel`(`git checkout -B routine/reel origin/main` 뒤 커밋 — routines/README '작업 세션이 지킬 것')로 푸시 → PR(초안 아님) →
   Actions 'EDIT H selftest' 초록 + Codex 리뷰(지적이 맞으면 처리, 10분 넘게 안 오면 selftest 초록만으로) → 머지.
   데이터·문서뿐이면 아침에도 머지해도 된다(18:00~20:00 은 피한다).
-- **짝수 날**: 실행 중인 post-instagram 이 없을 때 post-instagram.yml 을 workflow_dispatch(key={오늘}, mode=post, only=reel) — 릴스·AI 스토리·카드 스토리·5가지 웹툰이 함께 올라간다.
+- **평일(영상 날)**: 실행 중인 post-instagram 이 없을 때 post-instagram.yml 을 workflow_dispatch(key={오늘}, mode=post, only=reel) — 릴스·AI 스토리·카드 스토리·5가지 웹툰이 함께 올라간다.
   → `automation/ig_posted/{오늘}.json` 의 reel(style ai)·permalink·ai_label·story_ai·comic(permalink) 확인.
   머지 전에는 영상 공개 주소를 curl 로 찌르지 않는다(GitHub Pages 가 404 를 몇 분 기억해 게시가 늦어진다). 게시는 한 번에 하나만, 저녁 사슬 19:30 과 겹치지 않게.
-- **홀수 날**: post-instagram 은 돌리지 않는다(19:30 저녁 사슬이 main 의 웹툰을 올린다 — 릴스는 없다).
+- **주말·영상을 쉰 날**: post-instagram 은 돌리지 않는다(19:30 저녁 사슬이 main 의 웹툰을 올린다 — 릴스는 없다).
 
 ### 7. 알리기·보고
 - **릴스가 올라가면 바로**(11/02 운영자): reel permalink 를 확인한 그 즉시 PushNotification(한 줄 '오늘 릴스 올라갔어요: {permalink}') +
   SendUserFile(files [instagram/{오늘}/reel_ai.mp4], status proactive, display render).
 - 못 올리게 되면(생성 실패·검수 탈락·게시 오류·그날 쉬기) 정해지는 즉시, 10:00 KST 가 넘도록 아직 진행 중이면 그때 한 번, 사실과 이유를 PushNotification 으로 알린다.
-- 홀수 날은 알림 없이 마지막 답에 '오늘은 웹툰만 — 19:30 에 올라가요'.
+- 주말은 알림 없이 마지막 답에 '오늘은 웹툰만 — 19:30 에 올라가요'.
 - 마지막 답(한국어로 짧게): **첫 줄은 구독자 목표 줄**(`automation/metrics/summary.md` '한눈에'의 '목표 구독자' 줄 그대로 — 뉴스레터 N(7일 ±n)·인스타 N(7일 ±n)),
   릴스·웹툰 링크, 검수 결과(원 기사 대조 첫 줄·한 곳에만 있던 숫자 N개·이어짐 점검·검은 화면·꽉 찬 화면·멈춘 구간·글자 지움 여부·줄마다 받아쓰기 %·다시 녹음한 줄),
   쓴 크레딧(영상·웹툰 그림 따로)·남은 크레딧.
