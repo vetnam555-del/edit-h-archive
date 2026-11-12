@@ -4,6 +4,7 @@
 매일 14:10 개선 루틴(`RUNBOOK_IMPROVE.md`)과 일요일 21:00 주간 루틴이 적는다. 편집 회고는 `learnings.md`, 조사·실험은 `references.md`.
 
 ### 2026-11-12 (오후 — Claude 루틴을 '매번 새 세션'으로, 운영자 "너의 판단을 믿을게 알아서 진행해줘")
+- (점검) 2026-11-12 14:35 KST — 작업 세션이 지시 파일을 읽고 main 에 직접 올렸다('매번 새 세션' 구조 확인).
 - **구조**: 예약 → 배차 세션('EDIT H 배차', 가벼운 전용 세션) → `create_session` 으로 그날 작업 세션(저장소 main·main 푸시·자동 실행·모델 지정) → 작업 세션이
   지시 파일을 읽고 수행. 지시 파일은 `automation/routines/`(produce·check·improve·retro·weekly + README), 08:15 릴스/웹툰은 `automation/RUNBOOK_REEL.md`
   (그동안 예약 지시문에만 있던 1만7천 자 절차를 저장소로 옮김). AGENTS.md 0-2·2-6 추가.
