@@ -97,7 +97,7 @@ Claude 가 하는 일(07:40 제작 · 08:15 릴스/웹툰 · 08:50 점검 · 14:
 - 발송·게시 경로(send_newsletter·post_instagram·post_threads·워크플로)를 바꾸는 머지는 **06:30~09:00, 18:00~20:00 KST 에 하지 않는다**.
 - 테스트·점검을 끄거나 건너뛰어 초록을 만들지 않는다. 강제 푸시하지 않는다. 하루에 PR 을 여러 개 열지 않는다.
 - 비용이 드는 가입·광고, 발송 시각, 공개 호스팅 방식, 구독자 명단 변경은 **하지 말고** `automation/OWNER_TODO.md` 에 제안만.
-- 커밋·PR 에 AI 모델 이름을 쓰지 않는다. 지난 호의 html·카드·content 는 다시 만들지 않는다(기록이다).
+- 커밋·PR 에 AI 모델 이름을 쓰지 않는다(공동 작성 줄은 `Co-Authored-By: Claude <noreply@anthropic.com>` — 'Claude Opus 5.5'처럼 이름·버전을 붙이지 않는다). 지난 호의 html·카드·content 는 다시 만들지 않는다(기록이다).
 
 ## 4. 상태를 어디서 보나
 

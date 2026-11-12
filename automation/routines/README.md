@@ -32,6 +32,11 @@
 - 지켜보는 사람이 없다. 질문하지 말고 끝까지 한다. 막히면 이유를 마지막 답에 적고 끝낸다.
 - 처음에 한 줄씩: `git fetch origin main` → `git checkout main` → `git pull --ff-only origin main`.
 - 저장소 맨 위 `AGENTS.md` 3절(꼭 지킬 것)을 지킨다 — 비밀값·구독자 주소 금지, 발송·게시 경로 머지 시간, 강제 푸시 금지, 커밋·PR 에 모델 이름 금지.
+- 커밋 메시지 끝의 공동 작성 줄은 `Co-Authored-By: Claude <noreply@anthropic.com>` 로 쓴다 — **모델 이름·버전을 붙이지 않는다**(AGENTS.md 3절). PR 제목·본문도 같다.
+- PR 이 필요한 루틴의 작업 브랜치는 **고정 이름을 다시 쓴다**: `routine/improve` · `routine/reel` · `routine/weekly` · `routine/check`.
+  `git checkout -B <이름> origin/main` 으로 시작해 커밋하고 일반 푸시한다(강제 푸시 금지 — 지난 PR 이 머지돼 있으면 그대로 올라간다).
+  푸시가 거절되면 머지되지 않은 지난 PR 이 남은 것이니 그 PR 을 먼저 확인하고, 새로 올릴 땐 `<이름>-{날짜}` 를 쓴다.
+  (이 환경에서는 원격 브랜치를 지울 수 없어, 날마다 새 이름을 쓰면 브랜치가 쌓인다.)
 - 예약 작업(scheduled task)을 만들거나 바꾸지 않는다. 다른 세션을 만들지 않는다(자신을 다시 깨우는 send_later 는 된다).
 - 운영자에게 꼭 알려야 하는 일(릴스 게시 완료, 발행 실패, 사람 손이 필요한 오류)은 **PushNotification 한 줄**로 알린다. 평소 보고는 마지막 답으로만.
 - 마지막 답은 한국어로 짧게, 첫 줄에 결과.

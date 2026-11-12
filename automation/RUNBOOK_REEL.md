@@ -188,8 +188,8 @@ medias image_references `3d8becae-2f05-4b51-b4d2-db71e052f311`·`f485f5d5-8a54-4
 - `python3 automation/selftest.py` 가 '✓ 자동 점검 통과'인지도 본다(PR 의 점검과 같다).
 
 ### 6. 올리기
-- 커밋(`automation/CHANGELOG.md` 맨 위에 한 줄 — 무엇을 만들었고 무엇을 고쳤나, 다시 녹음한 줄·바꾼 컷) → 브랜치 `reel/{오늘}` 로 푸시 → PR(초안 아님) →
-  Actions 'EDIT H selftest' 초록 + Codex 리뷰(지적이 맞으면 처리, 10분 넘게 안 오면 selftest 초록만으로) → 머지 → 브랜치 삭제.
+- 커밋(`automation/CHANGELOG.md` 맨 위에 한 줄 — 무엇을 만들었고 무엇을 고쳤나, 다시 녹음한 줄·바꾼 컷) → 브랜치 `routine/reel`(`git checkout -B routine/reel origin/main` 뒤 커밋 — routines/README '작업 세션이 지킬 것')로 푸시 → PR(초안 아님) →
+  Actions 'EDIT H selftest' 초록 + Codex 리뷰(지적이 맞으면 처리, 10분 넘게 안 오면 selftest 초록만으로) → 머지.
   데이터·문서뿐이면 아침에도 머지해도 된다(18:00~20:00 은 피한다).
 - **짝수 날**: 실행 중인 post-instagram 이 없을 때 post-instagram.yml 을 workflow_dispatch(key={오늘}, mode=post, only=reel) — 릴스·AI 스토리·카드 스토리·5가지 웹툰이 함께 올라간다.
   → `automation/ig_posted/{오늘}.json` 의 reel(style ai)·permalink·ai_label·story_ai·comic(permalink) 확인.

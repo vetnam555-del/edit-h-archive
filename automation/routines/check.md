@@ -19,5 +19,5 @@ GitHub 예약 실행은 아침 0~3시간·낮저녁 3~6시간 늦거나 빠지�
 3) 세로 릴스: 오늘 `instagram/{날짜}/reel_frames/` 에 r1~r4 JPEG 가 있는지 본다. 없으면 빌드 경고(넘침 등)로 카드 릴스로 나간 것 — 보고에 한 줄.
 4) 모두 정상이면 한 줄로만 남기고 끝낸다(평일이면 `python3 automation/compare_anjang.py` 의 '겹침 N/10'·'큰 소식 다룸 N/M' 을 그 한 줄에 붙인다).
    수동으로 돌렸거나 실패가 있으면 원인(예약 미실행·루틴 지연·API 오류·GitHub 러너 미할당)을 찾아 운영자에게 한국어로 짧게 알린다
-   (PushNotification 한 줄 + 마지막 답). 코드 문제면 고쳐서 PR → selftest 초록 → 머지한다(발송·게시 경로 머지는 06:30~09:00·18:00~20:00 피하기 —
+   (PushNotification 한 줄 + 마지막 답). 코드 문제면 고쳐서 PR(작업 브랜치 `routine/check`) → selftest 초록 → 머지한다(발송·게시 경로 머지는 06:30~09:00·18:00~20:00 피하기 —
    급하면 workflow_dispatch 로 먼저 메운다). GitHub 러너 미할당 실패는 alert.py 가 한 번 자동 재실행한다.

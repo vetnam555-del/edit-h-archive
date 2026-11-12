@@ -6,7 +6,7 @@
 2) 고칠 거리 우선순위: 어제·오늘 발행 흐름 실패(alerts·Actions 실패·sent/ig_posted 빠짐) → learnings.md '시스템 개선 요청' → 판정일이 된 실험
    (references.md '지금 시험 중') → 3일 이상 반복되는 빌드 경고 → (비었으면) 지금 실험과 겹치지 않는 다음 실험 준비.
 3) 하루 PR 하나, 고치는 건 1~2건. 재현 → 수정 → `python3 automation/selftest.py` 통과 → PR(초안 아님, Codex 리뷰 지적은 확인해 처리) →
-   Actions 'EDIT H selftest' 초록 → merge. 작업 브랜치는 main 에서 `improve/{날짜}` 로 만들고 머지 뒤 지운다.
+   Actions 'EDIT H selftest' 초록 → merge. 작업 브랜치는 `routine/improve`(README '작업 세션이 지킬 것').
    발송·게시 경로 머지는 06:30~09:00·18:00~20:00 KST 피하기. 오늘 이미 머지된 개선 PR 이 있으면(CHANGELOG 맨 위가 오늘 14:10 개선) 새로 만들지 않는다.
 4) `automation/CHANGELOG.md` 에 한 줄(바꾼 것 — 왜 — 어떻게 확인), 처리한 개선 요청은 learnings.md 에서 지운다.
 5) 비용·개인정보·발송 시각·공개 호스팅 변경은 하지 말고 OWNER_TODO.md 에 제안만. 비밀값 출력·커밋 금지.
