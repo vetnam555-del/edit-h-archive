@@ -15,13 +15,17 @@
 
 | 시각(KST) | 루틴 | 지시 파일 | 작업 세션 제목 |
 |---|---|---|---|
-| 07:40 | 제작 | `automation/routines/produce.md` | EDIT H 제작 MM/DD |
+| 07:35 | 제작('07:40 제작') | `automation/routines/produce.md` | EDIT H 제작 MM/DD |
 | 08:15 | AI 릴스·5가지 웹툰 | `automation/RUNBOOK_REEL.md` | EDIT H 릴스·웹툰 MM/DD |
 | 08:50 | 발송·게시 확인 | `automation/routines/check.md` | EDIT H 점검 MM/DD |
 | 14:10 | 개선 | `automation/routines/improve.md` | EDIT H 개선 MM/DD |
-| 22:00 | 편집 회고 | `automation/routines/retro.md` | EDIT H 회고 MM/DD |
-| 일 21:00 | 주간 | `automation/routines/weekly.md` | EDIT H 주간 MM/DD |
+| 22:03 | 편집 회고 | `automation/routines/retro.md` | EDIT H 회고 MM/DD |
+| 일 21:03 | 주간 | `automation/routines/weekly.md` | EDIT H 주간 MM/DD |
 | (필요할 때) | 전환·환경 점검 | `automation/routines/selfcheck.md` | EDIT H 전환 점검 MM/DD |
+
+작업 세션의 모델은 그동안 루틴이 돌던 설정(claude-opus-5-5)으로 지정한다. 배차 세션은 가벼운 모델로 '세션 만들기'만 하고, 대화가 몇 달 쌓여 길어지면 새로 만든다.
+끝에서 끝까지 확인(2026-11-12 14:35): 예약 → 배차 → 작업 세션 → `selfcheck.md` 대로 main 에 한 줄 푸시까지 사람 없이 1분.
+같은 구조에서도 **저장소 문서에 근거가 없는 낯선 지시**(시험용 브랜치 푸시)는 작업 세션이 "해도 되나요?"라고 묻고 멈췄다 — 그래서 할 일은 반드시 지시 파일에 적는다.
 
 ## 작업 세션이 지킬 것 (모든 루틴 공통)
 
@@ -38,4 +42,5 @@
 - 루틴이 하는 일을 바꾸려면 **지시 파일을 고친다**(PR). 예약 지시문은 '어느 파일을 읽어라'만 담고 있어 건드릴 일이 거의 없다.
 - 시각·모델을 바꾸거나 되돌리려면 운영 대화('뉴스레터 및 카드뉴스 자동화')나 새 대화에서 Claude 에게 말한다.
   예전 방식(한 대화에서 계속 돌기)의 지시문은 이 폴더의 지시 파일과 같은 내용이다(2026-11-12 옮김).
-- 기존 제작 세션 예약은 07:55 보험으로 며칠 남겨 둔다 — 작업 세션이 '제작 시작' 표시(`run-claim/{날짜}-claude`)도 오늘 호도 남기지 못한 날만 대신 제작한다.
+- 기존 제작 세션 예약(07:40, 길게 이어진 세션)은 전환 첫날(11/13) 하루만 보험으로 같이 돌린다 — 둘 다 제작하고 먼저 올린 쪽이 나가며,
+  늦은 쪽은 푸시 직전에 `origin/main:{날짜}.html` 을 보고 멈춘다. 새 방식이 제때 올리면 그날 끈다.
