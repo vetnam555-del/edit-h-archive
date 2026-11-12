@@ -298,6 +298,13 @@ def _threads_due(date):
     return (now.hour, now.minute) >= (14, 10)
 
 
+def _reel_wanted(ig_cfg, date):
+    """그날 올릴 릴스가 있나 — 이미지를 이어 붙인 릴스는 config.instagram.image_reel_until 까지만 올린다(2026-11-12 운영자 결정).
+    그 뒤로는 AI 영상 릴스 파일(reel_ai.mp4)이 있는 날만 '릴스 미게시'를 본다 — 릴스가 없는 날을 날마다 알리지 않는다."""
+    until = ig_cfg.get("image_reel_until")
+    return not until or date <= until or (ROOT / "instagram" / date / "reel_ai.mp4").exists()
+
+
 def _reel_due(date):
     """오늘 릴스를 확인할 때가 됐나 — 저녁 게시(ig_plan.evening_reel)면 그 시각 + 70분 뒤부터."""
     from ig_plan import evening_reel
@@ -371,9 +378,10 @@ def problems(date, cfg, check_web=True):
             if not (log.get("carousel") or {}).get("id"):
                 out.append(("carousel", "인스타 카드뉴스(캐러셀)가 게시되지 않았습니다."))
             rewind = (_json(ROOT / "content" / f"{date}.json") or {}).get("rewind")   # 예비 호는 캐러셀만 올린다
-            if ig_cfg.get("reel", True) and not rewind and not _reel_due(date):
+            reel_on = ig_cfg.get("reel", True) and not rewind and _reel_wanted(ig_cfg, date)
+            if reel_on and not _reel_due(date):
                 pass   # 릴스 저녁 게시 날 — 아직 올릴 시각(+70분)이 안 됐다
-            elif ig_cfg.get("reel", True) and not rewind and not (log.get("reel") or {}).get("id"):
+            elif reel_on and not (log.get("reel") or {}).get("id"):
                 if log.get("reel_emailed"):
                     out.append(("reel_manual", "릴스 자동 게시가 안 돼 영상·캡션을 이 메일함으로 보냈습니다 — 휴대폰에서 올려 주세요."))
                 else:

@@ -421,6 +421,19 @@ def ai_video_day(cfg, key):
     return True
 
 
+def image_reel_on(cfg, key):
+    """이미지를 이어 붙여 만든 영상 릴스(make_reel.py — 카드·세로 프레임 슬라이드)를 올리는 호인가 — config.instagram.image_reel_until(날짜)까지만.
+    2026-11-12 운영자 '릴스에서 이미지 붙여서 만드는 영상 릴스는 앞으로 하지 마' — 그 뒤 호(데일리·주간 특집)는 AI 영상 릴스(reel_ai.mp4)가
+    있을 때만 릴스를 올린다. 날짜로 나눠 지난 호의 기록·다시 실행은 그대로다. 설정이 없으면 예전처럼 올린다."""
+    until = cfg.get("image_reel_until")
+    return not until or str(key)[:10] <= until
+
+
+def reel_wanted(cfg, key, folder):
+    """그 호에 올릴 릴스가 있나 — AI 영상 릴스 파일이 있거나, 이미지 릴스를 아직 올리는 날짜면."""
+    return (Path(folder) / AI_REEL).exists() or image_reel_on(cfg, key)
+
+
 def story_reel_only(cfg, key):
     """2026-11-02 운영자 '스토리에 올릴 때는 릴스만 올리는 건 어때?' — config.instagram.story_reel_only_from 부터 데일리 호의 스토리는
     그날 AI 릴스 영상 한 장만 올린다(아침 카드 스토리 4장은 안 올림). 근거: 카드 4장 + AI 영상 1장(하루 5장)이 된 10/31 부터
@@ -849,7 +862,7 @@ def main():
     if rewind and args.only != "carousel":
         print("예비 호(다시 보기) — 릴스는 올리지 않습니다")
     want_reel = cfg.get("reel", True) and (args.kind == "daily" or cfg.get("weekly_reel", True)) and not rewind
-    if args.only != "carousel" and want_reel and not log.get("reel"):
+    if args.only != "carousel" and want_reel and not log.get("reel") and reel_wanted(cfg, key, folder):
         try:
             print("릴스 준비 중…")
             media_id, track = post_reel(g, uid, key, folder, cfg, args.dry_run, args.ffmpeg, site_url)
@@ -881,6 +894,8 @@ def main():
                 reel.unlink(missing_ok=True)
     elif log.get("reel"):
         print("릴스는 이미 게시됨")
+    elif args.only != "carousel" and want_reel:
+        print("AI 영상 릴스가 없는 날 — 이미지를 이어 붙인 릴스는 올리지 않습니다(2026-11-12 운영자 결정, config.instagram.image_reel_until)")
     elif (args.only != "carousel" and not rewind and not cfg.get("reel", True) and cfg.get("reel_delivery") == "email"
           and (args.kind == "daily" or cfg.get("weekly_reel", True)) and not log.get("reel_emailed") and not args.dry_run):
         try:

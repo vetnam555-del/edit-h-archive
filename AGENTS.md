@@ -15,7 +15,7 @@
 | 08:30 | 인스타 캐러셀 게시 | `post-instagram.yml` |
 | 08:35 | **그날 호가 main 에 없으면 예비 호(지난 이야기 다시 보기)를 대신 발행** | `rewind.yml` |
 | 08:40 등 | 빠진 일 알림 메일 | `alerts.yml` |
-| 17:30~21:30 | 주간 특집(금)·저녁 릴스·성과 수집 | `evening.yml` |
+| 17:30~21:30 | 주간 특집(금)·저녁 게시(웹툰 — 이미지를 이어 붙인 릴스는 2026-11-13~ 올리지 않는다)·성과 수집 | `evening.yml` |
 | 새 호 푸시 직후 | 네이버·빙에 새 호 페이지 알림(IndexNow, 2026-10-31~) | `indexnow.yml` |
 | 07~00시 20분마다 | 댓글 '에디트'·'구독' → 구독 링크 DM(공식 API 비공개 답장, 권한 없으면 공개 답글로 안내, 2026-11-02~) | `comment-dm.yml` |
 | 일요일 12:00 | 경쟁 매체 인스타 지표(공식 API, 운영자 토큰을 넣은 뒤부터, 2026-11-01~) | `competitors-ig.yml` |
@@ -64,7 +64,8 @@ Claude 가 하는 일(07:40 제작 · 08:15 릴스/웹툰 · 08:50 점검 · 14:
 - 오늘 content 에 `"rewind": true` 면 예비 호가 나간 날 — 제작이 왜 멈췄는지 운영자에게 알린다.
 - `automation/sent/{날짜}.json` 이 없으면 `send-newsletter.yml` 을 workflow_dispatch(date={날짜}).
 - `automation/ig_posted/{날짜}.json` 에 carousel permalink 가 없으면 `post-instagram.yml` 을 mode=post, key={날짜}, only=carousel.
-  **어제** reel permalink 가 없으면 mode=post, key={어제}, only=reel. 이미 돌고 있는 실행이 있으면 기다린다(중복 실행 금지).
+  **어제** AI 영상 릴스(`instagram/{어제}/reel_ai.mp4`)가 있는데 reel permalink 가 없거나, 웹툰(`instagram/{어제}/comic/`)이 있는데 comic permalink 가 없으면
+  mode=post, key={어제}, only=reel. AI 영상이 없는 날은 릴스가 없는 게 정상이다(2026-11-13~). 이미 돌고 있는 실행이 있으면 기다린다(중복 실행 금지).
 - `instagram/{날짜}/reel_frames/` 에 r1~r4 JPEG 가 있나, 어제 `evening.yml` 이 성공했나, 어제 성과 스냅숏(`automation/metrics/daily/`)이 21:00 뒤에 모였나.
 - 평일이면 `python3 automation/compare_anjang.py` 의 '겹침 N/10' 과 '큰 소식 다룸 N/M' 을 붙여 **모두 정상이면 한 줄**로 보고.
 
@@ -83,7 +84,8 @@ Claude 가 하는 일(07:40 제작 · 08:15 릴스/웹툰 · 08:50 점검 · 14:
 
 ### 2-6. 08:15 AI 릴스 '오늘 아침 5가지' + 5가지 웹툰
 - `automation/RUNBOOK_REEL.md` 를 처음부터 읽고 그대로. 짝수 날은 AI 영상 릴스 + 웹툰(아침 게시), 홀수 날은 웹툰만(19:30 저녁 사슬이 올린다).
-- 힉스필드 도구(영상·그림·목소리 생성)가 있어야 한다 — 없는 환경이면 하지 않는다(저녁 사슬이 카드 릴스를 올린다).
+- 힉스필드 도구(영상·그림·목소리 생성)가 있어야 한다 — 없는 환경이면 하지 않는다(그날은 릴스·웹툰 없이 08:30 카드·스토리만 나간다).
+- **이미지를 이어 붙인 릴스(카드 릴스)는 올리지 않는다**(2026-11-12 운영자 결정, `config.instagram.image_reel_until`). 릴스는 AI 영상만.
 
 ### 2-5. 일요일 21:00 주간 루틴
 이번 주 `automation/CHANGELOG.md`·`automation/learnings.md`·`automation/metrics/summary.md`(출처 품질 칸 포함)·`automation/references.md`·Actions 실행을 훑고,

@@ -96,6 +96,11 @@ def t_alert():
     tz = now_kst().tzinfo
     expect(alert.watch_date(dt.datetime(2026, 10, 3, 3, 32, tzinfo=tz)) == "2026-10-02", "자정 넘긴 22:25 실행은 어제를 본다")
     expect(alert.watch_date(dt.datetime(2026, 10, 3, 8, 40, tzinfo=tz)) == "2026-10-03", "08:40 점검은 오늘을 본다")
+    # 2026-11-12 운영자 '이미지 붙여서 만드는 영상 릴스는 하지 마' — 릴스가 없는 날(AI 영상 파일 없음)을 '릴스 미게시'로 알리지 않는다
+    expect(alert._reel_wanted({}, "2999-01-01") and alert._reel_wanted({"image_reel_until": "2026-11-12"}, "2026-11-12")
+           and not alert._reel_wanted({"image_reel_until": "2026-11-12"}, "2999-01-01"), "이미지 릴스를 끈 뒤에도 릴스 없는 날을 '릴스 미게시'로 알린다")
+    expect("reel_on = ig_cfg.get(\"reel\", True) and not rewind and _reel_wanted(ig_cfg, date)" in (AUTOMATION / "alert.py").read_text(encoding="utf-8"),
+           "'릴스 미게시' 점검이 _reel_wanted 를 보지 않는다")
     # 실패 알림: GitHub 서버(러너)를 못 잡아 시작도 못 한 실행(10/6 05:36 성과 수집 예약) — 끝난 일이면 조용히, 아니면 한 번 다시 실행
     no_runner = [{"conclusion": "cancelled", "steps": [], "runner_name": None}]
     broke = [{"conclusion": "success", "steps": [{"name": "a", "conclusion": "success"}], "runner_name": "r1"},
@@ -1697,6 +1702,18 @@ def t_story():
     expect([post_instagram.cards_after_ai(ca, k) for k in ("2026-11-08", "2026-11-10", "2026-11-13-weekly")] == [False, True, False]
            and not post_instagram.cards_after_ai({}, "2026-11-10"), "AI 영상 스토리 뒤 카드 스토리 날짜·주간 특집 제외가 틀린다")
     expect(real_cfg.get("story_cards_after_ai_from") == "2026-11-10", "config 에 story_cards_after_ai_from(E21 되돌림)이 없다")
+    # 2026-11-12 운영자 '릴스에서 이미지 붙여서 만드는 영상 릴스는 앞으로 하지 마' — image_reel_until 뒤 호는 AI 영상 릴스 파일이 있을 때만 릴스를 올린다
+    ir = {"image_reel_until": "2026-11-12"}
+    expect([post_instagram.image_reel_on(ir, k) for k in ("2026-11-12", "2026-11-13", "2026-11-13-weekly")] == [True, False, False]
+           and post_instagram.image_reel_on({}, "2999-01-01"), "이미지 릴스 끝 날짜가 틀리다(설정이 없으면 예전처럼 올린다)")
+    expect(real_cfg.get("image_reel_until") == "2026-11-12", "config 에 image_reel_until(운영자 11/12 결정)이 없다")
+    with tempfile.TemporaryDirectory() as tmp:
+        f = Path(tmp)
+        expect(post_instagram.reel_wanted(ir, "2026-11-12", f) and not post_instagram.reel_wanted(ir, "2026-11-13", f),
+               "AI 영상이 없는 날 이미지를 이어 붙인 릴스를 올리려 한다")
+        (f / post_instagram.AI_REEL).write_bytes(b"")
+        expect(post_instagram.reel_wanted(ir, "2026-11-13", f), "AI 영상 릴스가 있는데 릴스를 올리지 않는다")
+    expect('not log.get("reel") and reel_wanted(cfg, key, folder)' in pi_src, "릴스 게시 조건에 이미지 릴스 중단(reel_wanted)이 빠졌다")
     after = pi_src.find("story_on(cfg, key) and cards_after_ai(cfg, key)")   # 이어 올리는 조건 줄(안내 문구가 아니라)
     expect("card_story(hook=False)" in pi_src[after:pi_src.find("AI 릴스가 없는 날 — 아침 카드 스토리를 대신")],
            "AI 영상 스토리 뒤 카드 스토리가 훅 화면을 빼지 않는다(AI 영상이 이미 훅 — Codex 리뷰)")
