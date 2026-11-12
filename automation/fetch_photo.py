@@ -135,13 +135,17 @@ def _tokens(text):
     return re.findall(r"[0-9A-Za-z]+|[가-힣]+", text or "")
 
 
-def library(day, words="", skip=None):
+def library(day, words="", skip=None, any_size=False):
     """대체 표지 후보 [{photo, credit, focus, subject, tags, last, score}] — 주제어가 많이 맞는 순, 같으면 오래전에 쓴 순(아직 안 쓴 사진이 먼저).
     library.json 에 있고, 발행한 일반 호가 실제로 표지로 쓴 사진(출처·초점은 그 호의 content JSON) 또는 개선 루틴이 미리 눈으로 검수해
     출처(credit·photo_source)를 목록에 적어 둔 아직 안 쓴 사진(2026-10-19 — 돈 사진이 하나뿐이라 10/18 에 쓰자 10/19 '예금' 호가 핵심어 표지로 나갔다).
     최근 사용은 예비 호까지 센다.
-    day 는 독자가 이 표지를 보는 날(그날까지 쓴 것을 센다), skip 은 만드는 호의 날짜(그 파일 자신은 뺀다, 기본 day)."""
+    day 는 독자가 이 표지를 보는 날(그날까지 쓴 것을 센다), skip 은 만드는 호의 날짜(그 파일 자신은 뺀다, 기본 day).
+    그 호의 카드 크기(common.card_height — 2026-11-07~ 3:4, 1080×1440)를 채우려면 10% 넘게 늘려야 하는 사진은 뺀다 — 빌드의 표지 검사가
+    어차피 막는다(2026-11-11: 예비 호가 1920×1275 사진을 골라 7번 모두 표지 검사에 걸렸고 그날은 호가 없었다). any_size=True 는 목록 검사용."""
     import datetime as dt
+    from edith.common import card_height, cover_photo_problem
+    height = card_height(skip or day)
     lib = {k: v for k, v in json.loads(LIBRARY.read_text(encoding="utf-8")).items() if not k.startswith("_")}
     today = dt.date.fromisoformat(day)
     used = {}
@@ -166,6 +170,8 @@ def library(day, words="", skip=None):
             # 미리 검수한 사진 — 일반 호가 아직 안 썼으면(예비 호가 먼저 써도) 출처·초점은 목록에 적힌 것, 출처 주소가 없으면 받지 않는다
             u = {"last": None, **(u or {}), "credit": meta["credit"], "focus": (u or {}).get("focus") or meta.get("focus")}
         if not u or not u.get("credit") or not (ROOT / photo).exists():
+            continue
+        if not any_size and cover_photo_problem(str(ROOT / photo), height):   # 이 호의 표지 크기엔 작다(흐려진다)
             continue
         ago = (today - dt.date.fromisoformat(u["last"])).days if u["last"] else None
         if ago is not None and ago <= RECENT_DAYS:   # 'RECENT_DAYS 안에 쓴 사진은 뺀다' — 그날 전 사진까지 뺀다(Codex 리뷰)

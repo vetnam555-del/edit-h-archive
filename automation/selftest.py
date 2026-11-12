@@ -1153,6 +1153,11 @@ def t_gift():
             f"릴스·웹툰 구독 한 줄({top}~ 둘째 줄)")
 
 
+def _png_stub(w, h):
+    """크기만 읽히는 PNG 머리 — common.image_size 가 읽는 24바이트(표지 크기 검사용 시험 사진)."""
+    return b"\x89PNG\r\n\x1a\n" + b"\x00\x00\x00\rIHDR" + w.to_bytes(4, "big") + h.to_bytes(4, "big")
+
+
 def t_photo_library():
     """대체 표지 사진(fetch_photo --library): 목록의 사진이 모두 있고 지난 호의 출처가 붙는지, 주제어 순위·최근 사용 제외가 맞는지."""
     import build_rewind
@@ -1160,7 +1165,7 @@ def t_photo_library():
     lib = {k for k in json.loads(fetch_photo.LIBRARY.read_text(encoding="utf-8")) if not k.startswith("_")}
     bad = sorted(p for p in lib if not fetch_photo.registered(p))
     expect(not bad, f"대체 사진 목록에 subject·tags 가 빠진 줄: {', '.join(bad)}")
-    every = fetch_photo.library("2999-01-01")
+    every = fetch_photo.library("2999-01-01", any_size=True)   # 목록 검사 — 표지 크기와 상관없이 전부
     missing = lib - {c["photo"] for c in every}
     expect(not missing, f"대체 사진 목록에 있지만 파일이나 출처(발행한 호의 credit)가 없다: {', '.join(sorted(missing))}")
     # AI 생성 사진(2026-11-01~ 힉스필드 — 10/31 회고 '대체 사진이 바닥'): 표지 출처 칸에 'AI 생성'을 밝히고, 3:4 표지도 흐리지 않게 채우고,
@@ -1170,6 +1175,11 @@ def t_photo_library():
     expect(ai and all("AI 생성" in c["credit"] for c in ai), "AI 생성 사진의 출처 칸에 'AI 생성' 표기가 없다")
     blurry = [why for c in ai if (why := cover_photo_problem(c["photo"], CARD_H_34))]
     expect(not blurry, f"AI 생성 사진이 3:4 표지를 채우기에 작다: {blurry[:1]}")
+    # 2026-11-11 예비 호가 1920×1275 사진을 골라 3:4 표지 검사에 7번 걸렸다(그날은 호가 없었다) — 후보는 그 호의 카드 크기를 채우는 사진만
+    fit = fetch_photo.library("2999-01-01")
+    expect(fit and not [c["photo"] for c in fit if cover_photo_problem(c["photo"], CARD_H_34)], "3:4 표지를 채우지 못하는 사진이 대체 후보에 나온다")
+    expect("assets/photos/2026-10-06.jpg" in {c["photo"] for c in every} - {c["photo"] for c in fit},
+           "1920×1275 사진(11/11 예비 호가 고른 것)이 3:4 날짜 후보에서 빠지지 않는다")
     for words in ("", "저축 동전", "출근 직장인", "카드 결제"):
         cands = fetch_photo.library("2999-01-01", words)
         late = [(a["photo"], b["photo"]) for a, b in zip(cands, cands[1:]) if a["score"] == b["score"] and a["ai"] and not b["ai"]]
@@ -1179,13 +1189,13 @@ def t_photo_library():
     expect(blank and blank[0]["neutral"] and not blank[0]["score"], f"맞는 주제어가 없을 때 중립 사진이 먼저가 아니다: {blank[:1]}")
     expect([c["photo"] for c in fetch_photo.library("2999-01-01", "버스 파업 출근")][:1] == ["assets/photos/lib-light-trails.jpg"],
            "'버스 파업' 이 교통 사진을 고르지 않는다")
-    top = fetch_photo.library("2999-01-01", "카드 공제 체크카드")[0]
+    top = fetch_photo.library("2999-01-01", "카드 공제 체크카드", any_size=True)[0]
     expect(top["photo"].endswith("2026-10-04.jpg") and top["score"] > 0, "주제어 '카드' 가 카드 결제 사진을 1순위로 고르지 않는다")
     for words in ("ai", "AI가 바꾼 세상", "IT업계 변화"):
-        top = fetch_photo.library("2999-01-01", words)[0]
+        top = fetch_photo.library("2999-01-01", words, any_size=True)[0]
         expect(top["score"] > 0 and top["photo"].endswith(("2026-10-01.jpg", "2026-10-06.jpg")), f"'{words}' 가 AI·IT 태그에 맞지 않는다")
     for words, photo in (("내일부터 달라지는 제도", "2026-10-02.jpg"), ("시설 점검", "2026-09-25.jpg"), ("mail 정리", "2026-10-01.jpg")):
-        hit = [c for c in fetch_photo.library("2999-01-01", words) if c["photo"].endswith(photo)]
+        hit = [c for c in fetch_photo.library("2999-01-01", words, any_size=True) if c["photo"].endswith(photo)]
         expect(hit and hit[0]["score"] == 0, f"한 글자 태그가 '{words}' 에 걸려 {photo} 를 맞는 후보로 올린다")
     with contextlib.redirect_stdout(io.StringIO()):
         expect(fetch_photo.cmd_library("카드", use=0, day="2999-01-01") == 2, "--use 0 이 마지막 후보를 고른다")
@@ -1195,7 +1205,7 @@ def t_photo_library():
         root = Path(tmp)
         (root / "content").mkdir()
         (root / "assets" / "photos").mkdir(parents=True)
-        (root / "assets" / "photos" / "x.jpg").write_bytes(b"")
+        (root / "assets" / "photos" / "x.jpg").write_bytes(_png_stub(1200, 1600))
         (root / "assets" / "photos" / "library.json").write_text(
             json.dumps({"assets/photos/x.jpg": {"subject": "동전", "tags": ["돈"]}}), encoding="utf-8")
         for day, rewind in (("2026-10-03", False), ("2026-10-10", True)):
@@ -1220,6 +1230,30 @@ def t_photo_library():
             expect(fetch_photo.last_used("assets/photos/x.jpg", "2026-11-10") == "2026-10-15", "표지 마지막 사용 날짜를 잘못 읽는다")
         finally:
             fetch_photo.ROOT, fetch_photo.LIBRARY = saved_root, saved_lib
+    with tempfile.TemporaryDirectory() as tmp:   # 표지 크기: 4:5 호(1350)엔 되는 1920×1275 사진이 3:4 호(1440, 11/07~)엔 후보에서 빠진다
+        root = Path(tmp)
+        (root / "content").mkdir()
+        (root / "assets" / "photos").mkdir(parents=True)
+        (root / "assets" / "photos" / "small.jpg").write_bytes(_png_stub(1920, 1275))
+        (root / "assets" / "photos" / "big.jpg").write_bytes(_png_stub(1920, 2560))
+        vet = {"credit": "사진 = A / Wikimedia Commons (CC0)", "photo_source": "https://x"}
+        (root / "assets" / "photos" / "library.json").write_text(json.dumps({
+            "assets/photos/small.jpg": {"subject": "동전", "tags": ["돈", "소비"], **vet},
+            "assets/photos/big.jpg": {"subject": "지갑", "tags": ["돈"], **vet}}), encoding="utf-8")
+        fetch_photo.ROOT, fetch_photo.LIBRARY = root, root / "assets" / "photos" / "library.json"
+        try:
+            def names(day, **kw):
+                return [c["photo"].rsplit("/", 1)[-1] for c in fetch_photo.library(day, "돈 소비", **kw)]
+            expect(names("2026-11-06") == ["small.jpg", "big.jpg"], f"4:5 호(11/06)에 1920×1275 사진이 후보에서 빠졌다: {names('2026-11-06')}")
+            expect(names("2026-11-11") == ["big.jpg"], f"3:4 호(11/11)에 1.13배 늘려야 하는 사진이 후보에 나온다: {names('2026-11-11')}")
+            expect(names("2026-11-11", any_size=True) == ["small.jpg", "big.jpg"], "any_size=True 가 크기와 상관없이 다 돌려주지 않는다")
+            # 지난 4:5 날짜(11/05) 호를 3:4 가 된 뒤(11/11)에 늦게 내도 카드는 그 호 날짜 크기(1350)다 — 만드는 호(skip) 기준으로 고른다
+            expect(names("2026-11-11", skip="2026-11-05") == ["small.jpg", "big.jpg"], "늦게 내는 4:5 호가 그 호의 카드 크기로 고르지 않는다")
+            with contextlib.redirect_stdout(io.StringIO()):
+                got = build_rewind.cover_photo("2026-11-11", ["돈 소비"], "2026-11-11")
+            expect(got and got["photo"].endswith("big.jpg"), f"11/11 예비 호가 3:4 표지를 채우는 사진을 고르지 않는다: {got}")
+        finally:
+            fetch_photo.ROOT, fetch_photo.LIBRARY = saved_root, saved_lib
     recent = {c["photo"] for c in fetch_photo.library("2026-10-09")}
     expect(not recent & {"assets/photos/2026-10-08.jpg", "assets/photos/2026-10-06.jpg"}, "사흘 안에 쓴 사진이 대체 후보에 나온다")
     # 10/19 '예금' 호 — 하나뿐인 돈 사진(10/3 동전)을 10/18 에 써서 핵심어 표지로 나갔다. 미리 검수한 아직 안 쓴 돈 사진이 이제 1순위
@@ -1231,7 +1265,7 @@ def t_photo_library():
         (root / "content").mkdir()
         (root / "assets" / "photos").mkdir(parents=True)
         for f in ("old.jpg", "new.jpg", "nocredit.jpg", "nosource.jpg", "rew.jpg"):
-            (root / "assets" / "photos" / f).write_bytes(b"")
+            (root / "assets" / "photos" / f).write_bytes(_png_stub(1200, 1600))
         vet = {"credit": "사진 = A / Wikimedia Commons (CC0)", "photo_source": "https://x"}
         (root / "assets" / "photos" / "library.json").write_text(json.dumps({
             "assets/photos/old.jpg": {"subject": "동전", "tags": ["돈"]},
