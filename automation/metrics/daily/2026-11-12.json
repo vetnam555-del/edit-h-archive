@@ -1,5 +1,5 @@
 {
- "collected_at": "2026-11-12T12:47+09:00",
+ "collected_at": "2026-11-12T21:30+09:00",
  "issues": {
   "2026-11-12": {
    "title": "해외서 산 비만치료제, 3개월치 들고 온다고?",
@@ -380,7 +380,7 @@
   }
  },
  "instagram": {
-  "followers": 164,
+  "followers": 163,
   "media": 137,
   "insights": true,
   "posts": {
@@ -501,7 +501,7 @@
      "reach": 1326,
      "saved": 0,
      "shares": 0,
-     "views": 1511,
+     "views": 1512,
      "seconds": 17.5,
      "avg_watch_s": 6.8
     },
@@ -570,7 +570,7 @@
      "reach": 174,
      "saved": 1,
      "shares": 1,
-     "views": 208,
+     "views": 209,
      "seconds": 22.7,
      "avg_watch_s": 4.4
     },
@@ -716,7 +716,7 @@
      "reach": 209,
      "saved": 0,
      "shares": 1,
-     "views": 243,
+     "views": 244,
      "seconds": 22.6,
      "avg_watch_s": 5.6
     },
@@ -750,7 +750,7 @@
      "reach": 125,
      "saved": 0,
      "shares": 0,
-     "views": 140,
+     "views": 141,
      "seconds": 7.9,
      "avg_watch_s": 1.5
     },
@@ -814,26 +814,26 @@
     "reach": 7,
     "saved": 0,
     "shares": 0,
-    "views": 24,
+    "views": 26,
     "profile_visits": 0,
     "follows": 0,
     "reel": {
      "likes": 0,
      "comments": 0,
-     "reach": 68,
+     "reach": 69,
      "saved": 0,
      "shares": 0,
-     "views": 74,
+     "views": 75,
      "seconds": 7.9,
      "avg_watch_s": 1.1
     },
     "comic": {
      "likes": 1,
      "comments": 0,
-     "reach": 8,
+     "reach": 9,
      "saved": 0,
      "shares": 0,
-     "views": 26
+     "views": 30
     },
     "story": {
      "reach": 7,
@@ -850,10 +850,10 @@
    "2026-11-10": {
     "likes": 2,
     "comments": 0,
-    "reach": 6,
+    "reach": 8,
     "saved": 0,
     "shares": 0,
-    "views": 19,
+    "views": 28,
     "profile_visits": 0,
     "follows": 0,
     "story": {
@@ -869,40 +869,40 @@
     }
    },
    "2026-11-12": {
-    "likes": 0,
+    "likes": 1,
     "comments": 0,
-    "reach": 4,
+    "reach": 10,
     "saved": 0,
     "shares": 0,
-    "views": 14,
+    "views": 32,
     "profile_visits": 0,
     "follows": 0,
     "reel": {
-     "likes": 0,
+     "likes": 2,
      "comments": 0,
-     "reach": 0,
+     "reach": 148,
      "saved": 0,
-     "shares": 0,
-     "views": 1,
+     "shares": 1,
+     "views": 165,
      "seconds": 22.6,
-     "avg_watch_s": 0.0
+     "avg_watch_s": 4.8
     },
     "comic": {
-     "likes": 0,
+     "likes": 1,
      "comments": 0,
-     "reach": 0,
+     "reach": 4,
      "saved": 0,
      "shares": 0,
-     "views": 0
+     "views": 8
     },
     "story": {
-     "reach": 0,
-     "views": 1,
+     "reach": 6,
+     "views": 10,
      "replies": 0,
      "frames": [
-      0,
-      0,
-      0
+      6,
+      6,
+      6
      ]
     }
    }
@@ -944,14 +944,14 @@
   "account": {
    "days": 7,
    "reach": {
-    "NON_FOLLOWER": 741,
-    "FOLLOWER": 39
+    "FOLLOWER": 33,
+    "NON_FOLLOWER": 544
    },
    "follows_and_unfollows": {
-    "FOLLOWER": 4,
-    "NON_FOLLOWER": 3
+    "FOLLOWER": 3,
+    "NON_FOLLOWER": 1
    },
-   "accounts_engaged": 11
+   "accounts_engaged": 10
   }
  },
  "mail": {
