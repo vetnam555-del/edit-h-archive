@@ -33,6 +33,11 @@
 - 08:50 점검·14:10 개선·일요일 주간 루틴은 자동 대체하지 않는다(발송·게시는 GitHub Actions 가 하고, 개선은 하루 쉬어도 된다).
 - 수동으로 시험: Actions → 'EDIT H Codex fallback' → Run workflow(task, dry_run=true 면 만들고 검사까지만).
 
+### 0-2. Claude 루틴은 매번 새 세션에서 (2026-11-12~)
+
+Claude 가 하는 일(07:40 제작 · 08:15 릴스/웹툰 · 08:50 점검 · 14:10 개선 · 22:00 회고 · 일요일 21:00 주간)은 그날 새로 뜬 작업 세션이 한다.
+지시 파일은 `automation/routines/`(README 에 구조·공통 규칙), 릴스/웹툰은 `automation/RUNBOOK_REEL.md`. 기억이 없는 세션이 읽고 하므로 **절차는 모두 저장소 문서에 적는다**.
+
 ## 1. 이어받을 때 순서
 
 1. `git fetch origin main && git checkout main && git pull --ff-only origin main`
@@ -76,6 +81,10 @@
    '지금 원칙'은 같은 방향 근거가 3호 이상일 때만 바꾼다. 실패·반복 불편은 '시스템 개선 요청'에 한 줄(코드는 고치지 않는다).
 4. `git add automation/learnings.md && git commit -m "Editor retrospective {날짜}" && git push origin HEAD:main`.
 
+### 2-6. 08:15 AI 릴스 '오늘 아침 5가지' + 5가지 웹툰
+- `automation/RUNBOOK_REEL.md` 를 처음부터 읽고 그대로. 짝수 날은 AI 영상 릴스 + 웹툰(아침 게시), 홀수 날은 웹툰만(19:30 저녁 사슬이 올린다).
+- 힉스필드 도구(영상·그림·목소리 생성)가 있어야 한다 — 없는 환경이면 하지 않는다(저녁 사슬이 카드 릴스를 올린다).
+
 ### 2-5. 일요일 21:00 주간 루틴
 이번 주 `automation/CHANGELOG.md`·`automation/learnings.md`·`automation/metrics/summary.md`(출처 품질 칸 포함)·`automation/references.md`·Actions 실행을 훑고,
 숫자가 오르내린 원인 진단 → 판정일이 된 실험 판정 → 레퍼런스 조사(20분) → 효과 큰 변경 1개 PR → 운영자에게 한국어 주간 리포트.
@@ -95,6 +104,8 @@
 | 파일 | 내용 |
 |---|---|
 | `automation/RUNBOOK.md` | 제작 절차(가장 자세한 규칙) |
+| `automation/routines/` | Claude 루틴 지시 파일(제작·점검·개선·회고·주간)과 '매번 새 세션' 구조 |
+| `automation/RUNBOOK_REEL.md` | 08:15 AI 릴스·5가지 웹툰 절차 |
 | `automation/learnings.md` | 지금 원칙·가설·시스템 개선 요청·회고 기록 |
 | `automation/references.md` | 지금 시험 중인 실험(판정일)·조사·다음 실험 후보 |
 | `automation/CHANGELOG.md` | 날마다 무엇을 바꿨나(최신이 위) |
