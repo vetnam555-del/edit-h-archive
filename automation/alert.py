@@ -298,11 +298,20 @@ def _threads_due(date):
     return (now.hour, now.minute) >= (14, 10)
 
 
+def _ai_reel_weekday(ig_cfg, date):
+    """AI 영상 릴스를 만들기로 정한 평일인가 — config.instagram.ai_video_weekdays_from 부터 월~금
+    (2026-11-13 운영자 '릴스 영상은 주말만 제외하는 방향으로'). 설정이 없으면 아니다."""
+    start = ig_cfg.get("ai_video_weekdays_from")
+    return bool(start and date >= start and parse_date(date).weekday() < 5)
+
+
 def _reel_wanted(ig_cfg, date):
     """그날 올릴 릴스가 있나 — 이미지를 이어 붙인 릴스는 config.instagram.image_reel_until 까지만 올린다(2026-11-12 운영자 결정).
-    그 뒤로는 AI 영상 릴스 파일(reel_ai.mp4)이 있는 날만 '릴스 미게시'를 본다 — 릴스가 없는 날을 날마다 알리지 않는다."""
+    그 뒤로는 AI 영상 릴스 파일(reel_ai.mp4)이 있는 날과, 영상을 만들기로 정한 평일(_ai_reel_weekday)에 '릴스 미게시'를 본다
+    — 평일인데 영상이 없으면 08:15 릴스 작업이 멈춘 것이다. 주말은 릴스가 없는 날이라 알리지 않는다."""
     until = ig_cfg.get("image_reel_until")
-    return not until or date <= until or (ROOT / "instagram" / date / "reel_ai.mp4").exists()
+    return (not until or date <= until or (ROOT / "instagram" / date / "reel_ai.mp4").exists()
+            or _ai_reel_weekday(ig_cfg, date))
 
 
 def _reel_due(date):
@@ -384,6 +393,8 @@ def problems(date, cfg, check_web=True):
             elif reel_on and not (log.get("reel") or {}).get("id"):
                 if log.get("reel_emailed"):
                     out.append(("reel_manual", "릴스 자동 게시가 안 돼 영상·캡션을 이 메일함으로 보냈습니다 — 휴대폰에서 올려 주세요."))
+                elif not (ROOT / "instagram" / date / "reel_ai.mp4").exists() and _ai_reel_weekday(ig_cfg, date):
+                    out.append(("reel", "평일인데 AI 영상 릴스가 만들어지지 않았습니다 — 08:15 릴스 작업이 멈췄거나(사용량·크레딧 부족) 검수에서 떨어졌어요."))
                 else:
                     out.append(("reel", "인스타 릴스가 게시되지 않았습니다."))
         if _threads_due(date) and not rewind_day and not (AUTOMATION / "threads_posted" / f"{date}.json").exists():

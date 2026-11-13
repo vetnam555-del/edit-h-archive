@@ -101,6 +101,12 @@ def t_alert():
            and not alert._reel_wanted({"image_reel_until": "2026-11-12"}, "2999-01-01"), "이미지 릴스를 끈 뒤에도 릴스 없는 날을 '릴스 미게시'로 알린다")
     expect("reel_on = ig_cfg.get(\"reel\", True) and not rewind and _reel_wanted(ig_cfg, date)" in (AUTOMATION / "alert.py").read_text(encoding="utf-8"),
            "'릴스 미게시' 점검이 _reel_wanted 를 보지 않는다")
+    # 2026-11-13 운영자 '릴스 영상은 주말만 제외' — 평일(월~금) 정규 호는 AI 영상 파일이 없어도 '릴스 미게시'를 본다(작업이 멈춘 날을 놓치지 않게), 주말은 안 본다
+    wk = {"image_reel_until": "2026-11-12", "ai_video_weekdays_from": "2026-11-13"}
+    expect([alert._reel_wanted(wk, d) for d in ("2999-01-01", "2999-01-04", "2999-01-05", "2999-01-06", "2999-01-07")] == [True, True, False, False, True],
+           "평일(월~금)인데 릴스가 없는 날을 알리지 않거나, 주말을 '릴스 미게시'로 알린다")   # 2999-01-01 화 · 01-04 금 · 01-05 토 · 01-06 일 · 01-07 월
+    expect(alert._ai_reel_weekday(wk, "2026-11-13") and not alert._ai_reel_weekday(wk, "2026-11-14") and not alert._ai_reel_weekday(wk, "2026-11-12")
+           and not alert._ai_reel_weekday({}, "2026-11-13"), "평일 영상 규칙의 시작 날짜·주말 제외가 틀리다(설정이 없으면 예전처럼)")
     # 실패 알림: GitHub 서버(러너)를 못 잡아 시작도 못 한 실행(10/6 05:36 성과 수집 예약) — 끝난 일이면 조용히, 아니면 한 번 다시 실행
     no_runner = [{"conclusion": "cancelled", "steps": [], "runner_name": None}]
     broke = [{"conclusion": "success", "steps": [{"name": "a", "conclusion": "success"}], "runner_name": "r1"},
@@ -1692,7 +1698,20 @@ def t_story():
     ev = {"story_reel_only_from": "2026-11-03", "ai_video_even_days": {"from": "2026-11-05", "until": "2026-11-30"}}
     expect([post_instagram.story_reel_only(ev, k) for k in ("2026-11-03", "2026-11-08", "2026-11-09", "2026-11-30", "2026-12-01")]
            == [True, True, False, True, True], "영상 없는 홀수 날에도 아침 카드 스토리를 건너뛴다(또는 계획 밖 날을 잘못 뺀다)")
-    expect(real_cfg.get("ai_video_even_days") == {"from": "2026-11-05", "until": "2026-11-30"}, "config 에 ai_video_even_days(11월 짝수 날 계획)가 없다")
+    # 2026-11-13 운영자 '릴스 영상은 주말만 제외하는 방향으로' — ai_video_weekdays_from 부터 평일(월~금)이 영상 날, 주말은 08:30 에 아침 카드 스토리.
+    # 그 전 날짜는 짝수 날 계획 그대로(지난 호의 다시 실행이 달라지지 않게)
+    wd = {"story_reel_only_from": "2026-11-03", "ai_video_even_days": {"from": "2026-11-05", "until": "2026-11-12"}, "ai_video_weekdays_from": "2026-11-13"}
+    days = ("2026-11-04", "2026-11-09", "2026-11-12", "2026-11-13", "2026-11-14", "2026-11-15", "2026-11-16", "2026-11-17", "2026-12-05", "2026-12-07")
+    expect([post_instagram.ai_video_day(wd, k) for k in days] == [True, False, True, True, False, False, True, True, False, True],
+           "평일(월~금)만 AI 영상 날이어야 한다 — 금 11/13 은 홀수여도 영상 날, 토 11/14 는 짝수여도 아니다")
+    expect([post_instagram.story_reel_only(wd, k) for k in days] == [True, False, True, True, False, False, True, True, False, True]
+           and not post_instagram.story_reel_only(wd, "2026-11-13-weekly"), "주말(영상 없는 날)에도 아침 카드 스토리를 건너뛴다")
+    expect(post_instagram.ai_video_day(wd, "2026-11-20-weekly") and post_instagram.ai_video_day({"ai_video_weekdays_from": "2026-11-13"}, "주간특집")
+           and post_instagram.ai_video_day({}, "2026-11-14"), "날짜로 읽히지 않는 키·설정이 없는 경우는 예전처럼 영상 날로 본다")
+    expect(real_cfg.get("ai_video_weekdays_from") == "2026-11-13" and real_cfg.get("ai_video_even_days") == {"from": "2026-11-05", "until": "2026-11-12"},
+           "config 에 ai_video_weekdays_from(평일 영상 규칙)이 없거나 짝수 날 계획의 끝 날짜가 11/12 가 아니다")
+    expect([post_instagram.ai_video_day(real_cfg, k) for k in ("2026-11-12", "2026-11-13", "2026-11-14", "2026-11-15", "2026-11-16")] == [True, True, False, False, True],
+           "실제 config 로 본 영상 날이 평일 규칙과 다르다")
     import inspect as _inspect
     pi_src = _inspect.getsource(post_instagram.main)
     expect("and not reel_only" in pi_src and "not ai.exists()" in pi_src and "card_story()" in pi_src,
@@ -2198,7 +2217,7 @@ def t_webtoon():
 
 
 def t_comic_only():
-    """웹툰만 만든 날 검수(qa --comic — 11월 크레딧 계획: 홀수 날은 AI 영상·목소리 없이 5가지 웹툰만, 19:30 저녁 사슬이 올린다):
+    """웹툰만 만든 날 검수(qa --comic — 주말·영상을 쉰 날은 AI 영상·목소리 없이 5가지 웹툰만, 19:30 저녁 사슬이 올린다. 2026-11-13~ 평일은 영상 날):
     영상·목소리·릴스 캡션이 없어도 통과하고, 만화 장수·크기·캡션('AI로 만들'·해시태그)·content 에 없는 숫자·'출처:' 칸은 그대로 막는다."""
     sys.path.insert(0, str(AUTOMATION / "pilots" / "ai_reel"))
     import qa
@@ -3273,7 +3292,7 @@ def main():
     check("데일리 저장각(체크리스트·차트)", t_save_cards)
     check("딥다이브 카드(「H의 장부」 연재 날)", t_dive_cards)
     check("5가지 웹툰(카드 글 그대로·요약 장)", t_webtoon)
-    check("웹툰만 검수(qa --comic — 11월 홀수 날)", t_comic_only)
+    check("웹툰만 검수(qa --comic — 주말·영상을 쉰 날)", t_comic_only)
     check("마스코트(안경 동그라미 H)", t_mascot)
     check("첫 화면 구독·사이트 그림(index.html)", t_home)
     check("문구·마크 2판(2030 대표 한 줄·마스코트 얼굴)", t_brand_v2)

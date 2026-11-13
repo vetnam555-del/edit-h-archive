@@ -65,7 +65,8 @@ Claude 가 하는 일(07:40 제작 · 08:15 릴스/웹툰 · 08:50 점검 · 14:
 - `automation/sent/{날짜}.json` 이 없으면 `send-newsletter.yml` 을 workflow_dispatch(date={날짜}).
 - `automation/ig_posted/{날짜}.json` 에 carousel permalink 가 없으면 `post-instagram.yml` 을 mode=post, key={날짜}, only=carousel.
   **어제** AI 영상 릴스(`instagram/{어제}/reel_ai.mp4`)가 있는데 reel permalink 가 없거나, 웹툰(`instagram/{어제}/comic/`)이 있는데 comic permalink 가 없으면
-  mode=post, key={어제}, only=reel. AI 영상이 없는 날은 릴스가 없는 게 정상이다(2026-11-13~). 이미 돌고 있는 실행이 있으면 기다린다(중복 실행 금지).
+  mode=post, key={어제}, only=reel. 주말·예비 호 날은 릴스가 없는 게 정상이다. 평일 정규 호인데 어제 `reel_ai.mp4` 가 없으면 이유를 찾아 보고에 한 줄
+  (2026-11-13~ 평일은 매일 AI 영상 — 22:25 알림 메일도 온다). 이미 돌고 있는 실행이 있으면 기다린다(중복 실행 금지).
 - `instagram/{날짜}/reel_frames/` 에 r1~r4 JPEG 가 있나, 어제 `evening.yml` 이 성공했나, 어제 성과 스냅숏(`automation/metrics/daily/`)이 21:00 뒤에 모였나.
 - 평일이면 `python3 automation/compare_anjang.py` 의 '겹침 N/10' 과 '큰 소식 다룸 N/M' 을 붙여 **모두 정상이면 한 줄**로 보고.
 
