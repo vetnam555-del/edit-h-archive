@@ -428,6 +428,13 @@ def t_send_time():
     backup = f'cron: "{utc % 60} {utc // 60} * * *"'   # KST 발송 5분 뒤 = UTC 9시간 전
     for wf in ("send-newsletter.yml", "post-instagram.yml"):
         expect(backup in (ROOT / ".github" / "workflows" / wf).read_text(encoding="utf-8"), f"{wf} 에 발송 5분 뒤 예비 예약({backup})이 없다")
+    # 홈·구독 페이지는 빌드가 다시 쓰지 않는 손으로 쓴 문구다(목록·최신 호 칸만 바뀐다) — 발송 시각을 바꿀 때 함께 고쳤는지 본다(PR #150 Codex 리뷰)
+    ko = send_time_ko(now).replace("오전 ", "")            # '8시' · '8시 30분'
+    colon, padded = f"{hh}:{mm:02d}", f"{hh:02d}:{mm:02d}"   # '8:00' · '08:00'
+    promise = re.compile(r"(?:매일|내일) 아침 (?:<span[^>]*>)?(\d{1,2}시(?: \d{1,2}분)?|\d{1,2}:\d\d)|매일 (\d\d:\d\d), 무료")
+    for name in ("index.html", "subscribe.html"):
+        said = [a or b for a, b in promise.findall((ROOT / name).read_text(encoding="utf-8"))]
+        expect(len(said) >= 4 and all(x in (ko, colon, padded) for x in said), f"{name} 의 발송 시각 문구가 설정({now})과 다르다: {sorted(set(said))}")
     watch = (hh * 60 + mm + 40)
     expect(f"wait_until_send.py schedule --at {watch // 60:02d}:{watch % 60:02d}" in (ROOT / ".github" / "workflows" / "alerts.yml").read_text(encoding="utf-8"),
            "아침 감시(alerts.yml)가 발송 40분 뒤가 아니다")
