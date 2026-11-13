@@ -1,0 +1,238 @@
+{
+ "date": "2026-11-13",
+ "story": "오늘 아침 5가지 — 메인 5개(big_issue·items 4개)를 20초 한 편에. 가장 센 반전(손님에게 '사지 마'라던 남대문 스카프 가게가 온라인 스토어를 열자 품절 — 가게 카운터에서 H 가 팔을 X로 엇갈려 '안 돼'를 하는데 회오리가 스카프를 모두 날려 선반이 텅 빈다)을 맨 앞에, 끝은 차에서 내려 두 팔 흔들기 — content/2026-11-13.json(늦은 발행 VOL.142). 저녁에 만들어 올린 날(아침 사용량 한도). 끝인사는 저장(bye_save — 최근 두 편이 뉴스레터).",
+ "hook": "반전",
+ "items": [
+  "남대문 스카프",
+  "네이버 물류",
+  "AI 안경",
+  "치킨 미투",
+  "구글 지도"
+ ],
+ "seedance": {
+  "model": "seedance_2_5",
+  "made_by": "크레딧 API(480p 20초, 화질 high, 60 크레딧 × 2 — 첫 판은 다시 만듦)",
+  "job": "1227f4cf-0bd6-427f-8207-ee3b8fef915a",
+  "prompt": "첫 프레임부터 장난감 시장 가게 — 카운터 뒤 H 가 팔을 X로 엇갈려 '안 돼'를 하는데 회오리가 스카프를 모두 날려 선반이 텅 빈다(‘사지 마’ 가게 온라인 품절) → 창고 컨베이어, 상자를 탄 H, 달이 내려가고 해가 뜨자 상자가 집 문 앞에 도착(네이버 배송 1조원·다음 날 도착) → 교실, 도우미 로봇의 탐지봉이 책상 밑 반짝이는 기계를 찾고 H 가 유리병에 잡아 넣는다(AI 안경 부정행위·시험 무효) → 냉동 코너, 똑같이 생긴 닭다리 둘 사이에서 H 눈이 빙글빙글(뿌링클 vs 뿌리즐링 이름 논란) → 장난감 마을, 길 위로 펼쳐지는 빈 종이 지도를 따라 H 가 차를 몬다(구글 고정밀 지도 반출·길찾기 강화) → 차에서 내려 두 팔 흔들기. 전문은 brief_prompt.txt",
+  "cut": "장면 경계(휙 넘김 가운데, 24fps 프레임 차이): 스카프 가게 0~3.46 · 창고 3.46~6.88 · 교실 6.88~10.04 · 냉동 코너 10.04~14.0 · 지도 마을 14.0~17.8 · 두 팔 흔들기 끝인사 17.8~20.04. 검은 화면 0, 멈춘 구간 없음, 꽉 찬 화면(letterboxed False, 중앙값 0.289). 0.5초 프레임으로 사람·로고 없음 확인. 첫 판(job a52dc571-4ef6-4d19-9e03-e73e6d57ebe8)은 화면 위에 엉터리 글자 띠('RIOANS TRERS')가 20초 내내 붙고 첫 장면 H 에 콧수염이 생겨 다시 만들었다(프롬프트에 '제목 띠·콧수염 금지', 위쪽 '자막 자리' 문장을 '장면 안의 단순한 벽·하늘'로 바꿈). 둘째 판 첫 장면의 입 아래 검은 모양은 프롬프트대로 X로 엇갈린 팔이다(크게 보고 확인). 글자 지우기 없음."
+ },
+ "trim": [
+  0.0,
+  20.0
+ ],
+ "end_seconds": 2.6,
+ "captions": [
+  {
+   "start": 0.0,
+   "end": 3.46,
+   "size": 84,
+   "html": "<div class=\"kick\">11월 13일 · 오늘 아침 5가지 · 1/5 · 트렌드</div><div class=\"main\">'사지 마' 했는데<br><span class=\"hl\">11만 명</span> 몰려 품절</div><div class=\"sub\">남대문 스카프 가게 온라인 스토어 · 6장 1만원 묶음</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 조세일보·데일리안</div>"
+  },
+  {
+   "start": 3.46,
+   "end": 6.88,
+   "size": 84,
+   "html": "<div class=\"kick\">2/5 · 유통</div><div class=\"main\">네이버, 배송에<br><span class=\"hl\">1조원</span> 쓴다</div><div class=\"sub\">2030년까지 · 도착보장 주문 약 75%가 다음 날 도착</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 연합뉴스·디지털데일리</div>"
+  },
+  {
+   "start": 6.88,
+   "end": 10.04,
+   "size": 84,
+   "html": "<div class=\"kick\">3/5 · 시험</div><div class=\"main\">AI 안경 걸리면<br><span class=\"hl\">시험 무효</span></div><div class=\"sub\">올해 자격시험 AI 안경 부정행위 6건 적발</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 매경이코노미·아시아경제·시사저널</div>"
+  },
+  {
+   "start": 10.04,
+   "end": 14.0,
+   "size": 84,
+   "html": "<div class=\"kick\">4/5 · 식품</div><div class=\"main\">뿌링클 vs<br><span class=\"hl\">뿌리즐링</span> 이름 논란</div><div class=\"sub\">치킨 프랜차이즈 협회가 CJ제일제당에 시정 요구</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 조선일보·아시아경제</div>"
+  },
+  {
+   "start": 14.0,
+   "end": 17.8,
+   "size": 84,
+   "html": "<div class=\"kick\">5/5 · 지도</div><div class=\"main\">구글 길찾기<br><span class=\"hl\">내년 초</span> 강해진다</div><div class=\"sub\">1대 5000 고정밀 지도 반출 조건 이행 확인</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 YTN·한국일보</div>"
+  }
+ ],
+ "end_card": {
+  "line": "저장해 두고 필요할 때 꺼내 보세요!",
+  "sub": "프로필 링크에서 구독하면 '돈·일 체크리스트' 선물부터",
+  "note": "숫자는 기사 2곳 이상에서 확인했어요<br>(출처는 장면마다·캡션에)"
+ },
+ "voices": [
+  {
+   "file": "stems/i1_scarf.mp3",
+   "start": 0.05,
+   "tempo": 1.0,
+   "text": "'사지 마' 가게, 온라인 열자 품절입니다!",
+   "tts": "[excited] 사지 마 가게, 온라인 열자 품절입니다!",
+   "voice": "Knox(elevenlabs_v4, '[excited]' 중계 아나운서) — 0초 여는 한 마디(B0)"
+  },
+  {
+   "file": "stems/i2_naver.mp3",
+   "start": 3.56,
+   "tempo": 1.0,
+   "text": "네이버가 1조원 들여 배송을 키워요!",
+   "tts": "네이버가 일조 원 들여 배송을 키워요!",
+   "voice": "Hana(qwen_audio_tts, '귀여운 만화 캐릭터, 신나서 또박또박 전하는 말투') — 다섯 번째 녹음: '쏟는대요'가 '썼는데요'로(뜻이 바뀜), '배송에'가 두 번 '배송의'로, '키운대요'가 '키운데요'로 들려 '1조원 들여 배송을 키워요'로 바꿔 녹음(100%)"
+  },
+  {
+   "file": "stems/i3_glasses.mp3",
+   "start": 6.98,
+   "tempo": 1.0,
+   "text": "AI 안경 쓰다 걸리면 시험 무효래요!",
+   "tts": "에이아이 안경 쓰다 걸리면 시험 무효래요!",
+   "voice": "Hana(qwen, '귀여운 만화 캐릭터, 다급하게 또박또박 알려 주는 말투') — '나'에게 닿는 줄(시험 보는 나·가족)"
+  },
+  {
+   "file": "stems/i4_chicken.mp3",
+   "start": 10.14,
+   "tempo": 1.0,
+   "text": "뿌링클 닮은 냉동 치킨, 이름 논란이래요!",
+   "voice": "Hana(qwen, '귀여운 만화 캐릭터, 놀라서 천천히 또박또박 전하는 말투') — '뿌리즐링'이 두 번 '뿌리질링'으로 들려(94%·85%) '냉동 치킨'으로 바꿔 녹음(100%). 자막에는 뿌리즐링을 그대로 둔다"
+  },
+  {
+   "file": "stems/i5_map.mp3",
+   "start": 14.08,
+   "tempo": 1.0,
+   "text": "구글 길찾기, 내년 초 더 강해진대요!",
+   "voice": "Hana(qwen, '귀여운 만화 캐릭터, 여유 있고 다정하게 조언하는 말투') — '나'에게 닿는 줄(지도 앱 고르기)"
+  },
+  {
+   "file": "stems/i_bye_save.mp3",
+   "start": 17.9,
+   "tempo": 1.0,
+   "text": "저장해 두고, 필요할 때 꺼내 보세요!",
+   "voice": "Hana(qwen, '귀엽고 밝은 만화 캐릭터, 경쾌하게 인사') — signoffs bye_save 를 존댓말로 그날 새로 녹음"
+  }
+ ],
+ "music": [
+  {
+   "file": "../2026-10-31/stems/m1_chase.m4a",
+   "start": 0.0,
+   "offset": 1.7,
+   "dur": 4.2,
+   "fade_out": 0.3
+  },
+  {
+   "file": "../2026-10-31/stems/m1_chase.m4a",
+   "start": 3.9,
+   "offset": 1.75,
+   "dur": 4.15,
+   "fade_in": 0.2,
+   "fade_out": 0.4
+  },
+  {
+   "file": "../2026-10-31/stems/m2_morning.m4a",
+   "start": 7.6,
+   "dur": 7.6,
+   "fade_in": 0.3,
+   "fade_out": 0.4
+  },
+  {
+   "file": "../2026-10-31/stems/m2_morning.m4a",
+   "start": 14.77,
+   "dur": 7.9,
+   "lufs": -20,
+   "fade_in": 0.3,
+   "fade_out": 0.8
+  }
+ ],
+ "sfx": [
+  [
+   0,
+   14.0,
+   0.4
+  ],
+  [
+   14.0,
+   999,
+   0.3
+  ]
+ ],
+ "music_note": "11/12 와 같은 곡 이음(m1_chase 1.7초부터, 곡 이음 0.3초 겹침). 끝인사가 17.9초 시작이라 m2_morning 을 14.77초에 다시 깔아 5.75초 강박이 끝인사 숨(20.5초께)에 오게. 효과음은 내내 0.4. 첫 렌더에서 5·6번 대사가 완성본 받아쓰기 79%(차 경적·종이 펼침 효과음과 겹침)라 14초부터 효과음 0.3, 마지막 곡 -20 LUFS 로 낮췄다.",
+ "duck": {
+  "mix": 0.85,
+  "release": 350
+ },
+ "source_note": "장면마다 그 소식의 매체를 작게 띄운다. 원 기사 대조(check_sources.py 막음 0 · 경고 7 · 기사 10/15곳 읽음 — 못 읽은 5곳 중 조선일보·아시아경제(치킨)·데일리안(스카프)은 read_article 로 다시 읽음, 시사저널(AI 안경)은 다시 읽음): 스카프 ''사지 마'·6장 1만원·품절·11만 명' 조세일보·데일리안, 네이버 '2030년까지 약 1조원·75% 다음 날 도착·새벽배송 센터 3곳→9곳·38%' 연합뉴스·디지털데일리, AI 안경 '6건' 매경이코노미·TV조선·아시아경제 / '시험 무효' 아시아경제·시사저널·MBN, 치킨 '12일·bhc·BBQ·교촌·굽네·뿌링클/뿌리즐링·황금올리브/황금홀릭' 조선일보·아시아경제, 구글 '1대 5000(5천)·13일·좌표 표시 제거' YTN·한국일보 / '이르면 내년 초' 한국일보 + --search 로 KBS·파이낸셜뉴스 확인(연합뉴스TV 는 시간 초과).",
+ "comic_note": "5가지 웹툰 3판. 그림 11장 gpt_image_2_5 4:3 1k(2.75 크레딧, 다시 그린 장 없음), 규칙 automation/pilots/ai_reel/webtoon_prompt.md. stills/ 는 저장소에 올리지 않는다. 장면: 표지 노을 옥상에서 상자 위 커피·빈 카드 다섯 장 · ① 가게에서 팔 X + 날아가는 스카프 → 노트북 앞 턱 괴고 감탄 · ② 컨베이어 상자 타기·달과 해 → 문 앞 상자 열기 · ③ 교실 탐지봉·날개 달린 기계·유리병 → 거실에서 로봇에게 쪽지 건네며 알려 주기 · ④ 냉동 코너 똑같은 닭다리 둘 앞 빙글 눈 → 냉동 치킨 상자 들고 에어프라이어 가리키기 · ⑤ 펼쳐지는 빈 지도 위 운전 → 길모퉁이에서 폰 둘 비교. pos 조정: 구글 A·B·AI 안경 B 50% 15%(H 머리가 잘리거나 말풍선에 덮여), 네이버 B 50% 25%.",
+ "comic": {
+  "series": "오늘 아침 5가지",
+  "layout": "duo",
+  "title": "'사지 마' 가게<br><span class='hl'>11만 명</span> 몰려 품절,<br>오늘 아침 5가지",
+  "cover": {
+   "img": "stills/cover.png",
+   "pos": "50% 40%",
+   "job": "5a4a4e77-faa9-4c9e-a6b6-5e33e936183e"
+  },
+  "summary": true,
+  "panels": [
+   {
+    "card": 5,
+    "img_a": "stills/sc_a.png",
+    "pos_a": "50% 45%",
+    "img_b": "stills/sc_b.png",
+    "pos_b": "50% 35%",
+    "say_side": "left",
+    "jobs": [
+     "7fe5141f-67b8-44d9-b26d-795bf41b3e7a",
+     "5bbd8abb-5edd-43f8-b227-d07273c7a69d"
+    ]
+   },
+   {
+    "card": 1,
+    "img_a": "stills/nv_a.png",
+    "pos_a": "50% 50%",
+    "img_b": "stills/nv_b.png",
+    "pos_b": "50% 25%",
+    "say_side": "left",
+    "jobs": [
+     "6bad14e6-04f2-423a-a6b9-786c8af8d8e1",
+     "7c32b032-8a22-4db9-a1b2-b7a574430aa8"
+    ]
+   },
+   {
+    "card": 3,
+    "img_a": "stills/gl_a.png",
+    "pos_a": "50% 45%",
+    "img_b": "stills/gl_b.png",
+    "pos_b": "50% 15%",
+    "say_side": "right",
+    "jobs": [
+     "02ce392d-fd5a-4af7-9195-b06e495fb334",
+     "21f42ac8-6252-4774-8897-9ea10d18d87d"
+    ]
+   },
+   {
+    "card": 4,
+    "img_a": "stills/ch_a.png",
+    "pos_a": "50% 45%",
+    "img_b": "stills/ch_b.png",
+    "pos_b": "50% 35%",
+    "say_side": "left",
+    "jobs": [
+     "33b890b2-ada6-4c0d-a608-2097e3b66f38",
+     "de86e2cd-5328-4378-b381-85037cd6ecf8"
+    ]
+   },
+   {
+    "card": 2,
+    "img_a": "stills/mp_a.png",
+    "pos_a": "50% 15%",
+    "img_b": "stills/mp_b.png",
+    "pos_b": "50% 15%",
+    "say_side": "left",
+    "jobs": [
+     "4a7900b2-1931-4f9b-9bfb-c8f7c2db2c86",
+     "ab3f94f4-8579-4562-b6c4-f39e875881bc"
+    ]
+   }
+  ],
+  "sources": "장마다 표시",
+  "end": {
+   "title": "오늘 아침 5가지,<br>매일 아침 8시",
+   "sub": "경제부터 트렌드까지, 오늘 소식 5가지를<br>웹툰으로 풀어 드려요"
+  }
+ },
+ "source_video_prep": "손질 없음 — 원본(job 1227f4cf…) 그대로(글자 지움·당겨 자르기 필요 없음)"
+}
