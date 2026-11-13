@@ -4,5 +4,36 @@
   "at": "2026-11-13T17:38:27+09:00",
   "permalink": "https://www.instagram.com/p/DfrOEeqkXI4/",
   "first_comment": true
+ },
+ "reel": {
+  "id": "18114213934887701",
+  "at": "2026-11-13T18:15:31+09:00",
+  "track": "AI 영상(자체 음악·목소리)",
+  "style": "ai",
+  "seconds": 22.6,
+  "feed": false,
+  "hook": true,
+  "ai_label": true,
+  "permalink": "https://www.instagram.com/reel/DfrSSAijiSx/"
+ },
+ "story_ai": {
+  "id": "18139488481731809",
+  "at": "2026-11-13T18:17:01+09:00",
+  "ai_label": true
+ },
+ "story": {
+  "id": "18427048063152386",
+  "ids": [
+   "18427048063152386",
+   "18109973294578008",
+   "18133469671701851"
+  ],
+  "at": "2026-11-13T18:17:45+09:00"
+ },
+ "comic": {
+  "id": "18116975816025722",
+  "at": "2026-11-13T18:18:29+09:00",
+  "ai_label": true,
+  "permalink": "https://www.instagram.com/p/DfrSqdzljUp/"
  }
 }
