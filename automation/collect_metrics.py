@@ -9,7 +9,7 @@
 - 콘텐츠: 호마다 H PICK 태그·제목 유형(질문형/숫자형)·표지(사진/핵심어)·요일.
 
 결과: automation/metrics/daily/{날짜}.json(그날 스냅숏) + automation/metrics/summary.md(최근 14호 성과표·순위).
-07:40 제작 루틴과 22:00 편집 회고가 summary.md 를 읽는다(RUNBOOK 0단계, automation/learnings.md).
+07:05 제작 루틴과 22:00 편집 회고가 summary.md 를 읽는다(RUNBOOK 0단계, automation/learnings.md).
 
   python3 automation/collect_metrics.py            # 수집 + 저장
   python3 automation/collect_metrics.py --dry-run  # 수집만(파일 안 씀)
@@ -281,7 +281,7 @@ def instagram(days, weekly_days=()):
             except IGError as e:
                 row[f"{slot}_error"] = str(e)[:120]
         mid = (log.get("comic") or {}).get("id")
-        if mid:   # 'H 극장' 만화 캐러셀(2026-11-01~) — 08:30 캐러셀과 따로 잰다
+        if mid:   # 'H 극장' 만화 캐러셀(2026-11-01~) — 아침 캐러셀과 따로 잰다
             try:
                 row["comic"] = _media_row(g, mid, 0, out)
             except IGError as e:
@@ -419,7 +419,7 @@ def _at_age(day, snap, hours=24, kind="carousel"):
 
 
 def _comic_compare(scored, snap):
-    """'H 극장' 만화 캐러셀(2026-11-01~) vs 같은 날 08:30 캐러셀 — 각자 게시 24시간 뒤 도달·저장·공유(호 수)."""
+    """'H 극장' 만화 캐러셀(2026-11-01~) vs 같은 날 아침 캐러셀 — 각자 게시 24시간 뒤 도달·저장·공유(호 수)."""
     pairs = [(c, a) for d, _, _, a in scored if a.get("reach") is not None
              for c in [_at_age(d, snap, kind="comic")] if c.get("reach") is not None]
     if not pairs:
@@ -584,7 +584,7 @@ def summary_md(snap):
         p = posts.get(day) or {}
         rows.append((day, f, p, score(p)))
     lines = [f"# EDIT H 성과표 (최근 {DAYS}일, {snap['collected_at']} 수집)", "",
-             "자동 생성 — automation/collect_metrics.py. 숫자만 있고 개인 정보는 없다. 07:40 제작·22:00 회고가 읽는다.", ""]
+             "자동 생성 — automation/collect_metrics.py. 숫자만 있고 개인 정보는 없다. 07:05 제작·22:00 회고가 읽는다.", ""]
     sub = snap.get("subscribers") or {}
     lines += ["## 한눈에", "",
               f"- 인스타 팔로워 **{ig.get('followers', '–')}** · 게시물 {ig.get('media', '–')}"

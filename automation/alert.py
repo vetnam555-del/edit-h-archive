@@ -2,7 +2,7 @@
 """운영 알림 — 문제가 생기면 운영자 메일(SMTP_USER)로 바로 알린다(.github/workflows/alerts.yml).
 
   python3 automation/alert.py failed    # 다른 워크플로가 실패로 끝났을 때(workflow_run — 예약 실행과 달리 늦지 않는다)
-  python3 automation/alert.py watch     # 발행 감시(매일 09:10·10:10 KST): 오늘 호·메일 발송·인스타 게시·웹 페이지·성과 수집·토큰
+  python3 automation/alert.py watch     # 발행 감시(매일 08:40·09:40 KST): 오늘 호·메일 발송·인스타 게시·웹 페이지·성과 수집·토큰
   python3 automation/alert.py test      # 알림 메일이 오는지 시험 한 통
   python3 automation/alert.py watch --dry-run [--date YYYY-MM-DD]   # 보내지 않고 무엇을 알릴지만 출력
 
@@ -34,7 +34,7 @@ SUBJECT = "EDIT H 운영 알림"  # '[EDIT H]' 로 시작하지 않게 — 답�
 WHAT = {
     "Send EDIT H newsletter": (
         "뉴스레터 메일 발송",
-        "08:35 예비 실행과 08:50 점검 루틴이 한 번 더 시도합니다. 같은 알림이 또 오면 Gmail 앱 비밀번호가 바뀌지 않았는지 보고, "
+        "08:05 예비 실행과 08:20 점검 루틴이 한 번 더 시도합니다. 같은 알림이 또 오면 Gmail 앱 비밀번호가 바뀌지 않았는지 보고, "
         "바뀌었다면 GitHub → Settings → Secrets 의 SMTP_PASSWORD 를 새로 넣어 주세요."),
     "Post EDIT H to Instagram": (
         "인스타그램 게시(캐러셀·릴스)",
@@ -185,7 +185,7 @@ def rerun(run_id):
     return bool(run_id) and _api("POST", f"actions/runs/{run_id}/rerun") is not None
 
 
-RERUN_LOOKBACK_H = 30   # 발행 점검이 이만큼 지난 자동 다시 실행까지 본다(점검은 09:10·20:45·22:25 — 사이가 최대 10시간)
+RERUN_LOOKBACK_H = 30   # 발행 점검이 이만큼 지난 자동 다시 실행까지 본다(점검은 08:40·20:45·22:25 — 사이가 최대 10시간)
 
 
 def rerun_failures(hours=RERUN_LOOKBACK_H):
@@ -241,7 +241,7 @@ def failed():
             return 0
         if not retried and rerun(run_id):
             print(f"{name}: GitHub 서버(러너)를 못 잡아 시작하지 못함 — 한 번 다시 실행했다. "
-                  "또 실패하면 발행 점검(09:10·20:45·22:25)이 알린다")
+                  "또 실패하면 발행 점검(08:40·20:45·22:25)이 알린다")
             return 0
     if name in HOURLY and alerted_recently(name, run_id):
         print(f"{name}: {QUIET_H}시간 안에 같은 작업의 실패를 이미 알렸다 — 매시간 반복 알림은 보내지 않음")
@@ -308,7 +308,7 @@ def _ai_reel_weekday(ig_cfg, date):
 def _reel_wanted(ig_cfg, date):
     """그날 올릴 릴스가 있나 — 이미지를 이어 붙인 릴스는 config.instagram.image_reel_until 까지만 올린다(2026-11-12 운영자 결정).
     그 뒤로는 AI 영상 릴스 파일(reel_ai.mp4)이 있는 날과, 영상을 만들기로 정한 평일(_ai_reel_weekday)에 '릴스 미게시'를 본다
-    — 평일인데 영상이 없으면 08:15 릴스 작업이 멈춘 것이다. 주말은 릴스가 없는 날이라 알리지 않는다."""
+    — 평일인데 영상이 없으면 07:45 릴스 작업이 멈춘 것이다. 주말은 릴스가 없는 날이라 알리지 않는다."""
     until = ig_cfg.get("image_reel_until")
     return (not until or date <= until or (ROOT / "instagram" / date / "reel_ai.mp4").exists()
             or _ai_reel_weekday(ig_cfg, date))
@@ -327,7 +327,7 @@ def _reel_due(date):
     return (now.hour * 60 + now.minute) >= hh * 60 + mm + 70
 
 
-ISSUE_DEADLINE = (8, 35)   # build_rewind.DEADLINE — 이 시각(KST) 전에는 오늘 호가 없어도 '미발행'이 아니다
+ISSUE_DEADLINE = (8, 5)   # build_rewind.DEADLINE — 이 시각(KST) 전에는 오늘 호가 없어도 '미발행'이 아니다
 
 
 def watch_date(now=None):
@@ -371,7 +371,7 @@ def problems(date, cfg, check_web=True):
     now = now_kst()
     before_deadline = now.date() == d and (now.hour, now.minute) < ISSUE_DEADLINE
     if publish_day and not before_deadline and not ((ROOT / f"{date}.html").exists() and issue):
-        out.append(("issue", f"오늘({date} {wd}) 호가 올라오지 않았습니다 — 07:40 제작 루틴이 원고를 못 올렸어요"
+        out.append(("issue", f"오늘({date} {wd}) 호가 올라오지 않았습니다 — 07:05 제작 루틴이 원고를 못 올렸어요"
                              "(Claude 사용량 한도·오류 가능). 08:50 점검 루틴이 원인을 확인해 알려드려요."))
     rewind_day = bool((_json(ROOT / "content" / f"{date}.json") or {}).get("rewind"))
     if issue:
@@ -394,7 +394,7 @@ def problems(date, cfg, check_web=True):
                 if log.get("reel_emailed"):
                     out.append(("reel_manual", "릴스 자동 게시가 안 돼 영상·캡션을 이 메일함으로 보냈습니다 — 휴대폰에서 올려 주세요."))
                 elif not (ROOT / "instagram" / date / "reel_ai.mp4").exists() and _ai_reel_weekday(ig_cfg, date):
-                    out.append(("reel", "평일인데 AI 영상 릴스가 만들어지지 않았습니다 — 08:15 릴스 작업이 멈췄거나(사용량·크레딧 부족) 검수에서 떨어졌어요."))
+                    out.append(("reel", "평일인데 AI 영상 릴스가 만들어지지 않았습니다 — 07:45 릴스 작업이 멈췄거나(사용량·크레딧 부족) 검수에서 떨어졌어요."))
                 else:
                     out.append(("reel", "인스타 릴스가 게시되지 않았습니다."))
         if _threads_due(date) and not rewind_day and not (AUTOMATION / "threads_posted" / f"{date}.json").exists():
@@ -471,7 +471,7 @@ def main():
     if args.mode == "rewind":   # rewind.yml — 제작 루틴이 멈춰 예비 호로 대신 발행한 날
         date = args.date or now_kst().date().isoformat()
         send_mail(f"{SUBJECT} · {date[5:].replace('-', '/')} 예비 호로 대신 발행",
-                  "07:40 제작 루틴이 08:35 까지 오늘 호를 올리지 못해, 예비 호('놓쳤다면, 다시 볼 만한 5가지' — 지난 호 이야기를 다시 엮은 호)로\n"
+                  "07:05 제작 루틴이 08:05 까지 오늘 호를 올리지 못해, 예비 호('놓쳤다면, 다시 볼 만한 5가지' — 지난 호 이야기를 다시 엮은 호)로\n"
                   "대신 발행했어요. 메일 발송과 인스타 게시도 이어서 돌렸습니다.\n\n"
                   "원인은 대개 Claude 사용량 한도나 루틴 오류예요. 08:50 점검 루틴이 원인을 확인해 알려드려요.\n"
                   f"실행 기록: https://github.com/{os.environ.get('GITHUB_REPOSITORY', 'vetnam555-del/edit-h-archive')}/actions",
@@ -480,7 +480,7 @@ def main():
     if args.mode == "codex":   # codex-fallback.yml — Claude 제작 루틴이 시작하지 않아 Codex 가 대신 만든 날
         date = args.date or now_kst().date().isoformat()
         send_mail(f"{SUBJECT} · {date[5:].replace('-', '/')} Codex 가 대신 제작",
-                  "07:55 까지 Claude 제작 루틴이 시작하지 않아(대개 사용량 한도), ChatGPT Codex 가 오늘 호를 대신 만들어 올렸어요.\n"
+                  "07:25 까지 Claude 제작 루틴이 시작하지 않아(대개 사용량 한도), ChatGPT Codex 가 오늘 호를 대신 만들어 올렸어요.\n"
                   "메일 발송·인스타 캐러셀·저녁 일정도 이어서 돌렸습니다. 지난 호 다시 보기(예비 호)가 아니라 오늘 새 소식이에요.\n\n"
                   f"뉴스레터: https://vetnam555-del.github.io/edit-h-archive/{date}.html\n"
                   f"실행 기록(Codex 보고서 포함): https://github.com/{os.environ.get('GITHUB_REPOSITORY', 'vetnam555-del/edit-h-archive')}/actions",
@@ -489,7 +489,7 @@ def main():
     if args.mode == "test":
         send_mail(f"{SUBJECT} · 시험 메일",
                   "EDIT H 운영 알림이 이 메일함으로 옵니다.\n"
-                  "발송·게시·집계가 실패하면 곧바로, 오늘 호·발송·게시가 빠지면 09:10(KST) 감시에서 알려드려요.", args.dry_run)
+                  "발송·게시·집계가 실패하면 곧바로, 오늘 호·발송·게시가 빠지면 08:40(KST) 감시에서 알려드려요.", args.dry_run)
         return 0
     return watch(args.date or watch_date(), args.dry_run)
 

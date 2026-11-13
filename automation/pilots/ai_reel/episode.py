@@ -31,6 +31,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "automation"))
+from edith.common import send_time_ko, send_time_on  # noqa: E402
 from edith.fonts import font_css  # noqa: E402
 
 SHOT = ROOT / "automation" / "screenshot.cjs"
@@ -196,7 +197,8 @@ def render_cards(ep, work):
         paths.append(p)
     e = ep.get("end_card") or {}
     end = work / "end.png"
-    shot(END.format(fonts=fonts, face=FACE, line=e.get("line", "내일 아침 8시 30분에 또 만나요!"),
+    when = send_time_ko(send_time_on(str(ep.get("date") or "9999")[:10])).replace("오전", "아침")   # 끝인사 기본 문구의 발송 시각("아침 8시")
+    shot(END.format(fonts=fonts, face=FACE, line=e.get("line", f"내일 {when}에 또 만나요!"),
                     sub=e.get("sub", "2030의 아침을 편집합니다 · 경제부터 트렌드까지<br>숫자·출처 전문은 프로필 링크 뉴스레터에서"),
                     note=e.get("note", "숫자는 기사 2곳 이상에서 확인했어요")), end, False)
     return paths, end

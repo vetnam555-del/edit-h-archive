@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """'H 극장' 4컷 만화 캐러셀 — 그날 AI 릴스 장면 4컷 + 말풍선(확인된 숫자) + 끝 장, 1080×1350 JPEG.
 
-2026-11-01 운영자 "캐러셀도 조금 더 재미있는 양식으로" → 시안 승인("좋네 오늘부터"). 08:30 기존 캐러셀(실험 E11·E12 중)은 그대로 두고,
+2026-11-01 운영자 "캐러셀도 조금 더 재미있는 양식으로" → 시안 승인("좋네 오늘부터"). 아침 기존 캐러셀(실험 E11·E12 중)은 그대로 두고,
 AI 릴스와 함께 따로 올리는 두 번째 캐러셀이다(post_instagram.py 가 instagram/{날짜}/comic/*.jpg 를 올린다, AI 정보 라벨).
 같은 AI 영상에서 장면을 뽑으므로 크레딧이 더 들지 않는다.
 
@@ -28,6 +28,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "automation"))
+from edith.common import send_time_ko, send_time_on  # noqa: E402
 from edith.fonts import font_css  # noqa: E402
 from edith.gift import PROMO_FROM, screen_line  # noqa: E402
 
@@ -120,7 +121,7 @@ def _md(text):
 
 
 def from_cards(c, date):
-    """panels[i].card = N 이면 그날 content 카드 N번의 제목·본문·'그래서'·출처를 그대로 쓴다 — 08:30 카드와 같은, 검수를 거친 글.
+    """panels[i].card = N 이면 그날 content 카드 N번의 제목·본문·'그래서'·출처를 그대로 쓴다 — 아침 카드와 같은, 검수를 거친 글.
     2026-11-01 운영자 "웹툰으로 하면 텍스트가 기존보다 조금 부족한 것 같은데" → 컷마다 제목(말풍선)·본문·'그래서 나는?'·출처를 카드와 똑같이."""
     if not any(p.get("card") for p in c["panels"]) and not c.get("summary"):
         return []
@@ -243,7 +244,7 @@ def build(ep, video, outdir, alt_path=None, base=None):
             shot(html, outdir / f"c{i}.jpg")
             alts[f"c{i}.jpg"] = (f"H 극장 {i}컷 — {plain(p.get('who', 'H'))}: {plain(p['bubble'])}" + (f" {plain(p['box'])}" if p.get("box") else "")
                                  + (f" {plain(p['body'])}" if p.get("body") else "") + (f" 그래서 나는? {plain(p['take'])}" if p.get("take") else ""))
-    if c.get("summary") and picked:   # 저장해 두는 한 장 — 5가지를 번호·제목·숫자로(08:30 카드의 '5가지 한눈에'와 같은 글)
+    if c.get("summary") and picked:   # 저장해 두는 한 장 — 5가지를 번호·제목·숫자로(아침 카드의 '5가지 한눈에'와 같은 글)
         k = n - 1
         rows = "".join(
             f"<div class='row'><div class='n'>{j}</div><div class='h'>{htmlmod.escape(re.sub(r'==|[*]{2}', '', it['headline']).replace(chr(10), ' '))}</div>"
@@ -265,7 +266,8 @@ def build(ep, video, outdir, alt_path=None, base=None):
             "팔로우하고 내일 아침에 받기</div>"
             f"<div style='margin-top:30px;font-weight:600;font-size:30px;color:#3d3a35'>{screen_line(ep['date'])}</div></div>")
     shot(page(fonts, body), outdir / f"c{n}.jpg")
-    alts[f"c{n}.jpg"] = "H 극장 끝 장 — 매일 아침 8시 30분 EDIT H 뉴스레터, 팔로우 안내" + (
+    when = send_time_ko(send_time_on(str(ep["date"])[:10])).replace("오전", "아침")   # 그날 호의 발송 시각("아침 8시")
+    alts[f"c{n}.jpg"] = f"H 극장 끝 장 — 매일 {when} EDIT H 뉴스레터, 팔로우 안내" + (
         f" · {screen_line(ep['date'])}" if str(ep["date"])[:10] >= PROMO_FROM else "")
     (alt_path or outdir.parent / "comic_alt.json").write_text(json.dumps(alts, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     return n

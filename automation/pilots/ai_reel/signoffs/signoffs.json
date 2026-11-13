@@ -2,8 +2,8 @@
  "_note": "끝인사 돌려쓰기(2026-11-02~). 같은 날 릴스끼리 겹치지 않게(qa.py 8). end_line 은 끝 화면 end_card.line 에 그대로. 녹음 qwen_audio_tts · Hana, bye_tomorrow 는 10/31 녹음.",
  "signoffs": {
   "bye_tomorrow.mp3": {
-   "text": "내일 아침 여덟 시 반에 또 만나요!",
-   "end_line": "내일 아침 8시 30분에 또 만나요!",
+   "text": "내일 아침 여덟 시에 또 만나요!",
+   "end_line": "내일 아침 8시에 또 만나요!",
    "cta": "다시 보기"
   },
   "bye_follow.mp3": {

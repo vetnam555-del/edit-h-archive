@@ -416,7 +416,7 @@ def ai_video_day(cfg, key):
       주말은 영상 없이 웹툰만 만드는 날이다(automation/RUNBOOK_REEL.md).
     - 그 전: config.instagram.ai_video_even_days({from, until}, 11월 크레딧 계획: 짝수 날만) 기간의 홀수 날이면 아니다.
     영상을 만들지 않기로 정한 날에 '스토리는 릴스만'을 적용하면 아침 카드 스토리가 건너뛰어져 19:30 대신 올리기만 나간다
-    (11/05·11/07 회고: 첫 장 도달 약 2시간 6·0 — 아침 영상 스토리는 18~19). 그래서 그런 날은 08:30 에 카드 스토리를 올린다."""
+    (11/05·11/07 회고: 첫 장 도달 약 2시간 6·0 — 아침 영상 스토리는 18~19). 그래서 그런 날은 아침 캐러셀 실행(발송 시각)이 카드 스토리를 올린다."""
     day = str(key)[:10]
     weekdays_from = cfg.get("ai_video_weekdays_from")
     if weekdays_from and day >= weekdays_from:
@@ -454,7 +454,7 @@ def story_reel_only(cfg, key):
 
 def cards_after_ai(cfg, key):
     """E21 판정(2026-11-09 되돌림) — config.instagram.story_cards_after_ai_from 부터 '스토리는 릴스만'(story_reel_only) 날에도
-    AI 영상 스토리 바로 뒤에 아침 카드 스토리를 이어 올린다. 순서는 릴스 → 카드(11/03 운영자 '스토리는 릴스가 먼저') — 08:30 캐러셀 실행은
+    AI 영상 스토리 바로 뒤에 아침 카드 스토리를 이어 올린다. 순서는 릴스 → 카드(11/03 운영자 '스토리는 릴스가 먼저') — 아침 캐러셀 실행은
     그대로 카드를 건너뛰고, AI 영상 스토리를 올리는 릴스 실행이 이어 올린다. 근거: AI 영상 스토리만 올린 날(11/03·11/04·11/06·11/08)
     첫 장 도달 19·18·10·5(평균 13) vs 카드 스토리 날(10/30~11/02) 23·13·14·17(평균 16.8), 최근 7일 팔로워 도달 63 → 51."""
     start = cfg.get("story_cards_after_ai_from")
@@ -508,7 +508,7 @@ def create_with_ai_label(g, uid, params, info, required=False):
         return g.call("POST", f"{uid}/media", **params)["id"]
 
 
-COMIC_DIR = "comic"   # 2026-11-01 운영자 '캐러셀도 재미있는 양식으로' → 'H 극장' 4컷 만화(AI 릴스 장면 + 말풍선), 08:30 캐러셀과 따로
+COMIC_DIR = "comic"   # 2026-11-01 운영자 '캐러셀도 재미있는 양식으로' → 'H 극장' 4컷 만화(AI 릴스 장면 + 말풍선), 아침 캐러셀과 따로
 
 
 def post_comic(g, uid, key, folder, site_url, dry):
@@ -957,7 +957,7 @@ def main():
                 save_log(key, log)
                 print(f"  ⚠ AI 영상 스토리 실패(게시는 계속): {e}")
 
-    # E21 판정(11/09 되돌림): AI 영상 스토리 바로 뒤에 아침 카드 스토리 — 08:30 캐러셀 실행은 '스토리는 릴스만'이라 카드를 건너뛰었으니
+    # E21 판정(11/09 되돌림): AI 영상 스토리 바로 뒤에 아침 카드 스토리 — 아침 캐러셀 실행은 '스토리는 릴스만'이라 카드를 건너뛰었으니
     # 여기서 이어 올린다(순서 릴스 → 카드). AI 영상 스토리가 실패한 날은 위 줄이 다음 실행에서 다시 시도한 뒤에 올린다.
     if (reel_only and args.only != "carousel" and log.get("story_ai") and log.get("carousel") and not log.get("story")
             and not args.dry_run and story_on(cfg, key) and cards_after_ai(cfg, key)):
@@ -971,7 +971,7 @@ def main():
         print("AI 릴스가 없는 날 — 아침 카드 스토리를 대신 올립니다")
         card_story()
 
-    # 'H 극장' 만화 캐러셀 — 08:30 캐러셀 실행(only=carousel)이 아니라 AI 릴스와 함께(수동·저녁 실행) 한 번만
+    # 'H 극장' 만화 캐러셀 — 아침 캐러셀 실행(only=carousel)이 아니라 AI 릴스와 함께(수동·저녁 실행) 한 번만
     if (args.only != "carousel" and not rewind and cfg.get("comic", True) and any((folder / COMIC_DIR).glob("*.jpg"))
             and not log.get("comic")):
         try:
