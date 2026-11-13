@@ -1,20 +1,20 @@
 # EDIT H Codex 대체 작업 — Claude 가 멈춘 날 ChatGPT Codex 가 GitHub Actions 에서 이어서 한다(2026-10-25 운영자 결정).
-# · 제작: 07:40 Claude 제작 루틴은 시작하자마자 'run-claim/{날짜}-claude' 표시를 남긴다(RUNBOOK 0단계). 07:55 까지 그 표시도 오늘 호도
+# · 제작: 07:05 Claude 제작 루틴은 시작하자마자 'run-claim/{날짜}-claude' 표시를 남긴다(RUNBOOK 0단계). 07:25 까지 그 표시도 오늘 호도
 #   없으면 Codex 가 'run-claim/{날짜}-codex' 를 남기고 RUNBOOK 0~4단계로 오늘 호를 만든다. 워크플로가 허용 경로 밖 변경을 되돌리고
 #   다시 빌드해 main 에 올린 뒤 발송·인스타·저녁 사슬을 직접 돌린다(GITHUB_TOKEN 푸시는 다른 워크플로를 못 깨운다). 예비 호(rewind.yml)는
-#   Codex 표시가 있으면 09:15 까지 기다린다.
+#   Codex 표시가 있으면 08:45 까지 기다린다.
 # · 회고: 그날 22:00 Claude 회고 커밋('Editor retrospective {날짜}')이 23:30 이 지나도 없으면 Codex 가 learnings.md 회고를 쓴다.
 # 필요한 Secret: OPENAI_API_KEY(없으면 아무것도 하지 않는다 — 키를 넣어야 켜진다. API 사용료는 Codex 가 일한 날만 든다),
 #               SMTP_USER·SMTP_PASSWORD(알림 메일, 이미 있음).
-# GitHub 예약 실행은 늦거나 빠지기 쉬워 새벽에 미리 시작해 07:55 까지 기다린다(rewind.yml 과 같은 방식). 기다리는 시간은 무료다.
+# GitHub 예약 실행은 늦거나 빠지기 쉬워 새벽에 미리 시작해 07:25 까지 기다린다(rewind.yml 과 같은 방식). 기다리는 시간은 무료다.
 name: EDIT H Codex fallback
 
 on:
   schedule:
-    - cron: "28 18 * * *"    # KST 03:28 → 07:55 까지 대기(제작)
-    - cron: "28 20 * * *"    # KST 05:28 → 07:55 까지 대기(제작)
-    - cron: "58 21 * * *"    # KST 06:58 → 07:55 까지 대기(제작)
-    - cron: "35 22 * * *"    # KST 07:35 → 07:55 까지 대기(제작, 예비)
+    - cron: "28 18 * * *"    # KST 03:28 → 07:25 까지 대기(제작)
+    - cron: "28 20 * * *"    # KST 05:28 → 07:25 까지 대기(제작)
+    - cron: "28 21 * * *"    # KST 06:28 → 07:25 까지 대기(제작)
+    - cron: "5 22 * * *"     # KST 07:05 → 07:25 까지 대기(제작, 예비)
     - cron: "50 14 * * *"    # KST 23:50 회고 확인
     - cron: "20 17 * * *"    # KST 02:20 회고 확인(예비)
   workflow_dispatch:
@@ -55,7 +55,7 @@ jobs:
           ref: main
           fetch-depth: 0
 
-      - name: Decide (and wait for 07:55 KST on morning runs)
+      - name: Decide (and wait for 07:25 KST on morning runs)
         id: decide
         env:
           OPENAI_API_KEY_SET: ${{ secrets.OPENAI_API_KEY != '' && 'yes' || '' }}
@@ -84,7 +84,7 @@ jobs:
     needs: decide
     if: needs.decide.outputs.task == 'produce' && needs.decide.outputs.go == 'true'
     runs-on: ubuntu-24.04
-    timeout-minutes: 80   # 07:55 시작 + 설치 + Codex 30분 + 08:30 발송 시각까지 기다림
+    timeout-minutes: 80   # 07:25 시작 + 설치 + Codex 30분 + 08:00 발송 시각까지 기다림
     env:
       EDITH_DATE: ${{ needs.decide.outputs.date }}
       DRY: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run && 'yes' || '' }}
@@ -94,7 +94,7 @@ jobs:
           ref: main
           persist-credentials: false   # Codex 가 일하는 동안 저장소 토큰이 작업 폴더에 남지 않게 — 올리기는 마지막 단계만 한다
 
-      # 07:55 판단 뒤 Claude 가 늦게 시작했거나 오늘 호가 올라왔으면 여기서 멈춘다(코드 3) — 맡았을 때만 PROCEED=yes
+      # 07:25 판단 뒤 Claude 가 늦게 시작했거나 오늘 호가 올라왔으면 여기서 멈춘다(코드 3) — 맡았을 때만 PROCEED=yes
       - name: Claim today's issue
         env:
           GH_TOKEN: ${{ github.token }}
@@ -177,7 +177,7 @@ jobs:
           done
           [ -n "$pushed" ] || { echo "::error::Codex 호를 main 에 푸시하지 못했습니다"; exit 1; }
           sleep 60   # GitHub Pages 가 새 카드 이미지를 올릴 시간
-          # 발송 시각(config.send_time_kst, 08:30) 전이면 그때까지 기다린다 — workflow_dispatch 로 부른 발송·게시는 스스로 기다리지 않는다(Codex 리뷰)
+          # 발송 시각(config.send_time_kst, 08:00) 전이면 그때까지 기다린다 — workflow_dispatch 로 부른 발송·게시는 스스로 기다리지 않는다(Codex 리뷰)
           if [ "$DATE" = "$(TZ=Asia/Seoul date +%F)" ]; then python3 automation/wait_until_send.py schedule; fi
           gh workflow run send-newsletter.yml --ref main -f date="$DATE"
           gh workflow run post-instagram.yml --ref main -f key="$DATE" -f mode=post -f only=carousel

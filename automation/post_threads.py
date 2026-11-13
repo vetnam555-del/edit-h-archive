@@ -27,7 +27,7 @@ import urllib.request
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from edith.common import AUTOMATION, CONTENT_DIR, INSTAGRAM_DIR, load_config, now_kst  # noqa: E402
+from edith.common import AUTOMATION, CONTENT_DIR, INSTAGRAM_DIR, load_config, now_kst, send_time_ko  # noqa: E402
 
 API = "https://graph.threads.net/v1.0"
 LOG_DIR = AUTOMATION / "threads_posted"
@@ -94,7 +94,8 @@ def compose(c, site_url):
     if len(text) > MAX_TEXT:
         text = re.sub(r"\n*오늘 나머지:[^\n]*", "", text)
     text = text[:MAX_TEXT]
-    reply = f"숫자·출처 전문은 매일 아침 8시 30분 뉴스레터로 보내드려요 → {site_url}/subscribe.html?ref=threads"
+    when = send_time_ko(load_config()["send_time_kst"]).replace("오전", "아침")   # "아침 8시"
+    reply = f"숫자·출처 전문은 매일 {when} 뉴스레터로 보내드려요 → {site_url}/subscribe.html?ref=threads"
     return text, reply
 
 

@@ -2,17 +2,17 @@
 """Claude 가 멈춘 날 ChatGPT Codex 가 GitHub Actions 에서 이어서 한다(.github/workflows/codex-fallback.yml, 2026-10-25 운영자 결정).
 
 Claude 는 사용량이 바닥나는 순간을 미리 알 수 없다. 그래서 '시작했다는 표시(claim)'로 판단한다:
-  · 07:40 제작 루틴(Claude)은 시작하자마자 `python3 automation/codex_fallback.py claim claude` 로 표시를 남긴다(RUNBOOK 0단계).
+  · 07:05 제작 루틴(Claude)은 시작하자마자 `python3 automation/codex_fallback.py claim claude` 로 표시를 남긴다(RUNBOOK 0단계).
     표시는 main 이 아닌 가지 `run-claim/{날짜}-claude` 라 워크플로를 깨우지 않는다.
-  · 07:55 까지 Claude 표시도 오늘 호도 없으면 Codex 가 `run-claim/{날짜}-codex` 를 남기고 제작한다. 늦게 깨어난 Claude 는
-    Codex 표시를 보고 손을 뗀다. 예비 호(rewind.yml, 08:35)는 Codex 표시가 있으면 09:15 까지 Codex 를 기다린다.
+  · 07:25 까지 Claude 표시도 오늘 호도 없으면 Codex 가 `run-claim/{날짜}-codex` 를 남기고 제작한다. 늦게 깨어난 Claude 는
+    Codex 표시를 보고 손을 뗀다. 예비 호(rewind.yml, 08:05)는 Codex 표시가 있으면 08:45 까지 Codex 를 기다린다.
   · 22:00 편집 회고가 다음 날 새벽까지 없으면(커밋 'Editor retrospective {날짜}') Codex 가 learnings.md 회고를 쓴다.
 OPENAI_API_KEY 시크릿이 없으면 아무것도 하지 않는다(키를 넣어야 켜진다 — API 사용료는 Codex 가 일한 날만 든다).
 
   python3 automation/codex_fallback.py claim claude            # 제작 루틴: 시작 표시(실패해도 제작은 계속)
   python3 automation/codex_fallback.py claims                  # 오늘 누가 표시했나
-  python3 automation/codex_fallback.py wait-produce            # 워크플로: 07:55 까지 기다려 Codex 제작이 필요한지(go=true/false)
-  python3 automation/codex_fallback.py wait-codex              # rewind.yml: Codex 가 제작 중이면 오늘 호가 오거나 09:15 까지 기다림
+  python3 automation/codex_fallback.py wait-produce            # 워크플로: 07:25 까지 기다려 Codex 제작이 필요한지(go=true/false)
+  python3 automation/codex_fallback.py wait-codex              # rewind.yml: Codex 가 제작 중이면 오늘 호가 오거나 08:45 까지 기다림
   python3 automation/codex_fallback.py need-retro              # 워크플로: 회고가 빠졌나(need=true/false, date=)
   python3 automation/codex_fallback.py restore --allow content/2026-10-26.json ...   # Codex 가 건드린 허용 밖 파일을 되돌림
   python3 automation/codex_fallback.py prune                   # 사흘 지난 표시 가지 지우기
@@ -30,9 +30,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from edith.common import ROOT, load_config, now_kst, parse_date, weekday_ko  # noqa: E402
 
 PREFIX = "run-claim/"
-START = (7, 55)          # 이때까지 Claude 표시가 없으면 Codex 가 제작한다(제작 루틴 07:40 시작)
-LATEST = (8, 25)         # 이보다 늦게 깨어난 예약 실행은 제작하지 않는다 — 08:35 예비 호에 맡긴다
-CODEX_WAIT_UNTIL = (9, 15)   # 예비 호가 Codex 제작을 기다리는 한도
+START = (7, 25)          # 이때까지 Claude 표시가 없으면 Codex 가 제작한다(제작 루틴 07:05 시작 — 2026-11-14~ 발송 08:00)
+LATEST = (7, 55)         # 이보다 늦게 깨어난 예약 실행은 제작하지 않는다 — 08:05 예비 호에 맡긴다
+CODEX_WAIT_UNTIL = (8, 45)   # 예비 호가 Codex 제작을 기다리는 한도
+REWIND_DEADLINE = "08:05"    # 안내 문구용 — build_rewind.DEADLINE 과 같아야 한다(selftest 가 본다)
 RETRO_AFTER = (23, 30)   # 그날 22:00 회고를 이때까지 기다린 뒤에야 Codex 가 쓴다
 POLL = 60
 # 제작 산출물(RUNBOOK 5단계 git add 와 같은 경로) — 이 밖의 변경은 되돌린다
@@ -96,7 +97,7 @@ def produce_decision(date, now, has_issue, who, key_set):
     if "codex" in who:
         return False, "Codex 가 이미 맡았음"
     if (now.hour, now.minute) >= LATEST:
-        return False, f"{LATEST[0]:02d}:{LATEST[1]:02d} 이후 — 예비 호(08:35)에 맡김"
+        return False, f"{LATEST[0]:02d}:{LATEST[1]:02d} 이후 — 예비 호({REWIND_DEADLINE})에 맡김"
     if (now.hour, now.minute) < START:
         return False, f"아직 {START[0]:02d}:{START[1]:02d} 전"
     return True, f"{START[0]:02d}:{START[1]:02d} 까지 Claude 표시도 오늘 호도 없음"
@@ -224,7 +225,7 @@ def main():
             print(f"■ Codex 가 오늘({date}) 제작을 맡았습니다 — 이 세션은 제작하지 말고 그대로 보고하고 끝내세요")
             return 3
         if args.who == "codex" and ("claude" in other or published(date)):
-            # 07:55 판단 뒤 이 작업이 시작되기 전에 Claude 가 늦게 시작했거나 오늘 호가 올라왔다(Codex 리뷰) — 제작하지 않는다
+            # 07:25 판단 뒤 이 작업이 시작되기 전에 Claude 가 늦게 시작했거나 오늘 호가 올라왔다(Codex 리뷰) — 제작하지 않는다
             print(f"■ 오늘({date}) 이미 {'Claude 가 제작을 시작했다' if 'claude' in other else '오늘 호가 올라왔다'} — Codex 는 제작하지 않습니다")
             return 3
         ok, msg = claim(args.who, date)

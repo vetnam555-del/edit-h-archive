@@ -16,7 +16,7 @@ import json
 import re
 
 from . import content
-from .common import CONTENT_DIR, ROOT, card_height, cover_photo_problem, load_config, parse_date, plain, send_time_ko, weekday_ko
+from .common import CONTENT_DIR, ROOT, card_height, cover_photo_problem, load_config, parse_date, plain, send_time_ko, send_time_on, weekday_ko
 from .site import _LETTER, _pick, _tags, _when, dm_line
 
 WEEKLY_DIR = CONTENT_DIR / "weekly"
@@ -172,7 +172,7 @@ def load(date_str):
                     "sub": ("날짜 장은 저장해 두면 그날 바로 꺼내 볼 수 있어요." if dates else "저장해두고 다음 주에 한 번 더 꺼내보세요."),
                     "pill": "팔로우 + 저장해두기"},
         },
-        "send_time_kst": load_config()["send_time_kst"],
+        "send_time_kst": send_time_on(date_str),   # 그 주 특집이 나간 때의 발송 시각
     }
 
 

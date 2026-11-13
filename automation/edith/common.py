@@ -76,13 +76,16 @@ def load_config():
     return json.loads((AUTOMATION / "config.json").read_text(encoding="utf-8"))
 
 
-SEND_TIME_BEFORE = ("2026-10-16", "08:00")   # 이 날짜 전 호는 08:00 에 나갔다(10/16~ 08:30 — config.send_time_kst)
+# 발송 시각이 바뀐 날들 — (이 날짜 전 호, 그때 발송 시각), 날짜순. 마지막 날짜부터는 config.send_time_kst.
+# ~10/15 08:00 → 10/16~11/13 08:30(안장출근길을 기다리려고) → 2026-11-14~ 08:00(11/13 운영자 '발행은 8시로 변경해줘')
+SEND_TIME_HISTORY = (("2026-10-16", "08:00"), ("2026-11-14", "08:30"))
 
 
 def send_time_on(date, cfg=None):
-    """그 호가 실제로 나간(나갈) 발송 시각 — 지난 호를 다시 빌드해도 발행 시각·구조화 데이터가 바뀌지 않게."""
-    if str(date) < SEND_TIME_BEFORE[0]:
-        return SEND_TIME_BEFORE[1]
+    """그 호가 실제로 나간(나갈) 발송 시각 — 지난 호를 다시 빌드해도 발행 시각·구조화 데이터·문구가 바뀌지 않게."""
+    for before, t in SEND_TIME_HISTORY:
+        if str(date) < before:
+            return t
     return (cfg or load_config())["send_time_kst"]
 
 

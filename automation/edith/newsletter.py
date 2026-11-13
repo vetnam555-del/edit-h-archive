@@ -439,7 +439,7 @@ def _share_mailto(d, site):
     구독자 개인 링크(수신 거부 등)는 넣지 않는다."""
     from urllib.parse import quote
     n = len(d["all_items"]) + (len(d["briefs"]) if d.get("format") == 2 else 0)
-    when = send_time_ko(load_config()['send_time_kst']).replace('오전', '아침')
+    when = send_time_ko(d.get('send_time_kst') or send_time_on(d['date'])).replace('오전', '아침')   # 그 호의 발송 시각(다시 빌드해도 그대로)
     if _v2(d):
         subject = f"{BRAND_LINE} — EDIT H 추천해요"
         pitch = f"매일 {when}, 경제부터 트렌드까지 2030이 알아야 할 소식 {n}가지를 골라 보내줘요."

@@ -339,7 +339,7 @@ def t_card_takeaway_topic():
 
 
 def t_anjang_wait():
-    """평일 07:55 전 fallback 빌드는 오늘 안장 글을 확인한 기록이 있을 때만(11/03 운영자 '안장출근길 소스가 너무 좋다' — 10/15·10/29 먼저 만들어 겹침 0~1/10)."""
+    """평일 07:30 전(2026-11-14~ 발송 08:00 — 그 전에는 07:55) fallback 빌드는 오늘 안장 글을 확인한 기록이 있을 때만(11/03 운영자 '안장출근길 소스가 너무 좋다' — 10/15·10/29 먼저 만들어 겹침 0~1/10)."""
     import build_issue
     import fetch_anjang
     kst = now_kst().tzinfo
@@ -350,7 +350,9 @@ def t_anjang_wait():
         prob = lambda d, now: build_issue.anjang_wait_problem(d, now=now, state_dir=tmp)   # noqa: E731
         os.environ.pop("EDITH_SKIP_ANJANG_WAIT", None)
         expect(prob(fb, at(tue, 7, 16)), "평일 07:16 기록 없는 fallback 빌드를 막지 않는다(10/29)")
-        expect(not prob(fb, at(tue, 7, 56)), "07:55 가 지나도 막는다(안장이 쉬는 날 예비 호가 나간다)")
+        expect(prob(fb, at(tue, 7, 29)), "07:30 전인데 기록 없는 fallback 빌드를 막지 않는다")
+        expect(not prob(fb, at(tue, 7, 30)) and not prob(fb, at(tue, 7, 56)), "07:30 이 지나도 막는다(안장이 쉬는 날 예비 호가 나간다)")
+        expect(build_issue.ANJANG_WAIT_UNTIL == (7, 30), "안장 글을 기다리는 시각이 07:30 이 아니다(발송 08:00 — 제작 목표 07:45)")
         expect(not prob({**fb, "source_mode": "anjang"}, at(tue, 7, 16)), "안장을 쓴 호를 막는다")
         expect(not prob({**fb, "date": "2026-11-07"}, at(sat, 7, 16)), "주말(안장 쉼) 호를 막는다")
         expect(not prob(fb, at(dt.date(2026, 11, 4), 7, 16)), "다른 날 호(다시 빌드)를 막는다")
@@ -359,7 +361,7 @@ def t_anjang_wait():
         try:
             fetch_anjang.now_kst = lambda: at(tue, 7, 20)
             fetch_anjang.record_check(tue, 3, False, state_dir=tmp)     # 기다리지 않고 '글 없음'만 본 기록
-            expect(prob(fb, at(tue, 7, 21)), "07:55 전 '글 없음' 기록만으로 통과한다(기다리지 않았다)")
+            expect(prob(fb, at(tue, 7, 21)), "07:30 전 '글 없음' 기록만으로 통과한다(기다리지 않았다)")
             fetch_anjang.record_check(tue, 2, False, state_dir=tmp)     # 접속 실패
             expect(not prob(fb, at(tue, 7, 21)), "접속 실패 기록이 있는데 막는다(그날은 WebSearch 로 간다)")
             fetch_anjang.record_check(tue, 0, True, state_dir=tmp)      # 오늘 글 봄(그래도 fallback 은 편집 판단)
@@ -404,10 +406,31 @@ def t_compare_anjang():
 
 
 def t_send_time():
-    """발송 08:30(2026-10-16~) — 그 전 호의 발행 시각은 08:00 그대로(지난 호를 다시 빌드해도, Codex 리뷰)."""
-    from edith.common import send_time_on
+    """발송 시각 이력 — ~10/15 08:00 · 10/16~11/13 08:30 · 2026-11-14~ 08:00(11/13 운영자 '발행은 8시로 변경해줘').
+    지난 호를 다시 빌드해도 그 호의 시각 그대로(Codex 리뷰). 발송 시각에 딸린 것(예비 호 기한·Codex 대체·안장 기다림·예비 예약)이 함께 움직였는지도 본다."""
+    import alert
+    import build_issue
+    import build_rewind
+    import codex_fallback as cf
+    from edith.common import send_time_ko, send_time_on
     expect(send_time_on("2026-10-15") == "08:00", "10/15 호 발행 시각이 08:00 이 아니다")
-    expect(send_time_on("2026-10-16") == load_config()["send_time_kst"] == "08:30", "10/16 부터 발송 08:30")
+    expect(send_time_on("2026-10-16") == send_time_on("2026-11-13") == "08:30", "10/16~11/13 호 발행 시각이 08:30 이 아니다(다시 빌드하면 문구가 바뀐다)")
+    now = load_config()["send_time_kst"]
+    expect(send_time_on("2026-11-14") == send_time_on("2999-01-01") == now == "08:00", "11/14 부터 발송 08:00 이어야 한다")
+    expect(send_time_ko(now) == "오전 8시", f"발송 시각 문구: {send_time_ko(now)}")
+    hh, mm = map(int, now.split(":"))
+    late = ((hh * 60 + mm + 5) // 60, (hh * 60 + mm + 5) % 60)   # 발송 5분 뒤 — 예비 호 기한 = 발송·게시 예비 실행
+    expect(build_rewind.DEADLINE == alert.ISSUE_DEADLINE == late, f"예비 호 기한이 발송 5분 뒤가 아니다: {build_rewind.DEADLINE}·{alert.ISSUE_DEADLINE}")
+    expect(cf.REWIND_DEADLINE == f"{late[0]:02d}:{late[1]:02d}", "codex_fallback 의 예비 호 안내 시각이 build_rewind.DEADLINE 과 다르다")
+    expect(cf.START < cf.LATEST < (hh, mm) < late < cf.CODEX_WAIT_UNTIL, f"Codex 대체 시각 순서: {cf.START}·{cf.LATEST}·{cf.CODEX_WAIT_UNTIL}")
+    expect(cf.START < build_issue.ANJANG_WAIT_UNTIL < (hh, mm), f"안장 기다림이 발송 시각 뒤다: {build_issue.ANJANG_WAIT_UNTIL}")
+    utc = (late[0] * 60 + late[1] - 9 * 60) % (24 * 60)
+    backup = f'cron: "{utc % 60} {utc // 60} * * *"'   # KST 발송 5분 뒤 = UTC 9시간 전
+    for wf in ("send-newsletter.yml", "post-instagram.yml"):
+        expect(backup in (ROOT / ".github" / "workflows" / wf).read_text(encoding="utf-8"), f"{wf} 에 발송 5분 뒤 예비 예약({backup})이 없다")
+    watch = (hh * 60 + mm + 40)
+    expect(f"wait_until_send.py schedule --at {watch // 60:02d}:{watch % 60:02d}" in (ROOT / ".github" / "workflows" / "alerts.yml").read_text(encoding="utf-8"),
+           "아침 감시(alerts.yml)가 발송 40분 뒤가 아니다")
     return None
 
 
@@ -785,13 +808,13 @@ def t_codex_fallback():
     """Claude 가 멈춘 날 Codex 자동 대체(codex-fallback.yml, 2026-10-25): 시작 판단·표시·회고 판단·허용 경로·워크플로 연결."""
     import codex_fallback as cf
     from edith.common import now_kst
-    t = now_kst().replace(year=2026, month=10, day=26, hour=7, minute=56, second=0, microsecond=0)
+    t = now_kst().replace(year=2026, month=10, day=26, hour=7, minute=26, second=0, microsecond=0)
     d = "2026-10-26"
-    expect(cf.produce_decision(d, t, False, set(), True)[0], "07:55 뒤 표시·오늘 호 없으면 Codex 가 시작해야 한다")
+    expect(cf.produce_decision(d, t, False, set(), True)[0], "07:25 뒤 표시·오늘 호 없으면 Codex 가 시작해야 한다")
     for args, why in [((d, t, False, {"claude"}, True), "Claude 표시"), ((d, t, False, {"codex"}, True), "Codex 표시"),
                       ((d, t, True, set(), True), "오늘 호 있음"), ((d, t, False, set(), False), "키 없음"),
-                      ((d, t.replace(hour=8, minute=26), False, set(), True), "08:25 뒤"),
-                      ((d, t.replace(minute=40), False, set(), True), "07:55 전")]:
+                      ((d, t.replace(minute=56), False, set(), True), "07:55 뒤"),
+                      ((d, t.replace(minute=10), False, set(), True), "07:25 전")]:
         expect(not cf.produce_decision(*args)[0], f"{why}인데 Codex 가 시작한다")
     ls = "a\trefs/heads/run-claim/2026-10-26-claude\nb\trefs/heads/run-claim/2026-10-25-codex\nc\trefs/heads/main\n"
     expect(cf.parse_claims(ls, d) == {"claude"} and cf.parse_claims(ls, "2026-10-25") == {"codex"}, "표시 가지를 날짜별로 못 읽는다")
@@ -3048,7 +3071,9 @@ def t_comment_dm():
                     ("에디트 매일 아침 잘 보고 있어요 오늘 내용 특히 좋았습니다", False)]:
         expect(cd.matches(t, s) is want, f"키워드 판정 {t!r} → {not want}")
     text = cd.dm_text(s, "2026-11-02")
-    expect(url in text and "8시 30분" in text and "무료" in text and "수신 거부" in text, f"DM 글: {text}")
+    from edith.common import send_time_ko as _when
+    expect(url in text and _when(load_config()["send_time_kst"]).replace("오전 ", "") in text and "8시 30분" not in text
+           and "무료" in text and "수신 거부" in text, f"DM 글(발송 시각은 지금 설정대로): {text}")
     KST = _dt.timezone(_dt.timedelta(hours=9))
     now = _dt.datetime(2026, 11, 2, 12, 0, tzinfo=KST)
     me = {"id": "900", "username": "edit.h.kr"}
@@ -3257,11 +3282,11 @@ def main():
     check("워크플로 서버 고정", t_runners)
     check("봇 커밋 이름은 KST 날짜", t_commit_dates)
     check("안장출근길 비교(회고 잣대)", t_compare_anjang)
-    check("평일 안장 글 기다리기(07:55 전 fallback 빌드 막음)", t_anjang_wait)
+    check("평일 안장 글 기다리기(07:30 전 fallback 빌드 막음)", t_anjang_wait)
     check("카드 마크·큰 숫자 단위(11/04~)", t_card_marks)
     check("카드 '그래서 나는?' 이어짐(11/04~)", t_card_takeaway_link)
     check("카드 '그래서 나는?' 제목 소식 맞춤·이어 읽기(11/06~)", t_card_takeaway_topic)
-    check("발송 시각(지난 호는 08:00)", t_send_time)
+    check("발송 시각 이력(08:00 → 08:30 → 08:00)과 딸린 시각", t_send_time)
     check("짧게 읽는 소식 점검", t_brief_check)
     check("새 호 막는 점검(짧은 소식 개수·H PICK 중복)", t_strict_content)
     check("월요일 투표 쉼(2026-10-19~)", t_poll_paused)

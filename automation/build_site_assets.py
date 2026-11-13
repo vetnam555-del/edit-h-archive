@@ -18,7 +18,7 @@ import tempfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from edith.common import ROOT  # noqa: E402
+from edith.common import ROOT, load_config  # noqa: E402
 from edith.fonts import font_css  # noqa: E402
 
 MASCOT = ROOT / "assets" / "mascot"
@@ -44,7 +44,7 @@ h1{{font-size:74px;line-height:1.17;font-weight:850;letter-spacing:-2.5px;margin
 </style></head><body>
 <div class="bar"></div>
 <div class="wrap">
-  <div class="eyebrow">매일 아침 8:30 · 무료 뉴스레터</div>
+  <div class="eyebrow">매일 아침 {when} · 무료 뉴스레터</div>
   <h1>경제부터 트렌드까지,<br><span class="hl">2030</span>이 알아야 할 것만</h1>
   <div class="sub">경제·재테크, 소비 트렌드, 마케팅, 테크<br>숫자는 두 번 확인해서, 5분 분량으로</div>
 </div>
@@ -70,7 +70,7 @@ def shot(html, out, w, h, transparent=False):
 
 def main():
     face = (MASCOT / "profile.png").as_uri()
-    og = shot(OG_HTML.format(fonts=font_css(), hello=(MASCOT / "h-hello.png").as_uri()), ROOT / "og_image.png", 1200, 630)
+    og = shot(OG_HTML.format(fonts=font_css(), hello=(MASCOT / "h-hello.png").as_uri(), when=load_config()["send_time_kst"].lstrip("0")), ROOT / "og_image.png", 1200, 630)
     if "Pretendard" not in og["fonts"]:
         raise SystemExit(f"공유 미리보기를 Pretendard 없이 그렸다(한글이 깨진다): {og['fonts']}")
     print(f"  ✓ og_image.png 1200×630 (글꼴 {', '.join(og['fonts'])})")

@@ -7,7 +7,7 @@ Claude Code 의 WebFetch 는 네이버 도메인을 열지 못해서(2026-09-24 
   python3 automation/fetch_anjang.py                         # 오늘(KST) 글
   python3 automation/fetch_anjang.py --since 2026-09-24      # 직전 발행일 다음 날~오늘 글 전부(연휴 뒤 첫 호)
   python3 automation/fetch_anjang.py --date 2026-09-23 --json
-  python3 automation/fetch_anjang.py --since 2026-10-14 --wait-until 07:55   # 오늘 글이 없으면 07:55 까지 2분마다 다시 본다(평일)
+  python3 automation/fetch_anjang.py --since 2026-10-14 --wait-until 07:30   # 오늘 글이 없으면 07:30 까지 2분마다 다시 본다(평일)
 
 출력은 주제를 고르는 '단서'다. 문장을 옮겨 쓰지 않고, 사실은 원 기사로 확인해 원 기사를 출처로 단다
 (원 기사 읽기: automation/read_article.py).
@@ -112,7 +112,7 @@ def parse_post(page):
 
 
 WAIT_POLL = 120
-# 오늘 안장 글을 확인한 기록(저장소에 올리지 않는다 — .gitignore) — build_issue.py 가 평일 07:55 전 fallback 빌드를 막을 때 본다(2026-11-03)
+# 오늘 안장 글을 확인한 기록(저장소에 올리지 않는다 — .gitignore) — build_issue.py 가 평일 07:30 전 fallback 빌드를 막을 때 본다(2026-11-03)
 STATE_DIR = Path(__file__).resolve().parent / ".state"
 
 

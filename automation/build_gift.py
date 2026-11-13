@@ -14,7 +14,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from edith.common import AUTOMATION, ROOT, load_config  # noqa: E402
+from edith.common import AUTOMATION, ROOT, load_config, send_time_ko  # noqa: E402
 from edith.gift import LIVE_FROM  # noqa: E402
 
 GIFTS = AUTOMATION / "gifts"
@@ -95,7 +95,7 @@ def render(data, site):
   <p class="note">EDIT H 구독자 선물이에요. 모두 뉴스레터에서 원 기사로 확인해 다룬 내용이고, 항목마다 그 호로 가면 출처가 있어요.
   {esc(data["as_of"].replace("-", "."))} 기준이라 신청 전엔 공식 사이트에서 한 번 더 확인하세요. 날짜가 지난 항목은 이 화면에서 저절로 빠지고, 체크 표시는 이 화면에서만 보여요.</p>
   {''.join(groups)}
-  <p class="foot">매일 아침 8시 30분, 이런 '할 일이 있는 숫자'를 5가지씩 보내드려요 — <a href="{site}/subscribe.html?ref=gift">EDIT H 구독</a> · <a href="{site}/">지난 호 전체</a></p>
+  <p class="foot">매일 {send_time_ko(load_config()["send_time_kst"]).replace("오전", "아침")}, 이런 '할 일이 있는 숫자'를 5가지씩 보내드려요 — <a href="{site}/subscribe.html?ref=gift">EDIT H 구독</a> · <a href="{site}/">지난 호 전체</a></p>
 </div>
 {HIDE_PAST}
 </body></html>

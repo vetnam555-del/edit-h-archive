@@ -137,9 +137,9 @@ def print_read_through(d):
 
 
 # 2026-11-03 운영자 '안장출근길 소스가 너무 좋다' — 10/15~11/02 평일 13일 중 안장을 제대로 쓴 날은 7일이었고, 2일(10/15·10/29)은
-# 안장 글(평일 07:29~07:40)이 올라오기 전에 먼저 만들어 겹침 0~1/10 이었다. 평일 07:55 전 fallback 빌드는 오늘 안장 글을 확인한
-# 기록(fetch_anjang.py — 글 있음 또는 접속 실패)이 있을 때만 한다. 07:55 가 지나면(안장이 쉬는 날 포함) 그대로 — 막다가 예비 호가 나가면 더 나쁘다.
-ANJANG_WAIT_UNTIL = (7, 55)
+# 안장 글(평일 07:29~07:40)이 올라오기 전에 먼저 만들어 겹침 0~1/10 이었다. 평일 07:30 전(2026-11-14~ 발송 08:00 — 그 전에는 07:55) fallback 빌드는 오늘 안장 글을 확인한
+# 기록(fetch_anjang.py — 글 있음 또는 접속 실패)이 있을 때만 한다. 그 시각이 지나면(안장이 쉬는 날 포함) 그대로 — 막다가 예비 호가 나가면 더 나쁘다.
+ANJANG_WAIT_UNTIL = (7, 30)
 
 
 def anjang_wait_problem(d, now=None, state_dir=None):
@@ -165,8 +165,8 @@ def anjang_wait_problem(d, now=None, state_dir=None):
         return None
     since = "{recent_issues 의 마지막 발행일}"
     return (f"평일({day}) {now:%H:%M} — 안장출근길 오늘 글을 아직 확인하지 않았는데 source_mode 가 fallback 이에요. "
-            f"안장 글은 평일 07:29~07:40 에 올라와요. python3 automation/fetch_anjang.py --since {since} --wait-until 07:55 로 "
-            "기다려 주제를 다시 고른 뒤 빌드하세요(07:55 가 지나면 이 검사는 넘어가요 — RUNBOOK 1-1)")
+            f"안장 글은 평일 07:29~07:40 에 올라와요. python3 automation/fetch_anjang.py --since {since} --wait-until 07:30 으로 "
+            "기다려 주제를 다시 고른 뒤 빌드하세요(07:30 이 지나면 이 검사는 넘어가요 — RUNBOOK 1-1)")
 
 
 def source_check_problem(d, now=None, cache=None):
