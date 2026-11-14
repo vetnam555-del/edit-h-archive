@@ -46,7 +46,10 @@
   주소가 열리지 않으면(curl 로 200 이 아니면) 저장소의 `assets/mascot/mascot-sheet.jpg`·`h-surprised.png`·`h-coffee.png` 를 다시 올린다:
   `create_upload_url(filename, content_type, size_bytes)` → 답에 든 curl 명령을 그대로 실행 → 답의 cdnUrl 을 쓰고, 이 문서의 주소도 같은 커밋에서 바꾼다
   (올리는 데 쓰는 서명 주소는 커밋·보고에 넣지 않는다 — cdnUrl 만).
-- **목소리**: 힉스필드 `generate_audio`·`generate_audio_batch`(아래 (A)). 드롭샷 연결에 목소리 도구가 생기면 그때 옮긴다(개선 요청에 적어 둠).
+- **목소리**: 힉스필드 `generate_audio`·`generate_audio_batch`(아래 (A)). 드롭샷 연결에 목소리 도구가 생기면 그때 옮긴다.
+  드롭샷 목록에 목소리 모델(`elevenlabs/v3`·`minimax/speech-2.8-turbo`)이 보여도 연결의 generate_image·generate_video 로는 부를 수 없다(11/14 확인 — '이 도구로는 실행할 수 없는 모델 종류').
+  **영상 모델이 대사를 직접 말하게 하는 방식(reference_audio 에 예전 녹음을 주고 프롬프트에 대사)은 쓰지 않는다** — 11/14 시험(Seedance 2.0 mini 7초)에서
+  대사는 정확했지만 운영자 "목소리 별로야". 목소리는 따로 녹음한 Hana·Knox 를 얹는 지금 방식 그대로.
 - 드롭샷 도구가 요금제·결제 때문에 안 된다고 답하면 그 문구와 요금 안내 주소(https://aistudio.dropshot.io/pricing)를 그대로 운영자 알림에 옮긴다.
 
 ## 크레딧 계획 (드롭샷 — 11/04 운영자 '480p로 해줘' · 11/13 '주말만 제외' · 11/14 '드롭샷으로')
