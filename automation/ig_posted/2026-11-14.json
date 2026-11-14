@@ -5,5 +5,14 @@
   "permalink": "https://www.instagram.com/p/Dfsw2yVEZ6e/",
   "first_comment": true
  },
- "story_error": "400 OAuthException (code 24): The media with 18,146,292,502,712,420 cannot be found."
+ "story": {
+  "id": "18025889609936245",
+  "ids": [
+   "18025889609936245",
+   "18129864337871297",
+   "17933953368164316",
+   "17882008920631976"
+  ],
+  "at": "2026-11-14T09:09:11+09:00"
+ }
 }
