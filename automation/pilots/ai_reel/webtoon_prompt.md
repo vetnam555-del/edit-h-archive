@@ -15,13 +15,19 @@
 글이 길면 두 컷이 같이 줄어든다(세로로 쌓은 칸). 그래도 넘치면 렌더가 실패한다(반쯤 잘린 장을 올리지 않게 — selftest 가 카드 글자 한도를 꽉 채워 확인).
 한 묶음 = 표지(그림 1장 + 오늘 5가지 목차) + 두 컷 5장 + '오늘의 5가지 한눈에' + 끝 장 = **8장**.
 
-## 그림 만들기 (하루 11장, 약 2.75 크레딧)
+## 그림 만들기 (하루 11장, 드롭샷 약 185 크레딧 — 2026-11-15~)
 
-- `generate_image_batch` — model `gpt_image_2_5`, `resolution` `1k`, `aspect_ratio` `4:3`(1168×880), `use_unlim` false, 장당 0.25 크레딧.
-- `medias`(role `image_references`): 늘 H 시트 `3d8becae-2f05-4b51-b4d2-db71e052f311`. 놀라는 장면은 + `f485f5d5-8a54-4c78-8b04-d2efcd3bed2f`(놀람),
-  표지·커피 장면은 + `9dc42fcf-8cdc-4c35-ac3b-1de2c6c3c21a`(커피).
+2026-11-14 운영자 "앞으로는 힉스필드가 아니라 드롭샷을 사용해서" → 그림은 **드롭샷(Dropshot AI Studio)** 으로 그린다. 도구 찾는 법·참고 그림 주소·크레딧 규칙은
+`automation/RUNBOOK_REEL.md` 의 '도구'·'크레딧 계획'·5-1 에 있다(주소는 한 곳에만 적는다 — 거기가 맞다).
+
+- 드롭샷 `generate_image` — model `google/nano-banana-2.1`, options `prompt`(2,000자 안)·`input_image`(참고 그림 주소 목록)·`aspect_ratio` `4:3`·`resolution` `1K`
+  (1200×896, 장당 16.8 크레딧). 한 번에 한 장 — 11번 부르고 `get_generation(job_id)` 로 받는다.
+- `input_image`: 늘 H 시트. 놀라는 장면은 + 놀람, 표지·커피 장면은 + 커피(주소는 RUNBOOK_REEL '도구').
+- 같은 장이 두 번 다 H 모양이 틀릴 때만 그 장을 `bytedance/seedream-5.5`(같은 options, 장당 18)로. 장당 125 인 `openai/gpt-image-2.5-*` 는 쓰지 않는다.
 - 표지 1장 + 주제마다 A·B 2장. 받은 PNG 는 `automation/pilots/ai_reel/{날짜}/stills/` 에 둔다(저장소에 올리지 않는다 — `.gitignore`). job id 는 brief.json comic 에 적는다.
 - 프롬프트 = 아래 STYLE + CHARACTER + 그날 SCENE + 구도(A·B·표지) + NEGATIVE. STYLE·CHARACTER·NEGATIVE 는 그대로 붙이고 SCENE 만 새로 쓴다.
+- 2026-11-14 시험: 같은 프롬프트·참고 그림으로 nano-banana-2.1 과 seedream-5.5 모두 H 모양(동그란 주황 공·검은 안경·가는 팔다리)을 맞게 그렸고, 장면·표정 지시는 nano-banana 가 더 잘 따랐다.
+- (2026-11-01~11-14 는 힉스필드 `gpt_image_2_5` 로 그렸다 — 그때 brief.json 의 job 은 힉스필드 번호다.)
 
 ### STYLE (그대로)
 ```
@@ -52,7 +58,7 @@ No people, no human figures, no text, no letters, no numbers, no logos, no emble
 ## 눈 검수 (11장 모아 한 장으로 보고)
 
 1. H 모양 — 동그란 주황 공 몸, 동그란 검은 안경, 가는 검은 팔다리. 코·귀·머리카락·옷이 생기면 다시.
-2. 사람·로고·글자·숫자·실제 제품 모양(상표 같은 줄무늬·로고 같은 무늬)이 없나. 있으면 그 장만 다시(한 장에 1번, 장당 0.25).
+2. 사람·로고·글자·숫자·실제 제품 모양(상표 같은 줄무늬·로고 같은 무늬)이 없나. 있으면 그 장만 다시(한 장에 1번, 장당 16.8).
 3. 렌더한 8장에서 내레이션 상자·숫자 스티커·말풍선이 H 얼굴을 덮지 않나 — 덮으면 아래 손잡이로 맞춘다.
 
 ## 손잡이 (brief.json comic.panels[i])

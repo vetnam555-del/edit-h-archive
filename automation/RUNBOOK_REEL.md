@@ -25,23 +25,52 @@
   (`config.instagram.image_reel_until`). 릴스는 AI 영상(평일)만. AI 영상을 못 만든 날 대신 올릴 릴스는 없다.
 - 11/13 "오늘 자 나갈 때 영상 릴스 같이 나가 줘, 릴스 영상은 주말만 제외하는 방향으로" → AI 영상 릴스는 **평일(월~금) 매일**, 주말은 웹툰만
   ('11월 짝수 날만' 계획을 바꿨다).
+- 11/14 "앞으로는 힉스필드가 아니라 드롭샷을 사용해서 작업물을 진행할 거야" → **영상·그림은 드롭샷(Dropshot AI Studio)으로 만든다**(11/15~, 아래 '도구').
+  드롭샷 연결에는 목소리를 만드는 도구가 없어 목소리(Hana·Knox)만 힉스필드에 남겼다. 영상·그림을 힉스필드로 만들지 않는다(드롭샷이 안 되는 날 힉스필드로 대신하지 않는다).
 - 11/02 "릴스 나오면 바로 알려줘" → 7번. 11/05 "매일 발전하고 있는 거 맞아?" → 보고 첫 줄은 구독자 목표 줄.
 
-## 크레딧 계획 (11/04 운영자 '480p로 해줘' · 11/13 '주말만 제외')
+## 도구 — 영상·그림은 드롭샷, 목소리만 힉스필드 (2026-11-15~)
 
-- **평일(월~금)은 매일 AI 영상** — seedance 2.5 **resolution 480p · bitrate_mode high**(20초 60크레딧, 720p 는 140. 다시 만들기도 480p).
-- 주말은 웹툰만(그림 11장 ≈ 2.75크레딧). 평일 하루는 영상 60 + 그림 2.75 + 목소리 약 0.5 ≈ 63크레딧(영상을 다시 만들면 +60).
-- 시작할 때 잔액(balance)을 본다: 영상 한 편 값(60)보다 적으면 그날 영상은 멈추고 웹툰만 만든 뒤 운영자에게 알린다
-  (PushNotification '크레딧이 N 남아 오늘 영상 릴스는 쉬었어요'). 크레딧을 사거나 요금제를 바꾸는 일은 운영자만 한다(여기서 하지 않는다).
-- 잔액이 300 아래면 그날 보고와 알림에 '남은 크레딧 N · 영상 약 M편(잔액 ÷ 63)' 한 줄을 붙인다(운영자가 미리 채울 수 있게).
-- 끝나는 날은 정해져 있지 않다 — 운영자가 다시 말할 때까지 평일마다 만든다(예전 '12월 계획 전에는 웹툰만' 규칙은 11/13 운영자 결정으로 없앴다).
+- **드롭샷(Dropshot AI Studio) 연결 도구**: `generate_video`·`generate_image`·`get_generation`·`get_credit_balance`·`create_upload_url`.
+  ToolSearch 로 'dropshot' 이나 'get_credit_balance' 를 찾아 부른다. 이름 앞에 연결 번호가 붙는다(지금은 `mcp__ef30ebc2-9f0c-4860-9ebd-57448c9a7251__generate_video` 꼴 —
+  번호가 달라도 `get_credit_balance`·`get_generation` 이 같이 있는 쪽이 드롭샷이다).
+  **힉스필드에도 이름이 같은 `generate_video`·`generate_image` 가 있다 — 영상·그림에는 `mcp__Higgsfield__…` 를 쓰지 않는다.**
+- 부르는 꼴: `generate_video(model, options, client_token)`·`generate_image(model, options, client_token)` → 답의 job_id 를 `get_generation(job_id)` 로 확인한다
+  (status 가 succeeded 가 되면 outputList 의 videoUrl·imageUrl 을 curl 로 받는다. 그림은 1~2분, 영상 20초는 15~25분 — 30초~1분 간격으로 보고, 그동안 다른 일을 먼저 한다).
+  **client_token 은 요청마다 새로**(예: `edith-{오늘}-video-1`, `edith-{오늘}-a3-1`) — 통신 오류로 같은 요청을 다시 보낼 때만 같은 값을 쓴다(크레딧이 두 번 빠지지 않는다).
+  다시 만들 때는 끝 번호를 올린다. 한 번에 여러 장을 보내는 도구는 없다 — 그림 11장은 generate_image 를 11번 부른다(한 답에 나란히 불러도 된다).
+- **H 참고 그림 주소**(드롭샷에 올려 둔 것 — 영상·그림 요청마다 붙인다):
+  - 시트(늘): `https://cdn.aistudio.dropshot.io/public/mcp-uploads/prod/RSNOZHV0/1987e2d538804af19b3205f75c627eef/edith-h-mascot-sheet.jpg`
+  - 놀람: `https://cdn.aistudio.dropshot.io/public/mcp-uploads/prod/RSNOZHV0/15516af56e7746f2b2fc8319638574ad/edith-h-surprised.png`
+  - 커피: `https://cdn.aistudio.dropshot.io/public/mcp-uploads/prod/RSNOZHV0/5a81d055fc7b461c93611b21016b87d4/edith-h-coffee.png`
+  주소가 열리지 않으면(curl 로 200 이 아니면) 저장소의 `assets/mascot/mascot-sheet.jpg`·`h-surprised.png`·`h-coffee.png` 를 다시 올린다:
+  `create_upload_url(filename, content_type, size_bytes)` → 답에 든 curl 명령을 그대로 실행 → 답의 cdnUrl 을 쓰고, 이 문서의 주소도 같은 커밋에서 바꾼다
+  (올리는 데 쓰는 서명 주소는 커밋·보고에 넣지 않는다 — cdnUrl 만).
+- **목소리**: 힉스필드 `generate_audio`·`generate_audio_batch`(아래 (A)). 드롭샷 연결에 목소리 도구가 생기면 그때 옮긴다(개선 요청에 적어 둠).
+- 드롭샷 도구가 요금제·결제 때문에 안 된다고 답하면 그 문구와 요금 안내 주소(https://aistudio.dropshot.io/pricing)를 그대로 운영자 알림에 옮긴다.
+
+## 크레딧 계획 (드롭샷 — 11/04 운영자 '480p로 해줘' · 11/13 '주말만 제외' · 11/14 '드롭샷으로')
+
+- 드롭샷 요금(2026-11-14 확인): 영상 `bytedance/seedance-2.5` **480p 는 1초에 51.5 → 20초 한 편 1,030크레딧**(720p 20초는 2,300 — 쓰지 않는다).
+  그림 `google/nano-banana-2.1` 1K 한 장 16.8 → 하루 11장 약 185크레딧. **평일 하루 약 1,215**(영상을 다시 만들면 +1,030), **주말 하루 약 185**.
+- 요금제는 한 달 24,000크레딧(11/14 밤 잔액 23,968.6, 2026-12-14 에 새로 채워진다). 평일마다 20초 영상이면 한 달에 약 27,000 이 들어 **3,000쯤 모자란다**
+  — 그래서 아래 '아껴 쓰기'를 지킨다(운영자 결정을 기다리는 일: OWNER_TODO '드롭샷 크레딧').
+- **시작할 때 `get_credit_balance` 를 본다**(totalBalance 와 creditList 의 expiredAt = 다음에 채워지는 날):
+  - **남은 그림 몫을 먼저 뗀다**: 채워지는 날까지 남은 날 수 × 185 를 잔액에서 빼고, 남은 것이 1,030 보다 적으면 그날 영상은 쉬고 웹툰만 만든 뒤
+    운영자에게 알린다(PushNotification '드롭샷 크레딧이 N 남아 오늘 영상 릴스는 쉬었어요'). 웹툰은 날마다 나가야 해서 그림이 먼저다.
+  - 잔액이 185 보다도 적으면 웹툰도 만들 수 없다 — 알리고 끝낸다.
+- **아껴 쓰기**: 영상 다시 만들기는 1번까지(그래도 걸리면 그날 영상은 쉰다). 그림 다시 그리기는 장당 1번까지. 720p·1080p·다른 영상 모델·장당 125 인 그림 모델(`openai/gpt-image-2.5-*`)은 쓰지 않는다.
+- 잔액이 6,000 아래면 그날 보고와 알림에 '남은 드롭샷 크레딧 N · 영상 약 M편((잔액 − 남은 날 × 185) ÷ 1,030) · 채워지는 날 M/D' 한 줄을 붙인다.
+- 크레딧을 사거나 요금제를 바꾸는 일은 운영자만 한다(여기서 하지 않는다). 끝나는 날은 정해져 있지 않다 — 운영자가 다시 말할 때까지 평일마다 만든다.
+- 목소리(힉스필드)는 하루 약 0.5크레딧(11/14 잔액 477.6)이라 따로 셈하지 않는다. 힉스필드 잔액이 5 아래면 보고에 한 줄.
 
 ## 새 세션 준비 (맨 처음)
 
 - `git fetch origin main` → `git checkout main` → `git pull --ff-only origin main`.
 - `python3 -c "import faster_whisper"` 가 실패하면 `pip install -q faster-whisper`(새 세션엔 없다 — qa.py 의 받아쓰기가 쓴다. 처음 실행 때 small 모델을 내려받는다).
-- 힉스필드 도구(balance·generate_video·generate_image_batch·generate_audio_batch·jobs_wait)와 GitHub 도구(PR·actions)는 ToolSearch 로 불러 쓴다.
-  힉스필드 도구가 없으면 만들 수 없다 — PushNotification 으로 알리고 끝낸다.
+- 드롭샷 도구(위 '도구')·힉스필드 목소리 도구(generate_audio·generate_audio_batch)·GitHub 도구(PR·actions)는 ToolSearch 로 불러 쓴다.
+  **드롭샷 도구가 없으면 영상도 그림도 만들 수 없다** — PushNotification 으로 알리고 끝낸다(힉스필드로 대신 만들지 않는다).
+  평일에 힉스필드 목소리 도구만 없으면 **영상을 만들기 전에** 멈춘다: 그날 영상은 쉬고 웹툰만 만든 뒤 알린다(목소리 없는 릴스는 올리지 않는다 — 영상값 1,030 을 먼저 쓰지 않게 목소리 도구부터 확인).
 - 받은 영상·그림·프레임 시트·시험 렌더는 저장소 밖 임시 폴더(scratchpad 나 `mktemp -d`)에 둔다. 저장소 루트에 임시 파일을 남기지 않는다.
 - 그림은 ffmpeg 로 한 장에 모아(tile) Read 로 본다(PIL 이 안 되는 환경이 있다).
 - 흐름 문서: `automation/reviews/2026-11-01-ai-video.md`('오늘 아침 5가지'·'같은 틀 반복 금지'·'기사·출처 맞춤'·'검은 화면'·'멈춘 듯한 구간'),
@@ -54,14 +83,14 @@
 11/02 운영자 "오늘 서울 도심 버스 편에서 나왔던 여자와 남자 목소리가 딱 좋았던 것 같은데". Ian·Brooks·차분한 진행자 말투는 쓰지 않는다.
 번갈아 시험·목소리 없는 판은 하지 않는다. 운영자가 다른 걸 고르면 바꾼다.
 
-- **Hana**(주제 줄 대부분 + 끝인사): generate_audio — model `qwen_audio_tts`, prompt 대사, voice_type `preset`,
+- **Hana**(주제 줄 대부분 + 끝인사): 힉스필드 generate_audio — model `qwen_audio_tts`, prompt 대사, voice_type `preset`,
   voice_id `c25f78a0-714e-42af-8da3-a399cef94968`, language `ko`, use_unlim false, instruction 은 줄마다 그 소식에 맞게 —
   '귀여운 만화 캐릭터, 깜짝 놀라서 신나게 전하는 말투'·'귀엽고 장난스러운 만화 캐릭터, 놀라서 또박또박 전하는 말투'·'귀여운 만화 캐릭터, 다급하게 또박또박 알려 주는 말투'·
   '귀여운 만화 캐릭터, 신나서 들뜬 말투'·'귀여운 만화 캐릭터, 여유 있고 다정하게 조언하는 말투'('나'에게 닿는 줄), 끝인사 '귀엽고 밝은 만화 캐릭터, 경쾌하게 인사'(줄당 약 0.05크레딧).
 - **Knox**(그날 가장 센 숫자·장면 한 줄 = 0초 여는 한 마디): model `elevenlabs_v4`, prompt '그날 짧은 이름',
   dialogue `[{text '[excited] …습니다!', voice_type preset, voice_id 195e386a-cb61-5c1b-a53b-0e2f0669c408}]`, use_unlim false.
   '[excited]'는 말투 표시라 brief 의 text 칸에는 넣지 않는다.
-- 녹음은 한 번에 6줄(Hana 주제 4줄 + 끝인사, Knox 1줄) generate_audio_batch — 다른 배치 바로 뒤에 보내면 429 가 나니 실패한 줄만 1분쯤 뒤 다시.
+- 녹음은 한 번에 6줄(Hana 주제 4줄 + 끝인사, Knox 1줄) 힉스필드 generate_audio_batch — 다른 배치 바로 뒤에 보내면 429 가 나니 실패한 줄만 1분쯤 뒤 다시.
 - 말: Hana 는 존댓말 '~해요!/~래요!', Knox 는 '~습니다!'. 녹음 문구 끝 '!'는 말투용이고 자막·캡션의 느낌표는 아낀다. '~해 보자!' 반복 금지.
 - 길이: 한 줄 14~18음절. 녹음 뒤 앞뒤 무음을 자르고(ffmpeg silenceremove), 장면 칸(약 3.3초)보다 길 때만 tempo 1.0~1.2(그보다 길면 대사를 줄여 다시 녹음, 짧으면 늘리지 않는다).
   episode.py 가 녹음 속 0.25초 넘는 쉼을 0.2초로 줄인다 — 줄 길이·tempo 는 `qa.py <brief.json> --stems` 의 '목소리 구간'으로 잰다.
@@ -102,7 +131,7 @@ hook 종류가 질문이면 '…라고?', 반전이면 '…인데 …' 꼴로 �
 
 ### 0. 준비
 **두 번 만들지 않기**: `automation/pilots/ai_reel/{오늘}/brief.json` 이 이미 main 에 있거나 `git ls-remote --heads origin run-claim/{오늘}-reel` 에 표시가 있으면
-다른 실행이 오늘 것을 만들었거나 만드는 중이다 — 만들지 않고 한 줄 보고하고 끝낸다(크레딧을 두 번 쓰지 않는다). 둘 다 없으면
+다른 실행이 오늘 것을 만들었거나 만드는 중이다 — 만들지 않고 한 줄 보고하고 끝낸다(크레딧을 두 번 쓰지 않는다 — 드롭샷 영상 한 편이 1,030 이다). 둘 다 없으면
 `git push origin origin/main:refs/heads/run-claim/{오늘}-reel` 로 '시작' 표시를 남기고 시작한다(표시는 사흘 뒤 자동으로 지워진다).
 운영자가 "다시 만들어"라고 한 경우에만 표시가 있어도 진행한다.
 오늘 호가 main 에 있나(`content/{오늘}.json`). 없으면 send_later 로 10분 뒤 자신을 다시 깨운다(최대 3번, 그래도 없으면 한 줄 보고하고 끝).
@@ -134,9 +163,15 @@ hook 종류(숫자 먼저·질문·반전·상황·할 일 먼저·비교·대�
 CAMERA 에 'continuous motion in every shot — no held poses, no frozen moments'.
 
 ### 2. 영상 (평일만)
-generate_video — model seedance_2_5, mode omni_reference, duration 20, resolution 480p, bitrate_mode high, aspect_ratio 9:16, generate_audio true, use_unlim false,
-medias image_references `3d8becae-2f05-4b51-b4d2-db71e052f311`·`f485f5d5-8a54-4c78-8b04-d2efcd3bed2f`·`9dc42fcf-8cdc-4c35-ac3b-1de2c6c3c21a`(@image1 시트·@image2 놀람·@image3 커피).
-프리셋 추천 notice 가 오면 declined_preset_id 를 넣어 그대로. 60크레딧, 생성 약 15분(jobs_wait 로 기다린다 — 그동안 5-1 웹툰 그림을 먼저 만든다).
+드롭샷 `generate_video` — model `bytedance/seedance-2.5`, client_token `edith-{오늘}-video-1`, options:
+`{"prompt": 그날 영어 프롬프트, "reference_image": [시트 주소, 놀람 주소, 커피 주소], "generation_mode": "reference", "duration": 20, "resolution": "480p", "aspect_ratio": "9:16", "generate_audio": true}`
+(주소는 위 '도구'. 1,030크레딧). 받은 job_id 를 `get_generation` 으로 1분쯤 간격으로 확인한다 — 15~25분 걸리니 **그동안 5-1 웹툰 그림과 목소리를 먼저 만든다**.
+40분이 넘도록 processing 이면 한 번 더 10분 기다리고, 그래도 안 끝나거나 failed 면 그날 영상은 쉰다(같은 client_token 으로 다시 보내지 않는다 — 다시 만들기는 끝 번호 2 로 1번).
+- **프롬프트 쓰는 법이 바뀌었다**: 힉스필드 때의 `@image1`·`@image2`·`@image3` 표시는 드롭샷에서 통하지 않는다. 참고 그림은
+  'H from the reference images'(생김새)·'the first reference image (character sheet)'·'the second reference image (surprised face)'·'the third reference image (coffee pose)'처럼 말로 가리킨다.
+  예전 날짜의 brief_prompt.txt 를 본보기로 쓸 때 `@image` 표시를 이렇게 바꾼다. CHARACTER 문장(동그란 주황 공 몸·동그란 검은 안경·가는 검은 팔다리, 코·귀·머리카락·옷 없음)은 프롬프트에 그대로 적는다.
+- 2026-11-14 시험(4초, 참고 그림 3장): H 모양 그대로·세로 480×854·효과음 있음. 받은 영상은 480×854 이고 episode.py 가 1080×1920 으로 키운다.
+- brief.json 의 `"seedance"` 칸: `{"model": "bytedance/seedance-2.5", "made_by": "dropshot", "job": job_id, "prompt": "brief_prompt.txt", "cut": …}`.
 
 ### 3. 받기·눈 검수
 원본을 임시 폴더에 받는다 → 0.5초 간격 프레임 시트로 사람·로고·실제 제품·글자·H 모양을 본다.
@@ -177,12 +212,13 @@ medias image_references `3d8becae-2f05-4b51-b4d2-db71e052f311`·`f485f5d5-8a54-4
 - (가) 그림 11장 = 표지 1 + 주제마다 A(상황 — 소식이 벌어지는 순간의 몸개그)·B(H 의 반응 — 카드 '그래서 나는?'을 H 가 하는 모습).
   프롬프트 = 문서의 STYLE + CHARACTER(그대로) + 그날 SCENE(기사에 있는 사실만, 실존 인물·회사·제품·장소는 비유로 — 사람 대신 작은 하얀 도우미 로봇, 차·폰은 장난감 덩어리) +
   구도 문장 A·B·표지(그대로) + NEGATIVE(그대로 + 그날 것). 전날과 다른 장소·동작·카메라.
-  generate_image_batch — model gpt_image_2_5, resolution 1k, aspect_ratio 4:3, use_unlim false, medias(role image_references) `3d8becae-2f05-4b51-b4d2-db71e052f311`(늘) +
-  `f485f5d5-8a54-4c78-8b04-d2efcd3bed2f`(놀라는 장면) 또는 `9dc42fcf-8cdc-4c35-ac3b-1de2c6c3c21a`(표지·커피). 11×0.25 ≈ 2.75크레딧.
-- (나) jobs_wait → `automation/pilots/ai_reel/{오늘}/stills/` 에 받는다(.gitignore — 저장소에 안 올린다). 11장을 한 장으로 모아 눈 검수:
-  H 모양(동그란 주황 공 몸·동그란 검은 안경·가는 검은 팔다리, 코·귀·머리카락·옷 없음), 사람·로고·글자·숫자·실제 제품 모양 없음. 걸리면 그 장만 다시(장당 1번).
+  드롭샷 `generate_image` 를 장마다 한 번씩(11번 — 한 답에 나란히 불러도 된다): model `google/nano-banana-2.1`, client_token `edith-{오늘}-{장 이름}-1`(cover·a1·b1…),
+  options `{"prompt": …(2,000자 안), "input_image": [시트 주소, 놀람 주소(놀라는 장면) 또는 커피 주소(표지·커피 장면)], "aspect_ratio": "4:3", "resolution": "1K"}`
+  (주소는 위 '도구'. 차분한 장면은 시트만 붙여도 된다). 장당 16.8 → 11장 약 185크레딧. 1200×896 PNG 가 온다.
+- (나) `get_generation` 으로 11장이 succeeded 인지 확인(1~2분) → imageUrl 을 curl 로 `automation/pilots/ai_reel/{오늘}/stills/` 에 받는다(.gitignore — 저장소에 안 올린다). 11장을 한 장으로 모아 눈 검수:
+  H 모양(동그란 주황 공 몸·동그란 검은 안경·가는 검은 팔다리, 코·귀·머리카락·옷 없음), 사람·로고·글자·숫자·실제 제품 모양 없음. 걸리면 그 장만 다시(장당 1번, client_token 끝 번호 2). 같은 장이 두 번 다 H 모양이 틀리면 그 장만 model `bytedance/seedream-5.5`(같은 options, 장당 18)로 한 번 더.
 - (다) brief.json 에 "comic": {"series": "오늘 아침 5가지", "layout": "duo", "title": 그날 가장 센 사실 + '오늘 아침 5가지'(숫자 hl, content 숫자만),
-  "cover": {"img": "stills/cover.png", "pos", "job"}, "summary": true, "panels": 5개(영상 순서 — {"card": 그 주제의 카드 번호(제목·본문·'그래서 나는?'·출처·숫자를 카드 글 그대로),
+  "cover": {"img": "stills/cover.png", "pos", "job"(드롭샷 job_id)}, "summary": true, "panels": 5개(영상 순서 — {"card": 그 주제의 카드 번호(제목·본문·'그래서 나는?'·출처·숫자를 카드 글 그대로),
   "img_a", "pos_a", "img_b", "pos_b", "say_side", 필요하면 "tail": "out"·"stk_side": "left"/"none", "jobs": [A, B]}), "sources": "장마다 표시",
   "end": {"title": "오늘 아침 5가지,<br>매일 아침 8시", "sub": "경제부터 트렌드까지, 오늘 소식 5가지를<br>웹툰으로 풀어 드려요"}}. 주말(웹툰만 만드는 날) brief.json 엔 date·items·comic 만 있으면 된다.
 - (라) `python3 automation/pilots/ai_reel/comic.py automation/pilots/ai_reel/{오늘}/brief.json` → `instagram/{오늘}/comic/c1~c8.jpg`·`comic_alt.json`.
@@ -216,7 +252,7 @@ medias image_references `3d8becae-2f05-4b51-b4d2-db71e052f311`·`f485f5d5-8a54-4
 - 주말은 알림 없이 마지막 답에 '오늘은 웹툰만 — 19:30 에 올라가요'.
 - 마지막 답(한국어로 짧게): **첫 줄은 구독자 목표 줄**(`automation/metrics/summary.md` '한눈에'의 '목표 구독자' 줄 그대로 — 뉴스레터 N(7일 ±n)·인스타 N(7일 ±n)),
   릴스·웹툰 링크, 검수 결과(원 기사 대조 첫 줄·한 곳에만 있던 숫자 N개·이어짐 점검·검은 화면·꽉 찬 화면·멈춘 구간·글자 지움 여부·줄마다 받아쓰기 %·다시 녹음한 줄),
-  쓴 크레딧(영상·웹툰 그림 따로)·남은 크레딧.
+  쓴 드롭샷 크레딧(영상·웹툰 그림 따로)·남은 드롭샷 크레딧(채워지는 날)·영상을 쉬었으면 그 이유.
 
 ## (D) 댓글 DM 약속 줄
 `python3 -c "import sys;sys.path.insert(0,'automation');from edith.site import dm_line;print(dm_line('{오늘}') or '')"` 가 글을 내면 그 한 줄을 릴스·만화 캡션에 넣고,
