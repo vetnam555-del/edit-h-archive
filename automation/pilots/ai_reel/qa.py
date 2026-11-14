@@ -358,6 +358,10 @@ def _sign_near(text, start, end, words=True):
     return ""
 
 
+# 한글 수사 + 단위처럼 보이지만 숫자가 아닌 낱말(붙여 쓸 때만) — 11/08 '이번 주는'이 '2번'으로 읽혀 대사 숫자 대조가 막았다
+NOT_NUMBER_WORDS = {"이번", "이달", "이곳", "이건", "이분", "사건"}
+
+
 _NATIVE_TENS = {"열": 10, "스물": 20, "스무": 20, "서른": 30, "마흔": 40}
 _NATIVE_ONES = {"한": 1, "하나": 1, "두": 2, "둘": 2, "세": 3, "셋": 3, "석": 3, "네": 4, "넷": 4, "넉": 4,
                 "다섯": 5, "여섯": 6, "일곱": 7, "여덟": 8, "아홉": 9}
@@ -388,6 +392,8 @@ def spoken_numbers(text):
         if not unit and run.endswith("일") and len(run) > 1 and (re.search(r"\d", run[:-1]) or run[:-1].endswith(" ")):
             run, unit = run[:-1].strip(), "일"
         if not re.search(r"\d", run) and not unit:
+            continue
+        if (run + unit) in NOT_NUMBER_WORDS and m.group(0).strip() == run + unit:   # 붙여 쓴 '이번'·'이달'·'사건' — 띄어 쓴 '이 번'은 숫자 그대로
             continue
         if unit == "잔" and not re.search(r"\d", run):   # '아홉 잔'은 고유어 수사(native_numbers)가 읽는다 — '이 잔'(this cup)을 2잔으로 읽지 않게
             continue

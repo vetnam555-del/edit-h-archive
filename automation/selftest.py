@@ -2810,6 +2810,10 @@ def t_ai_reel():
            "tts 의 '시월·유월'·고유어 수사('두 곳')·한 자씩 읽기('이공삼공')를 숫자로 못 맞추거나, 대사와 다른 말을 녹음한 tts 가 통과한다")
     expect(qa.spoken_numbers("이 잔 주세요") == [] and qa.spoken_numbers("커피 3잔") == [(3.0, "잔", "")],
            "'잔' 읽기가 틀린다 — 숫자 뒤 '9잔'은 9 잔, '이 잔'(this cup)은 숫자가 아니다")
+    expect(qa.spoken_numbers("기름값, 이번 주는 0.3원만 내렸어요") == [(0.3, "원", "")]
+           and qa.spoken_numbers("이달 말 사건") == [] and qa.spoken_numbers("이 번 더") == [(2.0, "번", "")]
+           and qa.spoken_numbers("2번 출구") == [(2.0, "번", "")],
+           "'이번'·'이달'·'사건'을 숫자로 읽는다(11/08 '이번 주'가 '2번'으로 막혔다) — 띄어 쓴 '이 번'·'2번'은 숫자")
     b03 = json.loads((ROOT / "automation" / "pilots" / "ai_reel" / "2026-11-03" / "brief.json").read_text(encoding="utf-8"))
     spans03 = [(0.10, 2.69), (3.12, 6.87), (7.06, 10.01), (10.20, 13.41), (14.08, 17.35), (17.60, 20.63)]   # 11/03 녹음을 잰 값
     got03 = qa.sync_gaps({**b03, "date": "2026-11-04"}, spans03)
