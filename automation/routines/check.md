@@ -10,7 +10,8 @@ GitHub 예약 실행은 아침 0~3시간·낮저녁 3~6시간 늦거나 빠지�
    (예비 호 날엔 릴스를 올리지 않는 게 정상). 평일 정규 호인데 `source_mode` 가 `fallback` 이면 안장출근길을 왜 못 썼는지(늦게 올라옴·접속 실패) 보고에 한 줄.
 2) 호가 있으면: main 의 `automation/sent/{날짜}.json` 이 없으면 send-newsletter.yml 을 workflow_dispatch(date={날짜})로 돌린다.
    인스타: `python3 automation/ig_plan.py` 의 저녁 게시인 날은 **아침엔 캐러셀만** 확인한다 — `automation/ig_posted/{날짜}.json` 에 carousel permalink 가 없으면
-   post-instagram.yml 을 mode=post, key={날짜}, only=carousel 로 돌린다. 그리고 **어제** AI 영상 릴스(`instagram/{어제}/reel_ai.mp4`)가 있는데
+   post-instagram.yml 을 mode=post, key={날짜}, only=carousel 로 돌린다. 같은 기록에 `story_error` 가 있고 `story` 가 없는데 오늘이 주말이거나 예비 호 날이면
+   (평일 정규 호는 카드 스토리를 릴스 실행이 올린다) 같은 실행(only=carousel)을 한 번 돌려 카드 스토리를 다시 올린다(11/14 — 08:01 인스타 오류로 실패, 09:09 다시 올림). 그리고 **어제** AI 영상 릴스(`instagram/{어제}/reel_ai.mp4`)가 있는데
    reel permalink 가 없거나, 웹툰(`instagram/{어제}/comic/`)이 있는데 comic permalink 가 없으면 mode=post, key={어제}, only=reel 로 돌린다.
    주말·예비 호 날은 AI 영상이 없어 릴스가 없는 게 정상이다 — 이미지를 이어 붙인 릴스는 2026-11-13~ 올리지 않는다(운영자 11/12).
    **평일(월~금) 정규 호인데 어제 `reel_ai.mp4` 가 없으면** 07:45 릴스 작업이 멈춘 날이다(2026-11-13 운영자 '릴스 영상은 주말만 제외' — 평일은 매일 만든다):
