@@ -95,11 +95,16 @@
   각 줄 `file`(stems/…)에 쓴다. 이미 있는 줄은 건너뛴다(같은 줄을 두 번 녹음하지 않는다). 한 줄만 다시: `--only i4 --force`. 원고·파일 이름만 보기: `--check`.
 - **누가 무슨 줄**: voices 칸에 `"who": "knox"`(0초 여는 한 마디)·`"who": "hana"`(주제 줄·끝인사), `"style"`: open·excited·urgent·bright·calm·hello.
   비우면 첫 줄 knox·나머지 hana, 이름에 'bye' 가 든 끝인사 줄은 hello(`tts.py --list` 로 목록).
-  · **Hana** = `ko-KR-SunHiNeural`(여자) rate +2% pitch +8Hz — 귀엽고 밝은 만화 캐릭터 쪽(주제 줄 대부분 + 끝인사).
-  · **Knox** = `ko-KR-InJoonNeural`(남자) rate +0% pitch +0Hz — 또렷한 중계 아나운서 쪽(0초 여는 한 마디).
+  · **Hana** = `en-US-EmmaMultilingualNeural`(여자) rate +15% pitch +0Hz — 기존 Hana 와 같은 높이·속도(주제 줄 대부분 + 끝인사).
+  · **Knox** = `en-US-BrianMultilingualNeural`(남자) rate +20% pitch +100Hz — 기존 Knox 와 같은 남자 성대·높고 들뜬 톤(0초 여는 한 마디).
+  · **왜 이 값인가(2026-11-15 분석)**: 기존 녹음 79개를 재 보니 Hana 는 음높이 205~215Hz·여자 성대, Knox 는 240~262Hz·남자 성대에
+    둘 다 초당 5음절 넘게 빨랐다. 그 높이·속도·발음(받아쓰기 93~97%)에 가장 가까운 조합이 위 값이다 — 녹음 줄마다 음높이 차이가 Hana 평균 +2Hz다.
+    **Knox 만 기존보다 40Hz 낮다** — 무료 서비스가 Brian 의 음을 +100Hz 위로 못 올린다(더 높이면 pronunciation 이 깨진다).
+  · 한국어 원어민 목소리(SunHi·InJoon)도 대안으로 남겼다 — 발음이 좋지만 음높이가 기존과 더 멀다(받아쓰기 시험 89~95%).
   · **말투를 세게 몰면 발음이 망가진다**(11/15 시험: pitch +34Hz·rate +10% 로 올리니 받아쓰기가 10~20%p 떨어졌다 — '네이버가'→'대숨을').
     세기는 말투가 아니라 대사·자막·편집으로 낸다.
-  · 다른 톤을 고르려면 `tts.py --samples "문장" --out /tmp/v` 로 같은 문장을 목소리별로 만들어 들어 보고 brief 의 `who`·`style` 만 바꾼다(코드 수정 없음).
+  · 다른 톤을 고르려면 `tts.py --samples "문장" --out /tmp/v` 로 목소리 5종 × 말투 2종을 들어 보고 brief 의 `who`·`style` 만 바꾼다(코드 수정 없음).
+    `who` 이름: hana · knox · sunhi · injoon · vivienne.
 - **tts 칸**: 실제로 읽을 말. `[excited]` 같은 표시는 스크립트가 지우고 읽는다(qa 는 표시가 있어도 되니 brief 에는 그대로 둔다). 숫자·영문은 소리 나는 대로 한글만.
   brief 의 `"voice"` 칸은 그날 무엇으로 녹음했는지 적어 두는 **메모**다(코드가 읽지 않는다) — 실제 목소리는 `who`·`style` 이 정한다.
 - **말**: Hana 는 존댓말 '~해요!/~래요!', Knox 는 '~습니다!'. 녹음 문구 끝 '!'는 말투용이고 자막·캡션의 느낌표는 아낀다. '~해 보자!' 반복 금지.

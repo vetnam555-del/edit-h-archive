@@ -21,7 +21,11 @@ brief.json 의 voices 칸(episode.py 와 같은 칸에 셋을 더한다):
    "tts": "사지 마 가게, 온라인 열자 품절입니다!",       ← 실제로 읽을 말(숫자·영문은 소리 나는 대로 한글, qa 가 요구)
    "who": "knox", "style": "open"}                        ← 목소리·말투(아래 VOICES·STYLES). 없으면 첫 줄 knox·나머지 hana,
                                                             이름에 'bye' 가 든 줄(끝인사)은 hello.
-  "who" 에는 hana·knox 말고도 sunhi·injoon(대안 목소리)이나 edge-tts 목소리 이름(ko-KR-…)을 그대로 적어도 된다.
+  "who" 에는 hana·knox 말고도 sunhi·injoon·vivienne(대안 목소리)이나 edge-tts 목소리 이름(ko-KR-…)을 그대로 적어도 된다.
+
+기존 릴스 목소리와의 관계(2026-11-15): Hana·Knox 는 힉스필드 목소리였고, 이 스크립트의 기본값은 **기존 녹음 79개를 재서
+음높이·말 속도·성대(포먼트)를 가장 비슷하게 맞춘 값**이다(자세한 수치는 아래 VOICES 주석). 힉스필드와 사람이 다르므로
+완전히 같지는 않다 — `--samples` 로 들어 보고 다르면 brief 의 `who`·`style` 만 바꾸면 된다.
 
 만들어지는 파일(지금까지 힉스필드가 주던 것과 같은 모양 — episode.py·qa.py 를 고치지 않는다):
   mp3 · 24kHz · 모노 · 96kbps, 앞뒤 무음을 -40dB 기준으로 잘라 냄(qa.TRIM_AF 와 같은 필터). tempo 는 brief 값으로 episode.py 가 건다.
@@ -46,31 +50,39 @@ TRIM_AF = ("silenceremove=start_periods=1:start_threshold=-40dB,areverse,"
 SPEC = {"channels": 1, "sample_rate": 24000, "codec": "mp3"}   # 힉스필드 녹음과 같은 모양
 BITRATE = "96k"
 
-# edge-tts 목록에 한국어 목소리는 셋(2026-11-15 확인: SunHi·InJoon·HyunsuMultilingual)인데,
-# 그중 HyunsuMultilingual 은 무료 읽기 서버가 소리를 주지 않는다(11/15 시험 — 'No audio received'). 쓸 수 있는 둘로 Hana·Knox 자리를 맞춘다.
-# 힉스필드 목소리와는 사람이 다르므로 음색이 달라진다(운영자가 듣고 고른다 — --samples).
+# edge-tts 목록에 한국어를 읽을 수 있는 목소리는 여섯이다(2026-11-15 확인: SunHi·InJoon·HyunsuMultilingual / Ava·Emma·Brian·Vivienne 다국어).
+# HyunsuMultilingual 은 무료 읽기 서버가 소리를 주지 않는다('No audio received').
+#
+# **기존 릴스 목소리(Hana·Knox — 힉스필드)와 가장 비슷하게 맞춘 값이다(2026-11-15 분석).**
+# 기존 녹음 79개를 재 보니 — Hana: F0(음높이) 205~215Hz · 여자 성대(F3 2,800~3,000Hz) · 초당 5.0~5.5음절.
+#   Knox: F0 240~262Hz(들뜬 남자 — 높은 톤으로 또박또박) · 남자 성대(F3 2,500Hz) · 초당 5.3음절.
+# 그래서 Hana 는 Emma(+15% 속도·음높이 그대로)로 F0 216·초당 5.2음절, Knox 는 Brian 을 +100Hz 로 올려 F0 222·초당 5.3음절에 맞췄다
+# (Brian 은 +100Hz 위로는 서비스가 음을 더 못 올린다 — 기존 Knox 보다 40Hz 낮은 것이 이 서비스의 한계).
+# 한국어 발음은 base 받아쓰기로 네 줄 평균 — Emma 97% · Brian 96% · SunHi(맨소리) 89%.
 VOICES = {
-    "hana": {"edge": "ko-KR-SunHiNeural", "rate": "+2%", "pitch": "+8Hz",
-             "note": "여자 · 만화 캐릭터 말투(조금 밝게)"},
-    "knox": {"edge": "ko-KR-InJoonNeural", "rate": "+0%", "pitch": "+0Hz",
-             "note": "남자 · 중계 아나운서(또렷하고 힘 있게)"},
-    # 대안(운영자가 다른 톤을 고르면 who 에 이 이름을 적는다)
+    "hana": {"edge": "en-US-EmmaMultilingualNeural", "rate": "+15%", "pitch": "+0Hz",
+             "note": "여자 · 만화 캐릭터 톤(기존 Hana 와 같은 높이)"},
+    "knox": {"edge": "en-US-BrianMultilingualNeural", "rate": "+20%", "pitch": "+100Hz",
+             "note": "남자 · 높고 들뜬 중계 톤(기존 Knox 와 같은 성대, 음은 40Hz 낮음)"},
+    # 대안 — 받아쓰기가 낮은 날·다른 톤을 고를 때 who 에 이 이름을 적는다
     "sunhi": {"edge": "ko-KR-SunHiNeural", "rate": "+0%", "pitch": "+0Hz",
-              "note": "여자 · 차분한 진행자(음을 올리지 않은 SunHi)"},
-    "injoon": {"edge": "ko-KR-InJoonNeural", "rate": "+0%", "pitch": "+0Hz",
-               "note": "남자 · 낮고 차분한 아나운서(음을 올리지 않은 InJoon)"},
+              "note": "한국어 원어민 여자 · 차분한 진행자"},
+    "injoon": {"edge": "ko-KR-InJoonNeural", "rate": "+4%", "pitch": "+40Hz",
+               "note": "한국어 원어민 남자 · 조금 높인 아나운서"},
+    "vivienne": {"edge": "fr-FR-VivienneMultilingualNeural", "rate": "+10%", "pitch": "+20Hz",
+                 "note": "여자 · 살짝 낮은 톤(기존 Hana 와 비슷한 높이, 발음 97%)"},
 }
 
-# 말투 — 목소리의 기본값에 **조금만** 더한다(rate %·pitch Hz).
-# 11/15 시험: 음을 크게 올리면(예 pitch +34Hz·rate +10%) 받아쓰기가 10~20%p 떨어졌다('네이버가'→'대숨을') —
-# 힉스필드처럼 말투를 세게 몰아가면 발음이 망가지므로, 말투는 표정 정도로만 얹고 세기는 대사·편집으로 낸다.
+# 말투 — 목소리의 기본값에 **아주 조금만** 더한다(rate %·pitch Hz).
+# 위에서 맞춘 값이 기준이라 말투는 0 근처로 두고, 세기는 대사·자막·편집으로 낸다.
+# 11/15 시험: 음을 크게 올리면(예 pitch +34Hz·rate +10%) 받아쓰기가 10~20%p 떨어졌다('네이버가'→'대숨을').
 STYLES = {
-    "open":    {"rate": "+2", "pitch": "+2", "note": "0초 여는 한 마디 — 세게"},
-    "excited": {"rate": "+4", "pitch": "+2", "note": "신나서 들뜬"},
-    "urgent":  {"rate": "+6", "pitch": "+0", "note": "다급하게 또박또박"},
-    "bright":  {"rate": "+2", "pitch": "+2", "note": "밝고 또박또박(주제 줄 기본)"},
-    "calm":    {"rate": "-2", "pitch": "-2", "note": "여유 있고 다정하게(‘나’에게 닿는 줄)"},
-    "hello":   {"rate": "+2", "pitch": "+4", "note": "경쾌한 끝인사"},
+    "open":    {"rate": "+0", "pitch": "+0", "note": "0초 여는 한 마디(기준)"},
+    "excited": {"rate": "+2", "pitch": "+1", "note": "신나서 들뜬"},
+    "urgent":  {"rate": "+4", "pitch": "+0", "note": "다급하게 또박또박"},
+    "bright":  {"rate": "+0", "pitch": "+0", "note": "밝게 또박또박(주제 줄 기본)"},
+    "calm":    {"rate": "-3", "pitch": "-1", "note": "여유 있고 다정하게(‘나’에게 닿는 줄)"},
+    "hello":   {"rate": "+1", "pitch": "+2", "note": "경쾌한 끝인사"},
 }
 DEFAULT_STYLE = {"first": "open", "bye": "hello", "rest": "bright"}
 

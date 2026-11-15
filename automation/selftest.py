@@ -3334,7 +3334,10 @@ def t_tts():
     expect(f[2] == "ko-KR-SunHiNeural", "edge-tts 목소리 이름을 그대로 적은 줄을 쓰지 않는다")
     expect(tts._shift("+2%", "+4", "%") == "+6%" and tts._shift("+8Hz", "-2", "Hz") == "+6Hz"
            and tts._shift("+0%", "-4", "%") == "-4%", "말투를 목소리 기본값에 더하지 못한다")
-    expect(all(v["edge"].startswith("ko-KR-") for v in tts.VOICES.values()), "한국어가 아닌 목소리가 섞였다(발음이 깨진다)")
+    expect(all(v["edge"].startswith("ko-KR-") or v["edge"].endswith("MultilingualNeural") for v in tts.VOICES.values()),
+           "한국어를 읽지 못하는 목소리가 섞었다(ko-KR 또는 Multilingual 만)")
+    expect(tts.VOICES["hana"]["edge"] == "en-US-EmmaMultilingualNeural" and tts.VOICES["knox"]["edge"] == "en-US-BrianMultilingualNeural",
+           "기존 릴스 목소리에 맞춰 둔 기본 목소리(Emma·Brian, 11/15 분석)가 바뀌었다 — 바꿀 거면 샘플을 다시 만들어 운영자에게 확인받는다")
     # 녹음 파일의 모양과 무음 자르기 — episode.py·qa.py 가 보는 것과 같아야 한다
     expect(tts.SPEC["codec"] == "mp3" and tts.SPEC["sample_rate"] == 24000 and tts.SPEC["channels"] == 1,
            f"녹음 모양(모노 24kHz mp3)이 바뀌었다: {tts.SPEC}")
