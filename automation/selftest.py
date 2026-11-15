@@ -1823,6 +1823,35 @@ def t_story():
                 expect(False, "스토리 게시 실패가 올라오지 않는다")
             except post_instagram.IGError as e:
                 expect(getattr(e, "posted", None) == ["s1"], f"실패 전까지 올린 스토리를 남기지 않는다: {getattr(e, 'posted', None)}")
+
+            class Lost(FakeGraph):   # 11/14 — 'code 24 … cannot be found' 는 같은 실행에서 컨테이너를 새로 만들어 한 번 더
+                n = 0
+                always = False
+
+                def call(self, method, path, **params):
+                    if path == "u/media_publish":
+                        Lost.n += 1
+                        if Lost.always or Lost.n == 2:
+                            raise post_instagram.IGError("400 OAuthException (code 24): The media with 18,146 cannot be found.")
+                    return super().call(method, path, **params)
+            saved_retry = post_instagram.STORY_RETRY_WAIT
+            post_instagram.STORY_RETRY_WAIT = 0
+            try:
+                calls.clear()
+                expect(post_instagram.post_story(Lost(), "u", "k", folder, "https://x", False) == ["s1"] * 3,
+                       "스토리 code 24(컨테이너 못 찾음)를 같은 실행에서 다시 시도하지 않는다")
+                expect([p["image_url"].rsplit("/", 1)[-1] for path, p in calls if path == "u/media"]
+                       == ["r1_hook.jpg", "s1_pick.jpg", "s1_pick.jpg", "s2_summary.jpg"], "code 24 뒤 컨테이너를 새로 만들지 않는다")
+                Lost.n, Lost.always = 0, True
+                calls.clear()
+                try:
+                    post_instagram.post_story(Lost(), "u", "k", folder, "https://x", False)
+                    expect(False, "code 24 가 계속되는데 실패가 올라오지 않는다")
+                except post_instagram.IGError as e:
+                    expect(getattr(e, "posted", None) == [] and len([1 for path, p in calls if path == "u/media"]) == 2,
+                           "code 24 를 한 번보다 많이 다시 시도하거나 기록을 잃는다")
+            finally:
+                post_instagram.STORY_RETRY_WAIT = saved_retry
             calls.clear()
             expect(post_instagram.post_story(FakeGraph(), "u", "k", folder, "https://x", False, done=["s1"]) == ["s1"] * 3,
                    "이어 올리기가 id 목록을 잇지 않는다")

@@ -573,17 +573,34 @@ def post_story(g, uid, key, folder, site_url, dry, done=(), hook=True):
     wait_public(urls[len(ids):])
     for i, url in enumerate(urls[len(ids):], len(ids) + 1):
         label = f"스토리 {i}/{len(urls)}"
-        try:
-            cid = g.call("POST", f"{uid}/media", media_type="STORIES", image_url=url)["id"]
-            g.wait_ready(cid, label)
-            if dry:
-                print(f"  (dry-run) {label} 컨테이너 준비 완료 — 게시하지 않음")
-                continue
-            ids.append(publish(g, uid, cid, label))
-        except IGError as e:
-            e.posted = ids
-            raise
+        for attempt in range(2):
+            try:
+                cid = g.call("POST", f"{uid}/media", media_type="STORIES", image_url=url)["id"]
+                g.wait_ready(cid, label)
+                if dry:
+                    print(f"  (dry-run) {label} 컨테이너 준비 완료 — 게시하지 않음")
+                    break
+                ids.append(publish(g, uid, cid, label))
+                break
+            except IGError as e:
+                if attempt == 0 and media_not_found(e):
+                    print(f"  {label}: 인스타가 방금 만든 컨테이너를 못 찾는다고 해(code 24) {STORY_RETRY_WAIT}초 뒤 새로 만들어 다시 올림")
+                    time.sleep(STORY_RETRY_WAIT)
+                    continue
+                e.posted = ids
+                raise
     return [] if dry else ids
+
+
+# 2026-11-14 08:01: 스토리 게시가 '400 OAuthException (code 24): The media with … cannot be found' 로 실패했고
+# 다시 시도하는 예비 예약은 09:07 에야 돌았다(GitHub 예약 지연) — 09:09 손으로 다시 돌리니 바로 올라갔다.
+# 그래서 이 오류면 같은 실행 안에서 잠시 뒤 컨테이너를 새로 만들어 한 번만 더 시도한다(learnings 11/14 개선 요청).
+STORY_RETRY_WAIT = 45
+
+
+def media_not_found(e):
+    s = str(e)
+    return "(code 24)" in s and "cannot be found" in s
 
 
 def reel_to_feed(cfg, key):
