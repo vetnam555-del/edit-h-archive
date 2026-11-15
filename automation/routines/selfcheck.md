@@ -8,7 +8,7 @@
 3. 도구 확인: ToolSearch 로 다음 도구가 있는지 본다 — PushNotification, GitHub 의 create_pull_request·actions_run_trigger,
    **드롭샷(Dropshot AI Studio)** 의 generate_image·generate_video·get_generation·get_credit_balance(ToolSearch 'dropshot' 또는 'get_credit_balance' —
    이름에 Higgsfield 가 없는 쪽. 있으면 `get_credit_balance` 를 한 번 불러 잔액 숫자를 적는다. **그림·영상은 만들지 않는다** — 크레딧이 든다).
-   힉스필드의 generate_audio_batch(목소리 — 11/15 밤 운영자 '원래 목소리로')·balance. 그리고 `python3 -c "import faster_whisper"` 가 되는지.
+   힉스필드의 generate_audio_batch(Knox 목소리)·balance. 그리고 `python3 -c "import faster_whisper"` 와 `uv --version`(Hana 복제 준비 `clone_voice.py setup` 이 쓴다) 이 되는지.
 4. `automation/CHANGELOG.md` 에서 가장 위에 있는 `### ` 제목 줄 바로 아래에 한 줄을 더한다(날짜·시각은 지금 KST, 도구는 있으면 ○ 없으면 ×):
    `- (점검) YYYY-MM-DD HH:MM KST — 작업 세션이 지시 파일을 읽고 main 에 직접 올렸다. 도구: 알림 ○ · GitHub PR ○ · GitHub Actions ○ · 드롭샷 그림 ○ 영상 ○ 확인 ○ 잔액 23968 · 힉스필드 목소리 ○ · faster_whisper ×`
 5. `git add automation/CHANGELOG.md` → `git commit -m "Routine self-check YYYY-MM-DD"` → `git push origin HEAD:main`
