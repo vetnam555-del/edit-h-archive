@@ -6,7 +6,14 @@
   <atom:link href="https://vetnam555-del.github.io/edit-h-archive/feed.xml" rel="self" type="application/rss+xml"/>
   <description>매일 아침 8시, 경제부터 트렌드까지 2030이 알아야 할 소식을 확인된 숫자로</description>
   <language>ko</language>
-  <lastBuildDate>Sun, 15 Nov 2026 08:00:00 +0900</lastBuildDate>
+  <lastBuildDate>Mon, 16 Nov 2026 08:00:00 +0900</lastBuildDate>
+  <item>
+    <title>VOL.145 은행 문, 내년엔 9시30분에 연다고?</title>
+    <link>https://vetnam555-del.github.io/edit-h-archive/2026-11-16.html</link>
+    <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-11-16.html</guid>
+    <pubDate>Mon, 16 Nov 2026 08:00:00 +0900</pubDate>
+    <description>은행 개점 30분 늦춤·코인원 유출·AI 홈쇼핑·AI 가짜 의사 광고 금지·청년 비정규직 46% — 오늘의 5가지</description>
+  </item>
   <item>
     <title>VOL.144 노란우산 192만명, 내 정보도 새 나갔나?</title>
     <link>https://vetnam555-del.github.io/edit-h-archive/2026-11-15.html</link>
@@ -209,13 +216,6 @@
     <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-10-17.html</guid>
     <pubDate>Sat, 17 Oct 2026 08:30:00 +0900</pubDate>
     <description>코스피 급락에 개인 7조 매수·건보 환급금 221억 소멸·전세 갱신 58.9%·임금체불·한우 반값 — 오늘의 5가지</description>
-  </item>
-  <item>
-    <title>VOL.115 커피 17잔이면, 50유로 스피커라고?</title>
-    <link>https://vetnam555-del.github.io/edit-h-archive/2026-10-16.html</link>
-    <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-10-16.html</guid>
-    <pubDate>Fri, 16 Oct 2026 08:30:00 +0900</pubDate>
-    <description>스타벅스 겨울 e-프리퀀시·편의점 패딩 3만9900원·호신용품 158%↑·지하철 노조·카톡 수수료 9% — 오늘의 5가지</description>
   </item>
 </channel>
 </rss>
