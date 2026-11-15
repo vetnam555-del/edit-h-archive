@@ -55,6 +55,7 @@ def expect(cond, msg):
 
 def compile_all():
     files = sorted(AUTOMATION.glob("*.py")) + sorted((AUTOMATION / "edith").glob("*.py"))
+    files += sorted((AUTOMATION / "pilots" / "ai_reel").glob("*.py"))   # 릴스·웹툰 스크립트(tts.py 포함)
     for f in files:
         py_compile.compile(str(f), doraise=True)
     return f"{len(files)}개"
@@ -3309,6 +3310,73 @@ def t_comment_dm():
     return f"키워드 {', '.join(s['keywords'])} · 링크 ref={s['link_ref']}"
 
 
+def t_tts():
+    """릴스 목소리 녹음(2026-11-15 힉스필드 대체 — 무료 edge-tts): 줄마다 목소리·말투 배정, 표시('[excited]') 지우기,
+    잘못된 줄(숫자·영문이 남은 원고, brief 폴더 밖 파일 이름, 빈 원고) 막기, 길이가 칸보다 길 때 tempo 권고 — 네트워크 없이 돈다.
+    녹음 파일의 모양(mp3·24kHz·모노)과 앞뒤 무음 자르는 필터가 qa.py 와 같은지는 값으로 본다(둘이 다르면 싱크가 틀어진다)."""
+    sys.path.insert(0, str(AUTOMATION / "pilots" / "ai_reel"))
+    import qa
+    import tts
+    expect(tts.strip_tags("[excited] 사지 마 가게!") == "사지 마 가게!", "tts 칸의 '[excited]' 표시를 지우지 않는다(edge-tts 가 표시를 소리로 읽는다)")
+    expect(tts.strip_tags("표시 없음") == "표시 없음", "표시가 없을 때 원고를 바꾼다")
+    # 기본 배정 — 0초 여는 줄 Knox·open, 주제 줄 Hana·bright, 끝인사(이름에 bye) Hana·hello
+    a = tts.resolve({}, 0, 6)
+    b = tts.resolve({"file": "stems/i3_x.mp3"}, 2, 6)
+    c = tts.resolve({"file": "stems/i_bye_save.mp3"}, 5, 6)
+    expect(a[0] == "knox" and a[1] == "open", f"0초 여는 줄이 Knox·open 이 아니다: {a[:2]}")
+    expect(b[0] == "hana" and b[1] == "bright", f"주제 줄이 Hana·bright 가 아니다: {b[:2]}")
+    expect(c[0] == "hana" and c[1] == "hello", f"끝인사 줄이 Hana·hello 가 아니다: {c[:2]}")
+    d = tts.resolve({"who": "Knox", "style": "urgent"}, 3, 6)
+    expect(d[0] == "knox" and d[1] == "urgent", f"적은 목소리·말투를 쓰지 않는다: {d[:2]}")
+    e = tts.resolve({"who": "없는이름"}, 0, 6)
+    expect(e[2] == tts.VOICES["knox"]["edge"], f"모르는 who 에서 기본 목소리로 돌아오지 않는다: {e}")
+    f = tts.resolve({"who": "ko-KR-SunHiNeural"}, 1, 6)
+    expect(f[2] == "ko-KR-SunHiNeural", "edge-tts 목소리 이름을 그대로 적은 줄을 쓰지 않는다")
+    expect(tts._shift("+2%", "+4", "%") == "+6%" and tts._shift("+8Hz", "-2", "Hz") == "+6Hz"
+           and tts._shift("+0%", "-4", "%") == "-4%", "말투를 목소리 기본값에 더하지 못한다")
+    expect(all(v["edge"].startswith("ko-KR-") or v["edge"].endswith("MultilingualNeural") for v in tts.VOICES.values()),
+           "한국어를 읽지 못하는 목소리가 섞었다(ko-KR 또는 Multilingual 만)")
+    expect(tts.VOICES["hana"]["edge"] == "en-US-EmmaMultilingualNeural" and tts.VOICES["knox"]["edge"] == "en-US-BrianMultilingualNeural",
+           "기존 릴스 목소리에 맞춰 둔 기본 목소리(Emma·Brian, 11/15 분석)가 바뀌었다 — 바꿀 거면 샘플을 다시 만들어 운영자에게 확인받는다")
+    # 녹음 파일의 모양과 무음 자르기 — episode.py·qa.py 가 보는 것과 같아야 한다
+    expect(tts.SPEC["codec"] == "mp3" and tts.SPEC["sample_rate"] == 24000 and tts.SPEC["channels"] == 1,
+           f"녹음 모양(모노 24kHz mp3)이 바뀌었다: {tts.SPEC}")
+    expect(tts.TRIM_AF == qa.TRIM_AF, "앞뒤 무음 자르는 필터가 qa.py 와 다르다 — 길이를 잘못 재 싱크가 틀어진다")
+    # 막을 것
+    with tempfile.TemporaryDirectory() as tmp:
+        base = Path(tmp)
+        bad = tts.problems(base, [{"i": 0, "file": "stems/a.mp3", "path": base / "stems/a.mp3", "say": "네이버가 1조원", "text": ""},
+                                  {"i": 1, "file": "../out.mp3", "path": base.parent / "out.mp3", "say": "밖", "text": ""},
+                                  {"i": 2, "file": "stems/b.wav", "path": base / "stems/b.wav", "say": "", "text": ""}])
+        expect(any("숫자" in x for x in bad), f"tts 에 숫자·영문이 남은 줄을 막지 않는다: {bad}")
+        expect(any("밖" in x for x in bad), f"brief 폴더 밖 파일 이름을 막지 않는다: {bad}")
+        expect(any("비었다" in x for x in bad), f"원고가 빈 줄을 막지 않는다: {bad}")
+        expect(tts.problems(base, []), "voices 칸이 비었는데 막지 않는다")
+        expect(not tts.problems(base, [{"i": 0, "file": "stems/a.mp3", "path": base / "stems/a.mp3", "say": "사지 마 가게", "text": ""}]),
+               "멀쩡한 줄을 막는다")
+    # 길이 → tempo 권고(칸보다 길 때만, 1.2 로도 안 되면 대사를 줄인다)
+    need, how = tts.tempo_hint(3.6, 3.0)
+    expect(need == 1.2 and "tempo" in how, f"칸보다 긴 줄에 tempo 를 권하지 않는다: {(need, how)}")
+    expect(tts.tempo_hint(2.5, 3.4)[0] is None, "칸에 들어가는 줄에 tempo 를 권한다")
+    expect(tts.tempo_hint(5.0, 3.0)[0] is None and "대사를 줄여" in tts.tempo_hint(5.0, 3.0)[1],
+           "tempo 1.2 로도 안 들어가면 대사를 줄이라고 하지 않는다")
+    # brief 읽기 — file 은 brief 폴더 기준, 그 줄의 칸은 captions 의 start~end
+    with tempfile.TemporaryDirectory() as tmp:
+        p = Path(tmp) / "brief.json"
+        p.write_text(json.dumps({"date": "2026-11-16", "captions": [{"start": 0, "end": 3.46, "html": "x"}],
+                                 "voices": [{"file": "stems/i1_a.mp3", "text": "오늘 아침 다섯 가지!", "tts": "[excited] 오늘 아침 다섯 가지!",
+                                             "who": "knox", "style": "open"}]}, ensure_ascii=False), encoding="utf-8")
+        _, base, lines = tts.load_lines(p)
+        expect(len(lines) == 1 and lines[0]["slot"] == 3.46 and lines[0]["path"] == base / "stems/i1_a.mp3"
+               and lines[0]["say"] == "오늘 아침 다섯 가지!" and lines[0]["who"] == "knox", f"brief 를 읽지 못한다: {lines}")
+    # 저장소의 마지막 영상 회차 brief 가 그대로 녹음 가능한 모양인지(칸 이름이 바뀌면 여기서 걸린다)
+    last = [p for p in sorted((AUTOMATION / "pilots" / "ai_reel").glob("2026-*/brief.json"))
+            if "voices" in json.loads(p.read_text(encoding="utf-8"))][-1]
+    _, base, lines = tts.load_lines(last)
+    expect(not tts.problems(base, lines), f"{last.parent.name} brief 의 voices 를 녹음할 수 없다: {tts.problems(base, lines)}")
+    return f"{last.parent.name} {len(lines)}줄 · 목소리 {len(tts.VOICES)}종 · 말투 {len(tts.STYLES)}종"
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--quick", action="store_true", help="다시 빌드 생략")
@@ -3362,6 +3430,7 @@ def main():
     check("첫 화면 구독·사이트 그림(index.html)", t_home)
     check("문구·마크 2판(2030 대표 한 줄·마스코트 얼굴)", t_brand_v2)
     check("AI 영상 릴스·스토리(reel_ai.mp4)", t_ai_reel)
+    check("릴스 목소리 녹음(tts.py — 무료 edge-tts, 2026-11-15~)", t_tts)
     check("캐러셀 이미지(마스코트 H)", t_mascot_cards)
     check("구독자 1만 목표 줄", t_goal_line)
     check("경쟁 매체 인스타(비즈니스 탐색)", t_competitors_ig)
