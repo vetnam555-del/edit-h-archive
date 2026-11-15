@@ -1,0 +1,475 @@
+{
+ "collected_at": "2026-11-15 19:43 KST",
+ "window_days": 7,
+ "ours": [
+  "2026-11-09",
+  "2026-11-10",
+  "2026-11-12",
+  "2026-11-13",
+  "2026-11-14",
+  "2026-11-15"
+ ],
+ "gaps": [
+  {
+   "word": "어디서",
+   "sources": [
+    "어피티",
+    "트렌드어워드"
+   ]
+  },
+  {
+   "word": "이렇게",
+   "sources": [
+    "고구마팜",
+    "어피티"
+   ]
+  },
+  {
+   "word": "최고",
+   "sources": [
+    "뉴닉",
+    "트렌드어워드"
+   ]
+  }
+ ],
+ "sources": [
+  {
+   "name": "어피티",
+   "group": "경제·뉴스 브리핑",
+   "url": "https://uppity.co.kr/feed/",
+   "kind": "rss",
+   "ok": true,
+   "items": [
+    {
+     "title": "중국 증시, 수출 늘었는데도 주춤한 이유는?",
+     "link": "https://uppity.co.kr/%ec%a4%91%ea%b5%ad-%ec%a6%9d%ec%8b%9c-%ec%88%98%ec%b6%9c-%eb%8a%98%ec%97%88%eb%8a%94%eb%8d%b0%eb%8f%84-%ec%a3%bc%ec%b6%a4%ed%95%9c-%ec%9d%b4%ec%9c%a0%eb%8a%94/",
+     "date": "2026-11-13",
+     "recent": true,
+     "overlap": []
+    },
+    {
+     "title": "앤트로픽 상장이 궁금한데 직접 투자하긴 부담스럽다면",
+     "link": "https://uppity.co.kr/%ec%95%a4%ed%8a%b8%eb%a1%9c%ed%94%bd-%ec%83%81%ec%9e%a5%ec%9d%b4-%ea%b6%81%ea%b8%88%ed%95%9c%eb%8d%b0-%ec%a7%81%ec%a0%91-%ed%88%ac%ec%9e%90%ed%95%98%ea%b8%b4-%eb%b6%80%eb%8b%b4%ec%8a%a4%eb%9f%bd/",
+     "date": "2026-11-13",
+     "recent": true,
+     "overlap": []
+    },
+    {
+     "title": "💰수출은 잘되는데 중국 증시는 왜 주춤할까요?",
+     "link": "https://uppity.co.kr/%f0%9f%92%b0%ec%88%98%ec%b6%9c%ec%9d%80-%ec%9e%98%eb%90%98%eb%8a%94%eb%8d%b0-%ec%a4%91%ea%b5%ad-%ec%a6%9d%ec%8b%9c%eb%8a%94-%ec%99%9c-%ec%a3%bc%ec%b6%a4%ed%95%a0%ea%b9%8c%ec%9a%94/",
+     "date": "2026-11-13",
+     "recent": true,
+     "overlap": []
+    },
+    {
+     "title": "맛집 옆에 또 맛집, 노포순례가 이렇게 쉬워도 돼? 1,000년 경력의 식당! 고창 골목에 다 있어요",
+     "link": "https://uppity.co.kr/%eb%a7%9b%ec%a7%91-%ec%98%86%ec%97%90-%eb%98%90-%eb%a7%9b%ec%a7%91-%eb%85%b8%ed%8f%ac%ec%88%9c%eb%a1%80%ea%b0%80-%ec%9d%b4%eb%a0%87%ea%b2%8c-%ec%89%ac%ec%9b%8c%eb%8f%84-%eb%8f%bc-1000%eb%85%84/",
+     "date": "2026-11-13",
+     "recent": true,
+     "overlap": []
+    },
+    {
+     "title": "👛 단풍을 돗자리 삼아, ‘야차’ 막차타기 어때요?",
+     "link": "https://uppity.co.kr/%f0%9f%91%9b-%eb%8b%a8%ed%92%8d%ec%9d%84-%eb%8f%97%ec%9e%90%eb%a6%ac-%ec%82%bc%ec%95%84-%ec%95%bc%ec%b0%a8-%eb%a7%89%ec%b0%a8%ed%83%80%ea%b8%b0-%ec%96%b4%eb%95%8c%ec%9a%94/",
+     "date": "2026-11-13",
+     "recent": true,
+     "overlap": []
+    },
+    {
+     "title": "암표, 단속하면 사라질 수 있을까? MZ세대 38% “매진되면 암표라도 산다”",
+     "link": "https://uppity.co.kr/%ec%95%94%ed%91%9c-%eb%8b%a8%ec%86%8d%ed%95%98%eb%a9%b4-%ec%82%ac%eb%9d%bc%ec%a7%88-%ec%88%98-%ec%9e%88%ec%9d%84%ea%b9%8c-mz%ec%84%b8%eb%8c%80-38-%eb%a7%a4%ec%a7%84%eb%90%98%eb%a9%b4/",
+     "date": "2026-11-12",
+     "recent": true,
+     "overlap": [
+      "mz세대"
+     ]
+    },
+    {
+     "title": "다시 취업했지만 불안한 미래, 어떻게 준비해야 할까요?",
+     "link": "https://uppity.co.kr/%eb%8b%a4%ec%8b%9c-%ec%b7%a8%ec%97%85%ed%96%88%ec%a7%80%eb%a7%8c-%eb%b6%88%ec%95%88%ed%95%9c-%eb%af%b8%eb%9e%98-%ec%96%b4%eb%96%bb%ea%b2%8c-%ec%a4%80%eb%b9%84%ed%95%b4%ec%95%bc-%ed%95%a0%ea%b9%8c/",
+     "date": "2026-11-12",
+     "recent": true,
+     "overlap": []
+    },
+    {
+     "title": "코어위브 매출은 급증했지만 이자 비용은 부담이에요",
+     "link": "https://uppity.co.kr/%ec%bd%94%ec%96%b4%ec%9c%84%eb%b8%8c-%eb%a7%a4%ec%b6%9c%ec%9d%80-%ea%b8%89%ec%a6%9d%ed%96%88%ec%a7%80%eb%a7%8c-%ec%9d%b4%ec%9e%90-%eb%b9%84%ec%9a%a9%ec%9d%80-%eb%b6%80%eb%8b%b4%ec%9d%b4%ec%97%90/",
+     "date": "2026-11-12",
+     "recent": true,
+     "overlap": []
+    },
+    {
+     "title": "비어 있는 포트폴리오, AI 실무 경험으로 채워볼까요? (🎁 AX 커리어 준비 혜택 3종)",
+     "link": "https://uppity.co.kr/%eb%b9%84%ec%96%b4-%ec%9e%88%eb%8a%94-%ed%8f%ac%ed%8a%b8%ed%8f%b4%eb%a6%ac%ec%98%a4-ai-%ec%8b%a4%eb%ac%b4-%ea%b2%bd%ed%97%98%ec%9c%bc%eb%a1%9c-%ec%b1%84%ec%9b%8c%eb%b3%bc%ea%b9%8c%ec%9a%94/",
+     "date": "2026-11-12",
+     "recent": true,
+     "overlap": []
+    },
+    {
+     "title": "💰AI 투자 열풍을 이어갈 돈은 어디서 올까요?",
+     "link": "https://uppity.co.kr/%f0%9f%92%b0ai-%ed%88%ac%ec%9e%90-%ec%97%b4%ed%92%8d%ec%9d%84-%ec%9d%b4%ec%96%b4%ea%b0%88-%eb%8f%88%ec%9d%80-%ec%96%b4%eb%94%94%ec%84%9c-%ec%98%ac%ea%b9%8c%ec%9a%94/",
+     "date": "2026-11-12",
+     "recent": true,
+     "overlap": []
+    }
+   ]
+  },
+  {
+   "name": "뉴닉",
+   "group": "경제·뉴스 브리핑",
+   "url": "https://newneek.co/sitemap/article-sitemap.xml",
+   "kind": "sitemap",
+   "ok": true,
+   "items": [
+    {
+     "title": "비트코인, 3개월 만에 6만 2000달러까지 뚝…11월에만 16% 내려간 이유는? 📉",
+     "link": "https://newneek.co/@newneek/article/48705",
+     "date": "2026-11-15",
+     "recent": true,
+     "overlap": []
+    },
+    {
+     "title": "서울 청년 절반 \"안정적인 삶이 최우선\"…결혼·출산 싫다는 여성, 남성의 2배인 이유는? 📊",
+     "link": "https://newneek.co/@newneek/article/48704",
+     "date": "2026-11-15",
+     "recent": true,
+     "overlap": []
+    },
+    {
+     "title": "청와대 '국민안전 플러스 프로젝트' 발표: 가석방 없는 무기형·안심순찰대 신설, 뭐가 달라질까? 🔒",
+     "link": "https://newneek.co/@newneek/article/48703",
+     "date": "2026-11-15",
+     "recent": true,
+     "overlap": []
+    },
+    {
+     "title": "'충성론·병장론' 이제 없어진다, 현역병 대부업 신용대출 연내 금지되는 이유는? 💳",
+     "link": "https://newneek.co/@newneek/article/48702",
+     "date": "2026-11-15",
+     "recent": true,
+     "overlap": []
+    },
+    {
+     "title": "10월 ICT 수출 703억 달러, 증가율 202%로 역대 최고 찍었다고? 반도체가 이끈 AI 특수 총정리 📦📈",
+     "link": "https://newneek.co/@newneek/article/48701",
+     "date": "2026-11-15",
+     "recent": true,
+     "overlap": [
+      "ai",
+      "수출"
+     ]
+    },
+    {
+     "title": "서울 간선급행버스 4개 노선·9호선 급행 확대, 16일 첫차부터 출퇴근길 어떻게 달라질까? 🚌",
+     "link": "https://newneek.co/@newneek/article/48700",
+     "date": "2026-11-15",
+     "recent": true,
+     "overlap": []
+    },
+    {
+     "title": "청년 임금근로자 46%가 비정규직, 23년 만에 역대 최고…정규직은 107만 개 사라졌어 📉",
+     "link": "https://newneek.co/@newneek/article/48699",
+     "date": "2026-11-15",
+     "recent": true,
+     "overlap": []
+    },
+    {
+     "title": "MS 아웃룩·팀즈·코파일럿 먹통, 13만 건 신고 쏟아진 이유는? 소비자·기업용 모두 복구 완료 🔧",
+     "link": "https://newneek.co/@newneek/article/48686",
+     "date": "2026-11-15",
+     "recent": true,
+     "overlap": [
+      "ms",
+      "복구",
+      "아웃룩"
+     ]
+    },
+    {
+     "title": "금융기관부터 대학·공공기관 민간기업까지…주말 내내 발생한 개인정보 유출 사고 🚨",
+     "link": "https://newneek.co/@newneek/article/48697",
+     "date": "2026-11-15",
+     "recent": true,
+     "overlap": []
+    },
+    {
+     "title": "롤드컵 결승서 젠지, BLG에 역전패…LCK 4년 연속 우승 기록 끊겼어요 🏆",
+     "link": "https://newneek.co/@newneek/article/48698",
+     "date": "2026-11-15",
+     "recent": true,
+     "overlap": []
+    },
+    {
+     "title": "코인원 개인정보 유출: 주민번호·비밀번호·계좌번호까지, 고객 상담 외주업체 해킹으로 새어나간 이유는? 🔓",
+     "link": "https://newneek.co/@newneek/article/48696",
+     "date": "2026-11-15",
+     "recent": true,
+     "overlap": [
+      "계좌번호",
+      "고객",
+      "유출",
+      "해킹"
+     ]
+    },
+    {
+     "title": "역대급 세무사 수석·리트 최초 만점이 ‘AI 딸깍’? AI 안경 컨닝 논란 내용·반응·대책 총정리",
+     "link": "https://newneek.co/@newneek/article/48660",
+     "date": "2026-11-15",
+     "recent": true,
+     "overlap": [
+      "ai",
+      "논란",
+      "안경"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "캐릿",
+   "group": "트렌드 미디어",
+   "url": "https://www.careet.net/",
+   "kind": "links",
+   "ok": true,
+   "items": [
+    {
+     "title": "화술을 갖춘 전문가가 새로운 인플루언서로 떠오를 거예요 제 2의 텍스트힙 제철코어? 캐릿이 예측한 2027 메가트렌",
+     "link": "https://www.careet.net/2025",
+     "date": null,
+     "recent": true,
+     "overlap": [
+      "인플루언서"
+     ]
+    },
+    {
+     "title": "역대급 치열함! 소비자 200명이 투표한 올해의 대표 마케팅 2026 마케팅 어워즈 브랜드 티어표 大공개",
+     "link": "https://www.careet.net/2022",
+     "date": null,
+     "recent": false,
+     "overlap": []
+    },
+    {
+     "title": "요즘 뜨는 밈 야르 vs 쌰갈 올해 언급량 1위 밈은? 밈으로 회고하는 2026 트렌드 총정리",
+     "link": "https://www.careet.net/2017",
+     "date": null,
+     "recent": false,
+     "overlap": []
+    },
+    {
+     "title": "관광객 2천만 시대! 50조 시장을 좌우하는 외국인 큰손들의 유행은? 외국인 관광객이 돈 쓴 곳 모음! 2026 방한 외국인 트렌드 결산",
+     "link": "https://www.careet.net/2019",
+     "date": null,
+     "recent": false,
+     "overlap": []
+    },
+    {
+     "title": "2026.11.13 북마크 이제는 동대문에 말랑이 말고 이거 사러 간대요! 이주의 유행템 4",
+     "link": "https://www.careet.net/2035",
+     "date": "2026-11-13",
+     "recent": true,
+     "overlap": []
+    },
+    {
+     "title": "2026.10.07 북마크 젠틀몬스터부터 국현미까지, 힙한 브랜드가 선택한 검증된 케이터링 브랜드 리스트업",
+     "link": "https://www.careet.net/2005",
+     "date": "2026-10-07",
+     "recent": false,
+     "overlap": []
+    },
+    {
+     "title": "2026.09.22 북마크 좋은 제작사 어디 없나요? 영상 프로덕션 리스트업 19",
+     "link": "https://www.careet.net/1997",
+     "date": "2026-09-22",
+     "recent": false,
+     "overlap": []
+    },
+    {
+     "title": "2025.06.12 북마크 행사 운영이 왜 이래요? 마케팅 전문가가 알려주는 실전 꿀팁",
+     "link": "https://www.careet.net/1664",
+     "date": "2025-06-12",
+     "recent": false,
+     "overlap": []
+    },
+    {
+     "title": "2026.11.02 북마크 제2의 ‘민음사빵’을 기획하고 싶다면? 일 잘한 브랜드 사례 5",
+     "link": "https://www.careet.net/2023",
+     "date": "2026-11-02",
+     "recent": false,
+     "overlap": []
+    }
+   ]
+  },
+  {
+   "name": "고구마팜",
+   "group": "트렌드 미디어",
+   "url": "https://gogumafarm.kr/feed/",
+   "kind": "rss",
+   "ok": true,
+   "items": [
+    {
+     "title": "응원봉 립밤, 형광펜 립 마커? 뷰티 업계 이색 콜라보 모음",
+     "link": "https://gogumafarm.kr/%ec%9d%91%ec%9b%90%eb%b4%89-%eb%a6%bd%eb%b0%a4-%ed%98%95%ea%b4%91%ed%8e%9c-%eb%a6%bd-%eb%a7%88%ec%bb%a4-%eb%b7%b0%ed%8b%b0-%ec%97%85%ea%b3%84-%ec%9d%b4%ec%83%89-%ec%bd%9c%eb%9d%bc%eb%b3%b4-%eb%aa%a8/",
+     "date": "2026-11-13",
+     "recent": true,
+     "overlap": []
+    },
+    {
+     "title": "오늘의 뉴스클리핑과 커머스 트렌드",
+     "link": "https://gogumafarm.kr/%ec%98%a4%eb%8a%98%ec%9d%98-%eb%89%b4%ec%8a%a4%ed%81%b4%eb%a6%ac%ed%95%91%ea%b3%bc-%ec%bb%a4%eb%a8%b8%ec%8a%a4-%ed%8a%b8%eb%a0%8c%eb%93%9c-169/",
+     "date": "2026-11-13",
+     "recent": true,
+     "overlap": []
+    },
+    {
+     "title": "온라인 절과 사우나가 유행하는 이유? 웹 콘텐츠의 인기 비결과 마케팅 활용법",
+     "link": "https://gogumafarm.kr/%ec%98%a8%eb%9d%bc%ec%9d%b8-%ec%a0%88%ea%b3%bc-%ec%82%ac%ec%9a%b0%eb%82%98%ea%b0%80-%ec%9c%a0%ed%96%89%ed%95%98%eb%8a%94-%ec%9d%b4%ec%9c%a0-%ec%9b%b9-%ec%bd%98%ed%85%90%ec%b8%a0%ec%9d%98-%ec%9d%b8/",
+     "date": "2026-11-11",
+     "recent": true,
+     "overlap": [
+      "사우나"
+     ]
+    },
+    {
+     "title": "페스티벌부터 서포터즈까지! 타깃과의 접점을 넓힌 크리넥스의 마케팅 전략",
+     "link": "https://gogumafarm.kr/%ed%8e%98%ec%8a%a4%ed%8b%b0%eb%b2%8c%eb%b6%80%ed%84%b0-%ec%84%9c%ed%8f%ac%ed%84%b0%ec%a6%88%ea%b9%8c%ec%a7%80-%ed%83%80%ea%b9%83%ea%b3%bc%ec%9d%98-%ec%a0%91%ec%a0%90%ec%9d%84-%eb%84%93%ed%9e%8c/",
+     "date": "2026-11-11",
+     "recent": true,
+     "overlap": []
+    },
+    {
+     "title": "요즘 Z세대는 이렇게 놀아요! 콘텐츠로 활용하기 좋은 잼컨 아이디어 15가지",
+     "link": "https://gogumafarm.kr/%ec%9a%94%ec%a6%98-z%ec%84%b8%eb%8c%80%eb%8a%94-%ec%9d%b4%eb%a0%87%ea%b2%8c-%eb%86%80%ec%95%84%ec%9a%94-%ec%bd%98%ed%85%90%ec%b8%a0%eb%a1%9c-%ed%99%9c%ec%9a%a9%ed%95%98%ea%b8%b0-%ec%a2%8b%ec%9d%80/",
+     "date": "2026-11-10",
+     "recent": true,
+     "overlap": []
+    },
+    {
+     "title": "오늘의 뉴스클리핑과 AI 트렌드",
+     "link": "https://gogumafarm.kr/%ec%98%a4%eb%8a%98%ec%9d%98-%eb%89%b4%ec%8a%a4%ed%81%b4%eb%a6%ac%ed%95%91%ea%b3%bc-ai-%ed%8a%b8%eb%a0%8c%eb%93%9c-62/",
+     "date": "2026-11-10",
+     "recent": true,
+     "overlap": []
+    },
+    {
+     "title": "빛나는 일바지부터 레고 경사로까지! 기발한 아이디어가 돋보이는 ESG 마케팅 사례 3가지",
+     "link": "https://gogumafarm.kr/%eb%b9%9b%eb%82%98%eb%8a%94-%ec%9d%bc%eb%b0%94%ec%a7%80%eb%b6%80%ed%84%b0-%eb%a0%88%ea%b3%a0-%ea%b2%bd%ec%82%ac%eb%a1%9c%ea%b9%8c%ec%a7%80-%ea%b8%b0%eb%b0%9c%ed%95%9c-%ec%95%84%ec%9d%b4%eb%94%94/",
+     "date": "2026-11-09",
+     "recent": true,
+     "overlap": []
+    },
+    {
+     "title": "오늘의 뉴스클리핑과 매체/퍼포먼스 트렌드",
+     "link": "https://gogumafarm.kr/%ec%98%a4%eb%8a%98%ec%9d%98-%eb%89%b4%ec%8a%a4%ed%81%b4%eb%a6%ac%ed%95%91%ea%b3%bc-%eb%a7%a4%ec%b2%b4-%ed%8d%bc%ed%8f%ac%eb%a8%bc%ec%8a%a4-%ed%8a%b8%eb%a0%8c%eb%93%9c-122/",
+     "date": "2026-11-09",
+     "recent": true,
+     "overlap": []
+    },
+    {
+     "title": "오늘의 뉴스클리핑과 커머스 트렌드",
+     "link": "https://gogumafarm.kr/%ec%98%a4%eb%8a%98%ec%9d%98-%eb%89%b4%ec%8a%a4%ed%81%b4%eb%a6%ac%ed%95%91%ea%b3%bc-%ec%bb%a4%eb%a8%b8%ec%8a%a4-%ed%8a%b8%eb%a0%8c%eb%93%9c-168/",
+     "date": "2026-11-06",
+     "recent": false,
+     "overlap": []
+    },
+    {
+     "title": "크리스마스만 준비하긴 아까운 12월! 시즈널 키워드로 풍성하게 준비한 마케팅 레퍼런스",
+     "link": "https://gogumafarm.kr/%ed%81%ac%eb%a6%ac%ec%8a%a4%eb%a7%88%ec%8a%a4%eb%a7%8c-%ec%a4%80%eb%b9%84%ed%95%98%ea%b8%b4-%ec%95%84%ea%b9%8c%ec%9a%b4-12%ec%9b%94-%ec%8b%9c%ec%a6%88%eb%84%90-%ed%82%a4%ec%9b%8c%eb%93%9c%eb%a1%9c/",
+     "date": "2026-11-04",
+     "recent": false,
+     "overlap": []
+    },
+    {
+     "title": "오늘의 뉴스클리핑과 유튜브 트렌드",
+     "link": "https://gogumafarm.kr/%ec%98%a4%eb%8a%98%ec%9d%98-%eb%89%b4%ec%8a%a4%ed%81%b4%eb%a6%ac%ed%95%91%ea%b3%bc-%ec%9c%a0%ed%8a%9c%eb%b8%8c-%ed%8a%b8%eb%a0%8c%eb%93%9c-178/",
+     "date": "2026-11-04",
+     "recent": false,
+     "overlap": []
+    },
+    {
+     "title": "댓글 하나로 구매 전환까지? 인스타그램 DM 자동화의 장단점과 효과적인 활용 전략",
+     "link": "https://gogumafarm.kr/%eb%8c%93%ea%b8%80-%ed%95%98%eb%82%98%eb%a1%9c-%ea%b5%ac%eb%a7%a4-%ec%a0%84%ed%99%98%ea%b9%8c%ec%a7%80-%ec%9d%b8%ec%8a%a4%ed%83%80%ea%b7%b8%eb%9e%a8-dm-%ec%9e%90%eb%8f%99%ed%99%94%ec%9d%98-%ec%9e%a5/",
+     "date": "2026-11-03",
+     "recent": false,
+     "overlap": []
+    }
+   ]
+  },
+  {
+   "name": "트렌드어워드",
+   "group": "트렌드 미디어",
+   "url": "https://maily.so/trendaword/posts",
+   "kind": "links",
+   "ok": true,
+   "items": [
+    {
+     "title": "[Trend A Word #656] 제 트둥이를 소개합니다 나이는 130세구요…(?) 26.11.13 (금) '랜덤 애인 소개 챌린지'. 용례 1. POV: 딸이 남자친구를 또 데려왔다 박00 씨 2. 제 애인을 소개합니다 이00 씨 2026.11.…",
+     "link": "https://maily.so/trendaword/posts/d5ryyyk8r1w",
+     "date": "2026-11-13",
+     "recent": true,
+     "overlap": []
+    },
+    {
+     "title": "[Trend A Word #655] 제 2의 한정선 등장이요 26.11.12 (목) '올기 찹쌀초콜렛'. 용례 1. “올기 찹쌀초콜렛 단면 보고 기절함. 찹쌀떡이 나보다 인생을 알차게 살고 있음.” 이 OO 씨 2. “다음은 올기 찹쌀초콜렛인가… 디…",
+     "link": "https://maily.so/trendaword/posts/92zenk5dzep",
+     "date": "2026-11-12",
+     "recent": true,
+     "overlap": []
+    },
+    {
+     "title": "[Trend A Word #654] ???: “트워드 최고! 트워드 짱!!” 트워드: “라우럴.” 26.11.11 (수) '라우럴.'. * 시작하기전에, 11월 6일 발행된 '얼데이드립' 트렌드 소개 레터에서, '유우시가 말아주는 아마겟돈 발라드 챌…",
+     "link": "https://maily.so/trendaword/posts/wdr98q59olx",
+     "date": "2026-11-11",
+     "recent": true,
+     "overlap": []
+    },
+    {
+     "title": "[Trend A Word #653] 빼빼로 못 받았다고? 그럼 '빼난지원금' 신청 26.11.10 (화) '빼난지원금'. 용례 1. “나 올해 빼빼로 하나도 못 받았는데… 빼난지원금 신청 어디서 해?” 강 OO 씨 2. “친구가 빼빼로 못 받았다길래…",
+     "link": "https://maily.so/trendaword/posts/xyowy388z28",
+     "date": "2026-11-10",
+     "recent": true,
+     "overlap": []
+    },
+    {
+     "title": "[Trend A Word #652] 트워드 써졌어. 26.11.09 (월) '00 와졌어'. 용례 1. 오늘 회사 와졌어 이00씨 2. 정신 차려보니 학교 와졌어 주00씨 2026.11.09 · 조회 7.55K",
+     "link": "https://maily.so/trendaword/posts/2qzpe1deo4x",
+     "date": "2026-11-09",
+     "recent": true,
+     "overlap": []
+    },
+    {
+     "title": "[Trend A Word #651] 눈 떠보니 내 아이돌이 7080년생? 26.11.06 (금) '얼데이드립'. 용례 1. 아일릿 체포하겠어 7080 뮤비 퀄리티 미쳤음; 노00씨 2. 나는 원곡보다 얼데이드립이 말아주는 7080이 좋더라 박00씨 …",
+     "link": "https://maily.so/trendaword/posts/wdr98q30olx",
+     "date": "2026-11-06",
+     "recent": false,
+     "overlap": []
+    },
+    {
+     "title": "[Trend A Word #650] 햄버거 주문하랬더니 힙합을 말아주는 존박 26.11.05 (목) '존박 맥도날드 랩'. 용례 1. “햄버거 주문하는 영상인데 왜 내 플레이리스트에 들어와 있는 건데.” 강 OO 씨 2. “존박 랩 들으러 갔다가 빅…",
+     "link": "https://maily.so/trendaword/posts/wjzdnp6vo3p",
+     "date": "2026-11-05",
+     "recent": false,
+     "overlap": []
+    },
+    {
+     "title": "[Trend A Word #649] 야차 뜨자는 게 아니고 야외에서 차 한 잔 하자는 뜻이에요 26.11.04 (수) '야차(野茶)'. 용례 1. 야차(野茶) 붐은 온다. 차 OO 씨 2. 한정선 요거트 찹쌀떡 사서 야차 하러 가면 트렌드 완전 정복…",
+     "link": "https://maily.so/trendaword/posts/2nznj784rp5",
+     "date": "2026-11-04",
+     "recent": false,
+     "overlap": []
+    },
+    {
+     "title": "[Trend A Word #648] 퇴근하고 싶은 것도 죄가 되나요? 아일릿이 체포하겠답니다🚨 26.11.03 (화) '체포하겠어'. 용례 1. “이번 면접 네 자리다🫵 취뽀하겠어🍀 취뽀하겠어🍀” 김 OO 씨 2. “오늘 안에 마감하겠어💻 마감하겠어…",
+     "link": "https://maily.so/trendaword/posts/8do7pk1yogq",
+     "date": "2026-11-03",
+     "recent": false,
+     "overlap": []
+    },
+    {
+     "title": "[Trend A Word #647] 온라인 절에서도 구석 자리만 찾게 되는 사람 등장 26.11.02 (월) '산사'. 용례 1. 온라인 절에서 마음 식히자 김 00씨 2. 팀장님한테 산사 알려주지 마 박 00씨 2026.11.02 · 조회 6.2K",
+     "link": "https://maily.so/trendaword/posts/w6ovx279zk5",
+     "date": "2026-11-02",
+     "recent": false,
+     "overlap": []
+    }
+   ]
+  }
+ ]
+}
