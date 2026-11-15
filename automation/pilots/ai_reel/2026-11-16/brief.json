@@ -1,0 +1,237 @@
+{
+ "date": "2026-11-16",
+ "story": "오늘 아침 5가지 — 메인 5개(big_issue·items 4개)를 20초 한 편에. 가장 센 생활 소식(내년 4월부터 은행 문이 30분 늦게 연다 — 출근길 H 가 닫힌 은행 문에 납작하게 부딪히고 문 위 시계 바늘이 반 바퀴 뛴다)을 맨 앞에, 끝은 발 구르며 점프 후 두 팔로 화면 가리키기 — content/2026-11-16.json(VOL.145). 끝인사는 뉴스레터(bye_newsletter — 최근 두 편이 저장·뉴스레터).",
+ "hook": "질문",
+ "items": [
+  "은행 영업시간",
+  "AI 홈쇼핑",
+  "코인원 유출",
+  "AI 가짜 의사",
+  "청년 비정규직"
+ ],
+ "seedance": {
+  "model": "bytedance/seedance-2.5",
+  "made_by": "dropshot",
+  "job": "mcp_1fe3b679a89b451f9663f096e22a71ce",
+  "prompt": "brief_prompt.txt",
+  "cut": "장면 경계(휙 넘김 가운데, 0.2초 움직임 창·scene 0.08): 은행 문 0~3.6 · AI 홈쇼핑 스튜디오 3.6~7.5 · 상담 서랍 7.5~11.7 · 약국 선반 11.7~15.0 · 책상 징검다리 마을 15.0~17.8 · 점프·두 팔 가리키기 끝인사 17.8~20.06. 검은 화면 0, 멈춘 구간 없음, 꽉 찬 화면(letterboxed False, 중앙값 0.78). 0.5초 프레임으로 사람·로고 없음 확인. 다시 만들지 않음(480p 20초 1,030크레딧 한 번). 약국 장면 병 라벨 엉터리 글자는 source_video_prep 로 지움. 0.8초 썸네일은 H 가 문에 납작하게 부딪힌 순간이라 얼굴이 안 보인다(후킹 숫자 '9시30분'은 보임) — 영상을 다시 만들지 않고 그대로 둠(보고에 적음)."
+ },
+ "trim": [
+  0.0,
+  20.0
+ ],
+ "end_seconds": 2.6,
+ "captions": [
+  {
+   "start": 0.0,
+   "end": 3.6,
+   "size": 84,
+   "html": "<div class=\"kick\">11월 16일 · 오늘 아침 5가지 · 1/5 · 금융</div><div class=\"main\">은행 문 <span class=\"hl\">9시30분</span>에?<br>출근 전 은행 일은?</div><div class=\"sub\">내년 4월부터 지금보다 30분 늦게 · 창구는 오후 4시까지</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 서울신문·더팩트</div>"
+  },
+  {
+   "start": 3.6,
+   "end": 7.5,
+   "size": 84,
+   "html": "<div class=\"kick\">2/5 · 유통</div><div class=\"main\">쇼호스트 없는<br><span class=\"hl\">100% AI</span> 홈쇼핑</div><div class=\"sub\">현대홈쇼핑 16일 첫 방송 · 협력사 제작비 80% 넘게 줄어</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 서울경제·뉴시스</div>"
+  },
+  {
+   "start": 7.5,
+   "end": 11.7,
+   "size": 80,
+   "html": "<div class=\"kick\">3/5 · 보안</div><div class=\"main\">코인원 상담업체 해킹<br><span class=\"hl\">비밀번호</span>까지 샜을 수도</div><div class=\"sub\">12일 공격 · 상담 이력 없으면 무관</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 비즈워치·문화일보</div>"
+  },
+  {
+   "start": 11.7,
+   "end": 15.08,
+   "size": 84,
+   "html": "<div class=\"kick\">4/5 · 광고</div><div class=\"main\">AI '가짜 의사' 광고<br><span class=\"hl\">27일</span>부터 금지</div><div class=\"sub\">가상 의사·약사·교수가 식품 추천하는 듯한 광고</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 한국경제·조선일보</div>"
+  },
+  {
+   "start": 15.08,
+   "end": 17.8,
+   "size": 84,
+   "html": "<div class=\"kick\">5/5 · 일자리</div><div class=\"main\">청년 비정규직<br><span class=\"hl\">46.0%</span></div><div class=\"sub\">올해 8월 15~29세 · 2003년 통계 작성 뒤 가장 높아</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 중앙일보·세계일보</div>"
+  }
+ ],
+ "end_card": {
+  "line": "더 자세한 건 프로필 링크 뉴스레터에서!",
+  "sub": "프로필 링크에서 구독하면 '돈·일 체크리스트' 선물부터",
+  "note": "숫자는 기사 2곳 이상에서 확인했어요<br>(출처는 장면마다·캡션에)"
+ },
+ "voices": [
+  {
+   "file": "stems/i1_bank.mp3",
+   "start": 0.05,
+   "tempo": 1.0,
+   "text": "은행 문, 내년엔 30분 늦게 열립니다!",
+   "tts": "[excited] 은행 문, 내년엔 삼십 분 늦게 열립니다!",
+   "voice": "Knox(elevenlabs_v4, '[excited]' 중계 아나운서, 힉스필드) — 0초 여는 한 마디(B0). '늦게 엽니다'가 두 번 '옵니다'(93%)로 들려 '열립니다'로 바꿔 세 번째 녹음"
+  },
+  {
+   "file": "stems/i2_aishop.mp3",
+   "start": 3.7,
+   "tempo": 1.0,
+   "text": "쇼호스트 없이 AI가 다 만든 방송이래요!",
+   "tts": "쇼호스트 없이 에이아이가 다 만든 방송이래요!",
+   "voice": "Hana(복제 — CosyVoice 3, 받아쓰기 97%·같음 0.888)"
+  },
+  {
+   "file": "stems/i3_coinone.mp3",
+   "start": 7.6,
+   "tempo": 1.0,
+   "text": "코인원에 상담했다면 비밀번호 바꿔요!",
+   "voice": "Hana(복제 — CosyVoice 3, 받아쓰기 100%·같음 0.873) — '나'에게 닿는 줄(내 계정)"
+  },
+  {
+   "file": "stems/i4_fakedoc.mp3",
+   "start": 11.8,
+   "tempo": 1.0,
+   "text": "가짜 의사 광고, 27일부터 금지돼요!",
+   "tts": "가짜 의사 광고, 이십칠 일부터 금지돼요!",
+   "voice": "Hana(복제 — CosyVoice 3, 받아쓰기 100%·같음 0.863) — '금지래요'가 완성 받아쓰기에서 '금질해요'(88%)로 들려 '금지돼요'로 바꿔 다시"
+  },
+  {
+   "file": "stems/i5_youth.mp3",
+   "start": 15.12,
+   "tempo": 1.0,
+   "text": "청년 비정규직 비율이 최고래요!",
+   "voice": "Hana(복제 — CosyVoice 3, 받아쓰기 100%·같음 0.919) — '나'에게 닿는 줄(취업) — '청년 비정규직 46%, 가장 높대요'(4.30초, 칸 2.8초)·'청년 비정규직, 가장 높대요'(91% — '비정규칙'·'녹대요')를 '비율이 최고래요'로 줄여 다시"
+  },
+  {
+   "file": "stems/i_bye_newsletter.mp3",
+   "start": 17.9,
+   "tempo": 1.0,
+   "text": "더 자세한 건 프로필 링크 뉴스레터에서!",
+   "voice": "Hana(복제 — CosyVoice 3, 받아쓰기 100%·같음 0.905) — signoffs bye_newsletter 를 그날 새로 녹음"
+  }
+ ],
+ "music": [
+  {
+   "file": "../2026-10-31/stems/m1_chase.m4a",
+   "start": 0.0,
+   "offset": 1.7,
+   "dur": 4.2,
+   "fade_out": 0.3
+  },
+  {
+   "file": "../2026-10-31/stems/m1_chase.m4a",
+   "start": 3.9,
+   "offset": 1.75,
+   "dur": 4.15,
+   "fade_in": 0.2,
+   "fade_out": 0.4
+  },
+  {
+   "file": "../2026-10-31/stems/m2_morning.m4a",
+   "start": 7.6,
+   "dur": 7.6,
+   "fade_in": 0.3,
+   "fade_out": 0.4
+  },
+  {
+   "file": "../2026-10-31/stems/m2_morning.m4a",
+   "start": 14.77,
+   "dur": 7.9,
+   "lufs": -20,
+   "fade_in": 0.3,
+   "fade_out": 0.8
+  }
+ ],
+ "sfx": [
+  [
+   0,
+   14.0,
+   0.4
+  ],
+  [
+   14.0,
+   999,
+   0.3
+  ]
+ ],
+ "duck": {
+  "mix": 0.6,
+  "release": 350
+ },
+ "source_note": "장면마다 그 소식의 매체를 작게 띄운다. 원 기사 대조(check_sources.py 막음 0 · 경고 1 · 기사 10/12곳 읽음 — 못 읽은 코인원 2곳(비즈워치·문화일보)은 read_article 로 다시 읽어 확인, 이데일리는 시간 초과): 은행 '9시→9시30분·내년 4월·991곳·40.3%' 서울신문·더팩트 / '오후 4시·10.9%·44.5%' 서울신문·금감원 보도자료, 코인원 '12일 오전 4시·메타엠·비밀번호·주민등록번호·상담 이력 없으면 무관' 비즈워치·문화일보, AI 홈쇼핑 '100% AI·16일·제주 하트 골드키위·80% 이상·120%' 서울경제·뉴시스, AI 가짜 의사 '27일·의사·약사·대학교수·식품' 한국경제·조선일보, 청년 비정규직 '46.0%·2003년 이후 최고·89.4%·43.8%·67.6%' 중앙일보·세계일보. 한 곳에만 있는 숫자: 릴스·웹툰에 쓴 것 0(뉴스레터 본문의 'AI 생성 표시해도 규제 대상'은 조선일보에만 — 릴스·웹툰에 쓰지 않음).",
+ "source_video_prep": "약국 장면(11.95~15.05초) 영양제 병 라벨의 AI 엉터리 글자('Ca Lattie' 같은)를 지움 — 카메라가 거의 멈춘 장면이지만 H·로봇이 라벨 앞을 지나가 delogo 대신, 라벨 줄(원본 480×854 기준 y 145~385 전체 + 13.9초 뒤 y 386~600, 그 전엔 H·로봇 사이 x 275~335 만) 안에서 위아래 7px 라벨보다 30 넘게 어둡고 무채색인 화소만 위아래 라벨 색 평균으로 누름. 1~3줄은 글자 없음, 아래 4~5줄은 흐린 자국만 남음. 명령: ffmpeg -i raw.mp4 -vf \"format=gbrp,geq=r='if(C,(r(X,Y-7)+r(X,Y+7))/2,r(X,Y))':g='if(C,(g(X,Y-7)+g(X,Y+7))/2,g(X,Y))':b='if(C,(b(X,Y-7)+b(X,Y+7))/2,b(X,Y))',format=yuv420p\" -c:v libx264 -crf 14 -c:a copy clean.mp4, C = between(T,11.95,15.05)*(between(Y,145,385)+between(Y,386,480)*between(X,275,335)*lt(T,13.9)+between(Y,386,600)*gte(T,13.9))*gt((0.3*r(X,Y)+0.59*g(X,Y)+0.11*b(X,Y)),35)*lt((max(max(r(X,Y),g(X,Y)),b(X,Y))-min(min(r(X,Y),g(X,Y)),b(X,Y))),40)*(gt((0.3*r(X,Y-7)+0.59*g(X,Y-7)+0.11*b(X,Y-7)),100)*lt((max(max(r(X,Y-7),g(X,Y-7)),b(X,Y-7))-min(min(r(X,Y-7),g(X,Y-7)),b(X,Y-7))),40)*lt((0.3*r(X,Y)+0.59*g(X,Y)+0.11*b(X,Y))+30,(0.3*r(X,Y-7)+0.59*g(X,Y-7)+0.11*b(X,Y-7))))*(gt((0.3*r(X,Y+7)+0.59*g(X,Y+7)+0.11*b(X,Y+7)),100)*lt((max(max(r(X,Y+7),g(X,Y+7)),b(X,Y+7))-min(min(r(X,Y+7),g(X,Y+7)),b(X,Y+7))),40)*lt((0.3*r(X,Y)+0.59*g(X,Y)+0.11*b(X,Y))+30,(0.3*r(X,Y+7)+0.59*g(X,Y+7)+0.11*b(X,Y+7))))",
+ "comic": {
+  "series": "오늘 아침 5가지",
+  "layout": "duo",
+  "title": "은행 문<br><span class='hl'>9시30분</span>에 연다고?<br>오늘 아침 5가지",
+  "cover": {
+   "img": "stills/cover.png",
+   "pos": "50% 40%",
+   "job": "mcp_2e6f6a2a456642a28275be818149cc53"
+  },
+  "summary": true,
+  "panels": [
+   {
+    "card": 1,
+    "img_a": "stills/bk_a.png",
+    "pos_a": "50% 45%",
+    "img_b": "stills/bk_b.png",
+    "pos_b": "50% 45%",
+    "say_side": "left",
+    "jobs": [
+     "mcp_51b8b88e851b4802a45bc06e9bb35dd2",
+     "mcp_e7d63b055eba468a930fe65ed4ed7ea7"
+    ]
+   },
+   {
+    "card": 3,
+    "img_a": "stills/ai_a.png",
+    "pos_a": "50% 50%",
+    "img_b": "stills/ai_b.png",
+    "pos_b": "50% 50%",
+    "say_side": "right",
+    "jobs": [
+     "mcp_c223e0ffcc134cb799283b76955558a2",
+     "mcp_b4c37c7e11d944d09f953bea78a5baf9"
+    ]
+   },
+   {
+    "card": 2,
+    "img_a": "stills/co_a.png",
+    "pos_a": "50% 45%",
+    "img_b": "stills/co_b.png",
+    "pos_b": "50% 50%",
+    "say_side": "left",
+    "jobs": [
+     "mcp_c8643c582c0b4d2691943a9f690bfafc",
+     "mcp_8b5a897c8d93476a867cd77e431e696d"
+    ]
+   },
+   {
+    "card": 4,
+    "img_a": "stills/dr_a.png",
+    "pos_a": "50% 50%",
+    "img_b": "stills/dr_b.png",
+    "pos_b": "50% 55%",
+    "say_side": "right",
+    "jobs": [
+     "mcp_16485be3d9984cceb8fc77de83c0b56d",
+     "mcp_4a9e63916a13474aab979a4f58583ddb"
+    ]
+   },
+   {
+    "card": 5,
+    "img_a": "stills/yt_a.png",
+    "pos_a": "50% 45%",
+    "img_b": "stills/yt_b.png",
+    "pos_b": "50% 70%",
+    "say_side": "left",
+    "jobs": [
+     "mcp_b0ce09c3501343388d4da8406b2e60bc",
+     "mcp_383b474be8264c629e7fd2e0c9a56d3c"
+    ]
+   }
+  ],
+  "sources": "장마다 표시",
+  "end": {
+   "title": "오늘 아침 5가지,<br>매일 아침 8시",
+   "sub": "경제부터 트렌드까지, 오늘 소식 5가지를<br>웹툰으로 풀어 드려요"
+  }
+ },
+ "comic_note": "5가지 웹툰 3판. 그림 11장 드롭샷 google/nano-banana-2.1 4:3 1K(장당 16.8, 다시 그린 장 없음), 규칙 webtoon_prompt.md. stills/ 는 저장소에 올리지 않는다. 장면: 표지 장난감 은행 앞 커피 들고 손 흔들기 · ① 닫힌 은행 문에 납작 → 점심 벤치에서 폰 · ② AI 스튜디오 반짝이 키위 과수원에 깜짝 → 소파에서 TV 화면 돋보기 · ③ 상담 서랍을 연 날개 기계·흩날리는 종이 → 자물쇠 다이얼 돌리며 새 열쇠 · ④ 흰 가운 로봇이 홀로그램 → 팔짱 끼고 화면 의심 · ⑤ 흔들려 가라앉는 책상 징검다리 → 책상에서 빈 종이에 적기. pos 조정: B 컷 H 얼굴이 말풍선에 덮이지 않게 50% 45~70%(청년 B 70%)."
+}
