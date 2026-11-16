@@ -3316,7 +3316,7 @@ def t_clone_voice():
     참고 녹음이 저장소에 있고 그날 brief 에 원고가 있는지."""
     sys.path.insert(0, str(AUTOMATION / "pilots" / "ai_reel"))
     import clone_voice as cvm
-    expect(cvm.CLONE_WHO == ("hana",), f"복제 목소리가 운영자가 '똑같다'고 한 Hana 만이 아니다: {cvm.CLONE_WHO}")
+    expect(cvm.CLONE_WHO == ("hana", "knox"), f"복제 목소리가 운영자가 '똑같다'고 한 Hana·Knox 가 아니다: {cvm.CLONE_WHO}")
     c = [{"path": "a", "heard": 0.97, "cos": 0.80}, {"path": "b", "heard": 0.96, "cos": 0.88}, {"path": "c", "heard": 0.90, "cos": 0.95}]
     expect(cvm.pick(c)["path"] == "b", "받아쓰기 95% 넘는 후보 중 목소리가 가장 같은 것을 고르지 않는다")
     expect(cvm.pick([{"path": "x", "heard": 0.9, "cos": 0.9}, {"path": "y", "heard": 0.93, "cos": 0.7}])["path"] == "y",
@@ -3328,7 +3328,9 @@ def t_clone_voice():
                  {"who": "hana", "file": "stems/i2.mp3", "path": Path(tmp) / "i2.mp3"},
                  {"who": "hana", "file": "stems/have.mp3", "path": have}]
         got = [x["file"] for x in cvm.targets(lines)]
-        expect(got == ["stems/i2.mp3"], f"복제할 줄이 Hana·아직 없는 줄만이 아니다: {got}")
+        expect(got == ["stems/i1.mp3", "stems/i2.mp3"], f"복제할 줄이 Hana·Knox 의 아직 없는 줄이 아니다: {got}")
+        got = [x["file"] for x in cvm.targets(lines, who=("hana",))]
+        expect(got == ["stems/i2.mp3"], f"who 로 목소리를 고르지 못한다: {got}")
         got = [x["file"] for x in cvm.targets(lines, only="have")]
         expect(got == ["stems/have.mp3"], f"--only 로 고른 줄을 다시 녹음하지 않는다: {got}")
     for who in cvm.REFS:
@@ -3459,7 +3461,7 @@ def main():
     check("문구·마크 2판(2030 대표 한 줄·마스코트 얼굴)", t_brand_v2)
     check("AI 영상 릴스·스토리(reel_ai.mp4)", t_ai_reel)
     check("릴스 목소리 녹음(tts.py — 무료 edge-tts, 2026-11-15~)", t_tts)
-    check("릴스 Hana 목소리 복제(clone_voice.py — 무료 CosyVoice 3, 2026-11-16~)", t_clone_voice)
+    check("릴스 Hana·Knox 목소리 복제(clone_voice.py — 무료 CosyVoice 3, 2026-11-16~)", t_clone_voice)
     check("캐러셀 이미지(마스코트 H)", t_mascot_cards)
     check("구독자 1만 목표 줄", t_goal_line)
     check("경쟁 매체 인스타(비즈니스 탐색)", t_competitors_ig)
