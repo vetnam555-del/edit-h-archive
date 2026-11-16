@@ -86,7 +86,7 @@ STYLES = {
 }
 DEFAULT_STYLE = {"first": "open", "bye": "hello", "rest": "bright"}
 
-TAG = re.compile(r"\[[^\]]*\]")          # qa.py 와 같은 표시 '[excited]' — 소리로 읽히지 않게 지운다
+TAG = re.compile(r"\[[^\]]*\]|</?strong>")   # qa.py _TAG 와 같은 표시 '[excited]'·강세 '<strong>…</strong>'(2026-11-17~ RUNBOOK_REEL 1-1) — 소리로 읽히지 않게 지운다
 ROUGH = re.compile(r"[0-9A-Za-z%]")      # qa 가 tts 칸에서 막는 것(숫자·영문)
 
 
