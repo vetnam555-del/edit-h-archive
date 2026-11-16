@@ -3354,6 +3354,15 @@ def t_clone_voice():
     expect("adelay=50:all=1" in fc and "adelay=3700:all=1" in fc and "atempo=1.1" in fc and "whole_dur=20.0" in fc,
            f"목소리 트랙의 줄 자리·tempo·길이가 brief 와 다르다: {fc}")
     expect(cmd[-1] == "/y/t.mp3" and "/x/stems/b.mp3" in cmd, "목소리 트랙 입력·출력 경로가 틀렸다")
+    # 완성본과 같은 쉼 줄이기(11/16 Codex P2): 11/07~ 회차는 트랙에도 줄인 파일을 쓴다 — 아니면 쉼 뒤의 말이 완성본과 어긋난다
+    seen = []
+    got = cvm.track_voices({"date": "2026-11-17", "voices": [{"file": "stems/a.mp3", "start": 0.05}]}, "/x", "/t",
+                           cap=lambda src, dst: (seen.append(str(src)), dst)[1])
+    expect(seen == ["/x/stems/a.mp3"] and got[0]["file"] == "/t/track_voice0.wav" and got[0]["start"] == 0.05,
+           f"목소리 트랙이 완성본과 같은 쉼 줄이기를 하지 않는다: {seen} {got}")
+    got = cvm.track_voices({"date": "2026-11-17", "pause_cap": False, "voices": [{"file": "stems/a.mp3", "start": 1}]}, "/x", "/t",
+                           cap=lambda src, dst: dst)
+    expect(got[0]["file"] == "stems/a.mp3", "pause_cap false 인 회차인데 쉼을 줄였다")
 
 
 def t_tts():
