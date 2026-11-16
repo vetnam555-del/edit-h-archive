@@ -102,6 +102,8 @@
 11/15 밤 운영자 "원래 목소리(지금 하고 있는 목소리)로" — 무료 목소리(edge-tts·Supertonic) 시안은 '다 별로'. → "깃허브 무료 목소리로 하되 그동안 목소리랑 똑같이" →
 11/16 새벽 복제 시안을 듣고 "첫 번째 목소리(Hana)는 똑같네, 이걸로 릴스 절차에 넣어 줘". 11/16 낮 Knox 시안(지난 Knox 5줄을 참고)도 "똑같네, 무료 복제로 바꿔 줘". 그래서 **Hana·Knox 줄 모두 무료 복제**(11/17 릴스부터).
 
+- **녹음은 영상보다 먼저**(1-1 — 립싱크). **생생하게**: tts 칸에서 줄마다 가장 센 낱말 하나를 `<strong>…</strong>` 로 감싸고(강세), 후보 중 억양 폭(줄 안 음높이 변화)이
+  Hana 8·Knox 7반음 이상인 것을 고른다(clone_voice.py 가 자동 — 표의 '억양 폭', 좁으면 '단조롭다' 표시). 11/16 운영자 '높낮이·강조·악센트로 진짜 아나운서처럼'.
 - **녹음(무료 복제 — Hana·Knox 6줄 한 번에)**: brief 의 voices 를 다 적은 뒤 `python3 automation/pilots/ai_reel/clone_voice.py automation/pilots/ai_reel/{오늘}/brief.json`
   — 첫 줄(0초 Knox)은 Knox 목소리, 나머지는 Hana 목소리로 줄마다 후보 3개 만들어(줄당 약 30초 — 6줄 약 9분) 받아쓰기 95% 넘는 것 중 원래 목소리와 가장 같은 것을 `file` 에 쓴다.
   끝에 줄마다 길이·받아쓰기·목소리 같음(0.85 안팎이면 원래 녹음끼리와 같다)·칸에 드는지 표가 나온다. 이미 있는 줄은 건너뛴다. 한 줄만 다시: `--only i4 --force`.
@@ -194,14 +196,30 @@ hook 종류(숫자 먼저·질문·반전·상황·할 일 먼저·비교·대�
 운동화·옷·차는 줄무늬·로고 없는 민무늬. **멈추지 않게**: ACTION TIMELINE 장면마다 끝을 'keeps moving until the whip-pan'으로,
 CAMERA 에 'continuous motion in every shot — no held poses, no frozen moments'.
 
+### 1-1. 목소리 먼저 — 립싱크용 목소리 트랙 (평일, 2026-11-17~)
+11/16 운영자 "영상과 립싱크가 잘 어울려야" → **영상보다 목소리를 먼저** 만든다. H 가 말하는 소리를 영상에 미리 들려줘야 입이 그 소리에 맞게 움직인다
+(11/16 시험: 4초 Knox 줄을 reference_audio 로 주니 말하기 전 0.3초는 입을 닫고, 말하는 동안 음절마다 열고 닫았다 — 받아쓰기도 원고 그대로).
+1. 1번 장면표대로 **장면 시각을 먼저 정한다**(예: 0~3.6·3.6~7.5·7.5~11.7·11.7~15.0·15.0~17.8·17.8~20). 4번 대사 6줄과 각 줄 `start`(그 장면 시작 + 0.05~0.3초)를 brief.json voices 에 적는다.
+2. 대사 tts 칸에서 줄마다 **가장 센 낱말(숫자·핵심어) 하나를 `<strong>…</strong>`** 로 감싼다(강세 — 11/16 운영자 '높낮이·강조·악센트'). 한 줄에 하나만.
+3. `python3 automation/pilots/ai_reel/clone_voice.py automation/pilots/ai_reel/{오늘}/brief.json` 로 6줄 녹음((A)) → 받아쓰기 95%·억양 폭(Hana 8·Knox 7반음 이상) 표를 본다.
+   줄이 장면 칸보다 길면 대사를 줄여 그 줄만 다시(`--only … --force`) — 영상이 목소리에 맞춰 만들어지니 **영상을 만든 뒤에는 녹음을 바꾸지 않는다**(바꾸면 입이 어긋난다).
+4. `python3 automation/pilots/ai_reel/clone_voice.py automation/pilots/ai_reel/{오늘}/brief.json --track <임시폴더>/voice_track.mp3` → 20초 목소리 트랙.
+5. 드롭샷 `create_upload_url`(filename `edith-{오늘}-voice.mp3`, content_type `audio/mpeg`, size_bytes, duration_seconds 20) → 답의 curl 명령 실행 → cdnUrl 을 2번 영상의 `reference_audio` 에.
+   (서명 주소는 커밋·보고에 넣지 않는다.) 올리기가 안 되면 reference_audio 없이 만들되 프롬프트를 '입은 작은 미소로 닫혀 있다(말하지 않는다)'로 바꾸고 보고에 한 줄 —
+   말하는데 입이 닫힌 영상은 립싱크 검수 탈락이 아니라 '해설 목소리'로 본다. 조용한데 입이 뻐끔거리는 영상은 탈락.
+
 ### 2. 영상 (평일만)
 드롭샷 `generate_video` — model `bytedance/seedance-2.5`, client_token `edith-{오늘}-video-1`, options:
-`{"prompt": 그날 영어 프롬프트, "reference_image": [시트 주소, 놀람 주소, 커피 주소], "generation_mode": "reference", "duration": 20, "resolution": "480p", "aspect_ratio": "9:16", "generate_audio": true}`
-(주소는 위 '도구'. 1,030크레딧). 받은 job_id 를 `get_generation` 으로 1분쯤 간격으로 확인한다 — 15~25분 걸리니 **그동안 5-1 웹툰 그림과 목소리를 먼저 만든다**.
+`{"prompt": 그날 영어 프롬프트, "reference_image": [시트 주소, 놀람 주소, 커피 주소], "reference_audio": [1-1 의 목소리 트랙 cdnUrl], "generation_mode": "reference", "duration": 20, "resolution": "480p", "aspect_ratio": "9:16", "generate_audio": true}`
+(주소는 위 '도구'. 1,030크레딧). 받은 job_id 를 `get_generation` 으로 1분쯤 간격으로 확인한다 — 15~25분 걸리니 **그동안 5-1 웹툰 그림을 만든다**(목소리는 1-1 에서 이미 만들었다).
 40분이 넘도록 processing 이면 한 번 더 10분 기다리고, 그래도 안 끝나거나 failed 면 그날 영상은 쉰다(같은 client_token 으로 다시 보내지 않는다 — 다시 만들기는 끝 번호 2 로 1번).
 - **프롬프트 쓰는 법이 바뀌었다**: 힉스필드 때의 `@image1`·`@image2`·`@image3` 표시는 드롭샷에서 통하지 않는다. 참고 그림은
   'H from the reference images'(생김새)·'the first reference image (character sheet)'·'the second reference image (surprised face)'·'the third reference image (coffee pose)'처럼 말로 가리킨다.
   예전 날짜의 brief_prompt.txt 를 본보기로 쓸 때 `@image` 표시를 이렇게 바꾼다. CHARACTER 문장(동그란 주황 공 몸·동그란 검은 안경·가는 검은 팔다리, 코·귀·머리카락·옷 없음)은 프롬프트에 그대로 적는다.
+- **LIP SYNC 문장(프롬프트에 그대로 — 11/16 시험에서 맞았다)**: `LIP SYNC: H is the speaker of the reference audio. H's small black mouth opens and closes exactly in time with every syllable of the speech in the reference audio, wider on stressed syllables, and stays closed in a small smile during the silent parts.`
+  + 장면마다 'H faces the camera with its mouth visible while speaking'(말하는 줄 동안 H 얼굴이 보이게 — 뒤돌거나 화면 밖이면 입을 볼 수 없다). AUDIO 줄은
+  `use the speech from the reference audio exactly, plus playful cartoon sound effects; no music, no other voices`.
+- 영상 소리는 효과음만 쓰고 목소리는 1-1 의 녹음 파일을 episode.py 가 얹는다(같은 시각이라 입과 맞는다). 받은 영상 소리에 우리 대사가 겹쳐 들리면 sfx 음량을 0.25 까지 내린다.
 - 2026-11-14 시험(4초, 참고 그림 3장): H 모양 그대로·세로 480×854·효과음 있음. 받은 영상은 480×854 이고 episode.py 가 1080×1920 으로 키운다.
 - brief.json 의 `"seedance"` 칸: `{"model": "bytedance/seedance-2.5", "made_by": "dropshot", "job": job_id, "prompt": "brief_prompt.txt", "cut": …}`.
 
@@ -220,7 +238,7 @@ CAMERA 에 'continuous motion in every shot — no held poses, no frozen moments
   **다섯 줄 중 1~2줄은 '나'에게 닿는 말로** — 돈·집·일·출근길·결혼처럼 2030 삶의 결정과 이어지는 소식은 그 각도로(기사에 있는 사실 범위 안).
 - **싱크**: 자막 start 는 장면 경계(그 줄 목소리 0~0.6초 앞), end 는 그 줄 목소리가 끝난 뒤(다음 장면 경계) — 한 줄 말하는 동안 자막은 한 장, 자막엔 대사와 같은 낱말이 하나 이상.
   마지막 주제 자막은 끝인사 목소리가 시작하기 전에 끝낸다(11/12).
-- 녹음하고 자막 시각까지 적었으면 렌더 전에 `python3 automation/pilots/ai_reel/qa.py <brief.json> --stems`(약 15초).
+- 녹음은 1-1 에서 영상보다 먼저 했다 — 여기서는 녹음을 바꾸지 않는다(입이 어긋난다). 렌더 전에 `python3 automation/pilots/ai_reel/qa.py <brief.json> --stems`(약 15초).
 - 자막: 첫 장면은 후킹 하나, 그다음 장면마다 '2/5 · 분야'…, 숫자는 hl, 장면마다 작게 '출처 매체·매체'(class "sub src").
   자막이 H 를 가리면 그 자막만 size 를 줄이거나 장면 처음부터 끝까지 다른 자리(top)에 둔다(중간 옮김 금지). 마무리 장면은 자막 없이.
 - 끝 화면: line = 끝인사 end_line, note '숫자는 기사 2곳 이상에서 확인했어요<br>(출처는 장면마다·캡션에)', sub = 아래 5번 명령의 둘째 줄.
@@ -262,6 +280,10 @@ CAMERA 에 'continuous motion in every shot — no held poses, no frozen moments
 ### 5-2. 검수
 - 평일(영상 날): `python3 automation/pilots/ai_reel/qa.py <brief.json>` ✓(숫자·싱크·발음(녹음 95%·완성본 85%)·음량·끊김·소리 구멍·검은 화면·번쩍임·꽉 찬 화면·멈춘 구간·반복·출처·만화) →
   완성본 프레임 눈 검수(0.8초 썸네일·장면마다·끝 화면 — 자막이 H 를 가리지 않나, 깨진 글자).
+- **립싱크 검수(평일 — 11/16 운영자 '필히 검수')**: 완성본 `reel_ai.mp4` 에서 목소리 줄마다(`qa.py --stems` 의 '목소리 구간') 8장/초로 H 얼굴 부분을 모아 한 장으로 본다
+  (`ffmpeg -ss <시작> -t <길이> -i reel_ai.mp4 -vf "fps=8,scale=180:-1,tile=8x4" -frames:v 1 <임시>/lip_<줄>.jpg`). 볼 것: 목소리가 나는 동안 입이 열리고 닫히나,
+  조용한 구간(줄 사이·끝 화면 전)에 입이 닫혀 있나, 입 모양이 음절보다 0.2초 넘게 늦거나 이르지 않나. 걸리면 그 장면을 다시 만들기(1번까지, 같은 목소리 트랙) —
+  그래도 안 맞으면 그날 영상은 쉰다. 보고에 '립싱크: 6줄 중 N줄 맞음'과 줄마다 억양 폭(반음)을 적는다.
 - 주말·영상을 쉰 날(웹툰만): `python3 automation/pilots/ai_reel/qa.py <brief.json> --comic` ✓.
 - `python3 automation/selftest.py` 가 '✓ 자동 점검 통과'인지도 본다(PR 의 점검과 같다).
 

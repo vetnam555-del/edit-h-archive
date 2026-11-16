@@ -536,7 +536,7 @@ TTS_SAME = 0.85   # tts(녹음 문구)가 대사(text)를 소리 나는 대로 �
 MIX_MIN = 0.85     # 완성본에서 그 줄이 나오는 시간(앞뒤 0.3초)에 들린 말이 원고와 맞는 비율 — 음악·효과음에 묻히거나 자리가 어긋나면 낮다
 TRIM_AF = ("silenceremove=start_periods=1:start_threshold=-40dB,areverse,"
            "silenceremove=start_periods=1:start_threshold=-40dB,areverse")   # episode.py 와 같은 앞뒤 무음 자르기
-_TAG = re.compile(r"\[[^\]]*\]")   # Knox(elevenlabs) 말투 표시 '[excited]'
+_TAG = re.compile(r"\[[^\]]*\]|</?strong>")   # Knox(elevenlabs) 말투 표시 '[excited]'·강세 표시 '<strong>…</strong>'(2026-11-16 복제 녹음)
 _LETTER = {"A": "에이", "B": "비", "C": "씨", "D": "디", "E": "이", "F": "에프", "G": "지", "H": "에이치", "I": "아이", "J": "제이",
            "K": "케이", "L": "엘", "M": "엠", "N": "엔", "O": "오", "P": "피", "Q": "큐", "R": "알", "S": "에스", "T": "티", "U": "유",
            "V": "브이", "W": "더블유", "X": "엑스", "Y": "와이", "Z": "제트"}
