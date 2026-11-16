@@ -32,7 +32,7 @@
   edge-tts·Supertonic 같은 다른 무료 목소리로 녹음하지 않는다(`tts.py` 는 기록으로만 남겼다).
 - 11/02 "릴스 나오면 바로 알려줘" → 7번. 11/05 "매일 발전하고 있는 거 맞아?" → 보고 첫 줄은 구독자 목표 줄.
 
-## 도구 — 영상·그림은 드롭샷, 목소리는 힉스필드 Hana·Knox (2026-11-16~)
+## 도구 — 영상·그림은 드롭샷, 목소리는 무료 복제 Hana·Knox (2026-11-16~)
 
 - **드롭샷(Dropshot AI Studio) 연결 도구**: `generate_video`·`generate_image`·`get_generation`·`get_credit_balance`·`create_upload_url`.
   ToolSearch 로 'dropshot' 이나 'get_credit_balance' 를 찾아 부른다. 이름 앞에 연결 번호가 붙는다(지금은 `mcp__ef30ebc2-9f0c-4860-9ebd-57448c9a7251__generate_video` 꼴 —
@@ -49,9 +49,9 @@
   주소가 열리지 않으면(curl 로 200 이 아니면) 저장소의 `assets/mascot/mascot-sheet.jpg`·`h-surprised.png`·`h-coffee.png` 를 다시 올린다:
   `create_upload_url(filename, content_type, size_bytes)` → 답에 든 curl 명령을 그대로 실행 → 답의 cdnUrl 을 쓰고, 이 문서의 주소도 같은 커밋에서 바꾼다
   (올리는 데 쓰는 서명 주소는 커밋·보고에 넣지 않는다 — cdnUrl 만).
-- **목소리**(2026-11-16~): **Hana 줄은 `automation/pilots/ai_reel/clone_voice.py`** — 무료 CosyVoice 3 가 지난 Hana 녹음을 듣고 같은 목소리로 읽는다
-  (운영자 11/16 "첫 번째 목소리는 똑같네, 이걸로 릴스 절차에 넣어 줘"). **Knox 줄(0초 여는 한 마디)만 힉스필드** `generate_audio`(아래 (A)).
-  복제 준비가 안 되는 날은 Hana 줄도 힉스필드로 녹음한다(같은 목소리라 운영자가 듣기엔 차이가 없다). 영상·그림에는 힉스필드를 쓰지 않는다.
+- **목소리**(2026-11-16~): **Hana·Knox 줄 모두 `automation/pilots/ai_reel/clone_voice.py`** — 무료 CosyVoice 3 가 지난 녹음을 듣고 같은 목소리로 읽는다
+  (운영자 11/16 새벽 "첫 번째 목소리(Hana)는 똑같네", 낮 "Knox 도 똑같네, 무료 복제로 바꿔 줘" — Knox 는 11/17 릴스부터).
+  복제 준비가 안 되는 날만 힉스필드 `generate_audio` 로 녹음한다(아래 (A) '힉스필드로 녹음할 때' — 같은 목소리). 영상·그림에는 힉스필드를 쓰지 않는다.
   드롭샷 목록에 목소리 모델(`elevenlabs/v3`·`minimax/speech-2.8-turbo`)이 보여도 연결의 generate_image·generate_video 로는 부를 수 없다(11/14 확인).
   **영상 모델이 대사를 직접 말하게 하는 방식(reference_audio 에 예전 녹음을 주고 프롬프트에 대사)은 쓰지 않는다** — 11/14 시험(Seedance 2.0 mini 7초)에서
   대사는 정확했지만 운영자 "목소리 별로야". 목소리는 따로 녹음한 Hana·Knox 를 얹는 지금 방식 그대로.
@@ -71,18 +71,18 @@
 - **아껴 쓰기**: 영상 다시 만들기는 1번까지(그래도 걸리면 그날 영상은 쉰다). 그림 다시 그리기는 장당 1번까지. 720p·1080p·다른 영상 모델·장당 125 인 그림 모델(`openai/gpt-image-2.5-*`)은 쓰지 않는다.
 - 잔액이 6,000 아래면 그날 보고와 알림에 '남은 드롭샷 크레딧 N · 영상 약 M편((잔액 − 남은 날 × 185) ÷ 1,030) · 채워지는 날 M/D' 한 줄을 붙인다.
 - 크레딧을 사거나 요금제를 바꾸는 일은 운영자만 한다(여기서 하지 않는다). 끝나는 날은 정해져 있지 않다 — 운영자가 다시 말할 때까지 평일마다 만든다.
-- 목소리: Hana 복제는 무료, Knox 한 줄(힉스필드)은 하루 약 0.1크레딧(11/14 잔액 477.6)이라 따로 셈하지 않는다. 힉스필드 잔액이 5 아래면 보고에 한 줄. 드롭샷은 영상·그림에만 센다.
+- 목소리: Hana·Knox 복제는 무료(크레딧 없음). 복제 준비가 안 된 날 힉스필드로 녹음하면 하루 약 0.5크레딧. 힉스필드 잔액이 5 아래면 보고에 한 줄. 드롭샷은 영상·그림에만 센다.
 
 ## 새 세션 준비 (맨 처음)
 
 - `git fetch origin main` → `git checkout main` → `git pull --ff-only origin main`.
 - `python3 -c "import faster_whisper"` 가 실패하면 `pip install -q faster-whisper`(새 세션엔 없다 — qa.py 의 받아쓰기가 쓴다. 처음 실행 때 small 모델을 내려받는다).
-- **평일이면 맨 처음에 Hana 목소리 복제 준비를 백그라운드로 건다**: `python3 automation/pilots/ai_reel/clone_voice.py setup`(새 세션마다 — 5~10분,
+- **평일이면 맨 처음에 목소리 복제 준비를 백그라운드로 건다**: `python3 automation/pilots/ai_reel/clone_voice.py setup`(새 세션마다 — 5~10분,
   `~/.cache/edith-voice` 에 프로그램·모델 약 7GB, 저장소 밖). Bash 의 run_in_background 로 돌리고 그동안 0~1번(원 기사 대조·장면 짜기)을 한다.
-  실패하면 한 번 더, 그래도 안 되면 그날 Hana 줄은 힉스필드로(아래 (A) '힉스필드로 녹음할 때') — 보고에 한 줄.
-- 드롭샷 도구(위 '도구')·힉스필드 목소리 도구(generate_audio·generate_audio_batch — Knox 줄)·GitHub 도구(PR·actions)는 ToolSearch 로 불러 쓴다.
+  실패하면 한 번 더, 그래도 안 되면 그날 Hana·Knox 줄은 힉스필드로(아래 (A) '힉스필드로 녹음할 때') — 보고에 한 줄.
+- 드롭샷 도구(위 '도구')·GitHub 도구(PR·actions)는 ToolSearch 로 불러 쓴다. 힉스필드 목소리 도구(generate_audio·generate_audio_batch)는 복제 준비가 안 된 날에만.
   **드롭샷 도구가 없으면 영상도 그림도 만들 수 없다** — PushNotification 으로 알리고 끝낸다(힉스필드로 대신 만들지 않는다).
-  평일에 **힉스필드 목소리 도구가 없으면 영상을 만들기 전에** 멈춘다: 그날 영상은 쉬고 웹툰만 만든 뒤 알린다
+  평일에 **복제 준비도 안 되고 힉스필드 목소리 도구도 없으면 영상을 만들기 전에** 멈춘다: 그날 영상은 쉬고 웹툰만 만든 뒤 알린다
   (목소리 없는 릴스·edge-tts 같은 다른 목소리 릴스는 올리지 않는다 — 영상값 1,030 을 먼저 쓰지 않게 목소리 도구부터 확인).
 - 받은 영상·그림·프레임 시트·시험 렌더는 저장소 밖 임시 폴더(scratchpad 나 `mktemp -d`)에 둔다. 저장소 루트에 임시 파일을 남기지 않는다.
 - 그림은 ffmpeg 로 한 장에 모아(tile) Read 로 본다(PIL 이 안 되는 환경이 있다).
@@ -91,18 +91,19 @@
 - 본보기: 가장 최근에 영상을 만든 날의 `automation/pilots/ai_reel/{날짜}/brief.json`·`brief_prompt.txt`(`brief.json` 에 "cut" 이 있는 날 — 예: 2026-11-12,
   후킹·tts 칸·source_video_prep·comic 3판), 웹툰만 만든 날은 2026-11-09. 틀만 빌리고 장면·동작은 그날 소식으로 새로 쓴다. FULL-BLEED 문장·NEGATIVE 의 가로 띠 금지는 그대로 둔다.
 
-## (A) 목소리 — Hana(만화 캐릭터 말투, 무료 복제) + Knox(중계 아나운서, 힉스필드) 한 줄
+## (A) 목소리 — Hana(만화 캐릭터 말투) + Knox(중계 아나운서) 한 줄 — 둘 다 무료 복제
 
 11/15 밤 운영자 "원래 목소리(지금 하고 있는 목소리)로" — 무료 목소리(edge-tts·Supertonic) 시안은 '다 별로'. → "깃허브 무료 목소리로 하되 그동안 목소리랑 똑같이" →
-11/16 새벽 복제 시안을 듣고 "첫 번째 목소리(Hana)는 똑같네, 이걸로 릴스 절차에 넣어 줘". 그래서 **Hana 줄은 무료 복제, Knox 줄은 힉스필드**(Knox 복제는 운영자가 '똑같다'고 할 때까지 쓰지 않는다).
+11/16 새벽 복제 시안을 듣고 "첫 번째 목소리(Hana)는 똑같네, 이걸로 릴스 절차에 넣어 줘". 11/16 낮 Knox 시안(지난 Knox 5줄을 참고)도 "똑같네, 무료 복제로 바꿔 줘". 그래서 **Hana·Knox 줄 모두 무료 복제**(11/17 릴스부터).
 
-- **Hana 줄 녹음(무료 복제)**: brief 의 voices 를 다 적은 뒤 `python3 automation/pilots/ai_reel/clone_voice.py automation/pilots/ai_reel/{오늘}/brief.json`
-  — 첫 줄(0초 Knox)을 뺀 줄을 줄마다 후보 3개 만들어(줄당 약 30초) 받아쓰기 95% 넘는 것 중 원래 목소리와 가장 같은 것을 `file` 에 쓴다.
+- **녹음(무료 복제 — Hana·Knox 6줄 한 번에)**: brief 의 voices 를 다 적은 뒤 `python3 automation/pilots/ai_reel/clone_voice.py automation/pilots/ai_reel/{오늘}/brief.json`
+  — 첫 줄(0초 Knox)은 Knox 목소리, 나머지는 Hana 목소리로 줄마다 후보 3개 만들어(줄당 약 30초 — 6줄 약 9분) 받아쓰기 95% 넘는 것 중 원래 목소리와 가장 같은 것을 `file` 에 쓴다.
   끝에 줄마다 길이·받아쓰기·목소리 같음(0.85 안팎이면 원래 녹음끼리와 같다)·칸에 드는지 표가 나온다. 이미 있는 줄은 건너뛴다. 한 줄만 다시: `--only i4 --force`.
-  '받아쓰기 95% 미만' 줄은 말을 더 흔한 말로 바꿔 그 줄만 다시(아래 '걸렸던 말'). 대사에는 원래처럼 Hana 말투(존댓말 '~해요!/~래요!')를 쓴다 — 말투 지시(instruction)는 복제에 없고, 참고 녹음의 들뜬 말투를 그대로 따라 한다.
-  참고 녹음은 `clone_voice.py` 의 REFS(11/13 Hana 3줄 — 운영자가 '똑같다'고 한 시안이 쓴 것). 바꾸지 않는다.
-  brief 의 Hana 줄 `"voice"` 칸에는 'Hana(복제 — CosyVoice 3, 받아쓰기 N%·같음 0.NN)'처럼 적는다(메모).
-- **Knox 줄과, 복제 준비가 안 된 날의 Hana 줄은 힉스필드로 녹음할 때**(아래 그대로):
+  '받아쓰기 95% 미만' 줄은 말을 더 흔한 말로 바꿔 그 줄만 다시(아래 '걸렸던 말'). 대사에는 원래처럼 Hana 는 존댓말 '~해요!/~래요!', Knox 는 '~습니다!' — 말투 지시(instruction)는 복제에 없고, 참고 녹음의 들뜬 말투를 그대로 따라 한다(tts 칸의 '[excited]'는 지우고 읽는다).
+  Knox 는 원래 녹음끼리도 날마다 목소리 같음이 0.6~0.8 로 흔들려서, Knox 줄 같음은 0.7 안팎이면 정상이다.
+  참고 녹음은 `clone_voice.py` 의 REFS(Hana 11/13 3줄, Knox 11/03·04·06·08·12 5줄 — 운영자가 '똑같다'고 한 시안이 쓴 것). 바꾸지 않는다.
+  brief 의 `"voice"` 칸에는 'Hana(복제 — CosyVoice 3, 받아쓰기 N%·같음 0.NN)'·'Knox(복제 — …)'처럼 적는다(메모).
+- **복제 준비가 안 된 날 힉스필드로 녹음할 때**(아래 그대로):
 `automation/pilots/ai_reel/tts.py`(edge-tts, 11/15 낮에 만든 것)는 쓰지 않는다 — brief 의 voices 칸 모양(file·start·tempo·text·tts·voice)은 예전 그대로다.
 
 11/02 운영자 "오늘 서울 도심 버스 편에서 나왔던 여자와 남자 목소리가 딱 좋았던 것 같은데". Ian·Brooks·차분한 진행자 말투는 쓰지 않는다.
@@ -115,7 +116,7 @@
 - **Knox**(그날 가장 센 숫자·장면 한 줄 = 0초 여는 한 마디): model `elevenlabs_v4`, prompt '그날 짧은 이름',
   dialogue `[{text '[excited] …습니다!', voice_type preset, voice_id 195e386a-cb61-5c1b-a53b-0e2f0669c408}]`, use_unlim false.
   '[excited]'는 말투 표시라 brief 의 text 칸에는 넣지 않는다.
-- 힉스필드 녹음은 Knox 1줄(복제를 못 한 날은 6줄 — Hana 주제 4줄 + 끝인사, Knox 1줄) generate_audio(여럿이면 generate_audio_batch) — 다른 배치 바로 뒤에 보내면 429 가 나니 실패한 줄만 1분쯤 뒤 다시.
+- 힉스필드 녹음은 6줄(Hana 주제 4줄 + 끝인사, Knox 1줄) generate_audio_batch — 다른 배치 바로 뒤에 보내면 429 가 나니 실패한 줄만 1분쯤 뒤 다시.
 - 말: Hana 는 존댓말 '~해요!/~래요!', Knox 는 '~습니다!'. 녹음 문구 끝 '!'는 말투용이고 자막·캡션의 느낌표는 아낀다. '~해 보자!' 반복 금지.
 - 길이: 한 줄 14~18음절. 녹음 뒤 앞뒤 무음을 자르고(ffmpeg silenceremove), 장면 칸(약 3.3초)보다 길 때만 tempo 1.0~1.2(그보다 길면 대사를 줄여 다시 녹음, 짧으면 늘리지 않는다).
   episode.py 가 녹음 속 0.25초 넘는 쉼을 0.2초로 줄인다 — 줄 길이·tempo 는 `qa.py <brief.json> --stems` 의 '목소리 구간'으로 잰다.

@@ -1,7 +1,7 @@
 """AI 릴스 대사 녹음 — 무료 CosyVoice 3 로 지금까지의 Hana 목소리를 그대로 따라 한다(2026-11-16~).
 
 운영자 11/15 밤: "깃허브에 있는 무료 목소리로 하는데 그동안 했던 목소리랑 똑같이" → 시안 2차(같은 날 녹음 3줄을 참고로 들려준 것)를 듣고
-"첫 번째 목소리(Hana)는 똑같네, 이걸로 릴스 절차에 넣어 줘". Knox(0초 여는 한 마디)는 아직 힉스필드로 녹음한다(CLONE_WHO).
+"첫 번째 목소리(Hana)는 똑같네, 이걸로 릴스 절차에 넣어 줘" → 11/16 낮 Knox 시안을 듣고 "Knox 도 똑같네, 무료 복제로 바꿔 줘"(CLONE_WHO).
 
 어떻게: CosyVoice 3(Apache-2.0, 그래픽카드 없이 CPU)로 참고 녹음(REFS — 저장소에 이미 있는 지난 릴스 녹음)을 들려주고 대사를 읽힌다.
 모델을 다시 학습시키지 않는다(참고만 — 힉스필드 약관은 '생성물로 AI 모델을 학습·미세조정하지 말 것'). 한 줄마다 후보 N개를 만들어
@@ -10,7 +10,7 @@
 
 사용:
   python3 automation/pilots/ai_reel/clone_voice.py setup                 # 처음 한 번(새 세션마다) — 5~10분, ~/.cache/edith-voice
-  python3 automation/pilots/ai_reel/clone_voice.py <brief.json>          # Hana 줄을 녹음(이미 있는 줄은 건너뜀)
+  python3 automation/pilots/ai_reel/clone_voice.py <brief.json>          # Hana·Knox 줄을 녹음(이미 있는 줄은 건너뜀)
   python3 automation/pilots/ai_reel/clone_voice.py <brief.json> --only i4 --force   # 한 줄만 다시
   python3 automation/pilots/ai_reel/clone_voice.py <brief.json> --check  # 무엇을 녹음할지·준비됐는지만
 녹음 결과 모양은 tts.py·힉스필드 녹음과 같다(mp3 24kHz 모노, 앞뒤 무음 자름) — episode.py·qa.py 는 그대로.
@@ -40,9 +40,12 @@ PROMPT = "You are a helpful assistant.<|endofprompt|>"
 # 참고 녹음 — 운영자가 '똑같다'고 한 시안(11/16 1시)이 쓴 것. 바꾸면 운영자에게 다시 들려준다.
 REFS = {
     "hana": [("2026-11-13", "stems/i3_glasses.mp3"), ("2026-11-13", "stems/i4_chicken.mp3"), ("2026-11-13", "stems/i5_map.mp3")],
-    "knox": [("2026-11-12", "stems/i1_med.mp3")],
+    # Knox — 11/16 운영자 'Knox 도 똑같네'. 5줄 조합이 두 시험 문장 모두에서 가장 고르게 나았다(받아쓰기 97·100%, 같음 0.82·0.73 —
+    # 힉스필드 Knox 녹음끼리도 날마다 0.59~0.79 로 흔들린다).
+    "knox": [("2026-11-03", "stems/i3_binance.mp3"), ("2026-11-04", "stems/i1_coupang.mp3"), ("2026-11-06", "stems/i1_nasdaq.mp3"),
+             ("2026-11-08", "stems/i1_hack.mp3"), ("2026-11-12", "stems/i1_med.mp3")],
 }
-CLONE_WHO = ("hana",)     # 이 목소리 줄만 복제로 녹음한다 — knox 는 운영자가 '똑같다'고 하기 전까지 힉스필드
+CLONE_WHO = ("hana", "knox")   # 둘 다 복제(Hana 11/16 새벽, Knox 11/16 낮 운영자 '똑같네') — 힉스필드 목소리는 복제 준비가 안 된 날의 대체
 N_CANDIDATES = 3
 HEARD_MIN = 0.95          # qa.py STEM_MIN 과 같다
 
