@@ -1345,6 +1345,10 @@ def t_seo():
     from edith import content as content_mod
     day = daily_issues(1)[0]
     site = load_config()["site_url"].rstrip("/")
+    # 맺음말은 문장마다 한 줄(2026-11-17 운영자 '내일 아침 8시에 또 … 한 칸 띄워 내려와도 되잖아') — 서명은 마지막 문장과 같은 줄
+    cl = newsletter.closing_lines("수능 보는 가족이 있다면 챙겨 주세요. 내일 아침 8시에 또 찾아갈게요. — 에디터 H 드림")
+    expect(cl == "수능 보는 가족이 있다면 챙겨 주세요.\n내일 아침 8시에 또 찾아갈게요. — 에디터 H 드림", f"맺음말 문장 나누기가 틀렸다: {cl!r}")
+    expect(newsletter.closing_lines("8.5% 올랐어요. — 에디터 H 드림") == "8.5% 올랐어요. — 에디터 H 드림", "소수점·서명 앞에서 줄을 나눴다")
     page = newsletter.render(content_mod.load(day), site, 8)
     for tag in ('<meta name="description"', f'<link rel="canonical" href="{site}/{day}.html">', 'application/ld+json'):
         expect(tag in page, f"호 페이지에 {tag} 가 없다")
