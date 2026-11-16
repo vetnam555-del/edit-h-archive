@@ -53,6 +53,14 @@ def _num(v):
         return None
 
 
+def cover_kind(cover):
+    """표지 갈래: 실사 '사진' · AI 로 만든 '그림(AI)' · 사진 없는 '핵심어'(마스코트 말풍선).
+    2026-11-02~ AI 생성 표지(credit '이미지 = AI 생성(…)')가 '사진'으로 섞여 원칙 9(실사 표지) 재판정이 흐려졌다(11/15 회고)."""
+    if not cover.get("photo"):
+        return "핵심어"
+    return "그림(AI)" if "AI 생성" in (cover.get("credit") or "") else "사진"
+
+
 def issue_facts(day):
     """content 에서 성과와 비교할 특징만 뽑는다."""
     p = CONTENT_DIR / f"{day}.json"
@@ -66,7 +74,7 @@ def issue_facts(day):
         "format": 2 if "items" in c and "sections" not in c else 1,
         "pick_tag": (c.get("big_issue") or {}).get("tag"),
         "title_style": "질문형" if title.rstrip().endswith("?") else ("숫자형" if re.search(r"\d", title) else "서술형"),
-        "cover": "사진" if cover.get("photo") else "핵심어",
+        "cover": cover_kind(cover),
         "weekday": weekday_ko(dt.date.fromisoformat(day)),
         "poll": bool(c.get("poll")),
         "source_mode": c.get("source_mode"),
