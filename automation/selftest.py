@@ -794,6 +794,9 @@ def t_headlines():
            and "H PICK 원문 **1/2**" in lines and "큰 소식 다룸 3/5" in lines,
            f"성과표 출처 품질 칸: {lines}")
     expect("src" not in collect_metrics.issue_facts("2026-10-21"), "예비 호까지 출처 품질을 잰다")
+    kinds = {d: collect_metrics.issue_facts(d)["cover"] for d in ("2026-11-10", "2026-11-15", "2026-11-16")}
+    expect(kinds == {"2026-11-10": "사진", "2026-11-15": "그림(AI)", "2026-11-16": "핵심어"},
+           f"성과표 표지 칸이 실사·AI 그림·핵심어를 나누지 못한다: {kinds}")
     late = {**c, "date": "2999-01-01"}
     expect(not style.headlines_check(c) and not style.headlines_check({**c, "date": "2026-10-24"})
            and style.headlines_check(late) and "fetch_headlines.py --save" in style.headlines_check(late)[0],
