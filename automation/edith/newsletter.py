@@ -9,6 +9,7 @@
 VOL.092 대비 보강: 출처를 원문 링크로, '카드뉴스 보기' 링크 추가. 이메일 호환을 위해 table + 인라인 스타일만 쓴다.
 """
 import json
+import re
 
 from .common import esc, load_config, md, plain, send_time_ko, send_time_on
 from .content import BRIEFS_FROM, TODO_FROM, TODO_MAX
@@ -187,9 +188,15 @@ def _briefs(d, heading="짧게 볼 것", start=None):
             + "".join(rows) + "</td></tr>")
 
 
+def closing_lines(text):
+    """맺음말을 문장마다 한 줄로 — 2026-11-17 운영자 '내일 아침 8시에 또 … 이 부분은 한 칸 띄워 내려와도 되잖아'.
+    문장 끝(. ! ? …) 뒤 빈칸을 줄바꿈으로 바꾸되 '— 에디터 H 드림' 서명 앞에서는 바꾸지 않는다(마지막 문장과 같은 줄)."""
+    return re.sub(r"(?<=[.!?…])[ \t]+(?=[^—\s])", "\n", str(text or "")).strip()
+
+
 def _question(d):
     q = d["question"]
-    closing = md(q.get("closing", "오늘도 EDIT H가 함께할게요. — 에디터 H 드림"))
+    closing = md(closing_lines(q.get("closing", "오늘도 EDIT H가 함께할게요. — 에디터 H 드림")))
     return (_divider(30) + f'<tr><td class="px" style="padding:0 36px;">'
             + _div(f"font-size:18px;font-weight:800;line-height:1;color:{BODY};", "Q", True)
             + _div(f"font-size:21px;font-weight:700;line-height:1.5;color:{INK};margin-top:10px;", md(q["text"], BOLD, HL_B), True)
@@ -390,7 +397,7 @@ def _poll_links(site, poll):
 
 def _poll_block(d, site):
     q = d["poll"]
-    closing = md(d["question"].get("closing", "오늘도 EDIT H가 함께할게요. — 에디터 H 드림"))
+    closing = md(closing_lines(d["question"].get("closing", "오늘도 EDIT H가 함께할게요. — 에디터 H 드림")))
     btn = lambda href, key, text: (  # noqa: E731
         f'<td width="50%" style="padding:0 4px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0">'
         f'<tr><td align="center" style="background:{"#FFFFFF" if key == "A" else HL};border:2px solid {INK};border-radius:12px;">'
