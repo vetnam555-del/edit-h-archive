@@ -16,6 +16,7 @@
 녹음 결과 모양은 tts.py·힉스필드 녹음과 같다(mp3 24kHz 모노, 앞뒤 무음 자름) — episode.py·qa.py 는 그대로.
 """
 import argparse
+import re
 import json
 import os
 import shutil
@@ -48,6 +49,16 @@ REFS = {
 CLONE_WHO = ("hana", "knox")   # 둘 다 복제(Hana 11/16 새벽, Knox 11/16 낮 운영자 '똑같네') — 힉스필드 목소리는 복제 준비가 안 된 날의 대체
 N_CANDIDATES = 3
 HEARD_MIN = 0.95          # qa.py STEM_MIN 과 같다
+# 억양 폭(줄 안 음높이 변화 — 반음, 10~90 백분위) 하한. 11/16 운영자 '높낮이·강조·악센트로 진짜 아나운서처럼 생생하게'.
+# 원래 힉스필드 녹음: Hana 6~18·Knox 7~13반음(11/12·11/13·11/16 측정) — 그보다 좁으면 단조롭다.
+RANGE_MIN = {"hana": 8.0, "knox": 7.0}
+EMPH = re.compile(r"</?strong>")   # 강세 표시 — tts 칸에서 가장 센 낱말을 <strong>…</strong> 로 감싼다(CosyVoice 가 그 낱말을 세게 읽는다)
+DEFAULT_LEN = 20.0                 # 목소리 트랙 길이 기본값(영상 20초)
+
+
+def plain(say):
+    """강세 표시를 지운 원고 — 받아쓰기·숫자 검사용."""
+    return re.sub(r"\s{2,}", " ", EMPH.sub("", say or "")).strip()
 
 
 def venv_python():
@@ -73,13 +84,34 @@ def ref_items(who):
     return out
 
 
-def pick(cands, heard_min=HEARD_MIN):
-    """후보 [{'path','heard','cos'}] → 고른 것. 받아쓰기가 기준을 넘는 것 중 목소리가 가장 같은 것,
-    하나도 못 넘으면 받아쓰기가 가장 나은 것(같으면 목소리)."""
+def pick(cands, heard_min=HEARD_MIN, range_min=0.0):
+    """후보 [{'path','heard','cos','range'}] → 고른 것.
+    ① 받아쓰기 기준을 넘고 억양 폭도 하한을 넘는 것 중 목소리가 가장 같은 것
+    ② 없으면 받아쓰기만 넘는 것 중 억양 폭이 가장 넓은 것(생생함 먼저 — 11/16 운영자)
+    ③ 그것도 없으면 받아쓰기가 가장 나은 것(같으면 목소리)."""
     ok = [c for c in cands if c["heard"] >= heard_min]
+    lively = [c for c in ok if c.get("range", 99) >= range_min]
+    if lively:
+        return max(lively, key=lambda c: (c["cos"], c["heard"]))
     if ok:
-        return max(ok, key=lambda c: (c["cos"], c["heard"]))
+        return max(ok, key=lambda c: (c.get("range", 0), c["cos"]))
     return max(cands, key=lambda c: (c["heard"], c["cos"]))
+
+
+def track_cmd(voices, base, out, total=DEFAULT_LEN):
+    """목소리 트랙(립싱크용 — 영상 생성에 reference_audio 로 준다) ffmpeg 명령. voices 는 brief 의 voices(file·start·tempo).
+    줄마다 tempo 를 적용하고 start 초에 놓아 total 초 모노 24kHz mp3 로 — episode.py 가 완성본에 놓는 자리와 같다."""
+    if not voices:
+        raise ValueError("voices 가 비었다")
+    ins, fc = [], []
+    for k, v in enumerate(voices):
+        ins += ["-i", str(Path(base) / v["file"])]
+        fc.append(f"[{k}:a]aresample=24000,aformat=channel_layouts=mono,atempo={float(v.get('tempo', 1.0))},"
+                  f"adelay={int(round(float(v['start']) * 1000))}:all=1[v{k}]")
+    fc.append("".join(f"[v{k}]" for k in range(len(voices))) +
+              f"amix=inputs={len(voices)}:normalize=0,apad=whole_dur={total},atrim=0:{total}")
+    return ["ffmpeg", "-v", "error", "-y", *ins, "-filter_complex", ";".join(fc), "-ac", "1", "-ar", "24000",
+            "-c:a", "libmp3lame", "-b:a", "128k", str(out)]
 
 
 def targets(lines, only=None, force=False, who=CLONE_WHO):
@@ -143,9 +175,20 @@ def worker(job_path):
     from cosyvoice.cli.cosyvoice import AutoModel
     from faster_whisper import WhisperModel
     import qa
+    import librosa
     torch.set_num_threads(os.cpu_count() or 4)
     cv = AutoModel(model_dir=str(HOME / "model"))
     asr = WhisperModel("small", device="cpu", compute_type="int8")
+
+    def pitch_range(p):
+        """줄 안 음높이 변화(반음, 10~90 백분위) — 클수록 높낮이가 살아 있다."""
+        y, sr = librosa.load(p, sr=16000)
+        f, _, _ = librosa.pyin(y, fmin=70, fmax=600, sr=sr)
+        f = f[~np.isnan(f)]
+        if len(f) < 5:
+            return 0.0
+        st = 12 * np.log2(f / np.median(f))
+        return round(float(np.percentile(st, 90) - np.percentile(st, 10)), 1)
 
     def emb(p):
         e = cv.frontend._extract_spk_embedding(p).flatten().numpy()
@@ -174,10 +217,11 @@ def worker(job_path):
             torchaudio.save(str(p), torch.cat(out, dim=1), cv.sample_rate)
             segs, _ = asr.transcribe(str(p), language="ko", beam_size=5)
             said = " ".join(x.text for x in segs).strip()
-            cands.append({"path": str(p), "seed": s, "said": said,
-                          "heard": round(qa.heard_ratio(ln["say"], said), 3), "cos": round(float(emb(str(p)) @ ref_e), 3)})
-            print(f"  {ln['file']} 후보 {s}: 받아쓰기 {cands[-1]['heard']:.0%} · 목소리 {cands[-1]['cos']:.3f} · '{said}'", flush=True)
-        best = pick(cands, job["heard_min"])
+            cands.append({"path": str(p), "seed": s, "said": said, "range": pitch_range(str(p)),
+                          "heard": round(qa.heard_ratio(plain(ln["say"]), said), 3), "cos": round(float(emb(str(p)) @ ref_e), 3)})
+            c = cands[-1]
+            print(f"  {ln['file']} 후보 {s}: 받아쓰기 {c['heard']:.0%} · 목소리 {c['cos']:.3f} · 억양 폭 {c['range']}반음 · '{said}'", flush=True)
+        best = pick(cands, job["heard_min"], RANGE_MIN.get(ln["who"], 0.0))
         results.append({"file": ln["file"], "best": best, "cands": cands})
     Path(job["out"]).write_text(json.dumps(results, ensure_ascii=False), encoding="utf-8")
 
@@ -193,9 +237,22 @@ def main():
     ap.add_argument("--force", action="store_true", help="이미 있어도 다시 녹음")
     ap.add_argument("--n", type=int, default=N_CANDIDATES, help=f"줄마다 후보 수(기본 {N_CANDIDATES})")
     ap.add_argument("--check", action="store_true", help="녹음하지 않고 무엇을 할지·준비됐는지만")
+    ap.add_argument("--track", metavar="OUT.mp3", help="녹음을 다 한 뒤 목소리 트랙(립싱크용 reference_audio)을 만든다 — 녹음은 하지 않는다")
     a = ap.parse_args()
     if a.episode == "setup":
         return setup()
+    if a.track:
+        brief = json.loads(Path(a.episode).read_text(encoding="utf-8"))
+        base = Path(a.episode).parent
+        missing = [v["file"] for v in brief.get("voices") or [] if not (base / v["file"]).exists()]
+        if missing:
+            raise SystemExit("× 아직 녹음 안 된 줄: " + ", ".join(missing))
+        trim = brief.get("trim")
+        total = float(trim[1]) - float(trim[0]) if trim else DEFAULT_LEN
+        subprocess.run(track_cmd(brief["voices"], base, a.track, total), check=True)
+        print(f"✓ 목소리 트랙 {a.track} — {total:.1f}초, 줄 {len(brief['voices'])}개(시작 초: "
+              + ", ".join(f"{v['start']}" for v in brief["voices"]) + ")")
+        return
     brief, base, lines = tts.load_lines(a.episode)
     todo = targets(lines, a.only, a.force)
     ok, why = ready()
@@ -212,7 +269,7 @@ def main():
     if not ok:
         raise SystemExit("× " + why)
     for ln in todo:
-        if tts.ROUGH.search(ln["say"]):
+        if tts.ROUGH.search(plain(ln["say"])):
             raise SystemExit(f"× {ln['file']} 원고에 숫자·영문이 남았다 — tts 칸에 한글 읽기로: '{ln['say']}'")
     with tempfile.TemporaryDirectory() as tmp:
         job = {"tmp": tmp, "out": str(Path(tmp) / "out.json"), "n": a.n, "heard_min": HEARD_MIN,
@@ -231,9 +288,11 @@ def main():
             shutil.move(str(done), str(ln["path"]))   # 다 만든 뒤에 바꾼다 — 실패해도 앞의 녹음이 남는다
             sec = tts.probe(ln["path"])[0]
             flag = "" if b["heard"] >= HEARD_MIN else " ← 받아쓰기 95% 미만: 말을 더 흔한 말로 바꿔 --only 로 다시"
-            rows.append((ln["file"], f"{sec:.2f}s" if sec else "?", f"{b['heard']:.0%}", f"{b['cos']:.3f}",
+            if b.get("range", 99) < RANGE_MIN.get(ln["who"], 0.0):
+                flag += f" ← 억양 폭 {b.get('range')}반음 — 단조롭다: 가장 센 낱말을 <strong>…</strong> 로 감싸 --only 로 다시"
+            rows.append((ln["file"], f"{sec:.2f}s" if sec else "?", f"{b['heard']:.0%}", f"{b['cos']:.3f}", f"{b.get('range')}반음",
                          tts.tempo_hint(sec, ln["slot"], ln.get("tempo", 1.0))[1] + flag))
-        print("\n줄 · 길이 · 받아쓰기 · 목소리 같음(1에 가까울수록) · 칸")
+        print("\n줄 · 길이 · 받아쓰기 · 목소리 같음(1에 가까울수록) · 억양 폭 · 칸")
         for r in rows:
             print("  " + " · ".join(str(x) for x in r))
 

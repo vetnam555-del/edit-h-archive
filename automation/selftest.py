@@ -3338,6 +3338,22 @@ def t_clone_voice():
             expect(Path(path).exists(), f"참고 녹음이 저장소에 없다: {path}")
             expect(text and not cvm.tts.ROUGH.search(text), f"참고 녹음 원고가 비었거나 숫자·영문이 있다: {path} '{text}'")
     expect(cvm.REQ.exists(), "목소리 복제 패키지 목록(voice_clone_requirements.txt)이 없다")
+    # 생생함(11/16 운영자 '높낮이·강조·악센트'): 받아쓰기를 넘는 후보 중 억양 폭이 하한을 넘는 것을 먼저 고른다
+    c = [{"path": "flat", "heard": 0.98, "cos": 0.92, "range": 5.0}, {"path": "lively", "heard": 0.96, "cos": 0.86, "range": 11.0}]
+    expect(cvm.pick(c, range_min=8.0)["path"] == "lively", "억양 폭이 하한을 넘는 후보를 고르지 않는다(단조로운 후보를 골랐다)")
+    c = [{"path": "a", "heard": 0.97, "cos": 0.9, "range": 5.0}, {"path": "b", "heard": 0.96, "cos": 0.8, "range": 7.0}]
+    expect(cvm.pick(c, range_min=8.0)["path"] == "b", "모두 하한 아래일 때 억양 폭이 가장 넓은 후보를 고르지 않는다")
+    expect(cvm.plain("은행 문, <strong>삼십 분</strong> 늦게!") == "은행 문, 삼십 분 늦게!", "강세 표시를 지우지 않는다(받아쓰기·숫자 검사가 틀린다)")
+    expect(not cvm.tts.ROUGH.search(cvm.plain("<strong>삼십 분</strong>")), "강세 표시가 숫자·영문 검사에 걸린다")
+    sys.path.insert(0, str(AUTOMATION / "pilots" / "ai_reel"))
+    import qa as qam
+    expect(qam.heard_ratio("내년엔 <strong>삼십 분</strong> 늦게", "내년엔 30분 늦게") >= 0.95, "qa 받아쓰기가 강세 표시를 글자로 센다")
+    # 립싱크용 목소리 트랙: 줄마다 start 초에 놓고(tempo 적용) 영상 길이만큼 — episode.py 가 완성본에 놓는 자리와 같아야 입이 맞는다
+    cmd = cvm.track_cmd([{"file": "stems/a.mp3", "start": 0.05}, {"file": "stems/b.mp3", "start": 3.7, "tempo": 1.1}], "/x", "/y/t.mp3", 20.0)
+    fc = cmd[cmd.index("-filter_complex") + 1]
+    expect("adelay=50:all=1" in fc and "adelay=3700:all=1" in fc and "atempo=1.1" in fc and "whole_dur=20.0" in fc,
+           f"목소리 트랙의 줄 자리·tempo·길이가 brief 와 다르다: {fc}")
+    expect(cmd[-1] == "/y/t.mp3" and "/x/stems/b.mp3" in cmd, "목소리 트랙 입력·출력 경로가 틀렸다")
 
 
 def t_tts():
