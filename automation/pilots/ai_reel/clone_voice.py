@@ -98,6 +98,19 @@ def pick(cands, heard_min=HEARD_MIN, range_min=0.0):
     return max(cands, key=lambda c: (c["heard"], c["cos"]))
 
 
+def track_voices(brief, base, tmp, cap=None):
+    """목소리 트랙에 쓸 줄 목록 — 완성본(episode.py compose)과 똑같이 대사 속 0.25초 넘는 쉼을 0.2초로 줄인 파일로 바꾼다
+    (11/16 Codex: 줄이지 않으면 쉼 뒤의 말이 완성본에서 0.3초쯤 먼저 나와 트랙에 맞춘 입 모양과 어긋난다). cap 은 시험용(파일 → 줄인 파일)."""
+    import episode
+    voices = [dict(v) for v in brief.get("voices") or []]
+    if not episode.pause_cap_on(brief):
+        return voices
+    cap = cap or (lambda src, dst: episode.cap_pauses(src, dst)[0])
+    for k, v in enumerate(voices):
+        v["file"] = str(cap(Path(base) / v["file"], Path(tmp) / f"track_voice{k}.wav"))
+    return voices
+
+
 def track_cmd(voices, base, out, total=DEFAULT_LEN):
     """목소리 트랙(립싱크용 — 영상 생성에 reference_audio 로 준다) ffmpeg 명령. voices 는 brief 의 voices(file·start·tempo).
     줄마다 tempo 를 적용하고 start 초에 놓아 total 초 모노 24kHz mp3 로 — episode.py 가 완성본에 놓는 자리와 같다."""
@@ -249,7 +262,8 @@ def main():
             raise SystemExit("× 아직 녹음 안 된 줄: " + ", ".join(missing))
         trim = brief.get("trim")
         total = float(trim[1]) - float(trim[0]) if trim else DEFAULT_LEN
-        subprocess.run(track_cmd(brief["voices"], base, a.track, total), check=True)
+        with tempfile.TemporaryDirectory() as tmp:
+            subprocess.run(track_cmd(track_voices(brief, base, tmp), base, a.track, total), check=True)
         print(f"✓ 목소리 트랙 {a.track} — {total:.1f}초, 줄 {len(brief['voices'])}개(시작 초: "
               + ", ".join(f"{v['start']}" for v in brief["voices"]) + ")")
         return
