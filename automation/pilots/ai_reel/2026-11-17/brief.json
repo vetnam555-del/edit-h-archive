@@ -1,0 +1,265 @@
+{
+ "date": "2026-11-17",
+ "story": "오늘 아침 5가지 — 메인 5개(big_issue·items 4개)를 20초 한 편에. 가장 센 생활 소식(카카오뱅크 체크카드로 애플페이 — 카페 계산대에서 H 지갑의 카드가 폰으로 휙 날아들고 결제 단말기에 '딩')을 맨 앞에, 끝은 한 발로 한 바퀴 돌고 두 팔 흔들어 인사 — content/2026-11-17.json(VOL.146). 끝인사는 내일 또 만나요(bye_tomorrow — 최근 세 편이 뉴스레터·저장·뉴스레터). 11/17 부터 목소리 먼저(1-1 립싱크) — 녹음 트랙을 영상 reference_audio 로 줬다.",
+ "hook": "숫자 먼저",
+ "items": [
+  "애플페이",
+  "코스피 전망",
+  "크리스마스 마케팅",
+  "AI 커닝",
+  "AI 질문"
+ ],
+ "seedance": {
+  "model": "bytedance/seedance-2.5",
+  "made_by": "dropshot",
+  "job": "mcp_9da1fd0819a34a95895e6249e6ccdd53",
+  "prompt": "brief_prompt.txt",
+  "reference_audio": "https://cdn.aistudio.dropshot.io/public/mcp-uploads/prod/RSNOZHV0/8bf563ee4dbe4e419ee73ce4a1980103/edith-2026-11-17-voice.mp3",
+  "cut": "장면 경계(scene 0.08): 카페 계산대 0~3.3 · 블록 탑 도시 3.3~7.4 · 선물 가게 7.4~11.0 · 시험장 잠자리채 11.0~14.75 · 사무실 빛나는 공 14.75~ · 같은 사무실에서 두 팔 흔드는 끝인사(영상이 마무리를 따로 장면으로 만들지 않음). 목소리 트랙 시각(3.8·7.6·11.7·15.3·17.9)보다 장면이 0.3~0.7초 일찍 넘어가 자막을 영상 장면에 맞춤. 검은 화면 0, 멈춘 구간 없음, 꽉 찬 화면(letterboxed False, 중앙값 0.93). 0.5초 프레임으로 사람·로고·글자 없음 확인(카페 칠판은 물결 줄만). 다시 만들지 않음(480p 20초 1,030크레딧 한 번). 시험장에서 잠자리채가 기계 대신 H 머리에 잠깐 씌워짐(몸개그로 둠). 블록 탑 장면 아래 도시 풍경이 실사 같은 실제 도시(뉴욕 같은 마천루)라 source_video_prep 로 흐림.",
+  "remake": {
+   "why": "립싱크 검수(11/16 운영자 '필히 검수') — 선물 가게 장면은 대사 3 동안 H 가 상자에 묻혀 있다가 입을 닫고 나오고, 시험장 장면은 대사 4 내내 H 가 고개 숙여 입이 닫혀 있어 탈락. 그 두 장면만 4초씩 다시 만들었다(20초 전체를 다시 만들면 1,030 — 웹툰 그림 몫이 모자라서).",
+   "jobs": {
+    "gift": "mcp_7663fb2aa92745b68f64076e1091212c",
+    "exam": "mcp_bba05de6cb0649b7912f790758deb356"
+   },
+   "credits": "4초 480p 206 × 2 = 412",
+   "reference_audio": "완성 목소리 트랙의 7.4~11.4초·11.0~15.0초 조각(edith-2026-11-17-voice-s3.mp3·-s4.mp3)",
+   "splice": "clean2 = 원본(흐림 처리) 0~7.4 + 선물 가게 새 장면 0.5~4.04초(입이 목소리보다 약 0.5초 늦게 움직여 앞을 잘라 맞춤, 끝 0.06초는 마지막 장면 늘림) → 7.4~11.0 + 시험장 새 장면 0.3~4.04초 → 11.0~14.75 + 원본 14.75~끝. 소리는 원본 영상 것 그대로(효과음). 장면 사이는 휙 넘김 대신 바로 바뀜(검은 화면 없음).",
+   "prompt": "두 장면 모두 'H 가 첫 프레임부터 앞 가운데에 크게, 카메라를 보고 말한다 — 얼굴을 가리는 것 없음'(선물은 뒤에서 떨어지고 작은 상자 하나만 머리 위에, 잠자리채는 H 를 건드리지 않음)."
+  },
+  "lip_sync": "립싱크: 6줄 중 5줄 맞음 — 1(카페, 폰을 든 손이 입 옆이지만 말하는 동안 입이 열고 닫힘)·2(블록 탑 꼭대기, 4.1초부터 말하는 내내 입 움직임 — 3.9~4.1초는 H 가 화면 아래에서 올라오는 중)·3(새 장면, 입이 목소리보다 약 0.2초 늦게 시작)·4(새 장면, 끝 0.3초 일찍 입을 닫음)·6(돌기 중 뒤돈 0.25초 빼고 입 움직임) 맞음, 5(사무실)는 처음 약 1초 입이 작게만 움직이고 그 뒤 맞음. 억양 폭(반음): 1 Knox 11.5 · 2 10.1 · 3 11.3 · 4 13.2 · 5 13.4 · 6 9.8."
+ },
+ "trim": [
+  0.0,
+  20.0
+ ],
+ "end_seconds": 2.6,
+ "captions": [
+  {
+   "start": 0,
+   "end": 3.3,
+   "size": 84,
+   "html": "<div class=\"kick\">11월 17일 · 오늘 아침 5가지 · 1/5 · 금융</div><div class=\"main\"><span class=\"hl\">3년 8개월</span> 만에 두 번째<br>내 카뱅 카드도 되나?</div><div class=\"sub\">카카오뱅크 체크카드로 16일부터 애플페이</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 세계일보·서울경제</div>"
+  },
+  {
+   "start": 3.3,
+   "end": 7.4,
+   "size": 84,
+   "html": "<div class=\"kick\">2/5 · 증시</div><div class=\"main\">모건스탠리<br>'3~5년 안 <span class=\"hl\">코스피 1만</span>'</div><div class=\"sub\">열쇠는 배당·자사주 — 주주환원율 약 35%→50~60%</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 한국경제TV·서울경제</div>",
+   "top": 1180
+  },
+  {
+   "start": 7.4,
+   "end": 11.0,
+   "size": 84,
+   "html": "<div class=\"kick\">3/5 · 마케팅</div><div class=\"main\">헬로키티 굿즈<br><span class=\"hl\">22종</span> 19일부터</div><div class=\"sub\">스타벅스 크리스마스 협업 · 두 번에 나눠 출시</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 연합뉴스·세계일보</div>"
+  },
+  {
+   "start": 11.3,
+   "end": 14.75,
+   "size": 84,
+   "html": "<div class=\"kick\">4/5 · 사회</div><div class=\"main\">'AI 커닝' 수법 게시물<br><span class=\"hl\">유통 차단</span></div><div class=\"sub\">방미통위 17일 발표 · 장비 판매 자체는 불법 아냐</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 연합뉴스·한국경제</div>"
+  },
+  {
+   "start": 14.8,
+   "end": 17.9,
+   "size": 84,
+   "html": "<div class=\"kick\">5/5 · 일</div><div class=\"main\">모를 땐 상사보다 AI<br><span class=\"hl\">72.4%</span></div><div class=\"sub\">이유 1위 '눈치' · '더 정확해서'는 5.1%</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 디지털데일리·라이센스뉴스</div>"
+  }
+ ],
+ "end_card": {
+  "line": "내일 아침 8시에 또 만나요!",
+  "sub": "프로필 링크에서 구독하면 '돈·일 체크리스트' 선물부터",
+  "note": "숫자는 기사 2곳 이상에서 확인했어요<br>(출처는 장면마다·캡션에)"
+ },
+ "voices": [
+  {
+   "file": "stems/i1_applepay.mp3",
+   "start": 0.05,
+   "tempo": 1.0,
+   "text": "애플페이, 이제 카카오뱅크 카드로 결제합니다!",
+   "tts": "<strong>애플페이</strong>, 이제 카카오뱅크 카드로 결제합니다!",
+   "voice": "Knox(복제 — CosyVoice 3, 받아쓰기 100%·같음 0.856·억양 11.5반음) — 0초 여는 한 마디(B0), '나'에게 닿는 줄(내 카드). 영상용 목소리 트랙은 '카카오뱅크로도 결제합니다'(3.94초·tempo 1.08)로 만들었는데 qa 받아쓰기가 '뱅코로도'(94%)로 들어, 같은 꼴·같은 길이(3.53초·tempo 1.0)의 '카카오뱅크 카드로'로 바꿔 넣음(립싱크 검수로 확인)"
+  },
+  {
+   "file": "stems/i2_kospi.mp3",
+   "start": 3.9,
+   "tempo": 1.0,
+   "text": "모건스탠리가 본 코스피, 만 포인트래요!",
+   "tts": "모건스탠리가 본 코스피, <strong>만 포인트</strong>래요!",
+   "voice": "Hana(복제 — CosyVoice 3, 받아쓰기 100%·같음 0.879·억양 10.1반음) — '코스피 만을 봤대요'가 '마늘받대요'(79%)로 들려 '만 포인트래요'로 바꿔 다시"
+  },
+  {
+   "file": "stems/i3_xmas.mp3",
+   "start": 7.7,
+   "tempo": 1.0,
+   "text": "크리스마스 굿즈, 19일부터 나와요!",
+   "tts": "크리스마스 굿즈, <strong>십구 일</strong>부터 나와요!",
+   "voice": "Hana(복제 — CosyVoice 3, 받아쓰기 100%·같음 0.865·억양 11.3반음) — '헬로키티 굿즈 22종'이 '할로기티·22총'(83~89%)·4.4초라 줄여 다시"
+  },
+  {
+   "file": "stems/i4_aicheat.mp3",
+   "start": 11.8,
+   "tempo": 1.0,
+   "text": "커닝 게시물, 이제 정부가 막아요!",
+   "tts": "커닝 <strong>게시물</strong>, 이제 정부가 막아요!",
+   "voice": "Hana(복제 — CosyVoice 3, 받아쓰기 100%·같음 0.873·억양 13.2반음) — 'AI 커닝 수법 글'(커딩·커밍 81%)·'시험 부정행위 글'(89%)·'부정행위 게시물'(92%)·'시험 속임수 게시물'(영상 트랙에 쓴 것 — qa '속임속' 93%) 다음 '커닝 게시물'(2.86초, 트랙의 3.41초보다 0.4초 짧음 — 립싱크 검수로 확인)"
+  },
+  {
+   "file": "stems/i5_askai.mp3",
+   "start": 15.4,
+   "tempo": 1.0,
+   "text": "모를 땐 상사보다 AI가 편해요!",
+   "tts": "모를 땐 상사보다 <strong>에이아이</strong>가 편해요!",
+   "voice": "Hana(복제 — CosyVoice 3, 받아쓰기 100%·같음 0.886·억양 13.4반음) — '나'에게 닿는 줄(회사). '묻는대요'가 '묻는데요'(93%)로 들려 바꿔 다시"
+  },
+  {
+   "file": "stems/i_bye_tomorrow.mp3",
+   "start": 18.0,
+   "tempo": 1.0,
+   "text": "내일 아침 여덟 시에 또 만나요!",
+   "tts": "내일 아침 <strong>여덟 시</strong>에 또 만나요!",
+   "voice": "Hana(복제 — CosyVoice 3) — signoffs bye_tomorrow 를 그날 새로 녹음"
+  }
+ ],
+ "music": [
+  {
+   "file": "../2026-10-31/stems/m1_chase.m4a",
+   "start": 0.0,
+   "offset": 1.7,
+   "dur": 4.4,
+   "fade_out": 0.3
+  },
+  {
+   "file": "../2026-10-31/stems/m1_chase.m4a",
+   "start": 4.1,
+   "offset": 1.75,
+   "dur": 3.95,
+   "fade_in": 0.2,
+   "fade_out": 0.4
+  },
+  {
+   "file": "../2026-10-31/stems/m2_morning.m4a",
+   "start": 7.7,
+   "dur": 7.6,
+   "fade_in": 0.3,
+   "fade_out": 0.4
+  },
+  {
+   "file": "../2026-10-31/stems/m2_morning.m4a",
+   "start": 14.87,
+   "dur": 7.9,
+   "lufs": -20,
+   "fade_in": 0.3,
+   "fade_out": 0.8
+  }
+ ],
+ "sfx": [
+  [
+   0,
+   14.0,
+   0.4
+  ],
+  [
+   14.0,
+   999,
+   0.3
+  ]
+ ],
+ "duck": {
+  "mix": 0.6,
+  "release": 350
+ },
+ "source_note": "장면마다 그 소식의 매체를 작게 띄운다. 원 기사 대조(check_sources.py 막음 0 · 경고 3 · 기사 9/14곳 읽음 — 못 읽은 애플페이 비즈워치·세계일보, AI 커닝 연합뉴스·한국경제는 read_article 로 다시 읽어 확인, 국제신문은 본문 칸을 못 찾음, AI 질문 디지털데일리는 본문을 못 읽어 --search 로 지디넷코리아 기사를 더 읽어 확인): 애플페이 '16일·3년 8개월·2023년 3월·두 번째·만 14세' 세계일보·서울경제(비즈워치·뉴스1 도), 코스피 '3~5년·1만·약 35%→50~60%·ROE 8%→13.5~14.5%' 한국경제TV·서울경제, 크리스마스 '19일·헬로키티·22종·두 차례' 연합뉴스·세계일보, AI 커닝 '17일·방미통위·장비 판매 자체는 불법 아님' 연합뉴스·한국경제, AI 질문 '5586명·72.4%·31.3%·5.1%·74.6%' 라이센스뉴스·지디넷코리아. 한 곳에만 있는 숫자: 해태 과자 달력 '3000개 완판·5000개'(세계일보만)·카카오뱅크 3분기 체크카드 결제액 '6.3조원'(서울경제만) — 릴스·웹툰에 쓰지 않음(웹툰 3번 컷 본문을 두 곳 확인된 말로 바꿈).",
+ "comic": {
+  "series": "오늘 아침 5가지",
+  "layout": "duo",
+  "title": "카뱅 체크카드로<br><span class='hl'>애플페이</span> 된다고?<br>오늘 아침 5가지",
+  "cover": {
+   "img": "stills/cover.png",
+   "pos": "50% 40%",
+   "job": "mcp_c5470f5b6aaf427796f87a0bb26f75ce"
+  },
+  "summary": true,
+  "panels": [
+   {
+    "card": 1,
+    "img_a": "stills/ap_a.png",
+    "pos_a": "50% 45%",
+    "img_b": "stills/ap_b.png",
+    "pos_b": "50% 50%",
+    "say_side": "right",
+    "stk_side": "left",
+    "jobs": [
+     "mcp_35c77f9e5e254a6685555c862ac04de6",
+     "mcp_e7f4ce0762044e778fddc5350e70a45b"
+    ]
+   },
+   {
+    "card": 5,
+    "img_a": "stills/ks_a.png",
+    "pos_a": "50% 40%",
+    "img_b": "stills/ks_b.png",
+    "pos_b": "50% 60%",
+    "say_side": "left",
+    "jobs": [
+     "mcp_4aa9833aaa914224a4f5ba8067f26b44",
+     "mcp_40b7dda4491141448fa0039bd6a7d28c"
+    ]
+   },
+   {
+    "card": 3,
+    "body": "스타벅스가 19일부터 헬로키티와 협업한 크리스마스 굿즈 22종을 두 번에 나눠 내요.",
+    "take": "굿즈는 두 번에 나눠 나와요 — 원하는 건 출시일을 적어 둬요",
+    "img_a": "stills/xm_a.png",
+    "pos_a": "50% 55%",
+    "img_b": "stills/xm_b.png",
+    "pos_b": "50% 50%",
+    "say_side": "left",
+    "tail": "out",
+    "jobs": [
+     "mcp_1c3ba44f207246448d17d0fb8a6c4489",
+     "mcp_b80054d767234141b7f663674ca45a4e"
+    ]
+   },
+   {
+    "card": 2,
+    "img_a": "stills/ch_a.png",
+    "pos_a": "50% 40%",
+    "img_b": "stills/ch_b.png",
+    "pos_b": "50% 50%",
+    "say_side": "left",
+    "stk_side": "left",
+    "jobs": [
+     "mcp_bc04e782706b46d5b344a84017387f72",
+     "mcp_eedbab87cefc43a0b257637c4f710fc6"
+    ]
+   },
+   {
+    "card": 4,
+    "img_a": "stills/aq_a.png",
+    "pos_a": "50% 55%",
+    "img_b": "stills/aq_b.png",
+    "pos_b": "50% 60%",
+    "say_side": "right",
+    "jobs": [
+     "mcp_8074398e4b274e3193a33a7b3f0cb16d",
+     "mcp_283af5943c7e4fe1b439edcac4105b60"
+    ]
+   }
+  ],
+  "sources": "장마다 표시",
+  "end": {
+   "title": "오늘 아침 5가지,<br>매일 아침 8시",
+   "sub": "경제부터 트렌드까지, 오늘 소식 5가지를<br>웹툰으로 풀어 드려요"
+  }
+ },
+ "comic_note": "5가지 웹툰 3판. 그림 11장 드롭샷 google/nano-banana-2.1 4:3 1K(장당 16.8, 다시 그린 장 없음), 규칙 webtoon_prompt.md. stills/ 는 저장소에 올리지 않는다. 장면: 표지 눈 덮인 겨울 노점 앞 커피 들고 손 흔들기 · ① 카페 계산대에서 카드가 폰으로 날아드는 반짝 → 공원 벤치에서 폰에 카드 넣고 끄덕 · ② 하늘로 솟는 블록 탑 꼭대기에 매달림 → 책상에서 새싹 돋은 돼지 저금통을 돋보기로 · ③ 선물 상자 눈사태에서 튀어나옴 → 빈 달력 칸에 동그라미 · ④ 시험장 날개 달린 렌즈 기계를 잠자리채가 낚아챔 → 체로 빈 게시물 걸러 내며 의심 · ⑤ 바쁜 로봇 옆에서 빛나는 공에게 속삭임 → 종이와 책 대조. 3번 컷 본문은 카드의 '해태 과자 달력은 3000개 완판 뒤 올해 5000개예요'(세계일보만)를 두 곳 확인된 '헬로키티와 협업한 크리스마스 굿즈 22종을 두 번에 나눠'로, '그래서 나는?'은 '한정판은 물량이 정해져 있어요'(물량 근거가 해태 한 곳)를 '굿즈는 두 번에 나눠 나와요'로 바꿈.",
+ "source_video_prep": "블록 탑 장면(3.29~7.42초) 아래쪽 도시 풍경(원본 480×854 기준 y 600~854)이 실제 도시처럼 보여(NEGATIVE 의 '실제 랜드마크 금지') boxblur 14:2 로 흐림 — H 가 그 띠 안 가운데에 있는 3.29~3.92초는 x 0~170·310~480 만. 명령: ffmpeg -i raw.mp4 -filter_complex \"[0:v]split=3[a][b][c];[b]crop=480:254:0:600,boxblur=14:2,split[bl][bl2];[bl2]crop=170:254:0:0[L];[c]crop=170:254:310:600,boxblur=14:2[R];[a][bl]overlay=0:600:enable='between(t,3.92,7.42)'[v1];[v1][L]overlay=0:600:enable='between(t,3.29,3.92)'[v2];[v2][R]overlay=310:600:enable='between(t,3.29,3.92)'[v]\" -map [v] -map 0:a -c:v libx264 -crf 14 -c:a copy clean.mp4",
+ "push": [
+  [
+   5.4,
+   7.4
+  ]
+ ]
+}
