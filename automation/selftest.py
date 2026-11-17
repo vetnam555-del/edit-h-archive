@@ -108,6 +108,10 @@ def t_alert():
            "평일(월~금)인데 릴스가 없는 날을 알리지 않거나, 주말을 '릴스 미게시'로 알린다")   # 2999-01-01 화 · 01-04 금 · 01-05 토 · 01-06 일 · 01-07 월
     expect(alert._ai_reel_weekday(wk, "2026-11-13") and not alert._ai_reel_weekday(wk, "2026-11-14") and not alert._ai_reel_weekday(wk, "2026-11-12")
            and not alert._ai_reel_weekday({}, "2026-11-13"), "평일 영상 규칙의 시작 날짜·주말 제외가 틀리다(설정이 없으면 예전처럼)")
+    wkly = dict(wk, ai_video_weekly={"from": "2026-11-18", "weekday": 0})
+    expect([alert._reel_wanted(wkly, d) for d in ("2999-01-01", "2999-01-04", "2999-01-05", "2999-01-07")] == [False, False, False, True]
+           and alert._ai_reel_weekday(wkly, "2026-11-17") and not alert._ai_reel_weekday(wkly, "2026-11-18") and alert._ai_reel_weekday(wkly, "2026-11-23"),
+           "주 1회(월) 규칙에서 화~일을 '릴스 미게시'로 알리거나, 월요일에 릴스가 없는데 알리지 않는다")   # 2999-01-07 월
     # 실패 알림: GitHub 서버(러너)를 못 잡아 시작도 못 한 실행(10/6 05:36 성과 수집 예약) — 끝난 일이면 조용히, 아니면 한 번 다시 실행
     no_runner = [{"conclusion": "cancelled", "steps": [], "runner_name": None}]
     broke = [{"conclusion": "success", "steps": [{"name": "a", "conclusion": "success"}], "runner_name": "r1"},
@@ -1750,6 +1754,15 @@ def t_story():
            "config 에 ai_video_weekdays_from(평일 영상 규칙)이 없거나 짝수 날 계획의 끝 날짜가 11/12 가 아니다")
     expect([post_instagram.ai_video_day(real_cfg, k) for k in ("2026-11-12", "2026-11-13", "2026-11-14", "2026-11-15", "2026-11-16")] == [True, True, False, False, True],
            "실제 config 로 본 영상 날이 평일 규칙과 다르다")
+    # 2026-11-17 운영자 '릴스는 일주일에 한 번 — 월요일 아침 4주' — ai_video_weekly.from 부터 월요일만 영상 날(평일 매일 규칙보다 먼저), 그 전 날짜는 그대로
+    wl = dict(wd, ai_video_weekly={"from": "2026-11-18", "weekday": 0})
+    wdays = ("2026-11-17", "2026-11-18", "2026-11-20", "2026-11-22", "2026-11-23", "2026-11-24", "2026-12-21")
+    expect([post_instagram.ai_video_day(wl, k) for k in wdays] == [True, False, False, False, True, False, True]
+           and [post_instagram.story_reel_only(wl, k) for k in wdays] == [True, False, False, False, True, False, True],
+           "주 1회(월) 규칙이 틀리다 — 11/18 부터 월요일만 영상 날, 화~일은 아침 카드 스토리를 올려야 한다(11/17 화는 예전 평일 규칙)")
+    expect(real_cfg.get("ai_video_weekly") == {"from": "2026-11-18", "weekday": 0}
+           and [post_instagram.ai_video_day(real_cfg, k) for k in ("2026-11-17", "2026-11-19", "2026-11-23")] == [True, False, True],
+           "config 의 ai_video_weekly(월요일만, 11/18~)가 없거나 실제 config 로 본 영상 날이 다르다")
     import inspect as _inspect
     pi_src = _inspect.getsource(post_instagram.main)
     expect("and not reel_only" in pi_src and "not ai.exists()" in pi_src and "card_story()" in pi_src,

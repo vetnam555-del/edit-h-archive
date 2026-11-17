@@ -412,12 +412,19 @@ def story_on(cfg, key, account_type=None):
 
 def ai_video_day(cfg, key):
     """그날 AI 릴스 영상을 만드는 날로 정해져 있나.
+    - config.instagram.ai_video_weekly({from, weekday})의 from 부터는 **그 요일(월)만** — 2026-11-17 운영자 '일주일에 한 번, 월요일 아침 4주'.
     - config.instagram.ai_video_weekdays_from(날짜)부터는 **평일(월~금)만** — 2026-11-13 운영자 '릴스 영상은 주말만 제외하는 방향으로'.
       주말은 영상 없이 웹툰만 만드는 날이다(automation/RUNBOOK_REEL.md).
     - 그 전: config.instagram.ai_video_even_days({from, until}, 11월 크레딧 계획: 짝수 날만) 기간의 홀수 날이면 아니다.
     영상을 만들지 않기로 정한 날에 '스토리는 릴스만'을 적용하면 아침 카드 스토리가 건너뛰어져 19:30 대신 올리기만 나간다
     (11/05·11/07 회고: 첫 장 도달 약 2시간 6·0 — 아침 영상 스토리는 18~19). 그래서 그런 날은 아침 캐러셀 실행(발송 시각)이 카드 스토리를 올린다."""
     day = str(key)[:10]
+    weekly = cfg.get("ai_video_weekly") or {}
+    if weekly.get("from") and day >= weekly["from"]:
+        try:   # 2026-11-17 운영자 '릴스는 일주일에 한 번, 월요일 아침' — 그 요일만 영상 날(평일 매일 규칙보다 먼저)
+            return dt.date.fromisoformat(day).weekday() == int(weekly.get("weekday", 0))
+        except ValueError:
+            return True
     weekdays_from = cfg.get("ai_video_weekdays_from")
     if weekdays_from and day >= weekdays_from:
         try:
