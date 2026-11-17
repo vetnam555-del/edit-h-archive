@@ -65,8 +65,8 @@ Claude 가 하는 일(07:05 제작 · 07:45 릴스/웹툰 · 08:20 점검 · 14:
 - `automation/sent/{날짜}.json` 이 없으면 `send-newsletter.yml` 을 workflow_dispatch(date={날짜}).
 - `automation/ig_posted/{날짜}.json` 에 carousel permalink 가 없으면 `post-instagram.yml` 을 mode=post, key={날짜}, only=carousel.
   **어제** AI 영상 릴스(`instagram/{어제}/reel_ai.mp4`)가 있는데 reel permalink 가 없거나, 웹툰(`instagram/{어제}/comic/`)이 있는데 comic permalink 가 없으면
-  mode=post, key={어제}, only=reel. 주말·예비 호 날은 릴스가 없는 게 정상이다. 평일 정규 호인데 어제 `reel_ai.mp4` 가 없으면 이유를 찾아 보고에 한 줄
-  (2026-11-13~ 평일은 매일 AI 영상 — 22:25 알림 메일도 온다). 이미 돌고 있는 실행이 있으면 기다린다(중복 실행 금지).
+  mode=post, key={어제}, only=reel. 화~일·예비 호 날은 릴스가 없는 게 정상이다. 어제가 월요일 정규 호인데 `reel_ai.mp4` 가 없으면 이유를 찾아 보고에 한 줄
+  (2026-11-18~ AI 영상은 주 1회 월요일 — 22:25 알림 메일도 온다). 이미 돌고 있는 실행이 있으면 기다린다(중복 실행 금지).
 - `instagram/{날짜}/reel_frames/` 에 r1~r4 JPEG 가 있나, 어제 `evening.yml` 이 성공했나, 어제 성과 스냅숏(`automation/metrics/daily/`)이 21:00 뒤에 모였나.
 - 평일이면 `python3 automation/compare_anjang.py` 의 '겹침 N/10' 과 '큰 소식 다룸 N/M' 을 붙여 **모두 정상이면 한 줄**로 보고.
 
@@ -84,8 +84,9 @@ Claude 가 하는 일(07:05 제작 · 07:45 릴스/웹툰 · 08:20 점검 · 14:
 4. `git add automation/learnings.md && git commit -m "Editor retrospective {날짜}" && git push origin HEAD:main`.
 
 ### 2-6. 07:45 AI 릴스 '오늘 아침 5가지' + 5가지 웹툰
-- `automation/RUNBOOK_REEL.md` 를 처음부터 읽고 그대로. 평일(월~금)은 AI 영상 릴스 + 웹툰(아침 게시), 주말은 웹툰만(19:30 저녁 사슬이 올린다)
-  — 2026-11-13 운영자 '릴스 영상은 주말만 제외'(그 전 11/05~11/12 는 짝수 날만).
+- `automation/RUNBOOK_REEL.md` 를 처음부터 읽고 그대로. **월요일은 AI 영상 릴스 + 웹툰(아침 게시), 화~일은 웹툰만(19:30 저녁 사슬이 올린다)**
+  — 2026-11-17 운영자 '릴스는 일주일에 한 번, 월요일 아침으로 4주 — 대신 퀄리티(내용·소스 전체)가 높아져야 한다'(RUNBOOK_REEL (Q)).
+  그 전: 11/13~11/17 평일 매일, 11/05~11/12 짝수 날만.
 - **영상·그림은 드롭샷(Dropshot AI Studio) 도구로, 목소리(Hana·Knox)는 무료 복제(`automation/pilots/ai_reel/clone_voice.py` — CosyVoice 3)로 만든다**
   (2026-11-14 운영자 '드롭샷', 11/16 운영자 '무료 목소리로 하되 원래 목소리랑 똑같이 → Hana·Knox 똑같다' — edge-tts·Supertonic 은 '다 별로'라 쓰지 않는다). 드롭샷 도구가 없는 환경이면 하지 않는다(그날은 릴스·웹툰 없이 08:00 카드·스토리만 나간다).
   힉스필드로 영상·그림을 대신 만들지 않는다.

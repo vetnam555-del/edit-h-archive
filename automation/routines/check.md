@@ -11,10 +11,10 @@ GitHub 예약 실행은 아침 0~3시간·낮저녁 3~6시간 늦거나 빠지�
 2) 호가 있으면: main 의 `automation/sent/{날짜}.json` 이 없으면 send-newsletter.yml 을 workflow_dispatch(date={날짜})로 돌린다.
    인스타: `python3 automation/ig_plan.py` 의 저녁 게시인 날은 **아침엔 캐러셀만** 확인한다 — `automation/ig_posted/{날짜}.json` 에 carousel permalink 가 없으면
    post-instagram.yml 을 mode=post, key={날짜}, only=carousel 로 돌린다. 같은 기록에 `story_error` 가 있고 `story` 가 없는데 오늘이 주말이거나 예비 호 날이면
-   (평일 정규 호는 카드 스토리를 릴스 실행이 올린다) 같은 실행(only=carousel)을 한 번 돌려 카드 스토리를 다시 올린다(11/14 — 08:01 인스타 오류로 실패, 09:09 다시 올림). 그리고 **어제** AI 영상 릴스(`instagram/{어제}/reel_ai.mp4`)가 있는데
+   (영상 날 — 2026-11-18~ 월요일 — 정규 호는 카드 스토리를 릴스 실행이 올린다) 같은 실행(only=carousel)을 한 번 돌려 카드 스토리를 다시 올린다(11/14 — 08:01 인스타 오류로 실패, 09:09 다시 올림). 그리고 **어제** AI 영상 릴스(`instagram/{어제}/reel_ai.mp4`)가 있는데
    reel permalink 가 없거나, 웹툰(`instagram/{어제}/comic/`)이 있는데 comic permalink 가 없으면 mode=post, key={어제}, only=reel 로 돌린다.
-   주말·예비 호 날은 AI 영상이 없어 릴스가 없는 게 정상이다 — 이미지를 이어 붙인 릴스는 2026-11-13~ 올리지 않는다(운영자 11/12).
-   **평일(월~금) 정규 호인데 어제 `reel_ai.mp4` 가 없으면** 07:45 릴스 작업이 멈춘 날이다(2026-11-13 운영자 '릴스 영상은 주말만 제외' — 평일은 매일 만든다):
+   화~일·예비 호 날은 AI 영상이 없어 릴스가 없는 게 정상이다(2026-11-17 운영자 '릴스는 일주일에 한 번, 월요일 아침') — 이미지를 이어 붙인 릴스는 2026-11-13~ 올리지 않는다(운영자 11/12).
+   **어제가 월요일 정규 호인데 `reel_ai.mp4` 가 없으면** 07:45 릴스 작업이 멈췄거나 쉰 날이다(2026-11-18~ 주 1회 월요일 — 11/13~11/17 은 평일 매일이었다):
    이유(크레딧 부족·검수 탈락·작업 세션이 안 뜸)를 `automation/CHANGELOG.md` 맨 위와 `automation/alerts/{어제}.json` 에서 찾아 보고에 한 줄 적는다(지난 날 영상을 다시 만들지는 않는다). 이미 돌고 있는 'Post EDIT H to Instagram' 실행(in_progress/queued)이 있으면 기다린다
    (중복 실행 금지 — 기록이 있으면 스크립트가 알아서 건너뛴다).
 2-1) 저녁 일정 사슬(evening.yml, 'EDIT H evening chain'): 오늘 호 push 로 시작해 17:30 까지 기다렸다가 18:00 주간 특집·19:30 릴스·20:45 점검·21:30 성과 수집을 실행한다.

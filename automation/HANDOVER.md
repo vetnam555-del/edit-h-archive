@@ -44,6 +44,7 @@
 | 11/13 | AI 영상 릴스는 평일 매일, 주말은 웹툰만 · 발행은 08:00(11/14 호부터) | `config.json`, `edith/common.py` |
 | 11/14 | **영상·그림은 힉스필드가 아니라 드롭샷으로** | `RUNBOOK_REEL.md` '도구' |
 | 11/15~16 | 무료 기본 목소리(edge-tts·Supertonic)는 '다 별로' → '무료로 하되 원래 목소리랑 똑같이' → **Hana 는 무료 복제('똑같네'), Knox 는 힉스필드** | `RUNBOOK_REEL.md` (A), `pilots/ai_reel/clone_voice.py` |
+| 11/17 | **AI 영상 릴스는 주 1회 월요일 아침(4주 시험 E23), 화~일은 웹툰만 · 대신 품질(내용·소스 전체)을 더 높게** · 드롭샷 충전은 운영자가 말하기 전까지 보류(별도 액션 금지) | `config.instagram.ai_video_weekly`, `RUNBOOK_REEL.md` (Q)·크레딧 계획 |
 
 ## 4. 드롭샷 전환 (11/14 밤)
 
