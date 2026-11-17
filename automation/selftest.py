@@ -696,7 +696,11 @@ def t_releases():
            and "https://www.mofe.go.kr/com/cmm/fms/FileDown.do?atchFileId=ATCH_000000000032967&fileSn=2" in body,
            f"재정경제부 보도자료(제목·첨부 PDF 주소)를 못 읽는다: {body[:300]}")
     expect([fr.is_primary(u) for u in ("https://www.fsc.go.kr/no010101/1", "https://www.korea.kr/briefing/x", "https://ecos.bok.or.kr/",
-                                       "https://n.news.naver.com/mnews/article/1", "https://evil-go.kr.example.com/")] == [True, True, True, False, False],
+                                       "https://n.news.naver.com/mnews/article/1", "https://evil-go.kr.example.com/",
+                                       "https://kind.krx.co.kr/disclosure/x", "https://www.ksd.or.kr/ko/about-ksd/ksd-news/press-release/1",
+                                       "https://www.sec.gov/Archives/edgar/data/1", "https://www.kaida.co.kr/ko/statistics/x",
+                                       "https://notkrx.co.kr/", "https://sec.gov.example.com/")] == [True, True, True, False, False,
+                                                                                                   True, True, True, True, False, False],
            "원문 주소 판정이 틀렸다")
     # 쪽 넘기기·빈 목록·끊긴 응답(Codex 리뷰) — 실제 접속 없이 예시 페이지로
     page = {k: (ex / f"{k}_list.html").read_text(encoding="utf-8") for k in ("fsc", "moel", "fss", "korea")}

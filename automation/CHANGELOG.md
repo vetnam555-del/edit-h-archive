@@ -3,6 +3,9 @@
 시스템이 날마다 무엇을 바꿨는지 한 줄씩 남긴다 — **바꾼 것 — 왜(근거) — 어떻게 판정·확인**. 최신이 위.
 매일 14:10 개선 루틴(`RUNBOOK_IMPROVE.md`)과 일요일 21:00 주간 루틴이 적는다. 편집 회고는 `learnings.md`, 조사·실험은 `references.md`.
 
+### 2026-11-17 (14:10 개선 — H PICK 원문에 거래소·공시·협회 통계도 센다)
+- `style.PRIMARY_HOSTS` 에 한국거래소(krx.co.kr, KIND 포함)·예탁결제원(ksd.or.kr·seibro.or.kr)·SEC(sec.gov)·수입차협회(kaida.co.kr)를 더함 — 성과표 'H PICK 원문'·`↘ 원문` 경고·`fetch_releases.is_primary` 가 같은 기준. 왜: 11/04 회고 — 원문을 놓친 H PICK 넷이 거래소·예탁결제원 발표(11/03 T+1)·SEC 제출 실적(11/04 쿠팡)·수입차협회 통계(11/01 BYD)·거래소 마감(10/31 코스피)이었고, 11/16 수집 최근 7호 4/7(목표 5/7). RUNBOOK 1-1b 에 한 줄(KIND·SEC 는 자동 접속을 막는 일이 많아 직접 읽은 화면만 출처로 — 오늘 확인: kind.krx.co.kr·sec.gov 403, krx.co.kr·ksd.or.kr·kaida.co.kr 200). 확인: selftest 원문 주소 칸에 새 주소 4개 ○·비슷한 가짜 주소 2개 × 추가, 지난 호 content 에 해당 주소 0건이라 성과표 지난 줄은 그대로. 판정: 11/18~11/24 H PICK 원문 칸.
+
 ### 2026-11-17 (오전 — 운영자 결정: AI 영상 릴스 주 1회 월요일 + 품질 기준)
 - 운영자 "릴스는 일주일에 한 번 — 월요일 아침으로 4주 해 보자, 대신 퀄리티라 함은 내용·소스 등 전체적으로 더 각별히". `config.instagram.ai_video_weekly`({from 11/18, weekday 0}) —
   `post_instagram.ai_video_day`·`alert._ai_reel_weekday` 가 평일 매일 규칙보다 먼저 본다: 월요일만 영상 날(08:00 실행은 카드 스토리를 릴스 실행에 맡김), 화~일은 08:00 에 카드 스토리·19:30 웹툰, '릴스 미게시' 알림은 월요일만.
