@@ -204,6 +204,39 @@ def render_cards(ep, work):
     return paths, end
 
 
+def lipsync_on(ep):
+    """영상을 목소리 트랙(reference_audio)으로 만든 날인가 — 그 영상 소리에는 우리 대사가 이미 들어 있다(립싱크, 2026-11-17~)."""
+    return bool((ep.get("seedance") or {}).get("reference_audio"))
+
+
+def voice_spans(voices, vfiles):
+    """[(시작, 끝)] — 대사 파일 길이 ÷ tempo. 파일을 못 읽으면 그 줄은 4초로 본다(넉넉하게 끈다)."""
+    spans = []
+    for v, path in zip(voices, vfiles):
+        try:
+            r = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(path)],
+                               capture_output=True, text=True, timeout=30)
+            dur = float(r.stdout.strip())
+        except (OSError, ValueError, subprocess.SubprocessError):
+            dur = 4.0
+        spans.append((float(v["start"]), float(v["start"]) + dur / float(v.get("tempo", 1.0) or 1.0)))
+    return spans
+
+
+def sfx_expr(ep, spans):
+    """영상 소리(효과음) 볼륨 식. sfx [[시작, 끝, 볼륨]] 구간별, 없으면 0.4·밖은 0.3.
+    립싱크 영상이면 대사마다 [시작 − 0.15, 끝 + 0.25] 는 0 — 영상 소리에 든 목소리 트랙(다시 만든 장면은 예전 문구)이 우리 녹음과
+    겹쳐 '모건스탠리→모건스탠비', '게시물→게이싯물' 처럼 뭉개졌다(11/17 릴스, 운영자 '음성에 문제').
+    """
+    expr = "0.3"
+    for a, b, vol in reversed(ep.get("sfx", [[0, 999, 0.4]])):
+        expr = f"if(between(t,{a},{b}),{vol},{expr})"
+    if lipsync_on(ep):
+        for a, b in spans:
+            expr = f"if(between(t,{max(0.0, a - 0.15):.2f},{b + 0.25:.2f}),0,{expr})"
+    return expr
+
+
 def compose(ep, base, src, out, work):
     caps, end = render_cards(ep, work)
     t0, t1 = ep["trim"]
@@ -231,10 +264,8 @@ def compose(ep, base, src, out, work):
     f.append(f"[{last}]trim=0:{main},setpts=PTS-STARTPTS,format=yuv420p,setsar=1,settb=1/{rate}[vm]")
     f.append(f"[{len(caps) + 1}:v]fps={rate},format=yuv420p,setsar=1,settb=1/{rate}[ve]")
     f.append(f"[vm][ve]xfade=transition=fade:duration={XFADE}:offset={main - XFADE:.3f}[v]")   # 길이는 그대로(main + endsec)
-    # 효과음(원래 AI 영상 소리) — 구간별 볼륨
-    expr = "0.3"
-    for a, b, vol in reversed(ep.get("sfx", [[0, 999, 0.4]])):
-        expr = f"if(between(t,{a},{b}),{vol},{expr})"
+    # 효과음(원래 AI 영상 소리) — 구간별 볼륨. 립싱크 영상(reference_audio)이면 대사 시간에는 영상 소리를 끈다(sfx_expr).
+    expr = sfx_expr(ep, voice_spans(voices, vfiles))
     f.append(f"[0:a]atrim={t0}:{t1},asetpts=PTS-STARTPTS,aresample=48000,aformat=channel_layouts=stereo,"
              f"volume='{expr}':eval=frame,apad=whole_dur={total},atrim=0:{total}[sfx]")
     vl = []

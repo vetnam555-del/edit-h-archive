@@ -251,7 +251,9 @@ CAMERA 에 'continuous motion in every shot — no held poses, no frozen moments
 - **LIP SYNC 문장(프롬프트에 그대로 — 11/16 시험에서 맞았다)**: `LIP SYNC: H is the speaker of the reference audio. H's small black mouth opens and closes exactly in time with every syllable of the speech in the reference audio, wider on stressed syllables, and stays closed in a small smile during the silent parts.`
   + 장면마다 'H faces the camera with its mouth visible while speaking'(말하는 줄 동안 H 얼굴이 보이게 — 뒤돌거나 화면 밖이면 입을 볼 수 없다). AUDIO 줄은
   `use the speech from the reference audio exactly, plus playful cartoon sound effects; no music, no other voices`.
-- 영상 소리는 효과음만 쓰고 목소리는 1-1 의 녹음 파일을 episode.py 가 얹는다(같은 시각이라 입과 맞는다). 받은 영상 소리에 우리 대사가 겹쳐 들리면 sfx 음량을 0.25 까지 내린다.
+- 영상 소리는 효과음만 쓰고 목소리는 1-1 의 녹음 파일을 episode.py 가 얹는다(같은 시각이라 입과 맞는다).
+  **립싱크 영상(seedance.reference_audio 가 있는 brief)은 영상 소리에 목소리 트랙이 그대로 들어 있다** — episode.py 가 대사마다 [시작−0.15, 끝+0.25] 동안 영상 소리를 0 으로 끈다(11/18~).
+  11/17 릴스는 그 소리를 0.4 로 함께 섞어 두 목소리가 겹쳤고(다시 만든 장면은 예전 문구 '시험 속임수 게시물'까지), 완성본이 '모건스탠비가 본 포스피'·'커닝 게이싯물'로 들렸다(운영자 11/18 '음성에 문제').
 - 2026-11-14 시험(4초, 참고 그림 3장): H 모양 그대로·세로 480×854·효과음 있음. 받은 영상은 480×854 이고 episode.py 가 1080×1920 으로 키운다.
 - brief.json 의 `"seedance"` 칸: `{"model": "bytedance/seedance-2.5", "made_by": "dropshot", "job": job_id, "prompt": "brief_prompt.txt", "cut": …}`.
 
@@ -310,12 +312,14 @@ CAMERA 에 'continuous motion in every shot — no held poses, no frozen moments
   '이 그림은 AI로 만들었어요. 숫자는 기사 2곳 이상에서 확인했어요.' + '출처: …'(컷 순서) + 해시태그 5개 이하.
 
 ### 5-2. 검수
-- 영상 날(월요일): `python3 automation/pilots/ai_reel/qa.py <brief.json>` ✓(숫자·싱크·발음(녹음 95%·완성본 85%)·음량·끊김·소리 구멍·검은 화면·번쩍임·꽉 찬 화면·멈춘 구간·반복·출처·만화) →
+- 영상 날(월요일): `python3 automation/pilots/ai_reel/qa.py <brief.json>` ✓(숫자·싱크·발음(녹음 95%·완성본 95% — 11/18~, 그 전 85% 라 11/17 뭉개진 두 줄이 통과했다)·음량·끊김·소리 구멍·검은 화면·번쩍임·꽉 찬 화면·멈춘 구간·반복·출처·만화) →
   완성본 프레임 눈 검수(0.8초 썸네일·장면마다·끝 화면 — 자막이 H 를 가리지 않나, 깨진 글자).
 - **립싱크 검수(영상 날 — 11/16 운영자 '필히 검수', 11/17~ 6줄 모두 맞아야 — (Q) 5)**: 완성본 `reel_ai.mp4` 에서 목소리 줄마다(`qa.py --stems` 의 '목소리 구간') 8장/초로 H 얼굴 부분을 모아 한 장으로 본다
   (`ffmpeg -ss <시작> -t <길이> -i reel_ai.mp4 -vf "fps=8,scale=180:-1,tile=8x4" -frames:v 1 <임시>/lip_<줄>.jpg`). 볼 것: 목소리가 나는 동안 입이 열리고 닫히나,
   조용한 구간(줄 사이·끝 화면 전)에 입이 닫혀 있나, 입 모양이 음절보다 0.2초 넘게 늦거나 이르지 않나. 걸리면 그 장면을 다시 만들기(1번까지, 같은 목소리 트랙) —
   그래도 안 맞으면 그날 영상은 쉰다. 보고에 '립싱크: 6줄 중 N줄 맞음'과 줄마다 억양 폭(반음)을 적는다.
+- **올리기 전 마지막 귀 검수(11/18~)**: 완성본을 음악째 받아 적은 qa 의 '완성본 받아쓰기' 줄을 6줄 모두 보고에 그대로 옮긴다 — 한 줄이라도 95% 아래이거나 립싱크가 6줄 중 6줄이 아니면 **올리지 않는다**
+  (11/17 은 립싱크 5/6·완성본 87.5%로 올렸다). 영상을 만든 뒤에는 녹음을 바꿔 넣지 않는다(4번) — 바꿔야 하면 그 장면을 새 녹음으로 다시 만든다(206).
 - 주말·영상을 쉰 날(웹툰만): `python3 automation/pilots/ai_reel/qa.py <brief.json> --comic` ✓.
 - `python3 automation/selftest.py` 가 '✓ 자동 점검 통과'인지도 본다(PR 의 점검과 같다).
 

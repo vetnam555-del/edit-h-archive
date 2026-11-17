@@ -2776,6 +2776,14 @@ def t_ai_reel():
     pf = ep_mod.push_filter({"push": [[12.75, 13.96]]}, 24)
     expect("zoompan=" in pf and "between(it\\,12.75\\,13.96)" in pf and "fps=24" in pf and ep_mod.push_filter({}, 24) == "",
            "push(천천히 다가가기) 필터가 틀린다")
+    # 립싱크 영상 소리(11/18~) — 11/17 릴스: reference_audio 로 만든 영상 소리(목소리 트랙)를 0.4 로 섞어 우리 녹음과 두 목소리가 겹쳤다
+    # ('모건스탠비가 본 포스피' 87.5%·'커닝 게이싯물' 92% 가 완성본 85% 기준을 통과 — 운영자 11/18 '음성에 문제'). 대사 동안 영상 소리는 0, 완성본도 95%.
+    lip = {"seedance": {"reference_audio": "https://x/voice.mp3"}, "sfx": [[0, 14.0, 0.4], [14.0, 999, 0.3]]}
+    e_lip, e_old = ep_mod.sfx_expr(lip, [(3.9, 7.0)]), ep_mod.sfx_expr({"sfx": lip["sfx"]}, [(3.9, 7.0)])
+    expect(ep_mod.lipsync_on(lip) and not ep_mod.lipsync_on({"seedance": {"model": "x"}})
+           and "between(t,3.75,7.25),0,if" in e_lip and "),0,if" not in e_old and "between(t,0,14.0),0.4" in e_old
+           and "sfx_expr(ep, voice_spans(" in inspect.getsource(ep_mod.compose) and qa.MIX_MIN >= 0.95,
+           "립싱크 영상(reference_audio)의 소리를 대사 동안 끄지 않거나, 완성본 받아쓰기 기준이 95% 아래다(11/17 겹친 목소리)")
     expect(ep_mod.out_rate({"date": "2026-11-02"}, "없는파일.mp4") == 30 and ep_mod.out_rate({"date": "2026-11-03"}, "없는파일.mp4") == 30,
            "11/02 까지 설정의 fps 가 30 이 아니거나, 원본을 못 읽을 때 30 으로 돌아가지 않는다")
     # 대사 속 긴 쉼·소리 구멍(11/07~) — 11/06 운영자 "릴스 보니까 중간에 목소리 끊기는 것 같은데": 코인 줄 '코인 세금,' 뒤 0.54초 쉼이
