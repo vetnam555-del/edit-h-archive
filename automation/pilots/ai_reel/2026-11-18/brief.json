@@ -11,51 +11,51 @@
  "voices": [
   {
    "file": "stems/i1_nvidia.mp3",
-   "start": 0.05,
+   "start": 0.55,
    "tempo": 1.0,
    "text": "엔비디아 매출이 1년 새 103% 뛰었습니다!",
    "tts": "엔비디아 매출이 일 년 새 <strong>백삼 퍼센트</strong> 뛰었습니다!",
-   "voice": "Knox"
+   "voice": "Knox(복제 — CosyVoice 3, 받아쓰기 100%·같음 0.890·억양 7.9반음) — '두 배 넘었습니다'가 '2배'로 받아 적혀 94%·억양 6.9 라 '백삼 퍼센트 뛰었습니다'로 바꿔 다시"
   },
   {
    "file": "stems/i2_aiwork.mp3",
-   "start": 3.75,
-   "tempo": 1.0,
+   "start": 5.0,
+   "tempo": 1.08,
    "text": "직장인 셋 중 둘, AI로 일한대요!",
    "tts": "직장인 셋 중 <strong>둘</strong>, 에이아이로 일한대요!",
-   "voice": "Hana"
+   "voice": "Hana(복제 — CosyVoice 3, 받아쓰기 97%·같음 0.911·억양 11.4반음) — 후보 1 에 '둘, 어? AI로' 짧은 감탄이 들어감(후보 2 100% 는 같음이 낮아 안 골라짐)"
   },
   {
    "file": "stems/i3_overdue.mp3",
-   "start": 7.65,
-   "tempo": 1.0,
+   "start": 9.1,
+   "tempo": 1.12,
    "text": "은행 연체율, 1년 전보다 모두 올랐대요!",
    "tts": "은행 연체율, 일 년 전보다 <strong>모두</strong> 올랐대요!",
-   "voice": "Hana"
+   "voice": "Hana(복제 — 받아쓰기 100%·같음 0.855·억양 10.1반음) — '다 올랐대요'는 억양 7.0~7.5 라 '모두 올랐대요'로 다시"
   },
   {
    "file": "stems/i4_beauty.mp3",
-   "start": 11.7,
-   "tempo": 1.0,
+   "start": 12.5,
+   "tempo": 1.12,
    "text": "오천 원 이하 화장품이 85개래요!",
    "tts": "오천 원 이하 화장품이 <strong>팔십오 개</strong>래요!",
-   "voice": "Hana"
+   "voice": "Hana(복제 — CosyVoice 3, 받아쓰기 100%)"
   },
   {
    "file": "stems/i5_musinsa.mp3",
-   "start": 15.05,
-   "tempo": 1.0,
+   "start": 15.4,
+   "tempo": 1.1,
    "text": "무신사, 내년에 유럽에서도 팔아요!",
    "tts": "무신사, 내년에 <strong>유럽</strong>에서도 팔아요!",
-   "voice": "Hana"
+   "voice": "Hana(복제 — 받아쓰기 100%·같음 0.845·억양 9.6반음) — '내년엔'이 qa 에서 '내년행'(93%)이라 '내년에'로 다시"
   },
   {
    "file": "stems/i_bye_share.mp3",
-   "start": 18.0,
+   "start": 18.1,
    "tempo": 1.0,
    "text": "필요한 친구에게 보내 주세요!",
    "tts": "필요한 친구에게 <strong>보내</strong> 주세요!",
-   "voice": "Hana"
+   "voice": "Hana(복제 — CosyVoice 3, 받아쓰기 100%)"
   }
  ],
  "comic": {
@@ -283,33 +283,37 @@
  "captions": [
   {
    "start": 0,
-   "end": 3.75,
+   "end": 4.85,
    "size": 84,
-   "html": "<div class=\"kick\">11월 18일 · 오늘 아침 5가지 · 1/5 · 테크</div><div class=\"main\">젠슨 황 없이도<br>매출 <span class=\"hl\">103%</span> 늘었다</div><div class=\"sub\">엔비디아 3분기 1158억 달러 — 내 ETF 속 비중은?</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 한국경제·NVIDIA 뉴스룸</div>"
+   "html": "<div class=\"kick\">11월 18일 · 오늘 아침 5가지 · 1/5 · 테크</div><div class=\"main\">젠슨 황 없이도<br>매출 <span class=\"hl\">103%</span> 늘었다</div><div class=\"sub\">엔비디아 3분기 1158억 달러 — 내 ETF 속 비중은?</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 한국경제·NVIDIA 뉴스룸</div>",
+   "top": 1250
   },
   {
-   "start": 3.75,
-   "end": 7.65,
+   "start": 4.85,
+   "end": 8.6,
    "size": 84,
-   "html": "<div class=\"kick\">2/5 · 일</div><div class=\"main\">직장인 <span class=\"hl\">66.5%</span><br>AI로 일한다</div><div class=\"sub\">주 40시간 중 평균 3.7시간 아껴 · 한은 1만6342명 조사</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 동아일보·중앙일보</div>"
+   "html": "<div class=\"kick\">2/5 · 일</div><div class=\"main\">직장인 <span class=\"hl\">66.5%</span><br>AI로 일한다</div><div class=\"sub\">주 40시간 중 평균 3.7시간 아껴 · 한은 1만6342명 조사</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 동아일보·중앙일보</div>",
+   "top": 1320
   },
   {
-   "start": 7.65,
-   "end": 11.65,
+   "start": 8.6,
+   "end": 12.45,
    "size": 84,
    "html": "<div class=\"kick\">3/5 · 금융</div><div class=\"main\">은행 연체율 <span class=\"hl\">0.59%</span><br>1년 전보다 모두 올라</div><div class=\"sub\">8월(0.69%)보단 낮아 · 1개월만 밀려도 연체</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 이데일리·SBS Biz</div>"
   },
   {
-   "start": 11.65,
-   "end": 15.05,
+   "start": 12.45,
+   "end": 15.3,
    "size": 84,
-   "html": "<div class=\"kick\">4/5 · 소비</div><div class=\"main\">5000원 이하 화장품<br><span class=\"hl\">85개</span></div><div class=\"sub\">이마트 · 9980원 노브랜드 더마 6종도 이달 입점</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 아이뉴스24·디지털데일리</div>"
+   "html": "<div class=\"kick\">4/5 · 소비</div><div class=\"main\">5000원 이하 화장품<br><span class=\"hl\">85개</span></div><div class=\"sub\">이마트 · 9980원 노브랜드 더마 6종도 이달 입점</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 아이뉴스24·디지털데일리</div>",
+   "top": 1250
   },
   {
-   "start": 15.05,
-   "end": 17.9,
+   "start": 15.3,
+   "end": 17.96,
    "size": 84,
-   "html": "<div class=\"kick\">5/5 · 패션</div><div class=\"main\">무신사, 내년<br><span class=\"hl\">유럽</span> 온라인 진출</div><div class=\"sub\">영국·프랑스·독일 · 지금은 13개 국가·지역</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 매일경제·서울경제</div>"
+   "html": "<div class=\"kick\">5/5 · 패션</div><div class=\"main\">무신사, 내년<br><span class=\"hl\">유럽</span> 온라인 진출</div><div class=\"sub\">영국·프랑스·독일 · 지금은 13개 국가·지역</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 매일경제·서울경제</div>",
+   "top": 1250
   }
  ],
  "end_card": {
@@ -322,47 +326,75 @@
    "file": "../2026-10-31/stems/m1_chase.m4a",
    "start": 0.0,
    "offset": 1.7,
-   "dur": 4.1,
-   "fade_out": 0.3
+   "dur": 5.1,
+   "fade_out": 0.3,
+   "lufs": -24
   },
   {
    "file": "../2026-10-31/stems/m1_chase.m4a",
-   "start": 3.8,
+   "start": 4.8,
    "offset": 1.75,
-   "dur": 4.1,
+   "dur": 3.8,
+   "lufs": -24,
    "fade_in": 0.2,
    "fade_out": 0.4
   },
   {
    "file": "../2026-10-31/stems/m2_morning.m4a",
-   "start": 7.6,
-   "dur": 7.7,
-   "fade_in": 0.3,
-   "fade_out": 0.4
+   "start": 3.4,
+   "offset": 0.0,
+   "dur": 5.2,
+   "lufs": -28,
+   "lowpass": 2200,
+   "fade_in": 0.2,
+   "fade_out": 0.3
   },
   {
    "file": "../2026-10-31/stems/m2_morning.m4a",
-   "start": 14.95,
+   "start": 8.3,
+   "dur": 6.9,
+   "fade_in": 0.3,
+   "fade_out": 0.4,
+   "lufs": -24
+  },
+  {
+   "file": "../2026-10-31/stems/m2_morning.m4a",
+   "start": 14.85,
    "dur": 7.9,
-   "lufs": -20,
+   "lufs": -24,
    "fade_in": 0.3,
    "fade_out": 0.8
   }
  ],
  "sfx": [
   [
-   0,
-   14.0,
-   0.4
+   4.45,
+   4.85,
+   0.35
   ],
   [
-   14.0,
+   8.45,
+   9.0,
+   0.35
+  ],
+  [
+   12.45,
+   12.5,
+   0.35
+  ],
+  [
+   15.3,
+   15.4,
+   0.35
+  ],
+  [
+   0,
    999,
-   0.3
+   0
   ]
  ],
  "duck": {
-  "mix": 0.6,
+  "mix": 0.75,
   "release": 350
  },
  "seedance": {
@@ -370,6 +402,18 @@
   "made_by": "dropshot",
   "job": "mcp_b73162e5a58443219500e199e3c3dbb3",
   "prompt": "brief_prompt.txt",
-  "reference_audio": "https://cdn.aistudio.dropshot.io/public/mcp-uploads/prod/RSNOZHV0/ed250ab7fd074e37ac5dcaf674bbcaf7/edith-2026-11-18-voice.mp3"
- }
+  "reference_audio": "https://cdn.aistudio.dropshot.io/public/mcp-uploads/prod/RSNOZHV0/ed250ab7fd074e37ac5dcaf674bbcaf7/edith-2026-11-18-voice.mp3",
+  "cut": "장면 경계(scene 0.08): 칩 공장 0~4.85 · 사무실 4.85~8.4 · 은행 홀 8.4~12.4 · 마트 통로 12.4~14.95 · 날개 상자 바다 위 14.95~17.4 · 옥상 테라스 착지·가리키고 손 흔들기 17.4~20. 장면이 목소리 줄 시작(3.75·7.65·11.7·15.05)보다 0.7~1.1초 늦게 넘어가 — 립싱크는 목소리를 따르니 자막은 목소리 시각에 맞춤. 검은 화면 0, 멈춘 구간 없음, 꽉 찬 화면(letterboxed False, 중앙값 0.96). 0.5초 프레임으로 사람·로고·글자 없음 확인(사무실 벽 액자·은행 계기판은 글자·숫자 없음). 다시 만들지 않음(480p 20초 1,030크레딧 한 번).",
+  "remake": {
+   "why": "립싱크 검수 — 사무실 장면은 대사 2 처음 약 0.9초 동안 H 가 의자 뒤로 돌아 입이 안 보였다. 그 장면만 4초로 다시 만들었다.",
+   "jobs": {
+    "office": "mcp_12a2ef5a32144a17a2c96bfc2429d2ec"
+   },
+   "credits": "4초 480p 206",
+   "reference_audio": "대사 2 녹음(tempo 1.08)을 0.15초에 둔 4초 조각(edith-2026-11-18-voice-s2.mp3)",
+   "splice": "clean = 원본 0~4.85 + 새 사무실 장면 0.45~4.0초 → 4.85~8.4 + 원본 8.4~끝(소리도 같은 자리)."
+  },
+  "lip_sync": "영상 속 말소리(=입)가 목소리 트랙보다 0.4~1.0초 늦게 나와(seedance 가 줄마다 늦춤 — 장면 경계 4.85·8.4·12.4·14.95 도 같이 늦음) 목소리 start 를 영상 입에 맞춰 옮김(0.55·5.0·9.1·12.5·15.4·18.1, tempo 1.0·1.08·1.12·1.12·1.1·1.0). 립싱크: 6줄 중 6줄 맞음(대사 2 는 다시 만든 장면, 대사 3 은 입이 약 0.2초 늦음). 억양 폭(반음): 1 Knox 7.9 · 2 11.4 · 3 10.1 · 4 12.8 · 5 9.6 · 6 12.4."
+ },
+ "not_posted": "올리지 않음 — qa.py 완성본 받아쓰기 ✗: 대사 1·2·5·6 이 75~80%(줄 첫 낱말 '엔비디아'·'직장인'·'무신사'·'필요한'이 빠짐). 같은 완성본을 줄마다 잘라 받아쓰면 6줄 모두 100% — 전체 받아쓰기의 낱말 시각이 0.3~1초 일찍 찍혀(목소리를 영상 입에 맞춰 옮긴 뒤 줄 사이 쉼이 길어짐) qa 의 줄 구간(앞뒤 0.3초) 밖으로 나간 것. 규칙(5-2 '한 줄이라도 95% 아래면 올리지 않는다')대로 올리지 않았다. 완성본은 저장소에 넣지 않음."
 }
