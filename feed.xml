@@ -6,7 +6,14 @@
   <atom:link href="https://vetnam555-del.github.io/edit-h-archive/feed.xml" rel="self" type="application/rss+xml"/>
   <description>매일 아침 8시, 경제부터 트렌드까지 2030이 알아야 할 소식을 확인된 숫자로</description>
   <language>ko</language>
-  <lastBuildDate>Tue, 17 Nov 2026 08:00:00 +0900</lastBuildDate>
+  <lastBuildDate>Wed, 18 Nov 2026 08:00:00 +0900</lastBuildDate>
+  <item>
+    <title>VOL.147 젠슨 황 없는 엔비디아, 매출 2배 됐다고?</title>
+    <link>https://vetnam555-del.github.io/edit-h-archive/2026-11-18.html</link>
+    <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-11-18.html</guid>
+    <pubDate>Wed, 18 Nov 2026 08:00:00 +0900</pubDate>
+    <description>엔비디아 3분기 실적·직장인 AI 활용·이마트 5000원 화장품·무신사 유럽 진출·은행 연체율 — 오늘의 5가지</description>
+  </item>
   <item>
     <title>VOL.146 카뱅 체크카드로, 애플페이 된다고?</title>
     <link>https://vetnam555-del.github.io/edit-h-archive/2026-11-17.html</link>
@@ -209,13 +216,6 @@
     <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-10-19.html</guid>
     <pubDate>Mon, 19 Oct 2026 08:30:00 +0900</pubDate>
     <description>4%대 예금 귀환·위스키 매출 소주 추월·12월 초진 비대면진료·취업 준비 월 58만원·사우나 검색 25배 — 오늘의 5가지</description>
-  </item>
-  <item>
-    <title>VOL.117 2%대에 빌린 3억, 월 29만원 더 낸다고?</title>
-    <link>https://vetnam555-del.github.io/edit-h-archive/2026-10-18.html</link>
-    <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-10-18.html</guid>
-    <pubDate>Sun, 18 Oct 2026 08:30:00 +0900</pubDate>
-    <description>주담대 변동금리 6% 돌파·11월 유류할증료 인상·경기 버스 파업 예고·카페 점심·아이폰 듀오 — 오늘의 5가지</description>
   </item>
 </channel>
 </rss>
