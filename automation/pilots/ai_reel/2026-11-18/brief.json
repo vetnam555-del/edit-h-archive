@@ -13,8 +13,8 @@
    "file": "stems/i1_nvidia.mp3",
    "start": 0.05,
    "tempo": 1.0,
-   "text": "엔비디아 매출, 1년 새 두 배 넘었습니다!",
-   "tts": "엔비디아 매출, 일 년 새 <strong>두 배</strong> 넘었습니다!",
+   "text": "엔비디아 매출이 1년 새 103% 뛰었습니다!",
+   "tts": "엔비디아 매출이 일 년 새 <strong>백삼 퍼센트</strong> 뛰었습니다!",
    "voice": "Knox"
   },
   {
@@ -29,13 +29,13 @@
    "file": "stems/i3_overdue.mp3",
    "start": 7.65,
    "tempo": 1.0,
-   "text": "은행 연체율, 1년 전보다 다 올랐대요!",
-   "tts": "은행 연체율, 일 년 전보다 <strong>다</strong> 올랐대요!",
+   "text": "은행 연체율, 1년 전보다 모두 올랐대요!",
+   "tts": "은행 연체율, 일 년 전보다 <strong>모두</strong> 올랐대요!",
    "voice": "Hana"
   },
   {
    "file": "stems/i4_beauty.mp3",
-   "start": 11.55,
+   "start": 11.7,
    "tempo": 1.0,
    "text": "오천 원 이하 화장품이 85개래요!",
    "tts": "오천 원 이하 화장품이 <strong>팔십오 개</strong>래요!",
@@ -45,8 +45,8 @@
    "file": "stems/i5_musinsa.mp3",
    "start": 15.05,
    "tempo": 1.0,
-   "text": "무신사, 내년엔 유럽에서도 팔아요!",
-   "tts": "무신사, 내년엔 <strong>유럽</strong>에서도 팔아요!",
+   "text": "무신사, 내년에 유럽에서도 팔아요!",
+   "tts": "무신사, 내년에 <strong>유럽</strong>에서도 팔아요!",
    "voice": "Hana"
   },
   {
@@ -295,12 +295,12 @@
   },
   {
    "start": 7.65,
-   "end": 11.55,
+   "end": 11.65,
    "size": 84,
    "html": "<div class=\"kick\">3/5 · 금융</div><div class=\"main\">은행 연체율 <span class=\"hl\">0.59%</span><br>1년 전보다 모두 올라</div><div class=\"sub\">8월(0.69%)보단 낮아 · 1개월만 밀려도 연체</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 이데일리·SBS Biz</div>"
   },
   {
-   "start": 11.55,
+   "start": 11.65,
    "end": 15.05,
    "size": 84,
    "html": "<div class=\"kick\">4/5 · 소비</div><div class=\"main\">5000원 이하 화장품<br><span class=\"hl\">85개</span></div><div class=\"sub\">이마트 · 9980원 노브랜드 더마 6종도 이달 입점</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 아이뉴스24·디지털데일리</div>"
@@ -364,5 +364,12 @@
  "duck": {
   "mix": 0.6,
   "release": 350
+ },
+ "seedance": {
+  "model": "bytedance/seedance-2.5",
+  "made_by": "dropshot",
+  "job": "mcp_b73162e5a58443219500e199e3c3dbb3",
+  "prompt": "brief_prompt.txt",
+  "reference_audio": "https://cdn.aistudio.dropshot.io/public/mcp-uploads/prod/RSNOZHV0/ed250ab7fd074e37ac5dcaf674bbcaf7/edith-2026-11-18-voice.mp3"
  }
 }
