@@ -242,7 +242,8 @@ CAMERA 에 'continuous motion in every shot — no held poses, no frozen moments
 
 ### 2. 영상 (영상 날만 — 월요일)
 드롭샷 `generate_video` — model `bytedance/seedance-2.5`, client_token `edith-{오늘}-video-1`, options:
-`{"prompt": 그날 영어 프롬프트, "reference_image": [시트 주소, 놀람 주소, 커피 주소], "reference_audio": [1-1 의 목소리 트랙 cdnUrl], "generation_mode": "reference", "duration": 20, "resolution": "480p", "aspect_ratio": "9:16", "generate_audio": true}`
+`{"prompt": 그날 영어 프롬프트, "reference_image": [시트 주소, 놀람 주소, 커피 주소], "reference_audio": [1-1 의 목소리 트랙 cdnUrl], "duration": 20, "resolution": "480p", "aspect_ratio": "9:16", "generate_audio": true}`
+  (2026-11-18: 드롭샷이 seedance-2.5 의 `generation_mode` 옵션을 없앴다 — 넣으면 "option does not exist" 로 거절된다. reference_image·reference_audio 만 주면 참고 영상으로 만든다.)
 (주소는 위 '도구'. 1,030크레딧). 받은 job_id 를 `get_generation` 으로 1분쯤 간격으로 확인한다 — 15~25분 걸리니 **그동안 5-1 웹툰 그림을 만든다**(목소리는 1-1 에서 이미 만들었다).
 40분이 넘도록 processing 이면 한 번 더 10분 기다리고, 그래도 안 끝나거나 failed 면 그날 영상은 쉰다(같은 client_token 으로 다시 보내지 않는다 — 다시 만들기는 끝 번호 2 로 1번).
 - **프롬프트 쓰는 법이 바뀌었다**: 힉스필드 때의 `@image1`·`@image2`·`@image3` 표시는 드롭샷에서 통하지 않는다. 참고 그림은

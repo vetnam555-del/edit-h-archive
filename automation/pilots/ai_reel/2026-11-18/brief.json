@@ -1,0 +1,419 @@
+{
+ "date": "2026-11-18",
+ "hook": "반전",
+ "items": [
+  "엔비디아 실적",
+  "AI 업무",
+  "은행 연체율",
+  "초저가 뷰티",
+  "K패션 수출"
+ ],
+ "voices": [
+  {
+   "file": "stems/i1_nvidia.mp3",
+   "start": 0.55,
+   "tempo": 1.0,
+   "text": "엔비디아 매출이 1년 새 103% 뛰었습니다!",
+   "tts": "엔비디아 매출이 일 년 새 <strong>백삼 퍼센트</strong> 뛰었습니다!",
+   "voice": "Knox(복제 — CosyVoice 3, 받아쓰기 100%·같음 0.890·억양 7.9반음) — '두 배 넘었습니다'가 '2배'로 받아 적혀 94%·억양 6.9 라 '백삼 퍼센트 뛰었습니다'로 바꿔 다시"
+  },
+  {
+   "file": "stems/i2_aiwork.mp3",
+   "start": 5.0,
+   "tempo": 1.08,
+   "text": "직장인 셋 중 둘, AI로 일한대요!",
+   "tts": "직장인 셋 중 <strong>둘</strong>, 에이아이로 일한대요!",
+   "voice": "Hana(복제 — CosyVoice 3, 받아쓰기 97%·같음 0.911·억양 11.4반음) — 후보 1 에 '둘, 어? AI로' 짧은 감탄이 들어감(후보 2 100% 는 같음이 낮아 안 골라짐)"
+  },
+  {
+   "file": "stems/i3_overdue.mp3",
+   "start": 9.1,
+   "tempo": 1.12,
+   "text": "은행 연체율, 1년 전보다 모두 올랐대요!",
+   "tts": "은행 연체율, 일 년 전보다 <strong>모두</strong> 올랐대요!",
+   "voice": "Hana(복제 — 받아쓰기 100%·같음 0.855·억양 10.1반음) — '다 올랐대요'는 억양 7.0~7.5 라 '모두 올랐대요'로 다시"
+  },
+  {
+   "file": "stems/i4_beauty.mp3",
+   "start": 12.5,
+   "tempo": 1.12,
+   "text": "오천 원 이하 화장품이 85개래요!",
+   "tts": "오천 원 이하 화장품이 <strong>팔십오 개</strong>래요!",
+   "voice": "Hana(복제 — CosyVoice 3, 받아쓰기 100%)"
+  },
+  {
+   "file": "stems/i5_musinsa.mp3",
+   "start": 15.4,
+   "tempo": 1.1,
+   "text": "무신사, 내년에 유럽에서도 팔아요!",
+   "tts": "무신사, 내년에 <strong>유럽</strong>에서도 팔아요!",
+   "voice": "Hana(복제 — 받아쓰기 100%·같음 0.845·억양 9.6반음) — '내년엔'이 qa 에서 '내년행'(93%)이라 '내년에'로 다시"
+  },
+  {
+   "file": "stems/i_bye_share.mp3",
+   "start": 18.1,
+   "tempo": 1.0,
+   "text": "필요한 친구에게 보내 주세요!",
+   "tts": "필요한 친구에게 <strong>보내</strong> 주세요!",
+   "voice": "Hana(복제 — CosyVoice 3, 받아쓰기 100%)"
+  }
+ ],
+ "comic": {
+  "series": "오늘 아침 5가지",
+  "layout": "duo",
+  "title": "젠슨 황 없이도<br>매출 <span class='hl'>103%↑</span><br>오늘 아침 5가지",
+  "cover": {
+   "img": "stills/cover.png",
+   "pos": "50% 40%",
+   "job": "mcp_614f21b56db8421e90bdb01b62f4987a"
+  },
+  "summary": true,
+  "panels": [
+   {
+    "card": 1,
+    "img_a": "stills/nv_a.png",
+    "pos_a": "50% 45%",
+    "img_b": "stills/nv_b.png",
+    "pos_b": "50% 50%",
+    "say_side": "left",
+    "number": "103%",
+    "stk_side": "left",
+    "body": "8~10월 매출이 1158억 달러예요. 1년 전보다 103% 늘어 두 배를 넘었어요.",
+    "jobs": [
+     "mcp_5830c61a50a649a094cca4b7b6933f58",
+     "mcp_588f15e14cc5446aa840d9918f8505d5"
+    ]
+   },
+   {
+    "card": 2,
+    "img_a": "stills/ai_a.png",
+    "pos_a": "50% 45%",
+    "img_b": "stills/ai_b.png",
+    "pos_b": "50% 50%",
+    "say_side": "left",
+    "jobs": [
+     "mcp_656d3065d3734ec686893678dda4fadd",
+     "mcp_775b2b064adc4cb5b64aa4644d7209fd"
+    ]
+   },
+   {
+    "card": 5,
+    "img_a": "stills/od_a.png",
+    "pos_a": "50% 45%",
+    "img_b": "stills/od_b.png",
+    "pos_b": "50% 50%",
+    "say_side": "right",
+    "body": "9월 말 0.59%로 8월(0.69%)보다는 낮아졌지만, 1년 전보다는 모든 부문이 올랐어요.",
+    "jobs": [
+     "mcp_c29960a8563941a98148033a5a98760f",
+     "mcp_0ceab83b38ec408bb55f5b9d6848e7e8"
+    ]
+   },
+   {
+    "card": 3,
+    "img_a": "stills/bt_a.png",
+    "pos_a": "50% 50%",
+    "img_b": "stills/bt_b.png",
+    "pos_b": "50% 50%",
+    "say_side": "left",
+    "stk_side": "left",
+    "jobs": [
+     "mcp_7428ee412a2a47849d221e14b2413abc",
+     "mcp_30c56698014e4d6f89d03d60405513a2"
+    ]
+   },
+   {
+    "card": 4,
+    "img_a": "stills/ms_a.png",
+    "pos_a": "50% 45%",
+    "img_b": "stills/ms_b.png",
+    "pos_b": "50% 50%",
+    "say_side": "left",
+    "stk_side": "left",
+    "jobs": [
+     "mcp_df696fc4ac364d258c94cf5ab0e33b98",
+     "mcp_9a503069be0e46ab89f32e19e8594d06"
+    ]
+   }
+  ],
+  "sources": "장마다 표시",
+  "end": {
+   "title": "오늘 아침 5가지,<br>매일 아침 8시",
+   "sub": "경제부터 트렌드까지, 오늘 소식 5가지를<br>웹툰으로 풀어 드려요"
+  }
+ },
+ "facts": [
+  {
+   "scene": 1,
+   "fact": "엔비디아 3분기(8~10월) 매출 1158억 달러",
+   "seen_in": [
+    "한국경제",
+    "NVIDIA 뉴스룸"
+   ]
+  },
+  {
+   "scene": 1,
+   "fact": "1년 전보다 103% 늘어(두 배 넘음)",
+   "seen_in": [
+    "한국경제",
+    "NVIDIA 뉴스룸"
+   ]
+  },
+  {
+   "scene": 1,
+   "fact": "젠슨 황 없이 콜레트 크레스 임시 CEO 체제",
+   "seen_in": [
+    "한국경제",
+    "블로터",
+    "NVIDIA 뉴스룸"
+   ]
+  },
+  {
+   "scene": 2,
+   "fact": "한은 17일 취업자 1만6342명 조사",
+   "seen_in": [
+    "동아일보",
+    "중앙일보"
+   ]
+  },
+  {
+   "scene": 2,
+   "fact": "업무에 생성형 AI 66.5%(3명 중 2명), 지난해 51.8%",
+   "seen_in": [
+    "동아일보",
+    "중앙일보"
+   ]
+  },
+  {
+   "scene": 2,
+   "fact": "주 40시간 중 평균 3.7시간 절감",
+   "seen_in": [
+    "동아일보",
+    "중앙일보"
+   ]
+  },
+  {
+   "scene": 2,
+   "fact": "아낀 시간 핵심 업무 33.8%·추가 업무 29.3%",
+   "seen_in": [
+    "동아일보",
+    "중앙일보"
+   ]
+  },
+  {
+   "scene": 3,
+   "fact": "9월 말 은행 원화대출 연체율 0.59%",
+   "seen_in": [
+    "이데일리",
+    "SBS Biz"
+   ]
+  },
+  {
+   "scene": 3,
+   "fact": "8월 0.69%보다 0.10%p 낮아",
+   "seen_in": [
+    "이데일리",
+    "SBS Biz"
+   ]
+  },
+  {
+   "scene": 3,
+   "fact": "1년 전보다 모든 부문 연체율 상승",
+   "seen_in": [
+    "이데일리",
+    "SBS Biz"
+   ]
+  },
+  {
+   "scene": 3,
+   "fact": "연체 기준 원리금 1개월 이상",
+   "seen_in": [
+    "이데일리",
+    "SBS Biz"
+   ]
+  },
+  {
+   "scene": 4,
+   "fact": "이마트 5000원 이하 뷰티 상품 85개",
+   "seen_in": [
+    "아이뉴스24",
+    "디지털데일리"
+   ]
+  },
+  {
+   "scene": 4,
+   "fact": "노브랜드 더마 스킨케어 6종 9980원, 이달 이마트 입점",
+   "seen_in": [
+    "아이뉴스24",
+    "디지털데일리"
+   ]
+  },
+  {
+   "scene": 4,
+   "fact": "시험 판매 1000개 이상",
+   "seen_in": [
+    "아이뉴스24",
+    "디지털데일리"
+   ]
+  },
+  {
+   "scene": 5,
+   "fact": "무신사 내년 영국·프랑스·독일에 글로벌 스토어",
+   "seen_in": [
+    "매일경제",
+    "서울경제"
+   ]
+  },
+  {
+   "scene": 5,
+   "fact": "13개 국가·지역, 한국 디자이너 브랜드 약 4000개",
+   "seen_in": [
+    "매일경제",
+    "서울경제"
+   ]
+  }
+ ],
+ "source_note": "원 기사 대조(check_sources.py 막음 0 · 경고 1 · 기사 12/13곳 읽음 — 못 읽은 무신사 서울경제와 동아일보는 read_article 로 다시 읽어 확인). 한 곳에만 있는 사실: 엔비디아 '시장 예상 1091억 달러·50억 달러 넘게 많아'(한국경제만 — 블로터는 예상치 1093억 달러)·'약 155조원'(한국경제만), 연체율 '분기 말 연체채권 정리 효과'(이데일리만)·'9월 기준 10년 만에 최고'(SBS Biz만), 무신사 '유럽 앱 리뷰 배송 불만'·'내년 4월'(매일경제만) — 릴스·웹툰에 쓰지 않음 (웹툰 1번 컷 본문을 '1158억 달러·103%'로, 3번(연체율) 컷 본문을 '0.59%·0.69%·1년 전보다 모든 부문'으로 바꿈).",
+ "story": "오늘 아침 5가지 — 메인 5개(big_issue·items 4개)를 20초 한 편에. 가장 센 숫자(엔비디아 매출 1년 새 103% — 장난감 칩 공장에서 초록 칩 더미가 두 배로 솟아 H 를 들어 올리고, 뒤에서 빈 의자가 혼자 돈다)를 맨 앞에, 끝은 날개 달린 상자에서 옥상 테라스로 내려 카메라를 가리키고 손 흔들기 — content/2026-11-18.json(VOL.147). 11/18(수)은 운영자 '오늘도 영상 만들어'로 영상 날. 끝인사는 공유(bye_share — 최근 네 편이 저장·뉴스레터·뉴스레터·내일).",
+ "trim": [
+  0.0,
+  20.0
+ ],
+ "end_seconds": 2.6,
+ "captions": [
+  {
+   "start": 0,
+   "end": 4.85,
+   "size": 84,
+   "html": "<div class=\"kick\">11월 18일 · 오늘 아침 5가지 · 1/5 · 테크</div><div class=\"main\">젠슨 황 없이도<br>매출 <span class=\"hl\">103%</span> 늘었다</div><div class=\"sub\">엔비디아 3분기 1158억 달러 — 내 ETF 속 비중은?</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 한국경제·NVIDIA 뉴스룸</div>",
+   "top": 1250
+  },
+  {
+   "start": 4.85,
+   "end": 8.6,
+   "size": 84,
+   "html": "<div class=\"kick\">2/5 · 일</div><div class=\"main\">직장인 <span class=\"hl\">66.5%</span><br>AI로 일한다</div><div class=\"sub\">주 40시간 중 평균 3.7시간 아껴 · 한은 1만6342명 조사</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 동아일보·중앙일보</div>",
+   "top": 1320
+  },
+  {
+   "start": 8.6,
+   "end": 12.45,
+   "size": 84,
+   "html": "<div class=\"kick\">3/5 · 금융</div><div class=\"main\">은행 연체율 <span class=\"hl\">0.59%</span><br>1년 전보다 모두 올라</div><div class=\"sub\">8월(0.69%)보단 낮아 · 1개월만 밀려도 연체</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 이데일리·SBS Biz</div>"
+  },
+  {
+   "start": 12.45,
+   "end": 15.3,
+   "size": 84,
+   "html": "<div class=\"kick\">4/5 · 소비</div><div class=\"main\">5000원 이하 화장품<br><span class=\"hl\">85개</span></div><div class=\"sub\">이마트 · 9980원 노브랜드 더마 6종도 이달 입점</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 아이뉴스24·디지털데일리</div>",
+   "top": 1250
+  },
+  {
+   "start": 15.3,
+   "end": 17.96,
+   "size": 84,
+   "html": "<div class=\"kick\">5/5 · 패션</div><div class=\"main\">무신사, 내년<br><span class=\"hl\">유럽</span> 온라인 진출</div><div class=\"sub\">영국·프랑스·독일 · 지금은 13개 국가·지역</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 매일경제·서울경제</div>",
+   "top": 1250
+  }
+ ],
+ "end_card": {
+  "line": "필요한 친구에게 보내 주세요!",
+  "sub": "프로필 링크에서 구독하면 '돈·일 체크리스트' 선물부터",
+  "note": "숫자는 기사 2곳 이상에서 확인했어요<br>(출처는 장면마다·캡션에)"
+ },
+ "music": [
+  {
+   "file": "../2026-10-31/stems/m1_chase.m4a",
+   "start": 0.0,
+   "offset": 1.7,
+   "dur": 5.1,
+   "fade_out": 0.3,
+   "lufs": -24
+  },
+  {
+   "file": "../2026-10-31/stems/m1_chase.m4a",
+   "start": 4.8,
+   "offset": 1.75,
+   "dur": 3.8,
+   "lufs": -24,
+   "fade_in": 0.2,
+   "fade_out": 0.4
+  },
+  {
+   "file": "../2026-10-31/stems/m2_morning.m4a",
+   "start": 3.4,
+   "offset": 0.0,
+   "dur": 5.2,
+   "lufs": -28,
+   "lowpass": 2200,
+   "fade_in": 0.2,
+   "fade_out": 0.3
+  },
+  {
+   "file": "../2026-10-31/stems/m2_morning.m4a",
+   "start": 8.3,
+   "dur": 6.9,
+   "fade_in": 0.3,
+   "fade_out": 0.4,
+   "lufs": -24
+  },
+  {
+   "file": "../2026-10-31/stems/m2_morning.m4a",
+   "start": 14.85,
+   "dur": 7.9,
+   "lufs": -24,
+   "fade_in": 0.3,
+   "fade_out": 0.8
+  }
+ ],
+ "sfx": [
+  [
+   4.45,
+   4.85,
+   0.35
+  ],
+  [
+   8.45,
+   9.0,
+   0.35
+  ],
+  [
+   12.45,
+   12.5,
+   0.35
+  ],
+  [
+   15.3,
+   15.4,
+   0.35
+  ],
+  [
+   0,
+   999,
+   0
+  ]
+ ],
+ "duck": {
+  "mix": 0.75,
+  "release": 350
+ },
+ "seedance": {
+  "model": "bytedance/seedance-2.5",
+  "made_by": "dropshot",
+  "job": "mcp_b73162e5a58443219500e199e3c3dbb3",
+  "prompt": "brief_prompt.txt",
+  "reference_audio": "https://cdn.aistudio.dropshot.io/public/mcp-uploads/prod/RSNOZHV0/ed250ab7fd074e37ac5dcaf674bbcaf7/edith-2026-11-18-voice.mp3",
+  "cut": "장면 경계(scene 0.08): 칩 공장 0~4.85 · 사무실 4.85~8.4 · 은행 홀 8.4~12.4 · 마트 통로 12.4~14.95 · 날개 상자 바다 위 14.95~17.4 · 옥상 테라스 착지·가리키고 손 흔들기 17.4~20. 장면이 목소리 줄 시작(3.75·7.65·11.7·15.05)보다 0.7~1.1초 늦게 넘어가 — 립싱크는 목소리를 따르니 자막은 목소리 시각에 맞춤. 검은 화면 0, 멈춘 구간 없음, 꽉 찬 화면(letterboxed False, 중앙값 0.96). 0.5초 프레임으로 사람·로고·글자 없음 확인(사무실 벽 액자·은행 계기판은 글자·숫자 없음). 다시 만들지 않음(480p 20초 1,030크레딧 한 번).",
+  "remake": {
+   "why": "립싱크 검수 — 사무실 장면은 대사 2 처음 약 0.9초 동안 H 가 의자 뒤로 돌아 입이 안 보였다. 그 장면만 4초로 다시 만들었다.",
+   "jobs": {
+    "office": "mcp_12a2ef5a32144a17a2c96bfc2429d2ec"
+   },
+   "credits": "4초 480p 206",
+   "reference_audio": "대사 2 녹음(tempo 1.08)을 0.15초에 둔 4초 조각(edith-2026-11-18-voice-s2.mp3)",
+   "splice": "clean = 원본 0~4.85 + 새 사무실 장면 0.45~4.0초 → 4.85~8.4 + 원본 8.4~끝(소리도 같은 자리)."
+  },
+  "lip_sync": "영상 속 말소리(=입)가 목소리 트랙보다 0.4~1.0초 늦게 나와(seedance 가 줄마다 늦춤 — 장면 경계 4.85·8.4·12.4·14.95 도 같이 늦음) 목소리 start 를 영상 입에 맞춰 옮김(0.55·5.0·9.1·12.5·15.4·18.1, tempo 1.0·1.08·1.12·1.12·1.1·1.0). 립싱크: 6줄 중 6줄 맞음(대사 2 는 다시 만든 장면, 대사 3 은 입이 약 0.2초 늦음). 억양 폭(반음): 1 Knox 7.9 · 2 11.4 · 3 10.1 · 4 12.8 · 5 9.6 · 6 12.4."
+ },
+ "not_posted": "올리지 않음 — qa.py 완성본 받아쓰기 ✗: 대사 1·2·5·6 이 75~80%(줄 첫 낱말 '엔비디아'·'직장인'·'무신사'·'필요한'이 빠짐). 같은 완성본을 줄마다 잘라 받아쓰면 6줄 모두 100% — 전체 받아쓰기의 낱말 시각이 0.3~1초 일찍 찍혀(목소리를 영상 입에 맞춰 옮긴 뒤 줄 사이 쉼이 길어짐) qa 의 줄 구간(앞뒤 0.3초) 밖으로 나간 것. 규칙(5-2 '한 줄이라도 95% 아래면 올리지 않는다')대로 올리지 않았다. 완성본은 저장소에 넣지 않음."
+}
