@@ -28,7 +28,7 @@ _BIG = {"조": 1e12, "억": 1e8, "만": 1e4}
 _SMALL = {"천": 1e3, "백": 1e2}
 # 날짜 꼴('11/4', '11.04')과 고정 표현('2030세대')은 사실 숫자가 아니다
 _SKIP = re.compile(r"\b\d{1,2}/\d{1,2}\b|(?<![\d.])\d{1,2}\.\d{2}(?=[\s),]|$)|2030\s?(?:세대|대)")
-_SKIP_KEYS = {"source", "sources", "pose", "by", "ask", "accent", "no", "series_label", "photo", "credit", "focus", "img"}
+_SKIP_KEYS = {"source", "sources", "pose", "by", "ask", "accent", "no", "series_label", "photo", "credit", "focus", "img", "type", "month"}
 
 
 def value(numtxt):
@@ -129,7 +129,7 @@ def issue_texts(d):
         for k in ("title", "body", "takeaway", "why", "paragraphs", "checklist", "numbers", "stat", "compare", "metrics", "lead"):
             texts += _flat(k, it.get(k))
         card = cards.get(it.get("tag")) or {}
-        for k in ("headline", "body", "number", "takeaway", "metrics", "compare"):
+        for k in ("headline", "body", "number", "takeaway", "metrics", "compare", "number_label", "visual", "send_to"):
             texts += _flat(f"카드 {k}", card.get(k))
         if i == 0:   # 메인 이슈(H PICK)의 깊이 읽기 카드
             texts += _flat("카드 deep", extra.get("deep")) + _flat("카드 dive", extra.get("dive"))
