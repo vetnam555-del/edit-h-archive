@@ -175,8 +175,15 @@ def _forward_box(d, site, campaign):
                         f'<b style="font-weight:700;color:{INK};">처음 받아 보셨나요?</b> 매일 {when}, 2030이 알아야 할 소식 {n}가지를 무료로 보내 드려요. '
                         f'<a href="{sub}" style="{link}">구독하기</a><br>'
                         f'<b style="font-weight:700;color:{INK};">도움이 됐다면</b> 한 명에게만 전달해 주세요. '
-                        f'<a href="{_share_mailto(d, site)}" style="{link}">전달하기</a>'), pad="14px 18px", mt=0)
+                        f'<a href="{share_url(d, site)}" style="{link}">카톡·링크로 전달하기</a>'), pad="14px 18px", mt=0)
             + "</td></tr>")
+
+
+def share_url(d, site):
+    """11/19~ '전달하기·친구에게 추천하기' — 메일 쓰기(mailto) 대신 공유 화면(share.html): 휴대폰 공유 창(카카오톡·문자 등)과 링크 복사.
+    2026-11-19 운영자 '요즘 누가 메일해, 카톡 공유나 이런 걸로 — 어려우면 주소 복사해서 복사하기 방식'. 메일 안에서는 스크립트가 돌지 않아
+    복사 버튼·카카오 공유를 메일에 바로 둘 수 없다 → 웹 화면 하나로 보낸다. ref=share 는 그 화면이 붙인다(구독 경로 '공유')."""
+    return f"{site}/share.html?d={d['date']}"
 
 
 def _toc_number(it):
@@ -230,7 +237,8 @@ def _item_v3(it):
 <tr><td class="px" style="padding:30px 36px 0;">{chip}
   {_div(f"font-size:20px;font-weight:700;line-height:1.45;color:{INK};margin-top:12px;", md(it['title']))}
   {_body(it['body'], "16px", "1.75", 12)}
-  {_box(_div(f"font-size:14.5px;font-weight:600;line-height:1.65;color:{INK};", md(it['takeaway'], BOLD)))}
+  {_box(_div(f"font-size:12.5px;font-weight:700;line-height:1.3;color:{INK};", "그래서 뭐가 달라져?")
+        + _div(f"font-size:14.5px;font-weight:600;line-height:1.65;color:{INK};margin-top:8px;", md(it['takeaway'], BOLD)))}
   {_sources(it['sources'])}</td></tr>"""
 
 
@@ -447,6 +455,23 @@ def _numbers(nums):
     return f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:10px;table-layout:fixed;"><tr>{cells}</tr></table>'
 
 
+def _fresh_checklist(b):
+    """11/19~ '알아두면 좋은 것'에서 위(큰 숫자·숫자로 보면)에 이미 나온 숫자만 되풀이하는 줄을 뺀다 — 2026-11-18 운영자 분석:
+    H PICK 에서 '1158억 달러·103%'가 본문·큰 숫자·숫자로 보면·알아두면 좋은 것에 네 번 나왔다. 숫자가 없는 줄(일정·대상·조건)과
+    새 숫자가 하나라도 있는 줄은 남긴다. 숫자 비교는 숫자 2곳 대조와 같은 읽기(twosource.numbers — 값·단위)."""
+    from .twosource import DATE_UNITS, numbers
+    shown = set()
+    st = b.get("stat") or {}
+    for t in [f"{st.get('value', '')}{st.get('unit', '')}"] + [str(n.get("value", "")) for n in b.get("numbers") or []]:
+        shown |= {(round(n[1], 6), n[2]) for n in numbers(t)}
+    keep = []
+    for c in b.get("checklist") or []:
+        nums = {(round(n[1], 6), n[2]) for n in numbers(str(c)) if n[2] not in DATE_UNITS}   # '10월 말 기준'·'19일' 같은 날짜는 새 숫자로 치지 않는다
+        if not nums or not nums <= shown:
+            keep.append(c)
+    return keep
+
+
 def _pick(d):
     """01 H PICK 심층 — 한 이슈를 '무슨 일 → 숫자 → 왜 중요 → 그래서'로 깊게."""
     b = d["big_issue"]
@@ -456,8 +481,9 @@ def _pick(d):
     paras = "".join(_body(p, size, lh, 8 if i == 0 else 12) for i, p in enumerate(b["paragraphs"]))
     why = "".join(_body(p, size, lh, 8 if i == 0 else 12) for i, p in enumerate(b["why"]))
     check = ""
-    if b.get("checklist"):
-        items = "".join(_div(f"font-size:14px;line-height:1.7;color:{BODY};margin-top:6px;", "☐ " + md(c)) for c in b["checklist"])
+    checklist = _fresh_checklist(b) if v3 else (b.get("checklist") or [])
+    if checklist:
+        items = "".join(_div(f"font-size:14px;line-height:1.7;color:{BODY};margin-top:6px;", "☐ " + md(c)) for c in checklist)
         check = _box(_div(f"font-size:12.5px;font-weight:700;line-height:1.3;color:{INK};", "알아두면 좋은 것") + items, mt=12)
     return f"""
 <!-- 01 H PICK 심층 -->
@@ -573,9 +599,10 @@ def _cta(d, site, campaign, n_cards):
   </tr></table>
 </td></tr></table>
 <div style="text-align:right;margin-top:10px;">{links}</div>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:16px;"><tr><td align="center" bgcolor="#FFFFFF" style="background:#FFFFFF;border:1.5px solid {CHIP_FG};border-radius:10px;"><a href="{_share_mailto(d, site)}" style="display:block;padding:13px 10px;font-family:{F};font-size:15px;font-weight:700;color:{CHIP_FG};text-decoration:none;">친구에게 추천하기</a></td></tr></table>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:16px;"><tr><td align="center" bgcolor="#FFFFFF" style="background:#FFFFFF;border:1.5px solid {CHIP_FG};border-radius:10px;"><a href="{share_url(d, site) if _v3(d) else _share_mailto(d, site)}" style="display:block;padding:13px 10px;font-family:{F};font-size:15px;font-weight:700;color:{CHIP_FG};text-decoration:none;">{"카톡·링크로 친구에게 추천하기" if _v3(d) else "친구에게 추천하기"}</a></td></tr></table>
+{_div(f"font-size:12px;font-weight:400;line-height:1.6;color:{MUTED};margin-top:6px;", "누르면 카카오톡·문자로 바로 보내거나 링크를 복사할 수 있어요.", True) if _v3(d) else ""}
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:10px;"><tr><td align="center" bgcolor="{CHIP_FG}" style="background:{CHIP_FG};border-radius:10px;"><a href="{_utm(site, "/subscribe.html", campaign, "cta_subscribe")}&amp;ref=letter" style="display:block;padding:14px 10px;font-family:{F};font-size:15px;font-weight:700;color:#FFFFFF;text-decoration:none;">EDIT H 구독하기</a></td></tr></table>
-{_div(f"font-size:12px;font-weight:400;line-height:1.6;color:{MUTED};margin-top:8px;", "추천하기를 누르면 오늘 호 링크가 담긴 메일이 열려요. 받는 사람만 넣어 보내면 돼요.", True)}</td></tr>""")
+{"" if _v3(d) else _div(f"font-size:12px;font-weight:400;line-height:1.6;color:{MUTED};margin-top:8px;", "추천하기를 누르면 오늘 호 링크가 담긴 메일이 열려요. 받는 사람만 넣어 보내면 돼요.", True)}</td></tr>""")
 
 
 def _footer(site, campaign, d=None):

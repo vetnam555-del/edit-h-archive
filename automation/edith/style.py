@@ -292,11 +292,25 @@ def source_quality(d):
             "wire": round(100 * wires / articles) if articles else 0, "solo": solo}
 
 
+_DATE_MARK = re.compile(r"^(?:\d{1,2}월\s*)?\d{1,2}일(?:\s*\(?[^)]*\)?)?(?:\s*[오전후]{2}\s*\d{1,2}시.*)?$")
+
+
+def highlight_check(d):
+    """메일 본문 형광펜(**굵게**)이 날짜에만 칠해졌나 — 2026-11-18 운영자 분석: 11/16~11/18 세 호의 형광펜이 모두 날짜('17일·18일')였고
+    정작 그 소식의 숫자(103%·66.5%)는 묻혔다. 소식마다 형광펜은 핵심 숫자·낱말 하나에. 경고만(날짜가 핵심인 소식도 있다)."""
+    bodies = [(d.get("big_issue") or {}).get("paragraphs") or []] + [[it.get("body")] for it in d.get("items") or []]
+    marks = [m.strip() for texts in bodies for t in texts if t for m in re.findall(r"\*\*(.+?)\*\*", str(t))]
+    dates = [m for m in marks if _DATE_MARK.match(m)]
+    if len(marks) >= 2 and len(dates) == len(marks):
+        return [f"형광펜 {len(marks)}곳이 모두 날짜예요({'·'.join(dates[:4])}) — 소식마다 핵심 숫자·낱말 하나에 칠하세요(예: '**103%** 늘어'). 날짜는 그냥 두세요"]
+    return []
+
+
 def lint(d):
     """경고 문장 목록(최대 MAX_LINES 개 + 남은 개수). 형식 2·데일리·STYLE_FROM 이후 호만."""
     if d.get("format") != 2 or d.get("rewind") or str(d.get("date", ""))[:10] < STYLE_FROM:
         return []
-    found, seen_acr = caption_keyword(d) + share_check(d) + brief_check(d) + todo_check(d) + repeat_check(d) + primary_check(d) + headlines_check(d), set()
+    found, seen_acr = caption_keyword(d) + share_check(d) + brief_check(d) + todo_check(d) + repeat_check(d) + primary_check(d) + headlines_check(d) + highlight_check(d), set()
     for where, text, kind in _texts(d):
         rules = _WEED + _FORCE + (_WEED_SOCIAL if kind in ("social", "card", "obs") else [])
         for rx, why in rules:

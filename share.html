@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EDIT H 공유하기 — 카톡·문자로 보내거나 링크 복사</title>
+<meta name="description" content="오늘의 EDIT H 를 카카오톡·문자로 보내거나 링크를 복사해 친구에게 전해 주세요.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#FFFFFF">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<!-- 2026-11-19 운영자 '친구에게 추천하기나 전달하기로 하면 메일로 가는데 요즘 누가 메일해 — 카톡 공유나 이런 걸로, 어려우면 주소 복사해서 복사하기 방식'.
+     메일 안에서는 스크립트가 돌지 않아 복사 버튼·공유 창을 메일에 바로 둘 수 없다 → 메일의 '전달하기·추천하기'가 이 화면으로 온다(?d=호 날짜).
+     ① 휴대폰 공유 창(navigator.share — 카카오톡·문자·인스타 DM 등 휴대폰에 깔린 앱이 뜬다) ② 링크 복사(클립보드, 안 되면 글을 골라 둔다) ③ 메일로 보내기(예전 방식).
+     공유 글의 구독 링크는 ref=share — 성과표 '구독 경로'에 '공유'로 잡힌다. 개인 정보는 다루지 않는다. 카카오 SDK(앱 키 필요)는 쓰지 않는다. -->
+<style>
+  :root { --bg:#FFFFFF; --band:#F6F4EF; --ink:#111111; --sub:#57534C; --mute:#8A857C; --line:#E9E5DD; --brand:#FF5233; --brand-ink:#C2410C; --peach:#FFEDE5; --focus:#2563EB; }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--ink); line-height: 1.6; letter-spacing: -0.01em;
+    font-family: 'Pretendard Variable','Pretendard','Apple SD Gothic Neo','Malgun Gothic',-apple-system,sans-serif;
+    word-break: keep-all; overflow-wrap: anywhere; -webkit-font-smoothing: antialiased; }
+  :focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; border-radius: 6px; }
+  main { max-width: 480px; margin: 0 auto; padding: 28px 20px 48px; }
+  .brand { font-weight: 800; font-size: 18px; letter-spacing: -0.02em; text-decoration: none; color: var(--ink); }
+  .brand b { color: var(--brand); }
+  h1 { font-size: 24px; line-height: 1.35; margin: 26px 0 6px; letter-spacing: -0.03em; }
+  .lead { color: var(--sub); font-size: 15px; margin: 0 0 20px; }
+  .issue { background: var(--band); border-radius: 14px; padding: 14px 16px; margin: 0 0 22px; }
+  .issue .k { font-size: 12.5px; font-weight: 700; color: var(--brand-ink); }
+  .issue .t { font-size: 16px; font-weight: 700; margin-top: 4px; }
+  button, .btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; min-height: 54px; border-radius: 12px;
+    font: inherit; font-size: 16.5px; font-weight: 700; cursor: pointer; text-decoration: none; margin: 0 0 12px; border: 0; }
+  .primary { background: var(--brand-ink); color: #fff; }
+  .secondary { background: #fff; color: var(--brand-ink); border: 1.5px solid var(--brand-ink); }
+  .tertiary { background: #fff; color: var(--sub); border: 1px solid var(--line); font-weight: 600; font-size: 15px; min-height: 48px; }
+  .url { width: 100%; font: inherit; font-size: 14px; color: var(--sub); background: #fff; border: 1px solid var(--line); border-radius: 10px;
+    padding: 12px; margin: 4px 0 18px; resize: none; }
+  .msg { min-height: 24px; font-size: 14.5px; font-weight: 600; color: var(--brand-ink); margin: 0 0 8px; text-align: center; }
+  .note { font-size: 13px; color: var(--mute); margin-top: 18px; }
+  .note a { color: var(--sub); }
+</style>
+</head>
+<body>
+<main>
+  <a class="brand" href="./">EDIT H<b>.</b></a>
+  <h1>친구에게 전해 주세요</h1>
+  <p class="lead">카카오톡·문자로 바로 보내거나, 링크를 복사해 붙여 넣으면 돼요.</p>
+
+  <div class="issue" id="issue" hidden>
+    <div class="k" id="issue-k">오늘의 EDIT H</div>
+    <div class="t" id="issue-t"></div>
+  </div>
+
+  <button class="primary" id="share" type="button">카카오톡·문자로 보내기</button>
+  <button class="secondary" id="copy" type="button">링크 복사하기</button>
+  <p class="msg" id="msg" role="status" aria-live="polite"></p>
+
+  <label for="text" class="note" style="display:block;margin-top:0;">보낼 글(길게 눌러 복사해도 돼요)</label>
+  <textarea class="url" id="text" rows="5" readonly></textarea>
+
+  <a class="btn tertiary" id="mail" href="#">메일로 보내기</a>
+  <p class="note">매일 아침 8시, 경제부터 트렌드까지 2030이 알아야 할 소식을 무료로 보내 드려요. <a href="subscribe.html?ref=share">구독하기</a></p>
+</main>
+<script>
+(function () {
+  var base = new URL('./', location.href);
+  var d = new URLSearchParams(location.search).get('d') || '';
+  var valid = /^\d{4}-\d{2}-\d{2}$/.test(d);
+  var issueUrl = valid ? new URL(d + '.html', base).href : base.href;
+  var subUrl = new URL('subscribe.html?ref=share', base).href;
+  var title = 'EDIT H — 2030의 아침을 편집합니다';
+  var textEl = document.getElementById('text'), msg = document.getElementById('msg');
+
+  function body(t) {
+    return (t ? '[EDIT H] ' + t + '\n' : '') + issueUrl + '\n\n매일 아침 8시, 2030이 알아야 할 소식을 골라 보내 줘요. 무료 구독: ' + subUrl;
+  }
+  function render(t) {
+    textEl.value = body(t);
+    var mail = 'mailto:?subject=' + encodeURIComponent('EDIT H 추천해요') + '&body=' + encodeURIComponent('오늘 받아본 뉴스레터인데 괜찮아서 보내요.\n\n' + body(t));
+    document.getElementById('mail').setAttribute('href', mail);
+    if (t) {
+      document.getElementById('issue-t').textContent = t;
+      document.getElementById('issue-k').textContent = (valid ? d.slice(5).replace('-', '/') + ' · ' : '') + '오늘의 EDIT H';
+      document.getElementById('issue').hidden = false;
+    }
+  }
+  var issueTitle = '';
+  render('');
+  if (valid) {
+    fetch(new URL('manifest.json', base).href, { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (m) {
+      var it = m && (m.issues || []).filter(function (x) { return x.date === d; })[0];
+      if (it && it.title) { issueTitle = it.title; render(issueTitle); }
+    }).catch(function () {});
+  }
+
+  function say(t) { msg.textContent = t; }
+  var COPIED = '복사했어요 — 카톡 대화창에 붙여 넣어 주세요';
+  function fallbackCopy(okMsg) {
+    textEl.removeAttribute('readonly'); textEl.focus(); textEl.select(); textEl.setSelectionRange(0, textEl.value.length);
+    var ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+    textEl.setAttribute('readonly', '');
+    say(ok ? (okMsg || COPIED) : '아래 글을 길게 눌러 복사해 주세요');
+  }
+  function copyText(okMsg) {
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(textEl.value).then(function () { say(okMsg || COPIED); }, function () { fallbackCopy(okMsg); });
+    } else { fallbackCopy(okMsg); }
+  }
+  document.getElementById('copy').addEventListener('click', function () { copyText(); });
+  document.getElementById('share').addEventListener('click', function () {
+    var data = { title: issueTitle ? '[EDIT H] ' + issueTitle : title, text: body(issueTitle).replace(issueUrl + '\n', ''), url: issueUrl };
+    if (navigator.share) {
+      navigator.share(data).then(function () { say('보냈어요. 고마워요!'); }).catch(function (e) {
+        if (e && e.name === 'AbortError') return;
+        copyText();
+      });
+    } else {
+      copyText('이 화면에선 바로 보내기가 안 돼요 — 대신 링크를 복사했으니 카톡에 붙여 넣어 주세요');
+    }
+  });
+})();
+</script>
+</body>
+</html>
