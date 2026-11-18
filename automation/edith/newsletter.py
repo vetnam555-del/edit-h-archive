@@ -50,8 +50,13 @@ def _divider(after=28):
             f'line-height:0;">&nbsp;</div></td></tr><tr><td style="height:{after}px;font-size:0;line-height:0;">&nbsp;</td></tr>')
 
 
-def _chips(items):
-    """[(text, dark?)] → 가운데 정렬 칩 한 줄."""
+def _align(align):
+    """표 정렬 속성 — 왼쪽은 속성을 빼야 한다(align="left" 는 표를 띄워 다음 글이 옆으로 붙는다)."""
+    return "" if align == "left" else f' align="{align}"'
+
+
+def _chips(items, align="center"):
+    """[(text, dark?)] → 칩 한 줄(기본 가운데 정렬, 11/19~ 새 배치는 왼쪽)."""
     tds = []
     for i, (text, dark) in enumerate(items):
         if i:
@@ -59,11 +64,11 @@ def _chips(items):
         bg, fg = (DARK_CHIP, DARK_CHIP_FG) if dark else (CHIP_BG, CHIP_FG)
         tds.append(f'<td style="background:{bg};color:{fg};font-family:{F};font-size:14px;font-weight:700;line-height:1;'
                    f'padding:7px 9px;white-space:nowrap;">{esc(text)}</td>')
-    return f'<table role="presentation" align="center" cellpadding="0" cellspacing="0"><tr>{"".join(tds)}</tr></table>'
+    return f'<table role="presentation"{_align(align)} cellpadding="0" cellspacing="0"><tr>{"".join(tds)}</tr></table>'
 
 
-def _tag(text):
-    return (f'<table role="presentation" align="center" cellpadding="0" cellspacing="0" style="margin-top:10px;"><tr><td>'
+def _tag(text, align="center"):
+    return (f'<table role="presentation"{_align(align)} cellpadding="0" cellspacing="0" style="margin-top:10px;"><tr><td>'
             f'<div style="display:inline-block;background:{CHIP_BG};color:{CHIP_FG};font-family:{F};font-size:12.5px;'
             f'font-weight:700;line-height:1;padding:6px 8px;">{esc(text)}</div></td></tr></table>')
 
@@ -146,6 +151,87 @@ def _hero(d):
   {_box(_div(f"font-size:12.5px;font-weight:700;line-height:1.3;color:{INK};", "그래서 뭐가 달라져?") + _div(f"font-size:14.5px;font-weight:400;line-height:1.75;color:{BODY};margin-top:8px;", md(b['takeaway'], BOLD)), mt=18)}
   {check}
   {_sources(b['sources'])}</td></tr>"""
+
+
+# 2026-11-18 운영자 '뉴스레터·카드 개선할 부분 없어? → 먼저 보여 줘 → 최종 버전으로 개선해 줘'.
+# Morning Brew·1440·TLDR·어피티 머니레터·뉴닉을 휴대폰 화면으로 보고(11/17) 고른 것만 넣었다 — 다섯 곳 모두 왼쪽 정렬·본문 16px 안팎,
+# 1440 은 맨 위에 '처음 받아 보셨나요'(전달받은 사람) 한 줄, 어피티는 숫자 줄로 연다. 시안에서 뺀 것: 소식마다 '전달하기' 줄(행동 요청이 8번으로 늘어
+# '하나만 고르라'는 근거와 어긋남)·메일 속 그림(Gmail 은 102KB 넘는 메일을 자른다). 이 날짜 호부터 — 지난 호를 다시 빌드하면 예전 그대로(기록).
+LAYOUT_V3_FROM = "2026-11-19"
+
+
+def _v3(d):
+    return d.get("format") == 2 and str(d.get("date", "")) >= LAYOUT_V3_FROM
+
+
+def _forward_box(d, site, campaign):
+    """맨 위 한 상자 — 전달받은 사람에게 구독 길, 구독자에게 전달 길(1440 방식). 행동 요청은 여기 한 번만(소식마다 넣지 않는다)."""
+    link = f"color:{CHIP_FG};font-weight:700;text-decoration:underline;"
+    n = len(d["all_items"]) + len(d["briefs"])
+    when = send_time_ko(d.get("send_time_kst") or send_time_on(d["date"])).replace("오전", "아침")
+    sub = f'{_utm(site, "/subscribe.html", campaign, "top_subscribe")}&amp;ref=letter_top'
+    return (f'<tr><td class="px" style="padding:22px 36px 0;">'
+            + _box(_div(f"font-size:13.5px;font-weight:400;line-height:1.7;color:{BODY};",
+                        f'<b style="font-weight:700;color:{INK};">처음 받아 보셨나요?</b> 매일 {when}, 2030이 알아야 할 소식 {n}가지를 무료로 보내 드려요. '
+                        f'<a href="{sub}" style="{link}">구독하기</a><br>'
+                        f'<b style="font-weight:700;color:{INK};">도움이 됐다면</b> 한 명에게만 전달해 주세요. '
+                        f'<a href="{_share_mailto(d, site)}" style="{link}">전달하기</a>'), pad="14px 18px", mt=0)
+            + "</td></tr>")
+
+
+def _toc_number(it):
+    """목차 오른쪽 숫자 — 카드 '5가지 한눈에' 장과 같은 값(큰 숫자, compare 카드는 바뀐 뒤 값)."""
+    return it["compare"]["to"]["value"] if it.get("compare") else it.get("number") or ""
+
+
+def _note_v3(d, site=None):
+    """11/19~ — 숫자 목차(깊게 5: 제목 + 그 소식의 숫자, 짧게 5: 제목) → 오늘 챙길 것 → 에디터 H 노트(편지).
+    'H의 한 줄'은 편지와 같은 말이라 메일에서는 뺐다(카드 '에디터 H 노트' 장에는 그대로). 첫 화면에 10가지가 다 보인다(10/15 운영자 '왜 5개냐')."""
+    rows = []
+    for i, it in enumerate(d["card_issues"], 1):
+        num = _toc_number(it)
+        rows.append(
+            f'<tr><td valign="top" style="width:28px;padding:9px 0;border-bottom:1px solid {RULE};"><div style="width:20px;height:20px;border-radius:5px;'
+            f'background:{INK};color:#FFFFFF;text-align:center;font-family:{F};font-size:11px;font-weight:700;line-height:20px;">{i}</div></td>'
+            f'<td valign="top" style="padding:9px 8px 9px 2px;border-bottom:1px solid {RULE};">'
+            + _div(f"font-size:15px;font-weight:700;line-height:1.45;color:{INK};", esc(plain(it["headline"]).replace(chr(10), " ")))
+            + f'</td><td valign="top" align="right" style="padding:9px 0;border-bottom:1px solid {RULE};white-space:nowrap;">'
+            + (_div(f"font-size:15px;font-weight:800;line-height:1.45;color:{INK};",
+                    f'<span style="background-color:{HL};padding:0 3px;">{esc(num)}</span>') if num else "")
+            + "</td></tr>")
+    for n, b in enumerate(d["briefs"], len(rows) + 1):
+        rows.append(
+            f'<tr><td valign="top" style="width:28px;padding:5px 0;"><div style="width:20px;height:20px;text-align:center;font-family:{F};'
+            f'font-size:11px;font-weight:800;line-height:20px;color:{CHIP_FG};">{n:02d}</div></td>'
+            f'<td valign="top" colspan="2" style="padding:5px 0 5px 2px;">'
+            + _div(f"font-size:14px;font-weight:400;line-height:1.55;color:{BODY};", esc(plain(b["title"])))
+            + "</td></tr>")
+    count = (f' <span style="font-size:12.5px;font-weight:400;color:{MUTED};">· 깊게 {len(d["card_issues"])} · 짧게 {len(d["briefs"])}</span>'
+             if d["briefs"] else "")
+    toc = (_div(f"font-size:17px;font-weight:700;line-height:1.4;color:{INK};", f'오늘의 {len(rows)}가지{count}')
+           + f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:6px;">{"".join(rows)}</table>')
+    head = (f'<table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:28px;"><tr><td valign="middle">{_face(d, site, 40)}</td>'
+            f'<td valign="middle" style="padding-left:10px;">'
+            + _div(f"font-size:17px;font-weight:700;line-height:1.3;color:{INK};", "에디터 H 노트")
+            + '</td></tr></table>')
+    lead = _div(f"font-size:16px;font-weight:400;line-height:1.8;color:{BODY};margin-top:10px;", md(d["lead"], HL_B, HL_B))
+    return f'\n<tr><td class="px" style="padding:0 36px;">{toc}\n  {_todo(d)}\n  {head}\n  {lead}</td></tr>'
+
+
+def _item_v3(it):
+    """11/19~ 02–05 소식 — [번호][태그] 칩 한 줄 + 왼쪽 정렬 제목 + 본문 16px(훑어 읽기 쉽게)."""
+    chip = (f'<table role="presentation" cellpadding="0" cellspacing="0"><tr>'
+            f'<td style="background:{INK};color:#FFFFFF;font-family:{F};font-size:12.5px;font-weight:700;line-height:1;padding:6px 8px;">{int(it["no"]):02d}</td>'
+            f'<td style="width:4px;font-size:0;line-height:0;">&nbsp;</td>'
+            f'<td style="background:{CHIP_BG};color:{CHIP_FG};font-family:{F};font-size:12.5px;font-weight:700;line-height:1;padding:6px 8px;">{esc(it["tag"])}</td>'
+            f'</tr></table>')
+    return f"""
+<!-- 이슈 {it['no']} -->
+<tr><td class="px" style="padding:30px 36px 0;">{chip}
+  {_div(f"font-size:20px;font-weight:700;line-height:1.45;color:{INK};margin-top:12px;", md(it['title']))}
+  {_body(it['body'], "16px", "1.75", 12)}
+  {_box(_div(f"font-size:14.5px;font-weight:600;line-height:1.65;color:{INK};", md(it['takeaway'], BOLD)))}
+  {_sources(it['sources'])}</td></tr>"""
 
 
 def _section_head(i, sec):
@@ -365,17 +451,19 @@ def _pick(d):
     """01 H PICK 심층 — 한 이슈를 '무슨 일 → 숫자 → 왜 중요 → 그래서'로 깊게."""
     b = d["big_issue"]
     st = b["stat"]
-    paras = "".join(_body(p, "15.5px", "1.85", 8 if i == 0 else 12) for i, p in enumerate(b["paragraphs"]))
-    why = "".join(_body(p, "15.5px", "1.85", 8 if i == 0 else 12) for i, p in enumerate(b["why"]))
+    v3 = _v3(d)
+    size, lh, align = ("16px", "1.8", "left") if v3 else ("15.5px", "1.85", "center")
+    paras = "".join(_body(p, size, lh, 8 if i == 0 else 12) for i, p in enumerate(b["paragraphs"]))
+    why = "".join(_body(p, size, lh, 8 if i == 0 else 12) for i, p in enumerate(b["why"]))
     check = ""
     if b.get("checklist"):
         items = "".join(_div(f"font-size:14px;line-height:1.7;color:{BODY};margin-top:6px;", "☐ " + md(c)) for c in b["checklist"])
         check = _box(_div(f"font-size:12.5px;font-weight:700;line-height:1.3;color:{INK};", "알아두면 좋은 것") + items, mt=12)
     return f"""
 <!-- 01 H PICK 심층 -->
-<tr><td class="px" style="padding:0 36px;">{_chips([("H PICK", True), ((d.get("series") or {}).get("label") or "오늘의 심층", False)])}
-  {_div(f"font-size:23px;font-weight:700;line-height:1.45;color:{INK};margin-top:14px;", esc(plain(d['big_issue'].get('title') or d['title'])), True)}
-  {_tag(f"01 · {b['tag']}")}
+<tr><td class="px" style="padding:0 36px;">{_chips([("H PICK", True), ((d.get("series") or {}).get("label") or "오늘의 심층", False)], align)}
+  {_div(f"font-size:23px;font-weight:700;line-height:1.45;color:{INK};margin-top:14px;", esc(plain(d['big_issue'].get('title') or d['title'])), not v3)}
+  {_tag(f"01 · {b['tag']}", align)}
   {_label("무슨 일이야?")}
   {paras}
   <table role="presentation" align="center" cellpadding="0" cellspacing="0" style="margin-top:22px;"><tr><td class="stat" style="background:{HL};padding:4px 14px;font-family:{F};font-size:44px;font-weight:800;line-height:1.1;color:{INK};">{esc(st['value'])}<span style="font-size:24px;">{esc(st.get('unit', ''))}</span></td></tr></table>
@@ -520,9 +608,11 @@ def render(d, site, n_cards):
     campaign = "daily_" + d["date"].replace("-", "")
     title = plain(d["title"])
     if d.get("format") == 2:
-        body = [_header(d), _divider(), _note(d, site), _divider(30), _pick(d), _divider(0),
-                f'<tr><td class="px" style="padding:30px 36px 0;">{_chips([("02–05", True), ("함께 볼 4가지", False)])}</td></tr>']
-        body.extend(_item(it) for it in d["items"])
+        v3 = _v3(d)
+        body = [_header(d)] + ([_forward_box(d, site, campaign)] if v3 else []) + [
+            _divider(), _note_v3(d, site) if v3 else _note(d, site), _divider(30), _pick(d), _divider(0),
+            f'<tr><td class="px" style="padding:30px 36px 0;">{_chips([("02–05", True), ("함께 볼 4가지", False)], "left" if v3 else "center")}</td></tr>']
+        body.extend((_item_v3 if v3 else _item)(it) for it in d["items"])
         body.append(_briefs(d, "짧게 읽는 소식" if str(d.get("date", "")) >= BRIEFS_FROM else "한 줄 뉴스", start=len(d["all_items"]) + 1))
         if d.get("poll_result"):
             body.append(_poll_result(d))

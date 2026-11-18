@@ -1346,6 +1346,56 @@ def t_photo_library():
     return f"{len(every)}장"
 
 
+def t_layout_v3():
+    """11/19~ 메일·카드 새 배치(2026-11-18 운영자 '최종 버전으로 개선해 줘') — 지난 호는 그대로, 새 칸 점검, 카드 순서, 메일 상자 하나."""
+    import copy
+    from edith import cards, newsletter
+    from edith import content as content_mod
+    site = load_config()["site_url"].rstrip("/")
+    raw = json.loads((ROOT / "content" / "2026-11-18.json").read_text(encoding="utf-8"))
+    old = content_mod.load("2026-11-18")
+    expect(cards.build(old, "")[1][3].endswith("_summary.png") and "처음 받아 보셨나요" not in newsletter.render(old, site, 10),
+           "11/18 호(새 배치 전)가 바뀌었다 — 지난 호는 다시 만들어도 그대로여야 한다")
+
+    def day19(edit=None):
+        d = copy.deepcopy(raw)
+        d["date"] = "2026-11-19"
+        if edit:
+            edit({int(c["no"]): c for c in d["cards"]["issues"]})
+        return content_mod.prepare(d, "2026-11-19")
+
+    def good(by):
+        by[2].update(number_label="업무에 AI를 쓰는 직장인",
+                     visual={"type": "bars", "caption": "AI를 쓰면 주 3.7시간 아꼈어요",
+                             "rows": [{"label": "주 근무", "value": 40, "text": "40시간"}, {"label": "AI로 아낀", "value": 3.7, "text": "3.7시간"}]})
+        by[4].update(number_label="글로벌 스토어의 한국 브랜드", send_to="유럽 사는 친구에게")
+        by[5].update(visual={"type": "calendar", "month": "2026-11", "days": [27], "caption": "시행일"})
+    d = day19(good)
+    page, files = cards.build(d, "")
+    expect([f.rsplit("_", 1)[-1][:-4] for f in files] == cards.CARD_NAMES_3, "11/19~ 카드 순서가 04 노트 · 09 5가지 한눈에가 아니다")
+    expect(page.count("보내 주세요") == 1 and "유럽 사는 친구에게 보내 주세요" in page, "보내기 줄이 send_to 한 장에만 나가야 한다")
+    expect("업무에 AI를 쓰는 직장인" in page and "AI로 아낀" in page and "D-8" in page,
+           "숫자 설명·막대 그림·달력(11/19 → 27일 D-8)이 카드에 안 나온다")
+    nl = newsletter.render(d, site, 10)
+    expect(nl.count("처음 받아 보셨나요") == 1 and "H의 한 줄" not in nl and "1158억 달러" in nl and "66.5%" in nl and "font-size:16px" in nl,
+           "11/19~ 메일: 맨 위 상자 하나·숫자 목차·본문 16px·'H의 한 줄' 빼기가 안 됐다")
+    expect(len(nl.encode("utf-8")) < 90_000, "메일이 90KB 를 넘는다(Gmail 은 102KB 넘으면 자른다)")
+    for name, edit, want in [
+        ("보내기 두 장", lambda by: (by[2].update(send_to="친구에게"), by[3].update(send_to="동료에게")), "한 장에만"),
+        ("H PICK 에 새 칸", lambda by: by[1].update(number_label="엔비디아 매출"), "02~05 이슈 장에만"),
+        ("그림 + 보조 수치", lambda by: by[2].update(visual={"type": "dots", "value": 66, "caption": "100명 중 66명"},
+                                                   metrics=[{"value": "3.7시간", "label": "아낀 시간"}]), "같이 쓰지 않습니다"),
+        ("점 101개", lambda by: by[2].update(visual={"type": "dots", "value": 101, "caption": "x"}), "1~99"),
+        ("없는 날짜", lambda by: by[2].update(visual={"type": "calendar", "month": "2026-11", "days": [31], "caption": "x"}), "그 달의 날짜"),
+        ("보내기 꼴", lambda by: by[2].update(send_to="친구"), "에게"),
+    ]:
+        try:
+            day19(edit)
+            expect(False, f"{name} — 막아야 하는데 지나갔다")
+        except content_mod.ContentError as e:
+            expect(want in str(e), f"{name} — 다른 이유로 막혔다: {e}")
+
+
 def t_seo():
     """호 페이지 검색 노출(2026-10-09): 설명문·canonical·NewsArticle 구조화 데이터가 웹 페이지엔 있고, 메일엔 스크립트가 빠진다."""
     import send_newsletter
@@ -3500,6 +3550,7 @@ def main():
     check("구독 선물(gift)", t_gift)
     check("대체 표지 사진(fetch_photo --library)", t_photo_library)
     check("검색 노출(호 페이지 SEO)", t_seo)
+    check("메일·카드 새 배치(11/19~)", t_layout_v3)
     check("저녁 일정 사슬(evening)", t_evening)
     check("인스타 검색 노출(해시태그·키워드·대체 텍스트)", t_ig_seo)
     check("조회수 진단(보내기 한 줄·릴스 피드·계정 지표)", t_views_diag)
