@@ -75,8 +75,14 @@ jobs:
 
       - name: Install ffmpeg, PyNaCl and Pillow
         if: steps.what.outputs.skip != 'true'
+        timeout-minutes: 20   # 2026-11-19 — apt 가 15~25분 멈춰 게시 3번이 멈춤(캐러셀 08:24 로 늦음). 멈추면 끊고 다시
         run: |
-          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg > /dev/null
+          APT="-o Acquire::Retries=3 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30"
+          for i in 1 2 3; do
+            timeout 300 sudo apt-get $APT update -qq && timeout 300 sudo apt-get $APT install -y -qq ffmpeg > /dev/null && break
+            echo "apt 시도 $i 실패/멈춤 — 다시"; sleep 10
+          done
+          command -v ffmpeg >/dev/null || { echo "ffmpeg 설치 실패"; exit 1; }
           pip install -q pynacl pillow   # Pillow: 릴스 영상 위쪽의 음악 출처 글자(make_reel.py)
 
       - name: Post
