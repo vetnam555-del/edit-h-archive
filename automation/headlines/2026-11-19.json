@@ -1,0 +1,516 @@
+{
+ "fetched_at": "2026-11-19T07:07+09:00",
+ "failed": [],
+ "clusters": [
+  {
+   "section": "사회",
+   "count": 126,
+   "title": "'윤석열 전화'부터 배척된 특검 논리…추경호 무죄, 왜?[영상]",
+   "press": "노컷뉴스",
+   "lede": "12·3 내란 사태 당시 국민의힘 국회의원들의 계엄 해제 표결 참여를 방해했다는 혐의로 재판에 넘겨진 추경호 대구시장이 1심에서 무죄를 선고받았다. '윤석열-추경호 전화통화', 법원은 다르게 봤다 서울중앙지법 형사합",
+   "url": "https://n.news.naver.com/mnews/article/079/0004211219",
+   "cluster": "https://news.naver.com/cluster/c_202611171700_00002210/section/102"
+  },
+  {
+   "section": "세계",
+   "count": 125,
+   "title": "엔비디아 임시 CEO “AI 생태계 지원하지만, 엄격히 심사할 것”...젠슨 황 CEO 복귀 고려 안 해",
+   "press": "조선일보",
+   "lede": "엔비디아가 17일(현지 시각) 사상 최대 분기 매출을 발표한 가운데, 콜레트 크레스 임시 최고경영자(CEO)는 “수요가 공급을 훨씬 초과하고 있다”고 밝혔다. 창업자 젠슨 황의 갑작스러운 사임으로 경영 불확실성이 커",
+   "url": "https://n.news.naver.com/mnews/article/023/0004010254",
+   "cluster": "https://news.naver.com/cluster/c_202611141010_00000042/section/104"
+  },
+  {
+   "section": "사회",
+   "count": 99,
+   "title": "지방세 체납 1위는 ‘선박왕’ 권혁…433억원 미납",
+   "press": "중앙일보",
+   "lede": "고액의 지방세와 지방행정제재·부과금을 상습 체납한 1만3000여명의 명단이 공개됐다. 이들이 내지 않은 금액은 총 9410억여원에 달했다. 행정안전부는 18일 지방세 또는 지방행정제재·부과금을 1000만원 이상 1년",
+   "url": "https://n.news.naver.com/mnews/article/025/0003566112",
+   "cluster": "https://news.naver.com/cluster/c_202611180750_00001986/section/102"
+  },
+  {
+   "section": "IT",
+   "count": 92,
+   "title": "자바도 보안 구멍…\"업데이트 받아야\"",
+   "press": "한국경제",
+   "lede": "과학기술정보통신부와 한국인터넷진흥원(KISA)은 자바(Java) 실행환경에서 보안 취약점이 발견됨에 따라 기업과 기관에 긴급 점검 및 보안 업데이트를 권고했다고 18일 밝혔다. 이번 취약점(Java4Shell, CV",
+   "url": "https://n.news.naver.com/mnews/article/015/0005355397",
+   "cluster": "https://news.naver.com/cluster/c_202611180720_00000008/section/105"
+  },
+  {
+   "section": "경제",
+   "count": 71,
+   "title": "롯데바이오 송도1공장 준공… 신동빈 “그룹 미래 성장동력”",
+   "press": "서울신문",
+   "lede": "신동빈 롯데그룹 회장이 바이오 사업을 그룹 미래 성장동력으로 육성하겠다는 의지를 재확인했다. 롯데바이오로직스의 인천 송도 바이오 캠퍼스 제1공장 준공을 계기로 글로벌 바이오의약품 위탁개발생산(CDMO) 시장 공략을",
+   "url": "https://n.news.naver.com/mnews/article/081/0003700963",
+   "cluster": "https://news.naver.com/cluster/c_202611171030_00000001/section/101"
+  },
+  {
+   "section": "사회",
+   "count": 67,
+   "title": "특검, ‘투표록 위·변조’ 등 선관위 직원 8명 구속영장 청구",
+   "press": "국민일보",
+   "lede": "6·3 지방선거 투표용지 부족 사태 등을 수사 중인 선거관리위원회 특검이 선관위 직원 8명에 대해 구속영장을 청구했다. 지방선거 5개월여 만이자 특검 출범 72일 만의 첫 신병 확보 시도다. 김진우 특검보는 18일",
+   "url": "https://n.news.naver.com/mnews/article/005/0001886013",
+   "cluster": "https://news.naver.com/cluster/c_202611181440_00000001/section/102"
+  },
+  {
+   "section": "사회",
+   "count": 65,
+   "title": "\"얼마든지 조사 응하겠다\"던 리트 만점자, 진짜 경찰에 고발됐다",
+   "press": "한국일보",
+   "lede": "'법학적성시험(LEET·리트) 사상 첫 만점자'로 알려진 서울대생 이진우(33)씨가 '인공지능(AI) 활용 부정행위' 의혹과 관련해 결국 경찰에 고발됐다. 고발 주체는 현직 변호사들로, 올해 리트와 지난해 대학수학능",
+   "url": "https://n.news.naver.com/mnews/article/469/0000966314",
+   "cluster": "https://news.naver.com/cluster/c_202611181610_00000009/section/102"
+  },
+  {
+   "section": "사회",
+   "count": 57,
+   "title": "다시 찾아온 '수능 한파'…아침 기온 5~10도 '뚝'[오늘날씨]",
+   "press": "이데일리",
+   "lede": "대학수학능력시험 당일인 19일 전국 대부분 지역의 아침 기온이 전날보다 5~10도 떨어지겠다. 충청권과 전라권 등에는 비 또는 눈이 내려 시험장 가는 길에 교통안전에 주의해야겠다. 지난달 22일 오전 경기 화성시의",
+   "url": "https://n.news.naver.com/mnews/article/018/0006412152",
+   "cluster": "https://news.naver.com/cluster/c_202611161810_00000037/section/102"
+  },
+  {
+   "section": "경제",
+   "count": 46,
+   "title": "‘성과급 파티’ 삼전닉스 인력 대체하나…아틀라스, 美 반도체 공장서 일 배운다 [biz-플러스]",
+   "press": "서울경제",
+   "lede": "현대자동차그룹 계열사인 보스턴다이내믹스의 휴머노이드 아틀라스가 미국의 반도체 위탁 생산 업체인 글로벌파운드리 공장에 투입된다. 아틀라스의 작업 무대가 자동차에 이어 반도체로 확대돼 산업 현장 투입이 늘게 됐다. 현대",
+   "url": "https://n.news.naver.com/mnews/article/011/0004683779",
+   "cluster": "https://news.naver.com/cluster/c_202611170530_00000476/section/101"
+  },
+  {
+   "section": "경제",
+   "count": 45,
+   "title": "10명 중 7명 “결혼 안 해도 동거 가능”…비혼 동거 동의 ‘역대 최고’",
+   "press": "경기일보",
+   "lede": "결혼을 해야 한다고 생각하는 국민이 2년 전보다 늘었지만, 미혼 남녀 사이의 인식 차이는 여전히 큰 것으로 나타났다. 결혼하지 않고도 함께 살거나 자녀를 가질 수 있다는 응답은 관련 조사를 시작한 이후 가장 높은 수",
+   "url": "https://n.news.naver.com/mnews/article/666/0000132618",
+   "cluster": "https://news.naver.com/cluster/c_202611181210_00000004/section/101"
+  },
+  {
+   "section": "세계",
+   "count": 44,
+   "title": "트럼프 또 북미 정상회동 가능성 언급 \"김정은도 원할 것\"",
+   "press": "YTN",
+   "lede": "아시아 순방길에 오르면서 북미 정상 회동 가능성을 시사했던 트럼프 대통령이 필리핀 마닐라에서 또 한 번 김정은 위원장을 언급했습니다. 연이틀 김 위원장의 중국행 가능성을 직접 거론하면서 불씨를 되살리는 분위기입니다.",
+   "url": "https://n.news.naver.com/mnews/article/052/0002434296",
+   "cluster": "https://news.naver.com/cluster/c_202611162350_00000001/section/104"
+  },
+  {
+   "section": "IT",
+   "count": 43,
+   "title": "2026 대한민국 게임대상 수상한 '붉은사막' 어떤 게임?",
+   "press": "아이뉴스24",
+   "lede": "2026 대한민국 게임대상 시상식에서 최고상인 대상(대통령상)을 수상한 '붉은사막'은 펄어비스(대표 허진영)가 자체 엔진인 블랙 스페이스 엔진으로 개발한 오픈월드 액션 어드벤처 게임이다. 올해 3월 출시된 붉은사막은",
+   "url": "https://n.news.naver.com/mnews/article/031/0001076347",
+   "cluster": "https://news.naver.com/cluster/c_202611161340_00000101/section/105"
+  },
+  {
+   "section": "경제",
+   "count": 42,
+   "title": "삼전·닉스 제외하니…3분기 코스피 영업이익 '뒷걸음질'",
+   "press": "한국경제",
+   "lede": "삼성전자와 SK하이닉스를 뺀 코스피 상장사의 3분기(7~9월) 영업이익이 직전 분기보다 20.78% 줄었다. 코스닥 상장사 영업이익은 17.35% 감소했다. 18일 한국거래소가 한국상장회사협의회, 코스닥협회와 함께",
+   "url": "https://n.news.naver.com/mnews/article/015/0005355272",
+   "cluster": "https://news.naver.com/cluster/c_202611181210_00000025/section/101"
+  },
+  {
+   "section": "경제",
+   "count": 40,
+   "title": "가계빚 2,030조원 또 역대 최대…증가폭은 1년 반 만에 최소",
+   "press": "연합뉴스TV",
+   "lede": "우리나라 가계빚이 2,030조원을 넘어서며 또다시 역대 최대치를 기록했습니다. 한국은행이 오늘(18일) 발표한 '2026년 3분기 가계신용(잠정)'에 따르면 지난 9월 말 기준 가계신용 잔액은 2,030조5천억원으로",
+   "url": "https://n.news.naver.com/mnews/article/422/0000927384",
+   "cluster": "https://news.naver.com/cluster/c_202611181210_00000015/section/101"
+  },
+  {
+   "section": "세계",
+   "count": 39,
+   "title": "시진핑·푸틴 있는 중국에 트럼프 왔다, 내일 역사적 3자 회담 개최",
+   "press": "이데일리",
+   "lede": "도널드 트럼프 미국 대통령이 18일 중국 남부 광둥성 선전에서 열리는 아시아태평양경제협력체(APEC) 정상회의에 참석하기 위해 중국에 도착했다. 시진핑 중국 국가주석이 직접 공항에 나가 트럼프 대통령을 맞았다. 18",
+   "url": "https://n.news.naver.com/mnews/article/018/0006412086",
+   "cluster": "https://news.naver.com/cluster/c_202611181830_00000004/section/104"
+  },
+  {
+   "section": "IT",
+   "count": 38,
+   "title": "게임의 경계가 무너진다…AI·웹툰까지 품은 '지스타 2026' 내일 개막",
+   "press": "뉴시스",
+   "lede": "국내 최대 게임 전시회 '지스타 2026'이 내일 부산에서 막을 올린다. 올해는 국내외 주요 게임사의 신작 체험뿐 아니라 인공지능(AI), 웹툰, 자동차 등 다른 산업과의 협업을 확대했다. 해외 게임사들이 참여하는",
+   "url": "https://n.news.naver.com/mnews/article/003/0014330724",
+   "cluster": "https://news.naver.com/cluster/c_202611172010_00000744/section/105"
+  },
+  {
+   "section": "IT",
+   "count": 36,
+   "title": "\"AI 부정행위, 꼼짝마\"…과기정통부·이통사·NIA 100여명 통신 모니터링",
+   "press": "머니투데이",
+   "lede": "오는 19일 치러지는 대학수학능력시험(수능)을 앞두고 AI(인공지능)를 활용한 부정 시험 우려가 커지는 가운데 과학기술정보통신부와 한국지능정보사회진흥원(NIA), 이동통신사가 힘을 합해 대응에 나선다. 18일 과학기",
+   "url": "https://n.news.naver.com/mnews/article/008/0005443011",
+   "cluster": "https://news.naver.com/cluster/c_202611171540_00000040/section/105"
+  },
+  {
+   "section": "경제",
+   "count": 35,
+   "title": "포스코그룹, CATL에 리튬 공급…핵심 파트너 확보",
+   "press": "비즈워치",
+   "lede": "포스코그룹의 미래 성장 동력인 리튬 사업이 핵심 파트너를 확보하는데 성공했다. 글로벌 최대 전기차 배터리 기업인 중국 CATL과 리튬 장기공급계약을 체결하면서 협력을 강화하기로 하면서다. 포스코그룹은 18일 CATL",
+   "url": "https://n.news.naver.com/mnews/article/648/0000052760",
+   "cluster": "https://news.naver.com/cluster/c_202611181600_00000001/section/101"
+  },
+  {
+   "section": "경제",
+   "count": 31,
+   "title": "HD현대로보틱스, 국내 첫 1t급 초대형 로봇 공급…고중량 작업 자동화",
+   "press": "아시아경제",
+   "lede": "HD현대로보틱스가 국내 최초로 자체 개발한 1t급 초대형 산업용 로봇을 제조 현장에 공급한다. 최대 1t에 달하는 부품을 정밀하게 운반할 수 있는 로봇으로, 그동안 자동화가 어려웠던 고중량 작업까지 적용 범위를 넓힐",
+   "url": "https://n.news.naver.com/mnews/article/277/0005844519",
+   "cluster": "https://news.naver.com/cluster/c_202611180640_00001048/section/101"
+  },
+  {
+   "section": "사회",
+   "count": 31,
+   "title": "‘조작기소 특검법’ 국무회의 통과…“법치주의 정면 배치”",
+   "press": "서울경제",
+   "lede": "이른바 ‘조작기소 특별검사법’ 공포안이 17일 국무회의 문턱을 넘으면서 법조계 안팎에서 위헌 논란이 거세지고 있다. 수사 대상과 직결된 이재명 대통령이 특별검사를 직접 낙점하는 구조적 이해충돌은 물론, 이미 수사권이",
+   "url": "https://n.news.naver.com/mnews/article/011/0004683360",
+   "cluster": "https://news.naver.com/cluster/c_202611171140_00000003/section/102"
+  },
+  {
+   "section": "사회",
+   "count": 30,
+   "title": "경찰, 수능 부정행위 의심 게시글 13건 내사 착수…40건 삭제·차단",
+   "press": "파이낸셜뉴스",
+   "lede": "2027학년도 대학수학능력시험(수능)을 하루 앞두고 경찰이 온라인에 부정행위를 예고한 게시글의 작성자를 파악해 사실관계를 확인했다. 시험 부정행위와 관련해 근거 없는 의혹을 제기하거나 음모론을 담은 게시물 40건도",
+   "url": "https://n.news.naver.com/mnews/article/014/0005606278",
+   "cluster": "https://news.naver.com/cluster/c_202611171510_00000134/section/102"
+  },
+  {
+   "section": "사회",
+   "count": 28,
+   "title": "여친 506회 때려 숨지게 한 20대 ‘징역 30년’",
+   "press": "세계일보",
+   "lede": "法 “피해자의 고통·억울함 고려” 檢 구형 20년보다 무겁게 선고 동거하던 여자친구를 3시간 넘게 500여 차례 폭행해 숨지게 한 20대 남성이 징역 30년을 선고받았다. 검찰의 구형보다 10년 더 무거운 형량이다.",
+   "url": "https://n.news.naver.com/mnews/article/022/0004176270",
+   "cluster": "https://news.naver.com/cluster/c_202611181100_00000030/section/102"
+  },
+  {
+   "section": "생활",
+   "count": 27,
+   "title": "마블 26억시간 봤다…디즈니, 배당 33% 인상[클릭 e종목]",
+   "press": "아시아경제",
+   "lede": "월트 디즈니가 마블 등 인기 콘텐츠와 구독료 인상에 힘입어 스트리밍 사업의 연간 영업이익률을 두 자릿수로 끌어올렸다. 18일 최민하 삼성증권 연구원은 디즈니의 \"스트리밍이 확실한 캐시카우(현금창출원)로 탈바꿈\"했다고",
+   "url": "https://n.news.naver.com/mnews/article/277/0005844671",
+   "cluster": "https://news.naver.com/cluster/c_202611181320_00000037/section/103"
+  },
+  {
+   "section": "경제",
+   "count": 23,
+   "title": "해외직구 건강식품 젤리에 ‘마약’ 성분…제품 95개 유해성분 검출",
+   "press": "국민일보",
+   "lede": "관세청이 해외직구 플랫폼에서 판매되는 건강식품 139개 제품의 성분을 분석한 결과 95개(68.3%)에서 마약류와 의약품 성분 등 유해성분이 검출됐다. 95개 제품 가운데 마약류 검출 제품은 9개, 의약품 성분 검출",
+   "url": "https://n.news.naver.com/mnews/article/005/0001885918",
+   "cluster": "https://news.naver.com/cluster/c_202611180930_00000001/section/101"
+  },
+  {
+   "section": "생활",
+   "count": 23,
+   "title": "내일 수능한파…일부 지역 한파특보[날씨/XR]",
+   "press": "SBS",
+   "lede": "수험생분들 내일(19일) 추위 대비 잘하셔야겠습니다. 지금 중국 쪽에 구름 없이 맑은 영역, 즉 차가운 성질의 고기압이 있습니다. 지금은 우리나라 저기압, 즉 비구름이 뒤덮고 있지만 저기압이 밤사이 빠져나가고 빠르게",
+   "url": "https://n.news.naver.com/mnews/article/055/0001404078",
+   "cluster": "https://news.naver.com/cluster/c_202611181200_00000112/section/103"
+  },
+  {
+   "section": "세계",
+   "count": 23,
+   "title": "우크라, 크림대교 또 공격...러 \"우크라 나토 가입 안 돼\"",
+   "press": "YTN",
+   "lede": "미중러 정상회담을 앞두고 우크라이나가 푸틴 러시아 대통령의 자존심으로 불리는 크림대교를 이틀 연속 공격하는 등 충돌이 격화하고 있습니다. 러시아는 우크라이나의 나토 가입을 수용할 수 없다며 미국의 중재안을 사실상 거",
+   "url": "https://n.news.naver.com/mnews/article/052/0002434322",
+   "cluster": "https://news.naver.com/cluster/c_202611161830_00000206/section/104"
+  },
+  {
+   "section": "세계",
+   "count": 22,
+   "title": "\"엔비디아, 2022년 알리바바에 앨리스 황 소개\"…'수출 통제 우회' 밀착 정황 추가",
+   "press": "파이낸셜뉴스",
+   "lede": "엔비디아 영업팀이 2022년 미국의 대중국 첨단 반도체 수출 통제 시행을 앞두고, 최근 '반도체 밀수 및 스캔들' 논란의 핵심 인물인 앨리스 황을 중국 알리바바에 소개하며 양측의 거래를 적극 주선했다는 외신 보도가",
+   "url": "https://n.news.naver.com/mnews/article/014/0005606468",
+   "cluster": "https://news.naver.com/cluster/c_202611181520_00000010/section/104"
+  },
+  {
+   "section": "경제",
+   "count": 21,
+   "title": "구로·양천·강북·성북에 모아타운 6319가구 공급",
+   "press": "매일경제",
+   "lede": "서울시 통합심의위 통과 서울시가 구로·양천·강북·성북구에서 모아주택을 통해 총 6319가구의 새 주택을 공급한다. 서울시는 지난 17일 열린 제13차 소규모주택정비 통합심의 본위원회에서 구로구 개봉동, 양천구 목2동",
+   "url": "https://n.news.naver.com/mnews/article/009/0005765751",
+   "cluster": "https://news.naver.com/cluster/c_202611171850_00000610/section/101"
+  },
+  {
+   "section": "세계",
+   "count": 21,
+   "title": "中 도착한 다카이치…日 언론 \"휑한 공항의전\"",
+   "press": "연합뉴스TV",
+   "lede": "다카이치 사나에 일본 총리가 현지시간 18일 APEC 정상회의 참석을 위해 중국 광둥성 선전에 도착한 가운데, 썰렁한 공항 의전 모습에 일본 언론이 주목했습니다. 다카이치 총리는 이날 오후 3시 선전 바오안 국제공항",
+   "url": "https://n.news.naver.com/mnews/article/422/0000927630",
+   "cluster": "https://news.naver.com/cluster/c_202611181940_00000877/section/104"
+  },
+  {
+   "section": "사회",
+   "count": 21,
+   "title": "수능 D-day, 개인 사인펜 못 쓴다…단추엔 스티커, 안경은 매 교시 점검",
+   "press": "시사저널",
+   "lede": "스마트안경 착용만으로 시험 무효…이듬해 응시 자격도 정지 개인 필기구는 흑색 연필만 허용…오전 8시10분까지 입실해야 2027학년도 대학수학능력시험이 19일 오전 8시40분 전국 시험장에서 일제히 시작된다. 올해 수",
+   "url": "https://n.news.naver.com/mnews/article/586/0000142581",
+   "cluster": "https://news.naver.com/cluster/c_202611181910_00000025/section/102"
+  },
+  {
+   "section": "사회",
+   "count": 19,
+   "title": "“수능 당장 내일인데 어쩌나” 연필 품절 대란···“흑색 연필” 지침에 대치·목동 다이소 연필·연필깎이 품절",
+   "press": "경향신문",
+   "lede": "2027학년도 대학수학능력시험에서 수험생은 ‘흑색 연필’만 직접 가져갈 수 있도록 지침이 변경되며 학군지를 중심으로 서울 곳곳에서 연필과 연필깎이가 동나는 현상이 나타났다. 18일 다이소에 따르면 이날 기준 다이소",
+   "url": "https://n.news.naver.com/mnews/article/032/0003483505",
+   "cluster": "https://news.naver.com/cluster/c_202611181650_00000114/section/102"
+  },
+  {
+   "section": "경제",
+   "count": 16,
+   "title": "KOSPI200·코스닥150 정기변경…두산퓨얼셀·리브스메드 등 신규 편입",
+   "press": "파이낸셜뉴스",
+   "lede": "한국거래소가 KOSPI200과 코스닥150, KRX300 등 주요 대표지수의 구성종목을 정기 변경한다. 두산퓨얼셀과 서울보증보험, 효성 등이 KOSPI200에 새롭게 편입되고 코스닥150에는 알지노믹스와 리브스메드,",
+   "url": "https://n.news.naver.com/mnews/article/014/0005606293",
+   "cluster": "https://news.naver.com/cluster/c_202611181630_00000001/section/101"
+  },
+  {
+   "section": "세계",
+   "count": 16,
+   "title": "후티군 \"사우디 최대 송유관에 공습 시작\".. 사우디 폭격에 보복",
+   "press": "뉴시스",
+   "lede": "예멘의 후티군이 사우디 아라비아 동서 횡단 송유관의 주유시설 두 곳에 무인기 5대로 폭격을 시작했다고 17일(현지시간) 발표했다. 그러면서 이번 폭격은 사우디 연합군이 예멘 전국에서 폭격으로 17명을 숨지게 했다는",
+   "url": "https://n.news.naver.com/mnews/article/003/0014328675",
+   "cluster": "https://news.naver.com/cluster/c_202611151850_00000516/section/104"
+  },
+  {
+   "section": "생활",
+   "count": 14,
+   "title": "오후부터 전국에 약한 비…수능일 영하권 추위[날씨]",
+   "press": "MBN",
+   "lede": "수능 예비소집일인 오늘 궂은 날씨가 예상됩니다 오후부터 다시 전국에 비와 눈 소식이 있는데요. 비의 양은 제주 산지에 최대 20mm로 많겠고, 그 밖의 지역은 최대 5mm 안팎의 약한 비만 지나겠습니다. 늦은 오후부",
+   "url": "https://n.news.naver.com/mnews/article/057/0001978699",
+   "cluster": "https://news.naver.com/cluster/c_202611121420_00000055/section/103"
+  },
+  {
+   "section": "IT",
+   "count": 12,
+   "title": "최휘영 장관 “게임 제작비 세액공제 관계부처 설득... 내년 대작 지원 신설”[대한민국 게임대상 2026]",
+   "press": "전자신문",
+   "lede": "최휘영 문화체육관광부 장관이 게임 제작비 세액공제 도입을 위해 관계부처 협의를 강화하겠다고 밝혔다. 내년부터 대작 게임 지원을 새롭게 추진하고 청년 인턴십도 500명 규모로 확대한다. 최 장관은 18일 열린 '202",
+   "url": "https://n.news.naver.com/mnews/article/030/0003487227",
+   "cluster": "https://news.naver.com/cluster/c_202611171050_00000275/section/105"
+  },
+  {
+   "section": "IT",
+   "count": 12,
+   "title": "누리호 5차, 미사출 위성 '전류오류' 원인...전기신호 보완",
+   "press": "파이낸셜뉴스",
+   "lede": "누리호 5차 발사에서 사출되지 못한 큐브위성 '쿼터니언 퍼샛-2' 1기는 사출관 덮개 모터에 전류가 흐르지 않은 게 미사출 원인으로 확인됐다. 6차 발사에서는 큐브위성 사출의 신뢰성을 높이기 위해 전기신호 이중화 등",
+   "url": "https://n.news.naver.com/mnews/article/014/0005606299",
+   "cluster": "https://news.naver.com/cluster/c_202611181710_00000005/section/105"
+  },
+  {
+   "section": "IT",
+   "count": 11,
+   "title": "국내 독자 개발 가스 측정 장비, 美 측정표준기관에 수출",
+   "press": "서울경제",
+   "lede": "우리나라에서 만든 극미량 가스 질량 측정 장비가 세계 최고 수준의 측정 표준 기관에 수출됐다. 한국표준과학연구원(KRISS)은 극미량 가스의 질량을 기존보다 100배 더 정밀하게 측정하는 3세대 ‘미니 실린더 자동",
+   "url": "https://n.news.naver.com/mnews/article/011/0004683756",
+   "cluster": "https://news.naver.com/cluster/c_202611181040_00000270/section/105"
+  },
+  {
+   "section": "세계",
+   "count": 11,
+   "title": "2시간 넘게 이어진 중러 정상회담…“협력 심화해야”",
+   "press": "KBS",
+   "lede": "사상 첫 미중러 정상회담을 하루 앞둔 오늘(18일) 시진핑 중국 국가주석과 블라디미르 푸틴 러시아 대통령이 별도 회담을 가졌습니다. 러시아 타스 통신 등은 현지 시각 오늘 정오쯤부터 시진핑 주석과 푸틴 대통령이 회담",
+   "url": "https://n.news.naver.com/mnews/article/056/0012296461",
+   "cluster": "https://news.naver.com/cluster/c_202611181720_00000067/section/104"
+  },
+  {
+   "section": "생활",
+   "count": 10,
+   "title": "서서 연주한 악단, 샤먼 같은 지휘… 객석 홀린 쿠렌치스 첫 내한",
+   "press": "한국일보",
+   "lede": "연주와 지휘 스타일만 놓고 보면 이단아인 게 확실하고, 객석의 집중도를 기준으로 한다면 정말 클래식 음악계의 구원자가 될지도 모르겠다. \"클래식 음악을 구원하겠다\"던 그리스·러시아 이중국적 지휘자 테오도르 쿠렌치스의",
+   "url": "https://n.news.naver.com/mnews/article/469/0000966262",
+   "cluster": "https://news.naver.com/cluster/c_202611181210_00000033/section/103"
+  },
+  {
+   "section": "세계",
+   "count": 9,
+   "title": "美 민주당, 트럼프 일가 조사 본격 예고…백악관 \"응할 의무 없다\"",
+   "press": "아시아경제",
+   "lede": "미국 중간선거에서 의회 권력을 탈환한 민주당이 도널드 트럼프 대통령 일가와 행정부 고위 인사들을 겨냥한 대대적인 조사를 예고했다. 이에 백악관은 민주당이 아직 다수당의 지위를 확보하지 못했다며 자료 제출 요구에 응할",
+   "url": "https://n.news.naver.com/mnews/article/277/0005844751",
+   "cluster": "https://news.naver.com/cluster/c_202611182340_00000002/section/104"
+  },
+  {
+   "section": "생활",
+   "count": 8,
+   "title": "하이브, 3000만장 판 일본 걸그룹 품었다…키홀더 인수",
+   "press": "한국경제",
+   "lede": "하이브재팬이 일본 종합 엔터테인먼트 기업 키홀더(KeyHolder)를 인수한다고 18일 밝혔다. 키홀더는 자회사를 통해 일본 걸그룹 노기자카46 운영사 지분 50%를 보유하고 있다. 하이브는 이번 인수로 세계 2위",
+   "url": "https://n.news.naver.com/mnews/article/015/0005355479",
+   "cluster": "https://news.naver.com/cluster/c_202611181710_00000031/section/103"
+  },
+  {
+   "section": "세계",
+   "count": 8,
+   "title": "美 중부사령관 이스라엘 방문, 이란 공세 확대 가능성",
+   "press": "파이낸셜뉴스",
+   "lede": "지난 2월 이스라엘과 함께 이란전쟁을 시작했던 미국의 브래드 쿠퍼 중부사령관이 18일(현지시간) 이스라엘을 방문했다. 프랑스 AFP통신 등 외신들에 따르면 미군에서 이란 공격을 담당하는 중부사령부의 쿠퍼는 이날 이스",
+   "url": "https://n.news.naver.com/mnews/article/014/0005606506",
+   "cluster": "https://news.naver.com/cluster/c_202611190420_00000006/section/104"
+  },
+  {
+   "section": "생활",
+   "count": 6,
+   "title": "2026년 11월 19일[백운산 오늘의 운세]",
+   "press": "한국일보",
+   "lede": "음력 10월 11일 丁酉 쥐띠 36년생 : 문서 매매에 속도를 내본다48년생 : 이런저런 망설임이 많아진다60년생 : 이익이 적더라도 마음은 편하다72년생 : 마음에 드는 곳으로 이사한다84년생 : 시험 운이 좋으니",
+   "url": "https://n.news.naver.com/mnews/article/469/0000966425",
+   "cluster": "https://news.naver.com/cluster/c_202611160620_00000388/section/103"
+  },
+  {
+   "section": "IT",
+   "count": 5,
+   "title": "애플·MS 잇단 서비스 장애…클라우드의 명과 암",
+   "press": "이데일리",
+   "lede": "애플이 지난 17일(현지시간) 내부 시스템 업데이트 오류로 대규모 서비스 장애를 겪었다. 아이클라우드 등 클라우드 서비스도 일부 영향을 받았다. 닷새 전인 12일에는 마이크로소프트(MS)의 네트워크 문제로 아웃룩과",
+   "url": "https://n.news.naver.com/mnews/article/018/0006412180",
+   "cluster": "https://news.naver.com/cluster/c_202611181650_00000377/section/105"
+  },
+  {
+   "section": "생활",
+   "count": 4,
+   "title": "배지 위 작은 점이 수출 원료로…hy의 50년 유산균 연구[르포]",
+   "press": "이데일리",
+   "lede": "18일 경기 용인시 기흥구 hy 중앙연구소. 영하 80도의 초저온 냉동고 문이 열리자 균주를 담은 용기들이 모습을 드러냈다. 잠시 뒤 알림이 울리자 연구원은 보관함을 넣고 문을 닫았다. 균주들의 온도 변화를 줄이기",
+   "url": "https://n.news.naver.com/mnews/article/018/0006412163",
+   "cluster": "https://news.naver.com/cluster/c_202611190610_00000004/section/103"
+  },
+  {
+   "section": "생활",
+   "count": 4,
+   "title": "6년 만의 수능 한파…도로 살얼음 주의",
+   "press": "KBS",
+   "lede": "대학수학능력시험일인 오늘 전국이 영하권으로 떨어지고 바람까지 강해 춥겠습니다. 경기 남부와 충청권은 오전까지 1cm 안팎의 눈이 내리겠고, 오후에는 남부지방으로 눈이나 비가 확대되겠습니다. 내일까지 호남에 최대 8c",
+   "url": "https://n.news.naver.com/mnews/article/056/0012296852",
+   "cluster": "https://news.naver.com/cluster/c_202611190010_00000103/section/103"
+  }
+ ],
+ "popular": [
+  {
+   "title": "美 증시, 엔비디아 호실적에도 혼조…나스닥 0.4%↑·다우 1.1%↓",
+   "url": "https://n.news.naver.com/article/138/0002249134",
+   "presses": [
+    "디지털데일리 1위",
+    "이데일리 2위",
+    "SBS Biz 2위"
+   ]
+  },
+  {
+   "title": "젠슨 황 없는 엔비디아, 매출 155조 '괴력'…K반도체엔 양날의 검?",
+   "url": "https://n.news.naver.com/article/648/0000052753",
+   "presses": [
+    "비즈워치 1위",
+    "디지털데일리 3위",
+    "지디넷코리아 5위"
+   ]
+  },
+  {
+   "title": "앤트로픽 IPO 청약 수요 5000억달러 육박…공모가 상단 초과·규모 확대 검토",
+   "url": "https://n.news.naver.com/article/138/0002249129",
+   "presses": [
+    "디지털데일리 2위",
+    "비즈워치 3위",
+    "헤럴드경제 5위"
+   ]
+  },
+  {
+   "title": "“수능 하루 전 이게 무슨 일?”…다이소까지 뜻밖의 ‘품절 대란’",
+   "url": "https://n.news.naver.com/article/018/0006412090",
+   "presses": [
+    "이데일리 1위",
+    "파이낸셜뉴스 5위"
+   ]
+  },
+  {
+   "title": "[단독] 수능 부정행위 걱정인데…초소형 카메라 수입액 1년새 3.6배",
+   "url": "https://n.news.naver.com/article/008/0005443260",
+   "presses": [
+    "머니투데이 2위",
+    "지디넷코리아 4위"
+   ]
+  },
+  {
+   "title": "한국 기술 빼돌려 어디 가나 봤더니…압도적 1위 '이 나라' [털리는 대한민국]",
+   "url": "https://n.news.naver.com/article/015/0005355570",
+   "presses": [
+    "한국경제 3위",
+    "서울경제 5위"
+   ]
+  },
+  {
+   "title": "카카오뱅크 품은 애플페이…카드업계 '연 1.1조 수수료 폭탄' 공포 현실화하나",
+   "url": "https://n.news.naver.com/article/092/0002445918",
+   "presses": [
+    "지디넷코리아 3위",
+    "블로터 5위"
+   ]
+  },
+  {
+   "title": "\"삼전닉스에 또 돈벼락 쏟아지나\"…엔비디아가 꺼낸 '비장의 카드'",
+   "url": "https://n.news.naver.com/article/015/0005355309",
+   "presses": [
+    "한국경제 1위"
+   ]
+  },
+  {
+   "title": "“지방 가라고요? 그냥 그만둘게요”…본사 지방 이전 묻자, 87%가 퇴사 고려",
+   "url": "https://n.news.naver.com/article/009/0005765879",
+   "presses": [
+    "매일경제 1위"
+   ]
+  },
+  {
+   "title": "34세 한그루 “입술이 왜 저 모양이야”…필러 계속 맞다가 결국 다 녹인 이유 [그들의 건강美학]",
+   "url": "https://n.news.naver.com/article/016/0002725357",
+   "presses": [
+    "헤럴드경제 1위"
+   ]
+  },
+  {
+   "title": "매년 2500만원 주식 팔아 생활비로…16억 모은 30대의 은퇴 전략",
+   "url": "https://n.news.naver.com/article/008/0005443273",
+   "presses": [
+    "머니투데이 1위"
+   ]
+  },
+  {
+   "title": "국민연금에 떨어진 숙제…“기금 감소기 韓주식 매각 충격 대비책 짜라”",
+   "url": "https://n.news.naver.com/article/366/0001205801",
+   "presses": [
+    "조선비즈 1위"
+   ]
+  }
+ ]
+}
