@@ -1,6 +1,36 @@
 {
- "collected_at": "2026-11-18T00:32+09:00",
+ "collected_at": "2026-11-18T21:30+09:00",
  "issues": {
+  "2026-11-18": {
+   "title": "젠슨 황 없는 엔비디아, 매출 2배 됐다고?",
+   "format": 2,
+   "pick_tag": "엔비디아 실적",
+   "title_style": "질문형",
+   "cover": "사진",
+   "weekday": "수",
+   "poll": false,
+   "source_mode": "fallback",
+   "audience": "2030",
+   "series": "없음",
+   "reel_style": null,
+   "reel_seconds": null,
+   "reel_slot": null,
+   "reel_feed": null,
+   "reel_hook": null,
+   "src": {
+    "main": 5,
+    "primary": 0,
+    "pick_primary": false,
+    "outlets": 16,
+    "wire": 0,
+    "solo": 0
+   },
+   "big": [
+    4,
+    17,
+    false
+   ]
+  },
   "2026-11-17": {
    "title": "카뱅 체크카드로, 애플페이 된다고?",
    "format": 2,
@@ -350,8 +380,8 @@
   }
  },
  "instagram": {
-  "followers": 163,
-  "media": 148,
+  "followers": 162,
+  "media": 149,
   "insights": true,
   "posts": {
    "2026-11-05": {
@@ -711,7 +741,7 @@
     "reach": 11,
     "saved": 0,
     "shares": 0,
-    "views": 24,
+    "views": 26,
     "profile_visits": 0,
     "follows": 0,
     "reel": {
@@ -722,15 +752,15 @@
      "shares": 0,
      "views": 122,
      "seconds": 22.6,
-     "avg_watch_s": 3.0
+     "avg_watch_s": 3.1
     },
     "comic": {
      "likes": 0,
      "comments": 0,
-     "reach": 5,
+     "reach": 6,
      "saved": 0,
      "shares": 0,
-     "views": 12
+     "views": 14
     },
     "story": {
      "reach": 8,
@@ -740,6 +770,27 @@
       8,
       7,
       0
+     ]
+    }
+   },
+   "2026-11-18": {
+    "likes": 0,
+    "comments": 0,
+    "reach": 6,
+    "saved": 0,
+    "shares": 0,
+    "views": 11,
+    "profile_visits": 0,
+    "follows": 0,
+    "story": {
+     "reach": 11,
+     "views": 15,
+     "replies": 0,
+     "frames": [
+      11,
+      9,
+      8,
+      8
      ]
     }
    }
@@ -773,11 +824,11 @@
   "account": {
    "days": 7,
    "reach": {
-    "NON_FOLLOWER": 1910,
-    "FOLLOWER": 32
+    "FOLLOWER": 34,
+    "NON_FOLLOWER": 1852
    },
    "follows_and_unfollows": {
-    "FOLLOWER": 3,
+    "FOLLOWER": 2,
     "NON_FOLLOWER": 3
    },
    "accounts_engaged": 17
@@ -796,7 +847,8 @@
    "2026-11-14": 0,
    "2026-11-15": 0,
    "2026-11-16": 0,
-   "2026-11-17": 0
+   "2026-11-17": 0,
+   "2026-11-18": 0
   },
   "signups_14d": 2,
   "unsubs_14d": 0,

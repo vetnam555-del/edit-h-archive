@@ -1,0 +1,92 @@
+{
+ "date": "2026-11-19",
+ "items": [
+  "앤트로픽 상장",
+  "가계빚",
+  "수능 연필",
+  "비혼 동거",
+  "직구 건강식품"
+ ],
+ "note": "웹툰만(목요일). 원 기사 대조: 카드 ⑤ '마약류 9개 중 3개는 젤리 모양'은 한겨레에만 있어(서울신문은 '젤리 형태로도 판매') 컷 본문을 두 곳 공통 사실로 바꿈. 카드 ④ 출처는 정책브리핑 본문을 못 읽어 읽은 경기일보·아시아경제·머니투데이로, 카드 ⑤ 는 국민일보가 계속 접속 안 돼 한겨레·TV조선·서울신문으로 표시.",
+ "comic": {
+  "series": "오늘 아침 5가지",
+  "layout": "duo",
+  "title": "앤트로픽 공모가<br><span class='hl'>83달러</span>,<br>오늘 아침 5가지",
+  "cover": {
+   "img": "stills/cover.png",
+   "pos": "50% 45%",
+   "job": "mcp_2be9f0eff42b47e7b11285e414528759"
+  },
+  "summary": true,
+  "panels": [
+   {
+    "card": 1,
+    "img_a": "stills/a1.png",
+    "pos_a": "50% 45%",
+    "img_b": "stills/b1.png",
+    "pos_b": "50% 35%",
+    "say_side": "left",
+    "jobs": [
+     "mcp_f09ea8ad43c74bdf959b7b4f6b8e22c8",
+     "mcp_b1d07cedc2d248d28e800fdb28f479f6"
+    ]
+   },
+   {
+    "card": 2,
+    "img_a": "stills/a2.png",
+    "pos_a": "50% 45%",
+    "img_b": "stills/b2.png",
+    "pos_b": "50% 35%",
+    "say_side": "right",
+    "jobs": [
+     "mcp_e7bbf6ac2abe4670811466bb0ccbc61e",
+     "mcp_fee4640ed2fb4675a1caf5a43578d5a2"
+    ]
+   },
+   {
+    "card": 3,
+    "img_a": "stills/a3.png",
+    "pos_a": "50% 45%",
+    "img_b": "stills/b3.png",
+    "pos_b": "50% 35%",
+    "say_side": "left",
+    "jobs": [
+     "mcp_d91ddfcb42a84ad2a005db6d27f22bfc",
+     "mcp_284300dfbb93446cb1b426ddb18f6bae"
+    ]
+   },
+   {
+    "card": 4,
+    "img_a": "stills/a4.png",
+    "pos_a": "50% 70%",
+    "img_b": "stills/b4.png",
+    "pos_b": "50% 35%",
+    "say_side": "left",
+    "src": "경기일보·아시아경제·머니투데이 11.18~19",
+    "jobs": [
+     "mcp_8a7ac4f1701547c081820375d73dfdc8",
+     "mcp_bb55be5521724a4e8131bcb1f18dd509"
+    ]
+   },
+   {
+    "card": 5,
+    "img_a": "stills/a5.png",
+    "pos_a": "50% 45%",
+    "img_b": "stills/b5.png",
+    "pos_b": "50% 35%",
+    "say_side": "left",
+    "body": "관세청이 139개를 분석했어요. 마약류가 나온 9개 중엔 젤리 모양도 있었어요.",
+    "src": "한겨레·TV조선·서울신문 11.18~19",
+    "jobs": [
+     "mcp_0c30d32a83994b6c9c792320064dbd87",
+     "mcp_ec5e7d3e86494728832b8addec8d7744"
+    ]
+   }
+  ],
+  "sources": "장마다 표시",
+  "end": {
+   "title": "오늘 아침 5가지,<br>매일 아침 8시",
+   "sub": "경제부터 트렌드까지, 오늘 소식 5가지를<br>웹툰으로 풀어 드려요"
+  }
+ }
+}

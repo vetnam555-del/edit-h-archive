@@ -6,7 +6,14 @@
   <atom:link href="https://vetnam555-del.github.io/edit-h-archive/feed.xml" rel="self" type="application/rss+xml"/>
   <description>매일 아침 8시, 경제부터 트렌드까지 2030이 알아야 할 소식을 확인된 숫자로</description>
   <language>ko</language>
-  <lastBuildDate>Wed, 18 Nov 2026 08:00:00 +0900</lastBuildDate>
+  <lastBuildDate>Thu, 19 Nov 2026 08:00:00 +0900</lastBuildDate>
+  <item>
+    <title>VOL.148 클로드 만든 앤트로픽, 공모가 더 올렸다고?</title>
+    <link>https://vetnam555-del.github.io/edit-h-archive/2026-11-19.html</link>
+    <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-11-19.html</guid>
+    <pubDate>Thu, 19 Nov 2026 08:00:00 +0900</pubDate>
+    <description>앤트로픽 상장·가계빚·수능 연필 품절·비혼 동거·직구 건강식품 — 오늘의 5가지</description>
+  </item>
   <item>
     <title>VOL.147 젠슨 황 없는 엔비디아, 매출 2배 됐다고?</title>
     <link>https://vetnam555-del.github.io/edit-h-archive/2026-11-18.html</link>
@@ -209,13 +216,6 @@
     <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-10-20.html</guid>
     <pubDate>Tue, 20 Oct 2026 08:30:00 +0900</pubDate>
     <description>할리스 회원정보 276만 건 유출·동일임금 12월 로드맵·업무시간 30% 줄인 AI의 뒷수습·캪틴큐 완판·증시 대책 예고 — 오늘의 5가지</description>
-  </item>
-  <item>
-    <title>VOL.118 4% 예금 1000만원, 1년 이자 40만원이라고?</title>
-    <link>https://vetnam555-del.github.io/edit-h-archive/2026-10-19.html</link>
-    <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-10-19.html</guid>
-    <pubDate>Mon, 19 Oct 2026 08:30:00 +0900</pubDate>
-    <description>4%대 예금 귀환·위스키 매출 소주 추월·12월 초진 비대면진료·취업 준비 월 58만원·사우나 검색 25배 — 오늘의 5가지</description>
   </item>
 </channel>
 </rss>

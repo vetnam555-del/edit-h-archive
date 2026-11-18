@@ -133,6 +133,12 @@ CARD_LIMITS = {
     "brief_body": 170,       # 형식 2: 짧게 읽는 소식 본문(2~3문장, 숫자 1개 이상 — 2026-10-16~, 예전 한 줄 뉴스는 1~2문장 100자)
     "todo": 40,              # 오늘 챙길 것 한 줄(동사로 끝나는 할 일, 마감·날짜가 있으면 넣는다)
     "ask": 16,               # H PICK 02·03 장 말풍선 질문(선택, 2026-11-02~ — 질문 사슬 '얼마나 팔렸나?' → '왜 잘 팔리나?')
+    # 02~05 이슈 장 새 배치(cards.CARDS_V3_FROM 2026-11-19~) — 숫자 설명·보내기 줄·숫자 그림
+    "number_label": 22,      # 큰 숫자 바로 밑 설명 한 줄(무엇의 숫자인지 — '15~29세 비정규직 비율')
+    "send_to": 16,           # '○○에게 보내 주세요'의 ○○에게(하루 한 장 — '코인원 쓰는 친구에게')
+    "visual_caption": 30,    # 숫자 그림 밑 한 줄
+    "visual_label": 9,       # 막대 그림의 막대 이름
+    "visual_text": 7,        # 막대 그림의 막대 값 글자
     # 딥다이브 카드(cards.dive, config.instagram.dive_card_from~ 연재 날) — 머니그라피 딥다이브 문법(2026-11-01 운영자)
     "dive_by": 14,           # 표지 이름표('H가 숫자로 읽어 주는')
     "dive_label": 8,         # 질문 장 머리표(없으면 Q1·Q2… — 비유 장은 '비유로 보면')
@@ -265,15 +271,72 @@ def _card_issues(data, where):
         for m in metrics:
             if not m.get("value") or not m.get("label"):
                 raise ContentError(f"{w}: metrics 의 각 항목에 value·label 이 모두 필요합니다")
+        # 02~05 이슈 장 새 칸(2026-11-19~, 모두 선택) — 숫자 설명·숫자 그림·보내기 줄
+        extra = [k for k in ("number_label", "visual", "send_to") if ci.get(k) not in (None, "")]
+        if extra and ci.get("accent"):
+            raise ContentError(f"{w}: {'·'.join(extra)} 는 02~05 이슈 장에만 씁니다(H PICK 검정 카드에는 자리가 없어요)")
+        if ci.get("number_label") and cmp:
+            raise ContentError(f"{w}: compare 카드에는 number_label 을 쓰지 않습니다(상자에 설명이 이미 있어요)")
+        if ci.get("visual") is not None:
+            if cmp or metrics:
+                raise ContentError(f"{w}: visual(숫자 그림)은 compare·metrics 와 같이 쓰지 않습니다(한 장에 그림 하나)")
+            _visual(ci["visual"], f"{w}.visual")
+        if ci.get("send_to") and not re.search(r"(에게|께)$", str(ci["send_to"]).strip()):
+            raise ContentError(f"{w}: send_to 는 '○○에게'·'○○께'로 끝나야 합니다(뒤에 '보내 주세요'가 붙어요 — 예: '코인원 쓰는 친구에게')")
         src = by_no[no]
         out.append({**ci, "no": no, "tag": ci.get("tag") or src["tag"],
                     "source": ci.get("source") or source_label(src["sources"])})
     if sum(1 for it in out if it.get("accent")) > 1:
         raise ContentError(f"{where}: accent(H PICK)는 한 장에만 쓰세요")
+    if sum(1 for it in out if it.get("send_to")) > 1:
+        raise ContentError(f"{where}: send_to(보내 주세요)는 하루 한 장에만 — 가장 보낼 만한 소식 하나를 고르세요(행동 요청은 장마다 넣지 않는다)")
     return out
 
 
 CHART_POINTS, CHART_TITLE, CHART_LABEL, CHART_TEXT = (3, 6), 22, 6, 7
+
+
+def _visual(v, where):
+    """02~05 이슈 장의 숫자 그림(선택, 2026-11-19~) — 숫자가 아래 세 모양에 맞는 날만 쓴다. 맞지 않으면 쓰지 않는다(억지 그림은 같은 숫자를 두 번 말할 뿐).
+    calendar {month 'YYYY-MM', days [1~3개], caption} · dots {value 1~99, caption} · bars {rows 2~3개 [{label, value, text}], caption, highlight?}.
+    그림 속 숫자도 숫자 원칙 그대로(서로 다른 출처 2곳) — check_sources 가 caption·rows 글자를 같이 본다."""
+    import calendar as _cal
+    if not isinstance(v, dict) or v.get("type") not in ("calendar", "dots", "bars"):
+        raise ContentError(f"{where}: type 은 calendar(날짜)·dots(100 중 N)·bars(막대 2~3개) 중 하나")
+    cap = str(v.get("caption") or "").strip()
+    if not 1 <= len(plain(cap)) <= CARD_LIMITS["visual_caption"]:
+        raise ContentError(f"{where}: caption 은 1~{CARD_LIMITS['visual_caption']}자(그림이 뜻하는 것 한 줄)")
+    kind = v["type"]
+    if kind == "calendar":
+        m = re.fullmatch(r"(\d{4})-(\d{2})", str(v.get("month") or ""))
+        if not m or not 1 <= int(m.group(2)) <= 12:
+            raise ContentError(f"{where}: month 는 'YYYY-MM'")
+        last = _cal.monthrange(int(m.group(1)), int(m.group(2)))[1]
+        days = v.get("days")
+        if (not isinstance(days, list) or not 1 <= len(days) <= 3
+                or any(isinstance(x, bool) or not isinstance(x, int) or not 1 <= x <= last for x in days)):
+            raise ContentError(f"{where}: days 는 그 달의 날짜 1~3개(숫자 목록, 1~{last})")
+    elif kind == "dots":
+        n = v.get("value")
+        if isinstance(n, bool) or not isinstance(n, int) or not 1 <= n <= 99:
+            raise ContentError(f"{where}: value 는 1~99 의 정수(100 중 몇 — 46.0% 는 46)")
+    else:
+        rows = v.get("rows")
+        if not isinstance(rows, list) or not 2 <= len(rows) <= 3:
+            raise ContentError(f"{where}: rows 는 2~3개({{label, value, text}})")
+        for i, r in enumerate(rows, 1):
+            val = r.get("value") if isinstance(r, dict) else None
+            if isinstance(val, bool) or not isinstance(val, (int, float)) or val < 0:
+                raise ContentError(f"{where}.rows[{i}]: value 는 0 이상의 숫자(막대 길이)")
+            if not 1 <= len(str(r.get("label") or "").strip()) <= CARD_LIMITS["visual_label"]:
+                raise ContentError(f"{where}.rows[{i}]: label 은 1~{CARD_LIMITS['visual_label']}자")
+            if not 1 <= len(str(r.get("text") or "").strip()) <= CARD_LIMITS["visual_text"]:
+                raise ContentError(f"{where}.rows[{i}]: text(막대 옆 숫자)는 1~{CARD_LIMITS['visual_text']}자")
+        if not any(float(r["value"]) > 0 for r in rows):
+            raise ContentError(f"{where}: 막대 값이 모두 0 입니다")
+        hi = v.get("highlight")
+        if hi is not None and (isinstance(hi, bool) or not isinstance(hi, int) or not 0 <= hi < len(rows)):
+            raise ContentError(f"{where}: highlight 는 0~{len(rows) - 1} 사이의 줄 번호")
 
 
 def _chart(ch, where):
@@ -619,6 +682,10 @@ def prepare(data, date_str):
             _len_check(m["label"], CARD_LIMITS["metric_label"], f"{w}.metrics[{j}].label", problems)
         if it.get("ask"):
             _len_check(it["ask"], CARD_LIMITS["ask"], f"{w}.ask", problems)
+        if it.get("number_label"):
+            _len_check(it["number_label"], CARD_LIMITS["number_label"], f"{w}.number_label", problems)
+        if it.get("send_to"):
+            _len_check(it["send_to"], CARD_LIMITS["send_to"], f"{w}.send_to", problems)
     _len_check(cta["headline"], CARD_LIMITS["cta_headline"], "cards.cta.headline(없으면 question.text)", problems)
     _len_check(data["observation"], CARD_LIMITS["observation"], "observation(관찰 카드)", problems)
     if fmt == 2:

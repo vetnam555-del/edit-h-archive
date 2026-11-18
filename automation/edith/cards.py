@@ -315,6 +315,125 @@ def dialogue(take, dark, pose=None):
             f'line-height:1.45;color:{TEXT};">{mk(take, TEXT).replace(" — ", " —<br>")}</div></div>')
 
 
+# 2026-11-18 운영자 '뉴스레터·카드 개선할 부분 없어? → 먼저 보여 줘 → 최종 버전으로 개선해 줘' — 이 날짜 호부터(지난 호는 예전 그대로 다시 만들어진다).
+# 근거: 인스타가 비팔로워에게 퍼뜨릴 때 '보내기(DM 공유)'를 조금 더 본다(모세리 2025-01) · 저장은 4~6번째 장의 체크리스트·비교표에서 난다(국내 카드뉴스 글) ·
+# 머니그라피 딥다이브는 장마다 표·그래프 하나(reviews/2026-11-01-moneygraphy.md). 그래서 ① 02~05 이슈 장을 [번호·태그] 칩 → 큰 숫자 → 숫자 설명 한 줄 →
+# (맞는 날만) 숫자 그림 → 제목 → 본문 → 대화 순서로 ② '보내 주세요' 한 줄은 하루 한 장에만(행동 요청은 하나씩 — 4장에 다 넣은 시안은 버렸다)
+# ③ 체크리스트가 든 '에디터 H 노트'를 9번째 → 4번째 장으로, '5가지 한눈에'를 4번째 → 9번째 장으로.
+CARDS_V3_FROM = "2026-11-19"
+CARD_NAMES_3 = ["cover", "pick", "deep", "note", "issue2", "issue3", "issue4", "issue5", "summary", "cta"]
+VISUAL_KINDS = ("calendar", "dots", "bars")
+
+
+def cards_v3(date):
+    return str(date or "") >= CARDS_V3_FROM
+
+
+def _visual_panel(inner, caption):
+    cap = (f'<div style="margin-top:16px;font-weight:500;font-size:{fs(26)};line-height:1.35;color:{SUB};text-align:center;">{caption}</div>'
+           if caption else "")
+    return f'<div style="flex:none;width:100%;margin-top:26px;background:{BOX};border-radius:30px;padding:28px 36px 24px;">{inner}{cap}</div>'
+
+
+def visual_calendar(v, date):
+    """달력 한 달 — 그날(days)을 주황으로, 호 날짜가 같은 달이면 '오늘'을 테두리로. 하루뿐이고 아직 안 온 날이면 D-N 을 붙인다."""
+    import calendar as _cal
+    import datetime as _dt
+    y, m = (int(x) for x in str(v["month"]).split("-"))
+    days = [int(x) for x in v["days"]]
+    try:
+        today = _dt.date.fromisoformat(str(date)[:10])
+    except ValueError:
+        today = None
+    now = today.day if today and (today.year, today.month) == (y, m) and today.day not in days else None
+    head = "".join(f'<div style="font-size:22px;font-weight:700;line-height:30px;color:{MUTED};">{w}</div>' for w in "일월화수목금토")
+    cells = []
+    for week in _cal.Calendar(firstweekday=6).monthdayscalendar(y, m):
+        for day in week:
+            if not day:
+                cells.append("<div></div>")
+            elif day in days:
+                cells.append(f'<div style="height:46px;line-height:46px;border-radius:23px;font-size:24px;font-weight:800;background:{ACC};color:#FFFFFF;">{day}</div>')
+            elif day == now:
+                cells.append(f'<div style="height:46px;line-height:40px;border-radius:23px;font-size:24px;font-weight:800;border:3px solid {TEXT};color:{TEXT};">{day}</div>')
+            else:
+                cells.append(f'<div style="height:46px;line-height:46px;font-size:24px;color:{SUB};">{day}</div>')
+    legend = f'<b style="color:{ACC};">●</b> {esc(v["caption"])}'
+    if now:
+        legend += f' · <b style="color:{TEXT};">○</b> 오늘'
+    if today and len(days) == 1 and (gap := (_dt.date(y, m, days[0]) - today).days) > 0:
+        legend += f' — <b style="color:{TEXT};">D-{gap}</b>'
+    return _visual_panel(
+        f'<div style="font-size:24px;font-weight:800;line-height:1.2;color:{TEXT};text-align:left;margin-bottom:10px;">{y}년 {m}월</div>'
+        f'<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px 10px;text-align:center;">{head}{"".join(cells)}</div>', legend)
+
+
+def visual_dots(v):
+    """100개 가운데 N개 — 비율(%)을 '100명 중 N명'으로 보여 준다."""
+    n = int(v["value"])
+    cells = "".join(f'<div style="width:30px;height:30px;border-radius:15px;background:{ACC if i < n else "#D9D9D9"};"></div>' for i in range(100))
+    return _visual_panel(f'<div style="display:grid;grid-template-columns:repeat(20,30px);gap:10px 12px;justify-content:center;">{cells}</div>',
+                         mk(v["caption"]))
+
+
+def visual_bars(v):
+    """가로 막대 2~3개 — 같은 잣대의 두세 값을 견준다(전·후, 우리·평균). 강조 막대(highlight, 기본 마지막)만 주황."""
+    rows = v["rows"]
+    top = max(float(r["value"]) for r in rows) or 1
+    hi = v.get("highlight", len(rows) - 1)
+    out = "".join(
+        f'<div style="display:flex;align-items:center;gap:18px;margin:{0 if i == 0 else 14}px 0 0;">'
+        f'<div style="flex:none;width:220px;text-align:left;font-weight:700;font-size:{fs(26)};line-height:1.25;color:{TEXT};">{esc(r["label"])}</div>'
+        f'<div style="flex:1;min-width:0;height:54px;background:#E4E4E4;border-radius:12px;overflow:hidden;">'
+        f'<div style="width:{max(round(float(r["value"]) / top * 100, 1), 2)}%;height:100%;border-radius:12px;background:{ACC if i == hi else "#9A9A9A"};"></div></div>'
+        f'<div style="flex:none;width:150px;text-align:right;font-weight:800;font-size:{fs(28)};line-height:1.1;white-space:nowrap;color:{ACC_INK if i == hi else TEXT};">{esc(r["text"])}</div></div>'
+        for i, r in enumerate(rows))
+    return _visual_panel(out, mk(v["caption"]))
+
+
+def visual_box(v, date=None):
+    kind = v.get("type")
+    return visual_calendar(v, date) if kind == "calendar" else visual_dots(v) if kind == "dots" else visual_bars(v)
+
+
+_PLANE = ('<svg width="34" height="34" viewBox="0 0 24 24" style="flex:none;"><path d="M3 11.5 21 3l-6.5 18-3.2-7.3L3 11.5Z" fill="none" '
+          f'stroke="{ACC_INK}" stroke-width="2" stroke-linejoin="round"/><path d="m11.3 13.7 4.2-4.2" stroke="{ACC_INK}" stroke-width="2" stroke-linecap="round"/></svg>')
+
+
+def send_pill(to):
+    """'○○에게 보내 주세요' — 누구에게 보낼지 콕 집는 한 줄(하루 한 장에만, content 가 막는다)."""
+    return (f'<div style="flex:none;margin-top:24px;display:inline-flex;align-items:center;gap:12px;border:3px solid {ACC_INK};border-radius:40px;'
+            f'padding:13px 30px;font-weight:700;font-size:{fs(28)};line-height:1.2;color:{ACC_INK};">{_PLANE}{esc(to)} 보내 주세요</div>')
+
+
+def issue_card_v3(it, n, date=None):
+    """11/19~ 02~05 이슈 장(흰 카드). [번호·태그] 칩 → 큰 숫자 → 숫자 설명(number_label) → 숫자 그림(visual, 맞는 날만) 또는 보조 수치 상자
+    → 제목 → 본문 → '그래서 뭐가 달라져?' 대화 → (하루 한 장) 보내기 줄. 그림이 있는 장은 자리가 모자라 작은 H 를 뺀다."""
+    cmp, vis = it.get("compare"), it.get("visual")
+    hero = compare_box(cmp, False) if cmp else marked_number(it["number"])
+    label = (f'<div style="flex:none;margin-top:6px;font-weight:700;font-size:{fs(30)};line-height:1.3;color:{SUB};">{esc(it["number_label"])}</div>'
+             if it.get("number_label") and not cmp else "")
+    side = [m for m in it.get("metrics") or [] if m["value"] != hero_value(it)][:2]
+    mid = visual_box(vis, date) if vis else stat_tiles(side, False) if side else ""
+    pose = None if vis or not mascot_on({"date": date}) else mascot_pose(f'{it.get("tag", "")} {it.get("headline", "")}')
+    chip = (f'<div style="flex:none;display:inline-flex;align-items:center;gap:12px;margin-bottom:{22 if cmp else 14}px;">'
+            f'<div style="width:48px;height:48px;border-radius:12px;background:{TEXT};color:#FFFFFF;font-weight:700;font-size:27px;line-height:48px;">{n}</div>'
+            f'<div style="background:{ACC_BG};color:{ACC_INK};font-weight:700;font-size:{fs(27)};line-height:1;padding:11px 18px;border-radius:10px;white-space:nowrap;">'
+            f'{esc(it["tag"])}</div></div>')
+    return _frame(f"""
+<div class="body" style="padding:96px 76px 130px;justify-content:center;align-items:center;text-align:center;">
+  {chip}
+  {hero}
+  {label}
+  {mid}
+  <div class="bal" style="margin-top:{30 if mid else 40}px;font-weight:700;font-size:{fs(58)};line-height:1.3;letter-spacing:-1px;color:{TEXT};">{mk(it["headline"], TEXT)}</div>
+  <div class="bal" style="margin-top:16px;font-weight:400;font-size:{fs(36)};line-height:1.5;color:{SUB};">{mk(it["body"], TEXT)}</div>
+  {dialogue(it["takeaway"], False, pose)}
+  {send_pill(it["send_to"]) if it.get("send_to") else ""}
+</div>
+<div style="position:absolute;left:60px;right:60px;bottom:56px;text-align:center;font-size:24px;line-height:1.4;color:{SRC_LIGHT};">출처 · {esc(it["source"])}</div>""")
+
+
 def issue_card(it, n, date=None):
     dark = bool(it.get("accent"))
     pose = (("point" if dark else mascot_pose(f'{it.get("tag", "")} {it.get("headline", "")}'))
@@ -853,6 +972,12 @@ def build(d, font_css):
     issues = d["card_issues"]
     if dive_on(d) and d["date"] >= PICK_FIRST_FROM:
         cards, names = dive_cards(d)
+    elif d.get("format") == 2 and cards_v3(d["date"]) and not d.get("rewind"):
+        # 11/19~: 저장할 장(체크리스트)을 4번째로 당기고, '5가지 한눈에'는 마무리 앞에서 다시 훑는 장으로(CARDS_V3_FROM 설명)
+        cards = ([cover(d), issue_card(issues[0], 1, d["date"]), deep_card(d), note_card(d)]
+                 + [issue_card_v3(it, i, d["date"]) for i, it in enumerate(issues[1:], 2)]
+                 + [summary(d), cta_follow(d) if follow_on(d) else cta(d)])
+        names = CARD_NAMES_3
     elif d.get("format") == 2 and d["date"] >= PICK_FIRST_FROM and not d.get("rewind"):
         cards = ([cover(d), issue_card(issues[0], 1, d["date"]), deep_card(d), summary(d)]
                  + [issue_card(it, i, d["date"]) for i, it in enumerate(issues[1:], 2)] + [note_card(d), cta_follow(d) if follow_on(d) else cta(d)])
