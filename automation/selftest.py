@@ -1396,6 +1396,27 @@ def t_layout_v3():
     expect(nl.count("처음 받아 보셨나요") == 1 and "H의 한 줄" not in nl and "1158억 달러" in nl and "66.5%" in nl and "font-size:16px" in nl,
            "11/19~ 메일: 맨 위 상자 하나·숫자 목차·본문 16px·'H의 한 줄' 빼기가 안 됐다")
     expect(len(nl.encode("utf-8")) < 90_000, "메일이 90KB 를 넘는다(Gmail 은 102KB 넘으면 자른다)")
+    # 11/19 오전(운영자 분석 A·공유): 공유 화면 링크·이름표·되풀이 숫자 줄 빼기·형광펜 날짜 경고·비교 상자 이름표·발송 시각 기본값
+    from edith import style
+    expect(nl.count("share.html?d=2026-11-19") == 2 and "mailto:?" not in nl and nl.count("그래서 뭐가 달라져?") >= 5,
+           "11/19~ 메일 '전달하기·추천하기'가 공유 화면(share.html)으로 가지 않거나 02~05 이름표가 없다")
+    expect("mailto:?" in newsletter.render(old, site, 10), "11/18 호(지난 호)의 추천하기 메일 링크가 바뀌었다")
+    b = d["big_issue"]
+    expect(newsletter._fresh_checklist({"stat": {"value": "103", "unit": "%"}, "numbers": [{"value": "1158억 달러"}],
+                                        "checklist": ["매출: 1158억 달러, 103% 늘어", "예상보다 50억 달러 많아", "CEO: 임시 체제", "매출 810억 달러(10월 말)"]})
+           == ["예상보다 50억 달러 많아", "CEO: 임시 체제", "매출 810억 달러(10월 말)"],
+           "'알아두면 좋은 것'에서 위에 나온 숫자만 되풀이하는 줄을 빼고, 숫자 없는 줄·새 숫자 줄은 남겨야 한다")
+    expect(style.highlight_check({"big_issue": {"paragraphs": ["엔비디아가 **17일** 발표"]}, "items": [{"body": "**18일** 발표"}]})
+           and not style.highlight_check({"big_issue": {"paragraphs": ["**103%** 늘어"]}, "items": [{"body": "**18일** 발표"}]}),
+           "형광펜이 모두 날짜일 때만 경고해야 한다")
+    tagged = cards.compare_box({"from": {"value": "1091억", "label": "예상치", "tag": "예상"}, "to": {"value": "1158억", "label": "실제", "tag": "실제"}}, True)
+    expect(">예상<" in tagged and "BEFORE" not in tagged and "BEFORE" in cards.compare_box({"from": {"value": "1", "label": "a"}, "to": {"value": "2", "label": "b"}}, False),
+           "비교 상자 이름표(compare.tag)가 안 나오거나 기본 BEFORE/AFTER 가 바뀌었다")
+    expect("8시 30분" not in cards.cta_follow({**content_mod.load("2026-11-18"), "send_time_kst": None}) if cards.follow_on(content_mod.load("2026-11-18")) else True,
+           "마지막 카드 발송 시각이 기본값 08:30 으로 나온다(11/14~ 08:00)")
+    share = (ROOT / "share.html").read_text(encoding="utf-8")
+    expect("navigator.share" in share and "clipboard" in share and "ref=share" in share and "execCommand('copy')" in share,
+           "share.html 에 휴대폰 공유 창·링크 복사(대체 포함)·구독 ref=share 가 없다")
     for name, edit, want in [
         ("보내기 두 장", lambda by: (by[2].update(send_to="친구에게"), by[3].update(send_to="동료에게")), "한 장에만"),
         ("H PICK 에 새 칸", lambda by: by[1].update(number_label="엔비디아 매출"), "02~05 이슈 장에만"),

@@ -263,6 +263,8 @@ def _card_issues(data, where):
             for side in ("from", "to"):
                 if not (cmp.get(side) or {}).get("value") or not cmp[side].get("label"):
                     raise ContentError(f"{w}: compare.{side} 에 value·label 이 모두 필요합니다")
+                if cmp[side].get("tag") is not None and not 1 <= len(str(cmp[side]["tag"]).strip()) <= 6:
+                    raise ContentError(f"{w}: compare.{side}.tag(상자 머리 — 예상·실제·작년·올해)는 1~6자")
         else:
             _need(ci, "number", w)
         metrics = ci.get("metrics") or []

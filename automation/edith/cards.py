@@ -24,7 +24,7 @@ import base64
 import mimetypes
 import re
 
-from .common import ROOT, card_height, dive_on, esc as _esc, load_config, send_time_ko
+from .common import ROOT, card_height, dive_on, esc as _esc, load_config, send_time_ko, send_time_on
 
 W, H = 1080, 1350
 TEXT, SUB, MUTED = "#282F38", "#555558", "#939393"
@@ -118,7 +118,8 @@ def outlined(text, line="#FFFFFF"):
 
 
 def compare_box(cmp, dark):
-    """compare형 — 이전/이후를 한 덩어리 숫자로 뭉개지 않고 2단 상자로 나눈다."""
+    """compare형 — 이전/이후를 한 덩어리 숫자로 뭉개지 않고 2단 상자로 나눈다. 상자 머리는 기본 BEFORE/AFTER, 원고 tag 가 있으면 그 말
+    (예상 → 실제처럼 '전·후'가 아닌 비교 — 2026-11-18 운영자 분석: '시장 예상치 → 실제 매출'에 BEFORE/AFTER 가 붙었다)."""
     arrow = ACC_ON_DARK if dark else ACC_INK
 
     def box(label, value, sub, accent):
@@ -131,9 +132,9 @@ def compare_box(cmp, dark):
                 f'color:{"#5A2A10" if accent else ("#BDBDBD" if dark else SUB)};margin-top:6px;">{esc(sub)}</div></div>')
 
     return (f'<div style="display:flex;align-items:stretch;gap:14px;width:100%;">'
-            f'{box("BEFORE", cmp["from"]["value"], cmp["from"]["label"], False)}'
+            f'{box(esc(cmp["from"].get("tag") or "BEFORE"), cmp["from"]["value"], cmp["from"]["label"], False)}'
             f'<div style="flex:none;display:flex;align-items:center;font-weight:800;font-size:34px;color:{arrow};">→</div>'
-            f'{box("AFTER", cmp["to"]["value"], cmp["to"]["label"], True)}</div>')
+            f'{box(esc(cmp["to"].get("tag") or "AFTER"), cmp["to"]["value"], cmp["to"]["label"], True)}</div>')
 
 
 def _frame(inner, bg="#FFFFFF", mark=True):
@@ -717,7 +718,7 @@ def cta_follow(d):
     만날지' 한 문장, 팔로우 버튼). 예전 마무리는 '팔로우 + 저장해두기>'가 옅은 글자 링크라 캐러셀을 보고 팔로우 0·프로필 방문 2
     (10/29 성과표, 최근 14일 13개 게시물 합)였다 — 인스타 화면과 같은 검은 버튼으로 할 일을 하나로 또렷하게. 저장 질문(오늘의 저장각)은 위에 그대로."""
     c = d["cards"]["cta"]
-    when = send_time_ko(d.get("send_time_kst") or "08:30").replace("오전 ", "")
+    when = send_time_ko(d.get("send_time_kst") or send_time_on(str(d.get("date", ""))[:10])).replace("오전 ", "")   # 빌드가 넣는 그 호 시각, 없으면 그날 시각(예전 기본값 08:30 은 11/14~ 와 달랐다)
     n = len(d["card_issues"])
     stats = [(f"{len(d['all_items'])}개", "이슈 전문"), (f"{n}장", "핵심 카드"), (f"{int(d['vol'])}호", "누적 발행")]
     stat_html = "".join(
