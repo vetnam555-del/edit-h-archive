@@ -635,6 +635,22 @@ def t_twosource():
     expect(any("'30일'" in w and "경고만" in w for w in r["warnings"]) and not any("30일" in b for b in r["blocked"]), "날짜(일)를 경고가 아니라 막음으로 본다")
     d["all_items"][0]["body"] += ", 점유율 7.22%"
     expect(any("'7.22%'" in w and "어디에도 없어요" in w for w in ts.check(d, arts)["warnings"]), "기사 어디에도 없는 숫자를 알리지 않는다")
+    # 2026-11-19 호~(UNREAD_SINGLE_FROM): 못 읽은 기사가 남아도 읽은 2곳 중 한 곳에만 있는 숫자는 막는다 — 11/17 H PICK 기사 5곳 중 2곳만 읽혀
+    # '6.3조원'(서울경제만)이 경고만 받고 카드·메일로 나갔다. 그 전 호는 경고 그대로, 날짜 단위는 경고만, 1곳만 읽힌 이슈는 숫자를 경고에 적는다
+    d17 = {"date": "2026-11-17", "format": 2, "card_issues": [],
+           "all_items": [{"tag": "카뱅", "body": "애플페이 16일부터, 3분기 결제액 6.3조원, 가맹점 1만5000곳",
+                          "sources": [{"name": n, "url": f"k{i}"} for i, n in enumerate(["서울경제", "한경", "연합", "뉴시스", "세계"])]},
+                         {"tag": "해태", "body": "한정판 3000개에서 5000개로", "sources": [{"name": "세계일보", "url": "h1"}, {"name": "뉴스1", "url": "h2"}]}]}
+    a17 = {"k0": {"body": "애플페이 16일부터. 3분기 체크카드 결제액 6.3조원. 가맹점 1만5000곳"}, "k1": {"body": "16일부터 애플페이, 가맹점 1만5000곳"},
+           "k2": None, "k3": None, "k4": None, "h1": {"body": "3000개에서 5000개로 늘려"}, "h2": None}
+    r = ts.check(d17, a17)
+    expect(not r["blocked"] and any("'6.3조원'" in w for w in r["warnings"]), f"시작일(11/19) 전 호를 못 읽은 기사 때문에 막는다: {r['blocked']}")
+    r = ts.check({**d17, "date": ts.UNREAD_SINGLE_FROM}, a17)
+    expect(len(r["blocked"]) == 1 and "'6.3조원'" in r["blocked"][0] and "못 읽은" in r["blocked"][0] and "read_article.py" in r["blocked"][0],
+           f"못 읽은 기사가 남은 이슈의 한 곳뿐 숫자를 막지 않는다(11/17 6.3조원): {r['blocked']}")
+    expect(not any("1만5000곳" in b or "16일" in b for b in r["blocked"]), f"두 곳에 다 있는 숫자·날짜를 막는다: {r['blocked']}")
+    expect(any("[해태]" in w and "한 곳에서만 확인된 숫자" in w and "3000개" in w and "5000개" in w for w in r["warnings"]),
+           f"1곳만 읽힌 이슈의 숫자를 경고에 적지 않는다(11/17 해태 3000→5000개): {r['warnings']}")
     expect(check_sources.usable({"body": "2026년 10월 수출입 동향 — 첨부 PDF https://www.korea.kr/x?fileId=198581810"}) is False
            and check_sources.usable({"body": "수출 1153억 달러, 93.7% 증가, 반도체 564억 달러"}), "제목·안내문만 읽힌 보도자료를 읽은 것으로 본다")
     # 빌드 막음 — 그날(2026-11-05~) 새 호만, 읽어 둔 기사로 네트워크 없이

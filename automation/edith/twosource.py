@@ -8,6 +8,8 @@
 그 이슈 sources 기사 본문 몇 곳에 같은 값이 있는지 센다(check_sources.py 가 기사를 읽어 넘긴다).
   막음 — 그 이슈 기사를 모두(2곳 이상) 읽었는데 한 곳에만 있는 숫자(날짜의 월·일·시각은 경고만 — '지난달 30일'처럼 상대 날짜로도 쓴다)
   경고 — 기사 어디에도 없는 숫자(우리가 계산·환산했으면 괜찮다), 기사를 다 못 읽은 이슈(발행을 멈추지 않는다)
+  (2026-11-19 호~ UNREAD_SINGLE_FROM: 못 읽은 기사가 남아도 읽은 2곳 이상 중 한 곳에만 있는 숫자는 막음. 읽은 기사가 1곳뿐인 이슈는
+   경고에 그 숫자들을 적는다 — 제작 보고에 남게)
 값 맞추기: '14조2209억원' = '14조 2,209억 원', '1만원' = '1만 원', '%포인트' = '%p'. content 가 어림값이면('14.2조'·'약 3500억'·
 '6000억원 넘게') 마지막 자리 반올림 안에서 같다고 본다 — 소수점이 있거나 조·억·만 앞이 0으로 끝날 때만(맨숫자 '10년'은 정확히).
 content 가 조·억·만 자리에서 끝나면('1723억원') 기사의 더 자세한 값('1723억3400만원')을 그 자리에서 자르거나 반올림한 것도 같다(11/05~).
@@ -15,6 +17,10 @@ content 가 조·억·만 자리에서 끝나면('1723억원') 기사의 더 자
 import re
 
 FROM = "2026-11-05"   # 이 날짜 호부터 빌드가 막는다(그 전 호는 기록이라 보지 않는다)
+# 이 날짜 호부터는 못 읽은 기사가 남아 있어도, 읽은 기사 2곳 이상 중 한 곳에만 있는 숫자를 막는다(날짜 단위는 그대로 경고).
+# 11/17 H PICK — 기사 5곳 중 2곳만 읽혀 '3분기 체크카드 결제액 6.3조원'(서울경제만)·'해태 3000→5000개'(세계일보만)가 경고만 받고
+# 카드·메일로 나갔다(07:45 릴스 세션이 찾아 릴스·웹툰에서만 뺐다). 못 읽은 기사에 있을지 모르는 숫자는 확인된 숫자가 아니다(원칙 2).
+UNREAD_SINGLE_FROM = "2026-11-19"
 
 _NUMTXT = r"\d[\d,]*(?:\.\d+)?(?:\s*[조억만천백](?:\s*\d[\d,]*(?:\.\d+)?)?)*"
 _UNITS = ("%p|%포인트|퍼센트포인트|%|퍼센트|원|달러|엔|위안|유로|명|건|개월|개|곳|배|년|월|일|시간|시|분|초|위|호|대|채|가구|회|세|살|"
@@ -146,6 +152,7 @@ def check(d, articles):
     """content(load 결과) + {url: 기사 dict 또는 None(못 읽음)} → {"blocked": [...], "warnings": [...], "issues": [...]}.
     blocked·warnings 는 사람이 읽는 한 줄들, issues 는 이슈마다 읽은 기사 수·한 곳에만 있는 숫자·어디에도 없는 숫자."""
     blocked, warnings, issues = [], [], []
+    strict = str(d.get("date") or "")[:10] >= UNREAD_SINGLE_FROM
     for tag, sources, texts in issue_texts(d):
         srcs = list({s["url"]: (s.get("name") or s["url"], s["url"]) for s in sources if s.get("url")}.values())   # 같은 기사를 두 번 적어도 한 곳
         read = [(name, article_numbers(articles[url])) for name, url in srcs if articles.get(url)]
@@ -156,6 +163,13 @@ def check(d, articles):
             warnings.append(f"[{tag}] 기사 {len(srcs)}곳 중 {len(read)}곳만 읽음({'·'.join(unread)} 못 읽음) — 이 이슈 숫자는 2곳 대조를 못 했어요."
                             " read_article.py 로 다시 읽거나 --search 로 같은 사실의 다른 매체 기사를 찾아 sources 에 더하세요")
         if len(read) < 2:
+            if strict and read and unread:   # 한 곳만 읽힌 이슈 — 대조를 못 한 숫자를 경고에 적어 보고에 남긴다
+                nums = list(dict.fromkeys(c[0] for _, text in texts for c in numbers(text)
+                                          if any(same(c, a) for a in read[0][1]) and c[2] not in DATE_UNITS))
+                if nums:
+                    warnings.append(f"[{tag}] {read[0][0]} 한 곳에서만 확인된 숫자: {' · '.join(nums[:8])}"
+                                    + (f" 외 {len(nums) - 8}개" if len(nums) > 8 else "")
+                                    + " — 다른 매체 한 곳에서 더 찾거나 빼세요(원칙 2)")
             continue
         seen = set()
         for where, text in texts:
@@ -171,12 +185,14 @@ def check(d, articles):
                 if not found:
                     row["none"].append(item)
                     warnings.append(f"[{tag}] '{c[0]}' — 읽은 기사 {len(read)}곳 어디에도 없어요({where}). 우리가 계산·환산한 값이면 괜찮고, 아니면 숫자를 확인하세요")
-                elif unread or c[2] in DATE_UNITS:
+                elif c[2] in DATE_UNITS or (unread and not strict):
                     row["single"].append(item)
                     warnings.append(f"[{tag}] '{c[0]}' — {found[0]}에만 있어요({where})"
                                     + (" — 날짜는 다른 기사가 '지난달·오는'처럼 쓸 수 있어 경고만" if c[2] in DATE_UNITS else ""))
                 else:
                     row["single"].append(item)
-                    blocked.append(f"[{tag}] '{c[0]}' — {found[0]}에만 있어요({where}). 두 기사에 다 있는 사실로 바꾸거나, 숫자를 빼거나, "
-                                   "같은 숫자를 쓴 다른 매체 기사를 sources 에 더하세요(원칙 2)")
+                    blocked.append(f"[{tag}] '{c[0]}' — {found[0]}에만 있어요({where})"
+                                   + (f" — 못 읽은 {'·'.join(unread)}는 대조에 못 넣었어요. read_article.py 로 다시 읽어 그 기사에 있는지 확인하거나"
+                                      if unread else ". 두 기사에 다 있는 사실로 바꾸거나")
+                                   + ", 숫자를 빼거나, 같은 숫자를 쓴 다른 매체 기사를 sources 에 더하세요(원칙 2)")
     return {"blocked": blocked, "warnings": warnings, "issues": issues}
