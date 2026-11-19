@@ -20,5 +20,21 @@
   "at": "2026-11-19T09:41:07+09:00",
   "ai_label": true,
   "permalink": "https://www.instagram.com/p/Df50OhhmCqc/"
+ },
+ "reel": {
+  "id": "18141660412723038",
+  "at": "2026-11-19T11:24:31+09:00",
+  "track": "AI 영상(자체 음악·목소리)",
+  "style": "ai",
+  "seconds": null,
+  "feed": false,
+  "hook": true,
+  "ai_label": true,
+  "permalink": "https://www.instagram.com/reel/Df6ABQYieS1/"
+ },
+ "story_ai": {
+  "id": "18139324447712076",
+  "at": "2026-11-19T11:25:03+09:00",
+  "ai_label": true
  }
 }
