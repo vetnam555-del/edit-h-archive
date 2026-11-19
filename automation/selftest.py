@@ -2936,6 +2936,27 @@ def t_ai_reel():
            and qa.heard_ratio("팔로우하면 내일 아침에도 알려 줄게요!", "팔로우 하면 매일 아침에도 알려줄게요") < qa.STEM_MIN
            and qa.heard_ratio("지마켓 유출 고객", "지마켓 유출 고객 바이낸스", recall=True) == 1.0,
            "11/02·11/03 잘못 들린 줄('제2세대'·'띄었대요'·'매일')을 받아쓰기 비교가 못 잡거나, 맞게 들린 줄을 막는다")
+    # 11/19 — 완성본 받아쓰기는 줄마다 그 구간만 잘라 따로 듣는다. 11/18 릴스는 완성본 전체를 한 번 받아 적고 낱말 시각으로 줄을 나눠
+    # 시각이 0.3~1초 일찍 찍힌 줄 첫 낱말이 빠져 바른 줄 4개가 75~80% 로 막혔다. 받침 넘기기('연체율 일 년' = '연체유일 1년')는 같은 소리로 본다.
+    expect(qa.mix_windows([(0.1, 3.0), (5.0, 8.4)], total=8.6) == [(0.0, 3.5), (4.7, 8.6)]
+           and qa.liaison("연체율일년") == "연체유릴년" and qa.liaison("않아요") == "아나요" and qa.liaison("강아지") == "강아지"
+           and qa.heard_ratio("은행 연체율, 일 년 전보다 모두 올랐대요!", "은행 연체유일 1년 전보다 모두 올랐대요.", recall=True) == 1.0
+           and qa.heard_ratio("직장인 셋 중 둘, 에이아이로 일한대요!", "직장인 셋 중 둘, 어? AI로 일한대요.", recall=True) == 1.0
+           and qa.heard_ratio("은행 연체율, 일 년 전보다 모두 올랐대요!", "운행 연체요일 1년 전보다 모두 올랐대요.", recall=True) < qa.MIX_MIN
+           and qa.heard_ratio("모건스탠리가 본 코스피", "모건스탠비가 본 포스피", recall=True) < qa.MIX_MIN,
+           "완성본 받아쓰기 비교 — 잘라 들을 구간(앞 0.3초·뒤 0.5초)·받침 넘기기가 틀리거나, 11/17·11/18 잘못 들린 줄('모건스탠비'·'운행')이 통과한다")
+    asked = []
+
+    def fake_hear(a, b):
+        asked.append((a, b))
+        return {0.25: "엔비디아 매출이 1년 새 103% 뛰었습니다", 4.7: "직장인 셋 중 둘 AI로 일한대요 은행"}.get(a, "보내 주세요")
+    mep = {"voices": [{"text": "엔비디아 매출이 1년 새 103% 뛰었습니다!", "tts": "엔비디아 매출이 일 년 새 백삼 퍼센트 뛰었습니다!"},
+                      {"text": "직장인 셋 중 둘, AI로 일한대요!", "tts": "직장인 셋 중 둘, 에이아이로 일한대요!"},
+                      {"text": "필요한 친구에게 보내 주세요!"}]}
+    mn, mf = qa.mix_heard(mep, [(0.55, 3.68), (5.0, 8.41), (18.1, 20.16)], fake_hear, total=20.4)
+    expect(asked == [(0.25, 4.18), (4.7, 8.91), (17.8, 20.4)] and len(mn) == 2 and len(mf) == 1 and mf[0].startswith("대사 3")
+           and "clip_hearer(video, model)" in inspect.getsource(qa.main) and "word_timestamps" not in inspect.getsource(qa.main),
+           "완성본 받아쓰기가 줄마다 잘라 듣지 않거나(전체 받아쓰기 낱말 시각은 립싱크 영상에서 0.3~1초 어긋난다), 못 들린 줄을 통과시킨다")
     tts_ep = lambda day, *vs: {"date": day, "voices": [dict(v) for v in vs]}   # noqa: E731
     expect(not qa.tts_gaps(tts_ep("2026-11-04", {"text": "바이낸스, 약 63억 달러!", "tts": "[excited] 바이낸스, 약 육십삼억 달러!"},
                                   {"text": "주식 판 돈, 하루 일찍 받게 돼요!"}))

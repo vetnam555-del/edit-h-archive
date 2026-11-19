@@ -533,8 +533,9 @@ SYNC_LATE = 0.15   # 목소리가 자막보다 먼저 나와도 되는 최대(�
 SYNC_TAIL = 0.15   # 목소리가 자막이 바뀐 뒤까지 이어져도 되는 최대(초)
 STEM_MIN = 0.95    # 녹음 파일 하나(음악 없이)를 받아 적은 말이 녹음 원고(tts)와 맞는 비율 — 11/02·11/03 잘못 들린 줄은 88~94%
 TTS_SAME = 0.85   # tts(녹음 문구)가 대사(text)를 소리 나는 대로 읽은 것인지 — 11/01~11/03 tts 는 모두 100%
-MIX_MIN = 0.95     # 완성본에서 그 줄이 나오는 시간(앞뒤 0.3초)에 들린 말이 원고와 맞는 비율 — 음악·효과음에 묻히거나 자리가 어긋나면 낮다.
+MIX_MIN = 0.95     # 완성본에서 그 줄이 나오는 시간(앞 0.3초·뒤 0.5초)을 잘라 받아 적은 말이 원고와 맞는 비율 — 음악·효과음에 묻히면 낮다.
                    # 0.85 였다 — 11/17 릴스가 87.5%('모건스탠비가 본 포스피')·92%('게이싯물')로 통과해 운영자가 '음성에 문제'를 찾았다(11/18). 녹음과 같은 95%.
+MIX_PAD = (0.3, 0.5)   # 줄 구간 앞·뒤로 더 잘라 듣는 여유(초) — 말끝이 잘려 낮게 나오지 않게
 TRIM_AF = ("silenceremove=start_periods=1:start_threshold=-40dB,areverse,"
            "silenceremove=start_periods=1:start_threshold=-40dB,areverse")   # episode.py 와 같은 앞뒤 무음 자르기
 _TAG = re.compile(r"\[[^\]]*\]|</?strong>")   # Knox(elevenlabs) 말투 표시 '[excited]'·강세 표시 '<strong>…</strong>'(2026-11-16 복제 녹음)
@@ -615,11 +616,37 @@ def read_ko(text, prefer=""):
     return hangul(t)
 
 
+_JONG_MOVE = {1: (0, 0), 2: (0, 1), 3: (1, 9), 4: (0, 2), 5: (4, 12), 6: (0, 2), 7: (0, 3), 8: (0, 5), 9: (8, 0), 10: (8, 6),
+               11: (8, 7), 12: (8, 9), 13: (8, 16), 14: (8, 17), 15: (0, 5), 16: (0, 6), 17: (0, 7), 18: (17, 9), 19: (0, 9),
+               20: (0, 10), 22: (0, 12), 23: (0, 14), 24: (0, 15), 25: (0, 16), 26: (0, 17), 27: (0, 11)}
+# 받침 번호 → (남는 받침, 다음 글자 첫소리) — 'ㄹ'(8) → (없음, ㄹ), 'ㄺ'(9) → (ㄹ, ㄱ), 'ㅎ'(27)·'ㄶ'·'ㅀ' 의 ㅎ 은 소리가 없어진다(좋아 → 조아). ㅇ(21)은 넘어가지 않는다.
+
+
+def liaison(s):
+    """받침 뒤에 ㅇ 으로 시작하는 글자가 오면 받침을 넘겨 소리 나는 대로 — '연체율일년' → '연체유릴년', '연체유일일년' → '연체유이릴년'.
+    11/19 — 음악이 깔린 완성본에서 받아쓰기가 '연체율, 일 년'을 같은 소리 '연체유일 1년'으로 적어 바른 줄이 94% 로 막혔다(녹음만 들으면 100%)."""
+    cs = [ord(c) - 0xAC00 for c in s]
+    for k in range(len(cs) - 1):
+        a, b = cs[k], cs[k + 1]
+        if not (0 <= a < 11172 and 0 <= b < 11172) or a % 28 not in _JONG_MOVE or b // 588 != 11:
+            continue
+        keep, onset = _JONG_MOVE[a % 28]
+        cs[k] = a - a % 28 + keep
+        cs[k + 1] = b - 11 * 588 + onset * 588
+    return "".join(chr(c + 0xAC00) for c in cs)
+
+
 def heard_ratio(want, heard, recall=False):
     """원고와 들린 말이 얼마나 같은가(0~1) — 둘 다 read_ko 로 소리 나는 대로 바꾼 뒤 글자 단위로 견준다.
-    기본은 빠진 말·더 들린 말 모두 깎는다(녹음 파일 하나). recall 이면 원고 글자 중 들린 비율만(완성본 시간대 — 앞뒤 줄 낱말이 섞여 들어온다)."""
+    기본은 빠진 말·더 들린 말 모두 깎는다(녹음 파일 하나). recall 이면 원고 글자 중 들린 비율만(완성본 시간대 — 앞뒤 줄 낱말이 섞여 들어온다)
+    이고, 받침 넘기기(liaison)를 한 꼴로도 견줘 둘 중 높은 쪽 — 음악이 깔린 완성본은 받아쓰기가 소리 나는 대로 적는 일이 많다('연체율 일 년' → '연체유일 1년').
+    둘 중 높은 쪽인 까닭: 녹음에 짧은 감탄이 더 들어간 줄('둘, 어? AI로')은 받침을 넘기면 오히려 글자가 어긋난다(11/19)."""
     a = read_ko(want)
     b = read_ko(heard, prefer=a)
+    if recall and a:
+        la, lb = liaison(a), liaison(b)
+        plain_r = sum(m.size for m in difflib.SequenceMatcher(None, a, b).get_matching_blocks()) / len(a)
+        return max(plain_r, sum(m.size for m in difflib.SequenceMatcher(None, la, lb).get_matching_blocks()) / len(la))
     if not a:
         return 1.0
     sm = difflib.SequenceMatcher(None, a, b)
@@ -738,14 +765,36 @@ def stem_heard(ep, base, model):
     return notes, fails
 
 
-def mix_heard(ep, spans, words):
-    """완성본 받아쓰기(낱말 시각 포함)에서 대사 줄마다 그 시간대(앞뒤 0.3초)에 들린 말만 모아 견준다 → (메모, 실패).
-    words: [(시작, 끝, 낱말)]. 음악·효과음에 묻히거나 목소리 자리가 어긋나면 낮게 나온다."""
+def mix_windows(spans, total=None, pad=MIX_PAD):
+    """대사 줄마다 완성본에서 잘라 들을 구간 [(시작, 끝)] — 줄 구간 앞 pad[0]·뒤 pad[1] 초(영상 0초·끝을 넘지 않게)."""
+    return [(round(max(0.0, a - pad[0]), 3), round(b + pad[1] if total is None else min(total, b + pad[1]), 3)) for a, b in spans]
+
+
+def clip_hearer(video, model):
+    """hear(시작, 끝) → 완성본의 그 구간만 잘라(16kHz 모노) 받아 적은 말. 구간마다 따로 받아 적어 앞뒤 줄 낱말 시각에 휘둘리지 않는다."""
+    import numpy as np
+
+    def hear(a, b):
+        raw = subprocess.run(["ffmpeg", "-v", "error", "-ss", f"{a:.3f}", "-t", f"{b - a:.3f}", "-i", str(video), "-vn",
+                              "-ac", "1", "-ar", "16000", "-f", "f32le", "-"], capture_output=True, check=True).stdout
+        audio = np.frombuffer(raw, dtype=np.float32)
+        if not len(audio):
+            return ""
+        segs, _ = model.transcribe(audio, language="ko", beam_size=5, condition_on_previous_text=False)
+        return " ".join(s.text for s in segs).strip()
+    return hear
+
+
+def mix_heard(ep, spans, hear, total=None):
+    """완성본에서 대사 줄마다 그 시간대(앞 0.3초·뒤 0.5초 — mix_windows)를 잘라 따로 받아 적어 원고와 견준다 → (메모, 실패).
+    hear(시작, 끝) → 들린 말(clip_hearer). 음악·효과음에 묻히면 낮게 나온다. 앞뒤 줄 낱말이 섞여 들어와도 원고 글자 중 들린 비율만 본다(recall).
+    11/19 전에는 완성본 전체를 한 번 받아 적고 낱말 시각으로 줄을 나눴는데, 립싱크 영상(11/18 — 목소리를 영상 입에 맞춰 옮겨 줄 사이 쉼이 길다)에서
+    낱말 시각이 0.3~1초 일찍 찍혀 줄 첫 낱말('엔비디아'·'직장인'·'무신사'·'필요한')이 앞 구간으로 빠졌다 — 대사 4줄 75~80%, 줄마다 잘라 들으면 100%."""
     notes, fails = [], []
-    for i, ((vs, ve), v) in enumerate(zip(spans, ep.get("voices") or []), 1):
-        said = "".join(w for a, b, w in words if vs - 0.3 <= (a + b) / 2 <= ve + 0.3).strip()
+    for i, ((ca, cb), (vs, ve), v) in enumerate(zip(mix_windows(spans, total), spans, ep.get("voices") or []), 1):
+        said = hear(ca, cb)
         got = heard_ratio(v.get("tts") or v.get("text", ""), said, recall=True)
-        msg = f"대사 {i} 완성본 {vs:.1f}~{ve:.1f}초 받아쓰기 {got:.0%} — 들린 '{said}'"
+        msg = f"대사 {i} 완성본 {vs:.1f}~{ve:.1f}초(잘라 듣기 {ca:.1f}~{cb:.1f}) 받아쓰기 {got:.0%} — 들린 '{said}'"
         (notes if got >= MIX_MIN else fails).append(msg + ("" if got >= MIX_MIN else
             f" — {MIX_MIN:.0%} 미만: 그 구간 음악·효과음(sfx)을 낮추거나 목소리 start 를 장면에 맞춘다"))
     return notes, fails
@@ -1137,7 +1186,7 @@ def main():
             from faster_whisper import WhisperModel
             model = WhisperModel("small", device="cpu", compute_type="int8")
             synced = ep.get("date", "") >= SYNC_RULE_FROM
-            segs, _ = model.transcribe(str(video), language="ko", beam_size=5, word_timestamps=synced)
+            segs, _ = model.transcribe(str(video), language="ko", beam_size=5)
             segs = list(segs)
             said = " ".join(s.text for s in segs)
             heard = hangul(said)
@@ -1147,7 +1196,7 @@ def main():
             notes.append(f"들린 숫자 {', '.join(_say(n) for n in heard_nums) or '없음'}")
             if synced:   # 11/04~ 줄마다 녹음 파일 하나 + 완성본의 그 줄 시간대(위 sync 검사와 같은 구간)
                 n1, f1 = stem_heard(ep, epath.parent, model)
-                n2, f2 = mix_heard(ep, spans, [(w.start, w.end, w.word) for s in segs for w in (s.words or [])])
+                n2, f2 = mix_heard(ep, spans, clip_hearer(video, model), total=dur)
                 notes += n1 + n2
                 fails += f1 + f2
             else:
