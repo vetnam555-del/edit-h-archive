@@ -1,0 +1,32 @@
+{
+ "date": "2026-11-20",
+ "items": [
+  "실손보험금 찾기",
+  "앤트로픽 상장",
+  "두 줄 김밥",
+  "워킹맘"
+ ],
+ "note": "웹툰만(금요일). 원 기사 11곳 대조 — 카드 ①~④ 숫자는 모두 두 곳 이상에서 확인. 카드 ⑤ '수능 AI'(챗GPT 수능 국어 100점·83점)는 지디넷코리아 자체 실험이라 출처가 한 곳뿐이어서(같은 사실을 다룬 다른 매체 기사 없음 — read_article --search 로 확인) 웹툰에서 빼고 4가지로 만듦. a5·b5 그림은 그려 두었으나 쓰지 않음.",
+ "comic": {
+  "series": "오늘 아침 4가지",
+  "layout": "duo",
+  "title": "안 찾은 실손보험금<br><span class='hl'>1조원</span>, 내 몫은?<br>오늘 아침 4가지",
+  "cover": {"img": "stills/cover.png", "pos": "50% 45%", "job": "mcp_aa12464f074b416f8f53500ab27c72ec"},
+  "summary": true,
+  "panels": [
+   {"card": 1, "img_a": "stills/a1.png", "pos_a": "50% 45%", "img_b": "stills/b1.png", "pos_b": "50% 35%", "say_side": "left",
+    "jobs": ["mcp_2062cb8319ff4ffcbec004f8a68749c1", "mcp_fb82c0846b0f4af2a8d18fcd12d9bd92"]},
+   {"card": 2, "img_a": "stills/a2.png", "pos_a": "50% 45%", "img_b": "stills/b2.png", "pos_b": "50% 35%", "say_side": "left",
+    "jobs": ["mcp_cb562f62cb2246adb758bc6f4a1a45fd", "mcp_fd10a251ea0b4a928fb0b94b157b9dd4"]},
+   {"card": 3, "img_a": "stills/a3.png", "pos_a": "50% 45%", "img_b": "stills/b3.png", "pos_b": "50% 35%", "say_side": "right", "stk_side": "left",
+    "jobs": ["mcp_d105e6a1361141198523e7f52c5eab46", "mcp_e5bb3fdc366e46efb8eb17014a43d1b9"]},
+   {"card": 4, "img_a": "stills/a4.png", "pos_a": "50% 50%", "img_b": "stills/b4.png", "pos_b": "50% 40%", "say_side": "left",
+    "jobs": ["mcp_cb46ea3a35b14b079fd0599524b9c02e", "mcp_00d59f95636f40b1b0fd9ef2ce16ade6"]}
+  ],
+  "sources": "장마다 표시",
+  "end": {
+   "title": "오늘 아침 소식,<br>매일 아침 8시",
+   "sub": "경제부터 트렌드까지, 오늘 소식을<br>웹툰으로 풀어 드려요"
+  }
+ }
+}
