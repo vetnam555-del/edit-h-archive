@@ -82,7 +82,8 @@ jobs:
             timeout 300 sudo apt-get $APT update -qq && timeout 300 sudo apt-get $APT install -y -qq ffmpeg > /dev/null && break
             echo "apt 시도 $i 실패/멈춤 — 다시"; sleep 10
           done
-          command -v ffmpeg >/dev/null || { echo "ffmpeg 설치 실패"; exit 1; }
+          # ffmpeg 는 릴스(영상)만 쓴다 — 못 깔아도 캐러셀·스토리·웹툰은 올린다(11/19 apt 미러 장애로 웹툰 게시가 막힘)
+          command -v ffmpeg >/dev/null || echo "::warning::ffmpeg 설치 실패 — 릴스 영상은 이번 실행에서 못 만듦(캐러셀·웹툰은 계속)"
           pip install -q pynacl pillow   # Pillow: 릴스 영상 위쪽의 음악 출처 글자(make_reel.py)
 
       - name: Post
