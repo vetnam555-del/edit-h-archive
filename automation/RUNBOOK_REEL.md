@@ -269,6 +269,7 @@ CAMERA 에 'continuous motion in every shot — no held poses, no frozen moments
 40분이 넘도록 끝나지 않거나 실패면 그날 영상은 쉰다(다시 만들기는 1번).
 - 립싱크를 하지 않으니 `audio_references` 는 넣지 않는다(11/17~11/18 은 드롭샷 reference_audio 로 목소리 트랙을 줬다).
 - (11/15~11/20 기록) 드롭샷 `generate_video` — model `bytedance/seedance-2.5`, options `{"prompt", "reference_image": [주소 3개], "duration": 20, "resolution": "480p", "aspect_ratio": "9:16", "generate_audio": true}`, 1,030크레딧.
+- **SPHERE 문장(11/21~ 프롬프트 CHARACTER 바로 뒤에 그대로 — 11/21 운영자 '캐릭터가 원래 동그랬는데 이상하게 나왔어')**: `SHAPE: H's body is a full 3D SPHERE like a glossy rubber ball - perfectly round from EVERY angle, including side, back and top views; it has real depth and volume. H is never a flat disc, coin, cookie, pancake, button or cylinder, and never looks thin when it turns sideways.` NEGATIVE 에도 `no flat disc or coin-shaped body, no cylinder body, no thin side profile` 를 더한다. 까닭: 11/16·11/20 드롭샷 영상에서 H 가 납작한 원반(옆에서 보면 동전 두께)으로 나왔다 — 11/13 힉스필드 영상은 공 모양. 0.5초 시트에서 H 가 옆으로 돌 때 납작하면 그 장면은 '모양 틀림'으로 본다(3번).
 - **NO TALKING 문장(11/23~ 프롬프트에 그대로 — 아래 LIP SYNC 문장 대신)**: `NO TALKING: H never speaks. H's small black mouth stays closed in a small smile the whole time (a small still 'o' only for a surprised beat) — no lip movement, no mouthing words; H reacts with facial expressions, gestures and body movement instead.`
   AUDIO 줄은 `playful cartoon sound effects only; no speech, no voices, no music`.
 - (11/17~11/18 기록) **LIP SYNC 문장(11/16 시험에서 맞았다)**: `LIP SYNC: H is the speaker of the reference audio. H's small black mouth opens and closes exactly in time with every syllable of the speech in the reference audio, wider on stressed syllables, and stays closed in a small smile during the silent parts.`
@@ -282,6 +283,7 @@ CAMERA 에 'continuous motion in every shot — no held poses, no frozen moments
 
 ### 3. 받기·눈 검수
 원본을 임시 폴더에 받는다 → 0.5초 간격 프레임 시트로 사람·로고·실제 제품·글자·H 모양을 본다.
+- **H 가 공(구) 모양인지** — 정면은 물론 옆·뒤로 돌 때도 두께가 동그란가(납작한 원반·동전·쿠키 모양이면 '모양 틀림'). 한 장면이면 그 장면만 다시(크레딧 계획 안), 여러 장면이면 20초 다시 만들기.
 - AI 가 그린 엉터리 글자: 카메라가 멈춘 구간이면 ffmpeg delogo, 카메라가 흐르면 글자 칸 안 무채색 화소만 판 색으로 누른다(geq — 11/12 brief.json source_video_prep 본보기).
   쓴 명령은 brief.json `source_video_prep` 에 적는다. 상표처럼 보이는 작은 무늬는 H 를 피해 아래쪽만 흐리게.
 - 프레임 차이로 장면 경계를 잰다. 검은 화면(blackdetect) 0.
