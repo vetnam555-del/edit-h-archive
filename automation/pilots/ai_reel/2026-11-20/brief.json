@@ -11,22 +11,284 @@
   "series": "오늘 아침 4가지",
   "layout": "duo",
   "title": "안 찾은 실손보험금<br><span class='hl'>1조원</span>, 내 몫은?<br>오늘 아침 4가지",
-  "cover": {"img": "stills/cover.png", "pos": "50% 45%", "job": "mcp_aa12464f074b416f8f53500ab27c72ec"},
+  "cover": {
+   "img": "stills/cover.png",
+   "pos": "50% 45%",
+   "job": "mcp_aa12464f074b416f8f53500ab27c72ec"
+  },
   "summary": true,
   "panels": [
-   {"card": 1, "img_a": "stills/a1.png", "pos_a": "50% 45%", "img_b": "stills/b1.png", "pos_b": "50% 35%", "say_side": "left",
-    "jobs": ["mcp_2062cb8319ff4ffcbec004f8a68749c1", "mcp_fb82c0846b0f4af2a8d18fcd12d9bd92"]},
-   {"card": 2, "img_a": "stills/a2.png", "pos_a": "50% 45%", "img_b": "stills/b2.png", "pos_b": "50% 35%", "say_side": "left",
-    "jobs": ["mcp_cb562f62cb2246adb758bc6f4a1a45fd", "mcp_fd10a251ea0b4a928fb0b94b157b9dd4"]},
-   {"card": 3, "img_a": "stills/a3.png", "pos_a": "50% 45%", "img_b": "stills/b3.png", "pos_b": "50% 35%", "say_side": "right", "stk_side": "left",
-    "jobs": ["mcp_d105e6a1361141198523e7f52c5eab46", "mcp_e5bb3fdc366e46efb8eb17014a43d1b9"]},
-   {"card": 4, "img_a": "stills/a4.png", "pos_a": "50% 50%", "img_b": "stills/b4.png", "pos_b": "50% 40%", "say_side": "left",
-    "jobs": ["mcp_cb46ea3a35b14b079fd0599524b9c02e", "mcp_00d59f95636f40b1b0fd9ef2ce16ade6"]}
+   {
+    "card": 1,
+    "img_a": "stills/a1.png",
+    "pos_a": "50% 45%",
+    "img_b": "stills/b1.png",
+    "pos_b": "50% 35%",
+    "say_side": "left",
+    "jobs": [
+     "mcp_2062cb8319ff4ffcbec004f8a68749c1",
+     "mcp_fb82c0846b0f4af2a8d18fcd12d9bd92"
+    ]
+   },
+   {
+    "card": 2,
+    "img_a": "stills/a2.png",
+    "pos_a": "50% 45%",
+    "img_b": "stills/b2.png",
+    "pos_b": "50% 35%",
+    "say_side": "left",
+    "jobs": [
+     "mcp_cb562f62cb2246adb758bc6f4a1a45fd",
+     "mcp_fd10a251ea0b4a928fb0b94b157b9dd4"
+    ]
+   },
+   {
+    "card": 3,
+    "img_a": "stills/a3.png",
+    "pos_a": "50% 45%",
+    "img_b": "stills/b3.png",
+    "pos_b": "50% 35%",
+    "say_side": "right",
+    "stk_side": "left",
+    "jobs": [
+     "mcp_d105e6a1361141198523e7f52c5eab46",
+     "mcp_e5bb3fdc366e46efb8eb17014a43d1b9"
+    ]
+   },
+   {
+    "card": 4,
+    "img_a": "stills/a4.png",
+    "pos_a": "50% 50%",
+    "img_b": "stills/b4.png",
+    "pos_b": "50% 40%",
+    "say_side": "left",
+    "jobs": [
+     "mcp_cb46ea3a35b14b079fd0599524b9c02e",
+     "mcp_00d59f95636f40b1b0fd9ef2ce16ade6"
+    ]
+   }
   ],
   "sources": "장마다 표시",
   "end": {
    "title": "오늘 아침 소식,<br>매일 아침 8시",
    "sub": "경제부터 트렌드까지, 오늘 소식을<br>웹툰으로 풀어 드려요"
   }
- }
+ },
+ "hook": "상황",
+ "story": "오늘 아침 4가지 — 웹툰과 같은 4가지(한 곳뿐인 '수능 AI'는 뺐다)를 20초 한 편에. 운영자 11/20 '오늘자 만들어서 진행해줘'(금요일이지만 영상 날로). RUNBOOK 2-0 첫 3초 훅: 여는 소식은 2030 이 자기 일로 느끼는 '청구 안 한 병원비 1조원'(내 돈) — H 가 병원 영수증 더미에서 잠자던 동전 상자를 찾아내는 장면, 1번 자막엔 날짜·'1/4' 머리말 없이 큰 두 줄만. 립싱크 없음(11/19 운영자 — H 는 말하지 않고 목소리는 해설). 끝인사는 저장(bye_save — 최근 셋이 뉴스레터·내일·공유).",
+ "voices": [
+  {
+   "file": "stems/i1_silson.mp3",
+   "start": 0.3,
+   "tempo": 1.0,
+   "text": "청구 안 한 병원비, 1조 원 쌓였습니다!",
+   "tts": "청구 안 한 병원비, <strong>일조 원</strong> 쌓였습니다!",
+   "voice": "Knox"
+  },
+  {
+   "file": "stems/i2_anthropic.mp3",
+   "start": 4.85,
+   "tempo": 1.2,
+   "text": "앤트로픽, 첫날 17.1% 올랐대요!",
+   "tts": "엔트로픽, 첫날 <strong>십칠 점 일 퍼센트</strong> 올랐대요!",
+   "voice": "Hana"
+  },
+  {
+   "file": "stems/i3_gimbap.mp3",
+   "start": 8.45,
+   "tempo": 1.0,
+   "text": "김밥 두 줄에 3980원이래요!",
+   "tts": "김밥 두 줄에 <strong>삼천구백팔십 원</strong>이래요!",
+   "voice": "Hana"
+  },
+  {
+   "file": "stems/i4_workingmom.mp3",
+   "start": 12.1,
+   "tempo": 1.0,
+   "text": "엄마들 고용률, 역대 최고래요!",
+   "tts": "엄마들 고용률, <strong>역대 최고</strong>래요!",
+   "voice": "Hana"
+  },
+  {
+   "file": "stems/i_bye_save.mp3",
+   "start": 16.55,
+   "tempo": 1.0,
+   "text": "저장해 두고 필요할 때 꺼내 보세요!",
+   "tts": "<strong>저장</strong>해 두고 필요할 때 꺼내 보세요!",
+   "voice": "Hana"
+  }
+ ],
+ "captions": [
+  {
+   "start": 0,
+   "end": 4.9,
+   "size": 92,
+   "top": 1250,
+   "html": "<div class=\"main\">청구 안 한 병원비<br><span class=\"hl\">1조원</span> 쌓였다</div><div class=\"sub\">3년 지나면 못 받아요 · 지금 청구부터</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 금융위원회 보도자료·헤럴드경제</div>"
+  },
+  {
+   "start": 4.9,
+   "end": 8.4,
+   "size": 84,
+   "top": 1250,
+   "html": "<div class=\"kick\">2/4 · 테크</div><div class=\"main\">앤트로픽 상장 첫날<br>공모가보다 <span class=\"hl\">17.1%</span>↑</div><div class=\"sub\">83달러 → 97.17달러로 마감</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 연합뉴스·YTN</div>"
+  },
+  {
+   "start": 8.4,
+   "end": 11.9,
+   "size": 84,
+   "top": 1250,
+   "html": "<div class=\"kick\">3/4 · 소비</div><div class=\"main\">김밥 두 줄에<br><span class=\"hl\">3980원</span></div><div class=\"sub\">이마트 19일부터 늘 판매 · 한 줄 1990원</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 매일경제·서울경제</div>"
+  },
+  {
+   "start": 11.95,
+   "end": 16.45,
+   "size": 84,
+   "top": 1250,
+   "html": "<div class=\"kick\">4/4 · 일</div><div class=\"main\">일하는 엄마<br><span class=\"hl\">66.2%</span> 역대 최고</div><div class=\"sub\">1년 새 1.9%포인트↑ · 그만둔 이유 1위는 육아(51.1%)</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 세계일보·아시아경제</div>"
+  }
+ ],
+ "end_card": {
+  "line": "저장해 두고 필요할 때 꺼내 보세요!",
+  "sub": "프로필 링크에서 구독하면 '돈·일 체크리스트' 선물부터",
+  "note": "숫자는 기사 2곳 이상에서 확인했어요<br>(출처는 장면마다·캡션에)"
+ },
+ "end_seconds": 2.6,
+ "trim": [
+  0.0,
+  20.0
+ ],
+ "music": [
+  {
+   "file": "../2026-10-31/stems/m1_chase.m4a",
+   "start": 0.0,
+   "offset": 1.7,
+   "dur": 4.2,
+   "fade_out": 0.3,
+   "lufs": -24
+  },
+  {
+   "file": "../2026-10-31/stems/m1_chase.m4a",
+   "start": 3.9,
+   "offset": 1.75,
+   "dur": 4.15,
+   "lufs": -24,
+   "fade_in": 0.2,
+   "fade_out": 0.4
+  },
+  {
+   "file": "../2026-10-31/stems/m2_morning.m4a",
+   "start": 7.75,
+   "dur": 8.85,
+   "fade_in": 0.3,
+   "fade_out": 0.4,
+   "lufs": -26,
+   "lowpass": 2200
+  },
+  {
+   "file": "../2026-10-31/stems/m2_morning.m4a",
+   "start": 16.3,
+   "dur": 6.4,
+   "lufs": -22,
+   "fade_in": 0.3,
+   "fade_out": 0.8
+  }
+ ],
+ "sfx": [
+  [
+   0,
+   14.0,
+   0.4
+  ],
+  [
+   14.0,
+   999,
+   0.3
+  ]
+ ],
+ "duck": {
+  "mix": 0.75,
+  "release": 350
+ },
+ "facts": [
+  {
+   "scene": 1,
+   "fact": "최근 3년간 찾아가지 않은 실손보험금 최대 약 1조원",
+   "seen_in": [
+    "금융위원회 보도자료",
+    "헤럴드경제",
+    "디지털타임스",
+    "서울신문"
+   ]
+  },
+  {
+   "scene": 1,
+   "fact": "실손보험금 소멸시효 3년(3년 지나면 청구 못 함)",
+   "seen_in": [
+    "금융위원회 보도자료",
+    "헤럴드경제"
+   ]
+  },
+  {
+   "scene": 1,
+   "fact": "내년(2027년) 1분기 실손24 앱이 카드 결제 정보로 미청구 진료를 찾아 줌",
+   "seen_in": [
+    "금융위원회 보도자료",
+    "디지털타임스",
+    "서울신문",
+    "헤럴드경제"
+   ]
+  },
+  {
+   "scene": 2,
+   "fact": "앤트로픽 공모가 83달러, 상장 첫날 97.17달러로 마감",
+   "seen_in": [
+    "연합뉴스",
+    "YTN",
+    "헤럴드경제"
+   ]
+  },
+  {
+   "scene": 2,
+   "fact": "공모가 대비 17.1%(YTN 17.07%) 상승",
+   "seen_in": [
+    "연합뉴스",
+    "YTN"
+   ]
+  },
+  {
+   "scene": 3,
+   "fact": "이마트 두 줄 김밥 3980원(한 줄 1990원), 19일부터 상시 판매",
+   "seen_in": [
+    "매일경제",
+    "서울경제"
+   ]
+  },
+  {
+   "scene": 4,
+   "fact": "미성년 자녀와 사는 기혼여성 고용률 66.2% 역대 최고, 1년 새 1.9%포인트 상승",
+   "seen_in": [
+    "세계일보",
+    "아시아경제"
+   ]
+  },
+  {
+   "scene": 4,
+   "fact": "직장을 그만둔 이유 1위 육아 51.1%",
+   "seen_in": [
+    "세계일보",
+    "아시아경제"
+   ]
+  }
+ ],
+ "source_note": "check_sources.py 막음 0 · 경고 1('11월' — 금융위 보도자료에만, 날짜라 경고만) · 기사 12/12곳 읽음. 릴스용으로 11곳을 read_article 로 다시 직접 읽고 사실표 대조. 앤트로픽 상승률은 연합 17.1%·YTN 17.07% — 17.1% 로. 카드 ⑤ '수능 AI'는 지디넷코리아 한 곳뿐이라 웹툰처럼 릴스에서도 뺐다.",
+ "seedance": {
+  "model": "bytedance/seedance-2.5",
+  "made_by": "dropshot",
+  "job": "mcp_2575d527f539472bab2cf8ae14e3cd32",
+  "prompt": "brief_prompt.txt",
+  "lip_sync": "없음(11/19 운영자 '입 모양 모션은 없는 게 낫지 않을까') — reference_audio 없이 NO TALKING 문장",
+  "cut": "장면 경계(프레임 차이): 거실 영수증 더미·보물 상자 0~4.95 · 옥상 선물 로켓 4.95~8.2 · 마트 김밥 매대 8.2~11.9 · 홈 오피스 저글링·유모차 11.95~16.4 · 책장 북마크·손 흔들기 16.4~20. 검은 화면 0, 멈춘 구간 없음, 꽉 찬 화면(letterboxed False, 중앙값 0.97). 다시 만들지 않음(480p 20초 1,030 한 번). H 입은 장면마다 닫힌 미소·놀람 'o'(말하듯 움직이지 않음)."
+ },
+ "source_video_prep": "마트 장면(8.15~11.95초) 위쪽 메뉴판 두 칸에 AI 가 그린 엉터리 글자('¥.00e'·'DUE3K') — 카메라가 멈춘 장면이라 위쪽 140px(480×854 기준)을 boxblur 18 로 흐림: ffmpeg -i raw.mp4 -filter_complex \"[0:v]split[a][b];[b]crop=480:140:0:0,boxblur=18:2[t];[a][t]overlay=0:0:enable='between(t,8.15,11.95)'[v]\" -map [v] -map 0:a"
 }
