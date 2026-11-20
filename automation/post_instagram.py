@@ -345,6 +345,16 @@ def probe_ratio(g, uid, site_url, image_url=None):
     return ok
 
 
+REEL_COVER = "reel_cover.jpg"   # 2026-11-21 운영자 '썸네일도 엄청 중요하다' — 있으면 릴스 표지(cover_url)로(pilots/ai_reel/reel_cover.py 가 만든다)
+
+
+def reel_cover_params(folder, key, site_url):
+    """릴스 표지 — folder/reel_cover.jpg 가 있으면 {'cover_url': 공개 주소}, 없으면 예전처럼 영상 0.8초 프레임 {'thumb_offset': '800'}."""
+    if (Path(folder) / REEL_COVER).exists():
+        return {"cover_url": f"{site_url}/instagram/{key}/{REEL_COVER}"}
+    return {"thumb_offset": "800"}
+
+
 def post_reel(g, uid, key, folder, cfg, dry, ffmpeg, site_url):
     out, track = build_reel(key, folder, ffmpeg)
     if not out:
@@ -358,9 +368,26 @@ def post_reel(g, uid, key, folder, cfg, dry, ffmpeg, site_url):
     print(f"  영상 공개 주소 {url}")
     feed = reel_to_feed(cfg, key)
     track["feed"] = feed
+    cover = reel_cover_params(folder, key, site_url)
+    if "cover_url" in cover:
+        publish_video(Path(folder) / REEL_COVER, key)   # 보통 PR 로 이미 main 에 있다(없을 때만 커밋)
+        wait_public([cover["cover_url"]], timeout=900)
+        print(f"  릴스 표지 {cover['cover_url']}")
     params = dict(media_type="REELS", video_url=url, caption=reel_caption(folder, track),
-                  share_to_feed="true" if feed else "false", thumb_offset="800")
-    cid = create_with_ai_label(g, uid, params, track) if track.get("style") == "ai" else g.call("POST", f"{uid}/media", **params)["id"]
+                  share_to_feed="true" if feed else "false", **cover)
+
+    def create(prm):
+        return create_with_ai_label(g, uid, prm, track) if track.get("style") == "ai" else g.call("POST", f"{uid}/media", **prm)["id"]
+    try:
+        cid = create(params)
+    except IGError as e:
+        if "cover_url" not in params:
+            raise
+        print(f"  ⚠ 표지(cover_url)로 만들기 실패 — 영상 0.8초 프레임으로 다시: {e}")
+        params = {k: v for k, v in params.items() if k != "cover_url"}
+        params["thumb_offset"] = "800"
+        cid = create(params)
+    track["cover"] = "cover_url" in params
     g.wait_ready(cid, "릴스", timeout=900)
     media_id = publish(g, uid, cid, "릴스")
     if track.get("license", "").upper() != "CC0" and not track.get("credit_in_video"):

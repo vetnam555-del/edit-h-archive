@@ -2692,6 +2692,32 @@ def t_brand_v2():
     return f"{newsletter.BRAND_V2_FROM} 호부터 · '{newsletter.BRAND_LINE}' · 마크 그림 {newsletter.MARK_IMG_FROM}~"
 
 
+def t_reel_cover():
+    """릴스 표지(2026-11-21 운영자 '썸네일도 엄청 중요하다'): reel_cover.py 검사·HTML, 게시가 표지가 있으면 cover_url·없으면 0.8초 프레임."""
+    import importlib.util
+    import inspect
+    import tempfile
+    spec = importlib.util.spec_from_file_location("reel_cover", ROOT / "automation" / "pilots" / "ai_reel" / "reel_cover.py")
+    rc = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(rc)
+    good = {"at": 3.6, "line1": "병원비 영수증", "hl": "버렸어요?"}
+    expect(not rc.cover_gaps(good) and rc.cover_gaps(None) and rc.cover_gaps({**good, "hl": ""})
+           and rc.cover_gaps({**good, "line1": "청구 안 한 병원비가 무려"}) and rc.cover_gaps({**good, "at": None}),
+           "릴스 표지 검사(at·line1·hl 필수, 줄마다 11자 안)가 틀린다")
+    page = rc.cover_html({**good, "line2": "<b>"}, "file:///x.png")
+    expect("병원비 영수증" in page and 'class="hl">버렸어요?</span>' in page and "&lt;b&gt;" in page and "file:///x.png" in page
+           and f"top:{rc.SAFE_TOP + 120}px" in page, "릴스 표지 HTML 이 글자·강조·배경을 넣지 않거나 3:4 안전 구역 밖에 둔다")
+    import post_instagram as pi
+    with tempfile.TemporaryDirectory() as tmp:
+        no = pi.reel_cover_params(tmp, "2026-11-21", "https://x.example")
+        (Path(tmp) / pi.REEL_COVER).write_bytes(b"\xff\xd8")
+        yes = pi.reel_cover_params(tmp, "2026-11-21", "https://x.example")
+    src = inspect.getsource(pi.post_reel)
+    expect(no == {"thumb_offset": "800"} and yes == {"cover_url": "https://x.example/instagram/2026-11-21/reel_cover.jpg"}
+           and "reel_cover_params(" in src and 'params["thumb_offset"] = "800"' in src and "wait_public([cover" in src,
+           "릴스 게시가 표지(reel_cover.jpg)를 cover_url 로 쓰지 않거나, 표지로 실패할 때 0.8초 프레임으로 다시 하지 않는다")
+
+
 def t_ai_reel():
     """AI 영상 릴스(2026-11-01 운영자 '바로 올려줘 … 스토리에도'): instagram/{키}/reel_ai.mp4 가 있으면 make_reel 로 만들지 않고
     그 영상을 형식 'ai' 로 쓰고, 캡션은 reel_ai_caption.txt, 소리는 영상 안에 있어 출처 댓글이 필요 없다(CC0 취급)."""
@@ -3656,6 +3682,7 @@ def main():
     check("대체 표지 사진(fetch_photo --library)", t_photo_library)
     check("검색 노출(호 페이지 SEO)", t_seo)
     check("메일·카드 새 배치(11/19~)", t_layout_v3)
+    check("릴스 표지(썸네일, 11/21~)", t_reel_cover)
     check("저녁 일정 사슬(evening)", t_evening)
     check("인스타 검색 노출(해시태그·키워드·대체 텍스트)", t_ig_seo)
     check("조회수 진단(보내기 한 줄·릴스 피드·계정 지표)", t_views_diag)
