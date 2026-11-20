@@ -236,19 +236,45 @@ PRIMARY_HOSTS = ("korea.kr", "go.kr", "bok.or.kr", "fss.or.kr", "kosis.kr", "kdi
                  "krx.co.kr", "ksd.or.kr", "seibro.or.kr", "sec.gov", "kaida.co.kr")      # 거래소(KIND 포함)·예탁결제원·SEC 공시·수입차협회
 
 
-def is_primary(url):
-    host = re.sub(r"^https?://", "", str(url or "")).split("/")[0].lower()
-    return any(host == h or host.endswith("." + h) for h in PRIMARY_HOSTS)
+# 2026-11-20~ 회사 공식 발표(뉴스룸·IR·보도자료 페이지)도 원문으로 센다 — 11/18 H PICK 이 'NVIDIA 뉴스룸'(nvidianews.nvidia.com)을 읽어 출처에 넣었는데
+# 성과표 'H PICK 원문'이 ×였다(주소 목록에 회사 주소가 없어서). 회사 주소는 끝이 없어 목록으로 못 담으니 출처 이름이 공식 발표임을 밝히고
+# 주소가 기사 모음(포털·통신사)이 아닐 때만 센다. 이름 예: 'NVIDIA 뉴스룸'·'카카오뱅크 보도자료'·'Anthropic 공식 발표'·'삼성전자 IR'.
+OFFICIAL_NAME = re.compile(r"(뉴스룸|newsroom|보도자료|발표문|공식\s*(발표|블로그|공지)|\bIR\b|투자자\s*정보|공시)", re.I)
+NOT_OFFICIAL_HOSTS = ("naver.com", "daum.net", "kakao.com", "google.com", "nate.com", "yna.co.kr", "newsis.com", "news1.kr",
+                      "youtube.com", "x.com", "twitter.com", "facebook.com", "instagram.com", "threads.net", "tistory.com", "brunch.co.kr")
+
+
+def _host(url):
+    return re.sub(r"^https?://", "", str(url or "").strip()).split("/")[0].split(":")[0].lower()
+
+
+def is_primary(url, name=None):
+    host = _host(url)
+    if any(host == h or host.endswith("." + h) for h in PRIMARY_HOSTS):
+        return True
+    return bool(name and host and "." in host and OFFICIAL_NAME.search(str(name))
+                and not any(host == h or host.endswith("." + h) for h in NOT_OFFICIAL_HOSTS))
+
+
+def _src_primary(s):
+    return isinstance(s, dict) and is_primary(s.get("url"), s.get("name"))
+
+
+def pick_primary_reason(d):
+    """H PICK 에 원문이 없을 때 그 이유 한 줄(content `pick_primary_reason`) — 문자열이 아니면 ''."""
+    raw = d.get("pick_primary_reason")
+    return raw.strip() if isinstance(raw, str) else ""
 
 
 def primary_check(d):
     if str(d.get("date", ""))[:10] < PRIMARY_FROM:
         return []
     srcs = (d.get("big_issue") or {}).get("sources") or []
-    if any(is_primary(s.get("url")) for s in srcs if isinstance(s, dict)):
+    if any(_src_primary(s) for s in srcs) or pick_primary_reason(d):
         return []
-    return ["원문: H PICK 출처에 원문(보도자료·통계·공시 — 정부·기관·거래소·공시 주소)이 없어요. 발표에서 나온 이야기면 "
-            "`python3 automation/fetch_releases.py --grep 핵심어` 로 원문을 찾아 출처 1건으로(숫자는 원문 기준). 원문이 없는 이야기면 6단계 보고에 한 줄"]
+    return ["원문: H PICK 출처에 원문(보도자료·통계·공시 — 정부·기관·거래소 주소, 또는 회사 뉴스룸·IR·보도자료)이 없어요. 발표에서 나온 이야기면 "
+            "`python3 automation/fetch_releases.py --grep 핵심어` 로, 회사 소식이면 그 회사 뉴스룸·IR 을 직접 읽어 출처 1건으로(이름에 '뉴스룸'·'보도자료'·'IR'). "
+            "원문이 정말 없으면 pick_primary_reason 에 찾아본 곳 한 줄(2026-11-21~ 없으면 빌드가 막힌다)"]
 
 
 WIRE = ("연합뉴스", "연합뉴스TV", "뉴시스", "뉴스1")   # 통신사 — 다른 매체가 받아 쓰는 일이 많아 '두 번째 출처'로는 약하다
@@ -276,7 +302,7 @@ def source_quality(d):
     names, articles, wires, primary, solo = set(), 0, 0, 0, 0
     for i, x in enumerate(main):
         srcs = [s for s in x.get("sources") or [] if isinstance(s, dict)]
-        prim = any(is_primary(s.get("url")) for s in srcs)
+        prim = any(_src_primary(s) for s in srcs)
         primary += prim
         solo += len({s.get("name") for s in srcs}) < 2
         if i == 0:
@@ -285,7 +311,7 @@ def source_quality(d):
         srcs = [s for s in x.get("sources") or [] if isinstance(s, dict)] or ([{"name": x.get("source"), "url": x.get("url")}] if x.get("source") else [])
         for s in srcs:
             names.add(s.get("name"))
-            if not is_primary(s.get("url")):
+            if not _src_primary(s):
                 articles += 1
                 wires += s.get("name") in WIRE
     return {"main": len(main), "primary": primary, "pick_primary": pick, "outlets": len(names - {None, ""}),

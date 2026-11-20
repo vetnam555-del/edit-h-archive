@@ -163,6 +163,9 @@ BRIEF_BODY_OLD = 100         # BRIEFS_FROM 전 호(한 줄 뉴스 1~2문장)의 
 # 2026-10-15 회고: 짧은 소식이 경고 뒤에도 4개로 나갔고(10/8·10/15), 메인 항목이 H PICK 과 같은 소식이었다(10/15 청년미래보금자리론 —
 # 같은 원 기사 2건). 이 날부터 둘 다 빌드를 막는다 — 채우거나, 정말 확인된 소식이 없으면 briefs_short_reason 에 사유 한 줄.
 STRICT_FROM = "2026-10-17"
+# 2026-11-21~ H PICK 에 원문이 없으면 짧은 소식처럼 빌드가 막고 이유 한 줄(pick_primary_reason)을 받는다 — 경고만으로는 11/17~11/19 사흘 내리 ×였다
+# (learnings 개선 요청 11/04·11/19 '이제 ② 할 때'). 원문 판정은 style.primary_check(정부·기관·거래소 주소 + 회사 뉴스룸·IR·보도자료).
+PICK_REASON_FROM = "2026-11-21"
 
 
 _TRACKING = {"fbclid", "gclid", "ref", "from", "sns", "cmp"}   # 이름이 똑같을 때만 — 'ref_id'·'fromArticle'은 기사 번호일 수 있다(Codex 리뷰)
@@ -196,6 +199,15 @@ def _strict_checks(data, items, briefs, date_str, where):
         raise ContentError(f"{where}: 짧게 읽는 소식이 {len(briefs)}개 — {'주말·공휴일' if need == BRIEFS_MIN_OK else '평일'}엔 {need}개 이상"
                            "(원칙 1, 2026-10-15 운영자). 안장출근길 남은 헤드라인·RUNBOOK 1-2 보강 소스에서 더 채우고, "
                            "정말 확인된 소식이 없으면 briefs_short_reason 에 사유 한 줄을 적으세요")
+    if date_str >= PICK_REASON_FROM:
+        from .style import primary_check
+        raw = data.get("pick_primary_reason")
+        if raw is not None and (not isinstance(raw, str) or not raw.strip() or "\n" in raw.strip()):
+            raise ContentError(f"{where}: pick_primary_reason 은 사유 한 줄(문장)이어야 합니다 — 지금 {raw!r}")
+        if primary_check(data):
+            raise ContentError(f"{where}: H PICK 출처에 원문이 없어요(최근 7호 1/7, 목표 5/7 — 11/19 회고). 정부·기관 보도자료(`fetch_releases.py --grep`)나 "
+                               "회사 뉴스룸·IR·보도자료를 직접 읽어 출처 1건으로 넣으세요(이름에 '보도자료'·'뉴스룸'·'IR'). "
+                               "정말 원문이 없는 이야기면 pick_primary_reason 에 찾아본 곳 한 줄을 적으세요")
     big = _urls(data.get("big_issue") or {})
     for it in items:
         mine = _urls(it)
