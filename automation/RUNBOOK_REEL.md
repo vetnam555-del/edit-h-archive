@@ -70,8 +70,9 @@
 - 생성은 비동기다: generate_* 의 답에 든 job id 를 `jobs_wait`(timeout_seconds 15 안쪽으로 되풀이)로 기다리고, 끝나면 결과 주소(영상 mp4·그림 png)를 curl 로 받는다
   (`jobs_wait`·`show_generation_by_ids` 답의 결과 URL). 그림은 1~2분, 영상 20초는 약 15분 — 그동안 다른 일을 먼저 한다.
 - **H 참고 그림(힉스필드에 올려 둔 media id — 영상·그림 요청마다 `medias` 에 role `image_references` 로 붙인다)**:
-  시트(늘) `3d8becae-2f05-4b51-b4d2-db71e052f311` · 놀람 `f485f5d5-8a54-4c78-8b04-d2efcd3bed2f` · 커피 `9dc42fcf-8cdc-4c35-ac3b-1de2c6c3c21a`
-  (11/21 `estimate_video_cost` 로 그대로 받아짐을 확인). 안 받아지면 저장소의 `assets/mascot/mascot-sheet.jpg`·`h-surprised.png`·`h-coffee.png` 를 `media_upload`→curl PUT→`media_confirm` 으로 다시 올리고
+  시트(늘) `ee62c528-5623-45b3-a0a9-eb87e08fb99d` · 놀람 `7145233b-470f-492b-b526-5bdf46989faa` · 커피 `0d7e7286-440a-4a61-a3e2-a51cf611dc46`
+  (11/21 07:50 다시 올림 — 그 전 id 3d8becae·f485f5d5·9dc42fcf 는 `estimate_video_cost` 는 통과했지만 `generate_video` 에서 '미디어 입력을 찾을 수 없어요'(404)로 막혔다.
+  견적이 통과해도 실제 생성에서 막힐 수 있으니, 404 가 나면 아래대로 다시 올린다). 안 받아지면 저장소의 `assets/mascot/mascot-sheet.jpg`·`h-surprised.png`·`h-coffee.png` 를 `media_upload`→curl PUT→`media_confirm` 으로 다시 올리고
   이 문서의 id 도 같은 커밋에서 바꾼다(올리는 서명 주소는 커밋·보고에 넣지 않는다).
 - 프롬프트에서 참고 그림은 `@image1`(시트)·`@image2`(놀람)·`@image3`(커피)처럼 가리키거나 'H from the reference images' 처럼 말로 써도 된다. CHARACTER 문장은 그대로.
 - **목소리**(2026-11-16~): **Hana·Knox 줄 모두 `automation/pilots/ai_reel/clone_voice.py`** — 무료 CosyVoice 3 가 지난 녹음을 듣고 같은 목소리로 읽는다
