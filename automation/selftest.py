@@ -790,6 +790,38 @@ def t_releases():
     expect(style.primary_check(c), "H PICK 출처가 모두 기사인데 원문 경고가 없다")
     c["big_issue"]["sources"] = c["big_issue"]["sources"] + [{"name": "금융위원회 보도자료", "url": "https://www.fsc.go.kr/no010101/87977"}]
     expect(not style.primary_check(c), "원문 출처가 있는데도 경고한다")
+    # 2026-11-20~ 회사 공식 발표도 원문 — 11/18 'NVIDIA 뉴스룸'이 성과표에서 × 로 셌다. 포털·통신사 주소는 이름이 그래도 원문이 아니다.
+    expect(style.is_primary("https://nvidianews.nvidia.com/news/x", "NVIDIA 뉴스룸")
+           and style.is_primary("https://www.kakaobank.com/Corp/News/PressRelease/1", "카카오뱅크 보도자료")
+           and style.is_primary("https://www.samsung.com/global/ir/", "삼성전자 IR")
+           and not style.is_primary("https://nvidianews.nvidia.com/news/x")
+           and not style.is_primary("https://n.news.naver.com/mnews/article/001/1", "연합뉴스 보도자료")
+           and not style.is_primary("https://www.yna.co.kr/view/AKR1", "연합뉴스 공시")
+           and not style.is_primary("https://www.hankyung.com/article/1", "한국경제")
+           and not style.is_primary("https://www.chosun.com/1", "조선일보 AIRPORT"), "회사 공식 발표(뉴스룸·IR·보도자료) 원문 판정")
+    n18 = json.loads((CONTENT_DIR / "2026-11-18.json").read_text(encoding="utf-8"))
+    expect(style.source_quality(n18)["pick_primary"] and not style.primary_check(n18), "11/18 NVIDIA 뉴스룸 H PICK 이 원문으로 세지지 않는다")
+    # 2026-11-21~ H PICK 원문이 없으면 빌드가 막는다 — 이유 한 줄(pick_primary_reason)이면 통과(11/19 회고 '이제 ② 할 때').
+    from edith.content import ContentError, _strict_checks
+    n19 = json.loads((CONTENT_DIR / "2026-11-19.json").read_text(encoding="utf-8"))
+    run = lambda d: _strict_checks(d, d.get("items") or [], d.get("briefs") or [], d["date"], "시험")
+    run(n19)   # 시작일 전(11/19) 호는 경고만
+    n19["date"] = "2026-11-21"
+    try:
+        run(n19)
+        expect(False, "11/21~ H PICK 원문이 없는데 빌드가 막지 않는다")
+    except ContentError as e:
+        expect("pick_primary_reason" in str(e), f"막음 메시지에 pick_primary_reason 안내가 없다: {e}")
+    n19["pick_primary_reason"] = "앤트로픽 공모가 상향은 회사 공식 발표가 없고 외신 보도뿐(anthropic.com/news·SEC EDGAR 찾아봄)"
+    run(n19)
+    expect(not style.primary_check(n19), "이유 한 줄이 있는데도 원문 경고를 낸다")
+    for bad in ("", "  ", "줄\n두 줄", 3):
+        n19["pick_primary_reason"] = bad
+        try:
+            run(n19)
+            expect(False, f"pick_primary_reason {bad!r} 을 사유로 받았다")
+        except ContentError:
+            pass
     return f"금융위 {len(fsc)}·고용부 {len(moel)}·금감원 {len(fss)}·재경부 {len(mofe)}·정책브리핑 {len(korea)}건(예시)"
 
 
