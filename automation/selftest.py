@@ -1901,6 +1901,13 @@ def t_story():
     expect(real_cfg.get("ai_video_weekly") == {"from": "2026-11-18", "weekday": 0}
            and [post_instagram.ai_video_day(real_cfg, k) for k in ("2026-11-17", "2026-11-19", "2026-11-23")] == [True, False, True],
            "config 의 ai_video_weekly(월요일만, 11/18~)가 없거나 실제 config 로 본 영상 날이 다르다")
+    # 2026-11-21 운영자 '조회수 1만 되도록 노력해 줘' — ai_video_daily_from 부터 매일 영상 날(주 1회 규칙보다 먼저), 그 전 날짜는 그대로
+    dl = dict(wl, ai_video_daily_from="2026-11-21")
+    expect([post_instagram.ai_video_day(dl, k) for k in ("2026-11-19", "2026-11-20", "2026-11-21", "2026-11-22", "2026-11-24")] == [False, False, True, True, True]
+           and real_cfg.get("ai_video_daily_from") == "2026-11-21"
+           and __import__("alert")._ai_reel_weekday(dict(wl, ai_video_daily_from="2026-11-21"), "2026-11-22")
+           and not __import__("alert")._ai_reel_weekday(dict(wl, ai_video_daily_from="2026-11-21"), "2026-11-20"),
+           "매일 영상 규칙(11/21~)이 틀리다 — 11/21 부터 날마다 영상 날, 그 전은 주 1회(월) 그대로")
     import inspect as _inspect
     pi_src = _inspect.getsource(post_instagram.main)
     expect("and not reel_only" in pi_src and "not ai.exists()" in pi_src and "card_story()" in pi_src,
