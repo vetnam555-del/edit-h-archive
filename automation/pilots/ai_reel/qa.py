@@ -29,6 +29,7 @@ import datetime as dt
 import difflib
 import html as htmlmod
 import json
+import math
 import re
 import statistics
 import subprocess
@@ -262,6 +263,12 @@ def dropouts(video, head=0.3, tail=0.8):
 # 대사 도중 소리 구멍(2026-11-07 회차~) — 11/06 운영자 "릴스 보니까 중간에 목소리 끊기는 것 같은데": 코인 줄 '코인 세금,' 뒤
 # 0.3초가 그 줄 말소리보다 19dB 꺼졌는데(영상 한가운데 11.35초) 바닥이 -25dB 라 dropouts(-32dB·18dB)는 지나갔다.
 HOLE_RULE_FROM = "2026-11-07"
+# 11/21 운영자 "오늘 영상에서 목소리가 너무 늘어지는 것 같다?" — 줄마다 말 빠르기(음절/초, 쉼을 줄이고 tempo 를 건 길이)를 쟀더니
+# 11/21 편 평균 5.06(가장 느린 줄 4.52)으로 11/12~11/20 편(평균 5.18~5.47)보다 느렸다. 11/22~ 줄마다 5.5 이상(tempo 1.25 까지 올려 맞춘다).
+RATE_RULE_FROM = "2026-11-22"
+RATE_MIN = 5.5          # 줄마다 최소 말 빠르기(음절/초)
+RATE_AIM = 5.8          # tempo 를 고칠 때 맞추는 빠르기
+TEMPO_MAX = 1.25        # 이보다 빠르게 돌리면 목소리가 얇아진다 — 넘으면 대사를 줄인다
 HOLE_DB, HOLE_MIN = 12, 0.25
 
 
@@ -748,6 +755,35 @@ def sync_gaps(ep, spans):
         for i in range(1, len(spans)):
             if spans[i - 1][1] > spans[i][0] + 0.02:
                 fails.append(f"대사 {i} 목소리({spans[i - 1][1]:.2f}초 끝)가 대사 {i + 1}({spans[i][0]:.2f}초 시작)과 겹친다 — tempo 를 올리거나 다음 줄 start 를 늦춘다")
+    if ep.get("date", "") >= RATE_RULE_FROM:
+        fails += rate_gaps(voices, spans)
+    return fails
+
+
+def syllables(text):
+    """녹음 문구(tts, 없으면 text)의 한글 음절 수 — 태그(<strong>)·문장부호·띄어쓰기는 세지 않는다."""
+    return len(re.findall(r"[가-힣]", _TAG.sub("", text or "")))
+
+
+def speech_rate(voice, span):
+    """줄 하나의 말 빠르기(음절/초) — span 은 voice_spans 의 (시작, 끝)(쉼을 줄이고 tempo 를 건 길이)."""
+    sec = span[1] - span[0]
+    n = syllables(voice.get("tts") or voice.get("text", ""))
+    return n / sec if sec > 0 and n else 0.0
+
+
+def rate_gaps(voices, spans, low=RATE_MIN, aim=RATE_AIM, cap=TEMPO_MAX):
+    """말 빠르기가 low 음절/초 아래인 줄 → 실패 목록(고칠 tempo 를 함께 적는다)."""
+    fails = []
+    for i, (v, sp) in enumerate(zip(voices, spans), 1):
+        r = speech_rate(v, sp)
+        if not r or r >= low:
+            continue
+        t = float(v.get("tempo", 1.0) or 1.0)
+        want = min(cap, math.ceil(t * aim / r * 20) / 20)
+        fix = (f"tempo 를 {want:.2f} 로" if r * want / t >= low else
+               f"tempo {cap} 로도 {r * cap / t:.1f}음절/초라 대사를 줄여 다시 녹음")
+        fails.append(f"대사 {i} '{v.get('text', '')[:20]}…' 말 빠르기 {r:.2f}음절/초 — {low} 아래라 늘어진다(11/21 운영자): {fix}")
     return fails
 
 

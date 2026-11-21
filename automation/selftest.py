@@ -3016,6 +3016,14 @@ def t_ai_reel():
            and qa.heard_ratio("팔로우하면 내일 아침에도 알려 줄게요!", "팔로우 하면 매일 아침에도 알려줄게요") < qa.STEM_MIN
            and qa.heard_ratio("지마켓 유출 고객", "지마켓 유출 고객 바이낸스", recall=True) == 1.0,
            "11/02·11/03 잘못 들린 줄('제2세대'·'띄었대요'·'매일')을 받아쓰기 비교가 못 잡거나, 맞게 들린 줄을 막는다")
+    # 11/21 운영자 "목소리가 너무 늘어지는 것 같다?" — 11/22~ 줄마다 말 빠르기 5.5음절/초 이상(쉼을 줄이고 tempo 를 건 길이로 잰다).
+    v_ok = {"text": "수험표 있으면 버거가 공짜래요!", "tts": "<strong>수험표</strong> 있으면 버거가 공짜래요!"}
+    rg_ok, rg_slow, rg_long = (qa.rate_gaps([v_ok], [(0.0, 2.2)]), qa.rate_gaps([v_ok], [(0.0, 2.64)]),
+                               qa.rate_gaps([{**v_ok, "tempo": 1.2}], [(0.0, 3.4)]))
+    expect(qa.syllables(v_ok["tts"]) == 13 and abs(qa.speech_rate(v_ok, (5.0, 7.6)) - 5.0) < 0.01
+           and not rg_ok and len(rg_slow) == 1 and "tempo 를 1.20" in rg_slow[0] and "대사를 줄여" in rg_long[0]
+           and qa.RATE_RULE_FROM == "2026-11-22",
+           f"말 빠르기 검사(11/22~)가 늘어진 줄을 못 잡거나 고칠 tempo 를 틀리게 낸다: {rg_ok} {rg_slow} {rg_long}")
     # 11/19 — 완성본 받아쓰기는 줄마다 그 구간만 잘라 따로 듣는다. 11/18 릴스는 완성본 전체를 한 번 받아 적고 낱말 시각으로 줄을 나눠
     # 시각이 0.3~1초 일찍 찍힌 줄 첫 낱말이 빠져 바른 줄 4개가 75~80% 로 막혔다. 받침 넘기기('연체율 일 년' = '연체유일 1년')는 같은 소리로 본다.
     expect(qa.mix_windows([(0.1, 3.0), (5.0, 8.4)], total=8.6) == [(0.0, 3.5), (4.7, 8.6)]

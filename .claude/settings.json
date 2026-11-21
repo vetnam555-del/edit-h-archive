@@ -11,7 +11,16 @@
       "Bash(git push origin HEAD:main)",
       "Bash(git push origin main)",
       "Bash(python3 automation/*)",
-      "Bash(node automation/*)"
+      "Bash(node automation/*)",
+      "mcp__Higgsfield__balance",
+      "mcp__Higgsfield__generate_video",
+      "mcp__Higgsfield__generate_image_batch",
+      "mcp__Higgsfield__jobs_wait",
+      "mcp__Higgsfield__show_generation_by_ids",
+      "mcp__Higgsfield__estimate_video_cost",
+      "mcp__Higgsfield__estimate_image_cost",
+      "mcp__Higgsfield__media_upload",
+      "mcp__Higgsfield__media_confirm"
     ]
   }
 }
