@@ -3,6 +3,12 @@
 시스템이 날마다 무엇을 바꿨는지 한 줄씩 남긴다 — **바꾼 것 — 왜(근거) — 어떻게 판정·확인**. 최신이 위.
 매일 14:10 개선 루틴(`RUNBOOK_IMPROVE.md`)과 일요일 21:00 주간 루틴이 적는다. 편집 회고는 `learnings.md`, 조사·실험은 `references.md`.
 
+### 2026-11-22 (새벽 — 운영자 '나한테만 시험발송해줘')
+- **시안 시험 발송**: `send_newsletter.py --test-to owner --page drafts/….html` — 운영자 메일(SMTP_USER, 알림이 가는 곳)로만, 제목 앞 '[시안]', 발송 기록 없음.
+  워크플로 입력 `page` 추가. `--page` 는 drafts/ 아래 .html 이고 `--test-to` 가 있을 때만(아니면 멈춤 — 구독자 전체에게 시안이 나가지 않게),
+  `owner` 인데 SMTP_USER 가 없으면 멈춘다(SUBSCRIBERS 로 넘어가지 않게). selftest 칸. 시안 v7(에디토리얼형 + 그날 웹툰 표지 H 그림)을 `drafts/` 에.
+  공개 저장소라 운영자 주소를 실행 입력에 적지 않으려고 'owner' 를 쓴다.
+
 ### 2026-11-21 (낮 — 운영자 '허용해도 돼, 루틴에 넣어 줘' · '목소리가 너무 늘어지는 것 같다?')
 - **힉스필드 도구를 저장소 `.claude/settings.json` 에 미리 허용**(balance·generate_video·generate_image_batch·jobs_wait·show_generation_by_ids·estimate_*·media_upload·media_confirm) — 07:45 릴스 작업 세션이
   영상 요청을 자동 실행 권한 검사에 막히지 않게. RUNBOOK_REEL '도구'에 한 줄(그래도 막히면 되풀이하지 말고 알리고 웹툰만).
