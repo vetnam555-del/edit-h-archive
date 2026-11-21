@@ -247,6 +247,8 @@ def main():
     if rep:
         print("  ⚠ 같은 숫자 되풀이 — 그래프는 새 비교로(RUNBOOK cards.deep.chart): "
               + " · ".join(f"그래프 '{lab}' {v} = {where}" for lab, v, where in rep))
+    for line in (newsletter.todo_repeats(d) if args.date >= newsletter.H_VOICE_FROM else []):
+        print(f"  ⚠ '오늘 챙길 것'이 '그래서 뭐가 달라져?'와 거의 같은 말 — 더 구체적인 행동·날짜로 바꾸기(RUNBOOK todo): {line}")
     d["send_time_kst"] = send_time_on(d["date"], cfg)  # 뉴스레터 푸터·카드 하단·캡션의 발송 시각 문구(지난 호는 그때 시각)
     files, card_report = [], []
     if not args.no_cards:

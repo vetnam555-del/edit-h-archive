@@ -532,7 +532,7 @@ def _week(d):
 
 # 2026-11-22 운영자 '5번(H 말투) 진행' — 뉴닉 고슴이·순살·트렌드어워드 문문처럼 '누가 말하는지 보이게'. 디자인은 그대로,
 # 맨 끝 질문·맺음말을 마스코트 H 얼굴 + 말풍선으로(말투 규칙은 RUNBOOK '에디터 H 말투'). 이 날짜 호부터 — 지난 호는 그대로.
-H_VOICE_FROM = "2026-11-23"
+H_VOICE_FROM = "2026-11-22"   # 운영자 11/22 새벽 '오늘부터 적용해 줘'(처음엔 11/23 로 잡았다)
 
 
 def _bubble(d, site, label, inner):
@@ -581,6 +581,25 @@ def repeated_numbers(d):
         if k and k in seen:
             out.append((p.get("label"), k, seen[k]))
     return out
+
+
+def todo_repeats(d):
+    """'오늘 챙길 것' 줄이 같은 호의 '그래서 뭐가 달라져?'와 거의 같은 문장인지 — 빌드 경고용(운영자 '중복 없지?').
+    11/21 호: todo '월요일 장 전, 내 계좌 속 반도체·미국 기술주 비중 보기' ≈ H PICK 결론. 위아래로 같은 말을 두 번 읽게 된다."""
+    import difflib
+    def key(t):
+        return re.sub(r"[^가-힣0-9A-Za-z]", "", plain(str(t or "")))
+    outs = [key(it.get("takeaway")) for it in d.get("all_items") or [] if it.get("takeaway")]
+    hits = []
+    for line in d.get("todo") or []:
+        k = key(line)
+        if not k:
+            continue
+        for t in outs:
+            if k in t or difflib.SequenceMatcher(None, k, t[:len(k) + 10]).ratio() >= 0.6:
+                hits.append(str(line))
+                break
+    return hits
 
 
 def _chart_block(ch):

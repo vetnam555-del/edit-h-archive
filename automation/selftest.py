@@ -3759,6 +3759,10 @@ def t_h_voice_week():
     d["market"] = {"rows": [{"name": "코스피", "value": "4,869.96", "pct": -5.21}], "asof": "x"}
     d["cards"]["deep"]["chart"] = {"points": [{"label": "코스피", "value": 5.21}, {"label": "업종 A", "value": 9.9}]}
     expect([x[:2] for x in newsletter.repeated_numbers(d)] == [("코스피", "5.21")], "그래프가 시세판·큰 숫자와 같은 숫자면 빌드가 알린다")
+    d21 = content_mod.load("2026-11-21")
+    expect(newsletter.todo_repeats(d21)[:1] == ["월요일 장 전, 내 계좌 속 반도체·미국 기술주 비중 보기"]
+           and not newsletter.todo_repeats({"todo": ["21·22일 성수동 매장에서 수험표 보여 주기"], "all_items": [{"takeaway": "독감 검사부터 받아 봐요"}]}),
+           "'오늘 챙길 것'이 '그래서 뭐가 달라져?'를 그대로 옮기면 빌드가 알린다(11/21 호 실제 사례)")
     old = content_mod.load("2026-11-21")
     expect("에디터 H의 질문" not in newsletter.render(old, site, 10), "지난 호(11/21)는 예전 질문 모양 그대로")
 
@@ -3826,7 +3830,7 @@ def main():
     check("경쟁 매체 웹(토큰 없이·robots 지킴)", t_competitors_web)
     check("댓글 키워드 → 구독 링크 DM", t_comment_dm)
     check("뉴스레터 시세판·평가 버튼·맨 위 전달 상자 뺌(11/22~)", t_nl_plus)
-    check("H 말풍선(질문·맺음말)·월요일 이번 주 일정(11/23~)", t_h_voice_week)
+    check("H 말풍선(질문·맺음말, 11/22~)·월요일 이번 주 일정(11/23~)", t_h_voice_week)
     if not args.quick:
         check("딥다이브 카드 글자 한도 렌더링(넘침 없음)", t_dive_render)
         check("웹툰 두 컷 장 글자 한도 렌더링(넘침 없음·넘침 잡음)", t_webtoon_render)
