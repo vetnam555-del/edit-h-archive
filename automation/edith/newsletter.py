@@ -455,6 +455,32 @@ def _numbers(nums):
     return f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:10px;table-layout:fixed;"><tr>{cells}</tr></table>'
 
 
+NL_CHART_FROM = "2026-11-22"   # 2026-11-22 운영자 '기존 매거진 형태로, 대신 시각화할 수 있게 그래프 추가' — 이 날짜 호부터
+
+
+def _chart_block(ch):
+    """H PICK '숫자로 보면' 아래 막대 그래프 — 카드의 cards.deep.chart 와 같은 칸(같은 잣대 확인된 숫자 3~6개)을 메일에서도 그린다.
+    매거진 색 그대로: 막대 바탕 BOX, 막대 HL, 강조 칸(highlight, 기본 마지막)만 진한 주황. 메일에서 안전한 표와 div 너비로."""
+    pts = ch["points"]
+    top = max(float(p["value"]) for p in pts) or 1
+    hi = ch.get("highlight", len(pts) - 1)
+    unit = str(ch.get("unit") or "")
+    rows = "".join(
+        f'<tr><td valign="middle" style="width:72px;padding:6px 8px 6px 0;font-family:{F};font-size:13px;line-height:1.3;color:{INK if i == hi else MUTED};'
+        f'font-weight:{700 if i == hi else 400};word-break:keep-all;">{esc(p["label"])}</td>'
+        f'<td valign="middle" style="padding:6px 0;"><div style="background:{BOX};border-radius:6px;height:14px;font-size:0;line-height:0;">'
+        f'<div style="background:{DARK_CHIP_FG if i == hi else HL};border-radius:6px;height:14px;width:{max(2, round(float(p["value"]) / top * 100))}%;font-size:0;line-height:0;">&nbsp;</div></div></td>'
+        f'<td valign="middle" align="right" style="width:64px;padding:6px 0 6px 8px;font-family:{F};font-size:13px;font-weight:{800 if i == hi else 600};color:{INK};white-space:nowrap;">'
+        f'{esc(p.get("text") or (format(p["value"], "g") + unit))}</td></tr>'
+        for i, p in enumerate(pts))
+    return (f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:12px;background:#FFFFFF;border:1px solid {RULE};border-radius:12px;">'
+            f'<tr><td style="padding:16px 16px 12px;">'
+            + _div(f"font-size:13.5px;font-weight:700;line-height:1.4;color:{INK};", esc(plain(ch["title"])))
+            + f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:8px;">{rows}</table>'
+            + _div(f"font-size:11.5px;font-weight:400;line-height:1.5;color:{MUTED};margin-top:8px;", "출처 · " + esc(ch.get("source", "")))
+            + "</td></tr></table>")
+
+
 def _fresh_checklist(b):
     """11/19~ '알아두면 좋은 것'에서 위(큰 숫자·숫자로 보면)에 이미 나온 숫자만 되풀이하는 줄을 뺀다 — 2026-11-18 운영자 분석:
     H PICK 에서 '1158억 달러·103%'가 본문·큰 숫자·숫자로 보면·알아두면 좋은 것에 네 번 나왔다. 숫자가 없는 줄(일정·대상·조건)과
@@ -476,6 +502,7 @@ def _pick(d):
     """01 H PICK 심층 — 한 이슈를 '무슨 일 → 숫자 → 왜 중요 → 그래서'로 깊게."""
     b = d["big_issue"]
     st = b["stat"]
+    chart = ((d.get("cards") or {}).get("deep") or {}).get("chart") if str(d.get("date", "")) >= NL_CHART_FROM else None
     v3 = _v3(d)
     size, lh, align = ("16px", "1.8", "left") if v3 else ("15.5px", "1.85", "center")
     paras = "".join(_body(p, size, lh, 8 if i == 0 else 12) for i, p in enumerate(b["paragraphs"]))
@@ -496,6 +523,7 @@ def _pick(d):
   {_div(f"font-size:12.5px;font-weight:400;line-height:1.6;color:{MUTED};margin-top:8px;", esc(plain(st['caption'])), True)}
   {_label("숫자로 보면")}
   {_numbers(b["numbers"])}
+  {_chart_block(chart) if chart else ""}
   {_label("왜 중요해?")}
   {why}
   {_box(_div(f"font-size:12.5px;font-weight:700;line-height:1.3;color:{INK};", "그래서 뭐가 달라져?") + _div(f"font-size:14.5px;font-weight:400;line-height:1.75;color:{BODY};margin-top:8px;", md(b['takeaway'], BOLD)), mt=20)}
