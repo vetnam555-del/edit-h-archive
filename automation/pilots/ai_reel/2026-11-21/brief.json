@@ -156,5 +156,204 @@
     "서울신문"
    ]
   }
+ ],
+ "hook": "질문",
+ "hook_candidates": [
+  "(가) 주식 앱 열어 봤어요? 코스피 5% 뚝! — 내 행동을 찌르는 질문, 답(5%)은 2초째",
+  "(나) 월요일 전에 내 계좌부터 봐요! — 경고, 그러나 무엇 때문인지 첫 3초에 안 보임",
+  "(다) 개인은 1.6조 샀는데, 코스피는 뚝! — 반전, 하지만 '개인'이 나라는 느낌이 약함"
+ ],
+ "hook_pick": "(가) — 2030 대부분이 주식 앱을 가진 '내 일'이고, 질문이 0.3초에 시작해 답 '5%'가 2초째에 나온다(열린 고리). 어제(11/20) 첫 마디는 '~쌓였습니다' 사실 읽기였으니 틀이 다르다. 끝까지 볼 까닭은 1번 자막 sub '끝엔 한국이 세계 1위 한 것'.",
+ "story": "오늘 아침 5가지 — 웹툰과 같은 5가지를 20초 한 편에. 07:45 세션이 힉스필드 영상 요청을 실행 권한 검사에 막혀 못 만들어, 09:10 확인 세션이 같은 프롬프트로 만들었다. (B00) 첫 3초: Hana 의 질문 '주식 앱 열어 봤어요?'(0.3초) → 2초째 '코스피 5% 뚝', H 가 돼지 저금통을 안고 롤러코스터 꼭대기에서 카메라 쪽으로 튀어나오고 0초 레코드 긁는 소리. 순서는 웹툰·카드와 같게(코스피 롤러코스터 → 버거 → 컬리 금고 → 독감 재채기 → 전자정부 시상대 — 영상 모델은 다른 순서로 만들어 장면을 다시 이었다). 끝인사는 팔로우(최근 넷이 뉴스레터·내일·공유·저장).",
+ "voices": [
+  {
+   "file": "stems/i1a_ask.mp3",
+   "start": 0.3,
+   "tempo": 1.0,
+   "text": "주식 앱 열어 봤어요?",
+   "tts": "주식 앱 열어 봤어요?",
+   "voice": "Hana",
+   "note": "한 번에 녹음한 '주식 앱 열어 봤어요? 코스피 오 퍼센트 빠졌대요!'(받아쓰기 100%)를 쉼(1.55~1.98초)에서 둘로 나눔 — 0~2초 질문 자막, 2초~ 답 자막(B00)"
+  },
+  {
+   "file": "stems/i1b_kospi.mp3",
+   "start": 2.05,
+   "tempo": 1.0,
+   "text": "코스피 5% 빠졌대요!",
+   "tts": "코스피 <strong>오 퍼센트</strong> 빠졌대요!",
+   "voice": "Hana"
+  },
+  {
+   "file": "stems/i5_burger.mp3",
+   "start": 4.98,
+   "tempo": 1.0,
+   "text": "수험표 있으면 버거가 공짜래요!",
+   "tts": "<strong>수험표</strong> 있으면 버거가 공짜래요!",
+   "voice": "Hana"
+  },
+  {
+   "file": "stems/i2_kurly.mp3",
+   "start": 7.88,
+   "tempo": 1.1,
+   "text": "장보기 앱에서 개인 정보가 유출됐대요!",
+   "tts": "장보기 앱에서 <strong>개인 정보</strong>가 유출됐대요!",
+   "voice": "Hana"
+  },
+  {
+   "file": "stems/i3_flu.mp3",
+   "start": 10.8,
+   "tempo": 1.0,
+   "text": "독감으로 입원하는 사람이 확 늘었대요!",
+   "tts": "독감으로 입원하는 사람이 <strong>확</strong> 늘었대요!",
+   "voice": "Hana"
+  },
+  {
+   "file": "stems/i4_egov.mp3",
+   "start": 14.6,
+   "tempo": 1.15,
+   "text": "한국 전자정부, 세계 1위입니다!",
+   "tts": "한국 전자정부, 세계 <strong>일 위</strong>입니다!",
+   "voice": "Knox"
+  },
+  {
+   "file": "stems/i_bye_follow.mp3",
+   "start": 17.55,
+   "tempo": 1.0,
+   "text": "팔로우하면 내일 아침에도 알려 줄게요!",
+   "tts": "<strong>팔로우</strong>하면 내일 아침에도 알려 줄게요!",
+   "voice": "Hana"
+  }
+ ],
+ "captions": [
+  {
+   "start": 0,
+   "end": 2.0,
+   "size": 104,
+   "top": 1250,
+   "html": "<div class=\"main\">주식 앱<br><span class=\"hl\">열어 봤어요?</span></div>"
+  },
+  {
+   "start": 2.0,
+   "end": 4.875,
+   "size": 88,
+   "top": 1250,
+   "html": "<div class=\"main\">코스피 하루 새<br><span class=\"hl\">5.21%</span> 급락</div><div class=\"sub\">개인은 1.6조 샀는데 · 끝엔 한국이 세계 1위 한 것</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 서울신문·디지털데일리</div>"
+  },
+  {
+   "start": 4.875,
+   "end": 7.775,
+   "size": 84,
+   "top": 1250,
+   "html": "<div class=\"kick\">2/5 · 소비</div><div class=\"main\">수험표 보여 주면<br>버거 <span class=\"hl\">무료</span></div><div class=\"sub\">21·22일 성수 · 선착순 1000명</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 한국일보·세계일보</div>"
+  },
+  {
+   "start": 7.775,
+   "end": 10.7,
+   "size": 84,
+   "top": 1250,
+   "html": "<div class=\"kick\">3/5 · 보안</div><div class=\"main\">컬리에서<br><span class=\"hl\">1만699명</span> 정보 유출</div><div class=\"sub\">큐레이터 정보 · 일부 주민번호까지 · 최대 15만원 보상</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 SBS·머니투데이</div>"
+  },
+  {
+   "start": 10.7,
+   "end": 14.5,
+   "size": 84,
+   "top": 1250,
+   "html": "<div class=\"kick\">4/5 · 건강</div><div class=\"main\">독감 입원 일주일 새<br><span class=\"hl\">1.5배</span></div><div class=\"sub\">한 주 926명 · 1년 전의 약 2배</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 한국경제·KBS</div>"
+  },
+  {
+   "start": 14.5,
+   "end": 17.4,
+   "size": 84,
+   "top": 1250,
+   "html": "<div class=\"kick\">5/5 · 행정</div><div class=\"main\">한국 전자정부<br><span class=\"hl\">12년 만에</span> 세계 1위</div><div class=\"sub\">유엔 평가 194개국 중 · 2위 덴마크</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 한국경제·서울신문</div>"
+  }
+ ],
+ "end_card": {
+  "line": "팔로우하면 내일 아침에도 알려 줄게요!",
+  "sub": "프로필 링크에서 구독하면 '돈·일 체크리스트' 선물부터",
+  "note": "숫자는 기사 2곳 이상에서 확인했어요<br>(출처는 장면마다·캡션에)"
+ },
+ "end_seconds": 2.6,
+ "trim": [
+  0.0,
+  20.0
+ ],
+ "music": [
+  {
+   "file": "../2026-10-31/stems/m1_chase.m4a",
+   "start": 0.0,
+   "offset": 1.7,
+   "dur": 4.2,
+   "fade_out": 0.3,
+   "lufs": -24
+  },
+  {
+   "file": "../2026-10-31/stems/m1_chase.m4a",
+   "start": 3.9,
+   "offset": 1.75,
+   "dur": 4.15,
+   "lufs": -24,
+   "fade_in": 0.2,
+   "fade_out": 0.4
+  },
+  {
+   "file": "../2026-10-31/stems/m2_morning.m4a",
+   "start": 7.75,
+   "dur": 9.6,
+   "fade_in": 0.3,
+   "fade_out": 0.4,
+   "lufs": -24,
+   "lowpass": 2200,
+   "offset": 1.0
+  },
+  {
+   "file": "../2026-10-31/stems/m2_morning.m4a",
+   "start": 16.9,
+   "dur": 5.9,
+   "lufs": -22,
+   "fade_in": 0.3,
+   "fade_out": 0.8
+  }
+ ],
+ "sfx": [
+  [
+   0,
+   0.6,
+   0.7
+  ],
+  [
+   0.6,
+   14.0,
+   0.4
+  ],
+  [
+   14.0,
+   999,
+   0.3
+  ]
+ ],
+ "duck": {
+  "mix": 0.6,
+  "release": 350
+ },
+ "seedance": {
+  "model": "seedance_2_5",
+  "made_by": "higgsfield",
+  "job": "7a9fd8ea-13fd-4963-9cbe-756fcdf8f86e",
+  "prompt": "brief_prompt.txt",
+  "lip_sync": "없음 — NO TALKING 문장, audio_references 없음",
+  "cut": "장면 경계(프레임 차이, 손질 뒤): 롤러코스터(돼지 저금통) 0~4.88 · 버거·쿠폰 4.88~7.78 · 금고 카드 7.78~10.7 · 재채기·체온계 10.7~14.5 · 시상대 트로피 14.5~17.4 · 문 앞 편지·손 흔들기 17.4~20. 검은 화면 0. 다시 만들지 않음(480p 20초 60크레딧 한 번). H 는 모든 장면에서 동그란 공(옆·뒤로 돌 때도 — 시상대 회전). 입은 놀람 'o'·웃음뿐(말하듯 움직이지 않음)."
+ },
+ "cover": {
+  "at": 0.3,
+  "line1": "주식 앱",
+  "hl": "열어 봤어요?"
+ },
+ "source_video_prep": "원본 장면 길이가 고르지 않아(롤러코스터 6.35초·시상대 2.0초·버거 2.25초) 대사 칸에 맞게 손질: 버거 장면 쿠폰의 AI 엉터리 무늬 글자(원본 x300 y360 125×100, 15.8~17.3초) boxblur 10 → 롤러코스터가 다가오는 넓은 화면 1.05~4.05초 2배 빠르게 · 시상대 13.05~15.05초 1.5배 느리게 · 버거 15.05~17.3초 1.3배 느리게(소리도 atempo 같은 비율) → 20.18초. ffmpeg: [0:v]split[a][b];[b]crop=125:100:300:360,boxblur=10:2[t];[a][t]overlay=300:360:enable='between(t,15.8,17.3)' → trim 0-1.05 | 1.05-4.05 setpts/2 | 4.05-13.05 | 13.05-15.05 setpts*1.5 | 15.05-17.3 setpts*1.3 | 17.3-20.06 → concat,fps=24; 소리 atrim 같은 구간 atempo 2.0·0.6667·0.7692 → concat → 웹툰(카드 순서)과 영상 순서를 맞추려고 장면을 다시 이음: 손질본 0-4.875(롤러코스터)|14.5-17.4(버거)|4.875-7.8(금고)|7.8-11.6(침대)|11.6-14.5(시상대)|17.4-20.18(문 앞), 소리도 같은 구간 → concat(장면 경계는 휙 넘김 흐림 한가운데).",
+ "push": [
+  [
+   13.2,
+   14.5
+  ]
  ]
 }
