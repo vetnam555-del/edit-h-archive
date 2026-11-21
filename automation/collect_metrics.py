@@ -658,6 +658,10 @@ def summary_md(snap):
     else:
         lines += ["", "(비교는 인스타 성과가 3호 이상 쌓이면 나온다)"]
     lines += weekly_lines(snap)
+    rates = snap.get("ratings") or {}
+    if rates:   # 2026-11-22~ 맨 끝 '좋았어요/아쉬웠어요'(메일) — 열람률을 못 보는 우리에게 '읽혔다'는 신호
+        lines += ["", "## 오늘 레터 평가(메일 버튼)", ""] + [f"- {k}: 좋았어요 {v.get('good', 0)} · 아쉬웠어요 {v.get('meh', 0)}"
+                                                       for k, v in sorted(rates.items())[-14:]]
     polls = snap.get("polls") or {}
     if polls:
         lines += ["", "## 투표 참여", ""] + [f"- {k}: {v}명" for k, v in sorted(polls.items())]
@@ -726,6 +730,7 @@ def main():
         t = json.loads(p.read_text(encoding="utf-8"))
         polls[p.stem] = sum(t["votes"].values())
     snap["polls"] = polls
+    snap["ratings"] = {p.stem: json.loads(p.read_text(encoding="utf-8")) for p in sorted((AUTOMATION / "ratings").glob("20*.json"))}
     ig = snap.get("instagram") or {}
     print(f"호 {len(issues)}개 · 인스타 {len(ig.get('posts') or {})}개 게시물(인사이트 {ig.get('insights')}) · "
           f"팔로워 {ig.get('followers')} · 발송 대상 {(snap.get('subscribers') or {}).get('sending')}")

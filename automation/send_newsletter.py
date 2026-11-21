@@ -155,7 +155,20 @@ def poll_links(page, site, sender):
         subject = urllib.parse.quote(f"[EDIT H POLL {pid}] {v}")
         body = urllib.parse.quote(f"{v} 에 투표합니다. (이대로 보내기만 하면 한 표가 돼요)")
         return f"mailto:{sender}?subject={subject}&amp;body={body}"
-    return re.sub(re.escape(site) + r"/poll\.html\?id=(\d{4}-\d{2}-\d{2})&amp;v=([AB])", to_mailto, page)
+    page = re.sub(re.escape(site) + r"/poll\.html\?id=(\d{4}-\d{2}-\d{2})&amp;v=([AB])", to_mailto, page)
+    return re.sub(re.escape(site) + r"/rate\.html\?d=(\d{4}-\d{2}-\d{2})&amp;v=(good|meh)", lambda m: rate_mailto(m, sender), page)
+
+
+RATE_SUBJECT = "EDIT H RATE"   # 평가 버튼 메일 제목: '[EDIT H RATE 2026-11-22] 좋았어요' (tally_poll.py 가 센다)
+RATE_WORD = {"good": "좋았어요", "meh": "아쉬웠어요"}
+
+
+def rate_mailto(m, sender):
+    """2026-11-22~ 맨 끝 '좋았어요/아쉬웠어요'(운영자가 고른 A — 투표와 같은 메일 방식). 본문 첫 줄에 한 줄 의견을 덧붙일 자리를 둔다."""
+    day, v = m.group(1), m.group(2)
+    subject = urllib.parse.quote(f"[{RATE_SUBJECT} {day}] {RATE_WORD[v]}")
+    body = urllib.parse.quote(f"{RATE_WORD[v]} — 이대로 보내기만 하면 돼요. (한 줄 의견을 여기에 덧붙여도 좋아요)\n")
+    return f"mailto:{sender}?subject={subject}&amp;body={body}"
 
 
 def draft_page(page, test_to):
