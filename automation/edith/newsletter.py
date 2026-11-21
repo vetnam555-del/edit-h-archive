@@ -458,6 +458,62 @@ def _numbers(nums):
 NL_CHART_FROM = "2026-11-22"   # 2026-11-22 운영자 '기존 매거진 형태로, 대신 시각화할 수 있게 그래프 추가' — 이 날짜 호부터
 
 
+# 2026-11-22 운영자 '1~4번 오늘부터 — 대신 처음에 「처음 받아 보셨나요?·도움이 됐다면」은 첫 단에서 방해하니 빼 줘'.
+# 경쟁 비교(뉴닉·어피티 머니레터·순살브리핑·Morning Brew 같은 날 호, automation/reviews/2026-11-22-newsletter-benchmark.md)에서 고른 칸:
+# 맨 위 시세판(fetch_market.py → automation/market/{날짜}.json) · 맨 끝 '좋았어요/아쉬웠어요'(메일로 세는 A 방식 — 운영자 선택).
+# 구독·전달 길은 맨 아래 추천·구독 버튼에 그대로 있다. 이 날짜 호부터 — 지난 호를 다시 빌드하면 예전 그대로(기록).
+NL_PLUS_FROM = "2026-11-22"
+UP, DOWN = "#D93A2B", "#2F6BD8"   # 한국식 — 오르면 빨강, 내리면 파랑
+
+
+def _plus(d):
+    return str(d.get("date", "")) >= NL_PLUS_FROM
+
+
+def _market_board(m):
+    """제목 아래 시세 4칸(2×2) — 이름 · 종가 · 등락률. 기준 날짜와 출처를 아래 한 줄에."""
+    def cell(r):
+        pct = float(r["pct"])
+        color, arrow = (DOWN, "▼") if pct < 0 else (UP, "▲") if pct > 0 else (MUTED, "")
+        return (f'<td width="50%" valign="top" style="padding:10px 12px;">'
+                + _div(f"font-size:12px;font-weight:500;line-height:1.3;color:{MUTED};", esc(r["name"]))
+                + _div(f"font-size:17px;font-weight:800;line-height:1.35;color:{INK};margin-top:3px;",
+                       f'{esc(r["value"])} <span style="font-size:13px;font-weight:700;color:{color};white-space:nowrap;">{arrow}{abs(pct):.2f}%</span>')
+                + "</td>")
+    r = m["rows"]
+    grid = (f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0">'
+            f'<tr>{cell(r[0])}{cell(r[1])}</tr>'
+            f'<tr><td colspan="2" style="padding:0 12px;"><div style="border-top:1px solid #E4E4E4;font-size:0;line-height:0;">&nbsp;</div></td></tr>'
+            f'<tr>{cell(r[2])}{cell(r[3])}</tr></table>')
+    return (f'<tr><td class="px" style="padding:18px 36px 0;">'
+            + _box(grid, pad="6px 4px", mt=0)
+            + _div(f"font-size:11.5px;font-weight:400;line-height:1.5;color:{MUTED};margin-top:6px;", esc(m["asof"]), True)
+            + "</td></tr>")
+
+
+def rate_links(site, date):
+    """평가 버튼 주소. 웹(아카이브)에서는 감사 화면(rate.html)으로 가고, 메일로 나갈 때 send_newsletter.py 가
+    'mailto:발신 주소?subject=[EDIT H RATE {날짜}] 좋았어요' 로 바꾼다(투표와 같은 방식 — tally_poll.py 가 센다)."""
+    return [f"{site}/rate.html?d={date}&amp;v={v}" for v in ("good", "meh")]
+
+
+def _rate_block(d, site):
+    good, meh = rate_links(site, d["date"])
+
+    def btn(href, text, bg):
+        return (f'<td width="50%" style="padding:0 4px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>'
+                f'<td align="center" style="background:{bg};border:1.5px solid {INK};border-radius:12px;">'
+                f'<a href="{href}" style="display:block;padding:12px 8px;font-family:{F};font-size:15px;font-weight:700;color:{INK};'
+                f'text-decoration:none;">{text}</a></td></tr></table></td>')
+    return (f'<tr><td class="px" style="padding:26px 36px 0;">'
+            + _div(f"font-size:15px;font-weight:700;line-height:1.4;color:{INK};", "오늘 레터, 어땠어요?", True)
+            + f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:12px;"><tr>'
+            + btn(good, "좋았어요", HL) + btn(meh, "아쉬웠어요", "#FFFFFF") + "</tr></table>"
+            + _div(f"font-size:12px;font-weight:400;line-height:1.6;color:{MUTED};margin-top:8px;",
+                   "누르면 평가 메일이 열려요 — 보내기만 누르면 끝. 무엇이 좋았는지·아쉬웠는지 한 줄 덧붙여 주시면 다음 호에 반영할게요.", True)
+            + "</td></tr>")
+
+
 def _chart_block(ch):
     """H PICK '숫자로 보면' 아래 막대 그래프 — 카드의 cards.deep.chart 와 같은 칸(같은 잣대 확인된 숫자 3~6개)을 메일에서도 그린다.
     매거진 색 그대로: 막대 바탕 BOX, 막대 HL, 강조 칸(highlight, 기본 마지막)만 진한 주황. 메일에서 안전한 표와 div 너비로."""
@@ -664,7 +720,8 @@ def render(d, site, n_cards):
     title = plain(d["title"])
     if d.get("format") == 2:
         v3 = _v3(d)
-        body = [_header(d)] + ([_forward_box(d, site, campaign)] if v3 else []) + [
+        top = [_market_board(d["market"])] if _plus(d) and d.get("market") else [_forward_box(d, site, campaign)] if v3 and not _plus(d) else []
+        body = [_header(d)] + top + [
             _divider(), _note_v3(d, site) if v3 else _note(d, site), _divider(30), _pick(d), _divider(0),
             f'<tr><td class="px" style="padding:30px 36px 0;">{_chips([("02–05", True), ("함께 볼 4가지", False)], "left" if v3 else "center")}</td></tr>']
         body.extend((_item_v3 if v3 else _item)(it) for it in d["items"])
@@ -672,6 +729,8 @@ def render(d, site, n_cards):
         if d.get("poll_result"):
             body.append(_poll_result(d))
         body.append(_poll_block(d, site) if d.get("poll") else _question(d))
+        if _plus(d):
+            body.append(_rate_block(d, site))
     else:
         body = [_header(d), _divider(), _letter(d), _divider(30), _hero(d)]
         for i, sec in enumerate(d["sections"], 1):

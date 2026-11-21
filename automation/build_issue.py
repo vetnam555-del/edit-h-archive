@@ -189,6 +189,24 @@ def source_check_problem(d, now=None, cache=None):
     return res["blocked"], res["warnings"]
 
 
+def market_for(date):
+    """뉴스레터 맨 위 시세판(2026-11-22~) — automation/market/{날짜}.json, 없으면 네이버 증권에서 받아 저장한다.
+    받지 못하면 None(시세판만 빠지고 빌드는 계속 — 틀린 숫자를 싣느니 비운다). 한 번 받은 파일은 다시 빌드해도 그대로 쓴다(기록)."""
+    import fetch_market
+    path = fetch_market.MARKET_DIR / f"{date}.json"
+    if path.exists():
+        return json.loads(path.read_text(encoding="utf-8"))
+    try:
+        data = fetch_market.fetch(date)
+    except Exception as e:  # noqa: BLE001 — 시세판은 덤이다
+        print(f"  ⚠ 시세판을 받지 못해 빼고 만든다({type(e).__name__}: {e}) — 나중에 python3 automation/fetch_market.py {date} 뒤 다시 빌드")
+        return None
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(data, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    print(f"  시세판  automation/market/{date}.json ({data['asof']})")
+    return data
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("date", help="YYYY-MM-DD (KST)")
@@ -223,6 +241,8 @@ def main():
         sys.exit(5)
 
     site_url = args.site_url or cfg["site_url"]
+    if args.date >= newsletter.NL_PLUS_FROM:
+        d["market"] = market_for(args.date)
     d["send_time_kst"] = send_time_on(d["date"], cfg)  # 뉴스레터 푸터·카드 하단·캡션의 발송 시각 문구(지난 호는 그때 시각)
     files, card_report = [], []
     if not args.no_cards:

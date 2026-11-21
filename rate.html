@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EDIT H — 오늘 레터 평가</title>
+<meta name="robots" content="noindex">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard','Apple SD Gothic Neo','Malgun Gothic',-apple-system,sans-serif; background: #FFFFFF; color: #282F38;
+    line-height: 1.7; word-break: keep-all; padding: 40px 18px; }
+  .wrap { max-width: 480px; margin: 0 auto; text-align: center; }
+  .top { font-size: 13px; font-weight: 700; color: #5A5A5E; }
+  h1 { font-size: 24px; font-weight: 800; margin-top: 26px; }
+  .pick { display: inline-block; margin-top: 12px; background: #FFC9AD; padding: 4px 12px; font-weight: 700; }
+  p { font-size: 15px; color: #555558; margin-top: 14px; }
+  a.btn { display: block; margin-top: 22px; padding: 14px; border-radius: 10px; background: #B23A0F; color: #FFFFFF; font-weight: 700; text-decoration: none; }
+  .note { font-size: 12px; color: #767676; margin-top: 22px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">@edit.h.kr</div>
+  <h1>고마워요!</h1>
+  <div class="pick" id="pick">좋았어요</div>
+  <p id="msg">내일 아침 8시에도 쓸모 있는 소식으로 찾아갈게요.</p>
+  <p>무엇이 좋았는지·아쉬웠는지는 받은 메일에 답장으로 한 줄 남겨 주세요. 다음 호에 반영할게요.</p>
+  <a class="btn" id="back" href="https://vetnam555-del.github.io/edit-h-archive/">지난 호 보러 가기</a>
+  <div class="note">메일 속 버튼을 누르면 평가 메일이 열리고, 보내기만 누르면 한 표로 세어져요. 웹에서 누른 평가는 세지 않아요.</div>
+</div>
+<script>
+  const p = new URLSearchParams(location.search);
+  if (p.get("v") === "meh") {
+    document.getElementById("pick").textContent = "아쉬웠어요";
+    document.getElementById("msg").textContent = "솔직하게 알려 줘서 고마워요. 더 나아지도록 고칠게요.";
+  }
+  const d = p.get("d");
+  if (d && /^\d{4}-\d{2}-\d{2}$/.test(d)) document.getElementById("back").href = `https://vetnam555-del.github.io/edit-h-archive/${d}.html`;
+</script>
+</body>
+</html>

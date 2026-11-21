@@ -3690,6 +3690,46 @@ def t_tts():
     return f"{last.parent.name} {len(lines)}줄 · 목소리 {len(tts.VOICES)}종 · 말투 {len(tts.STYLES)}종"
 
 
+def t_nl_plus():
+    """2026-11-22~ 운영자 '1~4번 오늘부터, 맨 위 처음 받아 보셨나요·도움이 됐다면은 빼 줘' — 시세판·평가 버튼(메일로 셈)."""
+    import fetch_market
+    import send_newsletter
+    import tally_poll
+    from edith import content as content_mod, newsletter
+    site = "https://example.com/x"
+    raw = json.loads((ROOT / "content" / "2026-11-21.json").read_text(encoding="utf-8"))
+    raw["date"] = "2026-11-22"
+    d = content_mod.prepare(raw, "2026-11-22")
+    fake = {"KOSPI": [{"localTradedAt": "2026-11-22", "closePrice": "1", "fluctuationsRatio": "9"},
+                      {"localTradedAt": "2026-11-20", "closePrice": "4,869.96", "fluctuationsRatio": "-5.21"}],
+            "KOSDAQ": [{"localTradedAt": "2026-11-20", "closePrice": "645.68", "fluctuationsRatio": "-5.71"}],
+            ".INX": [{"localTradedAt": "2026-11-21T16:35:54-05:00", "closePrice": "6,910.39", "fluctuationsRatio": "0.00"}],
+            ".IXIC": [{"localTradedAt": "2026-11-21T17:15:59-05:00", "closePrice": "22,617.73", "fluctuationsRatio": "+1.20"}]}
+    m = fetch_market.fetch("2026-11-22", getter=lambda url: next(v for k, v in fake.items() if f"/{k}/" in url))
+    expect([r["value"] for r in m["rows"]] == ["4,869.96", "645.68", "6,910.39", "22,617.73"]
+           and m["asof"] == "11/20(금) 마감 · 미국은 현지 11/21(토) 종가 · 네이버 증권",
+           f"시세판은 발행일 전날까지의 종가만 — {m}")
+    d["market"] = m
+    nl = newsletter.render(d, site, 10)
+    expect("처음 받아 보셨나요" not in nl and "도움이 됐다면" not in nl, "11/22 호부터 맨 위 전달 상자를 뺀다(운영자)")
+    expect("4,869.96" in nl and "▼5.21%" in nl and "▲1.20%" in nl and "S&amp;P 500" in nl and "11/20(금) 마감" in nl, "시세판 4칸·등락 화살표·기준 날짜")
+    expect("카톡·링크로 친구에게 추천하기" in nl and "EDIT H 구독하기" in nl, "구독·전달 길은 맨 아래 버튼에 남는다")
+    good, meh = newsletter.rate_links(site, "2026-11-22")
+    expect(good in nl and meh in nl and "오늘 레터, 어땠어요?" in nl, "맨 끝 '좋았어요/아쉬웠어요'")
+    del d["market"]
+    expect("네이버 증권" not in newsletter.render(d, site, 10), "시세를 못 받은 날은 시세판만 빠진다")
+    mail = send_newsletter.poll_links(nl, site, "me@example.com")
+    expect("rate.html" not in mail and "mailto:me@example.com?subject=%5BEDIT%20H%20RATE%202026-11-22%5D%20" in mail,
+           "메일로 나갈 때 평가 버튼은 평가 메일(mailto)로 바뀐다")
+    expect(tally_poll.rate_of("[EDIT H RATE 2026-11-22] 좋았어요", "2026-11-22") == "good"
+           and tally_poll.rate_of("Re: [EDIT H RATE 2026-11-22] 아쉬웠어요", "2026-11-22") == "meh"
+           and tally_poll.rate_of("[EDIT H RATE 2026-11-21] 좋았어요", "2026-11-22") is None, "평가 메일 제목 읽기")
+    old = content_mod.load("2026-11-21")
+    expect("처음 받아 보셨나요" in newsletter.render(old, site, 10) and "rate.html" not in newsletter.render(old, site, 10),
+           "지난 호(11/21)는 예전 그대로(기록)")
+    expect((ROOT / "rate.html").exists(), "웹 아카이브에서 누른 평가 버튼이 갈 화면(rate.html)")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--quick", action="store_true", help="다시 빌드 생략")
@@ -3752,6 +3792,7 @@ def main():
     check("경쟁 매체 인스타(비즈니스 탐색)", t_competitors_ig)
     check("경쟁 매체 웹(토큰 없이·robots 지킴)", t_competitors_web)
     check("댓글 키워드 → 구독 링크 DM", t_comment_dm)
+    check("뉴스레터 시세판·평가 버튼·맨 위 전달 상자 뺌(11/22~)", t_nl_plus)
     if not args.quick:
         check("딥다이브 카드 글자 한도 렌더링(넘침 없음)", t_dive_render)
         check("웹툰 두 컷 장 글자 한도 렌더링(넘침 없음·넘침 잡음)", t_webtoon_render)

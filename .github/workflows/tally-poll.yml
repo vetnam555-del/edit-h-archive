@@ -1,4 +1,5 @@
 # EDIT H 주간 독자 투표 집계 — 메일(투표 메일·A/B 답장, Gmail IMAP 읽기 전용) + 인스타그램 댓글.
+# 2026-11-22~ 뉴스레터 맨 끝 '좋았어요/아쉬웠어요' 평가 메일도 센다 → automation/ratings/{호 날짜}.json.
 # 매일 06:20(KST)에 돌아 automation/polls/{투표 날짜}.json 을 갱신한다. 07:00 제작 루틴이 금요일에 이 숫자로 결과를 싣는다.
 # 공개 저장소라 숫자만 남기고, 로그에도 주소·계정 이름은 찍지 않는다(automation/tally_poll.py).
 name: Tally EDIT H poll
@@ -47,10 +48,11 @@ jobs:
 
       - name: Record tally
         run: |
-          if [ -n "$(git status --porcelain automation/polls)" ]; then
+          if [ -n "$(git status --porcelain automation/polls automation/ratings)" ]; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git add automation/polls
+            [ -d automation/ratings ] && git add automation/ratings
             # 커밋 이름은 기록 파일의 날짜(자정 넘어 늦게 돈 실행이 전날 기록을 써도 전날) — 날짜 파일이 없으면 KST 오늘
             day=$(git diff --cached --name-only -- automation/polls | sed -nE 's#^.*/([0-9]{4}-[0-9]{2}-[0-9]{2}(-weekly)?)\.json$#\1#p' | sort -u | paste -sd, -)
             git commit -m "Tally EDIT H poll (${day:-$(TZ=Asia/Seoul date +%F)})"

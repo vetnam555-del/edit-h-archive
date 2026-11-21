@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """주간 독자 투표 집계 — 메일(투표 버튼으로 보낸 메일·A/B 답장) + 인스타그램 댓글(A/B).
+2026-11-22~ 맨 끝 평가 버튼(좋았어요/아쉬웠어요) 메일도 센다 → automation/ratings/{호 날짜}.json(숫자만).
 
 월요일(그 주 첫 호)에 content 의 `poll` 로 묻고, 금요일 호에 결과를 싣는다(RUNBOOK '독자 투표').
 tally-poll.yml 이 매일 06:20(KST)에 돌려 automation/polls/{투표 날짜}.json 을 갱신한다.
@@ -171,11 +172,89 @@ def tally(poll, issue_title, imap=None, graph=None):
             "channels": channels, "updated_at": now_kst().isoformat(timespec="seconds")}
 
 
+RATINGS_DIR = AUTOMATION / "ratings"
+RATE_SUBJECT = "EDIT H RATE"   # 2026-11-22~ 맨 끝 평가 버튼 메일: '[EDIT H RATE 2026-11-22] 좋았어요' (send_newsletter.py)
+RATE_FROM = "2026-11-22"
+_RATE_WORDS = {"좋았어요": "good", "아쉬웠어요": "meh"}
+
+
+def rate_of(subject, day):
+    """평가 메일 제목 → 'good'/'meh'/None."""
+    m = re.search(re.escape(RATE_SUBJECT) + r"\s+" + re.escape(day) + r"\]?\s*(좋았어요|아쉬웠어요)", subject or "")
+    return _RATE_WORDS[m.group(1)] if m else None
+
+
+def email_ratings(days, imap=None):
+    """{날짜: {보낸 주소: 'good'/'meh'}} — 한 사람 한 표(마지막 표). 주소는 세는 동안 메모리에서만 쓴다."""
+    user, pw = os.environ.get("SMTP_USER", ""), os.environ.get("SMTP_PASSWORD", "")
+    if imap is None:
+        if not user or not pw:
+            print("  평가: SMTP_USER·SMTP_PASSWORD 가 없어 건너뜀")
+            return None
+        imap = imaplib.IMAP4_SSL(os.environ.get("IMAP_HOST") or "imap.gmail.com", 993)
+        imap.login(user, pw)
+    imap.select("INBOX", readonly=True)
+    out, me = {}, user.lower()
+    for day in days:
+        since = dt.date.fromisoformat(day).strftime("%d-%b-%Y")
+        typ, data = imap.search(None, f'(SINCE {since} SUBJECT "{RATE_SUBJECT} {day}")')
+        votes = {}
+        for mid in sorted((data[0].split() if typ == "OK" and data and data[0] else []), key=int):
+            typ2, msg_data = imap.fetch(mid, "(RFC822)")
+            if typ2 != "OK" or not msg_data or not isinstance(msg_data[0], tuple):
+                continue
+            msg = email.message_from_bytes(msg_data[0][1])
+            sender = email.utils.parseaddr(msg.get("From", ""))[1].lower()
+            v = rate_of(_decode(msg.get("Subject")), day)
+            if sender and sender != me and v:
+                votes[sender] = v
+        out[day] = votes
+    try:
+        imap.logout()
+    except Exception:  # noqa: BLE001
+        pass
+    return out
+
+
+def rating_days(days=7, only=None):
+    """평가를 셀 호 날짜 — 최근 days 일 안의 2026-11-22 이후 호(content 가 있는 날)."""
+    today = now_kst().date()
+    out = []
+    for p in sorted(CONTENT_DIR.glob("20*.json")):
+        if p.stem < RATE_FROM or (only and p.stem != only):
+            continue
+        if not only and not 0 <= (today - dt.date.fromisoformat(p.stem)).days <= days:
+            continue
+        out.append(p.stem)
+    return out
+
+
+def tally_ratings(only=None, dry_run=False, imap=None):
+    days = rating_days(only=only)
+    if not days:
+        return {}
+    try:
+        got = email_ratings(days, imap)
+    except Exception as e:  # noqa: BLE001 — 평가가 막혀도 투표 집계는 끝났다
+        print(f"  평가: 집계 실패({type(e).__name__})")
+        return {}
+    res = {}
+    for day, votes in (got or {}).items():
+        good = sum(1 for v in votes.values() if v == "good")
+        res[day] = {"date": day, "good": good, "meh": len(votes) - good, "updated_at": now_kst().isoformat(timespec="seconds")}
+        print(f"■ {day} 평가 — 좋았어요 {good} · 아쉬웠어요 {len(votes) - good}")
+        if not dry_run:
+            RATINGS_DIR.mkdir(parents=True, exist_ok=True)
+            (RATINGS_DIR / f"{day}.json").write_text(json.dumps(res[day], ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    return res
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--id", help="투표 날짜(YYYY-MM-DD). 비우면 최근 14일 안의 투표 전부")
     ap.add_argument("--dry-run", action="store_true", help="세기만 하고 파일은 쓰지 않음")
     args = ap.parse_args()
+    tally_ratings(only=args.id, dry_run=args.dry_run)
     polls = open_polls(only=args.id)
     if not polls:
         print("집계할 투표가 없습니다(최근 14일 안에 poll 이 있는 호 없음)")
