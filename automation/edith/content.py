@@ -653,6 +653,12 @@ def prepare(data, date_str):
         if todo is not None and (not isinstance(todo, list) or len(todo) > TODO_MAX or not all(isinstance(x, str) and x.strip() for x in todo)):
             raise ContentError(f"{where}: todo(오늘 챙길 것)는 {TODO_MAX}줄 이하의 문장 목록이어야 합니다")
 
+    if data.get("quiz") is not None:   # 금요일 '이번 주 퀴즈'(2026-11-27~, edith/quiz.py)
+        from . import quiz as quiz_mod
+        try:
+            quiz_mod.check(data["quiz"], date_str, where, lambda day: (CONTENT_DIR / f"{day}.json").exists())
+        except ValueError as e:
+            raise ContentError(f"{where}: {e}")
     week = data.get("week_ahead")
     if week is not None:
         if date_str < WEEK_FROM:

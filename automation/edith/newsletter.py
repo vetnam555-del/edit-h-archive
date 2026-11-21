@@ -602,6 +602,29 @@ def todo_repeats(d):
     return hits
 
 
+def _quiz_block(d, site):
+    """금요일 '이번 주 퀴즈'(2026-11-27~) — 메일엔 1번 문제와 보기 3개 버튼, 누르면 웹 퀴즈 화면(quiz/{날짜}.html)에서 정답·풀이·2~5번."""
+    from . import quiz as quiz_mod
+    q = d["quiz"]["questions"][0]
+    url = quiz_mod.page_url(site, d["date"])
+
+    def opt(i, text):
+        return (f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:8px;"><tr>'
+                f'<td style="background:#FFFFFF;border:1.5px solid {INK};border-radius:12px;">'
+                f'<a href="{url}?q=1&amp;a={i}" style="display:block;padding:13px 16px;font-family:{F};font-size:15px;font-weight:700;'
+                f'color:{INK};text-decoration:none;">{"①②③"[i - 1]} &nbsp;{esc(plain(text))}</a></td></tr></table>')
+    day = q["date"]
+    return (_divider(30) + f'<tr><td class="px" style="padding:0 36px;">'
+            + _chips([("금요일 퀴즈", True), (f"이번 주 {len(d['quiz']['questions'])}문제", False)], "left")
+            + _div(f"font-size:20px;font-weight:700;line-height:1.45;color:{INK};margin-top:14px;", "이번 주 소식, 얼마나 기억나요?")
+            + _box(_div(f"font-size:12.5px;font-weight:700;line-height:1.3;color:{CHIP_FG};", f"Q1 · {int(day[5:7])}/{int(day[8:])} 호")
+                   + _div(f"font-size:16.5px;font-weight:700;line-height:1.5;color:{INK};margin-top:6px;", esc(plain(q["q"])))
+                   + "".join(opt(i, t) for i, t in enumerate(q["options"], 1)), pad="16px 16px 18px", mt=14)
+            + _div(f"font-size:12.5px;font-weight:400;line-height:1.7;color:{MUTED};margin-top:10px;",
+                   "누르면 정답과 풀이가 바로 나오고, 나머지 문제를 이어서 풀 수 있어요.", True)
+            + "</td></tr>")
+
+
 def _chart_block(ch):
     """H PICK '숫자로 보면' 아래 막대 그래프 — 카드의 cards.deep.chart 와 같은 칸(같은 잣대 확인된 숫자 3~6개)을 메일에서도 그린다.
     매거진 색 그대로: 막대 바탕 BOX, 막대 HL, 강조 칸(highlight, 기본 마지막)만 진한 주황. 메일에서 안전한 표와 div 너비로."""
@@ -816,6 +839,8 @@ def render(d, site, n_cards):
             f'<tr><td class="px" style="padding:30px 36px 0;">{_chips([("02–05", True), ("함께 볼 4가지", False)], "left" if v3 else "center")}</td></tr>']
         body.extend((_item_v3 if v3 else _item)(it) for it in d["items"])
         body.append(_briefs(d, "짧게 읽는 소식" if str(d.get("date", "")) >= BRIEFS_FROM else "한 줄 뉴스", start=len(d["all_items"]) + 1))
+        if d.get("quiz"):
+            body.append(_quiz_block(d, site))
         if d.get("poll_result"):
             body.append(_poll_result(d))
         body.append(_poll_block(d, site) if d.get("poll") else _question_h(d, site) if str(d.get("date", "")) >= H_VOICE_FROM else _question(d))

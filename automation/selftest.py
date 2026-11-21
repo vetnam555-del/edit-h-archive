@@ -3767,6 +3767,34 @@ def t_h_voice_week():
     expect("에디터 H의 질문" not in newsletter.render(old, site, 10), "지난 호(11/21)는 예전 질문 모양 그대로")
 
 
+def t_friday_quiz():
+    """2026-11-27~ 금요일 '이번 주 퀴즈' — 메일 1번 문제 버튼 → quiz/{날짜}.html(정답·풀이·2~5번)."""
+    from edith import content as content_mod, newsletter, quiz
+    site = "https://example.com/x"
+    raw = json.loads((ROOT / "content" / "2026-11-21.json").read_text(encoding="utf-8"))
+    raw["date"] = "2026-11-27"
+    qs = [{"date": f"2026-11-{16 + i}", "q": f"질문 {i}", "options": ["가", "나", "다"], "answer": 1 + i % 3, "why": "그 호에 실린 사실"} for i in range(5)]
+    raw["quiz"] = {"questions": qs}
+    d = content_mod.prepare(json.loads(json.dumps(raw)), "2026-11-27")
+    nl = newsletter.render(d, site, 10)
+    expect("금요일 퀴즈" in nl and f"{site}/quiz/2026-11-27.html?q=1&amp;a=3" in nl and "Q1 · 11/16 호" in nl,
+           "금요일 메일엔 1번 문제 + 보기 3개 버튼(웹 퀴즈 화면으로)")
+    pg = quiz.page(d, site)
+    expect('"a": 3' in pg and "11/16~11/20 소식" in pg and "</script>" in pg and "sessionStorage" in pg, "퀴즈 웹 화면에 5문제·정답·기간")
+    for bad, why in ((qs[:4], "4문제"), ([{**qs[0], "answer": 4}] + qs[1:], "정답 번호"), ([{**qs[0], "date": "2026-11-27"}] + qs[1:], "오늘 날짜 문제"),
+                     ([{**qs[0], "date": "2026-11-26"}] + qs[1:], "없는 호"), ([{**qs[0], "options": ["가", "나"]}] + qs[1:], "보기 2개")):
+        r = json.loads(json.dumps(raw))
+        r["quiz"] = {"questions": bad}
+        try:
+            content_mod.prepare(r, "2026-11-27")
+            expect(False, f"퀴즈 {why} 를 막아야 한다")
+        except content_mod.ContentError:
+            pass
+    expect("금요일 퀴즈" not in newsletter.render(content_mod.load("2026-11-21"), site, 10), "퀴즈 없는 날은 칸이 없다")
+    expect((ROOT / "quiz" / "README.md").exists() and "quiz/{d}.html" in (ROOT / "automation" / "codex_fallback.py").read_text(encoding="utf-8"),
+           "제작 커밋 경로에 quiz/(폴더가 늘 있어 git add 가 멈추지 않게)")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--quick", action="store_true", help="다시 빌드 생략")
@@ -3831,6 +3859,7 @@ def main():
     check("댓글 키워드 → 구독 링크 DM", t_comment_dm)
     check("뉴스레터 시세판·평가 버튼·맨 위 전달 상자 뺌(11/22~)", t_nl_plus)
     check("H 말풍선(질문·맺음말, 11/22~)·월요일 이번 주 일정(11/23~)", t_h_voice_week)
+    check("금요일 이번 주 퀴즈(11/27~)", t_friday_quiz)
     if not args.quick:
         check("딥다이브 카드 글자 한도 렌더링(넘침 없음)", t_dive_render)
         check("웹툰 두 컷 장 글자 한도 렌더링(넘침 없음·넘침 잡음)", t_webtoon_render)

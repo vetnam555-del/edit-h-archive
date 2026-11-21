@@ -247,6 +247,8 @@ def main():
     if rep:
         print("  ⚠ 같은 숫자 되풀이 — 그래프는 새 비교로(RUNBOOK cards.deep.chart): "
               + " · ".join(f"그래프 '{lab}' {v} = {where}" for lab, v, where in rep))
+    if args.date >= newsletter.H_VOICE_FROM and not d.get("rewind") and not ((d.get("cards") or {}).get("deep") or {}).get("chart"):
+        print("  ⚠ 오늘의 그래프(cards.deep.chart)가 없다 — 2026-11-22~ 매일 넣는 칸(RUNBOOK). H PICK·다른 4가지에서 같은 잣대 숫자 3개를 찾아 보기")
     for line in (newsletter.todo_repeats(d) if args.date >= newsletter.H_VOICE_FROM else []):
         print(f"  ⚠ '오늘 챙길 것'이 '그래서 뭐가 달라져?'와 거의 같은 말 — 더 구체적인 행동·날짜로 바꾸기(RUNBOOK todo): {line}")
     d["send_time_kst"] = send_time_on(d["date"], cfg)  # 뉴스레터 푸터·카드 하단·캡션의 발송 시각 문구(지난 호는 그때 시각)
@@ -274,6 +276,11 @@ def main():
     # 뉴스레터 프로필의 'N장 카드뉴스'는 이슈 카드 수(표지·마무리 제외, VOL.092 와 같은 기준)
     n_issue_cards = len(d["card_issues"]) if files else 0
     (ROOT / f"{args.date}.html").write_text(newsletter.render(d, site_url, n_issue_cards), encoding="utf-8")
+    if d.get("quiz"):   # 금요일 '이번 주 퀴즈' 웹 화면(메일 1번 문제 버튼이 여기로 온다)
+        from edith import quiz as quiz_mod
+        (ROOT / "quiz").mkdir(exist_ok=True)
+        (ROOT / "quiz" / f"{args.date}.html").write_text(quiz_mod.page(d, site_url), encoding="utf-8")
+        print(f"  금요일 퀴즈  quiz/{args.date}.html ({len(d['quiz']['questions'])}문제)")
     manifest = site.update_manifest(d, site_url, len(files), send_time_on(d["date"], cfg))
     site.regenerate_index(manifest)
     site.write_feeds(manifest, site_url)   # feed.xml(RSS)·sitemap.xml
