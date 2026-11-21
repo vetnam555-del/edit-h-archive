@@ -1551,6 +1551,11 @@ def t_seo():
     expect("&#x" not in html_part.lower(), "메일 HTML 에 16진수 문자 참조(&#x27; 등)가 남았다")
     sample = send_newsletter.plain_refs('<p title="a&#x27;b" class="c">흑상어 &#x27;부캉이&#x27;, 1&lt;2 &amp; &#34;인용&#34; &#39;끝&#39;</p>')
     expect(sample == '<p title="a&#39;b" class="c">흑상어 \'부캉이\', 1&lt;2 &amp; &#34;인용&#34; \'끝\'</p>', f"plain_refs 결과가 틀렸다: {sample}")
+    # 2026-11-21 운영자 '나한테만 시험발송해줘' — 시안(--page)은 drafts/ 아래 .html 이고 --test-to 와 함께일 때만
+    expect(send_newsletter.draft_page("", "") is None and send_newsletter.draft_page("drafts/x.html", "") is False
+           and send_newsletter.draft_page(f"{day}.html", "owner") is False
+           and send_newsletter.draft_page("drafts/../index.html", "owner") is False,
+           "시안 발송(--page)이 drafts/ 밖 파일이나 --test-to 없이도 허용된다 — 구독자 전체에게 시안이 나갈 수 있다")
     import sync_subscribers
     welcome = sync_subscribers.welcome_message("b@example.com", "a@example.com", cfg)
     expect("&#x" not in welcome.get_body(preferencelist=("html",)).get_content().lower(), "환영 메일 HTML 에 16진수 문자 참조가 남았다")

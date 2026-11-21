@@ -158,6 +158,18 @@ def poll_links(page, site, sender):
     return re.sub(re.escape(site) + r"/poll\.html\?id=(\d{4}-\d{2}-\d{2})&amp;v=([AB])", to_mailto, page)
 
 
+def draft_page(page, test_to):
+    """--page 시안 파일 → Path. 없으면 None, 규칙(drafts/ 아래 .html · --test-to 함께)에 안 맞으면 False.
+    구독자 전체에게 시안이 나가지 않게 --test-to 없이는 쓰지 못한다."""
+    if not page:
+        return None
+    path = (ROOT / page).resolve()
+    drafts = (ROOT / "drafts").resolve()
+    if not test_to or path.suffix != ".html" or drafts not in path.parents or not path.exists():
+        return False
+    return path
+
+
 def build_message(issue, page, to_addr, cfg, sender):
     site = cfg["site_url"]
     q = urllib.parse.quote(to_addr)
@@ -180,7 +192,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--mode", default="manual", help="schedule | push | workflow_dispatch | manual")
     ap.add_argument("--date", default="", help="YYYY-MM-DD (비우면 오늘 KST)")
-    ap.add_argument("--test-to", default="", help="이 주소로만 보내고 발송 기록은 남기지 않음")
+    ap.add_argument("--test-to", default="", help="이 주소로만 보내고 발송 기록은 남기지 않음 — 'owner' 면 운영자 메일(SMTP_USER, 알림이 가는 곳)")
+    ap.add_argument("--page", default="", help="시안 HTML(drafts/ 아래) — --test-to 와 함께만. 2026-11-21 운영자 '나한테만 시험발송해줘'")
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--check", action="store_true", help="구독자 수·SMTP 로그인만 확인하고 끝낸다")
     args = ap.parse_args()
@@ -191,6 +204,12 @@ def main():
     now = now_kst()
     date = args.date or now.date().isoformat()
     page_path = ROOT / f"{date}.html"
+    draft = draft_page(args.page, args.test_to)
+    if draft is False:
+        notice("--page 는 drafts/ 아래 .html 이고 --test-to 와 함께일 때만 — 발송하지 않습니다")
+        return 1
+    if draft:
+        page_path = draft
     manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
     issue = next((i for i in manifest["issues"] if i["date"] == date), None)
 
@@ -209,7 +228,11 @@ def main():
             notice(f"push 로 올라온 {date} 호: 정기 발송 시각({cfg['send_time_kst']}) 전이거나 오늘 호가 아니라 정기 발송에 맡깁니다")
             return 0
 
-    to_list = recipients(args.test_to) if args.test_to else recipients(os.environ.get("SUBSCRIBERS"))
+    test_to = os.environ.get("SMTP_USER", "") if args.test_to == "owner" else args.test_to
+    if args.test_to and not test_to:   # 'owner' 인데 SMTP_USER 가 없으면 구독자 전체로 넘어가지 않게 멈춘다
+        notice("--test-to owner 인데 SMTP_USER 가 없습니다 — 발송하지 않습니다")
+        return 1
+    to_list = recipients(test_to) if test_to else recipients(os.environ.get("SUBSCRIBERS"))
     if not to_list:
         notice("받는 사람이 없습니다 — 저장소 Secret SUBSCRIBERS 를 설정하세요")
         return 0 if args.dry_run else 1
@@ -231,7 +254,10 @@ def main():
         smtp.login(user, os.environ["SMTP_PASSWORD"])
         for addr in to_list:
             try:
-                smtp.send_message(build_message(issue, page, addr, cfg, sender))
+                msg = build_message(issue, page, addr, cfg, sender)
+                if draft:   # 시안은 제목 앞에 표시 — 정규 호와 헷갈리지 않게
+                    msg.replace_header("Subject", "[시안] " + msg["Subject"])
+                smtp.send_message(msg)
                 sent += 1
             except smtplib.SMTPException as e:
                 failed.append({"to_domain": addr.split("@")[-1], "error": str(e)[:200]})
