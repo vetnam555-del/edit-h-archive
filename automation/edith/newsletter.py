@@ -510,7 +510,8 @@ def _rate_block(d, site):
             + f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:12px;"><tr>'
             + btn(good, "좋았어요", HL) + btn(meh, "아쉬웠어요", "#FFFFFF") + "</tr></table>"
             + _div(f"font-size:12px;font-weight:400;line-height:1.6;color:{MUTED};margin-top:8px;",
-                   "누르면 평가 메일이 열려요 — 보내기만 누르면 끝. 무엇이 좋았는지·아쉬웠는지 한 줄 덧붙여 주시면 다음 호에 반영할게요.", True)
+                   "누르면 평가 메일이 열려요 — 보내기만 누르면 끝." if str(d.get("date", "")) >= H_VOICE_FROM   # 11/23~ 답장 부탁은 H 질문 한 곳만
+                   else "누르면 평가 메일이 열려요 — 보내기만 누르면 끝. 무엇이 좋았는지·아쉬웠는지 한 줄 덧붙여 주시면 다음 호에 반영할게요.", True)
             + "</td></tr>")
 
 
@@ -551,6 +552,35 @@ def _question_h(d, site):
                   + _div(f"font-size:13px;font-weight:400;line-height:1.6;color:{BODY};margin-top:8px;", "이 메일에 답장으로 들려주세요."))
     bye = _bubble(d, site, "에디터 H", _div(f"font-size:15px;font-weight:400;line-height:1.7;color:{INK};margin-top:6px;", md(closing)))
     return _divider(30) + f'<tr><td class="px" style="padding:0 36px;">{ask}{bye}</td></tr>'
+
+
+def repeated_numbers(d):
+    """같은 숫자가 시세판·큰 숫자·'숫자로 보면'·그래프에 거듭 나오는지(11/22 운영자 '중복되는 건 없지? 소비자 입장에서도') — 빌드 경고용.
+    [(그래프 칸 이름, 숫자, 이미 나온 곳)]. 그래프는 '새 비교'여야 한다 — 같은 숫자를 막대로 한 번 더 그리면 읽는 사람은 같은 말을 네 번 본다."""
+    def norm(v):
+        t = re.sub(r"[^0-9.]", "", str(v))
+        try:
+            return f"{float(t):g}" if t else ""
+        except ValueError:
+            return ""
+    seen = {}
+    b = d.get("big_issue") or {}
+    st = b.get("stat") or {}
+    if norm(st.get("value")):
+        seen.setdefault(norm(st.get("value")), "큰 숫자")
+    for n in b.get("numbers") or []:
+        if norm(n.get("value")):
+            seen.setdefault(norm(n.get("value")), "숫자로 보면")
+    for r in (d.get("market") or {}).get("rows") or []:
+        seen.setdefault(norm(r.get("value")), "시세판")
+        seen.setdefault(norm(abs(float(r.get("pct", 0)))), "시세판")
+    ch = ((d.get("cards") or {}).get("deep") or {}).get("chart") or {}
+    out = []
+    for p in ch.get("points") or []:
+        k = norm(p.get("text") or p.get("value"))
+        if k and k in seen:
+            out.append((p.get("label"), k, seen[k]))
+    return out
 
 
 def _chart_block(ch):
@@ -708,12 +738,14 @@ def _cta(d, site, campaign, n_cards):
         cards = _utm(site, f"/instagram/{d['date']}/", campaign, "cardnews")
         links = (f'<a href="{cards}" style="font-family:{F};font-size:14px;color:{MUTED};text-decoration:none;">카드뉴스 보기&gt;</a>'
                  f'<span style="color:#C4C4C4;"> &nbsp;|&nbsp; </span>' + links)
+    # 11/23~ 맨 위 목차가 이미 '오늘의 10가지 · 깊게 5 · 짧게 5'를 말한다 — 끝에서 같은 말을 되풀이하지 않는다(소비자 눈 점검, 운영자 '중복 없지?')
+    head_line = "" if str(d.get("date", "")) >= H_VOICE_FROM and d.get("format") == 2 else None
     return (_divider(30) + f'<tr><td class="px" style="padding:0 36px;">'
-            + _div(f"font-size:19px;font-weight:700;line-height:1.45;color:{INK};",
+            + (head_line if head_line is not None else _div(f"font-size:19px;font-weight:700;line-height:1.45;color:{INK};",
                    (f"오늘 아침 {n_topics}가지 소식을 정리했어요<br>깊게 {len(d['all_items'])} · 짧게 {len(d['briefs'])}"   # 실제 개수(주말 3개 허용 — Codex 리뷰), 조사 없이(3·6 뒤 '으로')
                     if str(d.get("date", "")) >= BRIEFS_FROM and d.get("format") == 2
-                    else f"매일 아침 {n_topics}가지 트렌드 이슈를<br>한 번에 정리해 드려요!"), True)
-            + f"""<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:16px;background:#FFFFFF;border:1px solid {RULE};border-radius:18px;box-shadow:0 2px 6px rgba(0,0,0,.08);"><tr><td style="padding:18px 16px;">
+                    else f"매일 아침 {n_topics}가지 트렌드 이슈를<br>한 번에 정리해 드려요!"), True))
+            + f"""<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:{0 if head_line == "" else 16}px;background:#FFFFFF;border:1px solid {RULE};border-radius:18px;box-shadow:0 2px 6px rgba(0,0,0,.08);"><tr><td style="padding:18px 16px;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
     <td valign="middle" style="width:70px;">{_face(d, site, 58)}</td>
     <td valign="middle" style="padding-left:12px;">{_div(f"font-size:15px;font-weight:500;line-height:1.2;color:{INK};", "edit.h.kr")}

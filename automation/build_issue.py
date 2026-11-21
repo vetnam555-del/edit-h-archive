@@ -243,6 +243,10 @@ def main():
     site_url = args.site_url or cfg["site_url"]
     if args.date >= newsletter.NL_PLUS_FROM:
         d["market"] = market_for(args.date)
+    rep = newsletter.repeated_numbers(d) if args.date >= newsletter.H_VOICE_FROM else []
+    if rep:
+        print("  ⚠ 같은 숫자 되풀이 — 그래프는 새 비교로(RUNBOOK cards.deep.chart): "
+              + " · ".join(f"그래프 '{lab}' {v} = {where}" for lab, v, where in rep))
     d["send_time_kst"] = send_time_on(d["date"], cfg)  # 뉴스레터 푸터·카드 하단·캡션의 발송 시각 문구(지난 호는 그때 시각)
     files, card_report = [], []
     if not args.no_cards:

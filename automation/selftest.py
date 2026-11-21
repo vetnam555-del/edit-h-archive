@@ -3754,6 +3754,11 @@ def t_h_voice_week():
             expect(False, f"week_ahead {why} 를 막아야 한다")
         except content_mod.ContentError:
             pass
+    expect("소식을 정리했어요" not in nl and "한 줄 덧붙여" not in nl and nl.count("답장으로") == 1,
+           "끝부분 되풀이 없음 — 맨 위 목차와 같은 '10가지 정리' 줄·두 번째 답장 부탁을 뺀다")
+    d["market"] = {"rows": [{"name": "코스피", "value": "4,869.96", "pct": -5.21}], "asof": "x"}
+    d["cards"]["deep"]["chart"] = {"points": [{"label": "코스피", "value": 5.21}, {"label": "업종 A", "value": 9.9}]}
+    expect([x[:2] for x in newsletter.repeated_numbers(d)] == [("코스피", "5.21")], "그래프가 시세판·큰 숫자와 같은 숫자면 빌드가 알린다")
     old = content_mod.load("2026-11-21")
     expect("에디터 H의 질문" not in newsletter.render(old, site, 10), "지난 호(11/21)는 예전 질문 모양 그대로")
 
