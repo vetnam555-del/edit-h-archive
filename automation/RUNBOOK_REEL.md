@@ -67,6 +67,8 @@
 - **힉스필드 도구**: `balance`·`generate_video`·`generate_image_batch`·`jobs_wait`·`show_generation_by_ids`(필요하면 `estimate_video_cost`·`media_upload`).
   ToolSearch 로 `select:mcp__Higgsfield__balance,mcp__Higgsfield__generate_video,mcp__Higgsfield__generate_image_batch,mcp__Higgsfield__jobs_wait,mcp__Higgsfield__show_generation_by_ids` 를 불러 쓴다.
   **드롭샷(`mcp__ef30ebc2-…`)의 `generate_video`·`generate_image` 는 쓰지 않는다**(11/21 운영자).
+  **이 도구들은 저장소 `.claude/settings.json` 에 미리 허용해 두었다**(11/21 운영자 '허용해도 돼, 루틴에 넣어 줘' — 11/21 07:45 세션은 영상 요청이 자동 실행 권한 검사에 막혀 영상을 못 만들었다).
+  그래도 막히면 같은 요청을 되풀이하지 말고 PushNotification 으로 '힉스필드 영상 요청이 권한 검사에 막혔어요'를 알리고 웹툰만 만든다(09:05 확인 세션이 이어서 만든다).
 - 생성은 비동기다: generate_* 의 답에 든 job id 를 `jobs_wait`(timeout_seconds 15 안쪽으로 되풀이)로 기다리고, 끝나면 결과 주소(영상 mp4·그림 png)를 curl 로 받는다
   (`jobs_wait`·`show_generation_by_ids` 답의 결과 URL). 그림은 1~2분, 영상 20초는 약 15분 — 그동안 다른 일을 먼저 한다.
 - **H 참고 그림(힉스필드에 올려 둔 media id — 영상·그림 요청마다 `medias` 에 role `image_references` 로 붙인다)**:
@@ -156,6 +158,9 @@
   '[excited]'는 말투 표시라 brief 의 text 칸에는 넣지 않는다.
 - 힉스필드 녹음은 6줄(Hana 주제 4줄 + 끝인사, Knox 1줄) generate_audio_batch — 다른 배치 바로 뒤에 보내면 429 가 나니 실패한 줄만 1분쯤 뒤 다시.
 - 말: Hana 는 존댓말 '~해요!/~래요!', Knox 는 '~습니다!'. 녹음 문구 끝 '!'는 말투용이고 자막·캡션의 느낌표는 아낀다. '~해 보자!' 반복 금지.
+- **말 빠르기(11/22~)**: 줄마다 **5.5음절/초 이상**(쉼을 줄이고 tempo 를 건 길이 — qa `--stems` 가 재고, 낮으면 고칠 tempo 를 알려 준다). 11/21 운영자 "목소리가 너무 늘어지는 것 같다?" —
+  11/21 편 평균 5.06(가장 느린 줄 4.52)으로 그전 편(평균 5.18~5.47)보다 느렸다. tempo 는 1.25 까지, 그래도 느리면 대사를 줄여 다시 녹음한다.
+  장면 칸이 남는다고 느리게 두지 않는다 — 남는 칸은 효과음·음악으로 채운다.
 - 길이: 한 줄 14~18음절. 녹음 뒤 앞뒤 무음을 자르고(ffmpeg silenceremove), 장면 칸(약 3.3초)보다 길 때만 tempo 1.0~1.2(그보다 길면 대사를 줄여 다시 녹음, 짧으면 늘리지 않는다).
   episode.py 가 녹음 속 0.25초 넘는 쉼을 0.2초로 줄인다 — 줄 길이·tempo 는 `qa.py <brief.json> --stems` 의 '목소리 구간'으로 잰다.
   끝인사는 끝 화면까지 이어져도 된다(칸 3.4초). 끝인사도 그날 새로 녹음한다(문구는 `automation/pilots/ai_reel/signoffs/signoffs.json`, 그 폴더의 예전 파일은 쓰지 않는다).
