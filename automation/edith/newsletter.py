@@ -12,7 +12,7 @@ import json
 import re
 
 from .common import esc, load_config, md, plain, send_time_ko, send_time_on
-from .content import BRIEFS_FROM, TODO_FROM, TODO_MAX
+from .content import BRIEFS_FROM, TODO_FROM, TODO_MAX, WEEK_FROM
 
 F = "'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif"
 INK = "#282F38"
@@ -222,7 +222,7 @@ def _note_v3(d, site=None):
             + _div(f"font-size:17px;font-weight:700;line-height:1.3;color:{INK};", "에디터 H 노트")
             + '</td></tr></table>')
     lead = _div(f"font-size:16px;font-weight:400;line-height:1.8;color:{BODY};margin-top:10px;", md(d["lead"], HL_B, HL_B))
-    return f'\n<tr><td class="px" style="padding:0 36px;">{toc}\n  {_todo(d)}\n  {head}\n  {lead}</td></tr>'
+    return f'\n<tr><td class="px" style="padding:0 36px;">{toc}\n  {_todo(d)}{_week(d)}\n  {head}\n  {lead}</td></tr>'
 
 
 def _item_v3(it):
@@ -510,8 +510,96 @@ def _rate_block(d, site):
             + f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:12px;"><tr>'
             + btn(good, "좋았어요", HL) + btn(meh, "아쉬웠어요", "#FFFFFF") + "</tr></table>"
             + _div(f"font-size:12px;font-weight:400;line-height:1.6;color:{MUTED};margin-top:8px;",
-                   "누르면 평가 메일이 열려요 — 보내기만 누르면 끝. 무엇이 좋았는지·아쉬웠는지 한 줄 덧붙여 주시면 다음 호에 반영할게요.", True)
+                   "누르면 평가 메일이 열려요 — 보내기만 누르면 끝." if str(d.get("date", "")) >= H_VOICE_FROM   # 11/23~ 답장 부탁은 H 질문 한 곳만
+                   else "누르면 평가 메일이 열려요 — 보내기만 누르면 끝. 무엇이 좋았는지·아쉬웠는지 한 줄 덧붙여 주시면 다음 호에 반영할게요.", True)
             + "</td></tr>")
+
+
+def _week(d):
+    """월요일 '이번 주 일정'(2026-11-23~) — 날짜가 정해진 일 2~4줄. '오늘 챙길 것'(할 일) 바로 아래, 달력 몫."""
+    week = d.get("week_ahead") or []
+    if not week or str(d.get("date", "")) < WEEK_FROM:
+        return ""
+    rows = "".join(
+        f'<tr><td valign="top" style="width:74px;padding:5px 0;white-space:nowrap;">'
+        + _div(f"font-size:13.5px;font-weight:800;line-height:1.6;color:{CHIP_FG};", esc(w["day"]))
+        + f'</td><td valign="top" style="padding:5px 0;">'
+        + _div(f"font-size:14.5px;font-weight:400;line-height:1.6;color:{INK};", md(w["text"])) + "</td></tr>"
+        for w in week)
+    return _box(_div(f"font-size:12.5px;font-weight:700;line-height:1.3;color:{CHIP_FG};", "이번 주 일정")
+                + f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:4px;">{rows}</table>', mt=10)
+
+
+# 2026-11-22 운영자 '5번(H 말투) 진행' — 뉴닉 고슴이·순살·트렌드어워드 문문처럼 '누가 말하는지 보이게'. 디자인은 그대로,
+# 맨 끝 질문·맺음말을 마스코트 H 얼굴 + 말풍선으로(말투 규칙은 RUNBOOK '에디터 H 말투'). 이 날짜 호부터 — 지난 호는 그대로.
+H_VOICE_FROM = "2026-11-22"   # 운영자 11/22 새벽 '오늘부터 적용해 줘'(처음엔 11/23 로 잡았다)
+
+
+def _bubble(d, site, label, inner):
+    return (f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:14px;"><tr>'
+            f'<td valign="top" style="width:52px;padding-top:2px;">{_face(d, site, 44)}</td>'
+            f'<td valign="top"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:{BOX};'
+            f'border-radius:4px 16px 16px 16px;"><tr><td style="padding:12px 16px 14px;">'
+            + _div(f"font-size:12px;font-weight:700;line-height:1.3;color:{CHIP_FG};", label) + inner
+            + "</td></tr></table></td></tr></table>")
+
+
+def _question_h(d, site):
+    q = d["question"]
+    closing = re.sub(r"\s*[—-]+\s*에디터 H 드림\s*$", "", closing_lines(q.get("closing", "오늘도 EDIT H가 함께할게요.")))
+    ask = _bubble(d, site, "에디터 H의 질문",
+                  _div(f"font-size:18px;font-weight:700;line-height:1.5;color:{INK};margin-top:6px;", md(q["text"], BOLD, HL_B))
+                  + _div(f"font-size:13px;font-weight:400;line-height:1.6;color:{BODY};margin-top:8px;", "이 메일에 답장으로 들려주세요."))
+    bye = _bubble(d, site, "에디터 H", _div(f"font-size:15px;font-weight:400;line-height:1.7;color:{INK};margin-top:6px;", md(closing)))
+    return _divider(30) + f'<tr><td class="px" style="padding:0 36px;">{ask}{bye}</td></tr>'
+
+
+def repeated_numbers(d):
+    """같은 숫자가 시세판·큰 숫자·'숫자로 보면'·그래프에 거듭 나오는지(11/22 운영자 '중복되는 건 없지? 소비자 입장에서도') — 빌드 경고용.
+    [(그래프 칸 이름, 숫자, 이미 나온 곳)]. 그래프는 '새 비교'여야 한다 — 같은 숫자를 막대로 한 번 더 그리면 읽는 사람은 같은 말을 네 번 본다."""
+    def norm(v):
+        t = re.sub(r"[^0-9.]", "", str(v))
+        try:
+            return f"{float(t):g}" if t else ""
+        except ValueError:
+            return ""
+    seen = {}
+    b = d.get("big_issue") or {}
+    st = b.get("stat") or {}
+    if norm(st.get("value")):
+        seen.setdefault(norm(st.get("value")), "큰 숫자")
+    for n in b.get("numbers") or []:
+        if norm(n.get("value")):
+            seen.setdefault(norm(n.get("value")), "숫자로 보면")
+    for r in (d.get("market") or {}).get("rows") or []:
+        seen.setdefault(norm(r.get("value")), "시세판")
+        seen.setdefault(norm(abs(float(r.get("pct", 0)))), "시세판")
+    ch = ((d.get("cards") or {}).get("deep") or {}).get("chart") or {}
+    out = []
+    for p in ch.get("points") or []:
+        k = norm(p.get("text") or p.get("value"))
+        if k and k in seen:
+            out.append((p.get("label"), k, seen[k]))
+    return out
+
+
+def todo_repeats(d):
+    """'오늘 챙길 것' 줄이 같은 호의 '그래서 뭐가 달라져?'와 거의 같은 문장인지 — 빌드 경고용(운영자 '중복 없지?').
+    11/21 호: todo '월요일 장 전, 내 계좌 속 반도체·미국 기술주 비중 보기' ≈ H PICK 결론. 위아래로 같은 말을 두 번 읽게 된다."""
+    import difflib
+    def key(t):
+        return re.sub(r"[^가-힣0-9A-Za-z]", "", plain(str(t or "")))
+    outs = [key(it.get("takeaway")) for it in d.get("all_items") or [] if it.get("takeaway")]
+    hits = []
+    for line in d.get("todo") or []:
+        k = key(line)
+        if not k:
+            continue
+        for t in outs:
+            if k in t or difflib.SequenceMatcher(None, k, t[:len(k) + 10]).ratio() >= 0.6:
+                hits.append(str(line))
+                break
+    return hits
 
 
 def _chart_block(ch):
@@ -669,12 +757,14 @@ def _cta(d, site, campaign, n_cards):
         cards = _utm(site, f"/instagram/{d['date']}/", campaign, "cardnews")
         links = (f'<a href="{cards}" style="font-family:{F};font-size:14px;color:{MUTED};text-decoration:none;">카드뉴스 보기&gt;</a>'
                  f'<span style="color:#C4C4C4;"> &nbsp;|&nbsp; </span>' + links)
+    # 11/23~ 맨 위 목차가 이미 '오늘의 10가지 · 깊게 5 · 짧게 5'를 말한다 — 끝에서 같은 말을 되풀이하지 않는다(소비자 눈 점검, 운영자 '중복 없지?')
+    head_line = "" if str(d.get("date", "")) >= H_VOICE_FROM and d.get("format") == 2 else None
     return (_divider(30) + f'<tr><td class="px" style="padding:0 36px;">'
-            + _div(f"font-size:19px;font-weight:700;line-height:1.45;color:{INK};",
+            + (head_line if head_line is not None else _div(f"font-size:19px;font-weight:700;line-height:1.45;color:{INK};",
                    (f"오늘 아침 {n_topics}가지 소식을 정리했어요<br>깊게 {len(d['all_items'])} · 짧게 {len(d['briefs'])}"   # 실제 개수(주말 3개 허용 — Codex 리뷰), 조사 없이(3·6 뒤 '으로')
                     if str(d.get("date", "")) >= BRIEFS_FROM and d.get("format") == 2
-                    else f"매일 아침 {n_topics}가지 트렌드 이슈를<br>한 번에 정리해 드려요!"), True)
-            + f"""<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:16px;background:#FFFFFF;border:1px solid {RULE};border-radius:18px;box-shadow:0 2px 6px rgba(0,0,0,.08);"><tr><td style="padding:18px 16px;">
+                    else f"매일 아침 {n_topics}가지 트렌드 이슈를<br>한 번에 정리해 드려요!"), True))
+            + f"""<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:{0 if head_line == "" else 16}px;background:#FFFFFF;border:1px solid {RULE};border-radius:18px;box-shadow:0 2px 6px rgba(0,0,0,.08);"><tr><td style="padding:18px 16px;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
     <td valign="middle" style="width:70px;">{_face(d, site, 58)}</td>
     <td valign="middle" style="padding-left:12px;">{_div(f"font-size:15px;font-weight:500;line-height:1.2;color:{INK};", "edit.h.kr")}
@@ -728,7 +818,7 @@ def render(d, site, n_cards):
         body.append(_briefs(d, "짧게 읽는 소식" if str(d.get("date", "")) >= BRIEFS_FROM else "한 줄 뉴스", start=len(d["all_items"]) + 1))
         if d.get("poll_result"):
             body.append(_poll_result(d))
-        body.append(_poll_block(d, site) if d.get("poll") else _question(d))
+        body.append(_poll_block(d, site) if d.get("poll") else _question_h(d, site) if str(d.get("date", "")) >= H_VOICE_FROM else _question(d))
         if _plus(d):
             body.append(_rate_block(d, site))
     else:

@@ -3730,6 +3730,43 @@ def t_nl_plus():
     expect((ROOT / "rate.html").exists(), "웹 아카이브에서 누른 평가 버튼이 갈 화면(rate.html)")
 
 
+def t_h_voice_week():
+    """2026-11-23~ 운영자 '5번(H 말투)·6번(이번 주 일정)' — 맨 끝 질문·맺음말을 H 말풍선으로, 월요일 '이번 주 일정' 상자."""
+    from edith import content as content_mod, newsletter
+    site = "https://example.com/x"
+    raw = json.loads((ROOT / "content" / "2026-11-21.json").read_text(encoding="utf-8"))
+    raw["date"] = "2026-11-23"
+    raw["week_ahead"] = [{"day": "11/26(목)", "text": "한은 금통위, 올해 마지막 금리 결정"}, {"day": "11/27(금)", "text": "미국 블랙프라이데이"}]
+    raw["question"]["closing"] = "저도 어제 앱을 닫았어요. 내일도 아침 8시에 찾아갈게요. — 에디터 H 드림"
+    d = content_mod.prepare(json.loads(json.dumps(raw)), "2026-11-23")
+    nl = newsletter.render(d, site, 10)
+    expect("이번 주 일정" in nl and "11/26(목)" in nl and nl.index("오늘 챙길 것") < nl.index("이번 주 일정") < nl.index("에디터 H 노트"),
+           "'이번 주 일정'은 '오늘 챙길 것' 바로 아래")
+    expect("에디터 H의 질문" in nl and "저도 어제 앱을 닫았어요." in nl and "에디터 H 드림" not in nl and "border-radius:4px 16px 16px 16px" in nl,
+           "질문·맺음말은 H 얼굴 + 말풍선(서명은 말풍선이 대신)")
+    for bad, why in (([{"day": "11월 26일", "text": "금통위"}, {"day": "11/27(금)", "text": "x"}], "날짜 꼴"),
+                     ([{"day": "11/26(목)", "text": "금통위"}], "2줄 미만"),
+                     ([{"day": "11/26(목)", "text": "가" * 31}, {"day": "11/27(금)", "text": "x"}], "30자 넘음")):
+        r = json.loads(json.dumps(raw))
+        r["week_ahead"] = bad
+        try:
+            content_mod.prepare(r, "2026-11-23")
+            expect(False, f"week_ahead {why} 를 막아야 한다")
+        except content_mod.ContentError:
+            pass
+    expect("소식을 정리했어요" not in nl and "한 줄 덧붙여" not in nl and nl.count("답장으로") == 1,
+           "끝부분 되풀이 없음 — 맨 위 목차와 같은 '10가지 정리' 줄·두 번째 답장 부탁을 뺀다")
+    d["market"] = {"rows": [{"name": "코스피", "value": "4,869.96", "pct": -5.21}], "asof": "x"}
+    d["cards"]["deep"]["chart"] = {"points": [{"label": "코스피", "value": 5.21}, {"label": "업종 A", "value": 9.9}]}
+    expect([x[:2] for x in newsletter.repeated_numbers(d)] == [("코스피", "5.21")], "그래프가 시세판·큰 숫자와 같은 숫자면 빌드가 알린다")
+    d21 = content_mod.load("2026-11-21")
+    expect(newsletter.todo_repeats(d21)[:1] == ["월요일 장 전, 내 계좌 속 반도체·미국 기술주 비중 보기"]
+           and not newsletter.todo_repeats({"todo": ["21·22일 성수동 매장에서 수험표 보여 주기"], "all_items": [{"takeaway": "독감 검사부터 받아 봐요"}]}),
+           "'오늘 챙길 것'이 '그래서 뭐가 달라져?'를 그대로 옮기면 빌드가 알린다(11/21 호 실제 사례)")
+    old = content_mod.load("2026-11-21")
+    expect("에디터 H의 질문" not in newsletter.render(old, site, 10), "지난 호(11/21)는 예전 질문 모양 그대로")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--quick", action="store_true", help="다시 빌드 생략")
@@ -3793,6 +3830,7 @@ def main():
     check("경쟁 매체 웹(토큰 없이·robots 지킴)", t_competitors_web)
     check("댓글 키워드 → 구독 링크 DM", t_comment_dm)
     check("뉴스레터 시세판·평가 버튼·맨 위 전달 상자 뺌(11/22~)", t_nl_plus)
+    check("H 말풍선(질문·맺음말, 11/22~)·월요일 이번 주 일정(11/23~)", t_h_voice_week)
     if not args.quick:
         check("딥다이브 카드 글자 한도 렌더링(넘침 없음)", t_dive_render)
         check("웹툰 두 컷 장 글자 한도 렌더링(넘침 없음·넘침 잡음)", t_webtoon_render)

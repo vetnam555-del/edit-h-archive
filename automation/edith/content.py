@@ -157,6 +157,9 @@ ITEMS = {1: 9, 2: 4}         # 형식별 H PICK(빅이슈) 뒤 아이템 수
 # 2026-10-15 운영자: '왜 5개냐' — 짧은 5개가 한 문장(평균 70자)이라 독자에겐 5개로 보였다 → 2~3문장·숫자 1개로 키우고 늘 5개(BRIEFS_FROM~).
 # 확인된 소식이 모자란 날(주말 등)은 3개까지 줄여도 된다 — 빌드는 막지 않고 알려만 준다(build_issue.py).
 BRIEFS_MAX, BRIEFS_TARGET, BRIEFS_MIN_OK = 5, 5, 3
+# 2026-11-22 운영자 '5번(H 말투)·6번(이번 주 일정) 진행' — 경쟁 비교(어피티 '일정'·순살 '다음 주까지 일정'). 월요일 호에만 쓴다(빌드가 막지는 않는다).
+WEEK_FROM, WEEK_LINES, WEEK_TEXT = "2026-11-23", (2, 4), 30
+_WEEK_DAY = re.compile(r"^\d{1,2}/\d{1,2}\([월화수목금토일]\)$")
 TODO_FROM, TODO_MAX = "2026-10-16", 3   # 메일 맨 위 '오늘 챙길 것'(10/15 운영자 선택) — content.todo, 없으면 결론 문장 앞 3개
 BRIEFS_FROM = "2026-10-16"   # 이 날부터 짧은 소식은 2~3문장·숫자 1개 이상, 평일엔 늘 5개(style.brief_check 가 알린다)
 BRIEF_BODY_OLD = 100         # BRIEFS_FROM 전 호(한 줄 뉴스 1~2문장)의 본문 한도 — 지난 호는 그때 기준으로 검증한다(Codex 리뷰)
@@ -649,6 +652,19 @@ def prepare(data, date_str):
         todo = data.get("todo")
         if todo is not None and (not isinstance(todo, list) or len(todo) > TODO_MAX or not all(isinstance(x, str) and x.strip() for x in todo)):
             raise ContentError(f"{where}: todo(오늘 챙길 것)는 {TODO_MAX}줄 이하의 문장 목록이어야 합니다")
+
+    week = data.get("week_ahead")
+    if week is not None:
+        if date_str < WEEK_FROM:
+            raise ContentError(f"{where}: week_ahead(이번 주 일정)는 {WEEK_FROM} 호부터 씁니다")
+        if not isinstance(week, list) or not WEEK_LINES[0] <= len(week) <= WEEK_LINES[1]:
+            raise ContentError(f"{where}: week_ahead(이번 주 일정)는 {WEEK_LINES[0]}~{WEEK_LINES[1]}줄 — "
+                               '[{"day": "11/26(목)", "text": "한은 금통위, 올해 마지막 금리 결정"}]')
+        for i, w in enumerate(week, 1):
+            if not isinstance(w, dict) or not _WEEK_DAY.match(str(w.get("day", ""))) or not str(w.get("text", "")).strip():
+                raise ContentError(f"{where} week_ahead[{i}]: day 는 '11/26(목)' 꼴, text 는 할 말 한 줄")
+            if len(plain(w["text"])) > WEEK_TEXT:
+                raise ContentError(f"{where} week_ahead[{i}]: text 는 {WEEK_TEXT}자 이하(지금 {len(plain(w['text']))}자)")
 
     # 번호: 빅이슈(H PICK)가 01, 나머지가 02~ (빅이슈를 목록에서 다시 반복하지 않는다)
     big["no"] = "01"
