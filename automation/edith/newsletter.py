@@ -12,7 +12,7 @@ import json
 import re
 
 from .common import esc, load_config, md, plain, send_time_ko, send_time_on
-from .content import BRIEFS_FROM, TODO_FROM, TODO_MAX
+from .content import BRIEFS_FROM, TODO_FROM, TODO_MAX, WEEK_FROM
 
 F = "'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif"
 INK = "#282F38"
@@ -222,7 +222,7 @@ def _note_v3(d, site=None):
             + _div(f"font-size:17px;font-weight:700;line-height:1.3;color:{INK};", "에디터 H 노트")
             + '</td></tr></table>')
     lead = _div(f"font-size:16px;font-weight:400;line-height:1.8;color:{BODY};margin-top:10px;", md(d["lead"], HL_B, HL_B))
-    return f'\n<tr><td class="px" style="padding:0 36px;">{toc}\n  {_todo(d)}\n  {head}\n  {lead}</td></tr>'
+    return f'\n<tr><td class="px" style="padding:0 36px;">{toc}\n  {_todo(d)}{_week(d)}\n  {head}\n  {lead}</td></tr>'
 
 
 def _item_v3(it):
@@ -514,6 +514,45 @@ def _rate_block(d, site):
             + "</td></tr>")
 
 
+def _week(d):
+    """월요일 '이번 주 일정'(2026-11-23~) — 날짜가 정해진 일 2~4줄. '오늘 챙길 것'(할 일) 바로 아래, 달력 몫."""
+    week = d.get("week_ahead") or []
+    if not week or str(d.get("date", "")) < WEEK_FROM:
+        return ""
+    rows = "".join(
+        f'<tr><td valign="top" style="width:74px;padding:5px 0;white-space:nowrap;">'
+        + _div(f"font-size:13.5px;font-weight:800;line-height:1.6;color:{CHIP_FG};", esc(w["day"]))
+        + f'</td><td valign="top" style="padding:5px 0;">'
+        + _div(f"font-size:14.5px;font-weight:400;line-height:1.6;color:{INK};", md(w["text"])) + "</td></tr>"
+        for w in week)
+    return _box(_div(f"font-size:12.5px;font-weight:700;line-height:1.3;color:{CHIP_FG};", "이번 주 일정")
+                + f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:4px;">{rows}</table>', mt=10)
+
+
+# 2026-11-22 운영자 '5번(H 말투) 진행' — 뉴닉 고슴이·순살·트렌드어워드 문문처럼 '누가 말하는지 보이게'. 디자인은 그대로,
+# 맨 끝 질문·맺음말을 마스코트 H 얼굴 + 말풍선으로(말투 규칙은 RUNBOOK '에디터 H 말투'). 이 날짜 호부터 — 지난 호는 그대로.
+H_VOICE_FROM = "2026-11-23"
+
+
+def _bubble(d, site, label, inner):
+    return (f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:14px;"><tr>'
+            f'<td valign="top" style="width:52px;padding-top:2px;">{_face(d, site, 44)}</td>'
+            f'<td valign="top"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:{BOX};'
+            f'border-radius:4px 16px 16px 16px;"><tr><td style="padding:12px 16px 14px;">'
+            + _div(f"font-size:12px;font-weight:700;line-height:1.3;color:{CHIP_FG};", label) + inner
+            + "</td></tr></table></td></tr></table>")
+
+
+def _question_h(d, site):
+    q = d["question"]
+    closing = re.sub(r"\s*[—-]+\s*에디터 H 드림\s*$", "", closing_lines(q.get("closing", "오늘도 EDIT H가 함께할게요.")))
+    ask = _bubble(d, site, "에디터 H의 질문",
+                  _div(f"font-size:18px;font-weight:700;line-height:1.5;color:{INK};margin-top:6px;", md(q["text"], BOLD, HL_B))
+                  + _div(f"font-size:13px;font-weight:400;line-height:1.6;color:{BODY};margin-top:8px;", "이 메일에 답장으로 들려주세요."))
+    bye = _bubble(d, site, "에디터 H", _div(f"font-size:15px;font-weight:400;line-height:1.7;color:{INK};margin-top:6px;", md(closing)))
+    return _divider(30) + f'<tr><td class="px" style="padding:0 36px;">{ask}{bye}</td></tr>'
+
+
 def _chart_block(ch):
     """H PICK '숫자로 보면' 아래 막대 그래프 — 카드의 cards.deep.chart 와 같은 칸(같은 잣대 확인된 숫자 3~6개)을 메일에서도 그린다.
     매거진 색 그대로: 막대 바탕 BOX, 막대 HL, 강조 칸(highlight, 기본 마지막)만 진한 주황. 메일에서 안전한 표와 div 너비로."""
@@ -728,7 +767,7 @@ def render(d, site, n_cards):
         body.append(_briefs(d, "짧게 읽는 소식" if str(d.get("date", "")) >= BRIEFS_FROM else "한 줄 뉴스", start=len(d["all_items"]) + 1))
         if d.get("poll_result"):
             body.append(_poll_result(d))
-        body.append(_poll_block(d, site) if d.get("poll") else _question(d))
+        body.append(_poll_block(d, site) if d.get("poll") else _question_h(d, site) if str(d.get("date", "")) >= H_VOICE_FROM else _question(d))
         if _plus(d):
             body.append(_rate_block(d, site))
     else:
