@@ -166,6 +166,10 @@ STRICT_FROM = "2026-10-17"
 # 2026-11-21~ H PICK 에 원문이 없으면 짧은 소식처럼 빌드가 막고 이유 한 줄(pick_primary_reason)을 받는다 — 경고만으로는 11/17~11/19 사흘 내리 ×였다
 # (learnings 개선 요청 11/04·11/19 '이제 ② 할 때'). 원문 판정은 style.primary_check(정부·기관·거래소 주소 + 회사 뉴스룸·IR·보도자료).
 PICK_REASON_FROM = "2026-11-21"
+# 2026-11-22~ 메인 5가지(H PICK + 아이템 4)는 서로 다른 출처 2곳 이상이어야 빌드가 된다(원칙 — 숫자·고유명사는 두 곳에서 확인).
+# 11/20 카드 ⑤ '수능 AI'(지디넷코리아 자체 실험, 출처 1곳)가 빌드를 통과해 07:45 웹툰 검수에서야 빠졌다(11/20 회고 개선 요청).
+# 기사 주소가 거의 모두 n.news.naver.com 이라 주소가 아니라 출처 이름(매체)으로 센다. 짧은 소식(briefs)은 지금처럼 한 곳도 된다.
+MAIN_SOURCES_FROM, MAIN_SOURCES_MIN = "2026-11-22", 2
 
 
 _TRACKING = {"fbclid", "gclid", "ref", "from", "sns", "cmp"}   # 이름이 똑같을 때만 — 'ref_id'·'fromArticle'은 기사 번호일 수 있다(Codex 리뷰)
@@ -184,6 +188,20 @@ def _urls(story):
         q = urlencode(sorted((k, v) for k, v in parse_qsl(p.query, keep_blank_values=True) if not (k.lower().startswith("utm_") or k.lower() in _TRACKING)))
         host = p.netloc.lower().removeprefix("www.")   # http/https·www 유무는 같은 기사(Codex 리뷰)
         out.add(urlunsplit(("", host, p.path.rstrip("/"), q, "")))
+    return out
+
+
+def _outlets(story):
+    """출처 매체 이름 모음 — 공백만 정리해 같은 이름은 한 곳으로 센다(이름이 없으면 주소의 호스트)."""
+    from urllib.parse import urlsplit
+    out = set()
+    for s in story.get("sources") or []:
+        name = re.sub(r"\s+", " ", str((s.get("name") if isinstance(s, dict) else "") or "")).strip()
+        if not name:
+            url = (s.get("url") if isinstance(s, dict) else s) or ""
+            name = urlsplit(str(url).strip()).netloc.lower().removeprefix("www.")
+        if name:
+            out.add(name)
     return out
 
 
@@ -208,6 +226,13 @@ def _strict_checks(data, items, briefs, date_str, where):
             raise ContentError(f"{where}: H PICK 출처에 원문이 없어요(최근 7호 1/7, 목표 5/7 — 11/19 회고). 정부·기관 보도자료(`fetch_releases.py --grep`)나 "
                                "회사 뉴스룸·IR·보도자료를 직접 읽어 출처 1건으로 넣으세요(이름에 '보도자료'·'뉴스룸'·'IR'). "
                                "정말 원문이 없는 이야기면 pick_primary_reason 에 찾아본 곳 한 줄을 적으세요")
+    if date_str >= MAIN_SOURCES_FROM:
+        for label, story in [("H PICK", data.get("big_issue") or {})] + [(f"메인 「{str(it.get('title', ''))[:24]}」", it) for it in items]:
+            got = _outlets(story)
+            if len(got) < MAIN_SOURCES_MIN:
+                raise ContentError(f"{where}: {label} — 출처가 {len(got)}곳({'·'.join(sorted(got)) or '없음'})이에요. 메인 5가지는 서로 다른 매체·기관 "
+                                   f"{MAIN_SOURCES_MIN}곳 이상에서 확인한 소식만 씁니다(11/20 '수능 AI' 한 곳뿐). "
+                                   "`read_article.py --search` 로 다른 매체 기사를 찾아 더하고, 없으면 짧은 소식으로 내리거나 다른 주제로 바꾸세요")
     big = _urls(data.get("big_issue") or {})
     for it in items:
         mine = _urls(it)

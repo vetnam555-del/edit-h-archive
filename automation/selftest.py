@@ -822,6 +822,31 @@ def t_releases():
             expect(False, f"pick_primary_reason {bad!r} 을 사유로 받았다")
         except ContentError:
             pass
+    # 2026-11-22~ 메인 5가지는 서로 다른 출처 2곳 이상 — 11/20 ⑤ '수능 AI'(지디넷코리아 한 곳)가 빌드를 통과했다(11/20 회고).
+    n20 = json.loads((CONTENT_DIR / "2026-11-20.json").read_text(encoding="utf-8"))
+    run(n20)   # 시작일 전(11/20) 호는 기록 그대로 통과
+    n20["date"] = "2026-11-22"
+    n20["pick_primary_reason"] = "시험"
+    try:
+        run(n20)
+        expect(False, "11/22~ 출처 1곳뿐인 메인 소식을 빌드가 막지 않는다")
+    except ContentError as e:
+        expect("수능" in str(e) and "1곳" in str(e), f"막음 메시지가 어느 소식·몇 곳인지 말하지 않는다: {e}")
+    lone = n20["items"][3]
+    lone["sources"] = lone["sources"] + [{"name": " 지디넷코리아 ", "url": "https://n.news.naver.com/mnews/article/092/2"}]
+    try:
+        run(n20)
+        expect(False, "같은 매체 기사 두 건을 두 곳으로 셌다")
+    except ContentError:
+        pass
+    lone["sources"][-1] = {"name": "전자신문", "url": "https://n.news.naver.com/mnews/article/030/1"}
+    run(n20)   # 다른 매체가 더해지면 통과(주소가 모두 네이버여도 매체 이름으로 센다)
+    n20["big_issue"]["sources"] = n20["big_issue"]["sources"][:1]
+    try:
+        run(n20)
+        expect(False, "11/22~ 출처 1곳뿐인 H PICK 을 빌드가 막지 않는다")
+    except ContentError as e:
+        expect("H PICK" in str(e), f"H PICK 막음 메시지가 틀렸다: {e}")
     return f"금융위 {len(fsc)}·고용부 {len(moel)}·금감원 {len(fss)}·재경부 {len(mofe)}·정책브리핑 {len(korea)}건(예시)"
 
 
