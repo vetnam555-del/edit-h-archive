@@ -206,11 +206,11 @@ def welcome_message(sender, to_addr, cfg, now=None, first=None):
     lead = "반응이 좋았던 지난 호" if by_score else "최근 호"
     from edith.gift import active_gift
     gift = active_gift(now.date().isoformat(), cfg)   # 구독 선물(E5) — 기간 안이면 맨 앞에
-    gift_txt = (f"구독 선물로 '{gift['title']}'({gift['count']}가지)를 준비했어요. 날짜별로 챙길 것만 모았어요.\n{gift['url']}\n\n"
+    gift_txt = (f"구독 선물로 '{gift['title']}'({gift['count']}가지)를 준비했어요. {gift['pitch']}\n{gift['url']}\n\n"
                 if gift else "")
     gift_html = (f'<p style="font-size:15px; line-height:1.8; color:#333; margin:0 0 18px; background:#F5F5EE; border-left:4px solid #B91C1C; '
                  f'padding:12px 16px;">🎁 구독 선물 — <a href="{gift["url"]}" style="color:#B91C1C; font-weight:800; text-decoration:none;">'
-                 f'{html.escape(gift["title"])}</a>({gift["count"]}가지). 날짜별로 챙길 것만 모았어요.</p>' if gift else "")
+                 f'{html.escape(gift["title"])}</a>({gift["count"]}가지). {html.escape(gift["pitch"])}</p>' if gift else "")
 
     first_html = (f"가장 최근 호(VOL.{html.escape(str(first['vol']))})를 이어서 <b>바로</b> 보내드려요. 새 호는 <b>{day} {when}</b>부터 매일 가요."
                   if first else f"<b>{day} {when}</b>에 첫 메일이 가요.")

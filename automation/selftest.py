@@ -1242,6 +1242,36 @@ def t_threads():
     return f"{day[0]} 본문 {len(text)}자"
 
 
+def t_card_calc():
+    """구독 선물 계산기(2026-11-22 '메리트 있게끔'): 조특법 제126조의2·소득세법 계산을 손계산 사례와 맞춘다(node 로 gifts/card_calc.js)."""
+    js = AUTOMATION / "gifts" / "card_calc.js"
+    cases = [   # [함수, 입력(만원), 기대(만원)] — 손계산
+        ["cardDeduction", {"pay": 4000, "credit": 1500}, 75],                     # 문턱 1000 ≤ 신용: 225 - 150
+        ["cardDeduction", {"pay": 4000, "credit": 1500, "debit": 100}, 105],      # 체크 30%
+        ["cardDeduction", {"pay": 4000, "credit": 600, "debit": 600}, 60],        # 문턱이 신용 넘어 체크까지: 90+180 - (90+120)
+        ["cardDeduction", {"pay": 9000, "credit": 1000, "debit": 500}, 0],        # 문턱 2250 못 넘음
+        ["cardDeduction", {"pay": 6000, "kids": 1, "credit": 2500, "debit": 800, "market": 100, "transit": 80}, 422],  # 한도 350 + 추가 72
+        ["cardDeduction", {"pay": 8000, "kids": 2, "credit": 3000, "debit": 1000, "culture": 100, "transit": 300}, 420],  # 7천 초과: 문화는 신용, 한도 300 + 추가 120
+        ["incomeTax", 3000, 324],          # 국세청 예시: 3000 × 15% - 126
+        ["wageDeduction", 4000, 1125],     # 750 + 2500 × 15%
+        ["wageCredit", [212.85, 4000], 68.4],   # 한도 74 - 700 × 0.008
+    ]
+    script = ("const c=require(process.argv[1]);const M=1e4;const out=[];for(const [f,a] of JSON.parse(process.argv[2])){"
+              "let r;if(f==='cardDeduction'){const s={};for(const k in a)s[k]=k==='kids'?a[k]:a[k]*M;r=c.cardDeduction(s).deduction/M;}"
+              "else if(f==='wageCredit')r=c.wageCredit(a[0]*M,a[1]*M)/M;else r=c[f](a*M)/M;out.push(r);}console.log(JSON.stringify(out));")
+    proc = subprocess.run(["node", "-e", script, str(js), json.dumps([[f, a] for f, a, _ in cases])], capture_output=True, text=True)
+    expect(proc.returncode == 0, f"card_calc.js 실행 실패: {proc.stderr[-300:]}")
+    got = json.loads(proc.stdout)
+    for (f, a, want), g in zip(cases, got):
+        expect(abs(g - want) < 0.01, f"계산기 {f}({a}) = {g} — 손계산 {want}")
+    data = json.loads((AUTOMATION / "gifts" / "2026-yearend.json").read_text(encoding="utf-8"))
+    page = (ROOT / "gift" / "2026-yearend.html").read_text(encoding="utf-8")
+    expect(data.get("tool") == "card-calc" and js.read_text(encoding="utf-8") in page and 'id="c-out"' in page and "홈택스" in page,
+           "선물 페이지에 계산기(스크립트·결과 칸·홈택스 안내)가 없다")
+    expect("CardCalc" not in (ROOT / "gift" / "2026-q4.html").read_text(encoding="utf-8"), "지난 판(2026-q4) 페이지가 바뀌었다")
+    return f"손계산 {len(cases)}건 일치"
+
+
 def t_gift():
     """구독 선물(E5): 페이지가 데이터와 맞고(build_gift.py 를 다시 돌렸는지), 기간 안의 환영 메일에 링크가 들어가는지."""
     import build_gift
@@ -4001,6 +4031,7 @@ def main():
     check("성과표(collect_metrics)", t_metrics)
     check("스레드 본문(post_threads)", t_threads)
     check("구독 선물(gift)", t_gift)
+    check("구독 선물 카드 공제 계산기", t_card_calc)
     check("대체 표지 사진(fetch_photo --library)", t_photo_library)
     check("검색 노출(호 페이지 SEO)", t_seo)
     check("메일·카드 새 배치(11/19~)", t_layout_v3)
