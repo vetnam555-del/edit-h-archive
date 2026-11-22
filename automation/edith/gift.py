@@ -26,9 +26,11 @@ def live_items(data, day):
 def active_gift(day=None, cfg=None):
     """이 날짜(기본 오늘 KST)에 나눠 주는 선물 {title, slug, url, count} — 없거나 기간 밖이면, 남은 항목이 없으면 None."""
     cfg = cfg or load_config()
-    g = cfg.get("gift") or {}
+    cur = cfg.get("gift") or {}
     day = str(day or now_kst().date().isoformat())[:10]
-    if not g.get("slug") or not (g.get("from", "") <= day <= g.get("until", "")):
+    # 지금 판 + 지난 판(history, 2026-11-22~) 중 그 날짜를 품은 것 — 지난 날짜 캡션·환영 메일은 그때 선물 그대로
+    g = next((x for x in [cur, *(cur.get("history") or [])] if x.get("slug") and x.get("from", "") <= day <= x.get("until", "")), None)
+    if not g:
         return None
     data = json.loads((AUTOMATION / "gifts" / f"{g['slug']}.json").read_text(encoding="utf-8"))
     count = len(live_items(data, day)) if day >= LIVE_FROM else len(items(data))
