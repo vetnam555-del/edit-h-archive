@@ -1270,7 +1270,23 @@ def t_cover_h():
             expect(probs, f"혼잣말 '{say}' 을 막지 않는다({why})")
         else:
             expect(not probs, f"제목에 있는 숫자 혼잣말 '{say}' 을 막았다: {probs}")
-    return "11/24~ 사진 표지 H·혼잣말 · 그 전 호 그대로 · 막는 경우 3가지"
+    r = copy.deepcopy(raw)
+    r["date"] = cards.COVER_H_FROM
+    r["cards"]["cover"].pop("say", None)
+    try:
+        content_mod.prepare(copy.deepcopy(r), cards.COVER_H_FROM)
+        blocked = False
+    except content_mod.ContentError as e:
+        blocked = "cards.cover.say" in str(e)
+    expect(blocked, f"{cards.COVER_H_FROM}~ 사진 표지에 혼잣말이 없는데 빌드를 막지 않는다")
+    r["rewind"] = True
+    try:
+        content_mod.prepare(copy.deepcopy(r), cards.COVER_H_FROM)
+        rewind_ok = True
+    except content_mod.ContentError as e:
+        rewind_ok = "cards.cover.say" not in str(e)
+    expect(rewind_ok, "예비 호(rewind)는 혼잣말이 없어도 막지 않아야 한다(사람 없이 08:05 에 만든다)")
+    return f"{cards.COVER_H_FROM}~ 사진 표지 H·혼잣말(없으면 막음, 예비 호 빼고) · 그 전 호 그대로 · 막는 경우 3가지"
 
 
 def t_card_calc():
@@ -4018,6 +4034,7 @@ def t_h_voice_week():
     site = "https://example.com/x"
     raw = json.loads((ROOT / "content" / "2026-11-21.json").read_text(encoding="utf-8"))
     raw["date"] = "2026-11-23"
+    raw["cards"]["cover"]["say"] = "이거 나만 몰랐어?"   # 11/23~ 사진 표지 혼잣말 필수(cards.COVER_H_FROM)
     raw["week_ahead"] = [{"day": "11/26(목)", "text": "한은 금통위, 올해 마지막 금리 결정"}, {"day": "11/27(금)", "text": "미국 블랙프라이데이"}]
     raw["question"]["closing"] = "저도 어제 앱을 닫았어요. 내일도 아침 8시에 찾아갈게요. — 에디터 H 드림"
     d = content_mod.prepare(json.loads(json.dumps(raw)), "2026-11-23")
@@ -4055,6 +4072,7 @@ def t_friday_quiz():
     site = "https://example.com/x"
     raw = json.loads((ROOT / "content" / "2026-11-21.json").read_text(encoding="utf-8"))
     raw["date"] = "2026-11-27"
+    raw["cards"]["cover"]["say"] = "이거 나만 몰랐어?"   # 11/23~ 사진 표지 혼잣말 필수
     qs = [{"date": f"2026-11-{16 + i}", "q": f"질문 {i}", "options": ["가", "나", "다"], "answer": 1 + i % 3, "why": "그 호에 실린 사실"} for i in range(5)]
     raw["quiz"] = {"questions": qs}
     d = content_mod.prepare(json.loads(json.dumps(raw)), "2026-11-27")
@@ -4112,7 +4130,7 @@ def main():
     check("스레드 본문(post_threads)", t_threads)
     check("구독 선물(gift)", t_gift)
     check("구독 선물 카드 공제 계산기", t_card_calc)
-    check("사진 표지 H 혼잣말(11/24~)", t_cover_h)
+    check("사진 표지 H 혼잣말(11/23~)", t_cover_h)
     check("대체 표지 사진(fetch_photo --library)", t_photo_library)
     check("검색 노출(호 페이지 SEO)", t_seo)
     check("메일·카드 새 배치(11/19~)", t_layout_v3)

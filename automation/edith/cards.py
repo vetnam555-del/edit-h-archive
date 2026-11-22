@@ -247,10 +247,10 @@ def _mascot_hero(d, cov, l1, l2, height):
     return (say + f'<div style="position:absolute;left:30px;bottom:-30px;z-index:1;">{mascot_img(pose, body, d3=mascot_3d_on(d))}</div>')
 
 
-# 사진 표지에 3D H 가 반응한다(2026-11-24~, 운영자 11/22 '매일1보 카드뉴스 참고해 봐'). 매일1보 표지는 사람 얼굴·표정과 짧은 혼잣말
+# 사진 표지에 3D H 가 반응한다(2026-11-23~ — 11/23 01시 운영자 '오늘자 제발 재미있게, 후킹'으로 하루 당김. 운영자 11/22 '매일1보 카드뉴스 참고해 봐'). 매일1보 표지는 사람 얼굴·표정과 짧은 혼잣말
 # 말풍선('이것 뭐에요~???')으로 멈춰 세우는데, 우리 사진 표지는 금괴·동전·청진기 같은 사물뿐이라 감정이 없었다(11/14~11/22 9장 중 9장).
 # 보도사진·초상권 때문에 실제 얼굴은 못 쓰니 우리 캐릭터가 그 자리를 맡는다 — cards.cover.say(혼잣말 ≤14자), pose(없으면 제목으로 고름).
-COVER_H_FROM = "2026-11-24"
+COVER_H_FROM = "2026-11-23"
 COVER_SAY_MAX = 14
 _COVER_H_POSES = ("surprised", "sweat", "sulky", "thinking", "point", "celebrate", "wink", "redpen")
 
