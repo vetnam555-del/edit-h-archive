@@ -54,7 +54,7 @@
 | 11/22 | **힉스필드 EDIT H 몫 한 달 1,500**(친구와 나눠 씀) — 만들기 전 `check`, 쓴 뒤 `add` | `higgsfield_budget.py`, `credits/higgsfield.jsonl` |
 | 11/22 | **금요일 주간 특집 퀴즈형**(11/27~ '몇 개 맞힐까요?' + ?? 스티커, 정답은 소식 카드 글에 있어야) | `edith/weekly.quiz_rows`, RUNBOOK 4-1, E27 |
 | 11/22 | **캐릭터 H**: 반응 표정 6·빨간 펜·성격(말버릇 '그래서 나는?')·표지만 3D(작은 H·프로필은 2D) | `assets/mascot/README.md`, `cards.POSE_V2_FROM`·`MASCOT_3D_FROM`, E28 |
-| 11/22 | **프로필 링크를 리틀리로**(운영자가 꾸미는 중 — 그림·문구는 준비됨) | `assets/littly/README.md`, OWNER_TODO |
+| 11/22 | **프로필 링크를 리틀리로**(https://litt.ly/edit.h — 11/22 밤 채움·확인, 인스타 프로필 링크 바꾸기는 운영자) | `assets/littly/README.md`, OWNER_TODO |
 | 11/17 | **AI 영상 릴스는 주 1회 월요일 아침(4주 시험 E23), 화~일은 웹툰만 · 대신 품질(내용·소스 전체)을 더 높게** · 드롭샷 충전은 운영자가 말하기 전까지 보류(별도 액션 금지) | `config.instagram.ai_video_weekly`, `RUNBOOK_REEL.md` (Q)·크레딧 계획 |
 
 ## 4. 영상·그림·목소리 (11/22 기준)
@@ -85,8 +85,8 @@ Claude 5시간 사용량 한도는 **계정 전체가 같이 쓴다**. 운영 �
 
 ## 7. 열린 일 (새 대화가 이어받는다)
 
-1. **리틀리** — 운영자가 꾸미는 중(도움 페이지 https://claude.ai/artifact/3FdM3pnjQKgWH6Qo7w9yny). 운영자가 리틀리 주소를 알려 주면 열어서 버튼 순서·구독 링크 `?ref=littly` 확인 → OWNER_TODO ✅.
-   12/6: 성과표 '구독 경로'의 `littly` 2주 vs 그 전 2주 `ig` — 줄었으면 구독 페이지 직행으로 되돌리자고 제안.
+1. **리틀리** — https://litt.ly/edit.h. 11/22 밤 운영자 '채워 줘'로 README 순서대로 채우고 공개 페이지에서 버튼 순서·`?ref=littly`(배너·구독 버튼) 확인 — OWNER_TODO ✅. 편집은 운영자 Chrome 에 로그인돼 있어 Claude in Chrome 으로 할 수 있다(요령은 `assets/littly/README.md` 맨 아래).
+   남은 일: 운영자가 **인스타 프로필 링크를 리틀리 주소로** 바꾸기(11/22 밤엔 아직 github.io). 바꾼 날 + 2주에 성과표 '구독 경로' `littly` vs 그 전 2주 `ig` — 줄었으면 구독 페이지 직행으로 되돌리자고 제안.
 2. **11/23(월) 첫날 점검**: 메일 바닥 '바쁜 아침', 카드 H 반응 표정·3D 표지, 시세판·월요일 '이번 주 일정', 07:45 릴스가 `higgsfield_budget.py check/add` 를 했는지(장부에 줄이 생겼나).
 3. **11/27(금) 첫 퀴즈형 특집 + 뉴스레터 금요일 퀴즈** — 표지에 답이 보이지 않는지, 정답 칩이 소식과 맞는지.
 4. **판정일**: E26 1번 소식 3문항(12/4) · E28 표지 3D(12/7) · E25 릴스 월·수·금·E27 퀴즈형 특집(12/20). `automation/references.md` '지금 시험 중'.
