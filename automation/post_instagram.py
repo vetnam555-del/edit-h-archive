@@ -444,6 +444,12 @@ def ai_video_day(cfg, key):
     영상을 만들지 않기로 정한 날에 '스토리는 릴스만'을 적용하면 아침 카드 스토리가 건너뛰어져 19:30 대신 올리기만 나간다
     (11/05·11/07 회고: 첫 장 도달 약 2시간 6·0 — 아침 영상 스토리는 18~19). 그래서 그런 날은 아침 캐러셀 실행(발송 시각)이 카드 스토리를 올린다."""
     day = str(key)[:10]
+    days = cfg.get("ai_video_days") or {}
+    if days.get("from") and day >= days["from"]:   # 2026-11-22 운영자 '월·수·금 주 3회' — 매일 규칙보다 먼저
+        try:
+            return dt.date.fromisoformat(day).weekday() in set(days.get("weekdays") or [])
+        except ValueError:
+            return True
     daily = cfg.get("ai_video_daily_from")
     if daily and day >= daily:   # 2026-11-21 운영자 '조회수 1만 되도록 노력해 줘' — 매일 영상 날(주 1회 규칙보다 먼저)
         return True
