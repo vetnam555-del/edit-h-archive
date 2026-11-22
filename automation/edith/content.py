@@ -730,6 +730,15 @@ def prepare(data, date_str):
     problems = []
     _len_check(cards["cover"]["title"], CARD_LIMITS["cover_title"], "cards.cover.title(없으면 hero_title)", problems)
     _len_check(cards["cover"]["keyword"], CARD_LIMITS["keyword"], "cards.cover.keyword(없으면 hero_title 의 ==강조==)", problems)
+    cov = cards["cover"]
+    if cov.get("say") or cov.get("pose"):   # 사진 표지 H 혼잣말(2026-11-24~ cards.COVER_H_FROM) — 숫자는 표지 제목에 있는 것만
+        from .cards import COVER_SAY_MAX, _COVER_H_POSES
+        _len_check(cov.get("say") or "", COVER_SAY_MAX, "cards.cover.say(H 혼잣말)", problems)
+        stray = [n for n in re.findall(r"\d[\d,.]*", plain(cov.get("say") or "")) if n not in plain(cov["title"])]
+        if stray:
+            problems.append(f"cards.cover.say: 표지 제목에 없는 숫자 {', '.join(stray)} — 혼잣말은 반응만, 사실·숫자는 제목에")
+        if cov.get("pose") and cov["pose"] not in _COVER_H_POSES:
+            problems.append(f"cards.cover.pose: '{cov['pose']}' 는 3D H 자세가 아니다 — {', '.join(_COVER_H_POSES)}")
     for i, it in enumerate(data["card_issues"], 1):
         w = f"cards.issues[{i}]"
         if "number" in it:
