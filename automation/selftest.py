@@ -2227,6 +2227,57 @@ def rebuild(days, strict):
                 print(f"  ✓ {name} — 뉴스레터·캡션이 발행본과 같음" + (f" (빌드 경고 {len(warn)}줄)" if warn else ""))
 
 
+def t_weekly_quiz():
+    """금요일 주간 특집 퀴즈형(2026-11-27~, 운영자 11/22 '이 표지 클릭하고 싶지 않다' → 시안 A): 문제 수 = 소식 수, 정답 보기가 그 소식
+    카드 글에 있어야, 표지 스티커 ?? 3개, 질문으로 끝나는 제목. 표지·문제 장·정답 칩, 캡션에 정답을 쓰지 않음. 11/20 전 특집은 그대로."""
+    from edith import cards, weekly
+    quiz = [{"q": "3년간 안 찾아간 실손보험금은?", "options": ["1000억원", "1조원", "10조원"], "answer": 2, "blank": "안 찾은 보험금 ??조원"},
+            {"q": "내년 4월부터 은행 여는 시각은?", "options": ["9시", "9시30분", "10시"], "answer": 2, "blank": "은행 여는 시각 ??:??"},
+            {"q": "엔비디아 매출, 1년 전보다?", "options": ["50%↑", "103%↑", "200%↑"], "answer": 2},
+            {"q": "또 최대 찍은 가계빚은?", "options": ["1030조원", "2030조원", "3030조원"], "answer": 2},
+            {"q": "AI로 일하는 직장인은?", "options": ["3명 중 1명", "3명 중 2명", "10명 중 9명"], "answer": 2, "blank": "AI로 일하는 직장인 ??%"}]
+    expect(not weekly.quiz_on("2026-11-20") and weekly.quiz_on("2026-11-27"), "quiz_from 이 2026-11-27 이 아니다(지난 특집은 기록)")
+    spec = json.loads((CONTENT_DIR / "weekly" / "2026-11-20.json").read_text(encoding="utf-8"))
+
+    def load(sp):
+        with tempfile.TemporaryDirectory() as tmp:
+            Path(tmp, "2026-11-20.json").write_text(json.dumps(sp, ensure_ascii=False), encoding="utf-8")
+            saved = weekly.WEEKLY_DIR, weekly.load_config
+            real = weekly.load_config
+            try:
+                weekly.WEEKLY_DIR = Path(tmp)
+                weekly.load_config = lambda: {**real(), "weekly_special": {**real()["weekly_special"], "quiz_from": "2026-11-20"}}
+                return weekly.load("2026-11-20")
+            finally:
+                weekly.WEEKLY_DIR, weekly.load_config = saved
+    good = {**spec, "title": "이번 주 뉴스,\n몇 개 맞힐까요?", "quiz": quiz}
+    w = load(good)
+    expect(len(w["quiz"]) == 5 and w["quiz"][0]["answer"] == 2, "퀴즈 행이 소식 순서대로 5개가 아니다")
+    bad = {"정답이 카드에 없음": {**good, "quiz": [{**quiz[0], "options": ["1000억원", "2조원", "10조원"]}] + quiz[1:]},
+           "문제 4개": {**good, "quiz": quiz[:4]},
+           "표지 ?? 2개": {**good, "quiz": [{**q, "blank": None} for q in quiz[:3]] + quiz[3:]},
+           "질문 아닌 제목": {**good, "title": "이번 주 숫자 5"},
+           "같은 보기": {**good, "quiz": [{**quiz[0], "options": ["1조원", "1조 원", "10조원"], "answer": 1}] + quiz[1:]},
+           "긴 보기": {**good, "quiz": [{**quiz[0], "options": ["1000억원", "1조원", "가" * 9]}] + quiz[1:]}}
+    for why, sp in bad.items():
+        try:
+            load(sp)
+            raise AssertionError(f"주간 퀴즈 검사가 '{why}'를 통과시켰다")
+        except weekly.WeeklyError:
+            pass
+    w["date"] = "2026-11-20-weekly"
+    nj = lambda s: s.replace("\u2060", "")   # noqa: E731 — 카드 esc 가 숫자·단위 사이에 넣는 줄바꿈 방지 문자
+    cov, qc = nj(cards.quiz_cover(w, "11월 4주차 주말 퀴즈 · 5문제", "밀어서 문제 풀기 →")), nj(cards.quiz_card(w))
+    expect("몇 개 맞힐까요?" in cov and cov.count("box-shadow:0 3px 8px") == 3 and cov.count(">??<") >= 3 and "1조원" not in cov, "퀴즈 표지에 ?? 스티커 3개가 없거나 답이 보인다")
+    expect(all(q["q"] in qc for q in quiz) and "② 1조원" in qc, "문제 장에 질문·보기가 없다")
+    chip = nj(cards.with_answer(cards.issue_card(w["card_issues"][0], 1, w["date"]), 1, w["quiz"][0]))
+    expect(chip.startswith('<section class="card"') and "Q1 정답 ② 1조원" in chip, "소식 카드에 정답 칩이 없다")
+    cap = weekly.caption(w)
+    expect("Q1. 3년간 안 찾아간 실손보험금은? ① 1000억원 ② 1조원 ③ 10조원" in cap and "몇 개 맞혔는지" in cap
+           and "안 찾아간 실손보험금\n3년간" not in cap and "다시 볼 만한 숫자" not in cap, "퀴즈 캡션이 문제 대신 정답 목록을 쓴다")
+    return f"막는 경우 {len(bad)}가지"
+
+
 def t_weekly_save():
     """금요일 주간 특집 저장각(E13, 2026-11-06~ — 2026-10-31 경쟁 비교 '두고 쓰는 자료'): 날짜는 이미 낸 호 원고에 글자로 있는 것만,
     지난·먼 날짜·아직 안 낸 호·글자 수·개수는 막고, 시작일 전 특집과 날짜 2개 미만은 예전 '한 줄로' 장, 캡션 날짜 줄, 성과표 '주간 특집' 표."""
@@ -3957,6 +4008,7 @@ def main():
     check("H 말풍선(질문·맺음말, 11/22~)·월요일 이번 주 일정(11/23~)", t_h_voice_week)
     check("금요일 이번 주 퀴즈(11/27~)", t_friday_quiz)
     check("힉스필드 EDIT H 몫 한 달 1,500(11/22~)", t_higgsfield_budget)
+    check("금요일 주간 특집 퀴즈형(11/27~)", t_weekly_quiz)
     if not args.quick:
         check("딥다이브 카드 글자 한도 렌더링(넘침 없음)", t_dive_render)
         check("웹툰 두 컷 장 글자 한도 렌더링(넘침 없음·넘침 잡음)", t_webtoon_render)
