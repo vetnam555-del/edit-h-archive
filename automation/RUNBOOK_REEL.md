@@ -321,7 +321,7 @@ CAMERA 에 'continuous motion in every shot — no held poses, no frozen moments
 1. **첫 줄 12~16자 한 마디** — 그날 가장 센 사실을 주장·반전·감정으로(숫자·사실은 content 그대로, 과장 금지).
 2. **둘째 줄(빈 줄 없이) '구독하면 받는 것' 한 줄** = `python3 -c "import sys; sys.path.insert(0, 'automation'); from edith import site, gift; print(site.reel_letter('{오늘}')); print(gift.screen_line('{오늘}'))"` 의
    첫 줄 그대로(글자 하나라도 바꾸면 qa 에 걸린다). 같은 명령의 둘째 줄은 끝 화면 `end_card.sub`.
-3. 빈 줄 + 주제 5줄 ①~⑤ + (DM 약속 줄 — 아래 (D)) + '이 영상과 목소리는 AI로 만들었어요. 숫자는 기사 2곳 이상에서 확인했어요.' +
+3. 빈 줄 + 주제 5줄 ①~⑤ + (DM 약속 줄 — 아래 (D)) + '숫자는 기사 2곳 이상에서 확인했어요.'(2026-11-22 운영자 'AI로 만들었어요 줄 삭제' — AI 표시는 인스타 'AI 정보' 라벨이 하고, 라벨이 거절된 날만 post_instagram 이 캡션에 붙인다. qa 가 그 줄을 막는다) +
    '출처: 매체·매체 / …'(영상 순서, 칸마다 그 이슈 content sources 매체 2곳 — 이름은 content 그대로, '식약처·관세청 보도자료'처럼 이름에 '·'가 든 출처는 매체 2곳을 따로 더 적는다) + 해시태그 5개 이하.
    숫자 표기는 content 그대로('12개 증권사'를 '12곳'으로 바꾸면 qa 에 걸린다).
 
@@ -343,7 +343,7 @@ CAMERA 에 'continuous motion in every shot — no held poses, no frozen moments
   '글이 칸을 넘쳤어요'로 멈추면 카드 글 문제라 보고(카드 글은 바꾸지 않는다).
 - (마) 8장을 눈으로 본다: 내레이션 상자·숫자 스티커·말풍선이 H 얼굴을 덮나 → pos_a·pos_b(세로 % 를 줄이면 그림 위쪽이 보인다)·stk_side·say_side·tail 로 맞춘다. H 가 잘렸나, 엉터리 글자.
 - (바) `instagram/{오늘}/comic_caption.txt`: 첫 줄 한 마디(+ '넘겨서 5가지 보기 👉') + 둘째 줄 같은 '구독하면 받는 것' 한 줄 + 빈 줄 + 5줄 ①~⑤ + (DM 약속 줄) +
-  '이 그림은 AI로 만들었어요. 숫자는 기사 2곳 이상에서 확인했어요.' + '출처: …'(컷 순서) + 해시태그 5개 이하.
+  '숫자는 기사 2곳 이상에서 확인했어요.'(AI 줄은 11/22~ 빼기 — 위와 같음) + '출처: …'(컷 순서) + 해시태그 5개 이하.
 
 ### 5-2. 검수
 - 영상 날(월요일): `python3 automation/pilots/ai_reel/qa.py <brief.json>` ✓(숫자·싱크·발음(녹음 95%·완성본 95% — 11/18~, 그 전 85% 라 11/17 뭉개진 두 줄이 통과했다)·음량·끊김·소리 구멍·검은 화면·번쩍임·꽉 찬 화면·멈춘 구간·반복·출처·만화) →

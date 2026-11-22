@@ -2497,7 +2497,7 @@ def t_comic_only():
 
     letters = qa.promo_lines(day)   # 11/06~ '구독하면 받는 것' 한 줄 — 11/09~ 둘째 줄(qa.letter_top, 11/08 주간 루틴)
     good_cap = ("오늘 아침 소식 넘겨서 보기\n" + "".join(f"{x}\n" for x in letters[:1])
-                + "\n이 그림은 AI로 만들었어요. 숫자는 기사 2곳 이상에서 확인했어요.\n"
+                + "\n숫자는 기사 2곳 이상에서 확인했어요.\n"
                 f"출처: {' / '.join(cells)}\n#경제뉴스 #EDITH")
     with tempfile.TemporaryDirectory() as tmp:
         folder = Path(tmp)
@@ -2516,7 +2516,8 @@ def t_comic_only():
         expect(qa.jpeg_size(folder / "comic" / "c1.jpg") == (1080, 1350), "JPEG 머리에서 크기를 읽지 못한다")
         expect(any("2장" in f for f in run(pages=2)), "만화 2장을 통과시켰다")
         expect(any("1080×1920" in f for f in run(size=(1080, 1920))), "1080×1350 이 아닌 장을 통과시켰다")
-        expect(any("AI로 만들" in f for f in run(cap=good_cap.replace("이 그림은 AI로 만들었어요. ", ""))), "'AI로 만들' 줄 없는 캡션을 통과시켰다")
+        expect(any("AI로 만들" in f for f in run(cap=good_cap.replace("숫자는 기사", "이 그림은 AI로 만들었어요. 숫자는 기사"))),
+               "'AI로 만들' 줄(11/22 운영자 — 빼기로 함)이 든 캡션을 통과시켰다")
         expect(any("해시태그 6개" in f for f in run(cap=good_cap + " #a #b #c #d")), "해시태그 6개를 통과시켰다")
         expect(any("content 에 없는 숫자" in f for f in run(cap=good_cap.replace("넘겨서 보기", "987654명이 봤어요"))),
                "content 에 없는 숫자를 통과시켰다")
@@ -2769,10 +2770,21 @@ def t_ai_reel():
         out, track = pi.build_reel("2026-11-01", folder, "ffmpeg")
         expect(out == folder / pi.AI_REEL and track["style"] == "ai" and track["credit_in_video"], "reel_ai.mp4 를 쓰지 않는다")
         expect(track["license"].upper() == "CC0", "AI 영상에 음악 출처 댓글이 붙는다")
-        expect(pi.reel_caption(folder, track).startswith("AI 릴스 캡션") and pi.AI_NOTE_KEY in pi.reel_caption(folder, track)
+        expect(pi.reel_caption(folder, track).startswith("AI 릴스 캡션") and pi.AI_NOTE_KEY not in pi.reel_caption(folder, track)
                and pi.reel_caption(folder, {"style": "vertical"}) == "보통 릴스 캡션", "AI 릴스 캡션 파일을 고르지 못한다")
-        (folder / "reel_ai_caption.txt").unlink()   # AI 전용 캡션이 없어도 AI 제작 표시는 남는다
-        expect(pi.AI_NOTE_KEY in pi.reel_caption(folder, track), "AI 전용 캡션이 없을 때 AI 표시가 빠진다")
+        # 2026-11-22~ 캡션의 AI 줄은 뺀다(운영자) — 표시는 'AI 정보' 라벨, 라벨이 거절된 때만 create_with_ai_label 이 캡션에 붙인다
+        class _G:
+            def __init__(self):
+                self.calls = []
+
+            def call(self, method, path, **kw):
+                self.calls.append(kw)
+                if kw.get("is_ai_generated"):
+                    raise pi.IGError("Invalid parameter is_ai_generated (code 100)")
+                return {"id": "c1"}
+        g2, info2 = _G(), {}
+        pi.create_with_ai_label(g2, "u", {"media_type": "REELS", "caption": "본문"}, info2)
+        expect(info2.get("ai_label") is False and pi.AI_NOTE_KEY in g2.calls[-1]["caption"], "AI 라벨이 거절된 날 캡션에 AI 한 줄을 붙이지 않는다")
     src = inspect.getsource(pi.main)
     expect("reel_ai" in src and "story_ai" in src and "post_story_video" in src, "AI 영상 릴스·스토리 게시 단계가 없다")
 
@@ -2821,7 +2833,7 @@ def t_ai_reel():
             pi.wait_public, pi.publish = saved_wp, saved_pub
         parent = g.calls[-1]
         expect(mid == "m1" and info.get("ai_label") is True and parent.get("is_ai_generated") == "true"
-               and pi.AI_NOTE_KEY in parent.get("caption", "") and parent.get("media_type") == "CAROUSEL", "만화 캐러셀에 AI 라벨·AI 한 줄이 없다")
+               and pi.AI_NOTE_KEY not in parent.get("caption", "") and parent.get("media_type") == "CAROUSEL", "만화 캐러셀에 AI 라벨이 없거나 캡션에 AI 줄이 남았다(11/22~ 라벨만)")
 
     # 메인 2~5번 AI 영상(운영자 앱 제작, 11/01~) — instagram/{키}/extra/N/ 를 AI 라벨 릴스로, 검수한 캡션 없으면 안 올림
     expect("--extra" in inspect.getsource(pi.main) and "EXTRA_DIR" in inspect.getsource(pi.prune), "메인 2~5번 AI 영상 게시·정리 단계가 없다")
@@ -2855,7 +2867,7 @@ def t_ai_reel():
         expect(no_cap and "reel_ai_caption" in no_cap, "검수한 캡션 없이 메인 AI 릴스를 올리려 했다")
         expect(mid == "x3" and reel.get("is_ai_generated") == "true" and reel.get("media_type") == "REELS"
                and reel.get("video_url", "").endswith("/instagram/2026-11-01/extra/3/reel_ai.mp4")
-               and "메인 3번 캡션" in reel.get("caption", "") and pi.AI_NOTE_KEY in reel.get("caption", ""),
+               and "메인 3번 캡션" in reel.get("caption", ""),
                f"메인 AI 릴스 게시 값이 틀린다: {reel}")
 
     # 게시 전 숫자 검수 — 큰 금액은 한 덩어리로 대조한다(11/01 Codex: '1조6000억원'이 '1조5000억원과 6000억원'에서 통과하면 안 된다)
@@ -2901,7 +2913,7 @@ def t_ai_reel():
                              {"tag": "샘 올트먼", "sources": [{"name": "서울경제"}, {"name": "MBC"}]}]}
     ok_ep = {"date": "2026-11-02", "item": "반도체 급락", "sources": ["전자신문", "헤럴드경제"],
              "end_card": {"note": "숫자는 기사 2곳 이상에서 확인했어요<br>(전자신문·헤럴드경제 보도 기준)"}}
-    ok_cap = "본문\n출처: 전자신문·헤럴드경제(10.31)\n이 영상과 목소리는 AI로 만들었어요."
+    ok_cap = "본문\n출처: 전자신문·헤럴드경제(10.31)\n숫자는 기사 2곳 이상에서 확인했어요."
     wrong = {**ok_ep, "sources": ["서울경제", "MBC"], "end_card": {"note": "(서울경제·MBC 보도 기준)"}}
     expect(qa.source_gaps(ok_ep, content_src, ok_cap) == [], "출처를 다 적은 릴스를 막았다")
     expect(qa.source_gaps(wrong, content_src, "출처: 서울경제·MBC"), "다른 이슈(올트먼)의 매체를 적은 인텔 릴스가 통과했다")

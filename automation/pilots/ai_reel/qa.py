@@ -1004,12 +1004,12 @@ def letter_top(path, day):
 
 
 def caption_texts(path, skip=()):
-    """캡션 파일 → ([(파일 이름, 해시태그 줄·skip 줄을 뺀 글)], 실패) — 'AI로 만들' 한 줄, 해시태그 5개 이하."""
+    """캡션 파일 → ([(파일 이름, 해시태그 줄·skip 줄을 뺀 글)], 실패) — 'AI로 만들' 줄 없음(11/22~), 해시태그 5개 이하."""
     raw = path.read_text(encoding="utf-8")
     body = "\n".join(x for x in raw.splitlines() if not x.startswith("#") and x.strip() not in skip)
     fails = []
-    if "AI로 만들" not in body:
-        fails.append(f"{path.name}: 'AI로 만들었어요' 한 줄이 없다")
+    if "AI로 만들" in body:   # 2026-11-22 운영자 '캡션의 「AI로 만들었어요」 삭제' — 표시는 인스타 'AI 정보' 라벨이 한다
+        fails.append(f"{path.name}: 'AI로 만들었어요' 줄은 빼기로 했다(11/22 운영자 — 인스타 AI 라벨이 표시한다)")
     tags = re.findall(r"#\S+", raw)
     if len(tags) > 5:
         fails.append(f"{path.name}: 해시태그 {len(tags)}개(5개 이하)")

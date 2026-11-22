@@ -174,9 +174,7 @@ def reel_caption(folder, track=None):
     path = folder / ("reel_ai_caption.txt" if ai and (folder / "reel_ai_caption.txt").exists() else "reel_caption.txt")
     if path.exists():
         text = path.read_text(encoding="utf-8").strip()
-        if ai and AI_NOTE_KEY not in text:   # AI 전용 캡션이 없어도 AI 제작을 밝힌다(라벨이 거절돼도 표시가 남게 — Codex 리뷰)
-            text += "\n\n" + AI_NOTE
-        return text
+        return text   # 2026-11-22 운영자 '캡션의 「이 영상과 목소리는 AI로 만들었어요」 삭제' — AI 표시는 인스타 'AI 정보' 라벨이 한다(라벨이 거절되면 create_with_ai_label 이 그때만 캡션에 붙인다)
     from edith.site import _GENERIC_TAGS
     cap = (folder / "caption.txt").read_text(encoding="utf-8").strip().splitlines()
     line = next((x for x in reversed(cap) if x.startswith("#")), "")
@@ -194,7 +192,7 @@ def music_credit(track):
 
 
 AI_REEL = "reel_ai.mp4"   # 2026-11-01 운영자: 힉스필드로 만든 AI 영상 릴스(대사·음악 포함) — 있으면 그날 릴스를 이것으로 올린다
-AI_NOTE_KEY = "AI로 만들"   # AI 릴스 캡션에 꼭 들어갈 말(없으면 AI_NOTE 를 붙인다)
+AI_NOTE_KEY = "AI로 만들"   # 'AI 정보' 라벨이 거절된 때만 캡션에 붙이는 말(2026-11-22~ 평소엔 캡션에 쓰지 않는다 — 운영자)
 AI_NOTE = "이 영상과 목소리는 AI로 만들었어요."
 
 
@@ -530,7 +528,7 @@ def story_images(folder, key, site_url, hook=True):
 def create_with_ai_label(g, uid, params, info, required=False):
     """AI 영상 컨테이너 — 인스타 'AI 정보' 라벨(is_ai_generated, 2026-06-22 Content Publishing API)을 붙여 만든다.
     11/01 운영자: '영상 안 AI 표시는 빼 줘, 인스타에 올릴 때 표시하니까'. 이 계정 API 가 라벨 값을 안 받으면 라벨 없이 다시 만들고
-    info['ai_label']=False 로 남긴다(캡션의 'AI로 만들었어요' 한 줄이 그때도 밝힌다)."""
+    info['ai_label']=False 로 남기고, 그때만 캡션에 'AI로 만들었어요' 한 줄을 붙인다(2026-11-22 운영자 '캡션의 AI 줄 삭제' — 평소엔 라벨이 밝힌다)."""
     try:
         cid = g.call("POST", f"{uid}/media", is_ai_generated="true", **params)["id"]
         info["ai_label"] = True
@@ -541,7 +539,9 @@ def create_with_ai_label(g, uid, params, info, required=False):
         info["ai_label"] = False
         if required:   # 캡션도 화면 표시도 없는 스토리는 라벨 없이 올리지 않는다(Codex 리뷰)
             raise IGError(f"AI 라벨을 받지 않아 올리지 않음(AI 표시가 하나도 없게 됨): {e}")
-        print(f"  ⚠ AI 라벨 값을 받지 않음 — 라벨 없이 다시 만듦(캡션 한 줄이 밝힌다): {e}")
+        if "caption" in params and AI_NOTE_KEY not in params["caption"]:   # 라벨이 없을 때만 캡션 한 줄로 밝힌다(2026-11-22~)
+            params = {**params, "caption": (params["caption"] + "\n\n" + AI_NOTE).strip()}
+        print(f"  ⚠ AI 라벨 값을 받지 않음 — 라벨 없이 다시 만들고 캡션에 AI 한 줄을 붙임: {e}")
         return g.call("POST", f"{uid}/media", **params)["id"]
 
 
@@ -576,9 +576,7 @@ def post_comic(g, uid, key, folder, site_url, dry):
         g.wait_ready(child, f"만화 {n}번째 장")
     cap_path = folder / "comic_caption.txt"
     caption = cap_path.read_text(encoding="utf-8").strip() if cap_path.exists() else ""
-    if AI_NOTE_KEY not in caption:
-        caption = (caption + "\n\n" + AI_NOTE).strip()
-    info = {}
+    info = {}   # AI 표시는 'AI 정보' 라벨(라벨이 거절된 때만 캡션 한 줄 — create_with_ai_label, 2026-11-22 운영자)
     parent = create_with_ai_label(g, uid, dict(media_type="CAROUSEL", children=",".join(children), caption=caption), info)
     g.wait_ready(parent, "만화 캐러셀")
     if dry:
