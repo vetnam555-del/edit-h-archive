@@ -301,6 +301,9 @@ def _threads_due(date):
 def _ai_reel_weekday(ig_cfg, date):
     """AI 영상 릴스를 만들기로 정한 평일인가 — config.instagram.ai_video_weekdays_from 부터 월~금
     (2026-11-13 운영자 '릴스 영상은 주말만 제외하는 방향으로'). 설정이 없으면 아니다."""
+    days = ig_cfg.get("ai_video_days") or {}
+    if days.get("from") and date >= days["from"]:   # 2026-11-22 운영자 '월·수·금 주 3회'
+        return parse_date(date).weekday() in set(days.get("weekdays") or [])
     daily = ig_cfg.get("ai_video_daily_from")
     if daily and date >= daily:   # 2026-11-21 운영자 '조회수 1만 되도록 노력해 줘' — 매일
         return True

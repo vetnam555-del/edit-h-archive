@@ -6,6 +6,9 @@
 ### 2026-11-22 (14:10 개선)
 - **예비 호 예약이 통째로 빠진 날, 발행 점검이 예비 호를 대신 부른다**(`alert.rewind_rescue`) — 11/10 회고: rewind 예약 7개 중 6개가 실행 기록조차 없이 빠져 메일이 10:31 에 나갔는데, 같은 밤 alerts 예약은 제때 돌았다. 08:40·09:40 발행 점검이 '오늘 호 없음'을 보면 오늘(KST 0시 뒤) rewind 실행을 찾아, 대기·진행 중이거나 성공한 실행이 없으면 `rewind.yml` 을 workflow_dispatch(dry_run=false)로 부르고 알림 메일에 한 줄 덧붙인다. 13시 뒤·다른 날·API 불가·dry-run 은 부르지 않는다. alerts.yml 점검 작업에 `actions: write`. 확인: selftest 알림 칸(부름·진행 중/성공/API 불가면 안 부름·실패만 있으면 다시·시각 경계·dry-run), 시각 경계를 일부러 깨면 selftest 가 잡는 것까지 봄.
 
+### 2026-11-22 (오후 — 운영자 '릴스는 월수금 주 3회로 하고 웹툰은 그만해 줘')
+- **AI 영상 릴스 월·수·금만, 웹툰 그만**(11/23~, `config.instagram.ai_video_days`·`comic_until` — `post_instagram.ai_video_day`·`alert._ai_reel_weekday` 가 매일 규칙보다 먼저 본다). 근거: 11/08~11/21 웹툰 13편 도달 2~9·저장 0·공유 0(카드뉴스와 내용 겹침), 릴스 도달 107~1,100. 화·목·토·일은 08:00 캐러셀 실행이 아침 카드 스토리를 올린다. 07:45 배차 예약도 월·수·금만. RUNBOOK_REEL 맨 위·AGENTS 2-2·2-6·selftest. 4주 뒤(12/20) 주간 릴스 총 조회·팔로우로 판정(주 2회로 줄일지).
+
 ### 2026-11-22 (낮 — 운영자 '캡션에 「이 영상과 목소리는 AI로 만들었어요」 이 부분 삭제해 줘')
 - 릴스·웹툰 캡션의 AI 줄을 뺀다 — AI 표시는 인스타 'AI 정보' 라벨(`is_ai_generated`)이 한다(11/22 릴스·웹툰 모두 라벨 붙음 `ai_label: true`). 라벨이 거절된 날만 `post_instagram.create_with_ai_label` 이 캡션에 AI 한 줄을 붙인다(AI 표시가 하나도 없게 되지 않도록). `reel_caption`·`post_comic` 의 자동 덧붙임 삭제, `qa.caption_texts` 는 그 줄이 있으면 막음, RUNBOOK_REEL 캡션 규칙, selftest. 이미 올라간 11/22 릴스·웹툰 캡션은 API 로 고칠 수 없어 운영자가 앱에서 지운다.
 

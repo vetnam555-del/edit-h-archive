@@ -1972,6 +1972,13 @@ def t_story():
     expect(real_cfg.get("ai_video_weekly") == {"from": "2026-11-18", "weekday": 0}
            and [post_instagram.ai_video_day(real_cfg, k) for k in ("2026-11-17", "2026-11-19", "2026-11-23")] == [True, False, True],
            "config 의 ai_video_weekly(월요일만, 11/18~)가 없거나 실제 config 로 본 영상 날이 다르다")
+    # 2026-11-22 운영자 '릴스는 월·수·금 주 3회, 웹툰은 그만' — ai_video_days 가 매일 규칙보다 먼저(11/23~), 그 전 날짜는 그대로
+    import post_instagram as _pi, alert as _al
+    real = load_config()["instagram"]
+    want = {"2026-11-23": True, "2026-11-24": False, "2026-11-25": True, "2026-11-26": False, "2026-11-27": True, "2026-11-28": False, "2026-11-29": False}
+    expect(all(_pi.ai_video_day(real, d) == v and _al._ai_reel_weekday(real, d) == v for d, v in want.items())
+           and _pi.ai_video_day(real, "2026-11-22") and _al._ai_reel_weekday(real, "2026-11-22") and real.get("comic_until") == "2026-11-22",
+           "11/23~ 영상 날은 월·수·금만(게시·22:25 알림 같은 판단), 11/22 까지는 매일")
     # 2026-11-21 운영자 '조회수 1만 되도록 노력해 줘' — ai_video_daily_from 부터 매일 영상 날(주 1회 규칙보다 먼저), 그 전 날짜는 그대로
     dl = dict(wl, ai_video_daily_from="2026-11-21")
     expect([post_instagram.ai_video_day(dl, k) for k in ("2026-11-19", "2026-11-20", "2026-11-21", "2026-11-22", "2026-11-24")] == [False, False, True, True, True]
