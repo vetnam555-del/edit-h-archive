@@ -2252,6 +2252,24 @@ def rebuild(days, strict):
                 print(f"  ✓ {name} — 뉴스레터·캡션이 발행본과 같음" + (f" (빌드 경고 {len(warn)}줄)" if warn else ""))
 
 
+def t_latest_page():
+    """오늘 호 바로 가기(2026-11-22 운영자 '바로 오늘 기사 볼 수 있는 페이지 링크'): latest.html 은 feed.xml 첫 호로 넘기고,
+    못 읽으면 첫 화면 '최근 호' 카드로. feed 첫 <item><link> 가 저장소에 있는 YYYY-MM-DD.html 이어야 리틀리 단추가 그 호로 간다."""
+    page = (ROOT / "latest.html").read_text(encoding="utf-8")
+    expect("fetch('feed.xml'" in page and "item > link" in page and "location.replace" in page,
+           "latest.html 이 feed.xml 첫 호로 넘기지 않는다")
+    expect(page.count("./#latest-title") >= 3 and 'name="robots" content="noindex"' in page,
+           "latest.html 에 못 읽을 때 가는 곳(#latest-title — 스크립트·noscript·눌러서)이나 noindex 가 없다")
+    home = (ROOT / "index.html").read_text(encoding="utf-8")
+    expect('id="latest-title"' in home, "첫 화면에 '최근 호' 자리(#latest-title)가 없다 — latest.html 이 못 읽을 때 갈 곳")
+    feed = (ROOT / "feed.xml").read_text(encoding="utf-8")
+    m = re.search(r"<item>.*?<link>[^<]*/(\d{4}-\d{2}-\d{2}\.html)</link>", feed, re.S)
+    expect(m and (ROOT / m.group(1)).exists(), f"feed.xml 첫 호가 저장소에 없다: {m and m.group(1)}")
+    dates = re.findall(r"<item>.*?<link>[^<]*/(\d{4}-\d{2}-\d{2})\.html</link>", feed, re.S)
+    expect(dates and dates[0] == max(dates), f"feed.xml 첫 호가 가장 최근 호가 아니다: {dates[:3]}")
+    return f"지금 넘어가는 곳 {m.group(1)}"
+
+
 def t_weekly_quiz():
     """금요일 주간 특집 퀴즈형(2026-11-27~, 운영자 11/22 '이 표지 클릭하고 싶지 않다' → 시안 A): 문제 수 = 소식 수, 정답 보기가 그 소식
     카드 글에 있어야, 표지 스티커 ?? 3개, 질문으로 끝나는 제목. 표지·문제 장·정답 칩, 캡션에 정답을 쓰지 않음. 11/20 전 특집은 그대로."""
@@ -4034,6 +4052,7 @@ def main():
     check("금요일 이번 주 퀴즈(11/27~)", t_friday_quiz)
     check("힉스필드 EDIT H 몫 한 달 1,500(11/22~)", t_higgsfield_budget)
     check("금요일 주간 특집 퀴즈형(11/27~)", t_weekly_quiz)
+    check("오늘 호 바로 가기 latest.html(11/22~)", t_latest_page)
     if not args.quick:
         check("딥다이브 카드 글자 한도 렌더링(넘침 없음)", t_dive_render)
         check("웹툰 두 컷 장 글자 한도 렌더링(넘침 없음·넘침 잡음)", t_webtoon_render)

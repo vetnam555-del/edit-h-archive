@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EDIT H 오늘 호 바로 보기</title>
+<meta name="description" content="EDIT H 가장 최근 호로 바로 넘어갑니다.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#FFFFFF">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<noscript><meta http-equiv="refresh" content="0;url=./#latest-title"></noscript>
+<!-- 2026-11-22 운영자 '바로 오늘 기사 볼 수 있는 페이지 링크도 추가하면 좋을 것 같은데?' — 리틀리 '오늘 아침 소식 먼저 보기' 단추가 여기로 온다.
+     날마다 바뀌는 호 주소(YYYY-MM-DD.html) 대신 늘 같은 주소. feed.xml 첫 <item><link> 의 호로 바로 넘긴다(제작이 새 호를 올리면 feed 도 같이 바뀐다).
+     feed 를 못 읽거나 4초 안에 안 되면 첫 화면 '최근 호' 카드(#latest-title)로. 검색에는 내지 않는다(noindex, sitemap 에 없음). -->
+<style>
+  body { margin: 0; background: #FFFFFF; color: #111111; line-height: 1.6;
+    font-family: 'Pretendard Variable','Pretendard','Apple SD Gothic Neo','Malgun Gothic',-apple-system,sans-serif; }
+  main { max-width: 480px; margin: 0 auto; padding: 40px 20px; }
+  .brand { font-weight: 800; font-size: 18px; letter-spacing: -0.02em; }
+  .brand b { color: #FF5233; }
+  p { color: #57534C; font-size: 15px; }
+  a { color: #C2410C; font-weight: 700; }
+</style>
+</head>
+<body>
+<main>
+  <div class="brand">EDIT <b>H</b></div>
+  <p>오늘 호로 가는 중이에요…</p>
+  <p><a id="fallback" href="./#latest-title">바로 안 넘어가면 여기를 눌러 주세요 →</a></p>
+</main>
+<script>
+(function () {
+  var fallback = './#latest-title';
+  var done = false;
+  function go(url) { if (done) return; done = true; location.replace(url); }
+  var timer = setTimeout(function () { go(fallback); }, 4000);
+  fetch('feed.xml', { cache: 'no-store' })
+    .then(function (r) { if (!r.ok) throw new Error('feed ' + r.status); return r.text(); })
+    .then(function (xml) {
+      var doc = new DOMParser().parseFromString(xml, 'application/xml');
+      var link = doc.querySelector('item > link');
+      var m = link && /\/(\d{4}-\d{2}-\d{2}\.html)$/.exec(link.textContent.trim());
+      clearTimeout(timer);
+      go(m ? m[1] : fallback);
+    })
+    .catch(function () { clearTimeout(timer); go(fallback); });
+})();
+</script>
+</body>
+</html>
