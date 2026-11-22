@@ -1242,6 +1242,37 @@ def t_threads():
     return f"{day[0]} 본문 {len(text)}자"
 
 
+def t_cover_h():
+    """사진 표지 H 혼잣말(2026-11-24~, 운영자 11/22 '매일1보 참고'): 그날부터 사진 표지에 3D H·말풍선, 그 전 호는 그대로, 혼잣말 검사."""
+    import copy
+    from edith import cards, content as content_mod
+    d = copy.deepcopy(content_mod.load("2026-11-22"))
+    before = cards.cover(d)
+    expect("COVER" not in before and "작년에" not in before, "11/24 전 호 표지가 바뀌었다")
+    d["date"] = cards.COVER_H_FROM
+    d["cards"]["cover"]["say"] = "작년에 산 거 어떡하지…"
+    after = cards.cover(d)
+    expect("작년에 산 거 어떡하지…" in after and after.count("data:image/png") >= 1 and len(after) > len(before) + 1000,
+           "11/24~ 사진 표지에 H·혼잣말이 안 붙는다")
+    raw = json.loads((CONTENT_DIR / "2026-11-22.json").read_text(encoding="utf-8"))
+    cases = {"작년에 산 거 정말 어떡하면 좋지…": "14자", "112만원이었는데": None, "3돈이나 샀는데": "숫자", "x": "자세"}
+    for say, why in cases.items():
+        r = copy.deepcopy(raw)
+        r["cards"]["cover"]["say"] = say
+        if why == "자세":
+            r["cards"]["cover"]["pose"] = "dance"
+        probs = []
+        try:
+            content_mod.prepare(r, "2026-11-22")
+        except content_mod.ContentError as e:
+            probs.append(str(e))
+        if why:
+            expect(probs, f"혼잣말 '{say}' 을 막지 않는다({why})")
+        else:
+            expect(not probs, f"제목에 있는 숫자 혼잣말 '{say}' 을 막았다: {probs}")
+    return "11/24~ 사진 표지 H·혼잣말 · 그 전 호 그대로 · 막는 경우 3가지"
+
+
 def t_card_calc():
     """구독 선물 계산기(2026-11-22 '메리트 있게끔'): 조특법 제126조의2·소득세법 계산을 손계산 사례와 맞춘다(node 로 gifts/card_calc.js)."""
     js = AUTOMATION / "gifts" / "card_calc.js"
@@ -4050,6 +4081,7 @@ def main():
     check("스레드 본문(post_threads)", t_threads)
     check("구독 선물(gift)", t_gift)
     check("구독 선물 카드 공제 계산기", t_card_calc)
+    check("사진 표지 H 혼잣말(11/24~)", t_cover_h)
     check("대체 표지 사진(fetch_photo --library)", t_photo_library)
     check("검색 노출(호 페이지 SEO)", t_seo)
     check("메일·카드 새 배치(11/19~)", t_layout_v3)

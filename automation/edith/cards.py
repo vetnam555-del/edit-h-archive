@@ -247,6 +247,35 @@ def _mascot_hero(d, cov, l1, l2, height):
     return (say + f'<div style="position:absolute;left:30px;bottom:-30px;z-index:1;">{mascot_img(pose, body, d3=mascot_3d_on(d))}</div>')
 
 
+# 사진 표지에 3D H 가 반응한다(2026-11-24~, 운영자 11/22 '매일1보 카드뉴스 참고해 봐'). 매일1보 표지는 사람 얼굴·표정과 짧은 혼잣말
+# 말풍선('이것 뭐에요~???')으로 멈춰 세우는데, 우리 사진 표지는 금괴·동전·청진기 같은 사물뿐이라 감정이 없었다(11/14~11/22 9장 중 9장).
+# 보도사진·초상권 때문에 실제 얼굴은 못 쓰니 우리 캐릭터가 그 자리를 맡는다 — cards.cover.say(혼잣말 ≤14자), pose(없으면 제목으로 고름).
+COVER_H_FROM = "2026-11-24"
+COVER_SAY_MAX = 14
+_COVER_H_POSES = ("surprised", "sweat", "sulky", "thinking", "point", "celebrate", "wink", "redpen")
+
+
+def cover_h_on(d):
+    return str((d or {}).get("date") or "")[:10] >= COVER_H_FROM
+
+
+def _cover_h(d, cov, l1, l2):
+    """사진 표지 오른쪽 아래 3D H + 혼잣말 말풍선(say 가 있을 때). 출처 줄·넘김 안내를 가리지 않게 아래 96px 위에 둔다."""
+    pose = cov.get("pose") or mascot_pose(f"{l1} {l2}", "surprised", d["date"])
+    if pose not in _COVER_H_POSES:
+        pose = "surprised"
+    say = str(cov.get("say") or "").strip()
+    bubble_html = ""
+    if say:
+        bubble_html = (f'<div style="position:absolute;right:380px;bottom:{480 + (card_height(d["date"]) - H) // 4}px;z-index:3;max-width:520px;'
+                       f'background:#FFFFFF;border:4px solid {TEXT};border-radius:30px;padding:14px 26px 16px;font-weight:800;font-size:36px;'
+                       f'line-height:1.25;letter-spacing:-1px;color:{TEXT};box-shadow:0 6px 0 {ACC_FILL};word-break:keep-all;">{esc(say)}'
+                       f'<div style="position:absolute;right:-20px;bottom:26px;width:30px;height:30px;background:#FFFFFF;'
+                       f'border-right:4px solid {TEXT};border-top:4px solid {TEXT};transform:rotate(45deg);"></div></div>')
+    return (bubble_html + f'<div style="position:absolute;right:6px;bottom:84px;z-index:2;filter:drop-shadow(0 10px 18px rgba(0,0,0,.45));">'
+            f'{mascot_img(pose, 460, d3=True)}</div>')
+
+
 def cover(d, kicker=None, foot=None, tag=None):
     """머리말 → (딥다이브 날 이름표) → 띠 제목 두 줄 → (사진 또는 핵심어 대형 마커) + 오늘의 다른 이슈 스티커 3개."""
     cov = d["cards"]["cover"]
@@ -269,6 +298,8 @@ def cover(d, kicker=None, foot=None, tag=None):
               '<div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.62) 0%,rgba(0,0,0,.35) 22%,'
               'rgba(0,0,0,0) 42%,rgba(0,0,0,0) 72%,rgba(0,0,0,.55) 100%);"></div>')
         hero, sticker_html = "", ""
+        if cover_h_on(d):
+            bg += _cover_h(d, cov, l1, l2)
     elif mascot_on(d):
         hero = _mascot_hero(d, cov, l1, l2, 560 + (card_height(d["date"]) - H) // 2)
         spots = [("right:10px;top:250px;", 2), ("right:60px;top:360px;", -2), ("right:0;top:470px;", 1.5)]   # H 오른쪽 아래로
