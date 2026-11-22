@@ -181,9 +181,28 @@ def mascot_on(d):
     return str(d.get("date") or "")[:10] >= MASCOT_CARDS_FROM
 
 
-def mascot_pose(text, default="thinking"):
-    """소식 글자로 H 의 자세를 고른다 — 놀라운 소식 surprised, 좋은 소식 celebrate, 날짜·마감 calendar, 그 밖엔 default."""
+# 2026-11-22 운영자 '캐릭터 더 개선할 부분 — 다 진행해 줘': 9장 중 8장이 같은 웃는 얼굴이라 급락·가격 인상·유출에도 H 가 웃고 있었다.
+# 11/23 호부터 반응 표정 6개(식은땀·시무룩·버럭·휴~·졸림·윙크)와 빨간 펜(편집자 소품)을 소식 글자로 고른다(assets/mascot/README '성격').
+# 지난 호 카드는 다시 만들어도 예전 그대로(기록). 순서가 중요하다 — 앞에서 걸리면 끝('가계빚 최대'는 축하가 아니라 식은땀).
+POSE_V2_FROM = "2026-11-23"
+_POSE_V2 = [
+    ("angry", re.compile(r"유출|해킹|사기|피싱|담합|과징금|제재|횡령|먹튀|갑질|위반")),
+    ("sweat", re.compile(r"급락|폭락|하락|떨어|빠졌|적자|손실|연체|파산|위기|경고|사이드카|빚|부채|감소|줄어|역성장")),
+    ("sulky", re.compile(r"인상|요금|수수료|세금|부담|비싸|값\s?올|가격\s?올|오른다|품절|중단|종료|폐지")),
+    ("surprised", re.compile(r"급등|폭등|사상\s?첫|처음|최초|깜짝")),
+    ("relief", re.compile(r"동결|유지|안정|면제|완화|회복|반등|피했|막았|연장")),
+    ("celebrate", re.compile(r"혜택|지원금|당첨|흑자|돌파|오픈|출시|역대")),
+    ("wink", re.compile(r"할인|무료|환급|절약|아끼|꿀팁|챙기|돌려받|공짜|쿠폰")),
+    ("calendar", _POSE_DATE),
+]
+
+
+def mascot_pose(text, default="thinking", date=None):
+    """소식 글자로 H 의 자세를 고른다. 11/23 호~(date 가 POSE_V2_FROM 뒤)는 _POSE_V2 순서대로 반응 표정,
+    그 전 호는 예전 그대로 — 놀라운 소식 surprised, 좋은 소식 celebrate, 날짜·마감 calendar, 그 밖엔 default."""
     t = plain(str(text or ""))
+    if date and str(date)[:10] >= POSE_V2_FROM:
+        return next((pose for pose, rx in _POSE_V2 if rx.search(t)), default)
     if _POSE_SHOCK.search(t):
         return "surprised"
     if _POSE_GOOD.search(t):
@@ -204,7 +223,7 @@ def mascot_img(pose, size, style=""):
 def _mascot_hero(d, cov, l1, l2, height):
     """사진 없는 표지 — 왼쪽에 크게 H(소식에 맞는 자세), 오른쪽 위에 H 가 외치는 핵심어 말풍선."""
     kw = cov.get("keyword") or ""
-    pose = cov.get("mascot") or mascot_pose(f"{kw} {l1} {l2}", "point")
+    pose = cov.get("mascot") or mascot_pose(f"{kw} {l1} {l2}", "redpen" if str(d.get("date", ""))[:10] >= POSE_V2_FROM else "point", d.get("date"))
     size = min(128, fit_size(kw, 860) * 600 // 860) if kw else 0   # 핵심어 5자 이하 — 말풍선이 오른쪽 절반 안에
     say = (f'<div style="position:absolute;right:0;top:10px;z-index:2;background:#FFFFFF;border:5px solid {TEXT};'
            f'border-radius:44px;padding:10px 36px 16px;font-weight:900;font-size:{size}px;line-height:1.1;letter-spacing:-3px;color:{TEXT};'
@@ -480,7 +499,7 @@ def issue_card_v3(it, n, date=None):
              if it.get("number_label") and not cmp else "")
     side = [m for m in it.get("metrics") or [] if m["value"] != hero_value(it)][:2]
     mid = visual_box(vis, date) if vis else stat_tiles(side, False) if side else ""
-    pose = None if vis or not mascot_on({"date": date}) else mascot_pose(f'{it.get("tag", "")} {it.get("headline", "")}')
+    pose = None if vis or not mascot_on({"date": date}) else mascot_pose(f'{it.get("tag", "")} {it.get("headline", "")}', date=date)
     chip = (f'<div style="flex:none;display:inline-flex;align-items:center;gap:12px;margin-bottom:{22 if cmp else 14}px;">'
             f'<div style="width:48px;height:48px;border-radius:12px;background:{TEXT};color:#FFFFFF;font-weight:700;font-size:27px;line-height:48px;">{n}</div>'
             f'<div style="background:{ACC_BG};color:{ACC_INK};font-weight:700;font-size:{fs(27)};line-height:1;padding:11px 18px;border-radius:10px;white-space:nowrap;">'
@@ -501,7 +520,7 @@ def issue_card_v3(it, n, date=None):
 
 def issue_card(it, n, date=None):
     dark = bool(it.get("accent"))
-    pose = (("point" if dark else mascot_pose(f'{it.get("tag", "")} {it.get("headline", "")}'))
+    pose = (("point" if dark else mascot_pose(f'{it.get("tag", "")} {it.get("headline", "")}', date=date))
             if mascot_on({"date": date}) else None)
     fg = "#FFFFFF" if dark else TEXT
     cmp = it.get("compare")

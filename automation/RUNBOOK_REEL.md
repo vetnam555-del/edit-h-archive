@@ -82,6 +82,9 @@
   (11/21 07:50 다시 올림 — 그 전 id 3d8becae·f485f5d5·9dc42fcf 는 `estimate_video_cost` 는 통과했지만 `generate_video` 에서 '미디어 입력을 찾을 수 없어요'(404)로 막혔다.
   견적이 통과해도 실제 생성에서 막힐 수 있으니, 404 가 나면 아래대로 다시 올린다). 안 받아지면 저장소의 `assets/mascot/mascot-sheet.jpg`·`h-surprised.png`·`h-coffee.png` 를 `media_upload`→curl PUT→`media_confirm` 으로 다시 올리고
   이 문서의 id 도 같은 커밋에서 바꾼다(올리는 서명 주소는 커밋·보고에 넣지 않는다).
+- **3D 기준 시트(2026-11-22~)**: 영상 요청엔 위 셋에 더해 힉스필드 작업 `c6ff5d88-1b53-491b-aa4d-a8b1bc0a1fa1`(=`assets/mascot/h-3d-sheet.jpg`, 3D 점토 H 앞·¾·옆·뒤)을 `image_references` 로 붙인다 —
+  영상마다 H 모양이 흔들리던 것(납작한 원반·물건이 입을 가림)을 줄인다. '미디어를 찾을 수 없다'면 그 파일을 위 방법대로 올려 새 id 를 이 줄에 적는다. 참고 그림이 4장이 되면 프롬프트에서 `@image4` 가 3D 시트다.
+- **H 성격·소품**(`assets/mascot/README.md` '성격'): 대사·장면은 그 성격대로 — 나쁜 소식엔 H 가 걱정하는 얼굴(늘 웃지 않는다), 첫 장면이나 '확인했어요' 장면엔 시그니처 **빨간 펜**(`a big chunky red marker pen`)으로 동그라미를 치게 할 수 있다. 소품이 입을 가리지 않게(손은 몸 옆·아래).
 - 프롬프트에서 참고 그림은 `@image1`(시트)·`@image2`(놀람)·`@image3`(커피)처럼 가리키거나 'H from the reference images' 처럼 말로 써도 된다. CHARACTER 문장은 그대로.
 - **목소리**(2026-11-16~): **Hana·Knox 줄 모두 `automation/pilots/ai_reel/clone_voice.py`** — 무료 CosyVoice 3 가 지난 녹음을 듣고 같은 목소리로 읽는다
   (운영자 11/16 새벽 "첫 번째 목소리(Hana)는 똑같네", 낮 "Knox 도 똑같네, 무료 복제로 바꿔 줘").
