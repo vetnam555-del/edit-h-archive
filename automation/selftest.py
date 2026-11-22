@@ -1863,6 +1863,15 @@ def t_mascot_cards():
     expect("background:url(" in cover2 and sig not in cover2, "사진 표지가 마스코트 표지로 바뀌었다(사진이 먼저)")
     expect(cards.mascot_pose("코스피 3.48% 급락") == "surprised" and cards.mascot_pose("청년 지원금 환급 돌파") == "celebrate"
            and cards.mascot_pose("내일부터 신청 접수") == "calendar" and cards.mascot_pose("AI 검색") == "thinking", "H 자세 고르기가 틀린다")
+    # 11/23 호~ 반응 표정(운영자 11/22 '캐릭터 개선 다 진행') — 나쁜 소식에 웃지 않는다, 지난 호는 예전 그대로
+    v2 = {"쿠팡 개인정보 유출": "angry", "가계빚 또 최대": "sweat", "코스피 3% 급락": "sweat", "택시 요금 인상": "sulky",
+          "기준금리 동결": "relief", "청년 지원금": "celebrate", "통신비 아끼는 법": "wink", "내일부터 신청": "calendar", "AI 검색": "thinking"}
+    got = {t: cards.mascot_pose(t, date=cards.POSE_V2_FROM) for t in v2}
+    expect(got == v2, f"11/23~ H 반응 표정 고르기가 틀린다: {got}")
+    expect(cards.mascot_pose("가계빚 또 최대", date="2026-11-22") == "celebrate" and cards.mascot_pose("쿠팡 개인정보 유출", date="2026-11-22") == "surprised",
+           "11/22 전 호의 H 자세가 바뀌었다(지난 카드는 기록)")
+    missing = [p for p in ("sweat", "sulky", "angry", "relief", "sleepy", "wink", "redpen") if not (cards.MASCOT_DIR / f"h-{p}.png").exists()]
+    expect(not missing and (cards.MASCOT_DIR / "h-3d-sheet.jpg").exists(), f"새 H 그림 파일이 없다: {missing}")
     expect(all((cards.MASCOT_DIR / f"h-{x}.png").exists() for x in ("point", "surprised", "celebrate", "calendar", "thinking", "hello")),
            "마스코트 자세 그림이 없다")
     return f"{cards.MASCOT_CARDS_FROM}~ 사진 없는 표지 H·이슈 카드 {n_issue}장 H · 사진 표지·지난 호 그대로"
