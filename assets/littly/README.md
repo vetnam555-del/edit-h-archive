@@ -15,7 +15,7 @@
 | 3 | 링크 버튼 | 썸네일 `btn-today.png` · 제목 `오늘 아침 소식 바로 보기` · 주소 `https://vetnam555-del.github.io/edit-h-archive/latest.html`(그날 호로 바로 — 11/22 밤~) |
 | 3-1 | 링크 버튼 | 썸네일 `btn-archive.png` · 제목 `지난 뉴스레터 전체 보기` · 주소 `https://vetnam555-del.github.io/edit-h-archive/`(첫 화면 — 11/22 밤 운영자 '전체 페이지로 가는 링크는 유지') |
 | 4 | 링크 버튼 | 썸네일 `btn-share.png` · 제목 `친구에게 추천하기` · 주소 `https://vetnam555-del.github.io/edit-h-archive/share.html` |
-| 5 | 텍스트 | `매일 아침 8시 / 숫자는 두 군데서 확인해요`(11/22 밤 운영자 '무료 광고 없음은 삭제') |
+| 5 | 텍스트 | `주말 포함 매일 아침 8시 / 숫자는 두 군데서 확인해요`(11/22 밤 '무료 · 광고 없음' 뺌 → '주말 포함' 더함) |
 | 6 | SNS 아이콘 | 인스타그램 `@edit.h.kr` |
 
 - 배경색 `#F5F1E8`(크림), 버튼색 `#FF5233`(주황) 글자 흰색, 강조 버튼만 애니메이션(흔들림 등)을 켠다.
