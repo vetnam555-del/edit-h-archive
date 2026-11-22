@@ -210,7 +210,48 @@ def t_alert():
             _smtplib.SMTP_SSL = smtp_saved
             for k, v in env2.items():
                 os.environ.pop(k, None) if v is None else os.environ.__setitem__(k, v)
+        # 예비 호 예약이 통째로 빠진 날 발행 점검이 rewind.yml 을 대신 부른다(2026-11-10 회고 — 예약 7개 중 6개가 실행 기록조차 없었다)
+        rday = "2026-11-10"
+        at = lambda h, m=40: dt.datetime.combine(parse_date(rday), dt.time(h, m), tz)
+
+        def _runs_api(runs):
+            def f(method, path, payload=None):
+                calls.append((method, path, payload))
+                if method == "GET":
+                    return None if runs is None else {"workflow_runs": runs}
+                return {}
+            return f
+        quiet = contextlib.redirect_stdout(io.StringIO())
+        with quiet:
+            calls = []
+            alert._api = _runs_api([])
+            got = alert.rewind_rescue(rday, at(8))
+            post = [c for c in calls if c[0] == "POST"]
+            expect(got and len(post) == 1 and post[0][1] == "actions/workflows/rewind.yml/dispatches"
+                   and post[0][2] == {"ref": "main", "inputs": {"date": rday, "dry_run": "false"}}
+                   and "created=%3E%3D2026-11-09T15:00:00Z" in calls[0][1],
+                   f"오늘 예비 호 실행이 없는데 rewind.yml 을 부르지 않는다(또는 오늘 KST 0시 기준이 틀리다): {calls}")
+            for runs, why in (([{"status": "in_progress", "conclusion": None, "event": "schedule"}], "기다리는 중인 예약"),
+                              ([{"status": "completed", "conclusion": "success", "event": "schedule"}], "성공한 실행"),
+                              (None, "API 를 못 씀")):
+                calls = []
+                alert._api = _runs_api(runs)
+                expect(not alert.rewind_rescue(rday, at(8)) and not [c for c in calls if c[0] == "POST"], f"{why}이 있는데 예비 호를 또 부른다")
+            calls = []
+            alert._api = _runs_api([{"status": "completed", "conclusion": "failure", "event": "schedule"}])
+            expect(alert.rewind_rescue(rday, at(9)), "오늘 예비 호 실행이 실패로만 끝났는데 다시 부르지 않는다")
+            for when, why in ((at(8, 0), "08:05 전"), (at(13, 5), "13시 뒤"),
+                              (dt.datetime.combine(parse_date("2026-11-11"), dt.time(8, 40), tz), "다음 날")):
+                calls = []
+                alert._api = _runs_api([])
+                expect(not alert.rewind_rescue(rday, when) and not calls, f"{why}에 예비 호를 부른다")
+            calls = []
+            alert._api = _runs_api([])
+            expect(alert.rewind_rescue(rday, at(8), dry=True) and not [c for c in calls if c[0] == "POST"], "dry-run 인데 예비 호를 실제로 부른다")
         wf = (ROOT / ".github" / "workflows" / "alerts.yml").read_text(encoding="utf-8")
+        watch_job = wf.split("\n  watch:\n", 1)[-1]
+        expect("actions: write" in watch_job and "contents: write" in watch_job,
+               "발행 점검 작업에 actions: write(예비 호 대신 부르기)·contents: write(알림 기록) 권한이 없다")
         expect(wf.count("issues: write") >= 2 and all("issues: write" in (ROOT / ".github" / "workflows" / n).read_text(encoding="utf-8")
                                                       for n in ("rewind.yml", "codex-fallback.yml")),
                "알림을 보내는 워크플로(alerts·rewind·codex-fallback)에 issues: write 가 없다 — 메일이 막히면 이슈로도 못 알린다")

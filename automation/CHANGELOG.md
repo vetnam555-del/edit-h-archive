@@ -3,6 +3,9 @@
 시스템이 날마다 무엇을 바꿨는지 한 줄씩 남긴다 — **바꾼 것 — 왜(근거) — 어떻게 판정·확인**. 최신이 위.
 매일 14:10 개선 루틴(`RUNBOOK_IMPROVE.md`)과 일요일 21:00 주간 루틴이 적는다. 편집 회고는 `learnings.md`, 조사·실험은 `references.md`.
 
+### 2026-11-22 (14:10 개선)
+- **예비 호 예약이 통째로 빠진 날, 발행 점검이 예비 호를 대신 부른다**(`alert.rewind_rescue`) — 11/10 회고: rewind 예약 7개 중 6개가 실행 기록조차 없이 빠져 메일이 10:31 에 나갔는데, 같은 밤 alerts 예약은 제때 돌았다. 08:40·09:40 발행 점검이 '오늘 호 없음'을 보면 오늘(KST 0시 뒤) rewind 실행을 찾아, 대기·진행 중이거나 성공한 실행이 없으면 `rewind.yml` 을 workflow_dispatch(dry_run=false)로 부르고 알림 메일에 한 줄 덧붙인다. 13시 뒤·다른 날·API 불가·dry-run 은 부르지 않는다. alerts.yml 점검 작업에 `actions: write`. 확인: selftest 알림 칸(부름·진행 중/성공/API 불가면 안 부름·실패만 있으면 다시·시각 경계·dry-run), 시각 경계를 일부러 깨면 selftest 가 잡는 것까지 봄.
+
 ### 2026-11-22 (낮 — 운영자 '캡션에 「이 영상과 목소리는 AI로 만들었어요」 이 부분 삭제해 줘')
 - 릴스·웹툰 캡션의 AI 줄을 뺀다 — AI 표시는 인스타 'AI 정보' 라벨(`is_ai_generated`)이 한다(11/22 릴스·웹툰 모두 라벨 붙음 `ai_label: true`). 라벨이 거절된 날만 `post_instagram.create_with_ai_label` 이 캡션에 AI 한 줄을 붙인다(AI 표시가 하나도 없게 되지 않도록). `reel_caption`·`post_comic` 의 자동 덧붙임 삭제, `qa.caption_texts` 는 그 줄이 있으면 막음, RUNBOOK_REEL 캡션 규칙, selftest. 이미 올라간 11/22 릴스·웹툰 캡션은 API 로 고칠 수 없어 운영자가 앱에서 지운다.
 
