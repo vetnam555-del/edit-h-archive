@@ -2790,6 +2790,30 @@ def t_brand_v2():
     return f"{newsletter.BRAND_V2_FROM} 호부터 · '{newsletter.BRAND_LINE}' · 마크 그림 {newsletter.MARK_IMG_FROM}~"
 
 
+def t_higgsfield_budget():
+    """힉스필드 EDIT H 몫(2026-11-22 운영자 '친구랑 같이 써서 한 달 1500 만'): 한 달 경계(18일)·합계·넘으면 막음·장부 파일."""
+    import importlib
+    hb = importlib.import_module("higgsfield_budget")
+    D = dt.date
+    expect(hb.cycle(D(2026, 11, 22), 18) == (D(2026, 11, 18), D(2026, 12, 18))
+           and hb.cycle(D(2026, 12, 17), 18) == (D(2026, 11, 18), D(2026, 12, 18))
+           and hb.cycle(D(2026, 12, 18), 18) == (D(2026, 12, 18), D(2027, 1, 18))
+           and hb.cycle(D(2027, 1, 5), 18) == (D(2026, 12, 18), D(2027, 1, 18))
+           and hb.cycle(D(2027, 3, 1), 31) == (D(2027, 2, 28), D(2027, 3, 31)), "힉스필드 한 달 경계(구독 크레딧 들어오는 날)가 틀린다")
+    rows = [{"date": "2026-11-17", "credits": 900}, {"date": "2026-11-20", "credits": 1450}, {"date": "2026-12-18", "credits": 50}]
+    ok, s = hb.can_spend(63, D(2026, 11, 30), rows)
+    expect(not ok and s["used"] == 1450 and s["cap"] == 1500 and hb.can_spend(50, D(2026, 11, 30), rows)[0], f"이번 달 1450 쓴 뒤 63 을 더 쓰게 두거나 50 을 막는다(몫 1500): {s}")
+    ok2, s2 = hb.can_spend(63, D(2026, 12, 20), rows)
+    expect(ok2 and s2["used"] == 50, f"다음 달로 넘어가도 지난달 합계가 남는다: {s2}")
+    expect(load_config()["higgsfield"]["monthly_cap"] == 1500, "config.higgsfield.monthly_cap 이 1500 이 아니다(운영자 11/22)")
+    led = hb.entries()
+    expect(led and all({"date", "credits", "what"} <= set(r) for r in led), "장부 automation/credits/higgsfield.jsonl 이 없거나 칸이 빠졌다")
+    rb = (AUTOMATION / "RUNBOOK_REEL.md").read_text(encoding="utf-8")
+    expect("higgsfield_budget.py check" in rb and "higgsfield_budget.py add" in rb, "RUNBOOK_REEL 이 만들기 전 검사·쓴 뒤 적기를 말하지 않는다")
+    st = hb.state()
+    return f"{st['start']}~{st['end']} 쓴 {st['used']:g} / {st['cap']:g}"
+
+
 def t_reel_cover():
     """릴스 표지(2026-11-21 운영자 '썸네일도 엄청 중요하다'): reel_cover.py 검사·HTML, 게시가 표지가 있으면 cover_url·없으면 0.8초 프레임."""
     import importlib.util
@@ -3932,6 +3956,7 @@ def main():
     check("뉴스레터 시세판·평가 버튼·맨 위 전달 상자 뺌(11/22~)", t_nl_plus)
     check("H 말풍선(질문·맺음말, 11/22~)·월요일 이번 주 일정(11/23~)", t_h_voice_week)
     check("금요일 이번 주 퀴즈(11/27~)", t_friday_quiz)
+    check("힉스필드 EDIT H 몫 한 달 1,500(11/22~)", t_higgsfield_budget)
     if not args.quick:
         check("딥다이브 카드 글자 한도 렌더링(넘침 없음)", t_dive_render)
         check("웹툰 두 컷 장 글자 한도 렌더링(넘침 없음·넘침 잡음)", t_webtoon_render)
