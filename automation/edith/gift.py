@@ -37,6 +37,7 @@ def active_gift(day=None, cfg=None):
     if not count:
         return None
     return {"title": data["title"], "short": data.get("short") or data["title"], "slug": g["slug"], "count": count,
+            "pitch": data.get("pitch") or "날짜별로 챙길 것만 모았어요.",   # 환영 메일 한 줄(2026-11-22~ 계산기 판)
             "url": f"{cfg['site_url'].rstrip('/')}/gift/{g['slug']}.html"}
 
 
