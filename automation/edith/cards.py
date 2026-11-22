@@ -705,9 +705,12 @@ def follow_on(d):
 # 팔로우 카드 소개 줄 — 11/01 운영자 "꼭 직장인보다는 2030 마케팅, 트렌드, 경제 등 폭넓게"(automation/reviews/2026-11-01-copy.md).
 # E11(팔로우 카드) 표본 10/31~11/06 은 예전 줄 그대로 두고 그다음 날부터 바꾼다. 지난 호 카드는 다시 만들어도 예전 그대로(기록).
 FOLLOW_LINE_V2_FROM = "2026-11-07"
+FOLLOW_LINE_V3_FROM = "2026-11-23"   # 11/22 운영자 '꼭 2030이 아니더라도 다 포괄적으로' — '2030이' → '꼭'
 
 
 def follow_line(d, when, n):
+    if str(d["date"])[:10] >= FOLLOW_LINE_V3_FROM:
+        return f"매일 아침 {when}, 경제부터 트렌드까지 꼭 알아야 할 소식 {n}가지"
     if str(d["date"])[:10] >= FOLLOW_LINE_V2_FROM:
         return f"매일 아침 {when}, 경제부터 트렌드까지 2030이 알아야 할 소식 {n}가지"
     return f"매일 아침 {when}, 2030 직장인의 돈·일·소비 뉴스 {n}가지"

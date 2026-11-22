@@ -125,7 +125,7 @@ def dm_text(s, day=None):
     hh, mm = s["send_time"].split(":")
     when = f"{int(hh)}시" + (f" {int(mm)}분" if int(mm) else "")
     lines = ["안녕하세요, EDIT H예요 📮",
-             f"2030이 알아야 할 경제·트렌드·마케팅·테크 소식을 골라 매일 아침 {when}에 메일로 보내드려요. 구독은 무료예요.",
+             f"꼭 알아야 할 경제·트렌드·마케팅·테크 소식을 골라 매일 아침 {when}에 메일로 보내드려요. 구독은 무료예요.",
              "", f"구독 신청 👉 {subscribe_url(s)}"]
     try:
         from edith.gift import active_gift
