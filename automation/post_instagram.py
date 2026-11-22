@@ -174,6 +174,8 @@ def reel_caption(folder, track=None):
     path = folder / ("reel_ai_caption.txt" if ai and (folder / "reel_ai_caption.txt").exists() else "reel_caption.txt")
     if path.exists():
         text = path.read_text(encoding="utf-8").strip()
+        from edith.site import with_today_link   # 2026-11-23~ 데일리 호 릴스: 해시태그 앞에 '오늘 호 전문은 프로필 링크' 한 줄(extra/ 소개 릴스는 폴더 이름이 날짜가 아니라 그대로)
+        text = with_today_link(text, folder.name)
         return text   # 2026-11-22 운영자 '캡션의 「이 영상과 목소리는 AI로 만들었어요」 삭제' — AI 표시는 인스타 'AI 정보' 라벨이 한다(라벨이 거절되면 create_with_ai_label 이 그때만 캡션에 붙인다)
     from edith.site import _GENERIC_TAGS
     cap = (folder / "caption.txt").read_text(encoding="utf-8").strip().splitlines()

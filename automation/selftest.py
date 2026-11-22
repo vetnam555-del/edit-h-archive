@@ -2313,6 +2313,37 @@ def rebuild(days, strict):
                 print(f"  ✓ {name} — 뉴스레터·캡션이 발행본과 같음" + (f" (빌드 경고 {len(warn)}줄)" if warn else ""))
 
 
+def t_today_link():
+    """캡션 '오늘 호 전문은 프로필 링크'(2026-11-23~, 운영자 11/22): 캐러셀은 서명 바로 앞, 릴스는 올릴 때 해시태그 앞에 한 번.
+    지난 호·extra 소개 릴스엔 붙지 않고, 두 번 붙지 않는다."""
+    from edith import content as content_mod
+    from edith import site as site_mod
+    import post_instagram as pi
+    old = content_mod.load(daily_issues(1)[0])
+    old["send_time_kst"] = load_config()["send_time_kst"]
+    url = load_config()["site_url"]
+    expect(str(old["date"]) >= site_mod.TODAY_LINK_FROM or "오늘 아침 소식 바로 보기" not in site_mod.instagram_caption(old, url),
+           "TODAY_LINK_FROM 전 호 캡션에 '오늘 아침 소식 바로 보기' 줄이 붙었다(게시된 캡션을 다시 빌드해도 같아야 한다)")
+    new = {**old, "date": "2026-11-23"}
+    cap = site_mod.instagram_caption(new, url).split("\n")
+    line = site_mod.today_link("2026-11-23")
+    expect(line and cap.count(line) == 1 and cap[cap.index(line) + 1] == "— 에디터 H",
+           "11/23~ 캐러셀 캡션에 '오늘 호 전문은 프로필 링크' 줄이 서명 바로 앞에 한 번 오지 않는다")
+    reel = "훅 한 줄\n구독은 프로필 링크에서요.\n\n요약\n#금값 #EDITH"
+    out = site_mod.with_today_link(reel, "2026-11-23")
+    expect(out.split("\n")[-2] == line and out.split("\n")[-1] == "#금값 #EDITH" and site_mod.with_today_link(out, "2026-11-23") == out,
+           "릴스 캡션에 '오늘 호' 줄이 해시태그 바로 앞에 한 번 들어가지 않는다")
+    expect(site_mod.with_today_link(reel, "2026-11-22") == reel and site_mod.with_today_link(reel, "7") == reel,
+           "11/22 전 호·extra 소개 릴스(폴더 이름 숫자) 캡션에 '오늘 호' 줄이 붙었다")
+    with tempfile.TemporaryDirectory() as tmp:
+        f = Path(tmp, "2026-11-23")
+        f.mkdir()
+        (f / "reel_ai_caption.txt").write_text(reel, encoding="utf-8")
+        got = pi.reel_caption(f, {"style": "ai"})
+        expect(line in got and got.index(line) < got.index("#금값"), f"올릴 때 AI 릴스 캡션에 '오늘 호' 줄이 안 붙는다: {got!r}")
+    return f"11/23 줄: {line}"
+
+
 def t_latest_page():
     """오늘 호 바로 가기(2026-11-22 운영자 '바로 오늘 기사 볼 수 있는 페이지 링크'): latest.html 은 feed.xml 첫 호로 넘기고,
     못 읽으면 첫 화면 '최근 호' 카드로. feed 첫 <item><link> 가 저장소에 있는 YYYY-MM-DD.html 이어야 리틀리 단추가 그 호로 간다."""
@@ -4116,6 +4147,7 @@ def main():
     check("힉스필드 EDIT H 몫 한 달 1,500(11/22~)", t_higgsfield_budget)
     check("금요일 주간 특집 퀴즈형(11/27~)", t_weekly_quiz)
     check("오늘 호 바로 가기 latest.html(11/22~)", t_latest_page)
+    check("캡션 오늘 호 전문은 프로필 링크(11/23~)", t_today_link)
     if not args.quick:
         check("딥다이브 카드 글자 한도 렌더링(넘침 없음)", t_dive_render)
         check("웹툰 두 컷 장 글자 한도 렌더링(넘침 없음·넘침 잡음)", t_webtoon_render)
