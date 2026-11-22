@@ -46,10 +46,16 @@ def main():
     else:
         eighth = cards.list_card("이번 주를 한 줄로", ol["title"], ol["lines"])
         names, foot = NAMES, f"밀어서 {n}가지 보기 →"
-    sections = ([cards.cover(w, kicker=f"{w['week_label']} 주간 특집 | 이번 주 TOP{n}", foot=foot),
-                 cards.summary(w, period="이번 주")]
-                + [cards.issue_card(it, i, w["date"]) for i, it in enumerate(w["card_issues"], 1)]
-                + [eighth, cards.cta(w)])
+    if w["quiz"]:   # 퀴즈형(11/27~, 운영자 11/22 시안 A) — 표지 '몇 개 맞힐까요?'·02 문제 5개·소식 카드에 정답 칩
+        names = ["cover", "quiz"] + names[2:]
+        head = [cards.quiz_cover(w, kicker=f"{w['week_label']} 주말 퀴즈 · {len(w['quiz'])}문제", foot="밀어서 문제 풀기 →"),
+                cards.quiz_card(w)]
+        items = [cards.with_answer(cards.issue_card(it, i, w["date"]), i, r)
+                 for i, (it, r) in enumerate(zip(w["card_issues"], w["quiz"]), 1)]
+    else:
+        head = [cards.cover(w, kicker=f"{w['week_label']} 주간 특집 | 이번 주 TOP{n}", foot=foot), cards.summary(w, period="이번 주")]
+        items = [cards.issue_card(it, i, w["date"]) for i, it in enumerate(w["card_issues"], 1)]
+    sections = head + items + [eighth, cards.cta(w)]
     files = [f"{i:02d}_edit_h_{w['date']}_{name}.png" for i, name in enumerate(names, 1)]
     out = Path(args.out) if args.out else INSTAGRAM_DIR / w["date"]
     jpeg_dir = out / "ig"  # 인스타그램 자동 게시용 JPEG

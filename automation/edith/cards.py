@@ -264,6 +264,70 @@ def cover(d, kicker=None, foot=None, tag=None):
 <div style="position:absolute;left:0;right:0;bottom:60px;text-align:center;font-weight:700;font-size:26px;color:{foot_color};{shadow}">{esc(foot)}</div>{credit}""", mark=False)
 
 
+# 금요일 주간 특집 퀴즈형(2026-11-27~, 운영자 11/22 '이 표지 전혀 클릭하고 싶지 않다' → 시안 A, drafts/weekly_quiz_cover.py).
+# 표지에 답을 쓰면 넘길 이유가 없다 — 답 자리를 ?? 로 가린 스티커 + '몇 개 맞힐까요?', 02 장은 문제 5개, 03~07 소식 카드에 정답 칩.
+def _bubble_say(text, size):
+    return (f'<div style="position:absolute;right:0;top:10px;z-index:2;background:#FFFFFF;border:5px solid {TEXT};'
+            f'border-radius:44px;padding:10px 36px 16px;font-weight:900;font-size:{size}px;line-height:1.1;letter-spacing:-3px;color:{TEXT};'
+            f'white-space:nowrap;box-shadow:0 8px 0 {ACC_FILL};">{esc(text)}'
+            f'<div style="position:absolute;left:46px;bottom:-24px;width:38px;height:38px;background:#FFFFFF;'
+            f'border-right:5px solid {TEXT};border-bottom:5px solid {TEXT};transform:rotate(45deg);"></div></div>')
+
+
+def _blank_sticker(text):
+    html = esc(text).replace("??", f'<span style="background:{ACC_FILL};padding:0 8px;">??</span>')
+    return (f'<div style="display:inline-block;background:#FFFFFF;border:3px solid {TEXT};padding:10px 18px;font-weight:700;'
+            f'font-size:38px;line-height:1;color:{TEXT};white-space:nowrap;box-shadow:0 3px 8px rgba(0,0,0,.14);">{html}</div>')
+
+
+def quiz_cover(d, kicker, foot):
+    l1, *rest = str(d["cards"]["cover"]["title"]).split("\n")
+    l2 = " ".join(rest)
+    blanks = [r["blank"] for r in d["quiz"] if r.get("blank")][:3]
+    spots = [("right:0;top:260px;", 2), ("right:30px;top:385px;", -2), ("right:0;top:510px;", 1.5)]
+    st = "".join(f'<div style="position:absolute;z-index:3;{pos}transform:rotate({r}deg);">{_blank_sticker(b)}</div>'
+                 for b, (pos, r) in zip(blanks, spots))
+    extra = card_height(d["date"]) - H
+    hero = _bubble_say("?", 150) + f'<div style="position:absolute;left:30px;bottom:-30px;z-index:1;">{mascot_img("thinking", 640)}</div>'
+    return _frame(f"""
+<div class="body" style="padding:64px 60px 0;align-items:center;text-align:center;">
+  <div style="font-weight:900;font-size:34px;line-height:1;letter-spacing:-1px;color:{TEXT};">EDIT H<span style="color:{ACC};">.</span></div>
+  <div style="margin-top:22px;font-weight:700;font-size:28px;color:#5A5A5E;">{esc(kicker)}</div>
+  <div style="flex:none;margin-top:26px;display:flex;flex-direction:column;align-items:center;gap:14px;">{_strip(l1, "#FFFFFF")}{_strip(l2, ACC_FILL)}</div>
+  <div style="flex:none;position:relative;margin-top:{70 + extra // 2 - 45}px;width:100%;height:{590 + extra}px;">{hero}{st}</div>
+</div>
+<div style="position:absolute;left:0;right:0;bottom:60px;text-align:center;font-weight:700;font-size:30px;color:{TEXT};">{esc(foot)}</div>""", mark=False)
+
+
+def quiz_card(d):
+    rows = "".join(
+        f'<div style="padding:30px 0;border-bottom:2px solid #EAEAEA;">'
+        f'<div style="display:flex;align-items:center;gap:20px;">'
+        f'<div style="flex:none;width:58px;height:58px;border-radius:13px;background:{TEXT};color:#FFFFFF;display:flex;align-items:center;'
+        f'justify-content:center;font-weight:700;font-size:28px;">Q{i}</div>'
+        f'<div style="font-weight:800;font-size:{fs(42)};line-height:1.25;color:{TEXT};">{esc(plain(r["q"]))}</div></div>'
+        f'<div style="margin:14px 0 0 78px;display:flex;gap:12px;">'
+        + "".join(f'<div style="border:2.5px solid {TEXT};border-radius:30px;padding:8px 22px;font-weight:700;font-size:31px;color:{TEXT};'
+                  f'white-space:nowrap;">{"①②③"[k]} {esc(plain(o))}</div>' for k, o in enumerate(r["options"]))
+        + '</div></div>' for i, r in enumerate(d["quiz"], 1))
+    return _frame(f"""
+<div class="body" style="padding:120px 60px 0;">
+  <div style="font-weight:700;font-size:28px;color:{ACC};">{esc(d["week_label"])} 주말 퀴즈</div>
+  <div style="margin-top:12px;font-weight:800;font-size:56px;line-height:1.2;letter-spacing:-1.5px;color:{TEXT};">먼저 풀어 보세요 — 정답은 다음 장부터</div>
+  <div style="margin-top:18px;">{rows}</div>
+</div>
+<div style="position:absolute;left:0;right:0;bottom:60px;text-align:center;font-weight:700;font-size:28px;color:{MUTED};">몇 개 맞혔는지 댓글로 남겨 주세요 · 밀어서 정답 →</div>""")
+
+
+def with_answer(card_html, n, row):
+    """소식 카드 오른쪽 위에 'Q1 정답 ② 1조원' 칩 — 문제 장과 소식 장을 잇는다."""
+    chip = (f'<div style="position:absolute;right:56px;top:36px;z-index:5;background:{ACC_FILL};border:3px solid {TEXT};border-radius:30px;'
+            f'padding:6px 18px;font-weight:800;font-size:28px;line-height:1.2;color:{TEXT};white-space:nowrap;">'
+            f'Q{n} 정답 {"①②③"[row["answer"] - 1]} {esc(plain(row["options"][row["answer"] - 1]))}</div>')
+    head, sep, rest = card_html.partition(">")
+    return head + sep + chip + rest
+
+
 def hero_value(it):
     return it["compare"]["to"]["value"] if it.get("compare") else it["number"]
 
