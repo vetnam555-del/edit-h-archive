@@ -234,6 +234,40 @@ _LETTER_BRIEFS = [
     "경제 뉴스레터에는 짧게 읽는 소식 {n}개와 출처까지 담았어요. {when}마다 보내드려요. (프로필 링크)",
     "출처랑 짧게 읽는 소식 {n}개는 {when} 경제 뉴스레터에 있어요. 구독은 프로필 링크에서요.",
 ]
+# 오늘 호 바로 보기(2026-11-22 운영자 '프로필 링크 안내 넣어 줘'): 프로필 링크가 리틀리(litt.ly/edit.h)로 바뀌고 거기에
+# '오늘 아침 소식 바로 보기'(latest.html — 그날 호로 바로) 단추가 생겼다. 성과표: 최근 14일 캐러셀을 보고 프로필에 온 사람 0 —
+# 캡션 끝에서 '프로필에 가면 오늘 호 전문이 있다'를 알린다. 캐러셀 캡션은 만들 때(instagram_caption), 릴스 캡션은 올릴 때
+# (post_instagram.reel_caption → with_today_link — 손으로 쓰는 AI 릴스 캡션·qa 를 건드리지 않게) 해시태그 줄 바로 앞에 붙인다.
+TODAY_LINK_FROM = "2026-11-23"
+_TODAY_LINK = [
+    "오늘 호 전문은 프로필 링크 → '오늘 아침 소식 바로 보기'에서 바로 읽을 수 있어요.",
+    "메일로 간 오늘 호 전문은 프로필 링크에서 바로 볼 수 있어요('오늘 아침 소식 바로 보기').",
+    "오늘 호를 지금 다 읽고 싶다면 프로필 링크 → '오늘 아침 소식 바로 보기'.",
+]
+
+
+def today_link(day):
+    """캡션 끝 '오늘 호 전문은 프로필 링크' 한 줄 — TODAY_LINK_FROM 부터의 데일리 호만(지난 호를 다시 빌드해도 그대로). 아니면 None."""
+    day = str(day)
+    if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", day) or day < TODAY_LINK_FROM:
+        return None
+    return _pick(_TODAY_LINK, {"date": day})
+
+
+def with_today_link(text, day):
+    """이미 쓴 캡션에 today_link 줄을 맨 끝 해시태그 줄 바로 앞에 넣는다(해시태그 줄이 없으면 맨 끝). 이미 있거나 날짜 전이면 그대로."""
+    line = today_link(day)
+    if not line or line in text:
+        return text
+    rows = text.rstrip().split("\n")
+    at = len(rows)
+    while at > 0 and rows[at - 1].lstrip().startswith("#"):
+        at -= 1
+    if at == 0:   # 해시태그만 있는 캡션은 없지만, 있으면 맨 끝에
+        at = len(rows)
+    return "\n".join(rows[:at] + [line] + rows[at:])
+
+
 _REEL_TAIL = ["넘겨보는 카드는 피드에 올려뒀어요.", "카드 전체는 피드 게시물에 있어요.", "자세한 숫자는 피드 카드에서 볼 수 있어요."]
 # 릴스·웹툰 캡션 끝의 '구독하면 받는 것' 한 줄(2026-11-05 구독 길 점검: 릴스는 비팔로워에게 주 2,800번 닿는데 캡션엔 구독 안내가 없고
 # '아침 카드'로만 보냈다 — 14일 신청 0·프로필 방문 2). 이 날짜 호부터 카드 릴스 캡션에 붙이고, AI 릴스·웹툰 캡션도 같은 줄을 쓴다(qa 가 숫자 검사에서 뺀다).
@@ -331,7 +365,7 @@ def instagram_caption(d, site):
         letter = _pick(_LETTER_GIFT, d).format(title=gift["title"], n=gift["count"], when=_when(d))
     if d.get("series"):   # 고정 연재 날: 다음 편 예고(같은 요일·같은 이름 — 기다릴 이유)
         lines += ["", _pick(_SERIES_LINE, d).format(wd=d["weekday"], name=d["series"]["name"])]
-    lines += ["", letter, "— 에디터 H", "", _tags(d, ig.get("hashtags"))]
+    lines += ["", letter, *([today_link(d["date"])] if today_link(d["date"]) else []), "— 에디터 H", "", _tags(d, ig.get("hashtags"))]
     return "\n".join(lines)
 
 
