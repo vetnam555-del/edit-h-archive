@@ -14,16 +14,10 @@
  "captions": [
   {
    "start": 0.0,
-   "end": 1.3,
-   "size": 90,
-   "html": "<div class=\"kick\">EDIT H · 에디트 에이치</div><div class=\"main\">뉴스 볼 틈 없는<br><span class=\"hl\">바쁜 아침</span></div><div class=\"sub\">오늘 꼭 알아야 할 것만 골라 드려요</div>",
-   "top": 300
-  },
-  {
-   "start": 1.3,
    "end": 3.05,
-   "size": 84,
-   "html": "<div class=\"kick\">EDIT H 는요</div><div class=\"main\">매일 아침 <span class=\"hl\">8시</span><br>무료 뉴스레터</div><div class=\"sub\">광고 없이 메일로 받아 보세요</div>"
+   "size": 90,
+   "html": "<div class=\"kick\">EDIT H · 에디트 에이치</div><div class=\"main\">뉴스 볼 틈 없는<br><span class=\"hl\">바쁜 아침</span></div><div class=\"sub\">매일 아침 8시 · 꼭 알아야 할 것만 무료로</div>",
+   "top": 300
   },
   {
    "start": 3.4,
@@ -59,14 +53,14 @@
   {
    "file": "stems/intro_v1_hook.mp3",
    "start": 0.1,
-   "tempo": 1.0,
+   "tempo": 1.08,
    "text": "뉴스 볼 틈 없는 아침, 걱정 마세요!",
    "voice": "Hana(qwen, 귀여운 만화 캐릭터 — 신나서 들뜬)"
   },
   {
    "file": "stems/intro_v2_pick.mp3",
    "start": 3.45,
-   "tempo": 1.0,
+   "tempo": 1.25,
    "text": "꼭 알아야 할 것만 골라요!",
    "tts": "꼭 <strong>알아야 할 것만</strong> 골라요!",
    "voice": "Hana",
@@ -75,7 +69,7 @@
   {
    "file": "stems/intro_v3_check.mp3",
    "start": 6.95,
-   "tempo": 1.0,
+   "tempo": 1.15,
    "text": "숫자는 기사 2곳 이상에서 확인해요!",
    "voice": "Hana(qwen, 귀여운 만화 캐릭터 — 또박또박 자신 있게)",
    "tts": "숫자는 기사 두 곳 이상에서 확인해요!"
@@ -83,9 +77,9 @@
   {
    "file": "stems/intro_v4_knox_800.mp3",
    "start": 10.15,
-   "tempo": 1.0,
-   "text": "매일 아침 8시, 이메일로 도착합니다!",
-   "tts": "매일 아침 <strong>여덟 시</strong>, 이메일로 도착합니다!",
+   "tempo": 1.25,
+   "text": "아침 8시, 날마다 이메일로 도착합니다!",
+   "tts": "아침 <strong>여덟 시</strong>, 날마다 이메일로 도착합니다!",
    "voice": "Knox",
    "id": "i4"
   },
