@@ -1274,15 +1274,25 @@ def t_gift():
     for it in every:
         expect(not it.get("until") or (re.fullmatch(r"\d{4}-\d{2}-\d{2}", it["until"]) and it["until"] <= g["until"]),
                f"선물 항목 '{it['do']}' 의 until 이 날짜(YYYY-MM-DD, 선물 기간 안)가 아니다: {it.get('until')}")
-    before = (dt.date.fromisoformat(gift_mod.LIVE_FROM) - dt.timedelta(days=1)).isoformat()
-    if g["from"] <= before:
-        expect(active_gift(before)["count"] == len(every), "LIVE_FROM 전 날짜는 모두 세야 한다(게시된 캡션을 다시 빌드해도 같게)")
-    for day in (gift_mod.LIVE_FROM, "2026-12-01", g["until"]):
+    for day in (max(g["from"], gift_mod.LIVE_FROM), "2026-12-01", "2026-12-11", g["until"]):
         live = gift_mod.live_items(data, day)
         expect((active_gift(day) or {}).get("count") == (len(live) or None), f"{day} 선물 가짓수가 남은 항목 수({len(live)})와 다르다")
         expect(all(not it.get("until") or it["until"] >= day for it in live), f"{day}: 지난 항목을 남은 것으로 센다")
-    expect(any(it.get("until") and it["until"] < gift_mod.LIVE_FROM for it in every)
-           and active_gift(gift_mod.LIVE_FROM)["count"] < len(every), "10월에 끝난 항목이 LIVE_FROM 부터 빠지지 않는다")
+    # 지난 판(history, 2026-11-22 운영자 '업데이트해 줘' → 4분기 판을 연말 판으로): 그 기간 날짜는 그때 선물 그대로, 기간이 겹치지 않는다
+    hist = g.get("history") or []
+    for h in hist:
+        expect((ROOT / "gift" / f"{h['slug']}.html").exists() and h["until"] < g["from"], f"지난 선물 {h['slug']} 페이지가 없거나 기간이 지금 판과 겹친다")
+        expect((active_gift(h["from"]) or {}).get("slug") == h["slug"] and (active_gift(h["until"]) or {}).get("slug") == h["slug"],
+               f"지난 선물 {h['slug']} 기간의 날짜가 그 선물을 돌려주지 않는다(지난 캡션·환영 메일이 바뀐다)")
+    q4 = next((h for h in [g, *hist] if h["from"] <= gift_mod.LIVE_FROM <= h["until"]), None)
+    if q4:   # 가짓수 세기 시작일(LIVE_FROM) 규칙은 그날 나눠 주던 판으로 본다
+        q4_data = json.loads((AUTOMATION / "gifts" / f"{q4['slug']}.json").read_text(encoding="utf-8"))
+        q4_every = gift_mod.items(q4_data)
+        before = (dt.date.fromisoformat(gift_mod.LIVE_FROM) - dt.timedelta(days=1)).isoformat()
+        if q4["from"] <= before:
+            expect(active_gift(before)["count"] == len(q4_every), "LIVE_FROM 전 날짜는 모두 세야 한다(게시된 캡션을 다시 빌드해도 같게)")
+        expect(any(it.get("until") and it["until"] < gift_mod.LIVE_FROM for it in q4_every)
+               and active_gift(gift_mod.LIVE_FROM)["count"] < len(q4_every), "10월에 끝난 항목이 LIVE_FROM 부터 빠지지 않는다")
     html_page = page.read_text(encoding="utf-8")
     expect(html_page.count("data-until=") == sum(1 for it in every if it.get("until")) and "li[data-until]" in html_page
            and '<span id="n">' in html_page, "선물 페이지가 지난 항목을 숨기지 못한다(data-until·숨김 스크립트·가짓수 칸)")
@@ -1300,8 +1310,8 @@ def t_gift():
     letter = site_mod.reel_letter(start)
     expect(letter in site_mod.reel_caption(dict(d, date=start)) and site_mod.reel_letter(prev) not in site_mod.reel_caption(dict(d, date=prev)),
            "카드 릴스 캡션의 '구독하면 받는 것' 줄이 시작일부터만 붙지 않는다")
-    expect(f"({active_gift(start)['count']}가지)" in letter and gift["title"] in letter, f"릴스 줄에 선물 이름·남은 가짓수가 없다: {letter}")
-    expect(gift_mod.screen_line(prev) == "숫자·출처 전문은 프로필 링크 뉴스레터에서" and data.get("short", data["title"]) in gift_mod.screen_line(start)
+    expect(f"({active_gift(start)['count']}가지)" in letter and active_gift(start)["title"] in letter, f"릴스 줄에 선물 이름·남은 가짓수가 없다: {letter}")
+    expect(gift_mod.screen_line(prev) == "숫자·출처 전문은 프로필 링크 뉴스레터에서" and active_gift(start)["short"] in gift_mod.screen_line(start)
            and not re.search(r"\d", gift_mod.screen_line(start) + gift_mod.screen_line(start, short=True)),
            "끝 장 문구가 시작일 전엔 그대로, 뒤엔 숫자 없이 선물 이름이어야 한다")
     sys.path.insert(0, str(AUTOMATION / "pilots" / "ai_reel"))

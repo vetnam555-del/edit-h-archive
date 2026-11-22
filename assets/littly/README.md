@@ -11,7 +11,7 @@
 |---|---|---|
 | 0 | 프로필 | 사진 `assets/mascot/profile.png`(2D 얼굴 — 작게 보여서 2D) · 이름 `EDIT H 에디트 에이치` · 소개 `바쁜 아침을 편집합니다` |
 | 1 | 이미지(배너) | `banner.png` — 누르면 구독 링크 |
-| 2 | 링크 버튼(강조) | 썸네일 `btn-subscribe.png` · 제목 `🎁 무료 구독하고 체크리스트 받기` · 주소 `https://vetnam555-del.github.io/edit-h-archive/subscribe.html?ref=littly` |
+| 2 | 링크 버튼(강조) | 썸네일 `btn-subscribe.png` · 제목 `🎁 무료 구독하면 '연말 놓치면 손해 체크리스트' 바로 받기`(11/23~ — 그 전 '무료 구독하고 체크리스트 받기'는 무엇을 주는지 몰라 운영자가 물었다. **리틀리에 이미 넣은 버튼 제목도 이것으로 바꿔야 한다**) · 주소 `https://vetnam555-del.github.io/edit-h-archive/subscribe.html?ref=littly` |
 | 3 | 링크 버튼 | 썸네일 `btn-today.png` · 제목 `오늘 아침 소식 먼저 보기` · 주소 `https://vetnam555-del.github.io/edit-h-archive/` |
 | 4 | 링크 버튼 | 썸네일 `btn-share.png` · 제목 `친구에게 추천하기` · 주소 `https://vetnam555-del.github.io/edit-h-archive/share.html` |
 | 5 | 텍스트 | `매일 아침 8시 · 무료 · 광고 없음 / 숫자는 두 군데서 확인해요` |
