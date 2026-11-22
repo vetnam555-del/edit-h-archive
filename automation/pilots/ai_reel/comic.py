@@ -132,7 +132,7 @@ def from_cards(c, date):
         if not p.get("card"):
             continue
         it = issues[int(p["card"]) - 1]
-        p.setdefault("bubble", _md(it["headline"]))
+        p.setdefault("bubble", _md(p.get("headline") or it["headline"]))   # headline: 카드 제목이 한 곳에만 있는 말일 때 컷·'한눈에'를 함께 바꾼다(11/22~)
         p.setdefault("body", _md(it["body"]))
         p.setdefault("take", _md(it["takeaway"]))
         p.setdefault("src", it["source"].replace("\u2060", ""))
@@ -141,7 +141,8 @@ def from_cards(c, date):
     with_card = [p for p in c["panels"] if p.get("card")]
     if not with_card:
         return list(issues)
-    return [dict(issues[int(p["card"]) - 1], **({"number": p["number"]} if p.get("number") else {})) for p in with_card]
+    return [dict(issues[int(p["card"]) - 1], **({"number": p["number"]} if p.get("number") else {}),
+                 **({"headline": p["headline"]} if p.get("headline") else {})) for p in with_card]
 
 
 def _src(p, c):

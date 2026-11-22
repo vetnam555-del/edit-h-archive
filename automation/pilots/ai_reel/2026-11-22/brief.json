@@ -1,0 +1,384 @@
+{
+ "date": "2026-11-22",
+ "items": [
+  "금값",
+  "GTA 6",
+  "중국 여행",
+  "손정의",
+  "tvN 채널"
+ ],
+ "hook": "질문",
+ "voices": [
+  {
+   "file": "stems/i1a_ask.mp3",
+   "start": 0.15,
+   "tempo": 1.1,
+   "text": "갖고 있는 금, 지금 팔면 얼마게요?",
+   "tts": "갖고 있는 금, 지금 <strong>팔면</strong> 얼마게요?",
+   "voice": "Hana"
+  },
+  {
+   "file": "stems/i1b_gold.mp3",
+   "start": 2.35,
+   "tempo": 1.1,
+   "text": "최고가보다 37% 빠졌대요!",
+   "tts": "최고가보다 <strong>삼십칠 퍼센트</strong> 빠졌대요!",
+   "voice": "Hana"
+  },
+  {
+   "file": "stems/i2_gta.mp3",
+   "start": 4.9,
+   "tempo": 1.25,
+   "text": "GTA, 첫날에만 5조 원 벌었대요!",
+   "tts": "지티에이, 첫날에만 <strong>오조 원</strong> 벌었대요!",
+   "voice": "Hana"
+  },
+  {
+   "file": "stems/i3_china.mp3",
+   "start": 7.8,
+   "tempo": 1.0,
+   "text": "자율주행 택시 타는 선전 여행이 뜬대요!",
+   "tts": "자율주행 택시 타는 <strong>선전</strong> 여행이 뜬대요!",
+   "voice": "Hana"
+  },
+  {
+   "file": "stems/i4_son.mp3",
+   "start": 10.8,
+   "tempo": 1.25,
+   "text": "소프트뱅크, 하이닉스 인수 알아봤대요!",
+   "tts": "소프트뱅크, 하이닉스 <strong>인수</strong> 알아봤대요!",
+   "voice": "Hana"
+  },
+  {
+   "file": "stems/i5_tvn.mp3",
+   "start": 13.95,
+   "tempo": 1.25,
+   "text": "보던 채널, 곧 끊길 수도 있대요!",
+   "tts": "보던 채널, 곧 <strong>끊길</strong> 수도 있대요!",
+   "voice": "Hana"
+  },
+  {
+   "file": "stems/i_bye_tomorrow.mp3",
+   "start": 16.9,
+   "tempo": 1.2,
+   "text": "내일 아침 8시에 또 만나요!",
+   "tts": "내일 아침 <strong>여덟 시</strong>에 또 만나요!",
+   "voice": "Hana"
+  }
+ ],
+ "comic": {
+  "series": "오늘 아침 5가지",
+  "layout": "duo",
+  "title": "금 한 돈 팔기 전에<br>최고가보다 <span class='hl'>37%</span> 뚝<br>오늘 아침 5가지",
+  "cover": {
+   "img": "stills/cover.png",
+   "pos": "50% 40%",
+   "job": "7298aca8-de90-4ee7-8bde-2fbb03a7dc31"
+  },
+  "summary": true,
+  "panels": [
+   {
+    "card": 1,
+    "img_a": "stills/a1.png",
+    "pos_a": "50% 45%",
+    "img_b": "stills/b1.png",
+    "pos_b": "50% 35%",
+    "say_side": "right",
+    "jobs": [
+     "0736ad1f-24d4-440c-abc9-381ecab7fa65",
+     "8470e396-0e6f-4252-b10f-4803716b1e8f"
+    ],
+    "body": "14개월 만에 가장 낮아요. 미국이 12월 금리를 더 올릴 수 있다는 신호에 달러가 강해진 탓이에요."
+   },
+   {
+    "card": 2,
+    "img_a": "stills/a2.png",
+    "pos_a": "50% 45%",
+    "img_b": "stills/b2.png",
+    "pos_b": "50% 30%",
+    "say_side": "right",
+    "jobs": [
+     "7dc6194a-f0c7-4663-b916-fb93bc850f1d",
+     "b650debc-21e0-459f-b504-22a6646fa34c"
+    ]
+   },
+   {
+    "card": 3,
+    "img_a": "stills/a3.png",
+    "pos_a": "50% 45%",
+    "img_b": "stills/b3.png",
+    "pos_b": "50% 30%",
+    "say_side": "left",
+    "jobs": [
+     "65208a0e-2650-4414-920d-f2397641855b",
+     "093bbfa6-23c1-4d1a-9482-921df58ce02a"
+    ],
+    "body": "2024년 11월 무비자 뒤로 빨라졌어요. 자율주행 택시·드론 배달을 체험하는 선전이 여행지로 떴어요.",
+    "headline": "자율주행 택시 타러\n중국 ==선전==으로"
+   },
+   {
+    "card": 4,
+    "img_a": "stills/a4.png",
+    "pos_a": "50% 50%",
+    "img_b": "stills/b4.png",
+    "pos_b": "50% 35%",
+    "say_side": "left",
+    "jobs": [
+     "19bacfdf-f1d7-474c-9ac0-2591a9310c6b",
+     "9b66ecfd-7a90-4751-b5cd-31bd0d36cce7"
+    ]
+   },
+   {
+    "card": 5,
+    "img_a": "stills/a5.png",
+    "pos_a": "50% 40%",
+    "img_b": "stills/b5.png",
+    "pos_b": "50% 45%",
+    "say_side": "right",
+    "jobs": [
+     "6f506105-29d8-44a1-a761-705fd4e6c6b2",
+     "06ec0c35-2b30-41e3-a316-023524a812e8"
+    ]
+   }
+  ],
+  "sources": "장마다 표시",
+  "end": {
+   "title": "오늘 아침 5가지,<br>매일 아침 8시",
+   "sub": "경제부터 트렌드까지, 오늘 소식 5가지를<br>웹툰으로 풀어 드려요"
+  }
+ },
+ "facts": [
+  {
+   "scene": 1,
+   "fact": "국제 금값, 1월 29일 사상 최고가보다 약 37% 하락·14개월 만에 최저",
+   "seen_in": [
+    "서울경제",
+    "세계일보"
+   ]
+  },
+  {
+   "scene": 1,
+   "fact": "1월 한 돈 최고 112만원(한국표준금거래소)",
+   "seen_in": [
+    "서울경제",
+    "세계일보"
+   ]
+  },
+  {
+   "scene": 1,
+   "fact": "연준 12월 금리 인상 신호·달러 강세가 금값을 누름",
+   "seen_in": [
+    "서울경제",
+    "세계일보"
+   ]
+  },
+  {
+   "scene": 2,
+   "fact": "GTA 6 출시 24시간 매출 37억 달러(약 5조원), GTA 5 첫날(약 8억 달러)의 약 5배",
+   "seen_in": [
+    "연합뉴스",
+    "디지털타임스"
+   ]
+  },
+  {
+   "scene": 2,
+   "fact": "예약 판매 3250만장, PS5·엑스박스 먼저 출시, PC판 출시 일정 미정",
+   "seen_in": [
+    "연합뉴스",
+    "디지털타임스"
+   ]
+  },
+  {
+   "scene": 3,
+   "fact": "올해 1~10월 한중 노선 여객 1731만명(전년 동기 1408만명), 2024년 11월 중국 무비자",
+   "seen_in": [
+    "뉴시스",
+    "한국경제"
+   ]
+  },
+  {
+   "scene": 3,
+   "fact": "선전 — 자율주행 택시·드론 배달을 체험하는 여행지",
+   "seen_in": [
+    "한국경제",
+    "중앙일보(9/1 CMG)"
+   ]
+  },
+  {
+   "scene": 4,
+   "fact": "손정의, SK하이닉스 약 1조달러(약 1350조원) 인수 자금 조달을 월가에 타진(디인포메이션 보도)",
+   "seen_in": [
+    "조선비즈",
+    "한국경제"
+   ]
+  },
+  {
+   "scene": 4,
+   "fact": "SK하이닉스 시가총액 777조원, 1조달러는 약 570조원 많음 · 소프트뱅크 '현재 적극 검토하지 않아'",
+   "seen_in": [
+    "조선비즈",
+    "한국경제"
+   ]
+  },
+  {
+   "scene": 5,
+   "fact": "LG헬로비전, 26일부터 CJ ENM 4개 채널(tvN SPORTS·tvN SHOW·투니버스·중화TV) 송출 중단 예고, CJ ENM 20일 가처분",
+   "seen_in": [
+    "블로터",
+    "디지털타임스"
+   ]
+  }
+ ],
+ "source_note": "check_sources.py 막음 0 · 경고 2('300만명' — 1731만−1408만 우리가 계산한 값, 릴스·웹툰 말에 안 씀 / tvN 기사 2곳 못 읽음 → read_article 로 다시 읽어 두 곳 모두 확인) · 기사 8/10곳. 릴스용으로 원 기사 10곳을 모두 직접 읽음. 한 곳에만 있던 말: '장자제'(한국경제만) — 릴스 대사에서 뺌, '58만원 남짓'(세계일보 58.6만·서울경제 KRX 57.8만으로 기준이 달라) 릴스·캡션에 쓰지 않음. 선전 여행은 중앙일보(9/1, CMG) 기사로 '자율주행 택시·드론 배송 체험 관광지'를 한 곳 더 확인.",
+ "comic_text_changes": "① 본문 '1월에 112만원이던 한 돈, 지금 팔면 58만원 남짓'(58만원은 세계일보 58.6만·서울경제 KRX 57.8만으로 기준이 달라 두 곳 공통값이 아님) → 금리·달러 이유(두 곳 공통). ③ 제목 '장자제 말고 선전'·본문 '선전 여행도 나왔어요'(한국경제에만) → '자율주행 택시 타러 중국 선전으로'(한국경제·중앙일보).",
+ "captions": [
+  {
+   "start": 0,
+   "end": 2.35,
+   "size": 104,
+   "top": 1250,
+   "html": "<div class=\"main\">갖고 있는 금,<br><span class=\"hl\">지금 팔면?</span></div>"
+  },
+  {
+   "start": 2.35,
+   "end": 4.8,
+   "size": 88,
+   "top": 1250,
+   "html": "<div class=\"main\">금값, 최고가보다<br><span class=\"hl\">37%</span> 뚝</div><div class=\"sub\">14개월 만에 최저 · 끝엔 내 TV 채널 얘기</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 서울경제·세계일보</div>"
+  },
+  {
+   "start": 4.8,
+   "end": 7.72,
+   "size": 84,
+   "top": 1250,
+   "html": "<div class=\"kick\">2/5 · 게임</div><div class=\"main\">GTA 6, 첫날 매출<br><span class=\"hl\">5조원</span></div><div class=\"sub\">GTA 5 첫날의 약 5배 · 예약 3250만장</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 연합뉴스·디지털타임스</div>"
+  },
+  {
+   "start": 7.72,
+   "end": 10.72,
+   "size": 84,
+   "top": 1250,
+   "html": "<div class=\"kick\">3/5 · 여행</div><div class=\"main\">자율주행 택시 타러<br>중국 <span class=\"hl\">선전</span>으로</div><div class=\"sub\">1~10월 한중 하늘길 승객 1731만명</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 뉴시스·한국경제</div>"
+  },
+  {
+   "start": 10.72,
+   "end": 13.76,
+   "size": 84,
+   "top": 1250,
+   "html": "<div class=\"kick\">4/5 · 증시</div><div class=\"main\">손정의, 하이닉스<br><span class=\"hl\">1조달러</span> 인수 타진</div><div class=\"sub\">아직 보도 · 소프트뱅크 '적극 검토 안 해'</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 조선비즈·한국경제</div>"
+  },
+  {
+   "start": 13.76,
+   "end": 16.76,
+   "size": 80,
+   "top": 1250,
+   "html": "<div class=\"kick\">5/5 · 방송</div><div class=\"main\">26일부터 케이블서<br><span class=\"hl\">tvN SPORTS</span> 끊기나</div><div class=\"sub\">LG헬로비전 · CJ ENM 채널 4개</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 블로터·디지털타임스</div>"
+  }
+ ],
+ "end_card": {
+  "line": "내일 아침 8시에 또 만나요!",
+  "sub": "프로필 링크에서 구독하면 '돈·일 체크리스트' 선물부터",
+  "note": "숫자는 기사 2곳 이상에서 확인했어요<br>(출처는 장면마다·캡션에)"
+ },
+ "end_seconds": 2.6,
+ "trim": [
+  0.0,
+  19.91
+ ],
+ "note": "일요일 — 운영자 11/21 '이번 주 토·일 릴스' + 11/21~ 매일 영상 날(config ai_video_daily_from). 힉스필드 영상(seedance 480p 20초) + 장면 2개 다시 만들기(5초·4초), 웹툰 그림 12장(1장 안전 차단으로 다시).",
+ "hook_candidates": [
+  "(가) 갖고 있는 금, 지금 팔면 얼마게요? — 내 행동을 찌르는 질문, 답(37%)은 2초째",
+  "(나) 금 팔기 전에 이것부터 봐요! — 경고, 그러나 무엇 때문인지 첫 3초에 안 보임",
+  "(다) 금이 반값이 됐대요 — 반전, 하지만 '반값'은 두 기사 공통 수치가 아님(과장)"
+ ],
+ "hook_pick": "(가) — 올해 초 금을 산 2030 이 많아 '내 일'이고, 질문이 0.15초에 시작해 답 '37%'가 2.35초째에 나온다(열린 고리). 어제(11/21) 첫 마디도 질문('주식 앱 열어 봤어요?')이었지만 소재·말끝이 다르고, 끝까지 볼 까닭은 1번 뒤 자막 sub '끝엔 내 TV 채널 얘기'(26일 케이블 채널 중단).",
+ "story": "오늘 아침 5가지 — 웹툰과 같은 5가지를 20초 한 편에. (B00) 첫 3초: Hana 의 질문 '갖고 있는 금, 지금 팔면 얼마게요?'(0.15초) → 2.35초째 '최고가보다 37% 빠졌대요', 첫 프레임부터 H 가 큰 금괴를 렌즈에 들이밀고 금괴가 풍선처럼 쪼그라든다, 0초 boing. 순서는 카드와 같게(금괴 → 동전 폭포 게임 → 운전자 없는 택시·드론 → 거대한 칩 카트 → TV 지지직 → 아침 커튼). GTA 줄은 Knox(둘째 장면). 끝인사는 내일 8시(최근 넷이 공유·저장·팔로우).'",
+ "music": [
+  {
+   "file": "../2026-10-31/stems/m1_chase.m4a",
+   "start": 0.0,
+   "offset": 1.7,
+   "dur": 5.0,
+   "fade_out": 0.3,
+   "lufs": -24
+  },
+  {
+   "file": "../2026-10-31/stems/m1_chase.m4a",
+   "start": 4.7,
+   "offset": 1.75,
+   "dur": 3.3,
+   "lufs": -28,
+   "fade_in": 0.2,
+   "fade_out": 0.4,
+   "lowpass": 2200
+  },
+  {
+   "file": "../2026-10-31/stems/m2_morning.m4a",
+   "start": 7.7,
+   "dur": 6.9,
+   "fade_in": 0.3,
+   "fade_out": 0.3,
+   "lufs": -25,
+   "lowpass": 2200,
+   "offset": 1.0
+  },
+  {
+   "file": "../2026-10-31/stems/m2_morning.m4a",
+   "start": 14.3,
+   "offset": 0.15,
+   "dur": 7.8,
+   "lufs": -23.5,
+   "fade_in": 0.2,
+   "fade_out": 0.8
+  }
+ ],
+ "sfx": [
+  [
+   0,
+   0.6,
+   0.7
+  ],
+  [
+   0.6,
+   4.8,
+   0.4
+  ],
+  [
+   4.8,
+   10.7,
+   0.3
+  ],
+  [
+   10.7,
+   13.8,
+   0.4
+  ],
+  [
+   13.8,
+   999,
+   0.3
+  ]
+ ],
+ "duck": {
+  "mix": 0.4,
+  "release": 350
+ },
+ "seedance": {
+  "model": "seedance_2_5",
+  "made_by": "higgsfield",
+  "job": "a9dba2e9-c165-4149-b2b1-f92cb0f4d43c",
+  "redo_jobs": [
+   "cfdc7dc7-18b1-46a6-b333-485fb4ba3703",
+   "2fb2b87e-882d-42e7-a1dc-a0566a62e183"
+  ],
+  "prompt": "brief_prompt.txt",
+  "lip_sync": "없음 — NO TALKING 문장, audio_references 없음",
+  "cut": "원본 장면(프레임 차이): 금괴 0~5.0 · 게임 5.0~7.92 · 택시 7.92~10.92 · 창고 10.92~13.96 · TV 13.96~16.96 · 커튼 16.96~20.04. 눈 검수에서 두 장면 탈락 → 장면만 다시: ① 금괴(0~2.5초 H 안경이 눈 위로 떠 '눈 네 개'처럼 보임 + 금괴 옆면에 AI 엉터리 글자) → 5초 다시(GLASSES 문장·'no engraving' 추가) ② 창고(H 가 납작한 원반 — 옆모습 동전 두께) → 4초 다시. 손질본: 다시 만든 금괴 0.2~3.6(1.41배 느리게) | 원본 5.0~10.92 | 다시 만든 창고 1.0~4.04 | 원본 13.96~20.04 → 19.88초. 장면 경계: 0~4.8 · 4.8~7.72 · 7.72~10.72 · 10.72~13.76 · 13.76~16.76 · 16.76~19.88. 검은 화면 0."
+ },
+ "source_video_prep": "ffmpeg: [s1(다시 만든 금괴)]trim=0.2:3.6 setpts×1.4118(소리 atempo 0.7083 — 3.6초 뒤 두 팔을 얼굴 아래로 꼬아 콧수염처럼 보여 뺐다) | [src]trim=5.0:10.92 | [s4(다시 만든 창고)]trim=1.0:4.04 | [src]trim=13.96:20.04 → concat fps=24 480x854 → TV 화면에 AI 가 그린 만화 얼굴·소용돌이 무늬(로고처럼 보임) 13.98~14.62초 crop=150:300:300:250,boxblur=12:3 overlay. 19.91초.",
+ "cover": {
+  "at": 15.1,
+  "line1": "갖고 있는 금,",
+  "hl": "지금 팔면?"
+ }
+}
