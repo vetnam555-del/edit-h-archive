@@ -62,7 +62,7 @@
   <textarea class="url" id="text" rows="5" readonly></textarea>
 
   <a class="btn tertiary" id="mail" href="#">메일로 보내기</a>
-  <p class="note">매일 아침 8시, 경제부터 트렌드까지 2030이 알아야 할 소식을 무료로 보내 드려요. <a href="subscribe.html?ref=share">구독하기</a></p>
+  <p class="note">매일 아침 8시, 경제부터 트렌드까지 꼭 알아야 할 소식을 무료로 보내 드려요. <a href="subscribe.html?ref=share">구독하기</a></p>
 </main>
 <script>
 (function () {
@@ -71,11 +71,11 @@
   var valid = /^\d{4}-\d{2}-\d{2}$/.test(d);
   var issueUrl = valid ? new URL(d + '.html', base).href : base.href;
   var subUrl = new URL('subscribe.html?ref=share', base).href;
-  var title = 'EDIT H — 2030의 아침을 편집합니다';
+  var title = 'EDIT H — 바쁜 아침을 편집합니다';
   var textEl = document.getElementById('text'), msg = document.getElementById('msg');
 
   function body(t) {
-    return (t ? '[EDIT H] ' + t + '\n' : '') + issueUrl + '\n\n매일 아침 8시, 2030이 알아야 할 소식을 골라 보내 줘요. 무료 구독: ' + subUrl;
+    return (t ? '[EDIT H] ' + t + '\n' : '') + issueUrl + '\n\n매일 아침 8시, 꼭 알아야 할 소식을 골라 보내 줘요. 무료 구독: ' + subUrl;
   }
   function render(t) {
     textEl.value = body(t);

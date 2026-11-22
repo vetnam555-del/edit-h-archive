@@ -1894,6 +1894,9 @@ def t_card_ratio():
         page_v2, _ = cards.build({**d, "date": cards.FOLLOW_LINE_V2_FROM}, "")
         expect("2030이 알아야 할 소식" in page_v2 and "돈·일·소비 뉴스" not in page_v2,
                "E11 표본 다음 날부터 팔로우 카드 소개 줄이 새 문구(2030 폭넓게)가 아니다")
+        page_v3, _ = cards.build({**d, "date": cards.FOLLOW_LINE_V3_FROM}, "")
+        expect("꼭 알아야 할 소식" in page_v3 and "2030이 알아야" not in page_v3,
+               "11/23 호부터 팔로우 카드 소개 줄이 '꼭 알아야 할'(11/22 운영자 '2030이 아니더라도 포괄적으로')이 아니다")
         expect(cards.follow_on({"date": "2026-10-31"}) and not cards.follow_on({"date": "2026-10-31", "poll": {"q": 1}}),
                "팔로우 카드 날짜·투표 날 예외가 틀린다")
         html_page = site.gallery_page(d_new, "https://x", ["01.png"], "caption")
@@ -2754,15 +2757,24 @@ def t_brand_v2():
     new = copy_mod.deepcopy(d)
     new["date"] = newsletter.BRAND_V2_FROM
     a, b = newsletter.render(old, site, 10), newsletter.render(new, site, 10)
-    expect("트렌드 한 입" in a and newsletter.BRAND_LINE not in a, "11/01 전 호의 바닥 문구가 바뀌었다(지난 호는 기록)")
-    expect(newsletter.BRAND_LINE in b and "트렌드 한 입" not in b, "11/01 호 메일에 옛 문구('트렌드 한 입')가 남았다")
+    expect("트렌드 한 입" in a and newsletter.BRAND_LINE_V2 not in a, "11/01 전 호의 바닥 문구가 바뀌었다(지난 호는 기록)")
+    expect(newsletter.BRAND_LINE_V2 in b and "트렌드 한 입" not in b and newsletter.BRAND_LINE not in b,
+           "11/01~11/22 호 메일 바닥이 '2030의 아침을 편집합니다'가 아니다(지난 호는 기록)")
+    # 11/23 호부터 '바쁜 아침을 편집합니다'·'꼭 알아야 할'(2026-11-22 운영자 '꼭 2030이 아니더라도 다 포괄적으로' → '바쁜 아침으로')
+    v3 = copy_mod.deepcopy(d)
+    v3["date"] = newsletter.BRAND_V3_FROM
+    c3 = newsletter.render(v3, site, 10)
+    expect(newsletter.BRAND_LINE in c3 and newsletter.BRAND_LINE_V2 not in c3 and "2030이 알아야" not in c3,
+           f"{newsletter.BRAND_V3_FROM} 호 메일에 '{newsletter.BRAND_LINE}'가 없거나 '2030' 문구가 남았다")
     expect("border-radius:0 0" in b and "border-radius:0 0" not in a, "11/01 호 프로필·노트 마크가 마스코트 얼굴(미소)이 아니다")
     for name in ("index.html", "subscribe.html"):
         page = (ROOT / name).read_text(encoding="utf-8")
-        expect("2030이 알아야 할 것만" in page and "직장인 버전" not in page and "돈·일·소비에" not in page
+        expect("꼭 알아야 할 것만" in page and "2030이 알아야" not in page and "2030의 아침을" not in page.split("-->", 1)[-1]
+               and "직장인 버전" not in page and "돈·일·소비에" not in page
                and "트렌드 한 입" not in page and "TREND BRIEF" not in page,
                f"{name} 에 옛 문구가 남았거나 새 대표 문구가 없다")
-    expect("트렌드 한 입" not in inspect.getsource(site_mod.write_feeds), "RSS 제목이 옛 문구다")
+    expect("트렌드 한 입" not in inspect.getsource(site_mod.write_feeds) and "2030" not in inspect.getsource(site_mod.write_feeds),
+           "RSS 제목·설명이 옛 문구다")
     # 11/03 호부터 프로필·노트 마크는 프로필과 같은 그림(2026-11-02 운영자 '메일 로고가 프로필 로고랑 다르다') — 11/02 호까지는 도형 그대로
     img = f'<img src="{site}/{newsletter.MARK_IMG}"'
     last_shape = copy_mod.deepcopy(d)

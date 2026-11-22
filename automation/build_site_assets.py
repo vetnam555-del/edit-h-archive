@@ -45,10 +45,10 @@ h1{{font-size:74px;line-height:1.17;font-weight:850;letter-spacing:-2.5px;margin
 <div class="bar"></div>
 <div class="wrap">
   <div class="eyebrow">매일 아침 {when} · 무료 뉴스레터</div>
-  <h1>경제부터 트렌드까지,<br><span class="hl">2030</span>이 알아야 할 것만</h1>
+  <h1>경제부터 트렌드까지,<br><span class="hl">꼭 알아야 할</span> 것만</h1>
   <div class="sub">경제·재테크, 소비 트렌드, 마케팅, 테크<br>숫자는 두 번 확인해서, 5분 분량으로</div>
 </div>
-<div class="foot"><div class="logo">EDIT<span class="h"> H</span></div><div class="meta">2030의 아침을 편집합니다</div></div>
+<div class="foot"><div class="logo">EDIT<span class="h"> H</span></div><div class="meta">바쁜 아침을 편집합니다</div></div>
 <div class="glow"></div>
 <img class="mascot" src="{hello}" alt="">
 </body></html>"""

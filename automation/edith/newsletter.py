@@ -315,7 +315,20 @@ AVATAR_MARK = ('<table role="presentation" aria-hidden="true" width="58" height=
 # 이날 호부터 ① 프로필·노트 마크를 마스코트 얼굴(안경 + 미소, assets/mascot/profile.png)로 ② 바닥·추천 메일 문구를 새 한 줄
 # '2030의 아침을 편집합니다'로(같은 날 운영자 '직장인보다 2030 마케팅·트렌드·경제 폭넓게'로 고침). 지난 호를 다시 빌드하면 예전 그대로 나온다(기록). 마크는 11/02 호까지 도형으로 그렸다(11/03 호부터 그림 — 아래 MARK_IMG_FROM).
 BRAND_V2_FROM = "2026-11-01"
-BRAND_LINE = "2030의 아침을 편집합니다"   # 11/01 운영자: 직장인보다 2030 마케팅·트렌드·경제 폭넓게
+BRAND_LINE_V2 = "2030의 아침을 편집합니다"   # 11/01 운영자: 직장인보다 2030 마케팅·트렌드·경제 폭넓게
+# 2026-11-22 운영자 '꼭 2030이 아니더라도 다 포괄적으로' → '바쁜 아침으로 가 줘'(계정 소개 릴스 3판 첫 화면 '바쁜 아침'과 같게).
+# 11/23 호부터 바닥·추천 메일 한 줄과 '2030이 알아야 할' → '꼭 알아야 할'. 그 전 호는 다시 빌드해도 예전 그대로(기록).
+BRAND_V3_FROM = "2026-11-23"
+BRAND_LINE = "바쁜 아침을 편집합니다"
+WHO_V2, WHO_V3 = "2030이 알아야 할", "꼭 알아야 할"
+
+
+def brand_line(d):
+    return BRAND_LINE if str(d.get("date", "")) >= BRAND_V3_FROM else BRAND_LINE_V2
+
+
+def who_line(d):
+    return WHO_V3 if str(d.get("date", "")) >= BRAND_V3_FROM else WHO_V2
 
 
 def _v2(d):
@@ -757,8 +770,8 @@ def _share_mailto(d, site):
     n = len(d["all_items"]) + (len(d["briefs"]) if d.get("format") == 2 else 0)
     when = send_time_ko(d.get('send_time_kst') or send_time_on(d['date'])).replace('오전', '아침')   # 그 호의 발송 시각(다시 빌드해도 그대로)
     if _v2(d):
-        subject = f"{BRAND_LINE} — EDIT H 추천해요"
-        pitch = f"매일 {when}, 경제부터 트렌드까지 2030이 알아야 할 소식 {n}가지를 골라 보내줘요."
+        subject = f"{brand_line(d)} — EDIT H 추천해요"
+        pitch = f"매일 {when}, 경제부터 트렌드까지 {who_line(d)} 소식 {n}가지를 골라 보내줘요."
     else:
         subject = "매일 아침 트렌드 한 입, EDIT H 추천해요"
         pitch = f"매일 {when}에 트렌드 {n}가지를 정리해서 보내줘요."
@@ -804,7 +817,7 @@ def _cta(d, site, campaign, n_cards):
 
 def _footer(site, campaign, d=None):
     ig = f"https://instagram.com/edit.h.kr?utm_source=edit_h&amp;utm_medium=email&amp;utm_campaign={campaign}&amp;utm_content=footer_instagram"
-    line = BRAND_LINE if d and _v2(d) else "매일 아침, 트렌드 한 입"
+    line = brand_line(d) if d and _v2(d) else "매일 아침, 트렌드 한 입"
     return (f'<tr><td class="px" style="padding:34px 36px 40px;">'
             + _div(f"font-size:12px;font-weight:400;line-height:1.9;color:{MUTED};",
                    f'EDIT H · {line} · 인스타그램 <a href="{ig}" style="color:{MUTED};">@edit.h.kr</a><br>'
