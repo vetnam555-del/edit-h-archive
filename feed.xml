@@ -1,12 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 <channel>
-  <title>EDIT H — 2030의 아침을 편집합니다</title>
+  <title>EDIT H — 바쁜 아침을 편집합니다</title>
   <link>https://vetnam555-del.github.io/edit-h-archive/</link>
   <atom:link href="https://vetnam555-del.github.io/edit-h-archive/feed.xml" rel="self" type="application/rss+xml"/>
-  <description>매일 아침 8시, 경제부터 트렌드까지 2030이 알아야 할 소식을 확인된 숫자로</description>
+  <description>매일 아침 8시, 경제부터 트렌드까지 꼭 알아야 할 소식을 확인된 숫자로</description>
   <language>ko</language>
-  <lastBuildDate>Sun, 22 Nov 2026 08:00:00 +0900</lastBuildDate>
+  <lastBuildDate>Mon, 23 Nov 2026 08:00:00 +0900</lastBuildDate>
+  <item>
+    <title>VOL.152 내 주식 계좌, 오늘 열어도 될까?</title>
+    <link>https://vetnam555-del.github.io/edit-h-archive/2026-11-23.html</link>
+    <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-11-23.html</guid>
+    <pubDate>Mon, 23 Nov 2026 08:00:00 +0900</pubDate>
+    <description>18년 만의 증안펀드 준비·한전 152만명 유출·토스·카카오페이 주민증 확인·AI가 푼 리만 가설·중국산 테슬라 — 오늘의 5가지</description>
+  </item>
   <item>
     <title>VOL.151 112만원에 산 금 한 돈, 지금 팔면 58만원</title>
     <link>https://vetnam555-del.github.io/edit-h-archive/2026-11-22.html</link>
@@ -209,13 +216,6 @@
     <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-10-24.html</guid>
     <pubDate>Sat, 24 Oct 2026 08:30:00 +0900</pubDate>
     <description>경기 버스 30일 파업 가결·기준금리 3% 동결·환율 2년 만 최저·솔리다임 상장 철회·에어비앤비 청소 요구 금지 — 오늘의 5가지</description>
-  </item>
-  <item>
-    <title>VOL.122 쿠팡 105곳 감독, 법 위반 206건이라고?</title>
-    <link>https://vetnam555-del.github.io/edit-h-archive/2026-10-23.html</link>
-    <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-10-23.html</guid>
-    <pubDate>Fri, 23 Oct 2026 08:30:00 +0900</pubDate>
-    <description>쿠팡 감독 위반 206건·지방세 환급 12월부터 앱으로·직장인 53% 직무 후회·일본 면세 출국 때 정산·AI 워싱 광고 기준 — 오늘의 5가지</description>
   </item>
 </channel>
 </rss>
