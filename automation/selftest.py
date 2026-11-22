@@ -1872,6 +1872,12 @@ def t_mascot_cards():
            "11/22 전 호의 H 자세가 바뀌었다(지난 카드는 기록)")
     missing = [p for p in ("sweat", "sulky", "angry", "relief", "sleepy", "wink", "redpen") if not (cards.MASCOT_DIR / f"h-{p}.png").exists()]
     expect(not missing and (cards.MASCOT_DIR / "h-3d-sheet.jpg").exists(), f"새 H 그림 파일이 없다: {missing}")
+    # 표지 H 3D(11/23~, E28) — 크게 보이는 표지만, 작은 H 는 2D, 지난 호 표지는 2D 그대로, 3D 없는 자세는 2D 로
+    expect(all((cards.MASCOT_3D_DIR / f"h-{p}.png").exists() for p in ("point", "thinking", "surprised", "celebrate", "sweat", "sulky", "wink", "redpen")),
+           "3D 표지 자세 8장이 없다(assets/mascot/3d)")
+    a3, a2 = cards.mascot_img("sweat", 100, d3=True), cards.mascot_img("sweat", 100)
+    expect(a3 != a2 and cards.mascot_img("calendar", 100, d3=True) == cards.mascot_img("calendar", 100), "3D 그림 고르기(없으면 2D)가 틀린다")
+    expect(cards.mascot_3d_on({"date": "2026-11-23"}) and not cards.mascot_3d_on({"date": "2026-11-22"}), "MASCOT_3D_FROM 이 11/23 이 아니다")
     expect(all((cards.MASCOT_DIR / f"h-{x}.png").exists() for x in ("point", "surprised", "celebrate", "calendar", "thinking", "hello")),
            "마스코트 자세 그림이 없다")
     return f"{cards.MASCOT_CARDS_FROM}~ 사진 없는 표지 H·이슈 카드 {n_issue}장 H · 사진 표지·지난 호 그대로"

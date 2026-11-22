@@ -212,8 +212,21 @@ def mascot_pose(text, default="thinking", date=None):
     return default
 
 
-def mascot_img(pose, size, style=""):
-    f = MASCOT_DIR / f"h-{pose}.png"
+# 2026-11-22 운영자 '3D 캐릭터가 더 좋지 않아?' → '말한 대로': 크게 보이는 표지(사진 없는 표지·주간 특집 표지)는 3D H,
+# 작게 보이는 곳(소식 카드 속 H·프로필·뉴스레터 얼굴)은 2D 그대로 — 3D 그림자·광택은 60px 아래에서 뭉개진다.
+# 3D 자세가 없는 날(달력·체크리스트 등)은 2D 로. 지난 호 표지는 다시 만들어도 2D(기록). 판정 E28(references).
+MASCOT_3D_FROM = "2026-11-23"
+MASCOT_3D_DIR = MASCOT_DIR / "3d"
+
+
+def mascot_3d_on(d):
+    return str((d or {}).get("date") or "")[:10] >= MASCOT_3D_FROM
+
+
+def mascot_img(pose, size, style="", d3=False):
+    f = MASCOT_3D_DIR / f"h-{pose}.png" if d3 else None
+    if not (f and f.exists()):
+        f = MASCOT_DIR / f"h-{pose}.png"
     if not f.exists():
         f = MASCOT_DIR / "h-hello.png"
     return (f'<img src="{_photo_uri(f.relative_to(ROOT))}" alt="" '
@@ -231,7 +244,7 @@ def _mascot_hero(d, cov, l1, l2, height):
            f'<div style="position:absolute;left:46px;bottom:-24px;width:38px;height:38px;background:#FFFFFF;'
            f'border-right:5px solid {TEXT};border-bottom:5px solid {TEXT};transform:rotate(45deg);"></div></div>') if kw else ""
     body = min(height + 40, 600)
-    return (say + f'<div style="position:absolute;left:30px;bottom:-30px;z-index:1;">{mascot_img(pose, body)}</div>')
+    return (say + f'<div style="position:absolute;left:30px;bottom:-30px;z-index:1;">{mascot_img(pose, body, d3=mascot_3d_on(d))}</div>')
 
 
 def cover(d, kicker=None, foot=None, tag=None):
@@ -307,7 +320,7 @@ def quiz_cover(d, kicker, foot):
     st = "".join(f'<div style="position:absolute;z-index:3;{pos}transform:rotate({r}deg);">{_blank_sticker(b)}</div>'
                  for b, (pos, r) in zip(blanks, spots))
     extra = card_height(d["date"]) - H
-    hero = _bubble_say("?", 150) + f'<div style="position:absolute;left:30px;bottom:-30px;z-index:1;">{mascot_img("thinking", 640)}</div>'
+    hero = _bubble_say("?", 150) + f'<div style="position:absolute;left:30px;bottom:-30px;z-index:1;">{mascot_img("thinking", 640, d3=mascot_3d_on({"date": str(d["date"])[:10]}))}</div>'
     return _frame(f"""
 <div class="body" style="padding:64px 60px 0;align-items:center;text-align:center;">
   <div style="font-weight:900;font-size:34px;line-height:1;letter-spacing:-1px;color:{TEXT};">EDIT H<span style="color:{ACC};">.</span></div>
