@@ -364,6 +364,36 @@ def retro_missing(date, now=None):
     return not any(((c.get("commit") or {}).get("message") or "").startswith(f"Editor retrospective {y}") for c in commits)
 
 
+RESCUE_UNTIL = 13   # 이 시각(KST) 전까지만 발행 점검이 예비 호를 대신 부른다 — 그 뒤엔 아침 메일로서 뜻이 적다
+
+
+def rewind_rescue(date, now=None, dry=False):
+    """오늘 호가 없는데 오늘 예비 호 실행이 하나도 돌지 않았으면 rewind.yml 을 workflow_dispatch 로 부른다(True = 불렀다).
+    2026-11-10 회고: rewind 예약 7개 중 6개가 실행 기록조차 없이 빠져 10:17 하나만 10:27 에 돌았다 — 같은 밤 alerts 예약은 제때 돌았다.
+    서로 다른 예약이 서로를 받치게, 발행 점검(08:40·09:40, 새벽에 미리 걸어 기다림)이 예비 호의 빈자리를 메운다.
+    오늘(KST 0시 뒤) 만들어진 rewind 실행이 대기·진행 중이거나 성공으로 끝났으면 부르지 않는다(실패·취소만 있으면 한 번 더).
+    API 를 못 쓰면 부르지 않는다. rewind.yml 은 오늘 호가 이미 있으면 아무것도 하지 않고, 발송·게시는 기록을 보고 겹치지 않는다."""
+    now = now or now_kst()
+    d = parse_date(date)
+    if now.date() != d or (now.hour, now.minute) < ISSUE_DEADLINE or now.hour >= RESCUE_UNTIL:
+        return False
+    since = (dt.datetime.combine(d, dt.time(0, 0), now.tzinfo).astimezone(dt.timezone.utc)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    data = _api("GET", f"actions/workflows/rewind.yml/runs?created=%3E%3D{since}&per_page=50")
+    if data is None:
+        return False
+    for r in data.get("workflow_runs", []):
+        if r.get("status") != "completed" or r.get("conclusion") in ("success", "skipped", "neutral"):
+            print(f"  오늘 예비 호 실행이 있습니다({r.get('event')} · {r.get('status')}/{r.get('conclusion')}) — 대신 부르지 않음")
+            return False
+    if dry:
+        print("  (dry-run) 오늘 예비 호 실행이 없어 rewind.yml 을 부를 차례")
+        return True
+    ok = _api("POST", "actions/workflows/rewind.yml/dispatches",
+              {"ref": "main", "inputs": {"date": date, "dry_run": "false"}}) is not None
+    print("  오늘 예비 호 실행이 없어 rewind.yml 을 불렀습니다" if ok else "  ⚠ rewind.yml 을 부르지 못했습니다(권한·API)")
+    return ok
+
+
 def problems(date, cfg, check_web=True):
     """[(알림 종류, 한 줄 설명)] — 오늘 발행 흐름에서 빠진 것."""
     out = []
@@ -439,6 +469,9 @@ def watch(date, dry=False):
     found = problems(date, cfg)
     prev = _json(ALERTS_DIR / f"{(parse_date(date) - dt.timedelta(days=1)).isoformat()}.json") or {}
     found += [(k, t) for k, t in rerun_failures() if k not in prev.get("sent", [])]   # 날짜를 넘겨도 한 번만
+    if any(k == "issue" for k, _ in found) and rewind_rescue(date, dry=dry):
+        found = [(k, t + (" 오늘 예비 호 실행이 하나도 돌지 않아(GitHub 예약 빠짐) 발행 점검이 예비 호를 대신 불렀어요"
+                          " — 몇 분 뒤 '예비 호로 대신 발행' 메일이 따로 갑니다." if k == "issue" else "")) for k, t in found]
     running = busy()
     skip = {k for k, name in (("send", "Send EDIT H newsletter"), ("carousel", "Post EDIT H to Instagram"),
                               ("reel", "Post EDIT H to Instagram"), ("reel_manual", "Post EDIT H to Instagram"))
