@@ -72,7 +72,7 @@ Claude 가 하는 일(07:05 제작 · 07:45 릴스/웹툰 · 08:20 점검 · 14:
 
 ### 2-3. 14:10 개선 (선택 — 사용량이 넉넉할 때만)
 - `automation/RUNBOOK_IMPROVE.md` 0~5단계 그대로. **하루 PR 하나**, 고치는 건 1~2건, `python3 automation/selftest.py` 가 '✓ 자동 점검 통과' 여야 PR.
-- 우선순위: 어제·오늘 발행 실패 → 구독자 길에서 가장 좁은 칸(RUNBOOK_IMPROVE '북극성') → `automation/learnings.md` '시스템 개선 요청' → 판정일이 된 실험(`automation/references.md` '지금 시험 중') → 3일 넘게 반복되는 빌드 경고 → 표지 사진 목록 채우기.
+- 우선순위: 어제·오늘 발행 실패 → **운영자 피드백 장부 `automation/owner_feedback.md`**(2026-11-23~ 매일 '휴대폰 화면 점검' 한 줄 + 되풀이된 불만 하나를 화면이 바뀌는 변경으로) → 구독자 길에서 가장 좁은 칸(RUNBOOK_IMPROVE '북극성') → `automation/learnings.md` '시스템 개선 요청' → 판정일이 된 실험(`automation/references.md` '지금 시험 중') → 3일 넘게 반복되는 빌드 경고 → 표지 사진 목록 채우기.
 
 ### 2-4. 22:00 편집 회고
 1. main 최신으로. `python3 automation/request_metrics.py`(성과표가 오늘 21:00 이후 것이 아니면 수집을 요청하고 최대 9분 기다린다 — 코드 0 최신, 2 기존 것으로 진행).
@@ -120,6 +120,7 @@ Claude 가 하는 일(07:05 제작 · 07:45 릴스/웹툰 · 08:20 점검 · 14:
 | `automation/references.md` | 지금 시험 중인 실험(판정일)·조사·다음 실험 후보 |
 | `automation/CHANGELOG.md` | 날마다 무엇을 바꿨나(최신이 위) |
 | `automation/OWNER_TODO.md` | 운영자만 할 수 있는 일 |
+| `automation/owner_feedback.md` | 운영자가 되풀이한 불만(재미·가독성·릴스…)과 매일 휴대폰 화면 점검 점수 — 14:10 개선이 위에서부터 고친다 |
 | `automation/HANDOVER.md` | 운영 대화를 새 대화로 옮길 때 처음 읽는 인수인계(구조·운영자 결정·사용량 규칙·열린 일) |
 | `automation/metrics/summary.md` | 최근 14호 성과표·출처 품질 |
 | `automation/competitors/ig/summary.md` | 경쟁 매체 인스타 지표(주 1회, 토큰을 넣은 뒤부터) |
