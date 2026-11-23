@@ -595,6 +595,25 @@ def load(date_str):
     return prepare(data, date_str)
 
 
+def _icon_problems(it, data, date_str, where):
+    """카드 v4(2026-11-25~ cards.CARDS_V4_FROM): 소식마다 3D 아이콘 2~3개(assets/icons3d/index.json 이름) — 그 장 장면과 '5가지 한눈에' 줄 아이콘.
+    예비 호·딥다이브 날은 v4 카드가 아니라 묻지 않는다."""
+    from .cards import CARDS_V4_FROM, _COVER_H_POSES, icon_names
+    if date_str < CARDS_V4_FROM or data.get("rewind") or (data.get("cards") or {}).get("dive"):
+        return []
+    icons, out = it.get("icons"), []
+    if not isinstance(icons, list) or not 2 <= len(icons) <= 3:
+        out.append(f"{where}.icons: 3D 아이콘 이름 2~3개가 필요하다(assets/icons3d/index.json — 소식 장면·'5가지 한눈에' 줄 아이콘, RUNBOOK cards.issues)")
+    else:
+        names = icon_names()
+        bad = [x for x in icons if x not in names]
+        if bad:
+            out.append(f"{where}.icons: 없는 아이콘 {', '.join(map(str, bad))} — assets/icons3d/index.json 에서 고른다")
+    if it.get("pose") and it["pose"] not in _COVER_H_POSES:
+        out.append(f"{where}.pose: '{it['pose']}' 는 3D H 자세가 아니다 — {', '.join(_COVER_H_POSES)}")
+    return out
+
+
 def prepare(data, date_str):
     where = f"content/{date_str}.json"
     if data.get("date") != date_str:
@@ -754,6 +773,7 @@ def prepare(data, date_str):
         _len_check(it["body"], CARD_LIMITS["body"], f"{w}.body", problems)
         _len_check(it["takeaway"], CARD_LIMITS["takeaway"], f"{w}.takeaway", problems)
         problems += card_rule_problems(it, data.get("date", ""), w)
+        problems += _icon_problems(it, data, date_str, w)
         for j, m in enumerate(it.get("metrics") or [], 1):
             _len_check(m["value"], CARD_LIMITS["metric_value"], f"{w}.metrics[{j}].value", problems)
             _len_check(m["label"], CARD_LIMITS["metric_label"], f"{w}.metrics[{j}].label", problems)

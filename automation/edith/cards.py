@@ -648,6 +648,141 @@ def issue_card(it, n, date=None):
                   "#000000" if dark else "#FFFFFF")
 
 
+# 카드 v4(2026-11-25~, 운영자 11/23 '카드뉴스 소스 퀄리티가 낮다' → '클로드로만 실행은 못 해?' → '글 압축도·밀집도는? 두 번째에 소식모음집' → '이대로 진행해 줘').
+# 11/23 호 10장 모두 글자 + 작은 H 뿐(문서처럼 보였다)이고 카드 한 장에 글 덩어리 6~7개(큰 숫자·설명·제목·본문·질문·답·출처), 같은 숫자를 세 번 되풀이했다.
+# 최근 2주 캐러셀 도달 4~15·저장 0(릴스는 100~1,200). 그래서 ① 2번째 장 = '오늘의 5가지 한눈에'(표지 약속을 바로 지키고, 첫 장을 넘기지 않은 사람에게
+# 인스타가 다시 보여 주는 두 번째 표지) ② H PICK 3장 → 2장(심층 + 오늘 챙길 것을 한 장으로) ③ 소식 장은 3D 아이콘 장면(Fluent Emoji 3D, MIT — assets/icons3d)
+# + 우리 3D H, 그 아래 큰 숫자·제목·답 한 줄만(본문·'그래서 뭐가 달라져?' 질문은 캡션·뉴스레터로). 10장 → 9장. 힉스필드 크레딧은 쓰지 않는다.
+CARDS_V4_FROM = "2026-11-25"
+CARD_NAMES_4 = ["cover", "summary", "pick", "deep", "issue2", "issue3", "issue4", "issue5", "cta"]
+ICON_DIR = ROOT / "assets" / "icons3d"
+SCENE_BG = ("#FFE9DF", "#E4EEFF", "#E3F6EE", "#FFF4D6", "#EFE8FF")
+_ICON_SLOTS = ((5, 10, 300, -8), (63, 8, 230, 10), (68, 50, 190, -8))   # 왼쪽%, 위%, 크기(높이 600 기준), 기울기
+
+
+def cards_v4(date):
+    return str(date or "")[:10] >= CARDS_V4_FROM
+
+
+def icon_names():
+    import json as _json
+    return _json.loads((ICON_DIR / "index.json").read_text(encoding="utf-8"))
+
+
+def _icon_uri(name):
+    return _photo_uri((ICON_DIR / f"{name}_3d.png").relative_to(ROOT))
+
+
+_SCENE_POSE_CYCLE = ("point", "surprised", "thinking", "sweat", "wink")   # 소식 글로 못 고르면 장마다 다르게(11/25 시안: 네 장 모두 놀란 H 였다)
+
+
+def scene_pose(it, date, n=1):
+    pose = it.get("pose") or ("point" if it.get("accent") else mascot_pose(f'{it.get("tag", "")} {it.get("headline", "")}', None, date))
+    if pose not in _COVER_H_POSES:
+        pose = _SCENE_POSE_CYCLE[(n - 1) % len(_SCENE_POSE_CYCLE)]
+    return pose
+
+
+def icon_scene(it, n, top, ph, date):
+    """소식 장면 — 옅은 색 바탕 + 아이콘 2~3개(첫째가 가장 크게) + 가운데 아래 3D H. 아래 100px 는 흰색으로 녹여 글과 이어진다."""
+    bg = SCENE_BG[(n - 1) % len(SCENE_BG)]
+    parts = [f'<div style="position:absolute;left:0;right:0;top:{top}px;height:{ph}px;z-index:1;overflow:hidden;'
+             f'background:radial-gradient(circle at 50% 62%,#FFFFFF 0%,{bg} 72%);">']
+    for name, (x, y, size, rot) in zip(it.get("icons") or [], _ICON_SLOTS):
+        parts.append(f'<img src="{_icon_uri(name)}" alt="" style="position:absolute;left:{x}%;top:{y}%;width:{size * ph // 600}px;'
+                     f'transform:rotate({rot}deg);filter:drop-shadow(0 14px 18px rgba(0,0,0,.18));">')
+    hs = int(ph * 0.92)
+    parts.append(f'<div style="position:absolute;left:50%;bottom:-{ph // 14}px;transform:translateX(-50%);filter:drop-shadow(0 16px 20px rgba(0,0,0,.2));">'
+                 f'{mascot_img(scene_pose(it, date, n), hs, d3=True)}</div>')
+    parts.append(f'</div><div style="position:absolute;left:0;right:0;top:{top + ph - 100}px;height:100px;z-index:1;'
+                 f'background:linear-gradient(180deg,rgba(255,255,255,0),#FFFFFF);"></div>')
+    return "".join(parts)
+
+
+def _answer(take):
+    """'그래서 뭐가 달라져?'의 답만 — 질문 말풍선은 빼고(다섯 장 모두 같은 말이었다), 복숭아색 상자 하나."""
+    return (f'<div class="bal shrink" style="flex:none;margin-top:30px;max-width:94%;background:{ACC_FILL};border:3px solid {TEXT};'
+            f'border-radius:22px;padding:18px 28px;text-align:left;font-weight:700;font-size:{fs(34)};line-height:1.45;color:{TEXT};">'
+            f'<span style="font-weight:800;color:{ACC_INK};">그래서 나는?</span> {mk(take, TEXT).replace(" — ", " —<br>")}</div>')
+
+
+def issue_card_v4(it, n, date):
+    """11/25~ 소식 장(H PICK 포함) — 위 장면 → [번호·태그] → 큰 숫자(또는 비교 상자) → 숫자 설명 → 제목 → 답 한 줄 → (하루 한 장) 보내기 줄."""
+    pick = bool(it.get("accent"))
+    top, ph = (120, 440) if pick else (0, 600)
+    cmp = it.get("compare")
+    hero = compare_box(cmp, False, big=pick) if cmp else marked_number(it["number"])
+    label = (f'<div style="flex:none;margin-top:6px;font-weight:700;font-size:{fs(30)};line-height:1.3;color:{SUB};">{esc(it["number_label"])}</div>'
+             if it.get("number_label") and not cmp else "")
+    chip = ("" if pick else
+            f'<div style="flex:none;display:inline-flex;align-items:center;gap:12px;margin-bottom:{22 if cmp else 12}px;">'
+            f'<div style="width:48px;height:48px;border-radius:12px;background:{TEXT};color:#FFFFFF;font-weight:700;font-size:27px;line-height:48px;">{n}</div>'
+            f'<div style="background:{ACC_BG};color:{ACC_INK};font-weight:700;font-size:{fs(27)};line-height:1;padding:11px 18px;border-radius:10px;white-space:nowrap;">'
+            f'{esc(it["tag"])}</div></div>')
+    return _frame(f"""{_pick_band(it) if pick else ""}{icon_scene(it, n, top, ph, date)}
+<div class="body" style="position:relative;z-index:2;padding:{top + ph - 10}px 70px 120px;justify-content:flex-start;align-items:center;text-align:center;">
+  {chip}
+  {hero}
+  {label}
+  <div class="bal" style="margin-top:{26 if pick else 30}px;font-weight:700;font-size:{fs(62)};line-height:1.3;letter-spacing:-1px;color:{TEXT};">{mk(it["headline"], TEXT)}</div>
+  {_answer(it["takeaway"])}
+  {send_pill(it["send_to"]) if it.get("send_to") else ""}
+</div>
+<div style="position:absolute;left:60px;right:60px;bottom:52px;text-align:center;font-size:26px;line-height:1.4;color:{SRC_LIGHT};">출처 · {esc(it["source"])}</div>""")
+
+
+def summary_v4(d):
+    """11/25~ 두 번째 장 '오늘의 5가지 한눈에' — 줄마다 그 소식의 첫 아이콘 + 제목 + 숫자. 표지('오늘의 5가지')의 약속을 바로 지킨다."""
+    rows = "".join(
+        f'<div style="display:flex;align-items:center;gap:24px;padding:32px 0;border-bottom:2px solid #EAEAEA;">'
+        f'<div style="flex:none;position:relative;width:104px;height:104px;">'
+        f'<img src="{_icon_uri((it.get("icons") or ["pushpin"])[0])}" alt="" style="width:104px;height:104px;">'
+        f'<div style="position:absolute;left:-10px;top:-8px;width:38px;height:38px;border-radius:10px;background:{ACC if it.get("accent") else TEXT};'
+        f'color:#FFFFFF;font-weight:700;font-size:22px;line-height:38px;text-align:center;">{i}</div></div>'
+        f'<div style="flex:1;min-width:0;font-weight:700;font-size:{fs(44)};line-height:1.3;color:{TEXT};">{plain(it["headline"])}</div>'
+        f'<div style="flex:none;font-weight:800;font-size:{fs(42)};color:{TEXT};white-space:nowrap;'
+        f'background:linear-gradient(180deg,transparent 58%,{ACC_FILL} 58%);">{esc(hero_value(it))}</div></div>'
+        for i, it in enumerate(d["card_issues"], 1))
+    n = len(d["card_issues"])
+    return _frame(f"""
+<div class="body" style="padding:110px 70px 100px;justify-content:center;">
+  <div style="text-align:center;font-weight:700;font-size:30px;color:#5A5A5E;">넘기기 전에, 오늘은 이것만</div>
+  <div style="text-align:center;margin-top:22px;font-weight:800;font-size:{fs(74)};letter-spacing:-1.5px;color:{TEXT};">오늘의 <span style="background:linear-gradient(180deg,transparent 58%,{ACC_FILL} 58%);">{n}가지</span> 한눈에</div>
+  <div style="flex:none;margin-top:46px;border-top:3px solid {TEXT};">{rows}</div>
+  <div style="margin-top:34px;text-align:center;font-weight:600;font-size:28px;color:{SUB};">하나씩 넘겨 보세요 →</div>
+</div>""")
+
+
+def deep_card_v4(d):
+    """11/25~ H PICK 두 번째 장 — 심층(제목 + 숫자 상자 또는 차트) + 오늘 챙길 것(체크리스트)을 한 장에. 예전 '심층'·'에디터 H 노트' 두 장을 합쳤다."""
+    b, deep = d["big_issue"], d["cards"]["deep"]
+    chart = deep.get("chart") if _on(d, "chart_card_from") else None
+    tiles = "".join(
+        f'<div style="flex:1;min-width:0;background:{BOX};border-radius:24px;padding:24px 14px;text-align:center;">'
+        f'<div style="font-weight:800;font-size:{fs(52)};line-height:1.1;letter-spacing:-1px;color:{TEXT};white-space:nowrap;">{esc(n["value"])}</div>'
+        f'<div style="font-weight:500;font-size:{fs(25)};line-height:1.35;margin-top:10px;color:{SUB};">{esc(n["label"])}</div></div>'
+        for n in b["numbers"])
+    todo = [x for x in d.get("todo") or [] if str(x).strip()][:3]
+    checks = "".join(
+        f'<div style="display:flex;gap:18px;align-items:flex-start;margin-top:{0 if i == 0 else 20}px;">'
+        f'<div style="flex:none;margin-top:5px;width:38px;height:38px;border:3px solid {TEXT};border-radius:8px;"></div>'
+        f'<div class="bal" style="font-weight:600;font-size:{fs(38)};line-height:1.4;color:{TEXT};text-align:left;">{mk(x)}</div></div>'
+        for i, x in enumerate(todo))
+    box = (f'<div style="flex:none;margin-top:44px;padding:32px 36px;border-radius:24px;background:#FFF3EC;border:3px solid {ACC_FILL};">'
+           f'<div style="display:flex;align-items:center;gap:14px;margin-bottom:26px;">{avatar(56, d.get("date"))}'
+           f'<div style="font-weight:800;font-size:{fs(32)};line-height:1;color:{ACC_INK};">오늘 챙길 것 · 저장해 두고 체크</div></div>{checks}</div>'
+           if todo else "")
+    src = d["card_issues"][0]["source"]
+    return _frame(f"""
+<div class="body" style="padding:110px 70px 130px;justify-content:center;">
+  <div style="text-align:center;">{bubble(deep.get("ask") or "왜 중요해?")}</div>
+  <div class="bal" style="text-align:center;font-weight:800;font-size:{fs(70)};line-height:1.3;letter-spacing:-1.5px;color:{TEXT};">{mk(deep["headline"])}</div>
+  {chart_box(chart) if chart else f'<div style="flex:none;display:flex;gap:14px;width:100%;margin-top:40px;">{tiles}</div>'}
+  {box}
+</div>
+<div style="position:absolute;left:60px;right:60px;bottom:60px;text-align:center;font-size:26px;line-height:1.4;color:{SRC_LIGHT};">H PICK 심층 · 출처 · {esc(src)}</div>""")
+
+
 def observation(d):
     """마트 '시식후기'식 마무리 전 장 — 오늘 6가지를 한 줄로 꿰는 에디터 H 의 관찰(뉴스레터 'H의 한 줄 관찰'과 같은 문장).
     ' — ' 뒤의 결론 부분에 형광 마커를 칠한다."""
@@ -1153,6 +1288,12 @@ def build(d, font_css):
     issues = d["card_issues"]
     if dive_on(d) and d["date"] >= PICK_FIRST_FROM:
         cards, names = dive_cards(d)
+    elif d.get("format") == 2 and cards_v4(d["date"]) and not d.get("rewind"):
+        # 11/25~: 2번째 '5가지 한눈에' · H PICK 2장 · 소식 장은 3D 아이콘 장면 + 숫자·제목·답만(CARDS_V4_FROM 설명)
+        cards = ([cover(d), summary_v4(d), issue_card_v4(issues[0], 1, d["date"]), deep_card_v4(d)]
+                 + [issue_card_v4(it, i, d["date"]) for i, it in enumerate(issues[1:], 2)]
+                 + [cta_follow(d) if follow_on(d) else cta(d)])
+        names = CARD_NAMES_4
     elif d.get("format") == 2 and cards_v3(d["date"]) and not d.get("rewind"):
         # 11/19~: 저장할 장(체크리스트)을 4번째로 당기고, '5가지 한눈에'는 마무리 앞에서 다시 훑는 장으로(CARDS_V3_FROM 설명)
         cards = ([cover(d), issue_card(issues[0], 1, d["date"]), deep_card(d), note_card(d)]
