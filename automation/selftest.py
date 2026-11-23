@@ -1242,6 +1242,47 @@ def t_threads():
     return f"{day[0]} 본문 {len(text)}자"
 
 
+def t_cards_v4():
+    """카드 v4(2026-11-25~, 운영자 11/23 '소스 퀄리티가 낮다'·'두 번째에 소식모음집' → '이대로 진행해 줘'): 9장 순서, 소식 장 3D 아이콘 장면,
+    본문·반복 질문 뺌, 아이콘 없으면 막음, 그 전 호는 10장 그대로."""
+    import copy
+    from edith import cards, content as content_mod
+    raw = json.loads((CONTENT_DIR / "2026-11-23.json").read_text(encoding="utf-8"))
+    old = content_mod.load("2026-11-23")
+    expect([f.rsplit("_", 1)[-1][:-4] for f in cards.build(old, "")[1]] == cards.CARD_NAMES_3, "11/25 전 호 카드 순서가 바뀌었다")
+    r = copy.deepcopy(raw)
+    r.update(date=cards.CARDS_V4_FROM); r.pop("week_ahead", None); r.pop("vol", None)
+    r["cards"]["cover"]["say"] = "앱 열까 말까…"
+    try:
+        content_mod.prepare(copy.deepcopy(r), cards.CARDS_V4_FROM)
+        blocked = False
+    except content_mod.ContentError as e:
+        blocked = ".icons" in str(e)
+    expect(blocked, "11/25~ 아이콘이 없는데 빌드를 막지 않는다")
+    bad = copy.deepcopy(r)
+    for ci in bad["cards"]["issues"]:
+        ci["icons"] = ["coin", "no_such_icon"]
+    try:
+        content_mod.prepare(bad, cards.CARDS_V4_FROM)
+        bad_ok = False
+    except content_mod.ContentError as e:
+        bad_ok = "no_such_icon" in str(e)
+    expect(bad_ok, "없는 아이콘 이름을 막지 않는다")
+    names = cards.icon_names()
+    expect(len(names) >= 60 and all((cards.ICON_DIR / f"{n}_3d.png").exists() for n in names), "assets/icons3d 목록과 파일이 맞지 않는다")
+    for ci in r["cards"]["issues"]:
+        ci["icons"] = ["coin", "chart_increasing", "bank"]
+    d = content_mod.prepare(r, cards.CARDS_V4_FROM)
+    page, files = cards.build(d, "")
+    expect([f.rsplit("_", 1)[-1][:-4] for f in files] == cards.CARD_NAMES_4, f"11/25~ 카드 순서가 다르다: {files}")
+    it = d["card_issues"][1]
+    card = cards.issue_card_v4(it, 2, d["date"])
+    expect("그래서 나는?" in card and "그래서 뭐가 달라져?" not in card and cards.plain(it["body"])[:12] not in cards.plain(card),
+           "11/25~ 소식 장에 본문·반복 질문이 남았다")
+    expect(card.count("_3d.png") == 0 and card.count("data:image/png") >= 4, "소식 장 장면에 아이콘·H 그림이 없다")
+    return f"{cards.CARDS_V4_FROM}~ 9장(2번째 5가지 한눈에) · 아이콘 장면 · 아이콘 없으면/없는 이름 막음 · 그 전 호 10장 그대로"
+
+
 def t_pick_light():
     """H PICK 흰 바탕(2026-11-24~, 운영자 11/23 '검은색이어서 잘 안 보여' → 흰 바탕 시안 '이렇게 해 줘'): 그날부터 흰 카드 + 위 주황 띠, 그 전 호는 검정 그대로."""
     from edith import cards, content as content_mod
@@ -4119,6 +4160,8 @@ def t_friday_quiz():
     raw = json.loads((ROOT / "content" / "2026-11-21.json").read_text(encoding="utf-8"))
     raw["date"] = "2026-11-27"
     raw["cards"]["cover"]["say"] = "이거 나만 몰랐어?"   # 11/23~ 사진 표지 혼잣말 필수
+    for ci in raw["cards"]["issues"]:   # 11/25~ 카드 v4 — 소식마다 3D 아이콘 2~3개
+        ci["icons"] = ["coin", "chart_increasing"]
     qs = [{"date": f"2026-11-{16 + i}", "q": f"질문 {i}", "options": ["가", "나", "다"], "answer": 1 + i % 3, "why": "그 호에 실린 사실"} for i in range(5)]
     raw["quiz"] = {"questions": qs}
     d = content_mod.prepare(json.loads(json.dumps(raw)), "2026-11-27")
@@ -4178,6 +4221,7 @@ def main():
     check("구독 선물 카드 공제 계산기", t_card_calc)
     check("사진 표지 H 혼잣말(11/23~)", t_cover_h)
     check("H PICK 흰 바탕(11/24~)", t_pick_light)
+    check("카드 v4 — 2번째 5가지·3D 아이콘 장면(11/25~)", t_cards_v4)
     check("사진 없는 표지 H 혼잣말(11/24~)", t_mascot_say)
     check("대체 표지 사진(fetch_photo --library)", t_photo_library)
     check("검색 노출(호 페이지 SEO)", t_seo)
