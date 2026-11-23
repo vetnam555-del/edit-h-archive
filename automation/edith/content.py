@@ -734,6 +734,10 @@ def prepare(data, date_str):
     from .cards import COVER_H_FROM
     if cov.get("photo") and not data.get("rewind") and date_str >= COVER_H_FROM and not str(cov.get("say") or "").strip():
         problems.append("cards.cover.say 가 없다 — 사진 표지 H 혼잣말 14자 이하를 쓴다(RUNBOOK 2-0 ⑥ 재미 점검: 독자가 제목 보고 속으로 할 말)")
+    from .cards import MASCOT_SAY_FROM
+    if not cov.get("photo") and not data.get("rewind") and date_str >= MASCOT_SAY_FROM and not str(cov.get("say") or "").strip():
+        problems.append("cards.cover.say 가 없다 — 사진 없는 표지도 큰 말풍선은 H 혼잣말 14자 이하(용어 keyword 는 작은 스티커로 간다, "
+                        "운영자 피드백 장부 #1 — 11/23 '증안펀드')")
     if cov.get("say") or cov.get("pose"):   # 사진 표지 H 혼잣말(2026-11-24~ cards.COVER_H_FROM) — 숫자는 표지 제목에 있는 것만
         from .cards import COVER_SAY_MAX, _COVER_H_POSES
         _len_check(cov.get("say") or "", COVER_SAY_MAX, "cards.cover.say(H 혼잣말)", problems)

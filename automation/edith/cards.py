@@ -237,6 +237,9 @@ def _mascot_hero(d, cov, l1, l2, height):
     """사진 없는 표지 — 왼쪽에 크게 H(소식에 맞는 자세), 오른쪽 위에 H 가 외치는 핵심어 말풍선."""
     kw = cov.get("keyword") or ""
     pose = cov.get("mascot") or mascot_pose(f"{kw} {l1} {l2}", "redpen" if str(d.get("date", ""))[:10] >= POSE_V2_FROM else "point", d.get("date"))
+    said = str(cov.get("say") or "").strip()
+    if said and mascot_say_on(d):
+        return _mascot_say(d, kw, said, pose, height)
     size = min(128, fit_size(kw, 860) * 600 // 860) if kw else 0   # 핵심어 5자 이하 — 말풍선이 오른쪽 절반 안에
     say = (f'<div style="position:absolute;right:0;top:10px;z-index:2;background:#FFFFFF;border:5px solid {TEXT};'
            f'border-radius:44px;padding:10px 36px 16px;font-weight:900;font-size:{size}px;line-height:1.1;letter-spacing:-3px;color:{TEXT};'
@@ -245,6 +248,31 @@ def _mascot_hero(d, cov, l1, l2, height):
            f'border-right:5px solid {TEXT};border-bottom:5px solid {TEXT};transform:rotate(45deg);"></div></div>') if kw else ""
     body = min(height + 40, 600)
     return (say + f'<div style="position:absolute;left:30px;bottom:-30px;z-index:1;">{mascot_img(pose, body, d3=mascot_3d_on(d))}</div>')
+
+
+# 사진 없는 표지도 큰 말풍선은 H 혼잣말(2026-11-24~ — 운영자 피드백 장부 #1, 11/23 호 '증안펀드'처럼 어려운 용어가 가장 큰 글자였다).
+# 용어를 외치면 모르는 사람은 멈추지 않는다 — 독자가 속으로 할 말(cards.cover.say)을 크게, 용어는 말풍선 아래 작은 노란 스티커로.
+MASCOT_SAY_FROM = "2026-11-24"
+MASCOT_SAY_SPOTS = [("right:10px;top:330px;", 2), ("right:70px;top:430px;", -2), ("right:0;top:530px;", 1.5)]   # 말풍선·용어 스티커 아래로
+
+
+def mascot_say_on(d):
+    return str((d or {}).get("date") or "")[:10] >= MASCOT_SAY_FROM
+
+
+def _mascot_say(d, kw, said, pose, height):
+    size, wide = (60, 600) if len(said) <= 11 else (54, 500)   # 12자 넘으면 두 줄 — 좁게 잡아 H 머리를 덜 가린다
+    term = (f'<div style="margin-top:30px;display:inline-block;transform:rotate(-2deg);background:{ACC_FILL};border:3px solid {TEXT};'
+            f'padding:8px 16px 10px;font-weight:800;font-size:30px;line-height:1;color:{TEXT};white-space:nowrap;">오늘의 말 · {esc(kw)}</div>') if kw else ""
+    bubble_html = (f'<div style="position:relative;max-width:{wide}px;background:#FFFFFF;border:5px solid {TEXT};border-radius:44px;'
+                   f'padding:16px 34px 20px;font-weight:900;font-size:{size}px;line-height:1.15;letter-spacing:-2px;color:{TEXT};'
+                   f'text-align:left;word-break:keep-all;box-shadow:0 8px 0 {ACC_FILL};">{esc(said)}'
+                   f'<div style="position:absolute;left:46px;bottom:-24px;width:38px;height:38px;background:#FFFFFF;'
+                   f'border-right:5px solid {TEXT};border-bottom:5px solid {TEXT};transform:rotate(45deg);"></div></div>')
+    body = min(height + 40, 600)
+    return (f'<div style="position:absolute;right:0;top:10px;z-index:2;display:flex;flex-direction:column;align-items:flex-end;">'
+            f'{bubble_html}{term}</div>'
+            f'<div style="position:absolute;left:30px;bottom:-30px;z-index:1;">{mascot_img(pose, body, d3=mascot_3d_on(d))}</div>')
 
 
 # 사진 표지에 3D H 가 반응한다(2026-11-23~ — 11/23 01시 운영자 '오늘자 제발 재미있게, 후킹'으로 하루 당김. 운영자 11/22 '매일1보 카드뉴스 참고해 봐'). 매일1보 표지는 사람 얼굴·표정과 짧은 혼잣말
@@ -303,6 +331,8 @@ def cover(d, kicker=None, foot=None, tag=None):
     elif mascot_on(d):
         hero = _mascot_hero(d, cov, l1, l2, 560 + (card_height(d["date"]) - H) // 2)
         spots = [("right:10px;top:250px;", 2), ("right:60px;top:360px;", -2), ("right:0;top:470px;", 1.5)]   # H 오른쪽 아래로
+        if mascot_say_on(d) and str(cov.get("say") or "").strip():
+            spots = MASCOT_SAY_SPOTS
         sticker_html = "".join(f'<div style="position:absolute;z-index:3;{pos}">{_sticker(t, r)}</div>' for t, (pos, r) in zip(stickers, spots))
     else:
         kw = cov["keyword"]
