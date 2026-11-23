@@ -194,7 +194,7 @@
  "seedance": {
   "model": "seedance_2_5",
   "made_by": "higgsfield",
-  "job": null,
+  "job": "4ea8043f-45ae-4219-9d4c-d041d626eee9",
   "prompt": "brief_prompt.txt",
   "lip_sync": "없음 — NO TALKING 문장, audio_references 없음",
   "medias": [
@@ -204,5 +204,131 @@
    "c6ff5d88-1b53-491b-aa4d-a8b1bc0a1fa1"
   ]
  },
- "note": "월요일 영상 날. 11/23 07:45 세션: 원 기사 대조·대본·목소리 7줄(받아쓰기 모두 100%)·프롬프트까지 준비, 힉스필드 generate_video 가 자동 실행 권한 검사에 막혀 영상은 못 만듦(견적 60 은 통과). 이어서 만들 세션: 2번(영상)부터 — 영상 받은 뒤 장면 경계에 맞춰 captions·music·sfx·cover·end_card 를 채운다."
+ "note": "월요일 영상 날. 11/23 07:45 세션: 원 기사 대조·대본·목소리 7줄(받아쓰기 모두 100%)·프롬프트까지 준비, 힉스필드 generate_video 가 자동 실행 권한 검사에 막혀 영상은 못 만듦(견적 60 은 통과). 이어서 만들 세션: 2번(영상)부터 — 영상 받은 뒤 장면 경계에 맞춰 captions·music·sfx·cover·end_card 를 채운다. 09:20 운영자 '릴스 만들어달라니까' → 같은 세션에서 다시 요청(이번엔 도구 이름이 mcp__Higgsfield__ 로 떠 통과).",
+ "captions": [
+  {
+   "start": 0,
+   "end": 2.35,
+   "size": 104,
+   "top": 1250,
+   "html": "<div class=\"main\">전기요금 앱 쓰면<br><span class=\"hl\">이거 꼭 보세요</span></div>"
+  },
+  {
+   "start": 2.35,
+   "end": 4.8,
+   "size": 86,
+   "top": 1250,
+   "html": "<div class=\"main\">한전 정보 유출<br><span class=\"hl\">152만 명</span></div><div class=\"sub\">한전ON 주민·계좌·카드번호까지 · 끝엔 내가 살 전기차 얘기</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 SBS·중앙일보</div>"
+  },
+  {
+   "start": 4.8,
+   "end": 7.75,
+   "size": 84,
+   "top": 1250,
+   "html": "<div class=\"kick\">2/5 · 증시</div><div class=\"main\"><span class=\"hl\">18년</span> 만에<br>증안펀드 가동 준비</div><div class=\"sub\">아직 준비 단계 · 빚투면 반대매매 안내부터</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 동아일보·중앙일보</div>"
+  },
+  {
+   "start": 7.75,
+   "end": 10.75,
+   "size": 84,
+   "top": 1250,
+   "html": "<div class=\"kick\">3/5 · 금융</div><div class=\"main\">토스·카카오페이도<br><span class=\"hl\">주민증 사진</span> 본다</div><div class=\"sub\">23일부터 · 네이버페이는 다음 달</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 경향신문·한국일보</div>"
+  },
+  {
+   "start": 10.75,
+   "end": 13.8,
+   "size": 84,
+   "top": 1250,
+   "html": "<div class=\"kick\">4/5 · 테크</div><div class=\"main\"><span class=\"hl\">167년</span> 난제<br>AI랑 증명했다?</div><div class=\"sub\">리만 가설 · 수학계 공식 인정은 남았어요</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 중앙일보·동아일보</div>"
+  },
+  {
+   "start": 13.8,
+   "end": 16.8,
+   "size": 84,
+   "top": 1250,
+   "html": "<div class=\"kick\">5/5 · 자동차</div><div class=\"main\">국내 테슬라<br>대부분 <span class=\"hl\">중국산</span></div><div class=\"sub\">1~10월 대중국 자동차 적자 42억 달러, 역대 최대</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 아시아경제·조선일보</div>"
+  }
+ ],
+ "music": [
+  {
+   "file": "../2026-10-31/stems/m1_chase.m4a",
+   "start": 0.0,
+   "offset": 1.7,
+   "dur": 5.0,
+   "fade_out": 0.3,
+   "lufs": -24
+  },
+  {
+   "file": "../2026-10-31/stems/m1_chase.m4a",
+   "start": 4.7,
+   "offset": 1.75,
+   "dur": 3.3,
+   "lufs": -28,
+   "fade_in": 0.2,
+   "fade_out": 0.4,
+   "lowpass": 2200
+  },
+  {
+   "file": "../2026-10-31/stems/m2_morning.m4a",
+   "start": 7.7,
+   "dur": 6.9,
+   "fade_in": 0.3,
+   "fade_out": 0.3,
+   "lufs": -25,
+   "lowpass": 2200,
+   "offset": 1.0
+  },
+  {
+   "file": "../2026-10-31/stems/m2_morning.m4a",
+   "start": 14.3,
+   "offset": 0.15,
+   "dur": 7.8,
+   "lufs": -23.5,
+   "fade_in": 0.2,
+   "fade_out": 0.8
+  }
+ ],
+ "sfx": [
+  [
+   0,
+   0.6,
+   0.7
+  ],
+  [
+   0.6,
+   4.8,
+   0.4
+  ],
+  [
+   4.8,
+   10.7,
+   0.3
+  ],
+  [
+   10.7,
+   13.8,
+   0.4
+  ],
+  [
+   13.8,
+   999,
+   0.3
+  ]
+ ],
+ "duck": {
+  "mix": 0.4,
+  "release": 350
+ },
+ "end_card": {
+  "line": "필요한 친구에게 보내 주세요!",
+  "sub": "프로필 링크에서 구독하면 '연말정산 카드 계산기' 선물부터",
+  "note": "숫자는 기사 2곳 이상에서 확인했어요<br>(출처는 장면마다·캡션에)"
+ },
+ "end_seconds": 2.6,
+ "cover": {
+  "at": 1.5,
+  "line1": "전기요금 앱 쓰면",
+  "hl": "이거 꼭 보세요"
+ },
+ "story": "오늘 아침 5가지 — 20초 한 편. (B00) 첫 3초: Hana 경고 '전기요금 앱 쓰면, 이거 꼭 보세요!'(0.15초) → 2.35초째 '152만 명 정보 털렸대요', 첫 프레임 H 가 렌즈로 돌진, 계량기 상자에서 카드·봉투가 팝콘처럼, 0초 boing. 순서: 한전 → 증안펀드(무너지는 블록·에어쿠션) → 주민증(신분증 스캔) → 리만(퍼즐 마지막 조각) → 중국산 테슬라(화물선에서 내리는 차) → 우체통 인사. 끝인사 공유(한전ON 쓰는 부모님께)."
 }
