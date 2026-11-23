@@ -117,7 +117,7 @@ def outlined(text, line="#FFFFFF"):
             f'<div style="{base}position:absolute;left:0;top:0;color:{ACC_FILL};">{esc(text)}</div></div>')
 
 
-def compare_box(cmp, dark):
+def compare_box(cmp, dark, big=False):
     """compare형 — 이전/이후를 한 덩어리 숫자로 뭉개지 않고 2단 상자로 나눈다. 상자 머리는 기본 BEFORE/AFTER, 원고 tag 가 있으면 그 말
     (예상 → 실제처럼 '전·후'가 아닌 비교 — 2026-11-18 운영자 분석: '시장 예상치 → 실제 매출'에 BEFORE/AFTER 가 붙었다)."""
     arrow = ACC_ON_DARK if dark else ACC_INK
@@ -125,10 +125,10 @@ def compare_box(cmp, dark):
     def box(label, value, sub, accent):
         bg = ACC_FILL if accent else ("#1E1E21" if dark else BOX)
         return (f'<div style="flex:1;min-width:0;background:{bg};border-radius:26px;padding:26px 24px;text-align:left;">'
-                f'<div style="font-weight:700;font-size:19px;letter-spacing:2px;color:{ACC_INK if accent else MUTED};">{label}</div>'
-                f'<div style="font-weight:800;font-size:{fs(40)};line-height:1.15;letter-spacing:-1px;'
+                f'<div style="font-weight:700;font-size:{25 if big else 19}px;letter-spacing:{1 if big else 2}px;color:{ACC_INK if accent else MUTED};">{label}</div>'
+                f'<div style="font-weight:800;font-size:{fs(54 if big else 40)};line-height:1.15;letter-spacing:-1px;'
                 f'color:{TEXT if accent or not dark else "#FFFFFF"};margin-top:8px;">{esc(value)}</div>'
-                f'<div style="font-weight:400;font-size:{fs(20)};line-height:1.35;'
+                f'<div style="font-weight:400;font-size:{fs(27 if big else 20)};line-height:1.35;'
                 f'color:{"#5A2A10" if accent else ("#BDBDBD" if dark else SUB)};margin-top:6px;">{esc(sub)}</div></div>')
 
     return (f'<div style="display:flex;align-items:stretch;gap:14px;width:100%;">'
@@ -424,13 +424,13 @@ def stat_tiles(metrics, dark):
     return f'<div style="flex:none;display:flex;gap:14px;width:100%;margin-top:30px;">{tiles}</div>'
 
 
-def dialogue(take, dark, pose=None):
+def dialogue(take, dark, pose=None, big=False):
     """대화 — 흰 질문 말풍선 '그래서 뭐가 달라져?' → 복숭아색 답 말풍선(이 뉴스로 바뀌는 것, 누구나 읽을 수 있게). 키트 본문 21(Q&A) 문법과도 맞다.
     답이 'A — B' 꼴이면 줄표 뒤에서 줄을 바꿔 두 마디로 읽히게 하고, 렌더러(.shrink)가 말풍선 폭을 가장 긴 줄에 맞춘다."""
     q_bg, q_fg = ("#1E1E21", "#FFFFFF") if dark else ("#FFFFFF", TEXT)
     line = "#FFFFFF" if dark else TEXT
     ask = (f'<div style="background:{q_bg};border:3px solid {line};border-radius:22px 22px 22px 6px;'
-           f'padding:14px 24px;font-weight:600;font-size:{fs(28)};line-height:1.2;color:{q_fg};">그래서 뭐가 달라져?</div>')
+           f'padding:14px 24px;font-weight:600;font-size:{fs(34 if big else 28)};line-height:1.2;color:{q_fg};">그래서 뭐가 달라져?</div>')
     if pose:   # H 가 독자 대신 묻는다(11/01~) — 말풍선 왼쪽에 작은 H. 검정 카드에선 검은 팔다리가 묻히지 않게 흰 테두리
         ask = (f'<div style="align-self:flex-start;display:flex;align-items:flex-end;gap:6px;margin-left:-14px;">'
                f'{mascot_img(pose, 180, "margin:-44px 0 -16px;" + (ON_DARK if dark else ""))}{ask}</div>')
@@ -562,14 +562,31 @@ def issue_card_v3(it, n, date=None):
 <div style="position:absolute;left:60px;right:60px;bottom:56px;text-align:center;font-size:24px;line-height:1.4;color:{SRC_LIGHT};">출처 · {esc(it["source"])}</div>""")
 
 
+# H PICK 장을 흰 바탕 + 위 주황 띠로(2026-11-24~, 운영자 11/23 '검은색이어서 잘 안 보이는 것 같은데' → 남색·주황 시안도 '전부 잘 안 보여' → 흰 바탕 시안 '좋네, 이렇게 해 줘').
+# 인스타 다크 모드에선 검정(#000000) 카드가 배경과 섞여 카드 경계가 사라지고 회색 글자가 묻혔다. 'H PICK' 은 맨 위 띠가 알리고, 글자를 키운다.
+PICK_LIGHT_FROM = "2026-11-24"
+
+
+def pick_light_on(date):
+    return str(date or "")[:10] >= PICK_LIGHT_FROM
+
+
+def _pick_band(it):
+    return (f'<div style="position:absolute;left:0;right:0;top:0;height:120px;z-index:3;background:{ACC};display:flex;align-items:center;'
+            f'justify-content:center;gap:14px;font-weight:900;font-size:42px;letter-spacing:-1px;color:#FFFFFF;">H PICK'
+            f'<span style="font-weight:600;font-size:32px;opacity:.92;">· {esc(it.get("series_label") or "오늘의 핵심")}</span></div>')
+
+
 def issue_card(it, n, date=None):
-    dark = bool(it.get("accent"))
-    pose = (("point" if dark else mascot_pose(f'{it.get("tag", "")} {it.get("headline", "")}', date=date))
+    is_pick = bool(it.get("accent"))
+    light = is_pick and pick_light_on(date)   # 흰 H PICK(11/24~) — 색은 흰 카드, 글자는 크게
+    dark = is_pick and not light
+    pose = (("point" if is_pick else mascot_pose(f'{it.get("tag", "")} {it.get("headline", "")}', date=date))
             if mascot_on({"date": date}) else None)
     fg = "#FFFFFF" if dark else TEXT
     cmp = it.get("compare")
     if cmp:
-        hero = compare_box(cmp, dark)
+        hero = compare_box(cmp, dark, big=light)
     elif dark:
         hero = outlined(it["number"])
     else:
@@ -582,19 +599,22 @@ def issue_card(it, n, date=None):
     # 검은 H PICK 카드는 '(H PICK · …)' 줄만큼 길어 9/29~10/4 5호 중 4호가 3% 자동 축소됐다 — 간격을 줄여 원래 크기로
     pick = (f'<div style="margin-top:18px;font-weight:500;font-size:30px;line-height:1;color:#F5C84C;">'
             f'(H PICK · {esc(it.get("series_label") or "오늘의 핵심")})</div>') if dark else ""
-    return _frame(f"""
-<div class="body" style="padding:0 80px 190px;justify-content:flex-end;align-items:center;text-align:center;">
+    if light:
+        pick = ""
+    body_pad = "padding:170px 70px 170px;justify-content:center" if light else "padding:0 80px 190px;justify-content:flex-end"
+    return _frame(f"""{_pick_band(it) if light else ""}
+<div class="body" style="{body_pad};align-items:center;text-align:center;">
   {bubble(it.get("ask") or it["tag"])}
   {hero}
   {tiles}
   <div style="flex:none;height:{20 if dark else 38}px;"></div>
   {badge}
   {pick}
-  <div class="bal" style="margin-top:{22 if dark else 32}px;font-weight:700;font-size:{fs(56)};line-height:1.34;letter-spacing:-1px;color:{fg};">{mk(it["headline"], fg, dark)}</div>
-  <div class="bal" style="margin-top:22px;font-weight:400;font-size:{fs(33)};line-height:1.55;color:{"#BDBDBD" if dark else SUB};">{mk(it["body"], fg, dark)}</div>
-  {dialogue(it["takeaway"], dark, pose)}
+  <div class="bal" style="margin-top:{22 if dark else 32}px;font-weight:700;font-size:{fs(66 if light else 56)};line-height:1.34;letter-spacing:-1px;color:{fg};">{mk(it["headline"], fg, dark)}</div>
+  <div class="bal" style="margin-top:22px;font-weight:400;font-size:{fs(38 if light else 33)};line-height:1.55;color:{"#BDBDBD" if dark else SUB};">{mk(it["body"], fg, dark)}</div>
+  {dialogue(it["takeaway"], dark, pose, big=light)}
 </div>
-<div style="position:absolute;left:60px;right:60px;bottom:80px;text-align:center;font-size:24px;line-height:1.4;color:{MUTED if dark else SRC_LIGHT};">출처 · {esc(it["source"])}</div>""",
+<div style="position:absolute;left:60px;right:60px;bottom:80px;text-align:center;font-size:{27 if light else 24}px;line-height:1.4;color:{MUTED if dark else SRC_LIGHT};">출처 · {esc(it["source"])}</div>""",
                   "#000000" if dark else "#FFFFFF")
 
 

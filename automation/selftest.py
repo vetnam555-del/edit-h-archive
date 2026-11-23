@@ -1242,6 +1242,19 @@ def t_threads():
     return f"{day[0]} 본문 {len(text)}자"
 
 
+def t_pick_light():
+    """H PICK 흰 바탕(2026-11-24~, 운영자 11/23 '검은색이어서 잘 안 보여' → 흰 바탕 시안 '이렇게 해 줘'): 그날부터 흰 카드 + 위 주황 띠, 그 전 호는 검정 그대로."""
+    from edith import cards, content as content_mod
+    it = content_mod.load("2026-11-23")["card_issues"][0]
+    before = cards.issue_card(it, 1, "2026-11-23")
+    after = cards.issue_card(it, 1, cards.PICK_LIGHT_FROM)
+    expect('style="background:#000000;"' in before and "H PICK ·" in before, "11/24 전 호 H PICK 장이 바뀌었다(검정 그대로여야)")
+    expect('style="background:#FFFFFF;"' in after and 'style="background:#000000;"' not in after and ">H PICK<span" in after,
+           "11/24~ H PICK 장이 흰 바탕 + 위 주황 띠가 아니다")
+    expect("calc(66px*var(--k))" in after and "calc(38px*var(--k))" in after, "11/24~ H PICK 장 글자를 키우지 않았다")
+    return f"{cards.PICK_LIGHT_FROM}~ 흰 바탕·주황 띠·큰 글자 · 그 전 호 검정 그대로"
+
+
 def t_cover_h():
     """사진 표지 H 혼잣말(2026-11-24~, 운영자 11/22 '매일1보 참고'): 그날부터 사진 표지에 3D H·말풍선, 그 전 호는 그대로, 혼잣말 검사."""
     import copy
@@ -4133,6 +4146,7 @@ def main():
     check("구독 선물(gift)", t_gift)
     check("구독 선물 카드 공제 계산기", t_card_calc)
     check("사진 표지 H 혼잣말(11/23~)", t_cover_h)
+    check("H PICK 흰 바탕(11/24~)", t_pick_light)
     check("대체 표지 사진(fetch_photo --library)", t_photo_library)
     check("검색 노출(호 페이지 SEO)", t_seo)
     check("메일·카드 새 배치(11/19~)", t_layout_v3)
