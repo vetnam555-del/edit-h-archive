@@ -320,6 +320,8 @@ CAMERA 에 'continuous motion in every shot — no held poses, no frozen moments
 - **H 가 공(구) 모양인지** — 정면은 물론 옆·뒤로 돌 때도 두께가 동그란가(납작한 원반·동전·쿠키 모양이면 '모양 틀림'). 한 장면이면 그 장면만 다시(크레딧 계획 안), 여러 장면이면 20초 다시 만들기.
 - AI 가 그린 엉터리 글자: 카메라가 멈춘 구간이면 ffmpeg delogo, 카메라가 흐르면 글자 칸 안 무채색 화소만 판 색으로 누른다(geq — 11/12 brief.json source_video_prep 본보기).
   쓴 명령은 brief.json `source_video_prep` 에 적는다. 상표처럼 보이는 작은 무늬는 H 를 피해 아래쪽만 흐리게.
+  **흐림(모자이크)은 마지막 수단(11/23 운영자 '영상에 왜 자꾸 모자이크 넣는거야?')**: 깨지지 않은 보통 숫자·무늬(전화 숫자판 등)는 흐리지 않고 그대로 둔다.
+  깨진 글자·로고·십자 같은 기호가 크게 보이면 흐리기보다 그 장면을 다시 만들거나(크레딧 계획 안) 그 구간을 잘라 낸다.
 - 프레임 차이로 장면 경계를 잰다. 검은 화면(blackdetect) 0.
 - **가로 띠 영상인지 원본부터 본다**: `python3 -c "import sys;sys.path.insert(0,'automation/pilots/ai_reel');import qa,statistics;r=qa.band_ratios('<원본>',0.1);print(qa.letterboxed(r),statistics.median(r))"`
   — True 면 다시 만들기(꽉 찬 영상은 중앙값 0.3 안팎). 아래쪽 바닥이 밋밋해서 걸린 것이면 그 장면만 1.15~1.2배로 당겨 잘라(위쪽 기준 crop → scale) 다시 잰다(11/12).
