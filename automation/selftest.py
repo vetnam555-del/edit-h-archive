@@ -1302,6 +1302,37 @@ def t_cover_h():
     return f"{cards.COVER_H_FROM}~ 사진 표지 H·혼잣말(없으면 막음, 예비 호 빼고) · 그 전 호 그대로 · 막는 경우 3가지"
 
 
+def t_mascot_say():
+    """사진 없는 표지 H 혼잣말(2026-11-24~, 운영자 피드백 장부 #1 — 11/23 호 큰 말풍선이 '증안펀드'): 큰 말풍선은 say, 용어는 작은 스티커, say 없으면 막음."""
+    import copy
+    from edith import cards, content as content_mod
+    d = copy.deepcopy(content_mod.load("2026-11-23"))
+    before = cards.cover(d)
+    d["cards"]["cover"]["say"] = "내 주식 괜찮은 거야?"
+    expect(cards.cover(d) == before, "11/24 전 호 사진 없는 표지가 바뀌었다")
+    d["date"] = cards.MASCOT_SAY_FROM
+    after = cards.cover(d)
+    expect("내 주식 괜찮은 거야?" in after and "오늘의 말 · 증안펀드" in after and "font-size:128px" not in after,
+           "11/24~ 사진 없는 표지 큰 말풍선이 혼잣말·작은 용어 스티커가 아니다")
+    raw = json.loads((CONTENT_DIR / "2026-11-23.json").read_text(encoding="utf-8"))
+    raw["date"] = cards.MASCOT_SAY_FROM
+    raw["cards"]["cover"].pop("say", None)
+    try:
+        content_mod.prepare(copy.deepcopy(raw), cards.MASCOT_SAY_FROM)
+        blocked = False
+    except content_mod.ContentError as e:
+        blocked = "cards.cover.say" in str(e)
+    expect(blocked, f"{cards.MASCOT_SAY_FROM}~ 사진 없는 표지에 혼잣말이 없는데 빌드를 막지 않는다")
+    raw["rewind"] = True
+    try:
+        content_mod.prepare(copy.deepcopy(raw), cards.MASCOT_SAY_FROM)
+        rewind_ok = True
+    except content_mod.ContentError as e:
+        rewind_ok = "cards.cover.say" not in str(e)
+    expect(rewind_ok, "예비 호(rewind)는 혼잣말이 없어도 막지 않아야 한다")
+    return f"{cards.MASCOT_SAY_FROM}~ 사진 없는 표지 큰 말풍선 = 혼잣말, 용어 = 작은 스티커 · 없으면 막음(예비 호 빼고) · 그 전 호 그대로"
+
+
 def t_card_calc():
     """구독 선물 계산기(2026-11-22 '메리트 있게끔'): 조특법 제126조의2·소득세법 계산을 손계산 사례와 맞춘다(node 로 gifts/card_calc.js)."""
     js = AUTOMATION / "gifts" / "card_calc.js"
@@ -4147,6 +4178,7 @@ def main():
     check("구독 선물 카드 공제 계산기", t_card_calc)
     check("사진 표지 H 혼잣말(11/23~)", t_cover_h)
     check("H PICK 흰 바탕(11/24~)", t_pick_light)
+    check("사진 없는 표지 H 혼잣말(11/24~)", t_mascot_say)
     check("대체 표지 사진(fetch_photo --library)", t_photo_library)
     check("검색 노출(호 페이지 SEO)", t_seo)
     check("메일·카드 새 배치(11/19~)", t_layout_v3)
