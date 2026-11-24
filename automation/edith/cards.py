@@ -654,6 +654,10 @@ def issue_card(it, n, date=None):
 # 인스타가 다시 보여 주는 두 번째 표지) ② H PICK 3장 → 2장(심층 + 오늘 챙길 것을 한 장으로) ③ 소식 장은 3D 아이콘 장면(Fluent Emoji 3D, MIT — assets/icons3d)
 # + 우리 3D H, 그 아래 큰 숫자·제목·답 한 줄만(본문·'그래서 뭐가 달라져?' 질문은 캡션·뉴스레터로). 10장 → 9장. 힉스필드 크레딧은 쓰지 않는다.
 CARDS_V4_FROM = "2026-11-25"
+# 작은 글자 바닥(11/25~, 운영자 피드백 장부 #2 '잘 안 보인다') — 1080px 카드가 휴대폰에선 가로 390px(×0.36)로 보여 24px 글자가 8.7px 가 된다.
+# v4 장의 라벨·번호·자료 줄은 이 값 아래로 두지 않고, 렌더러가 장마다 가장 작은 글자(minFont)를 재 빌드가 이보다 작으면 경고한다(build_issue).
+SMALL_TEXT_MIN = 28
+SMALL_TEXT_WARN = 24   # 렌더러 자동 축소(--k 0.8)까지 감안한 경고선 — 출처 한 줄(24~26px)은 여기 걸리지 않는다
 CARD_NAMES_4 = ["cover", "summary", "pick", "deep", "issue2", "issue3", "issue4", "issue5", "cta"]
 ICON_DIR = ROOT / "assets" / "icons3d"
 SCENE_BG = ("#FFE9DF", "#E4EEFF", "#E3F6EE", "#FFF4D6", "#EFE8FF")
@@ -737,8 +741,8 @@ def summary_v4(d):
         f'<div style="display:flex;align-items:center;gap:24px;padding:32px 0;border-bottom:2px solid #EAEAEA;">'
         f'<div style="flex:none;position:relative;width:104px;height:104px;">'
         f'<img src="{_icon_uri((it.get("icons") or ["pushpin"])[0])}" alt="" style="width:104px;height:104px;">'
-        f'<div style="position:absolute;left:-10px;top:-8px;width:38px;height:38px;border-radius:10px;background:{ACC if it.get("accent") else TEXT};'
-        f'color:#FFFFFF;font-weight:700;font-size:22px;line-height:38px;text-align:center;">{i}</div></div>'
+        f'<div style="position:absolute;left:-10px;top:-8px;width:46px;height:46px;border-radius:12px;background:{ACC if it.get("accent") else TEXT};'
+        f'color:#FFFFFF;font-weight:800;font-size:{SMALL_TEXT_MIN}px;line-height:46px;text-align:center;">{i}</div></div>'
         f'<div style="flex:1;min-width:0;font-weight:700;font-size:{fs(44)};line-height:1.3;color:{TEXT};">{plain(it["headline"])}</div>'
         f'<div style="flex:none;font-weight:800;font-size:{fs(42)};color:{TEXT};white-space:nowrap;'
         f'background:linear-gradient(180deg,transparent 58%,{ACC_FILL} 58%);">{esc(hero_value(it))}</div></div>'
@@ -777,7 +781,7 @@ def deep_card_v4(d):
 <div class="body" style="padding:110px 70px 130px;justify-content:center;">
   <div style="text-align:center;">{bubble(deep.get("ask") or "왜 중요해?")}</div>
   <div class="bal" style="text-align:center;font-weight:800;font-size:{fs(70)};line-height:1.3;letter-spacing:-1.5px;color:{TEXT};">{mk(deep["headline"])}</div>
-  {chart_box(chart) if chart else f'<div style="flex:none;display:flex;gap:14px;width:100%;margin-top:40px;">{tiles}</div>'}
+  {chart_box(chart, big=True) if chart else f'<div style="flex:none;display:flex;gap:14px;width:100%;margin-top:40px;">{tiles}</div>'}
   {box}
 </div>
 <div style="position:absolute;left:60px;right:60px;bottom:60px;text-align:center;font-size:26px;line-height:1.4;color:{SRC_LIGHT};">H PICK 심층 · 출처 · {esc(src)}</div>""")
@@ -805,10 +809,11 @@ def _on(d, key):
     return bool(start) and str(d["date"])[:10] >= str(start)
 
 
-def chart_box(ch, bg=BOX, show_source=True, frame=""):
+def chart_box(ch, bg=BOX, show_source=True, frame="", big=False):
     """숫자 비교·추이 막대 차트 — 주장 하나, 출처는 그림 안에(Chartr·Visual Capitalist, 2026-10-31 경쟁 비교 '자기만의 재료').
     ch: {'title', 'points': [{'label', 'value', 'text'?}] 3~6개, 'unit'?, 'highlight'?(기본 마지막), 'source'}. 값은 0 이상.
-    딥다이브 장은 흰 바탕·테두리(frame)로, 출처는 장 아래 '자료 ·' 한 줄에 모은다(show_source=False)."""
+    딥다이브 장은 흰 바탕·테두리(frame)로, 출처는 장 아래 '자료 ·' 한 줄에 모은다(show_source=False).
+    big: 카드 v4 심층 장(11/25~) — 휴대폰(가로 390px)에서 막대 라벨 24px·자료 21px 가 8px 안팎으로 보여 키운다(SMALL_TEXT_MIN)."""
     pts = ch["points"]
     top = max(float(p["value"]) for p in pts) or 1
     hi = ch.get("highlight", len(pts) - 1)
@@ -822,9 +827,9 @@ def chart_box(ch, bg=BOX, show_source=True, frame=""):
         f'background:{ACC if i == hi else "#D9D9D9"};"></div></div>'
         for i, p in enumerate(pts))
     labels = "".join(
-        f'<div style="flex:1;min-width:0;text-align:center;font-weight:{700 if i == hi else 500};font-size:{fs(24)};line-height:1.25;'
+        f'<div style="flex:1;min-width:0;text-align:center;font-weight:{700 if i == hi else 500};font-size:{fs(SMALL_TEXT_MIN if big else 24)};line-height:1.25;'
         f'color:{TEXT if i == hi else SUB};">{esc(p["label"])}</div>' for i, p in enumerate(pts))
-    src = (f'<div style="margin-top:14px;font-weight:500;font-size:{fs(21)};line-height:1.35;color:{SRC_LIGHT};text-align:right;">'
+    src = (f'<div style="margin-top:{10 if big else 14}px;font-weight:500;font-size:{fs(26 if big else 21)};line-height:1.35;color:{SRC_LIGHT};text-align:right;">'
            f'자료 · {esc(ch["source"])}</div>') if show_source else ""
     return (f'<div style="flex:none;width:100%;margin-top:40px;background:{bg};border-radius:24px;padding:28px 28px 22px;{frame}">'
             f'<div style="font-weight:800;font-size:{fs(32)};line-height:1.3;color:{TEXT};">{mk(ch["title"])}</div>'
@@ -1038,7 +1043,7 @@ def cta_follow(d):
     stats = [(f"{len(d['all_items'])}개", "이슈 전문"), (f"{n}장", "핵심 카드"), (f"{int(d['vol'])}호", "누적 발행")]
     stat_html = "".join(
         f'<div><div style="font-weight:700;font-size:{fs(32)};line-height:1;color:#1B1B1E;">{v}</div>'
-        f'<div style="font-weight:400;font-size:{fs(22)};line-height:1;color:#6B6E75;margin-top:10px;">{lbl}</div></div>'
+        f'<div style="font-weight:400;font-size:{fs(SMALL_TEXT_MIN if cards_v4(d.get("date")) else 22)};line-height:1;color:#6B6E75;margin-top:10px;">{lbl}</div></div>'
         for v, lbl in stats)
     tail = f"이슈 {len(d['all_items'])}개 전문＋출처는 매일 아침 뉴스레터로\n→ **프로필 링크**에서 받아보세요"
     return _frame(f"""
