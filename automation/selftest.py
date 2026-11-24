@@ -1283,6 +1283,24 @@ def t_cards_v4():
     return f"{cards.CARDS_V4_FROM}~ 9장(2번째 5가지 한눈에) · 아이콘 장면 · 아이콘 없으면/없는 이름 막음 · 그 전 호 10장 그대로"
 
 
+def t_small_text():
+    """작은 글자 바닥(2026-11-25~, 운영자 피드백 장부 #2 '잘 안 보인다'): v4 심층 차트·5가지 번호·마무리 라벨이 SMALL_TEXT_MIN,
+    빌드가 장마다 가장 작은 글자(minFont)를 보고 기준 아래면 알린다, 그 전 호는 그대로."""
+    import build_issue
+    from edith import cards
+    ch = {"title": "t", "points": [{"label": "a", "value": 1}, {"label": "b", "value": 2}, {"label": "c", "value": 3}], "source": "s"}
+    old, big = cards.chart_box(ch), cards.chart_box(ch, big=True)
+    expect("calc(21px*var(--k))" in old and "calc(24px*var(--k))" in old, "11/25 전 차트 글자가 바뀌었다")
+    expect(f"calc({cards.SMALL_TEXT_MIN}px*var(--k))" in big and "calc(21px*var(--k))" not in big, "v4 심층 차트 라벨을 키우지 않았다")
+    rep = [{"file": "a_cta.png", "minFont": {"px": 22, "text": "이슈 전문"}}, {"file": "b_pick.png", "minFont": {"px": 26, "text": "EDIT H"}},
+           {"file": "c.png"}]
+    notes = build_issue.small_text_notes(rep, cards.CARDS_V4_FROM)
+    expect(len(notes) == 1 and "a_cta.png" in notes[0] and "22px" in notes[0], f"작은 글자 경고가 다르다: {notes}")
+    expect(build_issue.small_text_notes(rep, "2026-11-24") == [], "11/25 전 호에도 작은 글자 경고를 낸다")
+    expect("minFont" in (AUTOMATION / "render_cards.cjs").read_text(encoding="utf-8"), "렌더러가 minFont 를 재지 않는다")
+    return f"{cards.CARDS_V4_FROM}~ 라벨·번호 {cards.SMALL_TEXT_MIN}px · {cards.SMALL_TEXT_WARN}px 아래면 빌드 경고 · 그 전 호 그대로"
+
+
 def t_pick_light():
     """H PICK 흰 바탕(2026-11-24~, 운영자 11/23 '검은색이어서 잘 안 보여' → 흰 바탕 시안 '이렇게 해 줘'): 그날부터 흰 카드 + 위 주황 띠, 그 전 호는 검정 그대로."""
     from edith import cards, content as content_mod
@@ -4222,6 +4240,7 @@ def main():
     check("사진 표지 H 혼잣말(11/23~)", t_cover_h)
     check("H PICK 흰 바탕(11/24~)", t_pick_light)
     check("카드 v4 — 2번째 5가지·3D 아이콘 장면(11/25~)", t_cards_v4)
+    check("작은 글자 바닥(11/25~)", t_small_text)
     check("사진 없는 표지 H 혼잣말(11/24~)", t_mascot_say)
     check("대체 표지 사진(fetch_photo --library)", t_photo_library)
     check("검색 노출(호 페이지 SEO)", t_seo)

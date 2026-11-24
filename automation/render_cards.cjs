@@ -61,7 +61,15 @@ function loadPlaywright() {
       }
       card.querySelectorAll('.shrink').forEach(shrinkWrap);
       const fonts = [...new Set([...card.querySelectorAll('*')].map((e) => getComputedStyle(e).fontFamily.split(',')[0].replace(/['"]/g, '')))];
-      return { k, overflow: !fits(card), fonts, text: card.innerText };   // text: 인스타 대체 텍스트(alt_text) 재료
+      // minFont: 이 장에서 가장 작은 글자(px, 자동 축소 뒤) — 휴대폰에선 ×0.36 으로 보인다. build_issue 가 기준보다 작으면 알린다(2026-11-24~).
+      let minFont = null;
+      for (const e of card.querySelectorAll('*')) {
+        const own = [...e.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent.trim()).join('');
+        if (!own || !e.getClientRects().length) continue;
+        const px = Math.round(parseFloat(getComputedStyle(e).fontSize) * 10) / 10;
+        if (minFont === null || px < minFont.px) minFont = { px, text: own.slice(0, 20) };
+      }
+      return { k, overflow: !fits(card), fonts, minFont, text: card.innerText };   // text: 인스타 대체 텍스트(alt_text) 재료
     });
   });
 

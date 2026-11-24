@@ -45,6 +45,16 @@ def render_cards(d, out_dir):
     return files, report["cards"]
 
 
+def small_text_notes(card_report, date):
+    """카드 v4(11/25~) 장마다 가장 작은 글자(render_cards.cjs minFont)가 cards.SMALL_TEXT_WARN 보다 작으면 알린다 —
+    1080px 카드는 휴대폰에서 가로 390px 로 보여 24px 가 8.7px 다(운영자 피드백 장부 #2 '잘 안 보인다', 2026-11-24)."""
+    if not cards.cards_v4(date):
+        return []
+    return [f"{c['file']}: 가장 작은 글자 {c['minFont']['px']:g}px '{c['minFont']['text']}' — 휴대폰에선 "
+            f"{c['minFont']['px'] * 390 / 1080:.1f}px 로 보여요. {cards.SMALL_TEXT_WARN}px 아래 글자는 키우거나 빼세요"
+            for c in card_report if (c.get("minFont") or {}).get("px", 99) < cards.SMALL_TEXT_WARN]
+
+
 def render_reel_frames(d, out_dir):
     """세로 전용 릴스 프레임(1080×1920 JPEG) → instagram/{날짜}/reel_frames/. make_reel.py 가 있으면 이걸로 릴스를 만든다.
     형식 2(H PICK) 데일리 호만. 실패해도 발행은 막지 않는다(릴스는 예전 카드 방식으로 만들어진다)."""
@@ -293,6 +303,8 @@ def main():
     shrunk = [c for c in card_report if c["k"] < 1 and not c["overflow"]]
     for c in shrunk:
         print(f"  ↘ {c['file']}: 글자 {round((1 - c['k']) * 100)}% 자동 축소 — 가능하면 문장을 줄이세요")
+    for n in small_text_notes(card_report, d["date"]):
+        print(f"  ↘ {n}")
     print_style(d)
     print_read_through(d)
     if (d.get("format") == 2 and not d.get("rewind") and len(d["briefs"]) < content.BRIEFS_TARGET
