@@ -3779,6 +3779,13 @@ def t_fetch_disclosure():
     rows = fd.parse_list(row)
     expect(rows == [{"rcp": "20261111800311", "corp": "NC", "title": "연결재무제표기준영업(잠정)실적(공정공시)", "date": "2026-11-11",
                      "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20261111800311"}], f"공시 목록: {rows}")
+    pages = []
+    def fake_get(url, data):   # 100건이 꽉 찬 쪽 다음 쪽까지 본다(PR #226 리뷰 — 2쪽 뒤 실적 공시를 '없음'으로 놓치지 않게)
+        pages.append(data["currentPage"])
+        n = fd.PAGE_SIZE if data["currentPage"] == 1 else 1
+        return "".join(row.replace("20261111800311", f"2026111180{data['currentPage']}{i:03d}") for i in range(n))
+    got = fd.search("NC", get=fake_get)
+    expect(pages == [1, 2] and len(got) == fd.PAGE_SIZE + 1, f"공시 여러 쪽: {pages} {len(got)}")
     one = 'viewDoc(original.rcpNo, original.dcmNo);\n viewDoc("20261111800311", "11649155", "0", "0", "0", "HTML", "");'
     expect(fd.toc_of(one) == [("본문", ("20261111800311", "11649155", "0", "0", "0", "HTML"))], "한 장짜리 공시 첫 문서")
     tree = "".join(f"node1['text'] = \"{t}\";\n node1['id'] = \"{i}\";\n node1['rcpNo'] = \"20261116002195\";\n node1['dcmNo'] = \"11662619\";\n"
