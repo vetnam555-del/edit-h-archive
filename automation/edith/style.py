@@ -273,7 +273,7 @@ def primary_check(d):
     if any(_src_primary(s) for s in srcs) or pick_primary_reason(d):
         return []
     return ["원문: H PICK 출처에 원문(보도자료·통계·공시 — 정부·기관·거래소 주소, 또는 회사 뉴스룸·IR·보도자료)이 없어요. 발표에서 나온 이야기면 "
-            "`python3 automation/fetch_releases.py --grep 핵심어` 로, 회사 소식이면 그 회사 뉴스룸·IR 을 직접 읽어 출처 1건으로(이름에 '뉴스룸'·'보도자료'·'IR'). "
+            "`python3 automation/fetch_releases.py --grep 핵심어` 로, 상장사 실적·투자·합병이면 `python3 automation/fetch_disclosure.py 회사이름` 으로 DART 공시 본문을 읽어 출처 1건으로(이름 '{회사} 공시(DART)', 2026-11-26~ 키 없이 읽힌다), 그 밖의 회사 소식은 그 회사 뉴스룸·IR 을 직접 읽어 출처 1건으로(이름에 '뉴스룸'·'보도자료'·'IR'). "
             "원문이 정말 없으면 pick_primary_reason 에 찾아본 곳 한 줄(2026-11-21~ 없으면 빌드가 막힌다)"]
 
 
