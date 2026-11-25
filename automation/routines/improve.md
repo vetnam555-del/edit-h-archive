@@ -4,7 +4,7 @@
 
 1) `automation/RUNBOOK_IMPROVE.md` 를 처음부터 읽고 0~5단계를 그대로 수행한다.
 2) 고칠 거리 우선순위: 어제·오늘 발행 흐름 실패(alerts·Actions 실패·sent/ig_posted 빠짐) → **운영자 피드백 장부 `automation/owner_feedback.md`**
-   (2026-11-23 운영자 '매일매일 개선해 줘' — 매일 '휴대폰 화면 점검' 한 줄 + `열림` 줄 하나를 화면이 바뀌는 변경으로) → learnings.md '시스템 개선 요청' → 판정일이 된 실험
+   (2026-11-23 운영자 '매일매일 개선해 줘' — 매일 '휴대폰 화면 점검' 한 줄 + **'경쟁사 대비' 한 줄**(2026-11-26~, RUNBOOK_IMPROVE 1단계 2) + `열림` 줄 하나를 화면이 바뀌는 변경으로) → learnings.md '시스템 개선 요청' → 판정일이 된 실험
    (references.md '지금 시험 중') → 3일 이상 반복되는 빌드 경고 → (비었으면) 지금 실험과 겹치지 않는 다음 실험 준비.
 3) 하루 PR 하나, 고치는 건 1~2건. 재현 → 수정 → `python3 automation/selftest.py` 통과 → PR(초안 아님, Codex 리뷰 지적은 확인해 처리) →
    Actions 'EDIT H selftest' 초록 → merge. 작업 브랜치는 `routine/improve`(README '작업 세션이 지킬 것').
