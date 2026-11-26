@@ -4,5 +4,30 @@
   "at": "2026-11-27T08:01:18+09:00",
   "permalink": "https://www.instagram.com/p/DgOPJX3llwO/",
   "first_comment": true
+ },
+ "reel": {
+  "id": "18355969864282117",
+  "at": "2026-11-27T08:31:15+09:00",
+  "track": "AI 영상(자체 음악·목소리)",
+  "style": "ai",
+  "seconds": 22.0,
+  "feed": false,
+  "hook": true,
+  "ai_label": true,
+  "permalink": "https://www.instagram.com/reel/DgOSjOxBGJb/"
+ },
+ "story_ai": {
+  "id": "17966086575251436",
+  "at": "2026-11-27T08:31:52+09:00",
+  "ai_label": true
+ },
+ "story": {
+  "id": "18575738290077621",
+  "ids": [
+   "18575738290077621",
+   "18111367085250155",
+   "18137900674742939"
+  ],
+  "at": "2026-11-27T08:32:33+09:00"
  }
 }

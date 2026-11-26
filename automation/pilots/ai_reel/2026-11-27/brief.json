@@ -1,0 +1,315 @@
+{
+ "date": "2026-11-27",
+ "items": [
+  "처분가능소득",
+  "기준금리 인상",
+  "메모리 품귀",
+  "모두의 AI",
+  "매장 리뉴얼"
+ ],
+ "hook": "반전",
+ "voices": [
+  {
+   "file": "stems/i1a_hook.mp3",
+   "start": 0.1,
+   "tempo": 1.25,
+   "text": "월급은 올랐는데, 쓸 돈은 줄었대요!",
+   "tts": "월급은 올랐는데, 쓸 돈은 <strong>줄었대요</strong>!",
+   "voice": "Hana"
+  },
+  {
+   "file": "stems/i1b_tax.mp3",
+   "start": 2.15,
+   "tempo": 1.25,
+   "text": "세금·이자 11% 늘었대요!",
+   "tts": "세금 이자 <strong>십일 퍼센트</strong> 늘었대요!",
+   "voice": "Hana"
+  },
+  {
+   "file": "stems/i2_rate.mp3",
+   "start": 4.45,
+   "tempo": 1.15,
+   "text": "금리를 올해 세 번이나 올렸대요!",
+   "tts": "금리를 올해 <strong>세 번</strong>이나 올렸대요!",
+   "voice": "Hana"
+  },
+  {
+   "file": "stems/i3_chip.mp3",
+   "start": 7.45,
+   "tempo": 1.15,
+   "text": "머스크도 삼성 반도체 줄 섰대요!",
+   "tts": "머스크도 <strong>삼성 반도체</strong> 줄 섰대요!",
+   "voice": "Hana"
+  },
+  {
+   "file": "stems/i4_ktx.mp3",
+   "start": 10.98,
+   "tempo": 1.15,
+   "text": "기차표 예매도 AI가 해 준대요!",
+   "tts": "<strong>기차표</strong> 예매도 에이아이가 해 준대요!",
+   "voice": "Hana"
+  },
+  {
+   "file": "stems/i5_cafe.mp3",
+   "start": 14.3,
+   "tempo": 1.25,
+   "text": "스타벅스, 4분기 흑자가 목표래요!",
+   "tts": "스타벅스, <strong>사 분기</strong> 흑자가 목표래요!",
+   "voice": "Hana"
+  },
+  {
+   "file": "stems/i_bye_save.mp3",
+   "start": 16.95,
+   "tempo": 1.15,
+   "text": "저장해 두고, 필요할 때 꺼내 보세요!",
+   "tts": "저장해 두고, 필요할 때 <strong>꺼내</strong> 보세요!",
+   "voice": "Hana"
+  }
+ ],
+ "hook_candidates": [
+  "(다) 월급은 올랐는데, 쓸 돈은 줄었대요 — 반전, 답(세금·이자 11%)은 2초째",
+  "(가) 이번 달 통장, 왜 더 빠듯하죠? — 질문, 하지만 11/25 가 질문 틀",
+  "(나) 변동금리 대출이면 이거 보세요 — 경고, 대출 있는 사람만이라 ① 약함"
+ ],
+ "hook_pick": "(다) — 11/25 질문·11/23 할 일 먼저였으니 반전으로. 월급·생활비는 독자 대부분의 일이고 '내 쓸 돈'으로 바로 내 몫, '올랐는데 줄었다'가 반전. 답(11%)은 2초째, 끝까지 볼 까닭은 1번 자막 sub '다음은 금리 또 올린 얘기'.",
+ "hook_score": {
+  "tag": "처분가능소득",
+  "q1": true,
+  "q2": true,
+  "q3": true,
+  "why": "월급·세금·이자는 대부분 겪는 일, '내가 쓸 수 있는 돈'으로 내 몫, 소득은 늘었는데 쓸 돈은 줄었다는 반전"
+ },
+ "facts": [
+  {
+   "scene": 1,
+   "fact": "3분기 처분가능소득 430만6000원, 1.7% 감소 — 13분기 만",
+   "seen_in": [
+    "아시아경제",
+    "서울경제",
+    "아이뉴스24",
+    "뉴시스"
+   ]
+  },
+  {
+   "scene": 1,
+   "fact": "세금·이자 등 비소비지출 117만4000원, 11.0% 증가",
+   "seen_in": [
+    "서울경제",
+    "아이뉴스24"
+   ]
+  },
+  {
+   "scene": 1,
+   "fact": "월평균 소득 548만원, 0.8% 증가",
+   "seen_in": [
+    "서울경제",
+    "뉴시스"
+   ]
+  },
+  {
+   "scene": 2,
+   "fact": "한은 기준금리 3.0%→3.25%, 올해 세 번째 인상(7·8월에 이어)",
+   "seen_in": [
+    "중앙일보",
+    "전자신문"
+   ]
+  },
+  {
+   "scene": 2,
+   "fact": "내년 성장률 전망 2.9%→4.1%",
+   "seen_in": [
+    "중앙일보",
+    "전자신문"
+   ]
+  },
+  {
+   "scene": 3,
+   "fact": "머스크가 삼성에 메모리 장기 구매 제안, 이재용 '뭘 더 해줄 수 있느냐'",
+   "seen_in": [
+    "동아일보",
+    "뉴시스"
+   ]
+  },
+  {
+   "scene": 3,
+   "fact": "고객사가 구매대금의 25~30% 선지급",
+   "seen_in": [
+    "뉴시스",
+    "동아일보",
+    "전자신문"
+   ]
+  },
+  {
+   "scene": 4,
+   "fact": "'모두의 AI' 12월 챗봇으로 공개, 내년 KTX 예매 등 에이전트 추가",
+   "seen_in": [
+    "SBS",
+    "조선비즈"
+   ]
+  },
+  {
+   "scene": 5,
+   "fact": "스타벅스 코리아 4분기 흑자 전환 목표, 내년 출점보다 리뉴얼",
+   "seen_in": [
+    "서울경제",
+    "아시아경제"
+   ]
+  }
+ ],
+ "source_note": "check_sources.py 막음 0 · 경고 2 · 기사 14/16곳 읽음(메모리 품귀 아이뉴스24·전자신문 못 읽음 — 릴스는 동아일보·뉴시스로 확인, 전자신문은 다시 읽어 25~30% 확인). 릴스용 원 기사 12곳 직접 읽음(조선비즈 시간 초과 → 다시 읽음). 한 곳에만 있던 말은 릴스에 안 씀: 스타벅스 '200곳'은 서울경제만(아시아경제·부산일보·한국일보 본문엔 없음 — 부산일보·한국일보는 무신사 기사) → 릴스는 '4분기 흑자'로.",
+ "end_card": {
+  "line": "저장해 두고 필요할 때 꺼내 보세요!",
+  "sub": "프로필 링크에서 구독하면 '연말정산 카드 계산기' 선물부터",
+  "note": "숫자는 기사 2곳 이상에서 확인했어요<br>(출처는 장면마다·캡션에)"
+ },
+ "cover": {
+  "at": 3.5,
+  "line1": "월급은 올랐는데",
+  "hl": "쓸 돈은 줄었다"
+ },
+ "captions": [
+  {
+   "start": 0,
+   "end": 2.1,
+   "size": 100,
+   "top": 300,
+   "html": "<div class=\"main\">월급은 올랐는데<br><span class=\"hl\">쓸 돈은 줄었다</span></div>"
+  },
+  {
+   "start": 2.1,
+   "end": 4.4,
+   "size": 84,
+   "top": 300,
+   "html": "<div class=\"main\">세금·이자 <span class=\"hl\">11.0%</span> 불어<br>쓸 돈 1.7% 감소</div><div class=\"sub\">13분기 만에 줄었어요 · 다음은 금리 또 올린 얘기</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 아시아경제·서울경제</div>"
+  },
+  {
+   "start": 4.4,
+   "end": 7.35,
+   "size": 84,
+   "top": 300,
+   "html": "<div class=\"kick\">2/5 · 금리</div><div class=\"main\">기준금리 <span class=\"hl\">3.25%</span><br>올해 세 번째 인상</div><div class=\"sub\">내년 성장률 전망은 4.1%</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 중앙일보·전자신문</div>"
+  },
+  {
+   "start": 7.35,
+   "end": 10.88,
+   "size": 84,
+   "top": 300,
+   "html": "<div class=\"kick\">3/5 · 반도체</div><div class=\"main\">머스크도 줄 선<br><span class=\"hl\">삼성 반도체</span></div><div class=\"sub\">구매대금 25~30%를 미리 내기도</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 동아일보·뉴시스</div>"
+  },
+  {
+   "start": 10.88,
+   "end": 14.2,
+   "size": 84,
+   "top": 300,
+   "html": "<div class=\"kick\">4/5 · AI</div><div class=\"main\">KTX 예매도<br><span class=\"hl\">AI가</span> 맡는다</div><div class=\"sub\">정부 '모두의 AI' 다음 달 챗봇으로 공개</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 SBS·조선비즈</div>"
+  },
+  {
+   "start": 14.2,
+   "end": 16.9,
+   "size": 84,
+   "top": 300,
+   "html": "<div class=\"kick\">5/5 · 소비</div><div class=\"main\">스타벅스<br><span class=\"hl\">4분기 흑자</span> 노린다</div><div class=\"sub\">내년엔 새 매장보다 리뉴얼</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 서울경제·아시아경제</div>"
+  }
+ ],
+ "story": "오늘 아침 5가지 — 11/27(금) 호. 순서: 처분가능소득(월급 봉투를 먹는 상자) → 기준금리(레버 당기기) → 메모리 품귀(칩 공장 앞 로봇 줄) → 모두의 AI(로봇이 기차표 건넴) → 스타벅스(카페 벽 다시 칠하기). 끝인사 뉴스레터. 영상 MAGI-2 첫 편.",
+ "music": [
+  {
+   "file": "../2026-10-31/stems/m1_chase.m4a",
+   "start": 0.0,
+   "offset": 1.7,
+   "dur": 4.5,
+   "fade_out": 0.25,
+   "lufs": -21
+  },
+  {
+   "file": "../2026-10-31/stems/m1_chase.m4a",
+   "start": 4.0,
+   "offset": 1.75,
+   "dur": 3.5,
+   "lufs": -26,
+   "fade_in": 0.15,
+   "fade_out": 0.4,
+   "lowpass": 2200
+  },
+  {
+   "file": "../2026-10-31/stems/m2_morning.m4a",
+   "start": 7.35,
+   "offset": 1.0,
+   "dur": 3.0,
+   "lufs": -26,
+   "lowpass": 1800,
+   "fade_in": 0.3,
+   "fade_out": 0.2
+  },
+  {
+   "file": "../2026-10-31/stems/m2_morning.m4a",
+   "start": 10.1,
+   "offset": 3.7,
+   "dur": 4.3,
+   "lufs": -24,
+   "lowpass": 2500,
+   "fade_in": 0.1,
+   "fade_out": 0.3
+  },
+  {
+   "file": "../2026-10-31/stems/m2_morning.m4a",
+   "start": 14.1,
+   "offset": 0.15,
+   "dur": 8.2,
+   "lufs": -24.5,
+   "lowpass": 3000,
+   "fade_in": 0.2,
+   "fade_out": 0.8
+  }
+ ],
+ "sfx": [
+  [
+   0,
+   0.6,
+   0.7
+  ],
+  [
+   0.6,
+   4.0,
+   0.4
+  ],
+  [
+   4.0,
+   7.35,
+   0.35
+  ],
+  [
+   7.35,
+   10.88,
+   0.35
+  ],
+  [
+   10.88,
+   14.2,
+   0.4
+  ],
+  [
+   14.2,
+   999,
+   0.3
+  ]
+ ],
+ "duck": {
+  "mix": 0.6,
+  "release": 350
+ },
+ "trim": [
+  0.0,
+  19.4
+ ],
+ "end_seconds": 2.5,
+ "seedance": {
+  "model": "magi_2",
+  "made_by": "higgsfield",
+  "job": "427be55b-e324-468f-961d-e677ed962936",
+  "prompt": "brief_prompt.txt",
+  "lip_sync": "없음 — NO TALKING",
+  "cut": "원본 장면(프레임 차이): 월급 봉투 0~4.0 · 금리 레버 4.0~7.35 · 칩 공장 줄 7.35~10.88 · 기차표 10.88~14.2 · 카페 칠하기 14.2~17.4 · 빨간 펜 인사 17.4~20.24. 카페 장면 첫 0.8초(H 가 뒤돌아 얼굴 안 보임) 뺌. 다시 만들기 없음."
+ },
+ "source_video_prep": "ffmpeg: trim 0:14.2 | 15.0:20.24 → concat fps=25 1080x1920, 19.44초. 흐림·글자 지움 없음."
+}
