@@ -6,7 +6,7 @@
 이번 달(구독 크레딧이 들어오는 날부터 한 달) 합계가 config.higgsfield.monthly_cap 을 넘지 않게 만들기 전에 검사한다.
 
   python3 automation/higgsfield_budget.py status                 # 이번 달 쓴 것·남은 것·영상 몇 편
-  python3 automation/higgsfield_budget.py check 63               # 63 을 더 써도 되나(넘으면 코드 1 — 만들지 않는다)
+  python3 automation/higgsfield_budget.py check 53               # 53 을 더 써도 되나(넘으면 코드 1 — 만들지 않는다)
   python3 automation/higgsfield_budget.py add 62.75 "11/24 릴스 영상 60 + 표지 그림 11장"   # 쓴 뒤 바로 적는다
 """
 import argparse
@@ -19,7 +19,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from edith.common import AUTOMATION, load_config, now_kst  # noqa: E402
 
 LEDGER = AUTOMATION / "credits" / "higgsfield.jsonl"
-REEL = 63   # 영상 날 한 편(영상 60 + 그림 약 3) — RUNBOOK_REEL '크레딧 계획'
+REEL = 53   # 영상 날 한 편(영상 magi_2 1080p 20초 50 + 그림 약 3, 2026-11-27~ — 그 전 seedance 60 → 63) — RUNBOOK_REEL '크레딧 계획'
 
 
 def settings():

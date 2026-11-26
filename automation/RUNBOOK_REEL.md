@@ -95,11 +95,18 @@
 
 ## 크레딧 계획 (힉스필드 — 11/21~, 11/04 운영자 '480p로 해줘' · 11/17 '주 1회 월요일')
 
-- 요금(11/21 `estimate_*` 확인): 영상 `seedance_2_5` 480p · bitrate high · 20초 **60크레딧**(720p 는 쓰지 않는다), 그림 `gpt_image_2_5` 1k 한 장 **0.25** → 웹툰 11장 약 2.75.
-  영상 날 하루 약 63(다시 만들기 +60). 월·수·금(11/23~) 한 달 약 13편 × 63 ≈ 820 — 1,500 몫 안에서 다시 만들기·특집에 약 680 이 남는다.
+- **영상 모델 MAGI-2(`magi_2`, Sand AI) — 2026-11-27 릴스~**(운영자 11/26 'MAGI-2가 씨댄스 2.5보다 가성비가 좋다는데 맞아? 맞으면 앞으로 MAGI-2로').
+  11/26 `estimate_video_cost` 로 같은 조건(20초·9:16) 견줌: `magi_2` 1080p **50크레딧**(소리 있든 없든 같음) vs `seedance_2_5` 480p·bitrate high **60** ·
+  `seedance_2_5` 1080p **320** — 값은 약 17% 싸고 화질은 480p → 1080p. 그림 `gpt_image_2_5` 1k 한 장 **0.25** → 웹툰 11장 약 2.75.
+  영상 날 하루 약 53(다시 만들기 +50). 월·수·금 한 달 약 13편 × 53 ≈ 690 — 1,500 몫 안에서 약 810 이 남는다.
+  **H 모양이 아직 MAGI-2 로 검증되지 않았다** — 첫 3편(11/27·11/30·12/2)은 3단계 눈 검수에서 H 가 '동그란 3D 공·안경·작은 입'으로 나오는지 특히 본다.
+  어긋나면 그날 한 번만 `seedance_2_5`(아래 예전 params, 60)로 다시 만들고 보고에 'MAGI-2 H 어긋남: …' 한 줄 — 3편 중 2편이 어긋나면 RUNBOOK 을 seedance 로 되돌린다.
+  (그 전 11/21~11/26: `seedance_2_5` 480p · bitrate high · 20초 60크레딧.)
 - **EDIT H 몫은 한 달 1,500**(2026-11-22 운영자 '한 달 3000 크레딧이지만 친구랑 같이 쓰는 거라 1500 만') — 계정 잔액(`balance`)엔 친구 몫이 섞여 우리 몫을 알 수 없다.
   우리가 쓴 것은 장부 `automation/credits/higgsfield.jsonl` 에 적고 `python3 automation/higgsfield_budget.py` 로 본다(한 달 = 매달 18일 KST 구독 크레딧이 들어온 날부터, `config.higgsfield`).
-  - **만들기 전**: `python3 automation/higgsfield_budget.py check 63`(다시 만들기·장면 다시 만들기 전에도 그 값으로 다시). 코드 1(넘음)이면 그날 영상은 쉬고 카드·스토리만 — PushNotification 한 줄('이번 달 힉스필드 몫 1,500 을 다 써 영상 쉼 · 다음 달 18일부터').
+  - **만들기 전**: `python3 automation/higgsfield_budget.py check 53`(MAGI-2 영상 50 + 그림 약 3). **다시 만들기·장면 다시 만들기·seedance 로 바꿔 만들기 전에는
+    그 요청의 `estimate_video_cost` 견적(+ 아직 안 만든 그림 몫)으로 다시** — seedance 되돌림이면 `check 63`(60 + 3), 장면만이면 그 견적 그대로(PR #235 리뷰: 남은 몫 55 에서
+    `check 53` 으로 통과한 뒤 seedance 60 을 쓰면 한 달 1,500 을 넘는다). 코드 1(넘음)이면 그날 영상은 쉬고 카드·스토리만 — PushNotification 한 줄('이번 달 힉스필드 몫 1,500 을 다 써 영상 쉼 · 다음 달 18일부터').
   - **쓴 바로 뒤**: `python3 automation/higgsfield_budget.py add <쓴 크레딧> "<날짜> 릴스 영상 60 + …"` — 실패해서 돌려받은(refund) 것은 빼고 적는다. 장부 파일을 릴스 커밋에 같이 올린다.
   - 운영 대화에서 쓴 것(시안·소개 영상·시험)도 같은 장부에 적는다. 그림 0.25 짜리도 적는다.
   - 남은 몫이 300 아래면 그날 보고와 알림에 `status` 줄('쓴 N / 1500 · 남은 M · 영상 날 약 K편')을 붙인다.
@@ -297,9 +304,11 @@ CAMERA 에 'continuous motion in every shot — no held poses, no frozen moments
    말하는데 입이 닫힌 영상은 립싱크 검수 탈락이 아니라 '해설 목소리'로 본다. 조용한데 입이 뻐끔거리는 영상은 탈락.
 
 ### 2. 영상 (영상 날만 — 월요일·위 '예외' 날짜)
-힉스필드 `generate_video` — params `{"model": "seedance_2_5", "mode": "omni_reference", "prompt": 그날 영어 프롬프트, "duration": 20, "resolution": "480p", "bitrate_mode": "high",
+힉스필드 `generate_video` — params `{"model": "magi_2", "prompt": 그날 영어 프롬프트, "duration": 20, "resolution": "1080p",
 "aspect_ratio": "9:16", "generate_audio": true, "use_unlim": false, "medias": [{"role": "image_references", "value": 시트 id}, {… 놀람 id}, {… 커피 id}]}`(id 는 위 '도구').
-프리셋 추천 notice 가 오면 declined_preset_id 를 넣어 그대로. 60크레딧, 생성 약 15분 — `jobs_wait` 로 기다리고 **그동안 5-1 웹툰 그림을 만든다**(목소리는 1-1 에서 이미 만들었다).
+**먼저 `estimate_video_cost` 로 같은 params 가 50 인지 본다**(값이 바뀌었으면 보고에 한 줄, 63 을 넘으면 seedance 로). `start_image` 는 references 와 함께 못 쓴다(MAGI-2).
+(되돌릴 때·H 가 어긋난 날의 다시 만들기: `{"model": "seedance_2_5", "mode": "omni_reference", …, "resolution": "480p", "bitrate_mode": "high", …}` 60크레딧.)
+프리셋 추천 notice 가 오면 declined_preset_id 를 넣어 그대로. 50크레딧, 생성 시간은 첫날 재서 보고에 한 줄 — `jobs_wait` 로 기다리고 **그동안 5-1 웹툰 그림을 만든다**(목소리는 1-1 에서 이미 만들었다).
 40분이 넘도록 끝나지 않거나 실패면 그날 영상은 쉰다(다시 만들기는 1번).
 - 립싱크를 하지 않으니 `audio_references` 는 넣지 않는다(11/17~11/18 은 드롭샷 reference_audio 로 목소리 트랙을 줬다).
 - (11/15~11/20 기록) 드롭샷 `generate_video` — model `bytedance/seedance-2.5`, options `{"prompt", "reference_image": [주소 3개], "duration": 20, "resolution": "480p", "aspect_ratio": "9:16", "generate_audio": true}`, 1,030크레딧.
@@ -313,7 +322,9 @@ CAMERA 에 'continuous motion in every shot — no held poses, no frozen moments
   **립싱크 영상(seedance.reference_audio 가 있는 brief)은 영상 소리에 목소리 트랙이 그대로 들어 있다** — episode.py 가 대사마다 [시작−0.15, 끝+0.25] 동안 영상 소리를 0 으로 끈다(11/18~).
   11/17 릴스는 그 소리를 0.4 로 함께 섞어 두 목소리가 겹쳤고(다시 만든 장면은 예전 문구 '시험 속임수 게시물'까지), 완성본이 '모건스탠비가 본 포스피'·'커닝 게이싯물'로 들렸다(운영자 11/18 '음성에 문제').
 - 2026-11-14 시험(4초, 참고 그림 3장): H 모양 그대로·세로 480×854·효과음 있음. 받은 영상은 480×854 이고 episode.py 가 1080×1920 으로 키운다.
-- brief.json 의 `"seedance"` 칸: `{"model": "seedance_2_5", "made_by": "higgsfield", "job": job_id, "prompt": "brief_prompt.txt", "cut": …}`(11/15~11/20 은 made_by dropshot).
+- brief.json 의 `"seedance"` 칸(이름은 그대로 — episode.py·qa 가 읽는다): `{"model": "magi_2", "made_by": "higgsfield", "job": job_id, "prompt": "brief_prompt.txt", "cut": …}`
+  (11/21~11/26 은 model `seedance_2_5`, 11/15~11/20 은 made_by dropshot). MAGI-2 는 1080×1920 으로 온다 — `source_video_prep` 의 scale 은 그대로 480x854 로 맞춰도 되고,
+  화질을 살리려면 1080x1920 으로(episode.py 가 받은 크기대로 쓴다).
 
 ### 3. 받기·눈 검수
 원본을 임시 폴더에 받는다 → 0.5초 간격 프레임 시트로 사람·로고·실제 제품·글자·H 모양을 본다.
