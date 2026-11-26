@@ -361,7 +361,7 @@ def instagram_caption(d, site):
     ig = d.get("instagram", {})
     issues = d["card_issues"]
     head = (ig.get("caption") or "").strip() or f"{plain(d['title'])}\n\n{plain(d['lead'])}"
-    if caption_dedupe(d["date"]) and len(issues) > 1:   # 1번(H PICK)은 위 훅·요약이 이미 말했다
+    if caption_dedupe(d["date"]) and len(issues) > 1 and not d.get("rewind"):   # 1번(H PICK)은 위 훅·요약이 이미 말했다(예비 호 도입부는 일반 안내라 목록 전부 — PR #231 리뷰)
         lines = [head, "", _pick(_LIST_HEAD_REST, d).format(n=len(issues) - 1)]
         lines += [f"{i}. {plain(it['headline'])}" for i, it in enumerate(issues[1:], 2)]
     else:

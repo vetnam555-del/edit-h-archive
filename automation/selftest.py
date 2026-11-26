@@ -3855,7 +3855,10 @@ def t_caption_dedupe():
     cap = site_mod.instagram_caption(d2, url)
     expect("1. 내일부터 홈플러스" not in cap and "2. 대출 금리" in cap and "4가지" in cap, "목록은 2번부터")
     expect(cap.count("프로필 링크") == 1 and "오늘 호 전문" in cap, f"'프로필 링크'는 한 번: {cap.count('프로필 링크')}")
-    return "목록 2번부터 · 프로필 링크 1번"
+    d3 = copy.deepcopy(d2)
+    d3["rewind"] = True   # 예비 호는 도입부가 일반 안내 — 목록 1번을 빼면 그 소식이 캡션에서 사라진다(PR #231 리뷰)
+    expect("1. 내일부터 홈플러스" in site_mod.instagram_caption(d3, url), "예비 호 캡션은 목록 전부")
+    return "목록 2번부터 · 프로필 링크 1번 · 예비 호는 전부"
 
 
 def plain_closing_ok(d):
