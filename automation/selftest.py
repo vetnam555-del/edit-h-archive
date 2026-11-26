@@ -3121,6 +3121,7 @@ def t_higgsfield_budget():
     expect(led and all({"date", "credits", "what"} <= set(r) for r in led), "장부 automation/credits/higgsfield.jsonl 이 없거나 칸이 빠졌다")
     rb = (AUTOMATION / "RUNBOOK_REEL.md").read_text(encoding="utf-8")
     expect("higgsfield_budget.py check" in rb and "higgsfield_budget.py add" in rb, "RUNBOOK_REEL 이 만들기 전 검사·쓴 뒤 적기를 말하지 않는다")
+    expect('"model": "magi_2"' in rb and hb.REEL == 53, "2026-11-27~ 릴스 영상은 MAGI-2(magi_2 1080p 20초 50, 한 편 53) — 운영자 11/26")
     st = hb.state()
     return f"{st['start']}~{st['end']} 쓴 {st['used']:g} / {st['cap']:g}"
 
