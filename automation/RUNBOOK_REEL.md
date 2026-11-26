@@ -104,7 +104,9 @@
   (그 전 11/21~11/26: `seedance_2_5` 480p · bitrate high · 20초 60크레딧.)
 - **EDIT H 몫은 한 달 1,500**(2026-11-22 운영자 '한 달 3000 크레딧이지만 친구랑 같이 쓰는 거라 1500 만') — 계정 잔액(`balance`)엔 친구 몫이 섞여 우리 몫을 알 수 없다.
   우리가 쓴 것은 장부 `automation/credits/higgsfield.jsonl` 에 적고 `python3 automation/higgsfield_budget.py` 로 본다(한 달 = 매달 18일 KST 구독 크레딧이 들어온 날부터, `config.higgsfield`).
-  - **만들기 전**: `python3 automation/higgsfield_budget.py check 53`(다시 만들기·장면 다시 만들기 전에도 그 값으로 다시). 코드 1(넘음)이면 그날 영상은 쉬고 카드·스토리만 — PushNotification 한 줄('이번 달 힉스필드 몫 1,500 을 다 써 영상 쉼 · 다음 달 18일부터').
+  - **만들기 전**: `python3 automation/higgsfield_budget.py check 53`(MAGI-2 영상 50 + 그림 약 3). **다시 만들기·장면 다시 만들기·seedance 로 바꿔 만들기 전에는
+    그 요청의 `estimate_video_cost` 견적(+ 아직 안 만든 그림 몫)으로 다시** — seedance 되돌림이면 `check 63`(60 + 3), 장면만이면 그 견적 그대로(PR #235 리뷰: 남은 몫 55 에서
+    `check 53` 으로 통과한 뒤 seedance 60 을 쓰면 한 달 1,500 을 넘는다). 코드 1(넘음)이면 그날 영상은 쉬고 카드·스토리만 — PushNotification 한 줄('이번 달 힉스필드 몫 1,500 을 다 써 영상 쉼 · 다음 달 18일부터').
   - **쓴 바로 뒤**: `python3 automation/higgsfield_budget.py add <쓴 크레딧> "<날짜> 릴스 영상 60 + …"` — 실패해서 돌려받은(refund) 것은 빼고 적는다. 장부 파일을 릴스 커밋에 같이 올린다.
   - 운영 대화에서 쓴 것(시안·소개 영상·시험)도 같은 장부에 적는다. 그림 0.25 짜리도 적는다.
   - 남은 몫이 300 아래면 그날 보고와 알림에 `status` 줄('쓴 N / 1500 · 남은 M · 영상 날 약 K편')을 붙인다.
