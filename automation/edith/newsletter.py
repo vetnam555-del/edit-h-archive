@@ -769,14 +769,25 @@ def _fresh_checklist(b):
     return keep
 
 
+def _same_words(a, b):
+    """띄어쓰기·문장부호만 다른 같은 말인가(11/27 호: 표지 '경기 좋다며, 금리는 또 올렸다' vs H PICK '경기 좋다며 금리는 또 올렸다' — 쉼표 하나로 비교를 빠져나갔다)."""
+    k = lambda s: re.sub(r"[^0-9A-Za-z가-힣]", "", plain(str(s or "")))   # noqa: E731
+    return k(a) == k(b)
+
+
 def pick_title(d):
-    """H PICK 제목 — 11/27~ 표지 제목과 글자까지 같으면 카드 '5가지 한눈에' 1번 제목(더 구체적: '내일부터 홈플러스 마트 전 점포 휴업')."""
+    """H PICK 제목 — 11/27~ 표지 제목과 같은 말이면 카드 '5가지 한눈에' 1번 제목(더 구체적: '내일부터 홈플러스 마트 전 점포 휴업')."""
     t = plain(d["big_issue"].get("title") or d["title"])
-    if _dedupe_on(d) and re.sub(r"\s+", "", t) == re.sub(r"\s+", "", plain(d.get("hero_title") or d["title"])):
+    if _dedupe_on(d) and _same_words(t, d.get("hero_title") or d["title"]):
         first = (d.get("card_issues") or [{}])[0].get("headline")
-        if first and re.sub(r"\s+", "", plain(first)) != re.sub(r"\s+", "", t):
+        if first and not _same_words(first, t):
             return re.sub(r"\s*\n\s*", " ", plain(first)).strip()
     return t
+
+
+def pick_title_repeats(d):
+    """H PICK 제목이 결국 표지 제목과 같은 말인가 — 빌드 경고용(카드 1번 제목까지 같으면 big_issue.title 을 따로 써야 한다)."""
+    return _dedupe_on(d) and _same_words(pick_title(d), d.get("hero_title") or d["title"])
 
 
 def _plus_on(d):

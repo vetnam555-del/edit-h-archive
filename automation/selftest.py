@@ -2638,6 +2638,8 @@ def _dive_sample(steps=4, worst=False, day=None):
     data.pop("vol", None)
     if day < "2026-11-23":   # 월요일 원고의 '이번 주 일정'(week_ahead)은 11/23 호~ — 그 전 날짜로 옮기면 content 가 막는다(11/23 월요일 호 뒤 빨간 점검)
         data.pop("week_ahead", None)
+    if day < "2026-11-27":   # 금요일 원고의 '이번 주 퀴즈'(quiz)는 11/27 호~ — 같은 까닭(11/27 금요일 호 발행 뒤 빨간 점검)
+        data.pop("quiz", None)
     for ci in (data.get("cards") or {}).get("issues") or []:   # 지난 호 원고의 '63억$' 꼴은 11/04~ content 가 막는다 — 옮겨 쓸 때 새 규칙대로
         if isinstance(ci.get("number"), str):
             ci["number"] = re.sub(r"([만억조])\s*[$€¥]", r"\1 달러", ci["number"])
@@ -3925,6 +3927,9 @@ def t_nl_dedupe():
     new = newsletter.render(d2, site, 5)
     expect("VOL.155 ·" not in new and "2026.11.26 · 읽는 시간" in new, "머리 줄은 날짜·읽는 시간만(호수·요일은 칩에)")
     expect(newsletter.pick_title(d2) == "내일부터 홈플러스 마트 전 점포 휴업", f"H PICK 제목: {newsletter.pick_title(d2)}")
+    d27 = content_mod.load("2026-11-27")   # 표지 '경기 좋다며, 금리는 또 올렸다' = 카드 1번 '경기 좋다며 금리는 또 올렸다'(쉼표만 다름)
+    expect(newsletter._same_words(d27["hero_title"], "경기 좋다며 금리는 또 올렸다") and newsletter.pick_title_repeats(d27),
+           "쉼표·줄바꿈만 다른 제목도 같은 말로 보고, 바꿀 제목이 없으면 빌드가 알린다")
     got = [newsletter.split_takeaway(d2, it["takeaway"]) for it in d2["all_items"]]
     expect(got[0] == ("내일부터 홈플러스 마트는 문을 닫아요.", 1) and got[1][1] == 2 and got[2][1] == 0,
            f"'그래서' 상자 할 일 → 오늘 챙길 것 번호: {got[:3]}")
