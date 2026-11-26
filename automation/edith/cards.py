@@ -654,6 +654,25 @@ def issue_card(it, n, date=None):
 # 인스타가 다시 보여 주는 두 번째 표지) ② H PICK 3장 → 2장(심층 + 오늘 챙길 것을 한 장으로) ③ 소식 장은 3D 아이콘 장면(Fluent Emoji 3D, MIT — assets/icons3d)
 # + 우리 3D H, 그 아래 큰 숫자·제목·답 한 줄만(본문·'그래서 뭐가 달라져?' 질문은 캡션·뉴스레터로). 10장 → 9장. 힉스필드 크레딧은 쓰지 않는다.
 CARDS_V4_FROM = "2026-11-25"
+# 2026-11-26 운영자 '카드뉴스도 중복 없는지 체크해 줘' — 11/26 호 9장을 다시 보니 ① 4번째 장 '오늘 챙길 것' 3줄 중 2줄이 바로 앞 H PICK 장·다음 장의
+# '그래서 나는?' 답과 같은 말(홈플러스 장 볼 곳·변동금리 변경일 — 메일과 같은 겹침) ② 마무리 장 숫자 줄 '5개 이슈 전문 · 5장 핵심 카드 · 155호 누적 발행'은
+# 표지 '#155'와 같은 말에 카드 수는 틀림(9장), 아래 줄 '이슈 5개 전문＋출처는 매일 아침 뉴스레터로'는 바로 위 소개 문장('매일 아침 8시…5가지')과 같은 말.
+# 이 날짜 호부터: ① 소식 장 답과 핵심어 2개 이상 겹치는 할 일 줄은 빼고(다 빠지면 상자 없음) ② 숫자 줄 빼고 아래 줄은 '출처·전문은 뉴스레터로'만. 지난 호는 그대로.
+CARDS_DEDUPE_FROM = "2026-11-27"
+
+
+def cards_dedupe(date):
+    return str(date or "")[:10] >= CARDS_DEDUPE_FROM
+
+
+def card_todo(d):
+    """마무리 앞 '오늘 챙길 것' 줄 — 11/27~ 소식 장 '그래서 나는?' 답과 같은 할 일은 뺀다(카드는 한 묶음이라 두 번 읽힌다)."""
+    todo = [x for x in d.get("todo") or [] if str(x).strip()][:3]
+    if not cards_dedupe(d.get("date")):
+        return todo
+    from .newsletter import _toks
+    answers = [_toks(it.get("takeaway")) | _toks(it.get("headline")) for it in d.get("card_issues") or []]   # 그 소식 장이 이미 답을 준 이야기
+    return [x for x in todo if not any(len(_toks(x) & a) >= 2 for a in answers)]
 # 작은 글자 바닥(11/25~, 운영자 피드백 장부 #2 '잘 안 보인다') — 1080px 카드가 휴대폰에선 가로 390px(×0.36)로 보여 24px 글자가 8.7px 가 된다.
 # v4 장의 라벨·번호·자료 줄은 이 값 아래로 두지 않고, 렌더러가 장마다 가장 작은 글자(minFont)를 재 빌드가 이보다 작으면 경고한다(build_issue).
 SMALL_TEXT_MIN = 28
@@ -766,7 +785,7 @@ def deep_card_v4(d):
         f'<div style="font-weight:800;font-size:{fs(52)};line-height:1.1;letter-spacing:-1px;color:{TEXT};white-space:nowrap;">{esc(n["value"])}</div>'
         f'<div style="font-weight:500;font-size:{fs(25)};line-height:1.35;margin-top:10px;color:{SUB};">{esc(n["label"])}</div></div>'
         for n in b["numbers"])
-    todo = [x for x in d.get("todo") or [] if str(x).strip()][:3]
+    todo = card_todo(d)
     checks = "".join(
         f'<div style="display:flex;gap:18px;align-items:flex-start;margin-top:{0 if i == 0 else 20}px;">'
         f'<div style="flex:none;margin-top:5px;width:38px;height:38px;border:3px solid {TEXT};border-radius:8px;"></div>'
@@ -1046,6 +1065,9 @@ def cta_follow(d):
         f'<div style="font-weight:400;font-size:{fs(SMALL_TEXT_MIN if cards_v4(d.get("date")) else 22)};line-height:1;color:#6B6E75;margin-top:10px;">{lbl}</div></div>'
         for v, lbl in stats)
     tail = f"이슈 {len(d['all_items'])}개 전문＋출처는 매일 아침 뉴스레터로\n→ **프로필 링크**에서 받아보세요"
+    if cards_dedupe(d.get("date")):   # 11/27~ 숫자 줄(표지 #호수와 같은 말·틀린 장 수) 빼고, 아래 줄은 위 소개 문장과 겹치지 않게
+        stat_html = ""
+        tail = "출처·전문은 뉴스레터로 → **프로필 링크**"
     return _frame(f"""
 <div class="body" style="padding:60px 78px;justify-content:center;">
   <div style="text-align:center;font-weight:700;font-size:28px;line-height:1;color:#5A5A5E;">{esc(c["kick"])}</div>
@@ -1056,7 +1078,7 @@ def cta_follow(d):
     {avatar(132, d.get('date'))}
     <div style="margin-top:22px;font-weight:800;font-size:{fs(40)};line-height:1;color:{TEXT};">edit.h.kr</div>
     <div class="bal" style="margin-top:16px;font-weight:500;font-size:{fs(30)};line-height:1.45;color:{SUB};">{follow_line(d, when, n)}</div>
-    <div style="flex:none;width:100%;display:grid;grid-template-columns:repeat(3,1fr);margin-top:28px;">{stat_html}</div>
+    {f'<div style="flex:none;width:100%;display:grid;grid-template-columns:repeat(3,1fr);margin-top:28px;">{stat_html}</div>' if stat_html else ""}
     <div style="flex:none;margin-top:32px;width:100%;background:#000000;color:#FFFFFF;border-radius:999px;padding:26px 0;
       font-weight:800;font-size:{fs(36)};line-height:1;">팔로우하고 내일 아침에 받기</div>
   </div>
