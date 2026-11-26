@@ -614,6 +614,9 @@ def _icon_problems(it, data, date_str, where):
     return out
 
 
+WEEKEND_WORD_FROM = "2026-11-27"
+
+
 def prepare(data, date_str):
     where = f"content/{date_str}.json"
     if data.get("date") != date_str:
@@ -699,6 +702,10 @@ def prepare(data, date_str):
     data["vol"] = data.get("vol") or next_vol(date_str)
     data["weekday"] = weekday_ko(d)
     data["date_obj"] = d
+    if date_str >= WEEKEND_WORD_FROM and data["weekday"] not in ("금", "토", "일"):   # 11/26 맺음말 '오늘 주말에'(목요일) — 운영자 점검 중 발견
+        for path, text in [("question.closing", (data.get("question") or {}).get("closing", ""))] + [(f"todo[{i}]", t) for i, t in enumerate(data.get("todo") or [])]:
+            if re.search(r"오늘\s*(이\s*)?주말", plain(str(text or ""))):
+                raise ContentError(f"{where} {path}: '오늘 주말'이라고 썼는데 이 호는 {data['weekday']}요일이에요 — '이번 주말'처럼 고치기")
     data.setdefault("briefs", [])
     data.setdefault("read_minutes", 7 if fmt == 1 else (5 if len(data["briefs"]) > 2 else 4))
     data.setdefault("emoji", "🧭")

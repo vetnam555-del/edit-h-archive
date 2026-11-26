@@ -3788,6 +3788,40 @@ def t_tail_v2():
     return "얼굴 1 · 숫자 카드 없음"
 
 
+def t_nl_dedupe():
+    """11/27~ 메일 중복 줄이기 2(운영자 '더 개선할 부분은 없는지'): 머리 줄 호수·요일 한 번, H PICK 제목 ≠ 표지 제목,
+    '그래서' 상자의 할 일이 오늘 챙길 것과 같으면 — 앞만 + 번호, 맺음말 되풀이 경고, 월~목 '오늘 주말' 막기. 11/26 호는 그대로."""
+    import copy
+    from edith import content as content_mod, newsletter
+    site = "https://example.com/x"
+    d = content_mod.load("2026-11-26")
+    old = newsletter.render(d, site, 5)
+    expect("VOL.155 · 2026.11.26 목요일" in old and "할 일은 맨 위" not in old, "11/26 호(지난 호)가 바뀌었다")
+    d2 = copy.deepcopy(d)
+    d2["date"] = "2026-11-27"
+    new = newsletter.render(d2, site, 5)
+    expect("VOL.155 ·" not in new and "2026.11.26 · 읽는 시간" in new, "머리 줄은 날짜·읽는 시간만(호수·요일은 칩에)")
+    expect(newsletter.pick_title(d2) == "내일부터 홈플러스 마트 전 점포 휴업", f"H PICK 제목: {newsletter.pick_title(d2)}")
+    got = [newsletter.split_takeaway(d2, it["takeaway"]) for it in d2["all_items"]]
+    expect(got[0] == ("내일부터 홈플러스 마트는 문을 닫아요.", 1) and got[1][1] == 2 and got[2][1] == 0,
+           f"'그래서' 상자 할 일 → 오늘 챙길 것 번호: {got[:3]}")
+    expect(new.count("할 일은 맨 위") == 2, "상자 두 곳에 번호 줄")
+    expect(len(newsletter.closing_repeats_todo(d2)) == 1, "맺음말이 오늘 챙길 것을 되풀이하면 경고")
+    raw = json.loads((ROOT / "content" / "2026-11-26.json").read_text(encoding="utf-8"))
+    raw["date"] = "2026-11-27"   # 금요일 — '오늘 주말'은 허용
+    for day, bad in (("2026-11-30", True), ("2026-11-27", False)):
+        r = json.loads(json.dumps(raw))
+        r["date"] = day
+        r.pop("quiz", None)
+        try:
+            content_mod.prepare(r, day)
+            blocked = False
+        except content_mod.ContentError as e:
+            blocked = "오늘 주말" in str(e)
+        expect(blocked == bad, f"{day}: '오늘 주말' 막기 {blocked}")
+    return "머리 줄·H PICK 제목·할 일 번호·맺음말·주말 말"
+
+
 def plain_closing_ok(d):
     return bool((d.get("question") or {}).get("closing"))
 
@@ -4336,6 +4370,7 @@ def main():
     check("경쟁 매체 웹(토큰 없이·robots 지킴)", t_competitors_web)
     check("공시 원문(DART, 키 없이)", t_fetch_disclosure)
     check("메일 끝 중복 줄이기(11/27~)", t_tail_v2)
+    check("메일 중복 줄이기 2(11/27~)", t_nl_dedupe)
     check("댓글 키워드 → 구독 링크 DM", t_comment_dm)
     check("뉴스레터 시세판·평가 버튼·맨 위 전달 상자 뺌(11/22~)", t_nl_plus)
     check("H 말풍선(질문·맺음말, 11/22~)·월요일 이번 주 일정(11/23~)", t_h_voice_week)
