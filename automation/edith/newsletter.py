@@ -779,6 +779,30 @@ def pick_title(d):
     return t
 
 
+def _plus_on(d):
+    from .content import PICK_PLUS_FROM
+    return str(d.get("date", "")) >= PICK_PLUS_FROM and d.get("format") == 2 and not d.get("rewind")
+
+
+def _head(d, key, default):
+    """H PICK 소제목 — 11/27~ 그날 독자 질문(big_issue.heads), 없으면 기본 소제목(뉴닉 '또 임시휴업을 한다고?' 처럼 다음 문단으로 끌기)."""
+    h = (d["big_issue"].get("heads") or {}).get(key) if _plus_on(d) else None
+    return plain(str(h)).strip() if h and str(h).strip() else default
+
+
+def _who_next(d):
+    """11/27~ H PICK '누가 영향받나'(2~3줄) + '앞으로 어떻게 될까?'(1~2문장) — 뉴닉 비교(운영자 11/26 '1~4번도 진행')."""
+    b = d["big_issue"]
+    if not _plus_on(d) or not b.get("next"):
+        return ""
+    rows = "".join(
+        _div(f"font-size:15px;line-height:1.7;color:{BODY};margin-top:8px;",
+             f'<b style="font-weight:700;color:{INK};">{esc(plain(str(w["label"])))}</b> · {md(w["text"])}')
+        for w in b.get("who") or [])
+    return ((_label("누가 영향받나?") + rows if rows else "")
+            + _label("앞으로 어떻게 될까?") + _body(b["next"], "16px", "1.8", 8))
+
+
 def _pick(d):
     """01 H PICK 심층 — 한 이슈를 '무슨 일 → 숫자 → 왜 중요 → 그래서'로 깊게."""
     b = d["big_issue"]
@@ -798,15 +822,16 @@ def _pick(d):
 <tr><td class="px" style="padding:0 36px;">{_chips([("H PICK", True), ((d.get("series") or {}).get("label") or "오늘의 심층", False)], align)}
   {_div(f"font-size:23px;font-weight:700;line-height:1.45;color:{INK};margin-top:14px;", esc(pick_title(d)), not v3)}
   {_tag(f"01 · {b['tag']}", align)}
-  {_label("무슨 일이야?")}
+  {_label(_head(d, "what", "무슨 일이야?"))}
   {paras}
   <table role="presentation" align="center" cellpadding="0" cellspacing="0" style="margin-top:22px;"><tr><td class="stat" style="background:{HL};padding:4px 14px;font-family:{F};font-size:44px;font-weight:800;line-height:1.1;color:{INK};">{esc(st['value'])}<span style="font-size:24px;">{esc(st.get('unit', ''))}</span></td></tr></table>
   {_div(f"font-size:12.5px;font-weight:400;line-height:1.6;color:{MUTED};margin-top:8px;", esc(plain(st['caption'])), True)}
   {_label("숫자로 보면")}
   {_numbers(b["numbers"])}
   {_chart_block(chart) if chart else ""}
-  {_label("왜 중요해?")}
+  {_label(_head(d, "why", "왜 중요해?"))}
   {why}
+  {_who_next(d)}
   {_takeaway_box(d, b['takeaway'], f"font-size:14.5px;font-weight:400;line-height:1.75;color:{BODY};margin-top:8px;", mt=20)}
   {check}
   {_sources(b['sources'])}</td></tr>"""

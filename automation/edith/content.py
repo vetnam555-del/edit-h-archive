@@ -622,6 +622,14 @@ WEEKEND_WORD_FROM = "2026-11-27"
 DEEP_FROM = "2026-11-27"
 DEEP_BODY_MIN = 280
 INSIGHT_MAX = 90
+# 2026-11-26 운영자 '뉴닉이랑도 비교해서 부족한 점 체크해 줘' → '1~4번도 진행해 줘'. 같은 홈플러스 휴업을 뉴닉은 약 2,100자로 — 지난 흐름(7월 휴업 →
+# 2000억 → 9월 인가), 누가 피해 보나(소비자·직원 8천 명 급여 25%·납품업체), '앞으로 어떻게 될까?'(인수의향서 → 실사·법원, 안 되면 파산 선고 가능),
+# 어려운 말 괄호 풀이(DIP), 독자 질문 소제목('또 임시휴업을 한다고?')으로 썼고, 우리 H PICK 은 약 340자 + 숫자 3칸에 '앞으로'·'누가'가 없었다.
+# 이 날짜 호부터 H PICK 에 `next`(앞으로 어떻게 될까? 1~2문장 — 다음 날짜·갈림길·조건)와 `who`(누가 영향받나 2~3줄 {label, text})가 필수,
+# `heads`(소제목을 그날 독자 질문으로 — {what, why}, 선택). 어려운 말은 처음 나올 때 괄호로 푼다(RUNBOOK).
+PICK_PLUS_FROM = "2026-11-27"
+NEXT_MAX = 160
+WHO_TEXT_MAX = 80
 
 
 def prepare(data, date_str):
@@ -642,6 +650,22 @@ def prepare(data, date_str):
     big = data["big_issue"]
     for key in ("tag", "paragraphs", "stat", "takeaway") + (("why", "numbers") if fmt == 2 else ()):
         _need(big, key, f"{where} big_issue")
+    if fmt == 2 and date_str >= PICK_PLUS_FROM and not data.get("rewind"):
+        nxt = plain(str(big.get("next") or "")).strip()
+        if not nxt:
+            raise ContentError(f"{where} big_issue: next('앞으로 어떻게 될까?' 1~2문장 — 다음 날짜·갈림길·조건)가 없어요(2026-11-27~, RUNBOOK '깊이')")
+        if len(nxt) > NEXT_MAX:
+            raise ContentError(f"{where} big_issue: next {len(nxt)}자 — {NEXT_MAX}자 이하 1~2문장")
+        who = big.get("who")
+        if not isinstance(who, list) or not 2 <= len(who) <= 3 or any(
+                not isinstance(w, dict) or not str(w.get("label") or "").strip() or not str(w.get("text") or "").strip() for w in who):
+            raise ContentError(f"{where} big_issue: who('누가 영향받나' 2~3줄 — [{{\"label\": \"🛒 장 보던 사람\", \"text\": \"…\"}}])가 필요해요(2026-11-27~)")
+        for i, w in enumerate(who):
+            if len(plain(str(w["text"]))) > WHO_TEXT_MAX:
+                raise ContentError(f"{where} big_issue who[{i}]: text {len(plain(str(w['text'])))}자 — {WHO_TEXT_MAX}자 이하")
+        heads = big.get("heads")
+        if heads is not None and (not isinstance(heads, dict) or any(k not in ("what", "why") or not str(v).strip() for k, v in heads.items())):
+            raise ContentError(f"{where} big_issue: heads 는 {{\"what\": \"독자 질문\", \"why\": \"독자 질문\"}} 꼴(선택)")
     _check_sources(big.get("sources"), f"{where} big_issue")
     if fmt == 2:
         if isinstance(big["why"], str):
