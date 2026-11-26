@@ -635,8 +635,10 @@ def t_twosource():
     # 조·억·만 자리에서 자른·반올림한 값(11/05 ELS '국민은행 1723억원' = 기사 '1723억3400만원' — '어디에도 없다'고 잘못 알렸다)
     expect(match("1723억원", "과징금 1723억3400만원") and match("1724억원", "1723억 6000만 원") and match("3619억원", "3619억6000만원"),
            "조·억·만 자리에서 자르거나 반올림한 숫자를 못 맞춘다")
-    got = ts.issue_texts({"all_items": [{"tag": "t", "title": "제목", "insight": "점유율 37.5%로 흐름이 바뀌어요"}]})[0][2]
-    expect(any("37.5" in str(t) for _, t in got), "11/27~ insight(메일 해석 한 줄)의 숫자도 2곳 대조 대상(PR #232 리뷰)")
+    got = ts.issue_texts({"all_items": [{"tag": "t", "title": "제목", "insight": "점유율 37.5%로 흐름이 바뀌어요",
+                                          "next": "12월 3일 결정", "heads": {"why": "2000억은 어디 갔어?"}}]})[0][2]
+    for n in ("37.5", "12월 3일", "2000억"):   # 11/27~ insight·next·heads(메일에 그대로 나가는 칸)도 2곳 대조(PR #232·#233 리뷰)
+        expect(any(n in str(t) for _, t in got), f"'{n}' 칸이 2곳 대조 대상에서 빠졌다")
     expect(not match("1724억원", "1722억5000만원") and not match("1723억원", "1724억1000만원") and not match("34만원", "35만원")
            and not match("1.5억원", "1억5900만원"), "자리 맞춤이 너무 넓다")
     # 보도자료 첨부 PDF 를 하나라도 못 받으면 그 보도자료는 '못 읽음'(11/05 고용 — 두 번째 PDF 접속 끊김, 반쯤 읽은 본문으로 324만명·19.9% 를 막았다)
@@ -3795,7 +3797,45 @@ def _deepen(raw):
     for it in raw.get("items") or []:
         it["body"] = str(it["body"]) + " " + "배경 숫자와 업계 대응을 더한 문장이에요. " * 8
         it.setdefault("insight", "이 소식으로 돈의 흐름이 이렇게 바뀌어요")
+    b = raw.get("big_issue") or {}
+    b.setdefault("next", "다음 달 결정이 나면 방향이 갈려요.")
+    b.setdefault("who", [{"label": "🛒 소비자", "text": "주문이 바뀌어요"}, {"label": "👥 직원", "text": "급여가 바뀌어요"}])
     return raw
+
+
+def t_pick_plus():
+    """11/27~ H PICK '누가 영향받나'·'앞으로 어떻게 될까?'·질문 소제목(운영자 11/26 뉴닉 비교 '1~4번도 진행'): next·who 없으면 막고 메일에 그린다. 11/26 호는 그대로."""
+    from edith import content as content_mod, newsletter
+    raw = _deepen(json.loads((ROOT / "content" / "2026-11-26.json").read_text(encoding="utf-8")))
+    raw["date"] = "2026-11-30"   # 월요일(퀴즈 없는 날)
+    raw["question"]["closing"] = raw["question"]["closing"].replace("오늘 주말", "이번 주말")   # 11/26 맺음말은 '오늘 주말'(월~목엔 막힘)
+    raw["big_issue"]["next"] = "인수 계약이 나면 영업 재개를 검토하고, 법원이 이행 불가로 보면 파산을 선고할 수 있어요."
+    raw["big_issue"]["who"] = [{"label": "🛒 장 보던 사람", "text": "26일 뒤 배송 주문은 자동 취소·환불"},
+                               {"label": "👥 직원 8천 명", "text": "휴업 중 급여 70% 수준"}]
+    raw["big_issue"]["heads"] = {"what": "또 문을 닫는다고?"}
+    for key, why in (("next", "next 없음"), ("who", "who 없음")):
+        r = json.loads(json.dumps(raw))
+        r["big_issue"].pop(key)
+        try:
+            content_mod.prepare(r, "2026-11-30")
+            got = ""
+        except content_mod.ContentError as e:
+            got = str(e)
+        expect(key in got, f"{why}을 막아야 한다: {got[:80]}")
+    try:
+        d = content_mod.prepare(json.loads(json.dumps(raw)), "2026-11-30")
+    except content_mod.ContentError as e:
+        if "week_ahead" not in str(e):
+            raise
+        r = json.loads(json.dumps(raw))
+        r["week_ahead"] = [{"day": "12/1(화)", "text": "일정 하나"}, {"day": "12/2(수)", "text": "일정 둘"}]
+        d = content_mod.prepare(r, "2026-11-30")
+    nl = newsletter.render(d, "https://example.com/x", 5)
+    expect("앞으로 어떻게 될까?" in nl and "파산을 선고할 수" in nl and "누가 영향받나?" in nl and "직원 8천 명" in nl, "메일에 누가·앞으로")
+    expect("또 문을 닫는다고?" in nl and "왜 중요해?" in nl, "질문 소제목(what)·기본 소제목(why)")
+    old = newsletter.render(content_mod.load("2026-11-26"), "https://example.com/x", 5)
+    expect("앞으로 어떻게 될까?" not in old, "11/26 호(지난 호)가 바뀌었다")
+    return "next·who 막기 · 메일 누가·앞으로 · 질문 소제목"
 
 
 def t_deep():
@@ -4459,6 +4499,7 @@ def main():
     check("카드 중복 줄이기(11/27~)", t_cards_dedupe)
     check("인스타 캡션 중복 줄이기(11/27~)", t_caption_dedupe)
     check("메일 깊이(11/27~ 본문 280자·insight)", t_deep)
+    check("H PICK 누가·앞으로·질문 소제목(11/27~)", t_pick_plus)
     check("댓글 키워드 → 구독 링크 DM", t_comment_dm)
     check("뉴스레터 시세판·평가 버튼·맨 위 전달 상자 뺌(11/22~)", t_nl_plus)
     check("H 말풍선(질문·맺음말, 11/22~)·월요일 이번 주 일정(11/23~)", t_h_voice_week)
