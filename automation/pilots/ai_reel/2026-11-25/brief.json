@@ -1,0 +1,320 @@
+{
+ "date": "2026-11-25",
+ "items": [
+  "홈플러스",
+  "리니지 클래식",
+  "앤트로픽 주가",
+  "골프 비용",
+  "대만 AI 보너스"
+ ],
+ "hook": "질문",
+ "voices": [
+  {
+   "file": "stems/i1a_ask.mp3",
+   "start": 0.1,
+   "tempo": 1.1,
+   "text": "홈플러스로 장 보세요?",
+   "tts": "<strong>홈플러스</strong>로 장 보세요?",
+   "voice": "Hana"
+  },
+  {
+   "file": "stems/i1b_stop.mp3",
+   "start": 2.0,
+   "tempo": 1.25,
+   "text": "26일부터 배송 끊겨요!",
+   "tts": "<strong>이십육 일</strong>부터 배송 끊겨요!",
+   "voice": "Hana"
+  },
+  {
+   "file": "stems/i2_lineage.mp3",
+   "start": 4.35,
+   "tempo": 1.15,
+   "text": "추억의 리니지로 큰돈 벌었대요!",
+   "tts": "추억의 리니지로 <strong>큰돈</strong> 벌었대요!",
+   "voice": "Hana"
+  },
+  {
+   "file": "stems/i3_anthropic.mp3",
+   "start": 7.6,
+   "tempo": 1.25,
+   "text": "앤트로픽 주가가 공모 가격 밑으로!",
+   "tts": "엔트로픽 주가가 <strong>공모 가격</strong> 밑으로!",
+   "voice": "Hana"
+  },
+  {
+   "file": "stems/i4_golf.mp3",
+   "start": 11.2,
+   "tempo": 1.25,
+   "text": "골프 비용, 일본보다 훨씬 비싸대요!",
+   "tts": "골프 비용, 일본보다 <strong>훨씬</strong> 비싸대요!",
+   "voice": "Hana"
+  },
+  {
+   "file": "stems/i5_taiwan.mp3",
+   "start": 14.25,
+   "tempo": 1.25,
+   "text": "대만 82만 원 지급법 통과!",
+   "tts": "대만 <strong>팔십이만 원</strong> 지급법 통과!",
+   "voice": "Hana"
+  },
+  {
+   "file": "stems/i_bye_tomorrow.mp3",
+   "start": 17.2,
+   "tempo": 1.15,
+   "text": "내일 아침 8시에 또 만나요!",
+   "tts": "내일 아침 <strong>여덟 시</strong>에 또 만나요!",
+   "voice": "Hana"
+  }
+ ],
+ "hook_candidates": [
+  "(가) 홈플러스로 장 보세요? — 질문, 답(26일 배송 중단)은 1.85초째",
+  "(나) 장 보는 앱, 내일 주문 꼭 확인하세요! — 경고, 그러나 11/23 첫 마디가 경고 틀",
+  "(다) 회생 중인 마트, 매대가 비었대요 — 반전, 하지만 '나' 이야기가 약함"
+ ],
+ "hook_pick": "(가) — 11/23 이 경고(나)였으니 질문으로. 장보기는 독자 대부분의 일이고 '내 주문 자동 취소'로 바로 내 몫이 된다. 답(26일)은 1.85초째, 끝까지 볼 까닭은 1번 자막 sub '끝엔 1인당 82만원 얘기'.",
+ "hook_score": {
+  "tag": "홈플러스",
+  "q1": true,
+  "q2": true,
+  "q3": true,
+  "why": "장보기·온라인 배송은 대부분 겪는 일, '내 주문은 자동 취소·환불'로 내 몫, 7월에 이어 '또' 멈춘다는 게 반전"
+ },
+ "facts": [
+  {
+   "scene": 1,
+   "fact": "홈플러스 26일부터 온라인 배송 중단 — 7월에 이어 올해 두 번째",
+   "seen_in": [
+    "블로터",
+    "머니투데이"
+   ]
+  },
+  {
+   "scene": 1,
+   "fact": "이후 배송 예정 주문 자동 취소·결제 금액 전액 환불",
+   "seen_in": [
+    "블로터",
+    "머니투데이"
+   ]
+  },
+  {
+   "scene": 2,
+   "fact": "리니지 클래식 출시 약 8개월 누적 매출 4278억원",
+   "seen_in": [
+    "매일경제",
+    "조선비즈",
+    "세계일보",
+    "전자신문"
+   ]
+  },
+  {
+   "scene": 2,
+   "fact": "엔씨 3분기 흑자 전환(영업이익 1196억원)",
+   "seen_in": [
+    "매일경제",
+    "세계일보",
+    "전자신문"
+   ]
+  },
+  {
+   "scene": 3,
+   "fact": "앤트로픽 상장 4거래일 만에 공모가 83달러 아래 — 24일 81.91달러 마감",
+   "seen_in": [
+    "뉴스1",
+    "연합뉴스"
+   ]
+  },
+  {
+   "scene": 4,
+   "fact": "1인당 주중 총이용료 한국 22만8900원·일본 5만9300원, 3.9배",
+   "seen_in": [
+    "서울경제",
+    "세계일보"
+   ]
+  },
+  {
+   "scene": 5,
+   "fact": "대만 입법원, 1인당 2만 대만달러(약 82만원) 현금 지급 법안 통과 — 찬성 50·반대 46",
+   "seen_in": [
+    "전자신문",
+    "한국일보",
+    "서울경제"
+   ]
+  },
+  {
+   "scene": 5,
+   "fact": "28일 지방선거 앞 — 실제 지급은 아직(정부는 1만 대만달러 예산)",
+   "seen_in": [
+    "서울경제",
+    "한국일보"
+   ]
+  }
+ ],
+ "source_note": "check_sources.py 막음 0 · 경고 2 · 기사 16/17곳 읽음(SBS Biz 못 읽음 — 홈플러스는 블로터·머니투데이 2곳으로 확인, 경고 '10명'은 30% 를 풀어 쓴 말). 릴스용 원 기사 15곳 직접 읽음(전자신문·세계일보 골프 시간 초과 → 다시 읽음). 한 곳에만 있던 말은 릴스에 안 씀(대만 '약 81만원'은 서울경제만 — 82만원은 전자신문·한국일보).",
+ "seedance": {
+  "model": "seedance_2_5",
+  "made_by": "higgsfield",
+  "job": "1245d14c-45a0-49a0-a3d6-bbbc8d0b1aba",
+  "prompt": "(11/25 07:46 세션 — 프롬프트 파일을 남기기 전에 Claude 주간 한도로 멈춤)",
+  "lip_sync": "없음 — NO TALKING",
+  "cut": "원본 장면(프레임 차이): 장보기 0~4.04 · 컴퓨터 동전 4.04~7.29 · 풍선→지붕 7.29~11.92 · 골프 11.92~15.3 · 금 돼지 15.3~17.96 · 아침 식탁 17.96~20.05. 0~0.35 먼 화면(H 작음) 뺌, 지붕에 앉아 멈춘 10.9~11.92 뺌, 아침 식탁은 신문에 엉터리 영문 글자('SOTOJEFI')가 커서 통째로 뺌(흐림 대신 잘라 냄). 새 영상·다시 만들기 없음(0크레딧)."
+ },
+ "source_video_prep": "ffmpeg: trim 0.35:4.04 setpts×1.15(atempo 0.8696) | 4.04:7.29 | 7.29:10.9 | 11.92:15.0 | 15.35:17.96 setpts×1.15 → concat fps=24 480x854, 17.21초. 흐림 없음.",
+ "trim": [
+  0.0,
+  17.2
+ ],
+ "push": [
+  [
+   3.0,
+   4.24
+  ]
+ ],
+ "end_seconds": 3.2,
+ "captions": [
+  {
+   "start": 0,
+   "end": 2.0,
+   "size": 104,
+   "top": 300,
+   "html": "<div class=\"main\">홈플러스로<br><span class=\"hl\">장 보세요?</span></div>"
+  },
+  {
+   "start": 2.0,
+   "end": 4.24,
+   "size": 86,
+   "top": 300,
+   "html": "<div class=\"main\"><span class=\"hl\">26일</span>부터<br>온라인 배송 또 멈춘다</div><div class=\"sub\">7월 이어 두 번째 · 주문은 자동 취소·환불 · 끝엔 1인당 82만원 얘기</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 블로터·머니투데이</div>"
+  },
+  {
+   "start": 4.24,
+   "end": 7.49,
+   "size": 84,
+   "top": 1300,
+   "html": "<div class=\"kick\">2/5 · 게임</div><div class=\"main\">옛날 리니지가<br>8개월 <span class=\"hl\">4278억원</span></div><div class=\"sub\">추억 게임으로 엔씨 3분기 흑자</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 매일경제·조선비즈</div>"
+  },
+  {
+   "start": 7.49,
+   "end": 11.1,
+   "size": 84,
+   "top": 1250,
+   "html": "<div class=\"kick\">3/5 · 증시</div><div class=\"main\">앤트로픽, 나흘 만에<br><span class=\"hl\">공모가</span> 83달러 아래</div><div class=\"sub\">24일 종가 81.91달러</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 뉴스1·연합뉴스</div>"
+  },
+  {
+   "start": 11.1,
+   "end": 14.18,
+   "size": 84,
+   "top": 1250,
+   "html": "<div class=\"kick\">4/5 · 소비</div><div class=\"main\">골프 한 번<br>일본의 <span class=\"hl\">3.9배</span></div><div class=\"sub\">1인당 주중 22만8900원 vs 5만9300원</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 서울경제·세계일보</div>"
+  },
+  {
+   "start": 14.18,
+   "end": 17.1,
+   "size": 80,
+   "top": 1380,
+   "html": "<div class=\"kick\">5/5 · 세계</div><div class=\"main\">대만, 1인당<br><span class=\"hl\">82만원</span> 주는 법 통과</div><div class=\"sub\">2만 대만달러 · 실제 지급은 아직</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 전자신문·한국일보</div>"
+  }
+ ],
+ "music": [
+  {
+   "file": "../2026-10-31/stems/m1_chase.m4a",
+   "start": 0.0,
+   "offset": 1.7,
+   "dur": 4.5,
+   "fade_out": 0.25,
+   "lufs": -21
+  },
+  {
+   "file": "../2026-10-31/stems/m1_chase.m4a",
+   "start": 4.25,
+   "offset": 1.75,
+   "dur": 3.5,
+   "lufs": -26,
+   "fade_in": 0.15,
+   "fade_out": 0.4,
+   "lowpass": 2200
+  },
+  {
+   "file": "../2026-10-31/stems/m2_morning.m4a",
+   "start": 7.45,
+   "offset": 1.0,
+   "dur": 3.0,
+   "lufs": -26,
+   "lowpass": 1800,
+   "fade_in": 0.3,
+   "fade_out": 0.2
+  },
+  {
+   "file": "../2026-10-31/stems/m2_morning.m4a",
+   "start": 10.15,
+   "offset": 3.7,
+   "dur": 4.3,
+   "lufs": -24,
+   "lowpass": 2500,
+   "fade_in": 0.1,
+   "fade_out": 0.3
+  },
+  {
+   "file": "../2026-10-31/stems/m2_morning.m4a",
+   "start": 14.15,
+   "offset": 0.15,
+   "dur": 6.4,
+   "lufs": -24.5,
+   "lowpass": 3000,
+   "fade_in": 0.2,
+   "fade_out": 0.8
+  }
+ ],
+ "sfx": [
+  [
+   0,
+   0.6,
+   0.7
+  ],
+  [
+   0.6,
+   4.24,
+   0.4
+  ],
+  [
+   4.24,
+   7.49,
+   0.3
+  ],
+  [
+   7.49,
+   10.15,
+   0.3
+  ],
+  [
+   10.15,
+   11.15,
+   0.7
+  ],
+  [
+   11.15,
+   14.18,
+   0.4
+  ],
+  [
+   14.18,
+   999,
+   0.3
+  ]
+ ],
+ "duck": {
+  "mix": 0.6,
+  "release": 350
+ },
+ "end_card": {
+  "line": "내일 아침 8시에 또 만나요!",
+  "sub": "프로필 링크에서 구독하면 '연말정산 카드 계산기' 선물부터",
+  "note": "숫자는 기사 2곳 이상에서 확인했어요<br>(출처는 장면마다·캡션에)"
+ },
+ "cover": {
+  "at": 1.0,
+  "line1": "홈플러스로",
+  "hl": "장 보세요?"
+ },
+ "story": "오늘 아침 5가지 — 11/25(수) 호, 11/26 아침에 늦게 올림(11/25 07:46 세션이 영상까지 만들고 Claude 주간 한도로 멈춤 — 같은 영상 사용). 순서: 홈플러스(장바구니·배송차·쏟아지는 과일) → 리니지(낡은 컴퓨터에서 금화) → 앤트로픽(풍선 타고 떴다 지붕으로) → 골프(긴 영수증) → 대만(금 돼지저금통·봉투). 끝인사 뉴스레터.",
+ "note": "운영자 11/26 07:45 '어제 릴스 못 올린 거 지금 바로 올려 줘'. 새 영상 0크레딧(영상 60은 11/25 장부에 이미 적음)."
+}
