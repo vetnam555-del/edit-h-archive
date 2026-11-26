@@ -80,12 +80,23 @@ def parse_list(page):
     return out
 
 
-def search(company, days=14, today=None):
-    today = today or datetime.now()
-    data = {"textCrpNm": company, "startDate": (today - timedelta(days=days)).strftime("%Y%m%d"),
-            "endDate": today.strftime("%Y%m%d"), "currentPage": 1, "maxResults": 30, "maxLinks": 10,
-            "sort": "date", "series": "desc"}
-    return parse_list(_get(f"{BASE}/dsab007/detailSearch.ax", data))
+PAGE_SIZE = 100
+MAX_PAGES = 5
+
+
+def search(company, days=14, today=None, get=None):
+    """기간 안 공시 전부(최신순) — 한 쪽에 다 안 들어가는 큰 회사는 다음 쪽까지(최대 MAX_PAGES, PR #226 리뷰)."""
+    today, get = today or datetime.now(), get or _get
+    out = []
+    for page in range(1, MAX_PAGES + 1):
+        data = {"textCrpNm": company, "startDate": (today - timedelta(days=days)).strftime("%Y%m%d"),
+                "endDate": today.strftime("%Y%m%d"), "currentPage": page, "maxResults": PAGE_SIZE, "maxLinks": 10,
+                "sort": "date", "series": "desc"}
+        rows = parse_list(get(f"{BASE}/dsab007/detailSearch.ax", data))
+        out += [r for r in rows if r["rcp"] not in {o["rcp"] for o in out}]
+        if len(rows) < PAGE_SIZE:
+            break
+    return out
 
 
 TOC = re.compile(r"node\d+\['text'\] = \"(.*?)\";\s*node\d+\['id'\] = \"[^\"]*\";\s*node\d+\['rcpNo'\] = \"(\d+)\";\s*"
