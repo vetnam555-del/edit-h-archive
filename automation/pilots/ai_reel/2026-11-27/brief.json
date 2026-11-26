@@ -27,15 +27,15 @@
   },
   {
    "file": "stems/i2_rate.mp3",
-   "start": 4.35,
+   "start": 4.1,
    "tempo": 1.15,
-   "text": "기준금리, 올해 세 번째 올렸어요!",
-   "tts": "기준금리, 올해 <strong>세 번째</strong> 올렸어요!",
+   "text": "금리를 올해 세 번이나 올렸대요!",
+   "tts": "금리를 올해 <strong>세 번</strong>이나 올렸대요!",
    "voice": "Hana"
   },
   {
    "file": "stems/i3_chip.mp3",
-   "start": 7.65,
+   "start": 7.45,
    "tempo": 1.15,
    "text": "머스크도 삼성 반도체 줄 섰대요!",
    "tts": "머스크도 <strong>삼성 반도체</strong> 줄 섰대요!",
@@ -43,23 +43,23 @@
   },
   {
    "file": "stems/i4_ktx.mp3",
-   "start": 10.95,
+   "start": 10.98,
    "tempo": 1.15,
-   "text": "KTX 예매도 AI가 맡는대요!",
-   "tts": "<strong>케이티엑스</strong> 예매도 에이아이가 맡는대요!",
+   "text": "KTX 예매도 AI가 해 준대요!",
+   "tts": "<strong>케이티엑스</strong> 예매도, 에이아이가 해 준대요!",
    "voice": "Hana"
   },
   {
    "file": "stems/i5_cafe.mp3",
-   "start": 14.25,
+   "start": 14.3,
    "tempo": 1.15,
-   "text": "스타벅스, 4분기 흑자 노린대요!",
-   "tts": "스타벅스, <strong>사 분기</strong> 흑자 노린대요!",
+   "text": "스타벅스, 4분기 흑자가 목표래요!",
+   "tts": "스타벅스, <strong>사 분기</strong> 흑자가 목표래요!",
    "voice": "Hana"
   },
   {
    "file": "stems/i_bye_newsletter.mp3",
-   "start": 17.3,
+   "start": 16.75,
    "tempo": 1.1,
    "text": "더 자세한 건 프로필 링크 뉴스레터에서!",
    "tts": "더 자세한 건 프로필 링크 <strong>뉴스레터</strong>에서!",
@@ -177,35 +177,35 @@
   },
   {
    "start": 2.0,
-   "end": 4.2,
+   "end": 4.0,
    "size": 84,
    "top": 300,
    "html": "<div class=\"main\">세금·이자 <span class=\"hl\">11.0%</span> 불어<br>쓸 돈 1.7% 감소</div><div class=\"sub\">13분기 만에 줄었어요 · 다음은 금리 또 올린 얘기</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 아시아경제·서울경제</div>"
   },
   {
-   "start": 4.2,
-   "end": 7.5,
+   "start": 4.0,
+   "end": 7.35,
    "size": 84,
    "top": 300,
    "html": "<div class=\"kick\">2/5 · 금리</div><div class=\"main\">기준금리 <span class=\"hl\">3.25%</span><br>올해 세 번째 인상</div><div class=\"sub\">내년 성장률 전망은 4.1%</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 중앙일보·전자신문</div>"
   },
   {
-   "start": 7.5,
-   "end": 10.8,
+   "start": 7.35,
+   "end": 10.88,
    "size": 84,
    "top": 300,
    "html": "<div class=\"kick\">3/5 · 반도체</div><div class=\"main\">머스크도 줄 선<br><span class=\"hl\">삼성 반도체</span></div><div class=\"sub\">구매대금 25~30%를 미리 내기도</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 동아일보·뉴시스</div>"
   },
   {
-   "start": 10.8,
-   "end": 14.1,
+   "start": 10.88,
+   "end": 14.2,
    "size": 84,
    "top": 300,
    "html": "<div class=\"kick\">4/5 · AI</div><div class=\"main\">KTX 예매도<br><span class=\"hl\">AI가</span> 맡는다</div><div class=\"sub\">정부 '모두의 AI' 다음 달 챗봇으로 공개</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 SBS·조선비즈</div>"
   },
   {
-   "start": 14.1,
-   "end": 17.2,
+   "start": 14.2,
+   "end": 16.6,
    "size": 84,
    "top": 300,
    "html": "<div class=\"kick\">5/5 · 소비</div><div class=\"main\">스타벅스<br><span class=\"hl\">4분기 흑자</span> 노린다</div><div class=\"sub\">내년엔 새 매장보다 리뉴얼</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 서울경제·아시아경제</div>"
@@ -223,7 +223,7 @@
   },
   {
    "file": "../2026-10-31/stems/m1_chase.m4a",
-   "start": 4.2,
+   "start": 4.0,
    "offset": 1.75,
    "dur": 3.5,
    "lufs": -26,
@@ -233,7 +233,7 @@
   },
   {
    "file": "../2026-10-31/stems/m2_morning.m4a",
-   "start": 7.5,
+   "start": 7.35,
    "offset": 1.0,
    "dur": 3.0,
    "lufs": -26,
@@ -243,9 +243,9 @@
   },
   {
    "file": "../2026-10-31/stems/m2_morning.m4a",
-   "start": 10.2,
+   "start": 10.1,
    "offset": 3.7,
-   "dur": 4.2,
+   "dur": 4.3,
    "lufs": -24,
    "lowpass": 2500,
    "fade_in": 0.1,
@@ -255,7 +255,7 @@
    "file": "../2026-10-31/stems/m2_morning.m4a",
    "start": 14.1,
    "offset": 0.15,
-   "dur": 6.4,
+   "dur": 8.2,
    "lufs": -24.5,
    "lowpass": 3000,
    "fade_in": 0.2,
@@ -270,26 +270,26 @@
   ],
   [
    0.6,
-   4.2,
+   4.0,
    0.4
   ],
   [
-   4.2,
-   7.5,
+   4.0,
+   7.35,
    0.35
   ],
   [
-   7.5,
-   10.8,
+   7.35,
+   10.88,
    0.35
   ],
   [
-   10.8,
-   14.1,
+   10.88,
+   14.2,
    0.4
   ],
   [
-   14.1,
+   14.2,
    999,
    0.3
   ]
@@ -300,7 +300,16 @@
  },
  "trim": [
   0.0,
-  17.2
+  19.4
  ],
- "end_seconds": 3.2
+ "end_seconds": 2.5,
+ "seedance": {
+  "model": "magi_2",
+  "made_by": "higgsfield",
+  "job": "427be55b-e324-468f-961d-e677ed962936",
+  "prompt": "brief_prompt.txt",
+  "lip_sync": "없음 — NO TALKING",
+  "cut": "원본 장면(프레임 차이): 월급 봉투 0~4.0 · 금리 레버 4.0~7.35 · 칩 공장 줄 7.35~10.88 · 기차표 10.88~14.2 · 카페 칠하기 14.2~17.4 · 빨간 펜 인사 17.4~20.24. 카페 장면 첫 0.8초(H 가 뒤돌아 얼굴 안 보임) 뺌. 다시 만들기 없음."
+ },
+ "source_video_prep": "ffmpeg: trim 0:14.2 | 15.0:20.24 → concat fps=25 1080x1920, 19.44초. 흐림·글자 지움 없음."
 }
