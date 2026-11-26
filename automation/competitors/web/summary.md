@@ -1,90 +1,93 @@
-# 경쟁 매체 웹 — 이번 주 다룬 주제 (2026-11-22 20:10 KST 자동 생성)
+# 경쟁 매체 웹 — 이번 주 다룬 주제 (2026-11-26 21:23 KST 자동 생성)
 
 공개 RSS·글 목록만 robots.txt 를 지켜 읽는다(제목·주소만 저장). 이번 주 = 최근 7일(날짜가 없는 목록은 지난 수집 2026-11-15 뒤 새로 보인 글).
-우리 호: 2026-11-16, 2026-11-17, 2026-11-18, 2026-11-19, 2026-11-20, 2026-11-21, 2026-11-22. 만든 곳: `automation/competitors_web.py`(주 1회, `.github/workflows/competitors-web.yml`).
+우리 호: 2026-11-20, 2026-11-21, 2026-11-22, 2026-11-23, 2026-11-24, 2026-11-25, 2026-11-26. 만든 곳: `automation/competitors_web.py`(매일 12:10, `.github/workflows/competitors-web.yml`).
 
 | 매체 | 무리 | 이번 주 글 | 우리와 겹친 글 |
 |---|---|---|---|
 | 어피티 | 경제·뉴스 브리핑 | 10 | 4 |
 | 뉴닉 | 경제·뉴스 브리핑 | 12 | 4 |
-| 캐릿 | 트렌드 미디어 | 4 | 0 |
-| 고구마팜 | 트렌드 미디어 | 8 | 1 |
-| 트렌드어워드 | 트렌드 미디어 | 5 | 1 |
+| 캐릿 | 트렌드 미디어 | 5 | 3 |
+| 고구마팜 | 트렌드 미디어 | 12 | 0 |
+| 트렌드어워드 | 트렌드 미디어 | 6 | 1 |
 
 ## 여러 매체가 다뤘는데 우리는 안 다룬 말 (2곳 이상)
 
-- **공식** — 뉴닉, 어피티
-- **너무** — 어피티, 트렌드어워드
-- **노래** — 고구마팜, 트렌드어워드
-- **다음** — 어피티, 캐릿
-- **어떤** — 캐릿, 트렌드어워드
-- **직접** — 어피티, 캐릿
+- **사이** — 캐릿, 트렌드어워드
 
 ## 우리와 겹친 글
 
-- 어피티: 「💰코스피 하락하는 동안 다섯 배 뛴 종목은?」 — 겹친 말: 코스피
-- 어피티: 「👛남대문 너무 핫한데 일요일에 문 닫으면 직장인은 어떻게 하나?」 — 겹친 말: 직장인
-- 어피티: 「젠슨 황 없는 엔비디아 실적 다음 과제는 리더십이에요」 — 겹친 말: 실적·엔비디아·젠슨
-- 어피티: 「남대문시장이 일요일에 문을 닫으면 직장인은 어디로 가야 하나요?」 — 겹친 말: 직장인
-- 뉴닉: 「이용철 법무장관 후보 청문회 24일, 이재명 대통령 재판 '공소 취소' 입장이 최대 쟁점 ⚖️」 — 겹친 말: 최대·후보
-- 뉴닉: 「수능 AI 부정행위 대책 혼란 책임지고…최교진 교육부 장관 사의, 이재명 대통령 수락 📋」 — 겹친 말: ai·수능
-- 뉴닉: 「세무사·수능 잇단 AI 커닝, 처벌 수위는? 경비지도사 시험서도 6명 적발 🚨」 — 겹친 말: ai·수능·커닝
-- 뉴닉: 「최교진 교육부 장관 사퇴, 수능 AI 부정행위 대응 논란 어떻게 됐나?」 — 겹친 말: ai·수능
-- 고구마팜: 「잘 단 댓글 하나가 소비자를 부른다! 브랜드 댓글 마케팅 유형 전격 해부」 — 겹친 말: 마케팅
-- 트렌드어워드: 「[Trend A Word #657] 한국인 보다 꿀템을 많이 아는 일본인 등장 26.11.16 (월) '한한미일'. 용례 1. 너무 완벽하게 한」 — 겹친 말: 많이·서울
+- 어피티: 「중국 칭다오 말고, 경북 청도요! 씨 없는 감부터 맑은 추어탕까지, 알수록 맛있는 ‘청도’ 여행」 — 겹친 말: 말고·여행·중국
+- 어피티: 「일주일에 몇 번씩 마음이 지치지만 “마음건강 지원정책은 잘 몰라요” 79.7%」 — 겹친 말: 일주일
+- 어피티: 「👛서울 아파트 평균 월세 168만 원 시대, 고시원에서 살아남기」 — 겹친 말: 서울·시대
+- 어피티: 「증안펀드부터 젠슨 황 복귀까지 엄청나게 시끄럽고 믿을 수 없게 출렁이는 증시」 — 겹친 말: 복귀·젠슨·증안펀드
+- 뉴닉: 「스페이스X '스타마인드' 미국 정부 승인: 위성 100만 기로 우주 AI 데이터센터 짓는다고? 🛰️」 — 겹친 말: ai·데이터센터
+- 뉴닉: 「AI 비서 앱 피클, 가입 안 해도 내 연락처가 미국 서버에 저장된다고? 📱」 — 겹친 말: ai·비서
+- 뉴닉: 「2027년 신설 청년 연금 지원, 09년생 10% 넘게 신청했다고? 💰」 — 겹친 말: 넘게·청년
+- 뉴닉: 「애플 아이폰16 'AI 광고' 논란, 공정위가 최대 536억 원 과징금 검토나선 이유 📱」 — 겹친 말: ai·최대
+- 캐릿: 「외국인 친구들 사이에서 서울 여행보다 부산 여행이 인기예요 K뷰티 다음은 K등산? 전국 외국인 핫플 지도」 — 겹친 말: 서울·여행
+- 캐릿: 「주말엔 야외 다도 퇴근 후엔 다회 간다! 사우나 다음은? 웰니스 트렌드 차(茶)」 — 겹친 말: 사우나
+- 캐릿: 「유행중 2026.11.26 북마크 잘 만드는 시대에서 잘 말하는 시대로 AI 대전환기, 인간의 경쟁력 ‘스피치힙’」 — 겹친 말: ai·시대
+- 트렌드어워드: 「[Trend A Word #663] 요즘 개발자들의 크리스마스 근황 26.11.24 (화) '코딩 트리'. 용례 1. “올해 트리는 코딩으로 만」 — 겹친 말: 크리스마스
 
 ## 매체별 이번 주 글
 
 ### 어피티 (10)
 
-- 11/20 「한진칼 폭등, 여전한 ‘코리아 디스카운트’ 보여줘요」 https://uppity.co.kr/한진칼-폭등-여전한-코리아-디스카운트-보여줘/
-- 11/20 「💰코스피 하락하는 동안 다섯 배 뛴 종목은?」 https://uppity.co.kr/💰코스피-하락하는-동안-다섯-배-뛴-종목은/
-- 11/20 「고창미식문화테마상권 | 혼자 가도, 둘이 가도 좋아! 구독자들이 직접 다녀온 고창 미식 탐험기 🍂」 https://uppity.co.kr/혼자-가도-둘이-가도-좋아-구독자들이-직접-다녀온-고/
-- 11/20 「👛남대문 너무 핫한데 일요일에 문 닫으면 직장인은 어떻게 하나?」 https://uppity.co.kr/👛남대문-너무-핫한데-일요일에-문-닫으면-직장인은/
-- 11/19 「예산이 있는데도 왜 매달 돈이 부족할까요?」 https://uppity.co.kr/예산이-있는데도-왜-매달-돈이-부족할까요/
-- 11/19 「젠슨 황 없는 엔비디아 실적 다음 과제는 리더십이에요」 https://uppity.co.kr/젠슨-황-없는-엔비디아-실적-다음-과제는-리더십이에/
-- 11/19 「킨텍스 새해상점 | 2027년, 당신의 재물운은? ‘어피티 철학관’에서 알려드립니다」 https://uppity.co.kr/2027년-당신의-재물운은-어피티-철학관에서-알려/
-- 11/19 「💰”복귀하겠다”는 젠슨황과 “그럴 계획 없다”는 이사회?」 https://uppity.co.kr/💰복귀하겠다는-젠슨황과-그럴-계획-없다/
-- 11/18 「남대문시장이 일요일에 문을 닫으면 직장인은 어디로 가야 하나요?」 https://uppity.co.kr/남대문시장이-일요일에-문을-닫으면-직장인은-어디/
-- 11/18 「K-호텔이 돈 버는 공식」 https://uppity.co.kr/k-호텔이-돈-버는-공식/
+- 11/26 「해리포터부터 F1까지 🪄 어드벤트 캘린더 내돈내산 솔직 후기 모음집」 https://uppity.co.kr/해리포터부터-f1까지-🪄-어드벤트-캘린더-내돈내산-솔/
+- 11/26 「중국 칭다오 말고, 경북 청도요! 씨 없는 감부터 맑은 추어탕까지, 알수록 맛있는 ‘청도’ 여행」 https://uppity.co.kr/중국-칭다오-말고-경북-청도요-씨-없는-감부터-맑은-추/
+- 11/26 「일주일에 몇 번씩 마음이 지치지만 “마음건강 지원정책은 잘 몰라요” 79.7%」 https://uppity.co.kr/일주일에-몇-번씩-마음이-지치지만-마음건강-지원/
+- 11/26 「킨텍스 새해상점 | 올해도 애쓴 독자님을 위해 준비했어요 어피티 철학관에서 만나요!」 https://uppity.co.kr/킨텍스-새해상점-올해도-애쓴-독자님을-위해-준비했/
+- 11/26 「한한령 해제_최종최최종진짜최종.zip(?)」 https://uppity.co.kr/한한령-해제_최종최최종진짜최종-zip/
+- 11/26 「💰’역사적 저평가’ 엔터주, 한한령 해제 기대 타고 상승할까?」 https://uppity.co.kr/💰역사적-저평가-엔터주-한한령-해제-기대-타고/
+- 11/25 「충동소비로 생긴 빚, 이제는 모두 갚고 싶어요」 https://uppity.co.kr/충동소비로-생긴-빚-이제는-모두-갚고-싶어요/
+- 11/25 「👛서울 아파트 평균 월세 168만 원 시대, 고시원에서 살아남기」 https://uppity.co.kr/👛서울-아파트-평균-월세-168만-원-시대-고시원에서-살/
+- 11/25 「일명 ‘죄악주’ K-카지노의 세계」 https://uppity.co.kr/일명-죄악주-k-카지노의-세계/
+- 11/25 「증안펀드부터 젠슨 황 복귀까지 엄청나게 시끄럽고 믿을 수 없게 출렁이는 증시」 https://uppity.co.kr/증안펀드부터-젠슨-황-복귀까지-엄청나게-시끄럽고/
 
 ### 뉴닉 (12)
 
-- 11/22 「정년 연장, 27일 민주당 특위 합의 없으면 정부안 나온다? 김영훈 장관이 마지노선 제시한 이유 🏢」 https://newneek.co/@newneek/article/48899
-- 11/22 「이용철 법무장관 후보 청문회 24일, 이재명 대통령 재판 '공소 취소' 입장이 최대 쟁점 ⚖️」 https://newneek.co/@newneek/article/48898
-- 11/22 「서울 지하철 25일 무기한 총파업 기로, 24일 노사 최종 교섭 결과는? 🚇」 https://newneek.co/@newneek/article/48897
-- 11/22 「카카오페이·토스, 내일부터 주민등록증 진위 확인 가능…전자금융업계 최초 🪪」 https://newneek.co/@newneek/article/48896
-- 11/22 「수능 AI 부정행위 대책 혼란 책임지고…최교진 교육부 장관 사의, 이재명 대통령 수락 📋」 https://newneek.co/@newneek/article/48895
-- 11/22 「반 고흐 미술관 식당, 김치 샌드위치를 일본풍으로 소개했다가 항의 끝에 메뉴 삭제 🥬」 https://newneek.co/@newneek/article/48894
-- 11/22 「세무사·수능 잇단 AI 커닝, 처벌 수위는? 경비지도사 시험서도 6명 적발 🚨」 https://newneek.co/@newneek/article/48893
-- 11/22 「중고차 광고에 수수료 포함 '총비용' 표시 의무화, 뭐가 달라질까? 🚗」 https://newneek.co/@newneek/article/48892
-- 11/22 「5대 은행 40대 마이너스통장 연체액, 10개월 새 82% 껑충…이유는? 💸」 https://newneek.co/@newneek/article/48891
-- 11/22 「강남권 첫 재초환 부담금 부과 임박, 서울 52개 단지 조합원 1인당 평균 1.1억 원 🏗️」 https://newneek.co/@newneek/article/48890
-- 11/22 「최교진 교육부 장관 사퇴, 수능 AI 부정행위 대응 논란 어떻게 됐나?」 https://newneek.co/@newneek/article/48889
-- 11/22 「EU, 빅테크 디지털세 공식 제안: 매출 3% 부과, 미국과 충돌 예고 🌐💸」 https://newneek.co/@newneek/article/48888
+- 11/26 「2030년까지 공적주택 119만 호 공급 계획 발표한 이재명 정부 🏠」 https://newneek.co/@newneek/article/49016
+- 11/26 「스페이스X '스타마인드' 미국 정부 승인: 위성 100만 기로 우주 AI 데이터센터 짓는다고? 🛰️」 https://newneek.co/@newneek/article/49030
+- 11/26 「AI 비서 앱 피클, 가입 안 해도 내 연락처가 미국 서버에 저장된다고? 📱」 https://newneek.co/@newneek/article/49017
+- 11/26 「초소형카메라, 왜 지금까지 안 막은 거야? 청원과 7개 법안의 행방불명 📷」 https://newneek.co/@newneek/article/48930
+- 11/26 「2027년 신설 청년 연금 지원, 09년생 10% 넘게 신청했다고? 💰」 https://newneek.co/@newneek/article/49043
+- 11/26 「'스시자로' 열풍에 대마도 찾는 한국인들, 새치기·쓰레기 투기 논란 🗑️」 https://newneek.co/@newneek/article/49040
+- 11/26 「애플 아이폰16 'AI 광고' 논란, 공정위가 최대 536억 원 과징금 검토나선 이유 📱」 https://newneek.co/@newneek/article/49039
+- 11/26 「‘56년 만의 미투’ 최말자 작가가 캔버스에 담아낸 생애 🌼」 https://newneek.co/@newneek/article/49042
+- 11/26 「한국은행, 기준금리 3.25%로 인상하고 내년 성장률 전망도 4.1%로 상향 📈」 https://newneek.co/@newneek/article/49032
+- 11/26 「미국 ‘과잉생산 관세’ 발표, 한국 15% 상한 지켰지만 안심할 수 없는 이유 🧐」 https://newneek.co/@newneek/article/49019
+- 11/26 「조작기소 특검 후보에 검사 출신 이임성·판사 출신 이정훈, 이재명 대통령이 임명할 전망 ⚖️」 https://newneek.co/@newneek/article/49041
+- 11/26 「76년 만에 역대 최강 ‘슈퍼 엘니뇨’? 식량 부족·물류 원자재 위기부터 5000조 경제 손실 전망까지 🌏🚨」 https://newneek.co/@newneek/article/49034
 
-### 캐릿 (4)
+### 캐릿 (5)
 
+- 「외국인 친구들 사이에서 서울 여행보다 부산 여행이 인기예요 K뷰티 다음은 K등산? 전국 외국인 핫플 지도」 https://www.careet.net/2043
 - 「어떤 IP와 콜라보해야 가장 매출이 높을까? 700명 설문조사해 봄 2030이 직접 뽑은 IP 화력 왕중왕전」 https://www.careet.net/2038
-- 「주말엔 야외 다도 퇴근 후엔 다회 간다! 사우나 다음은? 웰니스 트렌드 차(茶)」 https://www.careet.net/2029
 - 「경험형 소개팅이 대세죠 커플로 이어지지 않더라도 잼컨이 남으면 괜찮아요 이색 소개팅 열어볼까? 실전 노하우 40개」 https://www.careet.net/2030
-- 11/20 「2026.11.20 북마크 270만이 본 ‘설거지 K팝’이 뭐야? 국내외 트렌드 싹 모은 이주의 유행템 5」 https://www.careet.net/2042
+- 「주말엔 야외 다도 퇴근 후엔 다회 간다! 사우나 다음은? 웰니스 트렌드 차(茶)」 https://www.careet.net/2029
+- 11/26 「유행중 2026.11.26 북마크 잘 만드는 시대에서 잘 말하는 시대로 AI 대전환기, 인간의 경쟁력 ‘스피치힙’」 https://www.careet.net/2045
 
-### 고구마팜 (8)
+### 고구마팜 (12)
 
-- 11/20 「변화를 연결하는 관점 : 더에스엠씨 POSTWEEK 2026」 https://gogumafarm.kr/변화를-연결하는-관점-더에스엠씨-postweek-2026/
-- 11/20 「제작 과정도 콘텐츠가 된다! 바이럴을 부른 비하인드 콘텐츠 8가지」 https://gogumafarm.kr/제작-과정도-콘텐츠가-된다-바이럴을-부른-비하인드/
-- 11/18 「떡 디저트, 수능 노래… 인기 릴스 240개로 읽는 트렌드 [2026년 10월 인급동 데이터]」 https://gogumafarm.kr/떡-디저트-수능-노래-인기-릴스-240개로-읽는-트렌드-2026/
-- 11/18 「잘 단 댓글 하나가 소비자를 부른다! 브랜드 댓글 마케팅 유형 전격 해부」 https://gogumafarm.kr/잘-단-댓글-하나가-소비자를-부른다-브랜드-댓글-마케/
-- 11/18 「오늘의 뉴스클리핑과 영상/캠페인 트렌드」 https://gogumafarm.kr/오늘의-뉴스클리핑과-영상-캠페인-트렌드-164/
-- 11/17 「요즘 뜨는 AI 크리에이터 20인! 6가지 유형별 특징부터 브랜드 협업 사례까지」 https://gogumafarm.kr/요즘-뜨는-ai-크리에이터-20인-6가지-유형별-특징부터-브/
-- 11/17 「오늘의 뉴스클리핑과 유튜브 트렌드」 https://gogumafarm.kr/오늘의-뉴스클리핑과-유튜브-트렌드-179/
-- 11/16 「오늘의 뉴스클리핑과 매체/퍼포먼스 트렌드」 https://gogumafarm.kr/오늘의-뉴스클리핑과-매체-퍼포먼스-트렌드-123/
+- 11/26 「Casino Bonus ohne Einzahlung 2026 im Vergleich November」 https://gogumafarm.kr/casino-bonus-ohne-einzahlung-2026-im-vergleich-november-4/
+- 11/26 「Casino Bonus ohne Einzahlung 2026 im Vergleich November」 https://gogumafarm.kr/casino-bonus-ohne-einzahlung-2026-im-vergleich-november-3/
+- 11/26 「Book of Ra kostenlos spielen und Casinos mit Novoline Slots finden」 https://gogumafarm.kr/book-of-ra-kostenlos-spielen-und-casinos-mit-novoline-slots-finden/
+- 11/26 「Golfsportmagazin ️ Alles, was Golf ist!」 https://gogumafarm.kr/golfsportmagazin-️-alles-was-golf-ist/
+- 11/26 「Book of Ra Deluxe online spielen Jokerstar Online Spielhalle」 https://gogumafarm.kr/book-of-ra-deluxe-online-spielen-jokerstar-online-spielhalle/
+- 11/26 「Online Casino Spiele und Spielautomaten im Überblick」 https://gogumafarm.kr/online-casino-spiele-und-spielautomaten-im-uberblick/
+- 11/26 「Best online casino games in Canada 2026 ️」 https://gogumafarm.kr/best-online-casino-games-in-canada-2026-️-2/
+- 11/26 「Beste Online Casinos 2026: Test & Vergleich Deutschland」 https://gogumafarm.kr/beste-online-casinos-2026-test-vergleich-deutschland-2/
+- 11/26 「Unsere besten Online Spielotheken & Casinos 2026 iGaming.com」 https://gogumafarm.kr/unsere-besten-online-spielotheken-casinos-2026-igaming-com/
+- 11/26 「Die besten Online Casinos in Deutschland 2026 BILD.de」 https://gogumafarm.kr/die-besten-online-casinos-in-deutschland-2026-bild-de-2/
+- 11/26 「Online Slots & Spielautomaten kostenlos GameTwist Casino」 https://gogumafarm.kr/online-slots-spielautomaten-kostenlos-gametwist-casino/
+- 11/26 「Allerlei Redaktion Österreichisches Pressebüro」 https://gogumafarm.kr/allerlei-redaktion-osterreichisches-presseburo/
 
-### 트렌드어워드 (5)
+### 트렌드어워드 (6)
 
+- 11/26 「[Trend A Word #665] 진영과 나… 도대체 무슨 사이일까? 26.11.26 (목) '진영과 나'. 용례 1. “진영과 나의 관계는 모르겠고, 이 노래」 https://maily.so/trendaword/posts/1do183d0rx6
+- 11/25 「[Trend A Word #664] 내향인이지만 릴스는 찍고 싶어! 26.11.25 (수) '@@ 하기엔 너무 내향적인 나'. 용례 1. 가게 홍보하기엔 너무 내」 https://maily.so/trendaword/posts/d5ryyvk8r1w
+- 11/24 「[Trend A Word #663] 요즘 개발자들의 크리스마스 근황 26.11.24 (화) '코딩 트리'. 용례 1. “올해 트리는 코딩으로 만들었다.” 김 OO」 https://maily.so/trendaword/posts/8do7pgyyogq
+- 11/23 「[Trend A Word #662] 난 여기서 이런 선택을 해버려, 왈왈왈왈! 26.11.23 (월) '예능의 기원'. 용례 1. 예능 많이 배우고 갑니다 금00」 https://maily.so/trendaword/posts/x1zg6g29rqg
 - 11/20 「[Trend A Word #661] 아이돌 노래의 정수, 억랩의 맛(p) 26.11.20 (금) '억랩의 맛'. 용례 1. 억랩의 근본은 트와이스지.. 강00씨 」 https://maily.so/trendaword/posts/l1zq19yer5x
 - 11/19 「(광고) [Trend A Word #660] 곶감이 춤까지 추는 세상… 요즘 숏폼 근황 26.11.19 (목) '미안 이제 곶감'. 용례 1. “미안 이제 곶감~」 https://maily.so/trendaword/posts/x1zg6gn3rqg
-- 11/18 「[Trend A Word #659] 트둥이들은 모두 ’꿈꾸던 어른’이 되었나요? 26.11.18 (수) '꿈꾸던 어른이 되었나요?'. 용례 1. 꿈꾸던 어른이 되」 https://maily.so/trendaword/posts/32z831ppon4
-- 11/17 「[Trend A Word #658] 와플대학에 떡 추가요? 26.11.17 (화) '와플대학 모찌시트'. 용례 1. “와플대학에 떡도 넣어 먹는다고? 이 학교 커」 https://maily.so/trendaword/posts/vpzlk4kdrk9
-- 11/16 「[Trend A Word #657] 한국인 보다 꿀템을 많이 아는 일본인 등장 26.11.16 (월) '한한미일'. 용례 1. 너무 완벽하게 한국인 같으세요 조0」 https://maily.so/trendaword/posts/xyowyyg8z28
