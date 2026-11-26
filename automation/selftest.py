@@ -2638,6 +2638,8 @@ def _dive_sample(steps=4, worst=False, day=None):
     data.pop("vol", None)
     if day < "2026-11-23":   # 월요일 원고의 '이번 주 일정'(week_ahead)은 11/23 호~ — 그 전 날짜로 옮기면 content 가 막는다(11/23 월요일 호 뒤 빨간 점검)
         data.pop("week_ahead", None)
+    if day < "2026-11-27":   # 금요일 원고의 '이번 주 퀴즈'(quiz)는 11/27 호~ — 같은 까닭(11/27 금요일 호 발행 뒤 빨간 점검)
+        data.pop("quiz", None)
     for ci in (data.get("cards") or {}).get("issues") or []:   # 지난 호 원고의 '63억$' 꼴은 11/04~ content 가 막는다 — 옮겨 쓸 때 새 규칙대로
         if isinstance(ci.get("number"), str):
             ci["number"] = re.sub(r"([만억조])\s*[$€¥]", r"\1 달러", ci["number"])
