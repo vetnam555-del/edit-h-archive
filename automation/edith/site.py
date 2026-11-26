@@ -246,6 +246,19 @@ _TODAY_LINK = [
 ]
 
 
+# 2026-11-26 운영자 '인스타 캡션도 중복 없는지 체크해 줘' — 11/23~26 캡션을 보니 ① 목록 1번이 바로 위 훅·요약과 같은 소식(H PICK)을 또 말하고
+# (11/26: 훅 '내일부터 동네 홈플러스에 불이 꺼진대요' → 요약 '홈플러스 휴업이 27일부터' → 1번 '내일부터 홈플러스 마트 전 점포 휴업') ② 끝 두 줄이 모두
+# '프로필 링크'(구독 선물 줄 + 오늘 호 전문 줄). 이 날짜 호부터: 목록은 2번부터 '…가지 더'로, 끝은 한 줄로 합친다. 지난 호는 그대로.
+CAPTION_DEDUPE_FROM = "2026-11-27"
+_LIST_HEAD_REST = ["그리고 카드에 담은 {n}가지 더", "함께 넘겨볼 {n}가지 더", "이 {n}가지도 골랐어요"]
+_TODAY_LINK_SHORT = ["오늘 호 전문도 같은 링크에서 바로 볼 수 있어요.", "오늘 호 전문도 그 링크에 있어요.",
+                     "같은 링크에서 오늘 호 전문도 바로 읽을 수 있어요."]
+
+
+def caption_dedupe(day):
+    return str(day)[:10] >= CAPTION_DEDUPE_FROM
+
+
 def today_link(day):
     """캡션 끝 '오늘 호 전문은 프로필 링크' 한 줄 — TODAY_LINK_FROM 부터의 데일리 호만(지난 호를 다시 빌드해도 그대로). 아니면 None."""
     day = str(day)
@@ -348,8 +361,12 @@ def instagram_caption(d, site):
     ig = d.get("instagram", {})
     issues = d["card_issues"]
     head = (ig.get("caption") or "").strip() or f"{plain(d['title'])}\n\n{plain(d['lead'])}"
-    lines = [head, "", _pick(_LIST_HEAD, d).format(n=len(issues))]
-    lines += [f"{i}. {plain(it['headline'])}" for i, it in enumerate(issues, 1)]
+    if caption_dedupe(d["date"]) and len(issues) > 1 and not d.get("rewind"):   # 1번(H PICK)은 위 훅·요약이 이미 말했다(예비 호 도입부는 일반 안내라 목록 전부 — PR #231 리뷰)
+        lines = [head, "", _pick(_LIST_HEAD_REST, d).format(n=len(issues) - 1)]
+        lines += [f"{i}. {plain(it['headline'])}" for i, it in enumerate(issues[1:], 2)]
+    else:
+        lines = [head, "", _pick(_LIST_HEAD, d).format(n=len(issues))]
+        lines += [f"{i}. {plain(it['headline'])}" for i, it in enumerate(issues, 1)]
     ask = _ask(d) + _share(d)
     if ask:
         lines += ["", *ask]
@@ -365,7 +382,11 @@ def instagram_caption(d, site):
         letter = _pick(_LETTER_GIFT, d).format(title=gift["title"], n=gift["count"], when=_when(d))
     if d.get("series"):   # 고정 연재 날: 다음 편 예고(같은 요일·같은 이름 — 기다릴 이유)
         lines += ["", _pick(_SERIES_LINE, d).format(wd=d["weekday"], name=d["series"]["name"])]
-    lines += ["", letter, *([today_link(d["date"])] if today_link(d["date"]) else []), "— 에디터 H", "", _tags(d, ig.get("hashtags"))]
+    if caption_dedupe(d["date"]) and today_link(d["date"]) and "프로필 링크" in letter:   # '프로필 링크' 두 줄 → 한 줄
+        tail = [f"{letter} {_pick(_TODAY_LINK_SHORT, d)}"]
+    else:
+        tail = [letter, *([today_link(d["date"])] if today_link(d["date"]) else [])]
+    lines += ["", *tail, "— 에디터 H", "", _tags(d, ig.get("hashtags"))]
     return "\n".join(lines)
 
 

@@ -3841,6 +3841,26 @@ def t_cards_dedupe():
     return "할 일 3 → 1 · 마무리 숫자 줄 없음"
 
 
+def t_caption_dedupe():
+    """11/27~ 인스타 캡션 중복 줄이기(운영자 '인스타 캡션도 중복 없는지'): 목록은 2번부터(1번 = 위 훅·요약), '프로필 링크' 끝 두 줄 → 한 줄. 11/26 캡션은 그대로."""
+    import copy
+    from edith import content as content_mod, site as site_mod
+    d = content_mod.load("2026-11-26")
+    d["send_time_kst"] = "08:00"
+    url = load_config()["site_url"]
+    expect(site_mod.instagram_caption(d, url) == (ROOT / "instagram" / "2026-11-26" / "caption.txt").read_text(encoding="utf-8").strip(),
+           "11/26 캡션(지난 호)이 바뀌었다")
+    d2 = copy.deepcopy(d)
+    d2["date"] = "2026-11-27"
+    cap = site_mod.instagram_caption(d2, url)
+    expect("1. 내일부터 홈플러스" not in cap and "2. 대출 금리" in cap and "4가지" in cap, "목록은 2번부터")
+    expect(cap.count("프로필 링크") == 1 and "오늘 호 전문" in cap, f"'프로필 링크'는 한 번: {cap.count('프로필 링크')}")
+    d3 = copy.deepcopy(d2)
+    d3["rewind"] = True   # 예비 호는 도입부가 일반 안내 — 목록 1번을 빼면 그 소식이 캡션에서 사라진다(PR #231 리뷰)
+    expect("1. 내일부터 홈플러스" in site_mod.instagram_caption(d3, url), "예비 호 캡션은 목록 전부")
+    return "목록 2번부터 · 프로필 링크 1번 · 예비 호는 전부"
+
+
 def plain_closing_ok(d):
     return bool((d.get("question") or {}).get("closing"))
 
@@ -4391,6 +4411,7 @@ def main():
     check("메일 끝 중복 줄이기(11/27~)", t_tail_v2)
     check("메일 중복 줄이기 2(11/27~)", t_nl_dedupe)
     check("카드 중복 줄이기(11/27~)", t_cards_dedupe)
+    check("인스타 캡션 중복 줄이기(11/27~)", t_caption_dedupe)
     check("댓글 키워드 → 구독 링크 DM", t_comment_dm)
     check("뉴스레터 시세판·평가 버튼·맨 위 전달 상자 뺌(11/22~)", t_nl_plus)
     check("H 말풍선(질문·맺음말, 11/22~)·월요일 이번 주 일정(11/23~)", t_h_voice_week)
