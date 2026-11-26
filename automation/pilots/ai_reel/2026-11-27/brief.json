@@ -12,22 +12,22 @@
   {
    "file": "stems/i1a_hook.mp3",
    "start": 0.1,
-   "tempo": 1.1,
+   "tempo": 1.25,
    "text": "월급은 올랐는데, 쓸 돈은 줄었대요!",
    "tts": "월급은 올랐는데, 쓸 돈은 <strong>줄었대요</strong>!",
    "voice": "Hana"
   },
   {
    "file": "stems/i1b_tax.mp3",
-   "start": 2.1,
-   "tempo": 1.15,
-   "text": "세금과 이자가 11% 불었대요!",
-   "tts": "세금과 이자가 <strong>십일 퍼센트</strong> 불었대요!",
+   "start": 2.15,
+   "tempo": 1.25,
+   "text": "세금·이자 11% 늘었대요!",
+   "tts": "세금 이자 <strong>십일 퍼센트</strong> 늘었대요!",
    "voice": "Hana"
   },
   {
    "file": "stems/i2_rate.mp3",
-   "start": 4.1,
+   "start": 4.45,
    "tempo": 1.15,
    "text": "금리를 올해 세 번이나 올렸대요!",
    "tts": "금리를 올해 <strong>세 번</strong>이나 올렸대요!",
@@ -45,24 +45,24 @@
    "file": "stems/i4_ktx.mp3",
    "start": 10.98,
    "tempo": 1.15,
-   "text": "KTX 예매도 AI가 해 준대요!",
-   "tts": "<strong>케이티엑스</strong> 예매도, 에이아이가 해 준대요!",
+   "text": "기차표 예매도 AI가 해 준대요!",
+   "tts": "<strong>기차표</strong> 예매도 에이아이가 해 준대요!",
    "voice": "Hana"
   },
   {
    "file": "stems/i5_cafe.mp3",
    "start": 14.3,
-   "tempo": 1.15,
+   "tempo": 1.25,
    "text": "스타벅스, 4분기 흑자가 목표래요!",
    "tts": "스타벅스, <strong>사 분기</strong> 흑자가 목표래요!",
    "voice": "Hana"
   },
   {
-   "file": "stems/i_bye_newsletter.mp3",
-   "start": 16.75,
-   "tempo": 1.1,
-   "text": "더 자세한 건 프로필 링크 뉴스레터에서!",
-   "tts": "더 자세한 건 프로필 링크 <strong>뉴스레터</strong>에서!",
+   "file": "stems/i_bye_save.mp3",
+   "start": 16.95,
+   "tempo": 1.15,
+   "text": "저장해 두고, 필요할 때 꺼내 보세요!",
+   "tts": "저장해 두고, 필요할 때 <strong>꺼내</strong> 보세요!",
    "voice": "Hana"
   }
  ],
@@ -158,7 +158,7 @@
  ],
  "source_note": "check_sources.py 막음 0 · 경고 2 · 기사 14/16곳 읽음(메모리 품귀 아이뉴스24·전자신문 못 읽음 — 릴스는 동아일보·뉴시스로 확인, 전자신문은 다시 읽어 25~30% 확인). 릴스용 원 기사 12곳 직접 읽음(조선비즈 시간 초과 → 다시 읽음). 한 곳에만 있던 말은 릴스에 안 씀: 스타벅스 '200곳'은 서울경제만(아시아경제·부산일보·한국일보 본문엔 없음 — 부산일보·한국일보는 무신사 기사) → 릴스는 '4분기 흑자'로.",
  "end_card": {
-  "line": "더 자세한 건 프로필 링크 뉴스레터에서!",
+  "line": "저장해 두고 필요할 때 꺼내 보세요!",
   "sub": "프로필 링크에서 구독하면 '연말정산 카드 계산기' 선물부터",
   "note": "숫자는 기사 2곳 이상에서 확인했어요<br>(출처는 장면마다·캡션에)"
  },
@@ -170,20 +170,20 @@
  "captions": [
   {
    "start": 0,
-   "end": 2.0,
+   "end": 2.1,
    "size": 100,
    "top": 300,
    "html": "<div class=\"main\">월급은 올랐는데<br><span class=\"hl\">쓸 돈은 줄었다</span></div>"
   },
   {
-   "start": 2.0,
-   "end": 4.0,
+   "start": 2.1,
+   "end": 4.4,
    "size": 84,
    "top": 300,
    "html": "<div class=\"main\">세금·이자 <span class=\"hl\">11.0%</span> 불어<br>쓸 돈 1.7% 감소</div><div class=\"sub\">13분기 만에 줄었어요 · 다음은 금리 또 올린 얘기</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 아시아경제·서울경제</div>"
   },
   {
-   "start": 4.0,
+   "start": 4.4,
    "end": 7.35,
    "size": 84,
    "top": 300,
@@ -205,7 +205,7 @@
   },
   {
    "start": 14.2,
-   "end": 16.6,
+   "end": 16.9,
    "size": 84,
    "top": 300,
    "html": "<div class=\"kick\">5/5 · 소비</div><div class=\"main\">스타벅스<br><span class=\"hl\">4분기 흑자</span> 노린다</div><div class=\"sub\">내년엔 새 매장보다 리뉴얼</div><div class=\"sub src\" style=\"font-size:27px;margin-top:12px;opacity:.85\">출처 서울경제·아시아경제</div>"
