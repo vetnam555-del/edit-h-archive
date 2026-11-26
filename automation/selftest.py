@@ -3822,6 +3822,25 @@ def t_nl_dedupe():
     return "머리 줄·H PICK 제목·할 일 번호·맺음말·주말 말"
 
 
+def t_cards_dedupe():
+    """11/27~ 카드 중복 줄이기(운영자 '카드뉴스도 중복 없는지'): '오늘 챙길 것'에서 소식 장 답과 같은 이야기 줄 빼기, 마무리 숫자 줄 빼기. 11/26 호는 그대로."""
+    import copy
+    from edith import cards, content as content_mod
+    d = content_mod.load("2026-11-26")
+    expect(len(cards.card_todo(d)) == 3, "11/26 호(지난 호) 카드 할 일 3줄이 바뀌었다")
+    page_old = cards.cta_follow(d)
+    expect("누적 발행" in page_old, "11/26 호 마무리 숫자 줄이 바뀌었다")
+    d2 = copy.deepcopy(d)
+    d2["date"] = "2026-11-27"
+    expect(cards.card_todo(d2) == ["오늘 KTX 타면 9시 뒤 코레일 앱에서 지연 확인하기"], f"카드 할 일: {cards.card_todo(d2)}")
+    page = cards.cta_follow(d2)
+    expect("누적 발행" not in page and "핵심 카드" not in page and "전문은 뉴스레터로" in page, "마무리 숫자 줄·겹친 아래 줄")
+    d3 = copy.deepcopy(d2)
+    d3["todo"] = [d3["todo"][0]]
+    expect("오늘 챙길 것" not in cards.deep_card_v4(d3), "할 일이 다 겹치면 상자를 그리지 않는다")
+    return "할 일 3 → 1 · 마무리 숫자 줄 없음"
+
+
 def plain_closing_ok(d):
     return bool((d.get("question") or {}).get("closing"))
 
@@ -4371,6 +4390,7 @@ def main():
     check("공시 원문(DART, 키 없이)", t_fetch_disclosure)
     check("메일 끝 중복 줄이기(11/27~)", t_tail_v2)
     check("메일 중복 줄이기 2(11/27~)", t_nl_dedupe)
+    check("카드 중복 줄이기(11/27~)", t_cards_dedupe)
     check("댓글 키워드 → 구독 링크 DM", t_comment_dm)
     check("뉴스레터 시세판·평가 버튼·맨 위 전달 상자 뺌(11/22~)", t_nl_plus)
     check("H 말풍선(질문·맺음말, 11/22~)·월요일 이번 주 일정(11/23~)", t_h_voice_week)
