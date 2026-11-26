@@ -3769,6 +3769,29 @@ def t_competitors_web():
     return f"{len(sources)}곳 · robots 지킴 · 매일"
 
 
+def t_tail_v2():
+    """11/27~ 메일 맨 끝 중복 줄이기(운영자 11/26 '뭔가 중복으로 들어가는 느낌'): H 말풍선 하나·숫자 카드 없음·꼬리말 '전달' 문장 없음. 11/26 호는 그대로."""
+    import copy
+    from edith import content as content_mod, newsletter
+    site = "https://example.com/x"
+    d = content_mod.load("2026-11-26")
+    old = newsletter.render(d, site, 5)
+    expect("누적 발행" in old and "이 메일이 유용했다면" in old and "에디터 H의 질문" in old, "11/26 호(지난 호) 끝이 바뀌었다")
+    d2 = copy.deepcopy(d)
+    d2["date"] = "2026-11-27"
+    new = newsletter.render(d2, site, 5)
+    tail = new[new.index("답장으로 들려주세요") - 3000:]
+    expect("누적 발행" not in new and "오늘의 주제" not in new, "숫자 카드(VOL·개수 되풀이)가 남았다")
+    expect("이 메일이 유용했다면" not in new and "친구에게 추천하기" in new and "EDIT H 구독하기" in new, "꼬리말 전달 문장은 빼고 추천·구독 버튼은 남긴다")
+    expect("에디터 H의 질문" not in new and tail.count("avatar-192.png") == 1, f"끝의 H 얼굴은 한 번: {tail.count('avatar-192.png')}")
+    expect("내일도" in new or plain_closing_ok(d2), "맺음말이 말풍선 안에 남아야 한다")
+    return "얼굴 1 · 숫자 카드 없음"
+
+
+def plain_closing_ok(d):
+    return bool((d.get("question") or {}).get("closing"))
+
+
 def t_fetch_disclosure():
     """DART 공시 원문(2026-11-26~, 운영자 '유의미한 소스'): 검색 목록·목차·한 장짜리 공시를 키 없이 읽는다 — 네트워크 없이 화면 조각으로."""
     import fetch_disclosure as fd
@@ -4312,6 +4335,7 @@ def main():
     check("경쟁 매체 인스타(비즈니스 탐색)", t_competitors_ig)
     check("경쟁 매체 웹(토큰 없이·robots 지킴)", t_competitors_web)
     check("공시 원문(DART, 키 없이)", t_fetch_disclosure)
+    check("메일 끝 중복 줄이기(11/27~)", t_tail_v2)
     check("댓글 키워드 → 구독 링크 DM", t_comment_dm)
     check("뉴스레터 시세판·평가 버튼·맨 위 전달 상자 뺌(11/22~)", t_nl_plus)
     check("H 말풍선(질문·맺음말, 11/22~)·월요일 이번 주 일정(11/23~)", t_h_voice_week)

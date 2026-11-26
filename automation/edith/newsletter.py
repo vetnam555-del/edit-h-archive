@@ -557,9 +557,27 @@ def _bubble(d, site, label, inner):
             + "</td></tr></table></td></tr></table>")
 
 
+# 2026-11-26 운영자 '이 부분 마음에 안 들어, 뭔가 중복으로 들어가는 느낌' — 맨 끝(질문 → 맺음말 → 평가 → 숫자 카드 → 추천 → 구독 → 꼬리말)에
+# H 얼굴이 세 번(질문·맺음말·숫자 카드), '전달해 주세요'가 두 번(추천 버튼·꼬리말), 숫자 카드는 맨 위와 같은 말(VOL·목차 개수)에 카드 수는 틀렸다
+# (v4 9장인데 소식 장 5만 세어 '5장'). 이 날짜 호부터: H 말풍선 하나(얼굴·이름 한 번 — 질문 + 답장 안내 + 맺음말), 숫자 카드 빼고 링크 한 줄,
+# 꼬리말의 '동료에게 전달' 문장 뺌. 지난 호는 그대로(기록).
+TAIL_V2_FROM = "2026-11-27"
+
+
+def _tail_v2(d):
+    return str(d.get("date", "")) >= TAIL_V2_FROM
+
+
 def _question_h(d, site):
     q = d["question"]
     closing = re.sub(r"\s*[—-]+\s*에디터 H 드림\s*$", "", closing_lines(q.get("closing", "오늘도 EDIT H가 함께할게요.")))
+    if _tail_v2(d):   # 말풍선 하나: 질문(크게) → 답장 안내 → 가는 줄 → 맺음말
+        one = _bubble(d, site, "에디터 H",
+                      _div(f"font-size:18px;font-weight:700;line-height:1.5;color:{INK};margin-top:6px;", md(q["text"], BOLD, HL_B))
+                      + _div(f"font-size:13px;font-weight:400;line-height:1.6;color:{BODY};margin-top:6px;", "이 메일에 답장으로 들려주세요.")
+                      + f'<div style="border-top:1px solid {RULE};margin:14px 0 12px;font-size:0;line-height:0;">&nbsp;</div>'
+                      + _div(f"font-size:15px;font-weight:400;line-height:1.7;color:{INK};", md(closing)))
+        return _divider(30) + f'<tr><td class="px" style="padding:0 36px;">{one}</td></tr>'
     ask = _bubble(d, site, "에디터 H의 질문",
                   _div(f"font-size:18px;font-weight:700;line-height:1.5;color:{INK};margin-top:6px;", md(q["text"], BOLD, HL_B))
                   + _div(f"font-size:13px;font-weight:400;line-height:1.6;color:{BODY};margin-top:8px;", "이 메일에 답장으로 들려주세요."))
@@ -795,6 +813,12 @@ def _cta(d, site, campaign, n_cards):
                  f'<span style="color:#C4C4C4;"> &nbsp;|&nbsp; </span>' + links)
     # 11/23~ 맨 위 목차가 이미 '오늘의 10가지 · 깊게 5 · 짧게 5'를 말한다 — 끝에서 같은 말을 되풀이하지 않는다(소비자 눈 점검, 운영자 '중복 없지?')
     head_line = "" if str(d.get("date", "")) >= H_VOICE_FROM and d.get("format") == 2 else None
+    if _tail_v2(d) and d.get("format") == 2:   # 숫자 카드(얼굴·VOL·개수 되풀이) 없이 링크 한 줄 + 추천 + 구독
+        return (_divider(30) + f'<tr><td class="px" style="padding:0 36px;">'
+                + f'<div style="text-align:center;">{links}</div>'
+                + f"""<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:16px;"><tr><td align="center" bgcolor="#FFFFFF" style="background:#FFFFFF;border:1.5px solid {CHIP_FG};border-radius:10px;"><a href="{share_url(d, site)}" style="display:block;padding:13px 10px;font-family:{F};font-size:15px;font-weight:700;color:{CHIP_FG};text-decoration:none;">카톡·링크로 친구에게 추천하기</a></td></tr></table>
+{_div(f"font-size:12px;font-weight:400;line-height:1.6;color:{MUTED};margin-top:6px;", "누르면 카카오톡·문자로 바로 보내거나 링크를 복사할 수 있어요.", True)}
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:10px;"><tr><td align="center" bgcolor="{CHIP_FG}" style="background:{CHIP_FG};border-radius:10px;"><a href="{_utm(site, "/subscribe.html", campaign, "cta_subscribe")}&amp;ref=letter" style="display:block;padding:14px 10px;font-family:{F};font-size:15px;font-weight:700;color:#FFFFFF;text-decoration:none;">EDIT H 구독하기</a></td></tr></table></td></tr>""")
     return (_divider(30) + f'<tr><td class="px" style="padding:0 36px;">'
             + (head_line if head_line is not None else _div(f"font-size:19px;font-weight:700;line-height:1.45;color:{INK};",
                    (f"오늘 아침 {n_topics}가지 소식을 정리했어요<br>깊게 {len(d['all_items'])} · 짧게 {len(d['briefs'])}"   # 실제 개수(주말 3개 허용 — Codex 리뷰), 조사 없이(3·6 뒤 '으로')
@@ -821,7 +845,8 @@ def _footer(site, campaign, d=None):
     return (f'<tr><td class="px" style="padding:34px 36px 40px;">'
             + _div(f"font-size:12px;font-weight:400;line-height:1.9;color:{MUTED};",
                    f'EDIT H · {line} · 인스타그램 <a href="{ig}" style="color:{MUTED};">@edit.h.kr</a><br>'
-                   f'이 메일이 유용했다면 동료에게 전달해주세요. · <a href="{site}/unsubscribe.html?email=PLACEHOLDER" style="color:{MUTED};">수신거부</a>', True)
+                   + ('' if d and _tail_v2(d) else '이 메일이 유용했다면 동료에게 전달해주세요. · ')   # 11/27~ 추천 버튼과 같은 말 — 한 번만
+                   + f'<a href="{site}/unsubscribe.html?email=PLACEHOLDER" style="color:{MUTED};">수신거부</a>', True)
             + "</td></tr>")
 
 
