@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EDIT H — 이번 주 퀴즈 (2026-11-27)</title>
+<meta name="description" content="EDIT H 이번 주 퀴즈 — 11/23~11/26 소식으로 5문제">
+<meta property="og:title" content="EDIT H — 이번 주 퀴즈">
+<meta property="og:image" content="https://vetnam555-del.github.io/edit-h-archive/og_image.png">
+<link rel="icon" type="image/png" href="https://vetnam555-del.github.io/edit-h-archive/favicon.png">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard','Apple SD Gothic Neo','Malgun Gothic',-apple-system,sans-serif; background: #FFFFFF; color: #282F38;
+    line-height: 1.7; word-break: keep-all; padding: 28px 18px 48px; }
+  .wrap { max-width: 520px; margin: 0 auto; }
+  .top { font-size: 13px; font-weight: 700; color: #5A5A5E; text-align: center; }
+  .chips { display: flex; gap: 6px; margin-top: 22px; flex-wrap: wrap; }
+  .chip { font-size: 13px; font-weight: 700; padding: 4px 10px; border-radius: 4px; background: #FFDCCB; color: #B23A0F; }
+  .chip.dark { background: #363636; color: #FF9466; }
+  .bar { height: 6px; background: #F3F3F3; border-radius: 3px; margin-top: 18px; overflow: hidden; }
+  .bar i { display: block; height: 100%; background: #FF9466; border-radius: 3px; }
+  .from { font-size: 12.5px; font-weight: 700; color: #B23A0F; margin-top: 20px; }
+  h1 { font-size: 21px; font-weight: 700; line-height: 1.45; margin-top: 6px; }
+  .opts { display: grid; gap: 8px; margin-top: 16px; }
+  .opt { display: block; padding: 13px 16px; border: 1.5px solid #282F38; border-radius: 12px; font-size: 15.5px; font-weight: 700;
+    color: #282F38; text-decoration: none; background: #FFFFFF; }
+  .opt.right { background: #FFC9AD; }
+  .opt.wrong { border-color: #C9C9C9; color: #9A9A9A; text-decoration: line-through; }
+  .opt.dim { border-color: #E4E4E4; color: #9A9A9A; }
+  .result { margin-top: 18px; background: #F3F3F3; border-radius: 16px; padding: 16px 18px; }
+  .result b { font-size: 16px; }
+  .result p { font-size: 14.5px; color: #555558; margin-top: 6px; }
+  .result a { color: #B23A0F; font-weight: 700; }
+  .next { display: block; text-align: center; margin-top: 16px; padding: 14px; border-radius: 10px; background: #B23A0F; color: #FFFFFF;
+    font-weight: 700; text-decoration: none; }
+  .sub { display: block; text-align: center; margin-top: 10px; padding: 13px; border-radius: 10px; border: 1.5px solid #B23A0F; color: #B23A0F;
+    font-weight: 700; text-decoration: none; }
+  .score { font-size: 44px; font-weight: 800; margin-top: 14px; }
+  .score span { background: #FFC9AD; padding: 0 10px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">@edit.h.kr</div>
+  <div class="chips"><span class="chip dark">금요일 퀴즈</span><span class="chip">11/23~11/26 소식</span></div>
+  <div class="bar"><i id="bar"></i></div>
+  <div id="app"></div>
+</div>
+<script>
+const SITE = "https://vetnam555-del.github.io/edit-h-archive", DAY = "2026-11-27";
+const QS = [{"d": "2026-11-23", "q": "증안펀드에 실제 돈이 들어간 마지막 때는?", "o": ["2008년 금융위기", "2020년 코로나", "1997년 외환위기"], "a": 1, "why": "실제로 돈이 들어간 건 2008년 금융위기 때(5150억원)가 마지막이라, 이번 가동 준비는 18년 만이에요."}, {"d": "2026-11-24", "q": "젠슨 황 복귀 첫날, 엔비디아 주가는?", "o": ["3% 넘게 하락", "31% 넘게 상승", "13% 넘게 상승"], "a": 2, "why": "엔비디아 이사회가 23일(현지시간) 젠슨 황을 CEO로 복귀시킨 날, 주가는 31% 넘게 뛰었어요. 물러난 지 11일 만이었어요."}, {"d": "2026-11-25", "q": "리니지 클래식, 8개월 누적 매출은?", "o": ["428억원", "1조원", "4278억원"], "a": 3, "why": "2000년대 초 리니지를 되살린 '리니지 클래식'은 올해 2월 나온 뒤 약 8개월 만에 누적 매출 4278억원을 올렸어요."}, {"d": "2026-11-26", "q": "27일부터 영업을 멈추는 홈플러스 대형마트는?", "o": ["67곳", "670곳", "7곳"], "a": 1, "why": "기업회생 절차 중인 홈플러스가 27일부터 전국 67개 대형마트와 본사 영업을 임시로 멈춰요. 점포 안 임대 매장은 계속 영업해요."}, {"d": "2026-11-26", "q": "10월 국내 카드 결제액이 더 많았던 AI는?", "o": ["챗GPT", "클로드", "제미나이"], "a": 2, "why": "10월 국내 카드 결제액은 앤트로픽(클로드)이 1086억원, 오픈AI(챗GPT)가 709억원이었어요."}];
+const p = new URLSearchParams(location.search);
+const qn = Math.min(Math.max(parseInt(p.get("q") || "1", 10) || 1, 1), QS.length + 1);
+const ans = parseInt(p.get("a") || "0", 10) || 0;
+const KEY = "edith-quiz-" + DAY;
+const store = { get() { try { return JSON.parse(sessionStorage.getItem(KEY) || "{}"); } catch (e) { return {}; } },
+                set(v) { try { sessionStorage.setItem(KEY, JSON.stringify(v)); } catch (e) {} } };
+const app = document.getElementById("app");
+document.getElementById("bar").style.width = Math.round(Math.min(qn - (ans ? 0 : 1), QS.length) / QS.length * 100) + "%";
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const md = d => `${+d.slice(5, 7)}/${+d.slice(8)}`;
+if (qn > QS.length) {
+  const s = store.get(); const n = Object.values(s).filter(Boolean).length;
+  app.innerHTML = `<h1 style="margin-top:20px">이번 주 퀴즈 끝!</h1><div class="score"><span>${n} / ${QS.length}</span></div>
+    <p style="margin-top:12px;color:#555558">${n >= 4 ? "이번 주 소식, 거의 다 챙기셨네요." : "놓친 소식은 지난 호에서 다시 볼 수 있어요."}</p>
+    <a class="next" href="${SITE}/share.html?d=${DAY}">친구에게 퀴즈 보내기</a>
+    <a class="sub" href="${SITE}/subscribe.html?ref=quiz">매일 아침 받아 보기</a>`;
+} else {
+  const Q = QS[qn - 1];
+  let html = `<div class="from">Q${qn} · ${md(Q.d)} 호</div><h1>${esc(Q.q)}</h1><div class="opts">`;
+  Q.o.forEach((t, i) => {
+    const k = i + 1; let cls = "opt";
+    if (ans) cls += k === Q.a ? " right" : (k === ans ? " wrong" : " dim");
+    html += `<a class="${cls}" href="?q=${qn}&a=${k}">${"①②③"[i]} &nbsp;${esc(t)}</a>`;
+  });
+  html += `</div>`;
+  if (ans) {
+    const ok = ans === Q.a; const s = store.get(); if (!(qn in s)) { s[qn] = ok; store.set(s); }
+    html += `<div class="result"><b>${ok ? "정답이에요!" : "아쉬워요, 정답은 " + "①②③"[Q.a - 1] + "번"}</b>
+      <p>${esc(Q.why)}</p><p><a href="${SITE}/${Q.d}.html">${md(Q.d)} 호에서 자세히 보기 ›</a></p></div>
+      <a class="next" href="?q=${qn + 1}">${qn < QS.length ? "다음 문제" : "결과 보기"}</a>`;
+  }
+  app.innerHTML = html;
+}
+</script>
+</body>
+</html>

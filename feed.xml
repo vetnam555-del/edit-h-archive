@@ -6,7 +6,14 @@
   <atom:link href="https://vetnam555-del.github.io/edit-h-archive/feed.xml" rel="self" type="application/rss+xml"/>
   <description>매일 아침 8시, 경제부터 트렌드까지 꼭 알아야 할 소식을 확인된 숫자로</description>
   <language>ko</language>
-  <lastBuildDate>Thu, 26 Nov 2026 08:00:00 +0900</lastBuildDate>
+  <lastBuildDate>Fri, 27 Nov 2026 08:00:00 +0900</lastBuildDate>
+  <item>
+    <title>VOL.156 경기 좋다며, 금리는 또 올렸다</title>
+    <link>https://vetnam555-del.github.io/edit-h-archive/2026-11-27.html</link>
+    <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-11-27.html</guid>
+    <pubDate>Fri, 27 Nov 2026 08:00:00 +0900</pubDate>
+    <description>기준금리 3.25%로 인상·스타벅스 200곳 새 단장·가계 쓸 돈 13분기 만에 감소·정부 AI &#x27;KTX 예매&#x27;·머스크도 줄 선 메모리 — 오늘의 5가지</description>
+  </item>
   <item>
     <title>VOL.155 홈플러스 장보기, 오늘이 마지막?</title>
     <link>https://vetnam555-del.github.io/edit-h-archive/2026-11-26.html</link>
@@ -209,13 +216,6 @@
     <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-10-28.html</guid>
     <pubDate>Wed, 28 Oct 2026 08:36:12 +0900</pubDate>
     <description>지난 호 다시 보기 — 경기 버스 4130대, 30일 첫차부터 멈춘다고? · 서울 지하철 노조, 다음 달 파업 찬반투표 · 직장인 53%, 돌아가면 다른 직무 고른다 · 39세 이하 첫 집, 4억 이하 비아파트면 금리 2.1%p 우대 · 금값, 1월 고점보다 29% 내려 4000달러 아래로</description>
-  </item>
-  <item>
-    <title>VOL.126 놓쳤다면, 다시 볼 만한 5가지</title>
-    <link>https://vetnam555-del.github.io/edit-h-archive/2026-10-27.html</link>
-    <guid isPermaLink="true">https://vetnam555-del.github.io/edit-h-archive/2026-10-27.html</guid>
-    <pubDate>Tue, 27 Oct 2026 08:36:14 +0900</pubDate>
-    <description>지난 호 다시 보기 — 쿠팡 105곳 감독, 법 위반 206건이라고? · 1000원 호루라기 품절, 호신용품 거래액 158%↑ · 원·달러 1324원, 2년 만에 가장 낮다 · AI가 추천한 종목, 15개 중 8개는 떨어졌다 · 휘발유 23주째 내렸지만, 국제유가는 6개월 만에 최고</description>
   </item>
 </channel>
 </rss>
