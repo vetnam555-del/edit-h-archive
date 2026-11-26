@@ -14,5 +14,21 @@
    "17958030858037826"
   ],
   "at": "2026-11-25T19:32:07+09:00"
+ },
+ "reel": {
+  "id": "18057165515810800",
+  "at": "2026-11-26T09:12:57+09:00",
+  "track": "AI 영상(자체 음악·목소리)",
+  "style": "ai",
+  "seconds": 20.5,
+  "feed": false,
+  "hook": true,
+  "ai_label": true,
+  "permalink": "https://www.instagram.com/reel/DgLyhg3AMS2/"
+ },
+ "story_ai": {
+  "id": "18391352572236539",
+  "at": "2026-11-26T09:13:30+09:00",
+  "ai_label": true
  }
 }
