@@ -7,6 +7,7 @@
    최대 9분 기다린다). 종료 코드 0 이면 main 이 최신, 2 면 기존 성과표로 진행하고 회고 기록에 '성과표 지연' 한 줄, 1 이면 `git pull --rebase origin main` 후 한 번만 다시.
 2. 읽기: `automation/learnings.md`(맨 위 규칙 포함), `automation/metrics/summary.md`, 오늘 `content/{날짜}.json` 과 최근 3호의 content,
    `automation/sent/{날짜}.json`·`automation/ig_posted/{날짜}.json`, 있으면 `automation/alerts/{날짜}.json`.
+   (2026-11-28 호~) 오늘 content `trends`(제작 때 본 흐름 후보와 고른 자리·뺀 이유)를 안장 '안장만' 줄과 견줘 '놓친 흐름' — 후보에도 없던 흐름 소식 — 을 회고 '약했던 것'에 한 줄.
    `python3 automation/compare_anjang.py --date {날짜}` 의 안장 비교·큰 소식 줄도 본다(fallback 호면 '안장 칸 N/5' 안내 줄대로 메인 5가지 중
    RUNBOOK 1-4 의 7 ①~③ 칸에 드는 수를 눈으로 세어 회고에 한 줄).
    **편집 성적표 한 줄(2026-11-16~, 운영자 '매일 개선한다면서 왜 계속 고칠 게 생기나')** — 회고 기록 맨 앞에
