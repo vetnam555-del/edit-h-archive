@@ -63,6 +63,7 @@ Claude 회고가 23:30 까지 없으면 ChatGPT Codex 가 대신 쓴다(`(대체
 
 ## 시스템 개선 요청 (회고가 적고, 매일 14:10 개선 루틴이 처리한 뒤 지운다 — 처리 기록은 CHANGELOG.md)
 
+- (2026-11-26 운영자 '내일 개선 PR 에 같이 넣어 줘') **11/27 14:10 개선 PR 에 같이 넣기 — 공시 검색 여러 쪽** — PR #226 Codex 리뷰(P2): `automation/fetch_disclosure.py` 의 `search` 가 첫 쪽 30건만 받아, 공시가 많은 회사(삼성전자 60일 56건)는 `--grep` 이 2쪽 뒤 실적 공시를 '없음'으로 놓친다. 고친 커밋이 작업 브랜치 `claude/clever-wright-u30ihp` 의 `476700f` 에 있다(`git fetch origin claude/clever-wright-u30ihp && git cherry-pick 476700f`). 내용: 한 쪽 `PAGE_SIZE=100`, 꽉 차면 다음 쪽(최대 `MAX_PAGES=5`), 접수번호 겹치면 빼기, `search(..., get=)` 로 시험용 주입 + selftest `t_fetch_disclosure` 에 여러 쪽 사례. 그날 개선 PR 에 이 커밋을 함께 싣고 CHANGELOG 한 줄, 이 줄은 지운다(11/26 14:10 개선은 손대지 않는다 — 운영자가 '내일'로 정함).
 - (2026-11-22 주간) **댓글 읽기 권한을 다시 재기** — `comment_dm.py` 의 probe(댓글 읽기·DM 권한)가 11/02 한 번뿐이라 지금도 '댓글을 못 읽는'지 모른다(그 뒤 실행 로그는 '새 키워드 댓글 없음'만). 일요일 주간 성과 수집 때나 주 1회 probe 를 다시 돌려 `state.json` 날짜를 새로 남기면, 운영자가 권한을 넣었을 때 캡션 'DM' 약속(`config.instagram.dm_auto_reply_from`)을 켤지 판단할 수 있다.
 - (2026-11-16) **트렌드·임팩트를 빌드가 세게** — 운영자 "임팩트가 없다, 트렌드 반영"(RUNBOOK 1-4 8번). content 메인 5가지에 갈래(`lane`: 경제·트렌드·마케팅·테크)를 적게 하고
   트렌드 0개면 `↘` 경고, 공지·규제·사고 3개 이상이면 경고. `compare_anjang.py` 에 '안장만' 트렌드 칸 수, `fetch_headlines.py` 에 생활·문화 '많이 본' 섹션을 더해 후보로.
