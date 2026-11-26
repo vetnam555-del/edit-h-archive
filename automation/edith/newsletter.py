@@ -104,7 +104,7 @@ def _header(d):
 <tr><td class="px" style="padding:30px 36px 0;">{_div(f"font-size:13px;font-weight:700;line-height:1;color:#5A5A5E;", "@edit.h.kr", True)}</td></tr>
 <tr><td class="px" style="padding:26px 36px 0;">{_chips(chips)}
   <div class="h-cover" style="font-family:{F};font-size:31px;line-height:1.45;color:{INK};text-align:center;margin-top:18px;word-break:keep-all;letter-spacing:-0.5px;">{_cover_title(d['hero_title'])}</div>
-  {_div(f"font-size:12.5px;font-weight:400;line-height:1.5;color:{MUTED};margin-top:14px;", f"VOL.{esc(d['vol'])} · {date_txt} {d['weekday']}요일 · 읽는 시간 {d['read_minutes']}분", True)}</td></tr>"""
+  {_div(f"font-size:12.5px;font-weight:400;line-height:1.5;color:{MUTED};margin-top:14px;", (f"{date_txt} · 읽는 시간 {d['read_minutes']}분" if _dedupe_on(d) else f"VOL.{esc(d['vol'])} · {date_txt} {d['weekday']}요일 · 읽는 시간 {d['read_minutes']}분"), True)}</td></tr>"""
 
 
 def _lead_points(d):
@@ -225,7 +225,7 @@ def _note_v3(d, site=None):
     return f'\n<tr><td class="px" style="padding:0 36px;">{toc}\n  {_todo(d)}{_week(d)}\n  {head}\n  {lead}</td></tr>'
 
 
-def _item_v3(it):
+def _item_v3(it, d=None):
     """11/19~ 02–05 소식 — [번호][태그] 칩 한 줄 + 왼쪽 정렬 제목 + 본문 16px(훑어 읽기 쉽게)."""
     chip = (f'<table role="presentation" cellpadding="0" cellspacing="0"><tr>'
             f'<td style="background:{INK};color:#FFFFFF;font-family:{F};font-size:12.5px;font-weight:700;line-height:1;padding:6px 8px;">{int(it["no"]):02d}</td>'
@@ -237,8 +237,7 @@ def _item_v3(it):
 <tr><td class="px" style="padding:30px 36px 0;">{chip}
   {_div(f"font-size:20px;font-weight:700;line-height:1.45;color:{INK};margin-top:12px;", md(it['title']))}
   {_body(it['body'], "16px", "1.75", 12)}
-  {_box(_div(f"font-size:12.5px;font-weight:700;line-height:1.3;color:{INK};", "그래서 뭐가 달라져?")
-        + _div(f"font-size:14.5px;font-weight:600;line-height:1.65;color:{INK};margin-top:8px;", md(it['takeaway'], BOLD)))}
+  {_takeaway_box(d or {}, it['takeaway'], f"font-size:14.5px;font-weight:600;line-height:1.65;color:{INK};margin-top:8px;")}
   {_sources(it['sources'])}</td></tr>"""
 
 
@@ -568,6 +567,60 @@ def _tail_v2(d):
     return str(d.get("date", "")) >= TAIL_V2_FROM
 
 
+# 2026-11-26 운영자 '더 개선할 부분은 없는지 체크 후 반영' — 11/26 호를 휴대폰 폭으로 처음부터 끝까지 다시 읽은 중복:
+# ① 머리 칩 '#155 · 목요일의'와 바로 아래 줄 'VOL.155 · … 목요일'(호수·요일 두 번) ② 표지 제목과 H PICK 제목이 글자까지 같음
+# ③ '오늘 챙길 것' 줄이 소식마다 '그래서 뭐가 달라져?'의 뒷말(— 뒤 행동)과 같은 말(11/12~26 호 거의 매일 1~3줄) ④ 맺음말이 할 일을 또 말함.
+# 이 날짜 호부터: ① 아래 줄은 날짜·읽는 시간만 ② H PICK 제목은 카드 '5가지 한눈에' 1번 제목(구체적인 쪽)으로 ③ 상자엔 — 앞(무엇이 바뀌나)만 두고
+# '할 일 → 오늘 챙길 것 N번' 한 줄 ④ 빌드 경고. 지난 호는 그대로.
+NL_DEDUPE_FROM = "2026-11-27"
+_TOK_STOP = set("오늘 내일 이번 다음 있어요 해요 봐요 보기 확인 확인해요 확인하기 정해 두기 하기 있다면 거예요 먼저 지금 그리고 그래서".split())
+_TOK_JOSA = re.compile(r"(에서는|으로는|에서|으로|부터|까지|이면|라면|이나|은|는|이|가|을|를|의|에|로|과|와|도|만|면|나)$")
+
+
+def _dedupe_on(d):
+    return str(d.get("date", "")) >= NL_DEDUPE_FROM and d.get("format") == 2 and not d.get("rewind")
+
+
+def _toks(text):
+    out = set()
+    for w in re.findall(r"[가-힣A-Za-z0-9]{2,}", plain(str(text or ""))):
+        w = _TOK_JOSA.sub("", w)
+        if len(w) >= 2 and w not in _TOK_STOP:
+            out.add(w)
+    return out
+
+
+def split_takeaway(d, text):
+    """'그래서 뭐가 달라져?' 문장 → (상자에 둘 말, 같은 할 일이 있는 '오늘 챙길 것' 번호 또는 0).
+    '바뀌는 것 — 할 일' 꼴에서 — 뒤 할 일이 오늘 챙길 것 한 줄과 핵심어 2개 이상 겹치면 상자엔 — 앞만 둔다."""
+    text = str(text or "")
+    if not _dedupe_on(d) or " — " not in text:
+        return text, 0
+    head, tail = text.split(" — ", 1)
+    for i, line in enumerate(todo_lines(d), 1):
+        if len(_toks(tail) & _toks(line)) >= 2:
+            head = head.rstrip()
+            return (head if head.endswith((".", "?", "!")) else head + "."), i
+    return text, 0
+
+
+def _takeaway_box(d, text, size_style, mt=None):
+    body, n = split_takeaway(d, text)
+    ref = (_div(f"font-size:12.5px;font-weight:600;line-height:1.5;color:{CHIP_FG};margin-top:8px;", f"☑ 할 일은 맨 위 '오늘 챙길 것' {n}번")
+           if n else "")
+    inner = (_div(f"font-size:12.5px;font-weight:700;line-height:1.3;color:{INK};", "그래서 뭐가 달라져?")
+             + _div(size_style, md(body, BOLD)) + ref)
+    return _box(inner, mt=mt) if mt is not None else _box(inner)
+
+
+def closing_repeats_todo(d):
+    """맺음말이 '오늘 챙길 것' 한 줄을 되풀이하는지(핵심어 2개 이상) — 빌드 경고용(11/27 호~)."""
+    if not _dedupe_on(d):
+        return []
+    closing = (d.get("question") or {}).get("closing", "")
+    return [line for line in todo_lines(d) if len(_toks(closing) & _toks(line)) >= 2]
+
+
 def _question_h(d, site):
     q = d["question"]
     closing = re.sub(r"\s*[—-]+\s*에디터 H 드림\s*$", "", closing_lines(q.get("closing", "오늘도 EDIT H가 함께할게요.")))
@@ -696,6 +749,16 @@ def _fresh_checklist(b):
     return keep
 
 
+def pick_title(d):
+    """H PICK 제목 — 11/27~ 표지 제목과 글자까지 같으면 카드 '5가지 한눈에' 1번 제목(더 구체적: '내일부터 홈플러스 마트 전 점포 휴업')."""
+    t = plain(d["big_issue"].get("title") or d["title"])
+    if _dedupe_on(d) and re.sub(r"\s+", "", t) == re.sub(r"\s+", "", plain(d.get("hero_title") or d["title"])):
+        first = (d.get("card_issues") or [{}])[0].get("headline")
+        if first and re.sub(r"\s+", "", plain(first)) != re.sub(r"\s+", "", t):
+            return re.sub(r"\s*\n\s*", " ", plain(first)).strip()
+    return t
+
+
 def _pick(d):
     """01 H PICK 심층 — 한 이슈를 '무슨 일 → 숫자 → 왜 중요 → 그래서'로 깊게."""
     b = d["big_issue"]
@@ -713,7 +776,7 @@ def _pick(d):
     return f"""
 <!-- 01 H PICK 심층 -->
 <tr><td class="px" style="padding:0 36px;">{_chips([("H PICK", True), ((d.get("series") or {}).get("label") or "오늘의 심층", False)], align)}
-  {_div(f"font-size:23px;font-weight:700;line-height:1.45;color:{INK};margin-top:14px;", esc(plain(d['big_issue'].get('title') or d['title'])), not v3)}
+  {_div(f"font-size:23px;font-weight:700;line-height:1.45;color:{INK};margin-top:14px;", esc(pick_title(d)), not v3)}
   {_tag(f"01 · {b['tag']}", align)}
   {_label("무슨 일이야?")}
   {paras}
@@ -724,7 +787,7 @@ def _pick(d):
   {_chart_block(chart) if chart else ""}
   {_label("왜 중요해?")}
   {why}
-  {_box(_div(f"font-size:12.5px;font-weight:700;line-height:1.3;color:{INK};", "그래서 뭐가 달라져?") + _div(f"font-size:14.5px;font-weight:400;line-height:1.75;color:{BODY};margin-top:8px;", md(b['takeaway'], BOLD)), mt=20)}
+  {_takeaway_box(d, b['takeaway'], f"font-size:14.5px;font-weight:400;line-height:1.75;color:{BODY};margin-top:8px;", mt=20)}
   {check}
   {_sources(b['sources'])}</td></tr>"""
 
@@ -875,7 +938,7 @@ def render(d, site, n_cards):
         body = [_header(d)] + top + [
             _divider(), _note_v3(d, site) if v3 else _note(d, site), _divider(30), _pick(d), _divider(0),
             f'<tr><td class="px" style="padding:30px 36px 0;">{_chips([("02–05", True), ("함께 볼 4가지", False)], "left" if v3 else "center")}</td></tr>']
-        body.extend((_item_v3 if v3 else _item)(it) for it in d["items"])
+        body.extend(_item_v3(it, d) if v3 else _item(it) for it in d["items"])
         body.append(_briefs(d, "짧게 읽는 소식" if str(d.get("date", "")) >= BRIEFS_FROM else "한 줄 뉴스", start=len(d["all_items"]) + 1))
         if d.get("quiz"):
             body.append(_quiz_block(d, site))

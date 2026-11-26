@@ -261,6 +261,8 @@ def main():
         print("  ⚠ 오늘의 그래프(cards.deep.chart)가 없다 — 2026-11-22~ 매일 넣는 칸(RUNBOOK). H PICK·다른 4가지에서 같은 잣대 숫자 3개를 찾아 보기")
     for line in (newsletter.todo_repeats(d) if args.date >= newsletter.H_VOICE_FROM else []):
         print(f"  ⚠ '오늘 챙길 것'이 '그래서 뭐가 달라져?'와 거의 같은 말 — 더 구체적인 행동·날짜로 바꾸기(RUNBOOK todo): {line}")
+    for line in newsletter.closing_repeats_todo(d):
+        print(f"  ⚠ 맺음말이 '오늘 챙길 것'을 되풀이 — 맺음말은 H 의 느낌·내일 약속만(RUNBOOK question.closing): {line}")
     d["send_time_kst"] = send_time_on(d["date"], cfg)  # 뉴스레터 푸터·카드 하단·캡션의 발송 시각 문구(지난 호는 그때 시각)
     files, card_report = [], []
     if not args.no_cards:
