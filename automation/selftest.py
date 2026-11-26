@@ -2191,6 +2191,10 @@ def t_story():
     expect(all(_pi.ai_video_day(real, d) == v and _al._ai_reel_weekday(real, d) == v for d, v in want.items())
            and _pi.ai_video_day(real, "2026-11-22") and _al._ai_reel_weekday(real, "2026-11-22") and real.get("comic_until") == "2026-11-22",
            "11/23~ 영상 날은 월·수·금만(게시·22:25 알림 같은 판단), 11/22 까지는 매일")
+    # 2026-11-27 운영자 '앞으로 릴스는 월·금만' — ai_video_days_2(11/28~)가 월·수·금 규칙보다 먼저, 그 전(11/25 수) 은 그대로
+    want2 = {"2026-11-30": True, "2026-12-01": False, "2026-12-02": False, "2026-12-03": False, "2026-12-04": True, "2026-12-05": False}
+    expect(all(_pi.ai_video_day(real, d) == v and _al._ai_reel_weekday(real, d) == v for d, v in want2.items())
+           and _pi.ai_video_day(real, "2026-11-25"), "11/28~ 영상 날은 월·금만(수요일은 쉼), 11/25(수)는 예전 규칙 그대로")
     # 2026-11-21 운영자 '조회수 1만 되도록 노력해 줘' — ai_video_daily_from 부터 매일 영상 날(주 1회 규칙보다 먼저), 그 전 날짜는 그대로
     dl = dict(wl, ai_video_daily_from="2026-11-21")
     expect([post_instagram.ai_video_day(dl, k) for k in ("2026-11-19", "2026-11-20", "2026-11-21", "2026-11-22", "2026-11-24")] == [False, False, True, True, True]
