@@ -628,6 +628,12 @@ INSIGHT_MAX = 90
 # 이 날짜 호부터 H PICK 에 `next`(앞으로 어떻게 될까? 1~2문장 — 다음 날짜·갈림길·조건)와 `who`(누가 영향받나 2~3줄 {label, text})가 필수,
 # `heads`(소제목을 그날 독자 질문으로 — {what, why}, 선택). 어려운 말은 처음 나올 때 괄호로 푼다(RUNBOOK).
 PICK_PLUS_FROM = "2026-11-27"
+# 2026-11-26 운영자 '더 개선할 부분은 없어?' → 3번 '놓친 주제를 제작 때 잡는 장치' '응'. 11/26 안장 '피클(AI 쇼핑 비서)'·뉴닉 'ICO 9년 만에 허용'·
+# '인구총조사 30대 절반 비혼'처럼 독자에게 맞는 흐름 소식을 놓쳤는데, 경쟁 비교(12:10)는 제작(07:05)보다 늦어 그날엔 못 쓴다. 이 날짜 호부터 원고에
+# `trends` — 제작 때 본 '흐름' 후보 3~5개(안장출근길·큰 소식 목록·보도자료에서)와 고른 자리(pick '01'~'05') 또는 뺀 이유(why) — 를 적고,
+# 그중 2개 이상은 메인 5가지에 들어가야 한다(RUNBOOK 1-4 '깊이'의 '흐름 소식 2개'를 빌드가 본다). 메일·카드엔 나가지 않는다(회고·주간이 읽는다).
+TRENDS_FROM = "2026-11-28"
+TRENDS_MIN, TRENDS_MAX, TRENDS_PICKED = 3, 5, 2
 NEXT_MAX = 160
 WHO_TEXT_MAX = 80
 
@@ -650,6 +656,24 @@ def prepare(data, date_str):
     big = data["big_issue"]
     for key in ("tag", "paragraphs", "stat", "takeaway") + (("why", "numbers") if fmt == 2 else ()):
         _need(big, key, f"{where} big_issue")
+    if fmt == 2 and date_str >= TRENDS_FROM and not data.get("rewind"):
+        tr = data.get("trends")
+        if not isinstance(tr, list) or not TRENDS_MIN <= len(tr) <= TRENDS_MAX:
+            raise ContentError(f"{where}: trends(제작 때 본 '흐름' 후보 {TRENDS_MIN}~{TRENDS_MAX}개 — 안장출근길·큰 소식·보도자료에서, "
+                               "고른 자리 pick 또는 뺀 이유 why)가 필요해요(2026-11-28~, RUNBOOK 1-4 '깊이')")
+        picked = 0
+        for i, t in enumerate(tr):
+            if not isinstance(t, dict) or not str(t.get("title") or "").strip():
+                raise ContentError(f"{where} trends[{i}]: title(후보 소식 제목)이 필요해요")
+            pick = str(t.get("pick") or "").strip()
+            if pick:
+                if pick not in ("01", "02", "03", "04", "05"):
+                    raise ContentError(f"{where} trends[{i}]: pick 은 메인 자리 '01'(H PICK)~'05' — 지금 {pick!r}")
+                picked += 1
+            elif not str(t.get("why") or "").strip():
+                raise ContentError(f"{where} trends[{i}] '{t['title']}': 고르지 않았으면 why(뺀 이유 한 줄)를 적어요")
+        if picked < TRENDS_PICKED:
+            raise ContentError(f"{where}: trends 중 메인 5가지에 든 흐름 소식이 {picked}개 — {TRENDS_PICKED}개 이상(오늘 사건만 다섯이면 하나를 흐름 소식으로)")
     if fmt == 2 and date_str >= PICK_PLUS_FROM and not data.get("rewind"):
         nxt = plain(str(big.get("next") or "")).strip()
         if not nxt:

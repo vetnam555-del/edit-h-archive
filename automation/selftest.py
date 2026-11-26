@@ -3797,10 +3797,46 @@ def _deepen(raw):
     for it in raw.get("items") or []:
         it["body"] = str(it["body"]) + " " + "배경 숫자와 업계 대응을 더한 문장이에요. " * 8
         it.setdefault("insight", "이 소식으로 돈의 흐름이 이렇게 바뀌어요")
+    raw.setdefault("trends", [{"title": "흐름 하나", "from": "안장 1", "pick": "02"}, {"title": "흐름 둘", "from": "안장 2", "pick": "03"},
+                              {"title": "흐름 셋", "from": "큰 소식", "why": "숫자 대조가 안 됨"}])
     b = raw.get("big_issue") or {}
     b.setdefault("next", "다음 달 결정이 나면 방향이 갈려요.")
     b.setdefault("who", [{"label": "🛒 소비자", "text": "주문이 바뀌어요"}, {"label": "👥 직원", "text": "급여가 바뀌어요"}])
     return raw
+
+
+def t_trends():
+    """11/28~ 흐름 후보 기록(운영자 11/26 '놓친 주제를 제작 때 잡는 장치' '응'): trends 3~5개·고른 자리 또는 뺀 이유·2개 이상 메인 — 아니면 막는다."""
+    from edith import content as content_mod
+    raw = _deepen(json.loads((ROOT / "content" / "2026-11-26.json").read_text(encoding="utf-8")))
+    raw["date"] = "2026-11-30"
+    raw["question"]["closing"] = raw["question"]["closing"].replace("오늘 주말", "이번 주말")
+    raw["week_ahead"] = [{"day": "12/1(화)", "text": "일정 하나"}, {"day": "12/2(수)", "text": "일정 둘"}]
+    content_mod.prepare(json.loads(json.dumps(raw)), "2026-11-30")   # _deepen 기본값은 통과
+    bads = {"없음": None, "2개뿐": raw["trends"][:2], "이유 없음": raw["trends"][:2] + [{"title": "셋"}],
+            "자리 틀림": raw["trends"][:2] + [{"title": "셋", "pick": "06"}],
+            "메인 1개": [raw["trends"][0], {"title": "둘", "why": "이유"}, {"title": "셋", "why": "이유"}]}
+    for why, tr in bads.items():
+        r = json.loads(json.dumps(raw))
+        if tr is None:
+            r.pop("trends")
+        else:
+            r["trends"] = tr
+        try:
+            content_mod.prepare(r, "2026-11-30")
+            got = ""
+        except content_mod.ContentError as e:
+            got = str(e)
+        expect("trends" in got, f"trends {why}을 막아야 한다: {got[:70]}")
+    r = json.loads(json.dumps(raw))
+    r.pop("trends")
+    r["date"] = "2026-11-27"
+    r.pop("week_ahead")
+    try:
+        content_mod.prepare(r, "2026-11-27")
+    except content_mod.ContentError as e:
+        expect("trends" not in str(e), "11/27 호엔 trends 가 아직 필요 없다(11/28~)")
+    return "3~5개·자리/이유·메인 2개 막기 · 11/27 은 아직"
 
 
 def t_pick_plus():
@@ -4500,6 +4536,7 @@ def main():
     check("인스타 캡션 중복 줄이기(11/27~)", t_caption_dedupe)
     check("메일 깊이(11/27~ 본문 280자·insight)", t_deep)
     check("H PICK 누가·앞으로·질문 소제목(11/27~)", t_pick_plus)
+    check("흐름 후보 기록 trends(11/28~)", t_trends)
     check("댓글 키워드 → 구독 링크 DM", t_comment_dm)
     check("뉴스레터 시세판·평가 버튼·맨 위 전달 상자 뺌(11/22~)", t_nl_plus)
     check("H 말풍선(질문·맺음말, 11/22~)·월요일 이번 주 일정(11/23~)", t_h_voice_week)
