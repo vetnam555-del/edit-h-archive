@@ -237,7 +237,7 @@ def _item_v3(it, d=None):
 <tr><td class="px" style="padding:30px 36px 0;">{chip}
   {_div(f"font-size:20px;font-weight:700;line-height:1.45;color:{INK};margin-top:12px;", md(it['title']))}
   {_body(it['body'], "16px", "1.75", 12)}
-  {_takeaway_box(d or {}, it['takeaway'], f"font-size:14.5px;font-weight:600;line-height:1.65;color:{INK};margin-top:8px;")}
+  {_insight_box(d, it) if (d and it.get('insight') and _deep_on(d)) else _takeaway_box(d or {}, it['takeaway'], f"font-size:14.5px;font-weight:600;line-height:1.65;color:{INK};margin-top:8px;")}
   {_sources(it['sources'])}</td></tr>"""
 
 
@@ -611,6 +611,26 @@ def _takeaway_box(d, text, size_style, mt=None):
     inner = (_div(f"font-size:12.5px;font-weight:700;line-height:1.3;color:{INK};", "그래서 뭐가 달라져?")
              + _div(size_style, md(body, BOLD)) + ref)
     return _box(inner, mt=mt) if mt is not None else _box(inner)
+
+
+def _deep_on(d):
+    from .content import DEEP_FROM
+    return str(d.get("date", "")) >= DEEP_FROM and d.get("format") == 2 and not d.get("rewind")
+
+
+def _insight_box(d, it):
+    """11/27~ 02–05 '그래서 뭐가 달라져?' — 생활 팁 대신 해석 한 줄(insight). 같은 소식의 할 일이 '오늘 챙길 것'에 있으면 번호만 잇는다
+    (할 일 문장은 카드 '그래서 나는?'·오늘 챙길 것 몫 — 메일에선 늘 맞는 팁을 되풀이하지 않는다)."""
+    _, n = split_takeaway(d, it.get("takeaway"))
+    if not n:
+        for i, line in enumerate(todo_lines(d), 1):
+            if len(_toks(line) & (_toks(it.get("takeaway")) | _toks(it.get("title")))) >= 2:
+                n = i
+                break
+    ref = (_div(f"font-size:12.5px;font-weight:600;line-height:1.5;color:{CHIP_FG};margin-top:8px;", f"☑ 할 일은 맨 위 '오늘 챙길 것' {n}번")
+           if n else "")
+    return _box(_div(f"font-size:12.5px;font-weight:700;line-height:1.3;color:{INK};", "그래서 뭐가 달라져?")
+                + _div(f"font-size:14.5px;font-weight:600;line-height:1.65;color:{INK};margin-top:8px;", md(it["insight"], BOLD)) + ref)
 
 
 def closing_repeats_todo(d):

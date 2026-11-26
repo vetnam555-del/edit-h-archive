@@ -615,6 +615,13 @@ def _icon_problems(it, data, date_str, where):
 
 
 WEEKEND_WORD_FROM = "2026-11-27"
+# 2026-11-26 운영자 '안장출근길보다 왜 항상 인사이트나 내용이 부족해 보일까?' → '그래 이대로 진행해 줘'. 11/24~26 을 재 보니 안장 하루 약 13,500자 · 소식당
+# 3~4문단(600~1,000자, 배경 숫자·업계 대응·구조 해석)인데 우리는 하루 약 1,500자 · 02~05 본문 140~190자(2~3문장, '해석·전망 없이')이고 마무리는
+# 늘 맞는 생활 팁. 이 날짜 호부터 02~05 는 4~6문장(DEEP_BODY_MIN 자 이상: 무슨 일 → 왜(배경 숫자) → 누가 어떻게 움직이나)과
+# `insight`(해석 한 줄 — 업계·돈의 흐름에서 무엇이 바뀌나, 메일 '그래서 뭐가 달라져?' 상자)를 쓴다. 카드는 그대로 짧게(cards.issues).
+DEEP_FROM = "2026-11-27"
+DEEP_BODY_MIN = 280
+INSIGHT_MAX = 90
 
 
 def prepare(data, date_str):
@@ -658,6 +665,18 @@ def prepare(data, date_str):
     else:
         for it in data["items"]:
             _item_ok(it, f"{where} items '{it.get('title', '?')}'")
+            if date_str >= DEEP_FROM and not data.get("rewind"):
+                w = f"{where} items '{it.get('title', '?')}'"
+                n = len(plain(str(it.get("body") or "")))
+                if n < DEEP_BODY_MIN:
+                    raise ContentError(f"{w}: body {n}자 — 2026-11-27~ 02~05 는 4~6문장 {DEEP_BODY_MIN}자 이상(무슨 일 → 왜·배경 숫자 → 누가 어떻게 움직이나, "
+                                       "RUNBOOK '깊이'). 업계 분석·대응은 한 기사에만 있어도 '~라는 분석이에요(매체)'처럼 밝히고 쓴다")
+                ins = plain(str(it.get("insight") or "")).strip()
+                if not ins:
+                    raise ContentError(f"{w}: insight(해석 한 줄)가 없어요 — 2026-11-27~ 메일 '그래서 뭐가 달라져?' 상자는 생활 팁 대신 "
+                                       "'업계·돈의 흐름에서 무엇이 바뀌나' 한 줄(RUNBOOK '깊이')")
+                if len(ins) > INSIGHT_MAX:
+                    raise ContentError(f"{w}: insight {len(ins)}자 — {INSIGHT_MAX}자 이하 한 줄로")
             items.append(it)
     if len(items) != ITEMS[fmt]:
         what = "섹션 아이템은 모두 9개(빅이슈 01 + 02~10)" if fmt == 1 else "items 는 정확히 4개(H PICK 01 + 02~05)"
@@ -707,7 +726,7 @@ def prepare(data, date_str):
             if re.search(r"오늘\s*(이\s*)?주말", plain(str(text or ""))):
                 raise ContentError(f"{where} {path}: '오늘 주말'이라고 썼는데 이 호는 {data['weekday']}요일이에요 — '이번 주말'처럼 고치기")
     data.setdefault("briefs", [])
-    data.setdefault("read_minutes", 7 if fmt == 1 else (5 if len(data["briefs"]) > 2 else 4))
+    data.setdefault("read_minutes", 7 if fmt == 1 or (date_str >= DEEP_FROM and not data.get("rewind")) else (5 if len(data["briefs"]) > 2 else 4))
     data.setdefault("emoji", "🧭")
     data.setdefault("keywords", [big["tag"]] + [it["tag"] for it in items[:4]])
     if "hero_title" not in data:
