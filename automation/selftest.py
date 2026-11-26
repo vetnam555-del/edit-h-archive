@@ -3117,11 +3117,17 @@ def t_higgsfield_budget():
            and hb.cycle(D(2026, 12, 18), 18) == (D(2026, 12, 18), D(2027, 1, 18))
            and hb.cycle(D(2027, 1, 5), 18) == (D(2026, 12, 18), D(2027, 1, 18))
            and hb.cycle(D(2027, 3, 1), 31) == (D(2027, 2, 28), D(2027, 3, 31)), "힉스필드 한 달 경계(구독 크레딧 들어오는 날)가 틀린다")
-    rows = [{"date": "2026-11-17", "credits": 900}, {"date": "2026-11-20", "credits": 1450}, {"date": "2026-12-18", "credits": 50}]
-    ok, s = hb.can_spend(63, D(2026, 11, 30), rows)
-    expect(not ok and s["used"] == 1450 and s["cap"] == 1500 and hb.can_spend(50, D(2026, 11, 30), rows)[0], f"이번 달 1450 쓴 뒤 63 을 더 쓰게 두거나 50 을 막는다(몫 1500): {s}")
-    ok2, s2 = hb.can_spend(63, D(2026, 12, 20), rows)
-    expect(ok2 and s2["used"] == 50, f"다음 달로 넘어가도 지난달 합계가 남는다: {s2}")
+    # 2026-11-27 운영자 '연동된 전체 힉스필드 기준' — 계정 전체 사용 = 이번 달 시작 잔액 − 지금 잔액(EDIT H 장부 합계가 아니다)
+    rows = [{"date": "2026-11-17", "start_balance": 2000, "credits": 0}, {"date": "2026-11-20", "credits": 100},
+            {"date": "2026-11-27", "start_balance": 3029, "credits": 0}, {"date": "2026-11-28", "start_balance": 9999, "credits": 0},
+            {"date": "2026-12-18", "credits": 50}]
+    ok, s = hb.can_spend(53, 1580.03, D(2026, 11, 30), rows)
+    expect(not ok and s["used"] == 1448.97 and s["floor"] == 1529 and s["edith"] == 100 and hb.can_spend(50, 1580.03, D(2026, 11, 30), rows)[0],
+           f"계정 전체 1449 쓴 뒤 53 을 더 쓰게 두거나 50 을 막는다(EDIT H 장부 100 만 보면 안 된다): {s}")
+    ok2, s2 = hb.can_spend(53, 3000, D(2026, 12, 20), rows)
+    expect(not ok2 and s2["used"] is None and s2["edith"] == 50, f"새 달에 시작 잔액 없이 만들게 둔다(먼저 start): {s2}")
+    ok3, _ = hb.can_spend(53, 2990, D(2026, 12, 20), rows + [{"date": "2026-12-18", "start_balance": 3000, "credits": 0}])
+    expect(ok3, "새 달 시작 잔액을 적은 뒤에도 막는다")
     expect(load_config()["higgsfield"]["monthly_cap"] == 1500, "config.higgsfield.monthly_cap 이 1500 이 아니다(운영자 11/22)")
     led = hb.entries()
     expect(led and all({"date", "credits", "what"} <= set(r) for r in led), "장부 automation/credits/higgsfield.jsonl 이 없거나 칸이 빠졌다")
@@ -3129,7 +3135,8 @@ def t_higgsfield_budget():
     expect("higgsfield_budget.py check" in rb and "higgsfield_budget.py add" in rb, "RUNBOOK_REEL 이 만들기 전 검사·쓴 뒤 적기를 말하지 않는다")
     expect('"model": "magi_2"' in rb and hb.REEL == 53, "2026-11-27~ 릴스 영상은 MAGI-2(magi_2 1080p 20초 50, 한 편 53) — 운영자 11/26")
     st = hb.state()
-    return f"{st['start']}~{st['end']} 쓴 {st['used']:g} / {st['cap']:g}"
+    expect("--balance" in rb and "higgsfield_budget.py start" in rb, "RUNBOOK_REEL 이 계정 잔액(--balance)·달 시작 잔액(start)을 말하지 않는다(운영자 11/27)")
+    return f"{st['start']}~{st['end']} 시작 잔액 {st['start_balance']} · EDIT H 적은 것 {st['edith']:g}"
 
 
 def t_reel_cover():
@@ -4552,7 +4559,7 @@ def main():
     check("뉴스레터 시세판·평가 버튼·맨 위 전달 상자 뺌(11/22~)", t_nl_plus)
     check("H 말풍선(질문·맺음말, 11/22~)·월요일 이번 주 일정(11/23~)", t_h_voice_week)
     check("금요일 이번 주 퀴즈(11/27~)", t_friday_quiz)
-    check("힉스필드 EDIT H 몫 한 달 1,500(11/22~)", t_higgsfield_budget)
+    check("힉스필드 연동 계정 전체 한 달 1,500(11/22~, 11/27~ 계정 기준)", t_higgsfield_budget)
     check("금요일 주간 특집 퀴즈형(11/27~)", t_weekly_quiz)
     check("오늘 호 바로 가기 latest.html(11/22~)", t_latest_page)
     check("캡션 오늘 호 전문은 프로필 링크(11/23~)", t_today_link)
