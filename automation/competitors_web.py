@@ -6,7 +6,7 @@
 
 지키는 것(공개 저장소·남의 사이트):
 - 각 사이트 robots.txt 를 먼저 읽고 허락된 주소만 연다(urllib.robotparser). 거부되거나 막히면 그 매체만 건너뛴다.
-- 주 1회, 매체당 몇 번만 요청하고 같은 사이트는 1초씩 쉰다. 인스타 페이지는 열지 않는다(약관).
+- 하루 1회(2026-11-26~, 그 전 주 1회), 매체당 몇 번만 요청하고 같은 사이트는 1초씩 쉰다. 인스타 페이지는 열지 않는다(약관).
 - 제목·주소·날짜만 남긴다(본문은 저장하지 않는다).
 
 읽는 방식(config competitors_web.sources 의 kind):
@@ -16,7 +16,7 @@
   sitemap — 사이트맵에서 match 에 맞는 주소를 lastmod 최신순 limit 개 → 각 글의 og:title
 
 결과: automation/competitors/web/{날짜}.json + summary.md — 매체별 이번 주 글, 우리와 겹친 글(같은 말), 여러 매체가 다뤘는데
-우리는 안 다룬 말. 일요일 21:00 주간 루틴과 개선 루틴이 읽는다.
+우리는 안 다룬 말. 매일 14:10 개선 루틴('경쟁사 대비')과 일요일 21:00 주간 루틴이 읽는다.
 
   python3 automation/competitors_web.py             # 모아 저장(오늘 이미 모았으면 건너뜀)
   python3 automation/competitors_web.py --dry-run   # 모아서 요약만 출력
@@ -55,7 +55,8 @@ JOSA = ("에서는", "으로는", "에서", "으로", "에게", "까지", "부�
 STOP = set("""오늘 이번 이번주 지금 요즘 최근 올해 내년 작년 우리 나의 너의 무엇 뭐가 뭘까 왜 어떻게 얼마나 정리 총정리 요약 추천 가이드 방법 이유
 뉴스 소식 레터 뉴스레터 트렌드 이야기 모음 시리즈 특집 단독 속보 영상 사진 공개 발표 시작 진행 관련 대한 위한 통해 이상 이하 가지 하나 모두
 있다 없다 있는 없는 하는 되는 같은 다른 그리고 하지만 그래서 정말 진짜 가장 매우 다시 함께 바로 이제 처음 마지막 오늘의 이번엔 주간 월간
-trend word a the of and to in for 용례 oo 트워드 휴재 vs 사람 인기 광고 feat""".split())
+trend word a the of and to in for 용례 oo 트워드 휴재 vs 사람 인기 광고 feat
+공식 너무 노래 다음 어떤 직접 이렇게 그냥 완전 역대 무슨 누가 어디 언제 이거 저거 여기 거기 결국 드디어 벌써 아직 계속 요즘엔 먼저 선택 이색""".split())   # 11/26 — 주제가 아닌 말(공식·너무·다음…)이 '안 다룬 말'을 채웠다
 
 
 # ── 읽기 ──────────────────────────────────────────────────────────────
@@ -308,13 +309,17 @@ def settings(cfg=None):
 
 
 def previous(day, folder=OUT):
-    """지난 수집의 {매체: 글 주소 집합}."""
+    """{WINDOW_DAYS}일 전쯤 수집의 {매체: 글 주소 집합} — 날짜 없는 목록의 '이번 주 새 글' 잣대.
+    2026-11-26~ 매일 모으므로 바로 전날 것을 쓰면 '이번 주'가 하루로 줄어든다 — 7일 이상 지난 것 중 가장 최근, 없으면 가장 오래된 것."""
     names = [DAY_FILE.match(f.name) for f in folder.glob("*.json")] if folder.exists() else []
     days = sorted(m.group(1) for m in names if m and m.group(1) < day)
     if not days:
         return {}, None
-    data = json.loads((folder / f"{days[-1]}.json").read_text(encoding="utf-8"))
-    return {s["name"]: {i["link"] for i in s.get("items") or []} for s in data.get("sources") or []}, days[-1]
+    edge = (datetime.strptime(day, "%Y-%m-%d") - timedelta(days=WINDOW_DAYS)).strftime("%Y-%m-%d")
+    old = [d for d in days if d <= edge]
+    pick = old[-1] if old else days[0]
+    data = json.loads((folder / f"{pick}.json").read_text(encoding="utf-8"))
+    return {s["name"]: {i["link"] for i in s.get("items") or []} for s in data.get("sources") or []}, pick
 
 
 def collect(sources, fetch, now, prev):
@@ -343,7 +348,7 @@ def render(results, gaps, ours_days, prev_day, now):
     lines = [f"# 경쟁 매체 웹 — 이번 주 다룬 주제 ({now:%Y-%m-%d %H:%M} KST 자동 생성)", "",
              f"공개 RSS·글 목록만 robots.txt 를 지켜 읽는다(제목·주소만 저장). 이번 주 = 최근 {WINDOW_DAYS}일"
              + (f"(날짜가 없는 목록은 지난 수집 {prev_day} 뒤 새로 보인 글)." if prev_day else "(날짜가 없는 목록은 첫 수집이라 지금 보이는 글 모두)."),
-             f"우리 호: {', '.join(sorted(ours_days)) or '없음'}. 만든 곳: `automation/competitors_web.py`(주 1회, `.github/workflows/competitors-web.yml`).", "",
+             f"우리 호: {', '.join(sorted(ours_days)) or '없음'}. 만든 곳: `automation/competitors_web.py`(매일 12:10, `.github/workflows/competitors-web.yml`).", "",
              "| 매체 | 무리 | 이번 주 글 | 우리와 겹친 글 |", "|---|---|---|---|"]
     for r in results:
         if r["ok"]:

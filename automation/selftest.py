@@ -3755,7 +3755,42 @@ def t_competitors_web():
         expect(cw.main(["--dry-run"], fetch=lambda u: rss) == 0, "시험 실행이 0 으로 끝나지 않았다")
     wf = (ROOT / ".github" / "workflows" / "competitors-web.yml").read_text(encoding="utf-8")
     expect("competitors_web.py" in wf and "secrets." not in wf, "웹 추적 워크플로가 없거나 비밀값을 쓴다")
-    return f"{len(sources)}곳 · robots 지킴"
+    expect('"10 3 * * *"' in wf, "2026-11-26~ 경쟁 웹 추적은 매일(개선 루틴 '경쟁사 대비')")
+    for junk in ("공식", "너무", "다음", "어떤", "직접"):
+        expect(junk not in cw.keywords(f"{junk} 반도체 수출"), f"주제가 아닌 말 '{junk}'이 키워드로 잡힌다")
+    with tempfile.TemporaryDirectory() as tmp:   # 매일 모아도 날짜 없는 목록의 '이번 주'는 7일 전 수집과 견준다
+        folder = Path(tmp)
+        for d, link in (("2026-11-15", "a"), ("2026-11-19", "b"), ("2026-11-25", "c")):
+            (folder / f"{d}.json").write_text(json.dumps({"sources": [{"name": "캐릿", "items": [{"link": link}]}]}), encoding="utf-8")
+        prev, prev_day = cw.previous("2026-11-26", folder)
+        expect(prev_day == "2026-11-19" and prev == {"캐릿": {"b"}}, f"7일 전 수집을 골라야 한다: {prev_day}")
+        prev, prev_day = cw.previous("2026-11-20", folder)
+        expect(prev_day == "2026-11-15", f"7일 전이 없으면 가장 오래된 수집: {prev_day}")
+    return f"{len(sources)}곳 · robots 지킴 · 매일"
+
+
+def t_fetch_disclosure():
+    """DART 공시 원문(2026-11-26~, 운영자 '유의미한 소스'): 검색 목록·목차·한 장짜리 공시를 키 없이 읽는다 — 네트워크 없이 화면 조각으로."""
+    import fetch_disclosure as fd
+    row = ('<tbody id="tbody"><tr><td>1</td><td class="tL"><span class="innerWrap">'
+           '<a href="javascript:openCorpInfoNew(\'00261443\', \'winCorpInfo\', \'/x\');" title="NC 기업개황">\n NC\n</a></span></td>'
+           '<td class="tL"><a href="/dsaf001/main.do?rcpNo=20261111800311" id="r_1" title="t">\n 연결재무제표기준영업(잠정)실적(공정공시)\n</a></td>'
+           '<td class="tL ellipsis">NC</td><td>2026.11.11</td></tr></tbody>')
+    rows = fd.parse_list(row)
+    expect(rows == [{"rcp": "20261111800311", "corp": "NC", "title": "연결재무제표기준영업(잠정)실적(공정공시)", "date": "2026-11-11",
+                     "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20261111800311"}], f"공시 목록: {rows}")
+    one = 'viewDoc(original.rcpNo, original.dcmNo);\n viewDoc("20261111800311", "11649155", "0", "0", "0", "HTML", "");'
+    expect(fd.toc_of(one) == [("본문", ("20261111800311", "11649155", "0", "0", "0", "HTML"))], "한 장짜리 공시 첫 문서")
+    tree = "".join(f"node1['text'] = \"{t}\";\n node1['id'] = \"{i}\";\n node1['rcpNo'] = \"20261116002195\";\n node1['dcmNo'] = \"11662619\";\n"
+                   f" node1['eleId'] = \"{i}\";\n node1['offset'] = \"{i * 10}\";\n node1['length'] = \"5\";\n node1['dtd'] = \"dart4.xsd\";\n"
+                   for i, t in ((1, "분 기 보 고 서"), (2, "I. 회사의 개요")))
+    toc = fd.toc_of(tree)
+    expect([t for t, _ in toc] == ["분 기 보 고 서", "I. 회사의 개요"] and toc[1][1][2:4] == ("2", "20"), f"긴 보고서 목차: {toc}")
+    text = fd.text_of("<table><tr>\n<td>매출액</td>\n<td>686,485</td></tr></table><script>x</script>")
+    expect(text == "매출액 | 686,485", f"표 한 줄: {text!r}")
+    from edith.style import is_primary
+    expect(is_primary("https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20261111800311"), "DART 주소가 원문으로 세지지 않는다")
+    return "목록·목차·본문 표"
 
 
 def t_comment_dm():
@@ -4189,7 +4224,7 @@ def t_friday_quiz():
     pg = quiz.page(d, site)
     expect('"a": 3' in pg and "11/16~11/20 소식" in pg and "</script>" in pg and "sessionStorage" in pg, "퀴즈 웹 화면에 5문제·정답·기간")
     for bad, why in ((qs[:4], "4문제"), ([{**qs[0], "answer": 4}] + qs[1:], "정답 번호"), ([{**qs[0], "date": "2026-11-27"}] + qs[1:], "오늘 날짜 문제"),
-                     ([{**qs[0], "date": "2026-11-26"}] + qs[1:], "없는 호"), ([{**qs[0], "options": ["가", "나"]}] + qs[1:], "보기 2개")):
+                     ([{**qs[0], "date": "2026-09-01"}] + qs[1:], "없는 호"), ([{**qs[0], "options": ["가", "나"]}] + qs[1:], "보기 2개")):
         r = json.loads(json.dumps(raw))
         r["quiz"] = {"questions": bad}
         try:
@@ -4269,6 +4304,7 @@ def main():
     check("구독자 1만 목표 줄", t_goal_line)
     check("경쟁 매체 인스타(비즈니스 탐색)", t_competitors_ig)
     check("경쟁 매체 웹(토큰 없이·robots 지킴)", t_competitors_web)
+    check("공시 원문(DART, 키 없이)", t_fetch_disclosure)
     check("댓글 키워드 → 구독 링크 DM", t_comment_dm)
     check("뉴스레터 시세판·평가 버튼·맨 위 전달 상자 뺌(11/22~)", t_nl_plus)
     check("H 말풍선(질문·맺음말, 11/22~)·월요일 이번 주 일정(11/23~)", t_h_voice_week)
