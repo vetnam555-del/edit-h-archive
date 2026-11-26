@@ -661,7 +661,7 @@ def prepare(data, date_str):
         if not isinstance(tr, list) or not TRENDS_MIN <= len(tr) <= TRENDS_MAX:
             raise ContentError(f"{where}: trends(제작 때 본 '흐름' 후보 {TRENDS_MIN}~{TRENDS_MAX}개 — 안장출근길·큰 소식·보도자료에서, "
                                "고른 자리 pick 또는 뺀 이유 why)가 필요해요(2026-11-28~, RUNBOOK 1-4 '깊이')")
-        picked = 0
+        picked = set()   # 서로 다른 메인 자리(같은 자리를 두 후보가 가리키면 한 번 — PR #234 리뷰)
         for i, t in enumerate(tr):
             if not isinstance(t, dict) or not str(t.get("title") or "").strip():
                 raise ContentError(f"{where} trends[{i}]: title(후보 소식 제목)이 필요해요")
@@ -669,11 +669,11 @@ def prepare(data, date_str):
             if pick:
                 if pick not in ("01", "02", "03", "04", "05"):
                     raise ContentError(f"{where} trends[{i}]: pick 은 메인 자리 '01'(H PICK)~'05' — 지금 {pick!r}")
-                picked += 1
+                picked.add(pick)
             elif not str(t.get("why") or "").strip():
                 raise ContentError(f"{where} trends[{i}] '{t['title']}': 고르지 않았으면 why(뺀 이유 한 줄)를 적어요")
-        if picked < TRENDS_PICKED:
-            raise ContentError(f"{where}: trends 중 메인 5가지에 든 흐름 소식이 {picked}개 — {TRENDS_PICKED}개 이상(오늘 사건만 다섯이면 하나를 흐름 소식으로)")
+        if len(picked) < TRENDS_PICKED:
+            raise ContentError(f"{where}: trends 중 메인 5가지(서로 다른 자리)에 든 흐름 소식이 {len(picked)}개 — {TRENDS_PICKED}개 이상(오늘 사건만 다섯이면 하나를 흐름 소식으로)")
     if fmt == 2 and date_str >= PICK_PLUS_FROM and not data.get("rewind"):
         nxt = plain(str(big.get("next") or "")).strip()
         if not nxt:

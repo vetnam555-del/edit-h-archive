@@ -3815,7 +3815,8 @@ def t_trends():
     content_mod.prepare(json.loads(json.dumps(raw)), "2026-11-30")   # _deepen 기본값은 통과
     bads = {"없음": None, "2개뿐": raw["trends"][:2], "이유 없음": raw["trends"][:2] + [{"title": "셋"}],
             "자리 틀림": raw["trends"][:2] + [{"title": "셋", "pick": "06"}],
-            "메인 1개": [raw["trends"][0], {"title": "둘", "why": "이유"}, {"title": "셋", "why": "이유"}]}
+            "메인 1개": [raw["trends"][0], {"title": "둘", "why": "이유"}, {"title": "셋", "why": "이유"}],
+            "같은 자리 두 번": [raw["trends"][0], {"title": "둘", "pick": raw["trends"][0]["pick"]}, {"title": "셋", "why": "이유"}]}
     for why, tr in bads.items():
         r = json.loads(json.dumps(raw))
         if tr is None:
