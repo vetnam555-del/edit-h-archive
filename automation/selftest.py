@@ -635,6 +635,8 @@ def t_twosource():
     # 조·억·만 자리에서 자른·반올림한 값(11/05 ELS '국민은행 1723억원' = 기사 '1723억3400만원' — '어디에도 없다'고 잘못 알렸다)
     expect(match("1723억원", "과징금 1723억3400만원") and match("1724억원", "1723억 6000만 원") and match("3619억원", "3619억6000만원"),
            "조·억·만 자리에서 자르거나 반올림한 숫자를 못 맞춘다")
+    got = ts.issue_texts({"all_items": [{"tag": "t", "title": "제목", "insight": "점유율 37.5%로 흐름이 바뀌어요"}]})[0][2]
+    expect(any("37.5" in str(t) for _, t in got), "11/27~ insight(메일 해석 한 줄)의 숫자도 2곳 대조 대상(PR #232 리뷰)")
     expect(not match("1724억원", "1722억5000만원") and not match("1723억원", "1724억1000만원") and not match("34만원", "35만원")
            and not match("1.5억원", "1억5900만원"), "자리 맞춤이 너무 넓다")
     # 보도자료 첨부 PDF 를 하나라도 못 받으면 그 보도자료는 '못 읽음'(11/05 고용 — 두 번째 PDF 접속 끊김, 반쯤 읽은 본문으로 324만명·19.9% 를 막았다)
@@ -3788,6 +3790,49 @@ def t_tail_v2():
     return "얼굴 1 · 숫자 카드 없음"
 
 
+def _deepen(raw):
+    """11/27~ 깊이 규칙(content.DEEP_FROM) 시험용 — 지난 호 원고를 그 뒤 날짜로 돌릴 때 02~05 본문을 280자 넘게, insight 한 줄을 채운다."""
+    for it in raw.get("items") or []:
+        it["body"] = str(it["body"]) + " " + "배경 숫자와 업계 대응을 더한 문장이에요. " * 8
+        it.setdefault("insight", "이 소식으로 돈의 흐름이 이렇게 바뀌어요")
+    return raw
+
+
+def t_deep():
+    """11/27~ 메일 깊이(운영자 11/26 '안장출근길보다 인사이트·내용이 부족'): 02~05 본문 280자↑·insight 없으면 빌드가 막고,
+    메일 상자엔 insight(해석)가, 같은 할 일은 '오늘 챙길 것' 번호로. 읽는 시간 7분. 11/26 호는 그대로."""
+    from edith import content as content_mod, newsletter
+    raw = json.loads((ROOT / "content" / "2026-11-26.json").read_text(encoding="utf-8"))
+    raw["date"] = "2026-11-27"
+    raw.pop("quiz", None)
+    for bad, why in (("short", "본문 짧음"), ("noins", "insight 없음")):
+        r = _deepen(json.loads(json.dumps(raw)))
+        if bad == "short":
+            r["items"][0]["body"] = "짧은 본문이에요."
+        else:
+            r["items"][0].pop("insight")
+        try:
+            content_mod.prepare(r, "2026-11-27")
+            got = ""
+        except content_mod.ContentError as e:
+            got = str(e)
+        expect(("280자" in got) if bad == "short" else ("insight" in got), f"{why}을 막아야 한다: {got[:80]}")
+    r = _deepen(json.loads(json.dumps(raw)))
+    r["items"][0]["insight"] = "변동금리 대출자의 이자 부담이 커지는 쪽으로 흐름이 바뀌어요"
+    try:
+        d = content_mod.prepare(r, "2026-11-27")
+    except content_mod.ContentError as e:
+        if "퀴즈" not in str(e) and "quiz" not in str(e):
+            raise
+        return "금요일 퀴즈 필요 — 본문·insight 검사만 확인"
+    nl = newsletter.render(d, "https://example.com/x", 5)
+    expect("변동금리 대출자의 이자 부담" in nl and "읽는 시간 7분" in nl, "메일 상자에 insight·읽는 시간 7분")
+    expect("이자가 더 오를 수 있어요" not in nl.split("변동금리 대출자의")[1][:600], "insight 가 있으면 생활 팁 문장은 상자에서 뺀다")
+    old = newsletter.render(content_mod.load("2026-11-26"), "https://example.com/x", 5)
+    expect("읽는 시간 5분" in old, "11/26 호(지난 호) 읽는 시간이 바뀌었다")
+    return "본문 280자·insight 막기 · 메일 상자 해석 · 7분"
+
+
 def t_nl_dedupe():
     """11/27~ 메일 중복 줄이기 2(운영자 '더 개선할 부분은 없는지'): 머리 줄 호수·요일 한 번, H PICK 제목 ≠ 표지 제목,
     '그래서' 상자의 할 일이 오늘 챙길 것과 같으면 — 앞만 + 번호, 맺음말 되풀이 경고, 월~목 '오늘 주말' 막기. 11/26 호는 그대로."""
@@ -3807,7 +3852,7 @@ def t_nl_dedupe():
            f"'그래서' 상자 할 일 → 오늘 챙길 것 번호: {got[:3]}")
     expect(new.count("할 일은 맨 위") == 2, "상자 두 곳에 번호 줄")
     expect(len(newsletter.closing_repeats_todo(d2)) == 1, "맺음말이 오늘 챙길 것을 되풀이하면 경고")
-    raw = json.loads((ROOT / "content" / "2026-11-26.json").read_text(encoding="utf-8"))
+    raw = _deepen(json.loads((ROOT / "content" / "2026-11-26.json").read_text(encoding="utf-8")))
     raw["date"] = "2026-11-27"   # 금요일 — '오늘 주말'은 허용
     for day, bad in (("2026-11-30", True), ("2026-11-27", False)):
         r = json.loads(json.dumps(raw))
@@ -4315,6 +4360,7 @@ def t_friday_quiz():
     site = "https://example.com/x"
     raw = json.loads((ROOT / "content" / "2026-11-21.json").read_text(encoding="utf-8"))
     raw["date"] = "2026-11-27"
+    _deepen(raw)   # 11/27~ 02~05 본문 280자↑·insight
     raw["cards"]["cover"]["say"] = "이거 나만 몰랐어?"   # 11/23~ 사진 표지 혼잣말 필수
     for ci in raw["cards"]["issues"]:   # 11/25~ 카드 v4 — 소식마다 3D 아이콘 2~3개
         ci["icons"] = ["coin", "chart_increasing"]
@@ -4412,6 +4458,7 @@ def main():
     check("메일 중복 줄이기 2(11/27~)", t_nl_dedupe)
     check("카드 중복 줄이기(11/27~)", t_cards_dedupe)
     check("인스타 캡션 중복 줄이기(11/27~)", t_caption_dedupe)
+    check("메일 깊이(11/27~ 본문 280자·insight)", t_deep)
     check("댓글 키워드 → 구독 링크 DM", t_comment_dm)
     check("뉴스레터 시세판·평가 버튼·맨 위 전달 상자 뺌(11/22~)", t_nl_plus)
     check("H 말풍선(질문·맺음말, 11/22~)·월요일 이번 주 일정(11/23~)", t_h_voice_week)

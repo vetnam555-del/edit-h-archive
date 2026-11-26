@@ -132,7 +132,7 @@ def issue_texts(d):
     out = []
     for i, it in enumerate(d.get("all_items") or []):
         texts = []
-        for k in ("title", "body", "takeaway", "why", "paragraphs", "checklist", "numbers", "stat", "compare", "metrics", "lead"):
+        for k in ("title", "body", "takeaway", "insight", "why", "paragraphs", "checklist", "numbers", "stat", "compare", "metrics", "lead"):   # insight: 11/27~ 메일 해석 한 줄(PR #232 리뷰)
             texts += _flat(k, it.get(k))
         card = cards.get(it.get("tag")) or {}
         for k in ("headline", "body", "number", "takeaway", "metrics", "compare", "number_label", "visual", "send_to"):
