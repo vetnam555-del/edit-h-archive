@@ -3961,6 +3961,24 @@ def t_nl_dedupe():
     return "머리 줄·H PICK 제목·할 일 번호·맺음말·주말 말"
 
 
+def t_card_repeat():
+    """11/28~ 카드 묶음 되풀이 막기(14:10 휴대폰 화면 점검 — 장부 #5·#7): 표지 제목 = H PICK 장 제목, '5가지 한눈에' 같은 첫 아이콘. 11/27 호는 그대로."""
+    import copy
+    from edith import content as content_mod
+    d = content_mod.load("2026-11-27")   # 지난 호 — 날짜 전이라 그대로 빌드된다
+    expect(content_mod.card_repeat_problems(d, "2026-11-27") == [], "11/27 호(지난 호)가 막혔다")
+    got = content_mod.card_repeat_problems(d, "2026-11-28")
+    expect(len(got) == 2 and "표지 제목과 같은 말" in got[0] and "robot(4·5번)" in got[1], f"11/27 호를 11/28 로 보면 두 가지 다 막혀야: {got}")
+    d2 = copy.deepcopy(d)
+    d2["card_issues"][0]["headline"] = "기준금리 3.25%, 올해 세 번째 인상"
+    d2["card_issues"][4]["icons"] = ["chart_increasing", "robot"]
+    expect(content_mod.card_repeat_problems(d2, "2026-11-28") == [], "제목·아이콘을 고치면 통과")
+    d3 = copy.deepcopy(d)
+    d3["rewind"] = True
+    expect(content_mod.card_repeat_problems(d3, "2026-11-28") == [], "예비 호는 묻지 않는다")
+    return "표지=H PICK 제목·겹친 아이콘 막기, 지난 호·예비 호 그대로"
+
+
 def t_cards_dedupe():
     """11/27~ 카드 중복 줄이기(운영자 '카드뉴스도 중복 없는지'): '오늘 챙길 것'에서 소식 장 답과 같은 이야기 줄 빼기, 마무리 숫자 줄 빼기. 11/26 호는 그대로."""
     import copy
@@ -4550,6 +4568,7 @@ def main():
     check("공시 원문(DART, 키 없이)", t_fetch_disclosure)
     check("메일 끝 중복 줄이기(11/27~)", t_tail_v2)
     check("메일 중복 줄이기 2(11/27~)", t_nl_dedupe)
+    check("카드 묶음 되풀이 막기(11/28~)", t_card_repeat)
     check("카드 중복 줄이기(11/27~)", t_cards_dedupe)
     check("인스타 캡션 중복 줄이기(11/27~)", t_caption_dedupe)
     check("메일 깊이(11/27~ 본문 280자·insight)", t_deep)
