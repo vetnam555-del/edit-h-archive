@@ -2191,10 +2191,10 @@ def t_story():
     expect(all(_pi.ai_video_day(real, d) == v and _al._ai_reel_weekday(real, d) == v for d, v in want.items())
            and _pi.ai_video_day(real, "2026-11-22") and _al._ai_reel_weekday(real, "2026-11-22") and real.get("comic_until") == "2026-11-22",
            "11/23~ 영상 날은 월·수·금만(게시·22:25 알림 같은 판단), 11/22 까지는 매일")
-    # 2026-11-27 운영자 '앞으로 릴스는 월·금만' — ai_video_days_2(11/28~)가 월·수·금 규칙보다 먼저, 그 전(11/25 수) 은 그대로
-    want2 = {"2026-11-30": True, "2026-12-01": False, "2026-12-02": False, "2026-12-03": False, "2026-12-04": True, "2026-12-05": False}
+    # 2026-11-27 운영자 '앞으로 릴스는 월·금만' → 같은 날 '매주 한 개만' — ai_video_days_2(11/28~, 월요일만)가 월·수·금 규칙보다 먼저, 그 전(11/25 수) 은 그대로
+    want2 = {"2026-11-30": True, "2026-12-01": False, "2026-12-02": False, "2026-12-03": False, "2026-12-04": False, "2026-12-05": False, "2026-12-07": True}
     expect(all(_pi.ai_video_day(real, d) == v and _al._ai_reel_weekday(real, d) == v for d, v in want2.items())
-           and _pi.ai_video_day(real, "2026-11-25"), "11/28~ 영상 날은 월·금만(수요일은 쉼), 11/25(수)는 예전 규칙 그대로")
+           and _pi.ai_video_day(real, "2026-11-25"), "11/28~ 영상 날은 주 1회 월요일만(운영자 11/27 '매주 한 개만'), 11/25(수)는 예전 규칙 그대로")
     # 2026-11-21 운영자 '조회수 1만 되도록 노력해 줘' — ai_video_daily_from 부터 매일 영상 날(주 1회 규칙보다 먼저), 그 전 날짜는 그대로
     dl = dict(wl, ai_video_daily_from="2026-11-21")
     expect([post_instagram.ai_video_day(dl, k) for k in ("2026-11-19", "2026-11-20", "2026-11-21", "2026-11-22", "2026-11-24")] == [False, False, True, True, True]
@@ -3133,7 +3133,7 @@ def t_higgsfield_budget():
     expect(led and all({"date", "credits", "what"} <= set(r) for r in led), "장부 automation/credits/higgsfield.jsonl 이 없거나 칸이 빠졌다")
     rb = (AUTOMATION / "RUNBOOK_REEL.md").read_text(encoding="utf-8")
     expect("higgsfield_budget.py check" in rb and "higgsfield_budget.py add" in rb, "RUNBOOK_REEL 이 만들기 전 검사·쓴 뒤 적기를 말하지 않는다")
-    expect('"model": "magi_2"' in rb and hb.REEL == 53, "2026-11-27~ 릴스 영상은 MAGI-2(magi_2 1080p 20초 50, 한 편 53) — 운영자 11/26")
+    expect('"model": "magi_2"' in rb and hb.REEL == 50, "2026-11-27~ 릴스 영상은 MAGI-2(magi_2 1080p 20초 50 — 웹툰을 안 만들어 그림 몫 없음, 한 편 50) — 운영자 11/26")
     st = hb.state()
     expect("--balance" in rb and "higgsfield_budget.py start" in rb, "RUNBOOK_REEL 이 계정 잔액(--balance)·달 시작 잔액(start)을 말하지 않는다(운영자 11/27)")
     return f"{st['start']}~{st['end']} 시작 잔액 {st['start_balance']} · EDIT H 적은 것 {st['edith']:g}"
