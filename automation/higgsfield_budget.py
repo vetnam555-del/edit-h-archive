@@ -10,9 +10,9 @@
   EDIT H 가 쓴 것도 계속 `add` 로 적는다(무엇에 썼는지 기록 — 검사는 계정 잔액으로).
 
   python3 automation/higgsfield_budget.py status --balance 1580.03   # 이번 달 계정 전체 쓴 것·남은 것·영상 몇 편
-  python3 automation/higgsfield_budget.py check 53 --balance 1580.03 # 53 을 더 써도 되나(바닥 아래면 코드 1 — 만들지 않는다)
+  python3 automation/higgsfield_budget.py check 50 --balance 1580.03 # 50 을 더 써도 되나(바닥 아래면 코드 1 — 만들지 않는다)
   python3 automation/higgsfield_budget.py start 3000 "12/18 구독 크레딧 들어온 뒤 첫 잔액"   # 달마다 한 번(없으면 check 가 막는다)
-  python3 automation/higgsfield_budget.py add 53 "11/30 릴스 영상 50 + 그림 3"            # 쓴 뒤 바로 적는다(기록)
+  python3 automation/higgsfield_budget.py add 50 "11/30 릴스 영상 MAGI-2 20초"            # 쓴 뒤 바로 적는다(기록)
 """
 import argparse
 import datetime as dt
@@ -24,7 +24,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from edith.common import AUTOMATION, load_config, now_kst  # noqa: E402
 
 LEDGER = AUTOMATION / "credits" / "higgsfield.jsonl"
-REEL = 53   # 영상 날 한 편(영상 magi_2 1080p 20초 50 + 그림 약 3, 2026-11-27~ — 그 전 seedance 60 → 63) — RUNBOOK_REEL '크레딧 계획'
+REEL = 50   # 영상 날 한 편(영상 magi_2 1080p 20초 50, 2026-11-27~ — 웹툰을 안 만들어 그림 몫 없음. 그 전 seedance 60 + 웹툰 그림 3 → 63) — RUNBOOK_REEL '크레딧 계획'
 
 
 def settings():

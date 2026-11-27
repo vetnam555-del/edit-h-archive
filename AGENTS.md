@@ -65,7 +65,7 @@ Claude 가 하는 일(07:05 제작 · 07:45 릴스/웹툰 · 08:20 점검 · 14:
 - `automation/sent/{날짜}.json` 이 없으면 `send-newsletter.yml` 을 workflow_dispatch(date={날짜}).
 - `automation/ig_posted/{날짜}.json` 에 carousel permalink 가 없으면 `post-instagram.yml` 을 mode=post, key={날짜}, only=carousel.
   **어제** AI 영상 릴스(`instagram/{어제}/reel_ai.mp4`)가 있는데 reel permalink 가 없거나, 웹툰(`instagram/{어제}/comic/`)이 있는데 comic permalink 가 없으면
-  mode=post, key={어제}, only=reel. 예비 호 날과 화·수·목·토·일은 릴스가 없는 게 정상이다(11/28~ 월·금만 — 운영자 11/27, 그 전 11/23~11/27 월·수·금만 — 그 전 11/21~11/22 매일, 11/18~11/20 월요일만). 어제가 월·수·금 정규 호인데 `reel_ai.mp4` 가 없으면 이유를 찾아 보고에 한 줄
+  mode=post, key={어제}, only=reel. 예비 호 날과 화·수·목·토·일은 릴스가 없는 게 정상이다(11/28~ 월요일만 — 운영자 11/27 '매주 한 개만', 그 전 11/23~11/27 월·수·금만 — 그 전 11/21~11/22 매일, 11/18~11/20 월요일만). 어제가 영상 날(11/28~ 월) 정규 호인데 `reel_ai.mp4` 가 없으면 이유를 찾아 보고에 한 줄
   (2026-11-18~ AI 영상은 주 1회 월요일 — 22:25 알림 메일도 온다). 이미 돌고 있는 실행이 있으면 기다린다(중복 실행 금지).
 - `instagram/{날짜}/reel_frames/` 에 r1~r4 JPEG 가 있나, 어제 `evening.yml` 이 성공했나, 어제 성과 스냅숏(`automation/metrics/daily/`)이 21:00 뒤에 모였나.
 - 평일이면 `python3 automation/compare_anjang.py` 의 '겹침 N/10' 과 '큰 소식 다룸 N/M' 을 붙여 **모두 정상이면 한 줄**로 보고.
@@ -84,12 +84,12 @@ Claude 가 하는 일(07:05 제작 · 07:45 릴스/웹툰 · 08:20 점검 · 14:
 4. `git add automation/learnings.md && git commit -m "Editor retrospective {날짜}" && git push origin HEAD:main`.
 
 ### 2-6. 07:45 AI 릴스 '오늘 아침 5가지' + 5가지 웹툰
-- `automation/RUNBOOK_REEL.md` 를 처음부터 읽고 그대로. **2026-11-28~ AI 영상 릴스는 월·금만**(운영자 11/27 '앞으로 릴스는 월·금만 올리자', `config.instagram.ai_video_days_2`), 그 전 **2026-11-23~11-27 은 월·수·금만, 웹툰은 만들지 않는다**(운영자 11/22 — `config.instagram.ai_video_days`·`comic_until`, 웹툰 13편 도달 2~9·저장 0). 그 전 11/21~11/22 은 매일 AI 영상 릴스 + 웹툰(아침 게시) — 운영자 11/21 '조회수 1만 되도록 노력해 줘'(`config.instagram.ai_video_daily_from`). 그 전 11/18~11/20 은 월요일만, 화~일 웹툰만(19:30 저녁 사슬)
+- `automation/RUNBOOK_REEL.md` 를 처음부터 읽고 그대로. **2026-11-28~ AI 영상 릴스는 주 1회 월요일만**(운영자 11/27 '월·금만' → 같은 날 힉스필드 몫을 보고 '매주 한 개만', `config.instagram.ai_video_days_2`), 그 전 **2026-11-23~11-27 은 월·수·금만, 웹툰은 만들지 않는다**(운영자 11/22 — `config.instagram.ai_video_days`·`comic_until`, 웹툰 13편 도달 2~9·저장 0). 그 전 11/21~11/22 은 매일 AI 영상 릴스 + 웹툰(아침 게시) — 운영자 11/21 '조회수 1만 되도록 노력해 줘'(`config.instagram.ai_video_daily_from`). 그 전 11/18~11/20 은 월요일만, 화~일 웹툰만(19:30 저녁 사슬)
   — 2026-11-17 운영자 '릴스는 일주일에 한 번, 월요일 아침으로 4주 — 대신 퀄리티(내용·소스 전체)가 높아져야 한다'(RUNBOOK_REEL (Q)).
   그 전: 11/13~11/17 평일 매일, 11/05~11/12 짝수 날만.
 - **영상·그림은 힉스필드 도구로 — 영상 모델은 MAGI-2(`magi_2`, 2026-11-27~ 운영자 '씨댄스 2.5보다 가성비'), (2026-11-21~ 운영자 '드롭샷 말고 힉스필드로 다시' — 11/15~11/20 은 드롭샷), 목소리(Hana·Knox)는 무료 복제(`automation/pilots/ai_reel/clone_voice.py` — CosyVoice 3)로 만든다**
   (2026-11-14 운영자 '드롭샷', 11/16 운영자 '무료 목소리로 하되 원래 목소리랑 똑같이 → Hana·Knox 똑같다' — edge-tts·Supertonic 은 '다 별로'라 쓰지 않는다). 힉스필드 도구가 없는 환경이면 하지 않는다(그날은 릴스·웹툰 없이 08:00 카드·스토리만 나간다).
-  드롭샷으로 영상·그림을 대신 만들지 않는다. **힉스필드는 친구와 나눠 써서 한 달 1,500 — 연동된 계정 전체 기준**(운영자 11/22, 11/27 '다른 프로젝트 것도 포함') — 만들기 전 `balance` 를 불러 `python3 automation/higgsfield_budget.py check 53 --balance <잔액>`, 쓴 뒤 `add`(RUNBOOK_REEL '크레딧 계획').
+  드롭샷으로 영상·그림을 대신 만들지 않는다. **힉스필드는 친구와 나눠 써서 한 달 1,500 — 연동된 계정 전체 기준**(운영자 11/22, 11/27 '다른 프로젝트 것도 포함') — 만들기 전 `balance` 를 불러 `python3 automation/higgsfield_budget.py check 50 --balance <잔액>`, 쓴 뒤 `add`(RUNBOOK_REEL '크레딧 계획').
 - **이미지를 이어 붙인 릴스(카드 릴스)는 올리지 않는다**(2026-11-12 운영자 결정, `config.instagram.image_reel_until`). 릴스는 AI 영상만.
 
 ### 2-5. 일요일 21:00 주간 루틴
