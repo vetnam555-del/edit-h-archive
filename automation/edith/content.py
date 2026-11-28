@@ -614,6 +614,32 @@ def _icon_problems(it, data, date_str, where):
     return out
 
 
+# 2026-11-27 14:10 휴대폰 화면 점검(운영자 피드백 장부 #5·#7 '같은 아이콘 반복'·'중복') — 11/27 호 캐러셀 첫 세 장(표지 → '5가지 한눈에' 1번 →
+# H PICK 장)이 같은 문장 '경기 좋다며, 금리는 또 올렸다'를 세 번 보여 줬고(빌드 경고 'H PICK 제목이 표지 제목과 같은 말'은 떴지만 그대로 나감),
+# '5가지 한눈에' 4·5번 줄이 같은 로봇 아이콘이었다. 이 날짜 호부터 빌드가 막는다: ① 카드 1번(H PICK) 제목 ≠ 표지 제목(띄어쓰기·문장부호만 다른 것도 같은 말)
+# ② 소식 장 첫 아이콘(= '5가지 한눈에' 줄 아이콘)은 다섯 줄 모두 다르게. 지난 호는 그대로.
+CARD_REPEAT_FROM = "2026-11-28"
+
+
+def card_repeat_problems(data, date_str):
+    """카드 묶음 안 되풀이 — 11/28~ 표지 제목 = H PICK 장 제목, '5가지 한눈에' 같은 아이콘 두 줄을 막는다."""
+    if date_str < CARD_REPEAT_FROM or data.get("rewind") or (data.get("cards") or {}).get("dive"):
+        return []
+    from .newsletter import _same_words
+    issues, out = data.get("card_issues") or [], []
+    cover = ((data.get("cards") or {}).get("cover") or {}).get("title") or data.get("hero_title") or data.get("title")
+    if issues and _same_words(issues[0].get("headline"), cover):
+        out.append("cards.issues[1].headline: 표지 제목과 같은 말 — 표지 → '5가지 한눈에' → H PICK 장에서 같은 문장이 세 번 읽힌다(11/27 호). "
+                   "H PICK 장 제목은 더 구체적으로(날짜·범위·숫자 — 예: '내일부터 홈플러스 마트 전 점포 휴업')")
+    firsts = [(it.get("icons") or [None])[0] for it in issues]
+    dup = sorted({x for x in firsts if x and firsts.count(x) > 1})
+    if dup:
+        rows = ", ".join(f"{x}({'·'.join(str(i) for i, f in enumerate(firsts, 1) if f == x)}번)" for x in dup)
+        out.append(f"cards.issues[].icons: 첫 아이콘이 겹친다 {rows} — '5가지 한눈에' 줄 아이콘이 같아 보인다. "
+                   "겹치는 장의 icons 순서를 바꾸거나 다른 아이콘을 첫째로(assets/icons3d/index.json)")
+    return out
+
+
 WEEKEND_WORD_FROM = "2026-11-27"
 # 2026-11-26 운영자 '안장출근길보다 왜 항상 인사이트나 내용이 부족해 보일까?' → '그래 이대로 진행해 줘'. 11/24~26 을 재 보니 안장 하루 약 13,500자 · 소식당
 # 3~4문단(600~1,000자, 배경 숫자·업계 대응·구조 해석)인데 우리는 하루 약 1,500자 · 02~05 본문 140~190자(2~3문장, '해석·전망 없이')이고 마무리는
@@ -839,6 +865,7 @@ def prepare(data, date_str):
             problems.append(f"cards.cover.say: 표지 제목에 없는 숫자 {', '.join(stray)} — 혼잣말은 반응만, 사실·숫자는 제목에")
         if cov.get("pose") and cov["pose"] not in _COVER_H_POSES:
             problems.append(f"cards.cover.pose: '{cov['pose']}' 는 3D H 자세가 아니다 — {', '.join(_COVER_H_POSES)}")
+    problems += card_repeat_problems(data, date_str)
     for i, it in enumerate(data["card_issues"], 1):
         w = f"cards.issues[{i}]"
         if "number" in it:
