@@ -287,11 +287,21 @@ def cover_h_on(d):
     return str((d or {}).get("date") or "")[:10] >= COVER_H_FROM
 
 
+# 사진 표지 H 자세가 어제 호와 같으면 빌드가 막는다(2026-11-29 호~). 11/26·11/27·11/28 세 호 모두 'sweat'(식은땀·두 손 모음) —
+# 같은 자리·같은 표정이라 인스타 피드에서 세 장이 한 장처럼 보였다(14:10 휴대폰 화면 점검, 운영자 피드백 장부 #1 '재미·후킹').
+COVER_POSE_ROTATE_FROM = "2026-11-29"
+
+
+def cover_h_pose(cov, date, hero_title=""):
+    """사진 표지 3D H 의 자세 — 원고 pose, 없으면 표지 제목 글자로(_cover_h 와 같은 판단)."""
+    l1, *rest = str(cov.get("title") or hero_title or "").split("\n")
+    pose = cov.get("pose") or mascot_pose(f"{l1} {' '.join(rest)}", "surprised", date)
+    return pose if pose in _COVER_H_POSES else "surprised"
+
+
 def _cover_h(d, cov, l1, l2):
     """사진 표지 오른쪽 아래 3D H + 혼잣말 말풍선(say 가 있을 때). 출처 줄·넘김 안내를 가리지 않게 아래 96px 위에 둔다."""
-    pose = cov.get("pose") or mascot_pose(f"{l1} {l2}", "surprised", d["date"])
-    if pose not in _COVER_H_POSES:
-        pose = "surprised"
+    pose = cover_h_pose({**cov, "title": f"{l1}\n{l2}"}, d["date"])
     say = str(cov.get("say") or "").strip()
     bubble_html = ""
     if say:
@@ -654,6 +664,10 @@ def issue_card(it, n, date=None):
 # 인스타가 다시 보여 주는 두 번째 표지) ② H PICK 3장 → 2장(심층 + 오늘 챙길 것을 한 장으로) ③ 소식 장은 3D 아이콘 장면(Fluent Emoji 3D, MIT — assets/icons3d)
 # + 우리 3D H, 그 아래 큰 숫자·제목·답 한 줄만(본문·'그래서 뭐가 달라져?' 질문은 캡션·뉴스레터로). 10장 → 9장. 힉스필드 크레딧은 쓰지 않는다.
 CARDS_V4_FROM = "2026-11-25"
+# H PICK 장 큰 숫자 밑 '무엇의 숫자인지' 한 줄(number_label, 2026-11-29 호~ — 매일, 빠지면 빌드가 막는다). v4 소식 장 2~5 는 11/19~ 매일 썼는데
+# H PICK 은 '검정 카드에 자리가 없다'던 옛 규칙에 막혀 11/25~11/28 네 호 모두 '4278억원'·'67곳'·'3.25%'·'4601원'만 덩그러니 나갔다
+# — 하루 중 가장 중요한 장의 숫자가 1초 안에 무슨 숫자인지 안 읽혔다(14:10 휴대폰 화면 점검, 운영자 피드백 장부 #2 '잘 안 보인다').
+PICK_LABEL_FROM = "2026-11-29"
 # 2026-11-26 운영자 '카드뉴스도 중복 없는지 체크해 줘' — 11/26 호 9장을 다시 보니 ① 4번째 장 '오늘 챙길 것' 3줄 중 2줄이 바로 앞 H PICK 장·다음 장의
 # '그래서 나는?' 답과 같은 말(홈플러스 장 볼 곳·변동금리 변경일 — 메일과 같은 겹침) ② 마무리 장 숫자 줄 '5개 이슈 전문 · 5장 핵심 카드 · 155호 누적 발행'은
 # 표지 '#155'와 같은 말에 카드 수는 틀림(9장), 아래 줄 '이슈 5개 전문＋출처는 매일 아침 뉴스레터로'는 바로 위 소개 문장('매일 아침 8시…5가지')과 같은 말.
@@ -735,7 +749,7 @@ def issue_card_v4(it, n, date):
     top, ph = (120, 440) if pick else (0, 600)
     cmp = it.get("compare")
     hero = compare_box(cmp, False, big=pick) if cmp else marked_number(it["number"])
-    label = (f'<div style="flex:none;margin-top:6px;font-weight:700;font-size:{fs(30)};line-height:1.3;color:{SUB};">{esc(it["number_label"])}</div>'
+    label = (f'<div style="flex:none;margin-top:6px;font-weight:700;font-size:{fs(36 if pick else 30)};line-height:1.3;color:{SUB};">{esc(it["number_label"])}</div>'
              if it.get("number_label") and not cmp else "")
     chip = ("" if pick else
             f'<div style="flex:none;display:inline-flex;align-items:center;gap:12px;margin-bottom:{22 if cmp else 12}px;">'

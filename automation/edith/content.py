@@ -315,6 +315,9 @@ def _card_issues(data, where):
                 raise ContentError(f"{w}: metrics 의 각 항목에 value·label 이 모두 필요합니다")
         # 02~05 이슈 장 새 칸(2026-11-19~, 모두 선택) — 숫자 설명·숫자 그림·보내기 줄
         extra = [k for k in ("number_label", "visual", "send_to") if ci.get(k) not in (None, "")]
+        from .cards import CARDS_V4_FROM
+        if ci.get("accent") and str(data.get("date") or "")[:10] >= CARDS_V4_FROM:
+            extra = [k for k in extra if k != "number_label"]   # v4 H PICK 장엔 숫자 설명 자리가 있다 — 11/29 호~ 매일(cards.PICK_LABEL_FROM)
         if extra and ci.get("accent"):
             raise ContentError(f"{w}: {'·'.join(extra)} 는 02~05 이슈 장에만 씁니다(H PICK 검정 카드에는 자리가 없어요)")
         if ci.get("number_label") and cmp:
@@ -587,6 +590,25 @@ def _series(data, where):
     s["label"] = f"{s['name']} #{s['no']}"
 
 
+def _previous_cover(date_str):
+    """이 날짜 바로 전 정규 호(예비 호 빼고)의 사진 표지 H 자세 — (날짜, 자세). 사진 표지가 아니었으면 None(COVER_POSE_ROTATE_FROM)."""
+    from .cards import COVER_H_FROM, cover_h_pose
+    for p in sorted(CONTENT_DIR.glob("*.json"), reverse=True):
+        if p.stem >= date_str or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", p.stem):
+            continue
+        try:
+            d = json.loads(p.read_text(encoding="utf-8"))
+        except ValueError:
+            continue
+        if d.get("rewind"):
+            continue
+        cov = (d.get("cards") or {}).get("cover") or {}
+        if not cov.get("photo") or p.stem < COVER_H_FROM:
+            return None
+        return p.stem, cover_h_pose(cov, p.stem, d.get("hero_title", ""))
+    return None
+
+
 def load(date_str):
     path = CONTENT_DIR / f"{date_str}.json"
     if not path.exists():
@@ -839,8 +861,18 @@ def prepare(data, date_str):
             problems.append(f"cards.cover.say: 표지 제목에 없는 숫자 {', '.join(stray)} — 혼잣말은 반응만, 사실·숫자는 제목에")
         if cov.get("pose") and cov["pose"] not in _COVER_H_POSES:
             problems.append(f"cards.cover.pose: '{cov['pose']}' 는 3D H 자세가 아니다 — {', '.join(_COVER_H_POSES)}")
+    from .cards import COVER_POSE_ROTATE_FROM, PICK_LABEL_FROM, _COVER_H_POSES as _poses, cover_h_pose
+    if cov.get("photo") and not data.get("rewind") and date_str >= COVER_POSE_ROTATE_FROM:
+        prev = _previous_cover(date_str)
+        if prev and prev[1] == cover_h_pose(cov, date_str, data.get("hero_title", "")):
+            problems.append(f"cards.cover.pose: 표지 H 자세 '{prev[1]}' 가 지난 호({prev[0]})와 같다 — 피드에서 두 장이 한 장처럼 보인다. "
+                            f"다른 자세를 pose 로 고른다({', '.join(p for p in _poses if p != prev[1])}) — 운영자 피드백 장부 #1")
     for i, it in enumerate(data["card_issues"], 1):
         w = f"cards.issues[{i}]"
+        if (it.get("accent") and not it.get("compare") and not data.get("rewind") and not cards.get("dive")
+                and date_str >= PICK_LABEL_FROM and not str(it.get("number_label") or "").strip()):
+            problems.append(f"{w}.number_label 이 없다 — H PICK 큰 숫자 '{it.get('number', '')}' 바로 밑 '무엇의 숫자인지' 한 줄(22자 이하, "
+                            "예 '삼성전자 주당 분기 배당금'·'한국은행 기준금리') — 숫자만 덩그러니면 1초 안에 안 읽힌다(운영자 피드백 장부 #2)")
         if "number" in it:
             _len_check(it["number"], CARD_LIMITS["number"], f"{w}.number", problems)
         _len_check(it["headline"], CARD_LIMITS["headline"], f"{w}.headline", problems)
