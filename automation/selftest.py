@@ -3806,8 +3806,18 @@ def t_tail_v2():
     return "얼굴 1 · 숫자 카드 없음"
 
 
-def _deepen(raw):
-    """11/27~ 깊이 규칙(content.DEEP_FROM) 시험용 — 지난 호 원고를 그 뒤 날짜로 돌릴 때 02~05 본문을 280자 넘게, insight 한 줄을 채운다."""
+def _deepen(raw, day=None):
+    """11/27~ 깊이 규칙(content.DEEP_FROM) 시험용 — 지난 호 원고를 그 뒤 날짜로 돌릴 때 02~05 본문을 280자 넘게, insight 한 줄을 채운다.
+    11/29~ H PICK 숫자 설명(cards.PICK_LABEL_FROM)도 채우고, day 를 주면 표지 H 자세를 그 전 호와 다르게(cards.COVER_POSE_ROTATE_FROM)."""
+    for ci in (raw.get("cards") or {}).get("issues") or []:
+        if int(ci.get("no") or 0) == 1 and not ci.get("compare"):
+            ci.setdefault("number_label", "시험용 숫자 설명")
+    if day:
+        from edith import content as content_mod
+        prev = content_mod._previous_cover(day)
+        cov = (raw.get("cards") or {}).get("cover") or {}
+        if prev and cov.get("photo"):
+            cov["pose"] = "thinking" if prev[1] != "thinking" else "wink"
     for it in raw.get("items") or []:
         it["body"] = str(it["body"]) + " " + "배경 숫자와 업계 대응을 더한 문장이에요. " * 8
         it.setdefault("insight", "이 소식으로 돈의 흐름이 이렇게 바뀌어요")
@@ -3822,7 +3832,7 @@ def _deepen(raw):
 def t_trends():
     """11/28~ 흐름 후보 기록(운영자 11/26 '놓친 주제를 제작 때 잡는 장치' '응'): trends 3~5개·고른 자리 또는 뺀 이유·2개 이상 메인 — 아니면 막는다."""
     from edith import content as content_mod
-    raw = _deepen(json.loads((ROOT / "content" / "2026-11-26.json").read_text(encoding="utf-8")))
+    raw = _deepen(json.loads((ROOT / "content" / "2026-11-26.json").read_text(encoding="utf-8")), "2026-11-30")
     raw["date"] = "2026-11-30"
     raw["question"]["closing"] = raw["question"]["closing"].replace("오늘 주말", "이번 주말")
     raw["week_ahead"] = [{"day": "12/1(화)", "text": "일정 하나"}, {"day": "12/2(수)", "text": "일정 둘"}]
@@ -3857,7 +3867,7 @@ def t_trends():
 def t_pick_plus():
     """11/27~ H PICK '누가 영향받나'·'앞으로 어떻게 될까?'·질문 소제목(운영자 11/26 뉴닉 비교 '1~4번도 진행'): next·who 없으면 막고 메일에 그린다. 11/26 호는 그대로."""
     from edith import content as content_mod, newsletter
-    raw = _deepen(json.loads((ROOT / "content" / "2026-11-26.json").read_text(encoding="utf-8")))
+    raw = _deepen(json.loads((ROOT / "content" / "2026-11-26.json").read_text(encoding="utf-8")), "2026-11-30")
     raw["date"] = "2026-11-30"   # 월요일(퀴즈 없는 날)
     raw["question"]["closing"] = raw["question"]["closing"].replace("오늘 주말", "이번 주말")   # 11/26 맺음말은 '오늘 주말'(월~목엔 막힘)
     raw["big_issue"]["next"] = "인수 계약이 나면 영업 재개를 검토하고, 법원이 이행 불가로 보면 파산을 선고할 수 있어요."
@@ -3959,6 +3969,59 @@ def t_nl_dedupe():
             blocked = "오늘 주말" in str(e)
         expect(blocked == bad, f"{day}: '오늘 주말' 막기 {blocked}")
     return "머리 줄·H PICK 제목·할 일 번호·맺음말·주말 말"
+
+
+def t_pick_label_pose():
+    """11/29~ H PICK 큰 숫자 밑 숫자 설명(cards.PICK_LABEL_FROM — 11/25~28 네 호 '4601원'만 덩그러니)과
+    사진 표지 H 자세가 지난 호와 같으면 막기(cards.COVER_POSE_ROTATE_FROM — 11/26~28 세 호 모두 sweat). 11/28 호는 그대로."""
+    from edith import cards, content as content_mod
+    old = content_mod.load("2026-11-28")
+    expect(not old["card_issues"][0].get("number_label"), "11/28 호(지난 호)가 바뀌었다")
+    raw = _deepen(json.loads((ROOT / "content" / "2026-11-28.json").read_text(encoding="utf-8")))
+    raw["date"] = "2026-11-29"
+    day = "2026-11-29"
+    prev = content_mod._previous_cover(day)
+    expect(prev and prev[0] >= "2026-11-28", f"지난 호 표지 자세를 못 읽는다: {prev}")
+
+    def err(r):
+        try:
+            content_mod.prepare(json.loads(json.dumps(r)), day)
+            return ""
+        except content_mod.ContentError as e:
+            return str(e)
+    same = json.loads(json.dumps(raw))
+    same["cards"]["cover"]["pose"] = prev[1]
+    expect("cards.cover.pose" in err(same), "지난 호와 같은 표지 H 자세를 막지 않는다")
+    other = "thinking" if prev[1] != "thinking" else "wink"
+    raw["cards"]["cover"]["pose"] = other
+    expect("cards.cover.pose" not in err(raw), f"다른 자세({other})를 막았다")
+    nolabel = json.loads(json.dumps(raw))
+    nolabel["cards"]["issues"][0].pop("number_label")
+    expect("cards.issues[1].number_label" in err(nolabel), "H PICK 숫자 설명이 없는데 막지 않는다")
+    raw["cards"]["issues"][0]["number_label"] = "삼성전자 주당 분기 배당금"
+    got = err(raw)
+    expect("number_label" not in got and "cards.cover.pose" not in got, f"숫자 설명·다른 자세인데 막았다: {got[:120]}")
+    if not got:
+        d = content_mod.prepare(json.loads(json.dumps(raw)), day)
+        card = cards.issue_card_v4(d["card_issues"][0], 1, day)
+        expect("삼성전자 주당 분기 배당금" in card, "H PICK 장에 숫자 설명이 그려지지 않는다")
+    return f"지난 호({prev[0]}) 자세 '{prev[1]}' 그대로면 막음 · H PICK 숫자 설명 없으면 막음 · 있으면 장에 그림 · 11/28 호 그대로"
+def t_card_repeat():
+    """11/28~ 카드 묶음 되풀이 막기(14:10 휴대폰 화면 점검 — 장부 #5·#7): 표지 제목 = H PICK 장 제목, '5가지 한눈에' 같은 첫 아이콘. 11/27 호는 그대로."""
+    import copy
+    from edith import content as content_mod
+    d = content_mod.load("2026-11-27")   # 지난 호 — 날짜 전이라 그대로 빌드된다
+    expect(content_mod.card_repeat_problems(d, "2026-11-27") == [], "11/27 호(지난 호)가 막혔다")
+    got = content_mod.card_repeat_problems(d, "2026-11-28")
+    expect(len(got) == 2 and "표지 제목과 같은 말" in got[0] and "robot(4·5번)" in got[1], f"11/27 호를 11/28 로 보면 두 가지 다 막혀야: {got}")
+    d2 = copy.deepcopy(d)
+    d2["card_issues"][0]["headline"] = "기준금리 3.25%, 올해 세 번째 인상"
+    d2["card_issues"][4]["icons"] = ["chart_increasing", "robot"]
+    expect(content_mod.card_repeat_problems(d2, "2026-11-28") == [], "제목·아이콘을 고치면 통과")
+    d3 = copy.deepcopy(d)
+    d3["rewind"] = True
+    expect(content_mod.card_repeat_problems(d3, "2026-11-28") == [], "예비 호는 묻지 않는다")
+    return "표지=H PICK 제목·겹친 아이콘 막기, 지난 호·예비 호 그대로"
 
 
 def t_cards_dedupe():
@@ -4550,7 +4613,9 @@ def main():
     check("공시 원문(DART, 키 없이)", t_fetch_disclosure)
     check("메일 끝 중복 줄이기(11/27~)", t_tail_v2)
     check("메일 중복 줄이기 2(11/27~)", t_nl_dedupe)
+    check("카드 묶음 되풀이 막기(11/28~)", t_card_repeat)
     check("카드 중복 줄이기(11/27~)", t_cards_dedupe)
+    check("H PICK 숫자 설명·표지 H 자세 돌리기(11/29~)", t_pick_label_pose)
     check("인스타 캡션 중복 줄이기(11/27~)", t_caption_dedupe)
     check("메일 깊이(11/27~ 본문 280자·insight)", t_deep)
     check("H PICK 누가·앞으로·질문 소제목(11/27~)", t_pick_plus)
